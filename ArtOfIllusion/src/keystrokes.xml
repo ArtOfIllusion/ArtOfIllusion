@@ -1,0 +1,59 @@
+<keystrokes><keystroke name="Delete Selection" code="8" modifiers="0">if (window instanceof LayoutWindow)
+{
+	score = window.getScore();
+	if (score.getSelectedKeyframes().length == 0)
+		window.clearCommand();
+	else
+		score.deleteSelectedKeyframes();
+}
+else if (window instanceof MeshEditorWindow)
+{
+	if (window.getToolPalette().getSelectedTool() instanceof artofillusion.animation.SkeletonTool)
+		window.deleteJointCommand();
+	else
+		window.deleteCommand();
+}</keystroke><keystroke name="Display Mode: Flat" code="50" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_FLAT);
+window.updateMenus();</keystroke><keystroke name="Display Mode: Smooth" code="51" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_SMOOTH);
+window.updateMenus();</keystroke><keystroke name="Display Mode: Textured" code="52" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_TEXTURED);
+window.updateMenus();</keystroke><keystroke name="Display Mode: Transparent" code="53" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
+window.updateMenus();</keystroke><keystroke name="Display Mode: Wireframe" code="49" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_WIREFRAME);
+window.updateMenus();</keystroke><keystroke name="Select Tool: Next" code="34" modifiers="0">tools = window.getToolPalette();
+selected = tools.getSelection();
+selected = (selected == tools.getNumTools()-1 ? 0 : selected+1);
+tools.selectTool(tools.getTool(selected));</keystroke><keystroke name="Select Tool: Previous" code="33" modifiers="0">tools = window.getToolPalette();
+selected = tools.getSelection();
+selected = (selected == 0 ? tools.getNumTools()-1 : selected-1);
+tools.selectTool(tools.getTool(selected));</keystroke><keystroke name="Select Tool: Toggle Default" code="32" modifiers="0">tools = window.getToolPalette();
+tools.toggleDefaultTool();
+window.setTool(tools.getSelectedTool());
+</keystroke><keystroke name="Selection Mode: Edge/Curve" code="69" modifiers="0">if (window instanceof MeshEditController)
+  window.setSelectionMode(MeshEditController.EDGE_MODE);</keystroke><keystroke name="Selection Mode: Face" code="70" modifiers="0">if (window instanceof MeshEditController)
+  window.setSelectionMode(MeshEditController.FACE_MODE);</keystroke><keystroke name="Selection Mode: Point/Vertex" code="86" modifiers="0">if (window instanceof MeshEditController)
+  window.setSelectionMode(MeshEditController.POINT_MODE);</keystroke><keystroke name="View: Back" code="98" modifiers="0">window.getView().selectOrientation(ViewerCanvas.VIEW_BACK);</keystroke><keystroke name="View: Bottom" code="102" modifiers="0">window.getView().selectOrientation(ViewerCanvas.VIEW_BOTTOM);</keystroke><keystroke name="View: Camera 1" code="103" modifiers="0">window.getView().selectOrientation(6);</keystroke><keystroke name="View: Camera 2" code="104" modifiers="0">window.getView().selectOrientation(7);</keystroke><keystroke name="View: Front" code="97" modifiers="0">window.getView().selectOrientation(ViewerCanvas.VIEW_FRONT);</keystroke><keystroke name="View: Left" code="99" modifiers="0">window.getView().selectOrientation(ViewerCanvas.VIEW_LEFT);</keystroke><keystroke name="View: Right" code="100" modifiers="0">window.getView().selectOrientation(ViewerCanvas.VIEW_RIGHT);</keystroke><keystroke name="View: Toggle Perspective" code="96" modifiers="0">view = window.getView();
+view.setPerspective(!view.isPerspective());</keystroke><keystroke name="View: Top" code="101" modifiers="0">window.getView().selectOrientation(ViewerCanvas.VIEW_TOP);</keystroke><keystroke name="View: Zoom In" code="107" modifiers="0">view = window.getView();
+if (view.isPerspective())
+{
+	camera = view.getCamera();
+	coords = camera.getCameraCoordinates();
+	delta = coords.getZDirection().times(0.1);
+	coords.setOrigin(coords.getOrigin().plus(delta));
+	camera.setCameraCoordinates(coords);
+	view.repaint();
+}
+else
+{
+	view.setScale(view.getScale()/0.99);
+}</keystroke><keystroke name="View: Zoom Out" code="109" modifiers="0">view = window.getView();
+if (view.isPerspective())
+{
+	camera = view.getCamera();
+	coords = camera.getCameraCoordinates();
+	delta = coords.getZDirection().times(0.1);
+	coords.setOrigin(coords.getOrigin().minus(delta));
+	camera.setCameraCoordinates(coords);
+	view.repaint();
+}
+else
+{
+	view.setScale(view.getScale()*0.99);
+}</keystroke></keystrokes>

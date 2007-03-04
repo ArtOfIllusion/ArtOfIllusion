@@ -1,0 +1,14 @@
+<?xml version="1.0" standalone="yes"?>
+<script>
+  <name>OSSpecific</name>
+  <author>Peter Eastman</author>
+  <version>1.8</version>
+  <date>2004</date>
+  <description>
+This plugin provides platform-specific features to help Art of Illusion behave in ways that are
+expected on particular operating systems.
+  </description>
+  <comments>
+  </comments>
+</script>
+

@@ -1,0 +1,251 @@
+/* Copyright (C) 2002-2004 by Peter Eastman
+
+   This program is free software; you can redistribute it and/or modify it under the
+   terms of the GNU General Public License as published by the Free Software
+   Foundation; either version 2 of the License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
+
+package artofillusion.osspecific;
+
+import artofillusion.*;
+import artofillusion.ui.*;
+import buoy.event.*;
+import buoy.widget.*;
+import java.awt.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.util.prefs.*;
+import javax.swing.*;
+
+/** This is a plugin to make Art of Illusion behave more like a standard Macintosh 
+    application when running under Mac OS X. */
+
+public class MacOSPlugin implements Plugin, InvocationHandler
+{
+  private boolean isMacOSX, usingAppMenu;
+
+  public void processMessage(int message, Object args[])
+  {
+    if (message == APPLICATION_STARTING)
+    {
+      String os = ((String) System.getProperties().get("os.name")).toLowerCase();
+      if (!os.startsWith("mac os x"))
+        return;
+      isMacOSX = true;
+      ModellingApp.addWindow(new MacMenuBarWindow());
+      ModellingApp.defaultFont = new Font("Application", Font.PLAIN, 11);
+      ModellingApp.standardDialogInsets = 3;
+      try
+      {
+        // Use reflection to set up the application menu.
+        
+        Class appClass = Class.forName("com.apple.eawt.Application");
+        Object app = appClass.getMethod("getApplication", new Class [0]).invoke(null, new Object [0]);
+        appClass.getMethod("setEnabledAboutMenu", new Class [] {Boolean.TYPE}).invoke(app, new Object [] {Boolean.TRUE});
+        appClass.getMethod("setEnabledPreferencesMenu", new Class [] {Boolean.TYPE}).invoke(app, new Object [] {Boolean.TRUE});
+        Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
+        Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class [] {listenerClass}, this);
+        appClass.getMethod("addApplicationListener", new Class [] {listenerClass}).invoke(app, new Object [] {proxy});
+      }
+      catch (Exception ex)
+      {
+        // An error occured trying to set up the application menu, so just stick with the standard
+        // Quit and Preferences menu items in the File and Edit menus.
+        
+        ex.printStackTrace();
+      }
+      usingAppMenu = true;
+    }
+    else if (message == SCENE_WINDOW_CREATED)
+    {
+      if (!usingAppMenu)
+        return;
+      
+      // Remove the Quit and Preferences menu items, since we are using the ones in the application
+      // menu instead.
+      
+      LayoutWindow win = (LayoutWindow) args[0];
+      removeMenuItem(win, Translate.text("menu.file"), Translate.text("menu.quit"));
+      removeMenuItem(win, Translate.text("menu.edit"), Translate.text("menu.preferences"));
+    }
+  }
+  
+  /** Remove a menu item from a menu in a window.  If it is immediately preceded by a separator,
+      also remove that. */
+  
+  private void removeMenuItem(BFrame frame, String menu, String item)
+  {
+    BMenuBar bar = frame.getMenuBar();
+    for (int i = 0; i < bar.getChildCount(); i++)
+    {
+      BMenu m = bar.getChild(i);
+      if (!m.getText().equals(menu))
+        continue;
+      for (int j = 0; j < m.getChildCount(); j++)
+      {
+        MenuWidget w = m.getChild(j);
+        if (w instanceof BMenuItem && ((BMenuItem) w).getText().equals(item))
+        {
+          m.remove((Widget) w);
+          if (j > 0 && m.getChild(j-1) instanceof BSeparator)
+            m.remove((Widget) m.getChild(j-1));
+          return;
+        }
+      }
+      return;
+    }
+  }
+  
+  /** Handle ApplicationListener methods. */
+  
+  public Object invoke(Object proxy, Method method, Object args[])
+  {
+    boolean handled = true;
+    if ("handleAbout".equals(method.getName()))
+    {
+      TitleWindow win = new TitleWindow();
+      win.addEventLink(MouseClickedEvent.class, win, "dispose");
+    }
+    else if ("handlePreferences".equals(method.getName()))
+    {
+      BFrame f = new BFrame();
+      Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+      f.setBounds(new Rectangle(0, 0, d.width, d.height));
+      UIUtilities.centerWindow(f);
+      new PreferencesWindow(f);
+      f.dispose();
+    }
+    else if ("handleQuit".equals(method.getName()))
+    {
+      ModellingApp.quit();
+      handled = false;
+    }
+    else if ("handleOpenFile".equals(method.getName()))
+    {
+      try
+      {
+        Method getFilename = args[0].getClass().getMethod("getFilename", new Class [0]);
+        String path = (String) getFilename.invoke(args[0], new Object [0]);
+        ModellingApp.newWindow(new Scene(new File(path), true));
+      }
+      catch (Exception ex)
+      {
+        // Nothing we can really do about it...
+        
+        ex.printStackTrace();
+      }
+    }
+    else
+      return null;
+    
+    // Call setHandled(true) on the event to show we have handled it.
+    
+    try
+    {
+      Method setHandled = args[0].getClass().getMethod("setHandled", new Class [] {Boolean.TYPE});
+      setHandled.invoke(args[0], new Object [] {Boolean.valueOf(handled)});
+    }
+    catch (Exception ex)
+    {
+      // Nothing we can really do about it...
+      
+      ex.printStackTrace();
+    }
+    return null;
+  }
+  
+  /** This is an inner class used to provide a minimal menu bar when all windows are
+      closed. */
+  
+  private class MacMenuBarWindow extends BFrame implements EditingWindow
+  {
+    public MacMenuBarWindow()
+    {
+      super();
+      ((JFrame) getComponent()).setUndecorated(true);
+      setBackground(new Color(0, 0, 0, 0));
+      BMenuBar menubar = new BMenuBar();
+      setMenuBar(menubar);
+      BMenu file = Translate.menu("file");
+      menubar.add(file);
+      file.add(Translate.menuItem("new", this, "actionPerformed"));
+      file.add(Translate.menuItem("open", this, "actionPerformed"));
+      final BMenu recentMenu = Translate.menu("openRecent");
+      RecentFiles.createMenu(recentMenu);
+      file.add(recentMenu);
+      Preferences.userNodeForPackage(RecentFiles.class).addPreferenceChangeListener(new PreferenceChangeListener() {
+        public void preferenceChange(PreferenceChangeEvent ev)
+        {
+          RecentFiles.createMenu(recentMenu);
+        }
+      });
+      pack();
+      setBounds(new Rectangle(-1000, -1000, 0, 0));
+      setVisible(true);
+    }
+
+    public ToolPalette getToolPalette()
+    {
+      return null;
+    }
+
+    public void setTool(EditingTool tool)
+    {
+    }
+  
+    public void setHelpText(String text)
+    {
+    }
+
+    public BFrame getFrame()
+    {
+      return this;
+    }
+
+    public void updateImage()
+    {
+    }
+
+    public void updateMenus()
+    {
+    }
+
+    public void setUndoRecord(UndoRecord command)
+    {
+    }
+
+    public void setModified()
+    {
+    }
+
+    public Scene getScene()
+    {
+      return null;
+    }
+
+    public ViewerCanvas getView()
+    {
+      return null;
+    }
+
+    public boolean confirmClose()
+    {
+      dispose();
+      return true;
+    }
+    
+    private void actionPerformed(CommandEvent ev)
+    {
+      String command = ev.getActionCommand();
+      if (command.equals("new"))
+        ModellingApp.newWindow();
+      else if (command.equals("open"))
+        ModellingApp.openScene(this);
+      else if (command.equals("quit"))
+        ModellingApp.quit();
+    }
+  }
+}

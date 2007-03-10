@@ -57,6 +57,7 @@ public class Raytracer implements Runnable
   boolean needCopyToUI = true;
   PhotonMap globalMap, causticsMap, volumeMap;
   BoundingBox materialBounds;
+  ThreadLocal threadContext;
 
   public static final double TOL = 1e-12;
   
@@ -108,6 +109,12 @@ public class Raytracer implements Runnable
 
   public Raytracer()
   {
+    threadContext = new ThreadLocal() {
+      protected Object initialValue()
+      {
+        return new RaytracerContext(Raytracer.this);
+      }
+    };
   }
   
   /** Methods from the Renderer interface. */
@@ -1073,15 +1080,20 @@ public class Raytracer implements Runnable
       rtWidth = width;
       rtHeight = height;
       final int currentRow[] = new int [1];
-      ThreadManager threads = new ThreadManager(width, this, new ThreadManager.Task() {
-        public void execute(int index, RaytracerContext context)
+      ThreadManager threads = new ThreadManager(width, new ThreadManager.Task() {
+        public void execute(int index)
         {
+          RaytracerContext context = (RaytracerContext) threadContext.get();
           PixelInfo pixel = context.tempPixel;
           pixel.clear();
           pixel.depth = (float) spawnEyeRay(context, index, currentRow[0], 0, 1);
           pixel.object = context.firstObjectHit;
           pixel.add(context.color[0], (float) context.transparency[0]);
           recordPixel(index, currentRow[0], pixel);
+        }
+        public void cleanup()
+        {
+          ((RaytracerContext) threadContext.get()).cleanup();
         }
       });
       for (currentRow[0] = 0; currentRow[0] < height; currentRow[0]++)
@@ -1127,9 +1139,10 @@ public class Raytracer implements Runnable
     int minPerSubpixel = minRays/4, maxPerSubpixel = maxRays/4;
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];
-    ThreadManager threads = new ThreadManager(rtWidth, this, new ThreadManager.Task() {
-      public void execute(int index, RaytracerContext context)
+    ThreadManager threads = new ThreadManager(rtWidth, new ThreadManager.Task() {
+      public void execute(int index)
       {
+        RaytracerContext context = (RaytracerContext) threadContext.get();
         PixelInfo tempPixel = context.tempPixel;
         for (int m = 0; m < 6; m++)
         {
@@ -1167,6 +1180,10 @@ public class Raytracer implements Runnable
             thisPixel.add(tempPixel);
           }
         }
+      }
+      public void cleanup()
+      {
+        ((RaytracerContext) threadContext.get()).cleanup();
       }
     });
 

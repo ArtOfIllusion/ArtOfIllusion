@@ -130,7 +130,7 @@ public class RenderingMesh
     for (int i = 0; i < triangle.length; i++)
     {
       RenderingTriangle tri = triangle[i];
-      if (tri.v1 != tri.n1 || tri.v3 != tri.n3 || tri.v3 != tri.n3)
+      if (tri.v1 != tri.n1 || tri.v2 != tri.n2 || tri.v3 != tri.n3)
         return null;
     }
     indices = new int [triangle.length*3];

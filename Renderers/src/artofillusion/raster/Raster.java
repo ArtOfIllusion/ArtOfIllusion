@@ -42,11 +42,11 @@ public class Raster implements Runnable
   private RenderListener listener;
   private Image img;
   private Thread renderThread;
-  private Vec3 tempVec[], lightPosition[], lightDirection[];
-  private RGBColor color, tempColor[], ambColor, envColor, fogColor;
+  private Vec3 lightPosition[], lightDirection[];
+  private RGBColor ambColor, envColor, fogColor;
   private TextureMapping envMapping;
-  private TextureSpec surfSpec, surfSpec2;
-  private MaterialSpec matSpec;
+  private ThreadLocal threadContext;
+  private RowLock lock[];
   private double time, smoothing = 1.0, smoothScale, depthOfField, focalDist, surfaceError = 0.02, fogDist;
   private boolean fog, transparentBackground = false, adaptive = true, hideBackfaces = true, generateHDR = false, positionNeeded, depthNeeded, needCopyToUI = true;
 
@@ -62,6 +62,12 @@ public class Raster implements Runnable
 
   public Raster()
   {
+    threadContext = new ThreadLocal() {
+      protected Object initialValue()
+      {
+        return new RasterContext(theCamera.duplicate(), width);
+      }
+    };
   }
 
   /* Methods from the Renderer interface. */
@@ -102,17 +108,10 @@ public class Raster implements Runnable
     theCamera.setSize(width, height);
     theCamera.setDistToScreen(theCamera.getDistToScreen()*samplesPerPixel);
     theCamera.setClipDistance(theCamera.getClipDistance()/samplesPerPixel);
-    color = new RGBColor();
-    surfSpec = new TextureSpec();
-    surfSpec2 = new TextureSpec();
-    matSpec = new MaterialSpec();
-    tempColor = new RGBColor [4];
-    for (int i = 0; i < tempColor.length; i++)
-      tempColor[i] = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempVec = new Vec3 [4];
-    for (int i = 0; i < tempVec.length; i++)
-      tempVec[i] = new Vec3();
-    renderThread = new Thread(this);
+    lock = new RowLock[height];
+    for (int i = 0; i < lock.length; i++)
+      lock[i] = new RowLock();
+    renderThread = new Thread(this, "Raster Renderer Main Thread");
     renderThread.start();
   }
 
@@ -366,7 +365,7 @@ public class Raster implements Runnable
 
   public void run()
   {
-    Thread thisThread = Thread.currentThread();
+    final Thread thisThread = Thread.currentThread();
     if (renderThread != thisThread)
       return;
     updateTime = System.currentTimeMillis();
@@ -384,9 +383,9 @@ public class Raster implements Runnable
 
     // Determine information about the viewpoint.
 
-    Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+    final Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
     Point p = new Point(width/2, height/2);
-    Vec3 orig = theCamera.getCameraCoordinates().getOrigin();
+    final Vec3 orig = theCamera.getCameraCoordinates().getOrigin();
     Vec3 center = theCamera.convertScreenToWorld(p, focalDist);
     p.x++;
     Vec3 hvec = theCamera.convertScreenToWorld(p, focalDist).minus(center);
@@ -398,12 +397,14 @@ public class Raster implements Runnable
 
     // Render the objects.
 
-    ObjectInfo sortedObjects[] = sortObjects();
-    for (int i = 0; i < sortedObjects.length; i++)
+    final ObjectInfo sortedObjects[] = sortObjects();
+    ThreadManager threads = new ThreadManager(sortedObjects.length, new ThreadManager.Task() {
+      public void execute(int index)
       {
-        ObjectInfo obj = sortedObjects[i];
-        theCamera.setObjectTransform(obj.coords.fromLocal());
-        renderObject(obj, orig, viewdir, obj.coords.toLocal());
+        RasterContext context = (RasterContext) threadContext.get();
+        ObjectInfo obj = sortedObjects[index];
+        context.camera.setObjectTransform(obj.coords.fromLocal());
+        renderObject(obj, orig, viewdir, obj.coords.toLocal(), context, thisThread);
         if (thisThread != renderThread)
           {
             finish(null);
@@ -412,6 +413,12 @@ public class Raster implements Runnable
         if (System.currentTimeMillis()-updateTime > 5000)
           updateImage();
       }
+      public void cleanup()
+      {
+        ((RasterContext) threadContext.get()).cleanup();
+      }
+    });
+    threads.run();
     finish(createFinalImage(center, orig, hvec, vvec));
   }
 
@@ -472,8 +479,10 @@ public class Raster implements Runnable
 
   /** Update the image being displayed. */
 
-  private void updateImage()
+  private synchronized void updateImage()
   {
+    if (System.currentTimeMillis()-updateTime < 5000)
+      return;
     RGBColor frontColor = new RGBColor();
       for (int i1 = 0, i2 = 0; i1 < imageHeight; i1++, i2 += samplesPerPixel)
         for (int j1 = 0, j2 = 0; j1 < imageWidth; j1++, j2 += samplesPerPixel)
@@ -492,7 +501,8 @@ public class Raster implements Runnable
   {
     Thread currentThread = Thread.currentThread();
     int n = samplesPerPixel*samplesPerPixel;
-    Vec3 dir = tempVec[1];
+    RasterContext context = new RasterContext(theCamera.duplicate(), 0);
+    Vec3 dir = context.tempVec[1];
     RGBColor addColor = new RGBColor(), multColor = new RGBColor(), subpixelMult = new RGBColor();
     RGBColor subpixelColor = new RGBColor(), totalColor = new RGBColor(), totalTransparency = new RGBColor();
     ArrayList materialStack = new ArrayList();
@@ -525,7 +535,7 @@ public class Raster implements Runnable
               ObjectMaterialInfo currentMaterial = null;
               if (materialStack.size() > 0)
                 currentMaterial = (ObjectMaterialInfo) materialStack.get(materialStack.size()-1);
-              adjustColorsForMaterial(currentMaterial, j2+m, i2+k, lastDepth, f.getDepth(), addColor, multColor);
+              adjustColorsForMaterial(currentMaterial, j2+m, i2+k, lastDepth, f.getDepth(), addColor, multColor, context);
               addColor.multiply(subpixelMult);
               subpixelColor.add(addColor);
               subpixelMult.multiply(multColor);
@@ -560,11 +570,11 @@ public class Raster implements Runnable
                   dir.z = center.z + h*hvec.z + v*vvec.z;
                   dir.subtract(orig);
                   dir.normalize();
-                  envMapping.getTextureSpec(dir, surfSpec, 1.0, smoothScale, time, null);
+                  envMapping.getTextureSpec(dir, context.surfSpec, 1.0, smoothScale, time, null);
                   if (envMode == Scene.ENVIRON_DIFFUSE)
-                    addColor.copy(surfSpec.diffuse);
+                    addColor.copy(context.surfSpec.diffuse);
                   else
-                    addColor.copy(surfSpec.emissive);
+                    addColor.copy(context.surfSpec.emissive);
                 }
               }
               else
@@ -648,7 +658,7 @@ public class Raster implements Runnable
    * passing through.
    */
 
-  private void adjustColorsForMaterial(ObjectMaterialInfo material, int x, int y, float startDepth, float endDepth, RGBColor addColor, RGBColor multColor)
+  private void adjustColorsForMaterial(ObjectMaterialInfo material, int x, int y, float startDepth, float endDepth, RGBColor addColor, RGBColor multColor, RasterContext context)
   {
     if (material == null)
     {
@@ -673,8 +683,8 @@ public class Raster implements Runnable
     {
       // A uniform material, so we can calculate the effect exactly.
 
-      material.getMapping().getMaterialSpec(tempVec[0], matSpec, 0.0, time);
-      RGBColor trans = matSpec.transparency, blend = matSpec.color;
+      material.getMapping().getMaterialSpec(context.tempVec[0], context.matSpec, 0.0, time);
+      RGBColor trans = context.matSpec.transparency, blend = context.matSpec.color;
       double dist = endDepth-startDepth;
       float rs = (float) Math.pow(trans.getRed(), dist);
       float gs = (float) Math.pow(trans.getGreen(), dist);
@@ -689,14 +699,14 @@ public class Raster implements Runnable
     // Step through the material and add up the contribution at each point.
 
     Vec2 imagePos = new Vec2(x, y);
-    Vec3 startPoint = theCamera.convertScreenToWorld(imagePos, startDepth, false);
-    Vec3 endPoint = theCamera.convertScreenToWorld(imagePos, endDepth, false);
-    double distToPoint = theCamera.getCameraCoordinates().getOrigin().distance(startPoint);
+    Vec3 startPoint = context.camera.convertScreenToWorld(imagePos, startDepth, false);
+    Vec3 endPoint = context.camera.convertScreenToWorld(imagePos, endDepth, false);
+    double distToPoint = context.camera.getCameraCoordinates().getOrigin().distance(startPoint);
     material.getToLocal().transform(startPoint);
     material.getToLocal().transform(endPoint);
     double dist = startPoint.distance(endPoint);
     double stepSize = material.getMapping().getStepSize();
-    double distToScreen = theCamera.getDistToScreen();
+    double distToScreen = context.camera.getDistToScreen();
     if (distToPoint > distToScreen)
       stepSize *= distToPoint/distToScreen;
     int steps = FastMath.ceil(dist/stepSize);
@@ -706,11 +716,11 @@ public class Raster implements Runnable
     for (int i = 0; i < steps; i++)
     {
       double fract2 = (0.5+i)/steps, fract1 = 1.0-fract2;
-      tempVec[0].set(fract1*startPoint.x+fract2*endPoint.x,
+      context.tempVec[0].set(fract1*startPoint.x+fract2*endPoint.x,
           fract1*startPoint.y+fract2*endPoint.y,
           fract1*startPoint.z+fract2*endPoint.z);
-      material.getMapping().getMaterialSpec(tempVec[0], matSpec, stepSize, time);
-      RGBColor trans = matSpec.transparency, blend = matSpec.color;
+      material.getMapping().getMaterialSpec(context.tempVec[0], context.matSpec, stepSize, time);
+      RGBColor trans = context.matSpec.transparency, blend = context.matSpec.color;
       float rs = (float) Math.pow(trans.getRed(), stepSize);
       float gs = (float) Math.pow(trans.getGreen(), stepSize);
       float bs = (float) Math.pow(trans.getBlue(), stepSize);
@@ -743,7 +753,7 @@ public class Raster implements Runnable
     Thread t = renderThread;
     listener = null;
     renderThread = null;
-    if (rl != null && t == Thread.currentThread() && finalImage != null)
+    if (rl != null && finalImage != null)
       rl.imageComplete(finalImage);
   }
 
@@ -774,38 +784,38 @@ public class Raster implements Runnable
   /** Render a single object into the scene.  viewdir is the direction from 
      which the object is being viewed in world coordinates. */
 
-  private void renderObject(ObjectInfo obj, Vec3 orig, Vec3 viewdir, Mat4 toLocal)
+  private void renderObject(ObjectInfo obj, Vec3 orig, Vec3 viewdir, Mat4 toLocal, RasterContext context, Thread mainThread)
   {
     RenderingMesh mesh;
     Object3D theObject;
     double tol;
     int i;
 
-    if (Thread.currentThread() != renderThread)
+    if (mainThread != renderThread)
       return;
     if (!obj.visible)
       return;
     theObject = obj.object;
-    if (theCamera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
+    if (context.camera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
       return;
     if (theObject instanceof ObjectCollection)
       {
         Enumeration objects = ((ObjectCollection) theObject).getObjects(obj, false, theScene);
-        Mat4 fromLocal = theCamera.getObjectToWorld();
+        Mat4 fromLocal = context.camera.getObjectToWorld();
         while (objects.hasMoreElements())
           {
             ObjectInfo elem = (ObjectInfo) objects.nextElement();
             CoordinateSystem coords = elem.coords.duplicate();
             coords.transformCoordinates(fromLocal);
-            theCamera.setObjectTransform(coords.fromLocal());
-            renderObject(elem, orig, viewdir, coords.toLocal());
+            context.camera.setObjectTransform(coords.fromLocal());
+            renderObject(elem, orig, viewdir, coords.toLocal(), context, mainThread);
           }
         return;
       }
     if (adaptive)
       {
         double dist = obj.getBounds().distanceToPoint(toLocal.times(orig));
-        double distToScreen = theCamera.getDistToScreen();
+        double distToScreen = context.camera.getDistToScreen();
         if (dist < distToScreen)
           tol = surfaceError;
         else
@@ -816,7 +826,7 @@ public class Raster implements Runnable
     mesh = obj.getRenderingMesh(tol);
     if (mesh == null)
       return;
-    if (Thread.currentThread() != renderThread)
+    if (mainThread != renderThread)
       return;
     viewdir = toLocal.timesDirection(viewdir);
     for (i = light.length-1; i >= 0; i--)
@@ -831,23 +841,23 @@ public class Raster implements Runnable
     if (theObject.getMaterialMapping() != null)
       material = new ObjectMaterialInfo(theObject.getMaterialMapping(), toLocal);
     if (theObject.getTexture().hasComponent(Texture.DISPLACEMENT_COMPONENT))
-      renderMeshDisplaced(mesh, viewdir, tol, cullBackfaces, bumpMap, material);
+      renderMeshDisplaced(mesh, viewdir, tol, cullBackfaces, bumpMap, material, context);
     else if (shadingMode == GOURAUD)
-      renderMeshGouraud(mesh, viewdir, cullBackfaces, material);
+      renderMeshGouraud(mesh, viewdir, cullBackfaces, material, context);
     else if (shadingMode == HYBRID && !bumpMap)
-      renderMeshHybrid(mesh, viewdir, cullBackfaces, material);
+      renderMeshHybrid(mesh, viewdir, cullBackfaces, material, context);
     else
-      renderMeshPhong(mesh, viewdir, cullBackfaces, bumpMap, material);
+      renderMeshPhong(mesh, viewdir, cullBackfaces, bumpMap, material, context);
   }
 
   /** Calculate the lighting model at a point on a surface.  If diffuse, specular, or highlight
      is null, that component will not be calculated. */
 
-  private void calcLight(Vec3 pos, Vec3 norm, Vec3 viewdir, Vec3 faceNorm, double roughness, RGBColor diffuse, RGBColor specular, RGBColor highlight)
+  private void calcLight(Vec3 pos, Vec3 norm, Vec3 viewdir, Vec3 faceNorm, double roughness, RGBColor diffuse, RGBColor specular, RGBColor highlight, RasterContext context)
   {
-    Vec3 reflectDir = tempVec[0], lightDir = tempVec[1];
+    Vec3 reflectDir = context.tempVec[0], lightDir = context.tempVec[1];
     double viewDot = viewdir.dot(norm), faceDot = viewdir.dot(faceNorm);
-    RGBColor outputColor = tempColor[0];
+    RGBColor outputColor = context.tempColor[0];
 
     if (diffuse != null)
       diffuse.copy(ambColor);
@@ -864,12 +874,12 @@ public class Raster implements Runnable
             reflectDir.set(norm);
             reflectDir.scale(-2.0*viewDot);
             reflectDir.add(viewdir);
-            theCamera.getViewToWorld().transformDirection(reflectDir);
-            envMapping.getTextureSpec(reflectDir, surfSpec2, 1.0, smoothScale, time, null);
+            context.camera.getViewToWorld().transformDirection(reflectDir);
+            envMapping.getTextureSpec(reflectDir, context.surfSpec2, 1.0, smoothScale, time, null);
             if (envMode == Scene.ENVIRON_DIFFUSE)
-              specular.copy(surfSpec2.diffuse);
+              specular.copy(context.surfSpec2.diffuse);
             else
-              specular.copy(surfSpec2.emissive);
+              specular.copy(context.surfSpec2.emissive);
           }
       }
 
@@ -941,9 +951,8 @@ public class Raster implements Runnable
   }
 
   /**
-   * Record a fragment into the buffer.
+   * Create a Fragment object.
    *
-   * @param index      the index of the pixel
    * @param addColor   the additive color in ERGB format
    * @param multColor  the multiplicative color in ERGB format
    * @param depth      the depth of the fragment
@@ -951,43 +960,60 @@ public class Raster implements Runnable
    * @param isBackface true if this triangle faces away from the camera
    */
 
-  private void recordFragment(int index, int addColor, int multColor, float depth, ObjectMaterialInfo material, boolean isBackface)
+  private Fragment createFragment(int addColor, int multColor, float depth, ObjectMaterialInfo material, boolean isBackface)
   {
     if (multColor == 0)
     {
       // It is fully opaque.
 
-      Fragment f = new OpaqueFragment(addColor, depth);
-      Fragment current = fragment[index];
-      if (depth < current.getDepth())
-        fragment[index] = f;
-      else
-        fragment[index] = current.insertNextFragment(f);
+      return new OpaqueFragment(addColor, depth);
     }
     else if (addColor == 0 && multColor == WHITE_ERGB && material == null)
-      return; // This is a fully transparent fragment, so we can just discard it.
+      return null; // This is a fully transparent fragment, so we can just discard it.
     else
     {
-      Fragment f;
       if (material == null)
-        f = new TransparentFragment(addColor, multColor, depth, BACKGROUND_FRAGMENT);
-      else if (isBackface)
-        f = new MaterialFragment(addColor, multColor, depth, BACKGROUND_FRAGMENT, material, false);
-      else
-        f = new MaterialFragment(addColor, multColor, depth, BACKGROUND_FRAGMENT, material, true);
-      Fragment current = fragment[index];
-      if (depth < current.getDepth())
-        fragment[index] = f.insertNextFragment(current);
-      else
-        fragment[index] = current.insertNextFragment(f);
+        return new TransparentFragment(addColor, multColor, depth, BACKGROUND_FRAGMENT);
+      return new MaterialFragment(addColor, multColor, depth, BACKGROUND_FRAGMENT, material, !isBackface);
+    }
+  }
+
+  /**
+   * Record a row of Fragment objects into the buffer.
+   *
+   * @param row      the index of the row
+   * @param xstart   the starting position along the row
+   * @param xend     the ending position along the row
+   * @param context  the RasterContext from which to copy the Fragments
+   */
+
+  private void recordRow(int row, int xstart, int xend, RasterContext context)
+  {
+    Fragment source[] = context.fragment;
+    int indexBase = row*width;
+
+    synchronized (lock[row])
+    {
+      for (int x = xstart; x < xend; x++)
+      {
+        Fragment f = source[x];
+        if (f == null)
+          continue;
+        int index = indexBase+x;
+        Fragment current = fragment[index];
+        if (f.getDepth() < current.getDepth())
+          fragment[index] = f.insertNextFragment(current);
+        else
+          fragment[index] = current.insertNextFragment(f);
+      }
     }
   }
 
   /** Clip a triangle to the region in front of the z clipping plane. */
 
-  private Vec3 [] clipTriangle(Vec3 v1, Vec3 v2, Vec3 v3, float z1, float z2, float z3, float newz[], double newu[], double newv[])
+  private Vec3 [] clipTriangle(Vec3 v1, Vec3 v2, Vec3 v3, float z1, float z2, float z3, float newz[], double newu[], double newv[], RasterContext context)
   {
-    double clip = theCamera.getClipDistance();
+    double clip = context.camera.getClipDistance();
     boolean c1 = z1 < clip, c2 = z2 < clip, c3 = z3 < clip;
     Vec3 u1, u2, u3, u4;
     int clipCount = 0;
@@ -1129,15 +1155,15 @@ public class Raster implements Runnable
 
   /** Render a triangle mesh with Gouraud shading. */
 
-  private void renderMeshGouraud(RenderingMesh mesh, Vec3 viewdir, boolean cullBackfaces, ObjectMaterialInfo material)
+  private void renderMeshGouraud(RenderingMesh mesh, Vec3 viewdir, boolean cullBackfaces, ObjectMaterialInfo material, RasterContext context)
   {
     Vec3 vert[] = mesh.vert, norm[] = mesh.norm;
     Vec2 pos[] = new Vec2 [vert.length];
-    float z[] = new float [vert.length], clip = (float) theCamera.getClipDistance(), clipz[] = new float [4];
+    float z[] = new float [vert.length], clip = (float) context.camera.getClipDistance(), clipz[] = new float [4];
     double clipu[] = new double [4], clipv[] = new double [4];
-    double distToScreen = theCamera.getDistToScreen(), tol = smoothScale;
+    double distToScreen = context.camera.getDistToScreen(), tol = smoothScale;
     RGBColor diffuse[] = new RGBColor [4], specular[] = new RGBColor [4], highlight[] = new RGBColor [4];
-    Mat4 toView = theCamera.getObjectToView(), toScreen = theCamera.getObjectToScreen();
+    Mat4 toView = context.camera.getObjectToView(), toScreen = context.camera.getObjectToScreen();
     RenderingTriangle tri;
     int i, v1, v2, v3, n1, n2, n3;
     boolean backface;
@@ -1168,27 +1194,27 @@ public class Raster implements Runnable
         double viewdot = viewdir.dot(mesh.faceNorm[i]);
         if (z[v1] < clip || z[v2] < clip || z[v3] < clip)
           {
-            Vec3 clipPos[] = clipTriangle(vert[v1], vert[v2], vert[v3], z[v1], z[v2], z[v3], clipz, clipu, clipv);
+            Vec3 clipPos[] = clipTriangle(vert[v1], vert[v2], vert[v3], z[v1], z[v2], z[v3], clipz, clipu, clipv, context);
             Vec2 clipPos2D[] = new Vec2 [clipPos.length];
             for (int j = clipPos.length-1; j >= 0; j--)
               {
                 clipPos2D[j] = toScreen.timesXY(clipPos[j]);
                 double u = clipu[j], v = clipv[j], w = 1.0-u-v;
-                tri.getTextureSpec(surfSpec, viewdot, u, v, 1.0-u-v, tol, time);
-                tempVec[2].set(norm[n1].x*u + norm[n2].x*v + norm[n3].x*w, norm[n1].y*u + norm[n2].y*v + norm[n3].y*w, norm[n1].z*u + norm[n2].z*v + norm[n3].z*w);
-                tempVec[2].normalize();
-                calcLight(clipPos[j], tempVec[2], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[j], specular[j], highlight[j]);
+                tri.getTextureSpec(context.surfSpec, viewdot, u, v, 1.0-u-v, tol, time);
+                context.tempVec[2].set(norm[n1].x*u + norm[n2].x*v + norm[n3].x*w, norm[n1].y*u + norm[n2].y*v + norm[n3].y*w, norm[n1].z*u + norm[n2].z*v + norm[n3].z*w);
+                context.tempVec[2].normalize();
+                calcLight(clipPos[j], context.tempVec[2], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[j], specular[j], highlight[j], context);
                 specular[j].add(highlight[j]);
               }
             renderTriangleGouraud(clipPos2D[0], clipz[0], clipu[0], clipv[0], diffuse[0], specular[0],
                 clipPos2D[1], clipz[1], clipu[1], clipv[1], diffuse[1], specular[1],
                 clipPos2D[2], clipz[2], clipu[2], clipv[2], diffuse[2], specular[2],
-                tri, clip, viewdot, backface, material);
+                tri, clip, viewdot, backface, material, context);
             if (clipPos.length == 4)
               renderTriangleGouraud(clipPos2D[1], clipz[1], clipu[1], clipv[1], diffuse[1], specular[1],
                 clipPos2D[2], clipz[2], clipu[2], clipv[2], diffuse[2], specular[2],
                 clipPos2D[3], clipz[3], clipu[3], clipv[3], diffuse[3], specular[3],
-                tri, clip, viewdot, backface, material);
+                tri, clip, viewdot, backface, material, context);
           }
         else
           {
@@ -1196,23 +1222,23 @@ public class Raster implements Runnable
               continue;
             if (z[v1] > distToScreen)
               tol = smoothScale*z[v1];
-            tri.getTextureSpec(surfSpec, viewdot, 1.0, 0.0, 0.0, tol, time);
-            calcLight(vert[v1], norm[n1], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[0], specular[0], highlight[0]);
+            tri.getTextureSpec(context.surfSpec, viewdot, 1.0, 0.0, 0.0, tol, time);
+            calcLight(vert[v1], norm[n1], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[0], specular[0], highlight[0], context);
             specular[0].add(highlight[0]);
             if (z[v2] > distToScreen)
               tol = smoothScale*z[v2];
-            tri.getTextureSpec(surfSpec, viewdot, 0.0, 1.0, 0.0, tol, time);
-            calcLight(vert[v2], norm[n2], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[1], specular[1], highlight[1]);
+            tri.getTextureSpec(context.surfSpec, viewdot, 0.0, 1.0, 0.0, tol, time);
+            calcLight(vert[v2], norm[n2], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[1], specular[1], highlight[1], context);
             specular[1].add(highlight[1]);
             if (z[v3] > distToScreen)
               tol = smoothScale*z[v3];
-            tri.getTextureSpec(surfSpec, viewdot, 0.0, 0.0, 1.0, tol, time);
-            calcLight(vert[v3], norm[n3], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[2], specular[2], highlight[2]);
+            tri.getTextureSpec(context.surfSpec, viewdot, 0.0, 0.0, 1.0, tol, time);
+            calcLight(vert[v3], norm[n3], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[2], specular[2], highlight[2], context);
             specular[2].add(highlight[2]);
             renderTriangleGouraud(pos[v1], z[v1], 1.0, 0.0, diffuse[0], specular[0],
                 pos[v2], z[v2], 0.0, 1.0, diffuse[1], specular[1],
                 pos[v3], z[v3], 0.0, 0.0, diffuse[2], specular[2],
-                tri, clip, viewdot, backface, material);
+                tri, clip, viewdot, backface, material, context);
           }
       }
   }
@@ -1222,7 +1248,7 @@ public class Raster implements Runnable
   private void renderTriangleGouraud(Vec2 pos1, float zf1, double uf1, double vf1, RGBColor diffuse1, RGBColor specular1,
                                      Vec2 pos2, float zf2, double uf2, double vf2, RGBColor diffuse2, RGBColor specular2,
                                      Vec2 pos3, float zf3, double uf3, double vf3, RGBColor diffuse3, RGBColor specular3,
-                                     RenderingTriangle tri, double clip, double viewdot, boolean isBackface, ObjectMaterialInfo material)
+                                     RenderingTriangle tri, double clip, double viewdot, boolean isBackface, ObjectMaterialInfo material, RasterContext context)
   {
     double x1, x2, x3, y1, y2, y3;
     double dx1, dx2, dy1, dy2, mx1, mx2;
@@ -1242,6 +1268,7 @@ public class Raster implements Runnable
     float denom;
     int left, right, i, index, yend, y, lastAddColor = 0, lastMultColor = 0;
     boolean doSubsample = (subsample > 1), repeat;
+    TextureSpec surfSpec = context.surfSpec;
 
     // Order the three vertices by y coordinate.
 
@@ -1604,17 +1631,20 @@ public class Raster implements Runnable
                             vl = v*zl;
                             wl = 1.0-ul-vl;
                             tri.getTextureSpec(surfSpec, viewdot, ul, vl, wl, smoothScale*z, time);
-                            tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*specred + surfSpec.emissive.getRed(),
+                            context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*specred + surfSpec.emissive.getRed(),
                               surfSpec.diffuse.getGreen()*difgreen + surfSpec.hilight.getGreen()*specgreen + surfSpec.emissive.getGreen(),
                               surfSpec.diffuse.getBlue()*difblue + surfSpec.hilight.getBlue()*specblue + surfSpec.emissive.getBlue());
-                            lastAddColor = tempColor[0].getERGB();
+                            lastAddColor = context.tempColor[0].getERGB();
                             lastMultColor = surfSpec.transparent.getERGB();
                           }
-                        recordFragment(index+i, lastAddColor, lastMultColor, zl, material, isBackface);
+                        context.fragment[i] = createFragment(lastAddColor, lastMultColor, zl, material, isBackface);
                         repeat = doSubsample;
                       }
                     else
+                    {
+                      context.fragment[i] = null;
                       repeat = false;
+                    }
                     z += dz;
                     u += du;
                     v += dv;
@@ -1625,6 +1655,7 @@ public class Raster implements Runnable
                     specgreen += dspecgreen;
                     specblue += dspecblue;
                   }
+                recordRow(y, left, right, context);
               }
             xstart += mx1;
             zstart += mz1;
@@ -1808,17 +1839,20 @@ public class Raster implements Runnable
                             vl = v*zl;
                             wl = 1.0-ul-vl;
                             tri.getTextureSpec(surfSpec, viewdot, ul, vl, wl, smoothScale*z, time);
-                            tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*specred + surfSpec.emissive.getRed(),
+                            context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*specred + surfSpec.emissive.getRed(),
                               surfSpec.diffuse.getGreen()*difgreen + surfSpec.hilight.getGreen()*specgreen + surfSpec.emissive.getGreen(),
                               surfSpec.diffuse.getBlue()*difblue + surfSpec.hilight.getBlue()*specblue + surfSpec.emissive.getBlue());
-                            lastAddColor = tempColor[0].getERGB();
+                            lastAddColor = context.tempColor[0].getERGB();
                             lastMultColor = surfSpec.transparent.getERGB();
                           }
-                        recordFragment(index+i, lastAddColor, lastMultColor, zl, material, isBackface);
+                        context.fragment[i] = createFragment(lastAddColor, lastMultColor, zl, material, isBackface);
                         repeat = doSubsample;
                       }
                     else
+                    {
+                      context.fragment[i] = null;
                       repeat = false;
+                    }
                     z += dz;
                     u += du;
                     v += dv;
@@ -1829,6 +1863,7 @@ public class Raster implements Runnable
                     specgreen += dspecgreen;
                     specblue += dspecblue;
                   }
+                recordRow(y, left, right, context);
               }
             xstart += mx1;
             zstart += mz1;
@@ -1858,15 +1893,15 @@ public class Raster implements Runnable
 
   /** Render a triangle mesh with hybrid Gouraud/Phong shading. */
 
-  private void renderMeshHybrid(RenderingMesh mesh, Vec3 viewdir, boolean cullBackfaces, ObjectMaterialInfo material)
+  private void renderMeshHybrid(RenderingMesh mesh, Vec3 viewdir, boolean cullBackfaces, ObjectMaterialInfo material, RasterContext context)
   {
     Vec3 vert[] = mesh.vert, norm[] = mesh.norm, clipNorm[] = new Vec3 [4];
     Vec2 pos[] = new Vec2 [vert.length];
-    float z[] = new float [vert.length], clip = (float) theCamera.getClipDistance(), clipz[] = new float [4];
+    float z[] = new float [vert.length], clip = (float) context.camera.getClipDistance(), clipz[] = new float [4];
     double clipu[] = new double [4], clipv[] = new double [4];
-    double distToScreen = theCamera.getDistToScreen(), tol = smoothScale;
+    double distToScreen = context.camera.getDistToScreen(), tol = smoothScale;
     RGBColor diffuse[] = new RGBColor [4];
-    Mat4 toView = theCamera.getObjectToView(), toScreen = theCamera.getObjectToScreen();
+    Mat4 toView = context.camera.getObjectToView(), toScreen = context.camera.getObjectToScreen();
     RenderingTriangle tri;
     int i, v1, v2, v3, n1, n2, n3;
     boolean backface;
@@ -1896,26 +1931,26 @@ public class Raster implements Runnable
         double viewdot = viewdir.dot(mesh.faceNorm[i]);
         if (z[v1] < clip || z[v2] < clip || z[v3] < clip)
           {
-            Vec3 clipPos[] = clipTriangle(vert[v1], vert[v2], vert[v3], z[v1], z[v2], z[v3], clipz, clipu, clipv);
+            Vec3 clipPos[] = clipTriangle(vert[v1], vert[v2], vert[v3], z[v1], z[v2], z[v3], clipz, clipu, clipv, context);
             Vec2 clipPos2D[] = new Vec2 [clipPos.length];
             for (int j = clipPos.length-1; j >= 0; j--)
               {
                 clipPos2D[j] = toScreen.timesXY(clipPos[j]);
                 double u = clipu[j], v = clipv[j], w = 1.0-u-v;
-                tri.getTextureSpec(surfSpec, viewdot, u, v, 1.0-u-v, tol, time);
+                tri.getTextureSpec(context.surfSpec, viewdot, u, v, 1.0-u-v, tol, time);
                 clipNorm[j].set(norm[n1].x*u + norm[n2].x*v + norm[n3].x*w, norm[n1].y*u + norm[n2].y*v + norm[n3].y*w, norm[n1].z*u + norm[n2].z*v + norm[n3].z*w);
                 clipNorm[j].normalize();
-                calcLight(clipPos[j], tempVec[2], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[j], null, null);
+                calcLight(clipPos[j], context.tempVec[2], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[j], null, null, context);
               }
             renderTriangleHybrid(clipPos2D[0], clipz[0], clipPos[0], clipNorm[0], clipu[0], clipv[0], diffuse[0],
                 clipPos2D[1], clipz[1], clipPos[1], clipNorm[1], clipu[1], clipv[1], diffuse[1],
                 clipPos2D[2], clipz[2], clipPos[2], clipNorm[2], clipu[2], clipv[2], diffuse[2],
-                tri, viewdir, mesh.faceNorm[i], clip, viewdot, backface, material);
+                tri, viewdir, mesh.faceNorm[i], clip, viewdot, backface, material, context);
             if (clipPos.length == 4)
               renderTriangleHybrid(clipPos2D[1], clipz[1], clipPos[1], clipNorm[1], clipu[1], clipv[1], diffuse[1],
                 clipPos2D[2], clipz[2], clipPos[2], clipNorm[2], clipu[2], clipv[2], diffuse[2],
                 clipPos2D[3], clipz[3], clipPos[3], clipNorm[3], clipu[3], clipv[3], diffuse[3],
-                tri, viewdir, mesh.faceNorm[i], clip, viewdot, backface, material);
+                tri, viewdir, mesh.faceNorm[i], clip, viewdot, backface, material, context);
           }
         else
           {
@@ -1923,20 +1958,20 @@ public class Raster implements Runnable
               continue;
             if (z[v1] > distToScreen)
               tol = smoothScale*z[v1];
-            tri.getTextureSpec(surfSpec, viewdot, 1.0, 0.0, 0.0, tol, time);
-            calcLight(vert[v1], norm[n1], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[0], null, null);
+            tri.getTextureSpec(context.surfSpec, viewdot, 1.0, 0.0, 0.0, tol, time);
+            calcLight(vert[v1], norm[n1], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[0], null, null, context);
             if (z[v2] > distToScreen)
               tol = smoothScale*z[v2];
-            tri.getTextureSpec(surfSpec, viewdot, 0.0, 1.0, 0.0, tol, time);
-            calcLight(vert[v2], norm[n2], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[1], null, null);
+            tri.getTextureSpec(context.surfSpec, viewdot, 0.0, 1.0, 0.0, tol, time);
+            calcLight(vert[v2], norm[n2], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[1], null, null, context);
             if (z[v3] > distToScreen)
               tol = smoothScale*z[v3];
-            tri.getTextureSpec(surfSpec, viewdot, 0.0, 0.0, 1.0, tol, time);
-            calcLight(vert[v3], norm[n3], viewdir, mesh.faceNorm[i], surfSpec.roughness, diffuse[2], null, null);
+            tri.getTextureSpec(context.surfSpec, viewdot, 0.0, 0.0, 1.0, tol, time);
+            calcLight(vert[v3], norm[n3], viewdir, mesh.faceNorm[i], context.surfSpec.roughness, diffuse[2], null, null, context);
             renderTriangleHybrid(pos[v1], z[v1], vert[v1], norm[n1], 1.0, 0.0, diffuse[0],
                 pos[v2], z[v2], vert[v2], norm[n2], 0.0, 1.0, diffuse[1],
                 pos[v3], z[v3], vert[v3], norm[n3], 0.0, 0.0, diffuse[2],
-                tri, viewdir, mesh.faceNorm[i], clip, viewdot, backface, material);
+                tri, viewdir, mesh.faceNorm[i], clip, viewdot, backface, material, context);
           }
       }
   }
@@ -1946,7 +1981,7 @@ public class Raster implements Runnable
   private void renderTriangleHybrid(Vec2 pos1, float zf1, Vec3 vert1, Vec3 normf1, double uf1, double vf1, RGBColor diffuse1,
                                     Vec2 pos2, float zf2, Vec3 vert2, Vec3 normf2, double uf2, double vf2, RGBColor diffuse2,
                                     Vec2 pos3, float zf3, Vec3 vert3, Vec3 normf3, double uf3, double vf3, RGBColor diffuse3,
-                                    RenderingTriangle tri, Vec3 viewdir, Vec3 faceNorm, double clip, double viewdot, boolean isBackface, ObjectMaterialInfo material)
+                                    RenderingTriangle tri, Vec3 viewdir, Vec3 faceNorm, double clip, double viewdot, boolean isBackface, ObjectMaterialInfo material, RasterContext context)
   {
     double x1, x2, x3, y1, y2, y3;
     double dx1, dx2, dy1, dy2, mx1, mx2;
@@ -1954,7 +1989,7 @@ public class Raster implements Runnable
     float z1, z2, z3, dz1, dz2, mz1, mz2, zstart, zend, z, zl, dz;
     double u1, u2, u3, v1, v2, v3, du1, du2, dv1, dv2, mu1, mu2, mv1, mv2;
     double ustart, uend, vstart, vend, u, v, ul, vl, wl, du, dv;
-    RGBColor dif1, dif2, dif3, specular = tempColor[1], highlight = tempColor[2];
+    RGBColor dif1, dif2, dif3, specular = context.tempColor[1], highlight = context.tempColor[2];
     Vec3 norm1, norm2, norm3;
     float ddifred1, ddifred2, ddifgreen1, ddifgreen2, ddifblue1, ddifblue2;
     float mdifred1, mdifred2, mdifgreen1, mdifgreen2, mdifblue1, mdifblue2;
@@ -1967,6 +2002,7 @@ public class Raster implements Runnable
     float denom;
     int left, right, i, index, yend, y, lastAddColor = 0, lastMultColor = 0;
     boolean doSubsample = (subsample > 1), repeat;
+    TextureSpec surfSpec = context.surfSpec;
 
     // Order the three vertices by y coordinate.
 
@@ -2331,28 +2367,31 @@ public class Raster implements Runnable
                             tri.getTextureSpec(surfSpec, viewdot, ul, vl, wl, smoothScale*z, time);
                             if (surfSpec.hilight.getRed() == 0.0f && surfSpec.hilight.getGreen() == 0.0f && surfSpec.hilight.getBlue() == 0.0f &&
                                 surfSpec.specular.getRed() == 0.0f && surfSpec.specular.getGreen() == 0.0f && surfSpec.specular.getBlue() == 0.0f)
-                              tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.emissive.getRed(),
+                              context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.emissive.getRed(),
                                 surfSpec.diffuse.getGreen()*difgreen + surfSpec.emissive.getGreen(),
                                 surfSpec.diffuse.getBlue()*difblue + surfSpec.emissive.getBlue());
                             else
                               {
                                 if (positionNeeded)
-                                  tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
-                                tempVec[3].set(normx, normy, normz);
-                                tempVec[3].normalize();
-                                calcLight(tempVec[2], tempVec[3], viewdir, faceNorm, surfSpec.roughness, null, specular, highlight);
-                                tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
+                                  context.tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
+                                context.tempVec[3].set(normx, normy, normz);
+                                context.tempVec[3].normalize();
+                                calcLight(context.tempVec[2], context.tempVec[3], viewdir, faceNorm, surfSpec.roughness, null, specular, highlight, context);
+                                context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
                                   surfSpec.diffuse.getGreen()*difgreen + surfSpec.hilight.getGreen()*highlight.getGreen() + surfSpec.specular.getGreen()*specular.getGreen() + surfSpec.emissive.getGreen(),
                                   surfSpec.diffuse.getBlue()*difblue + surfSpec.hilight.getBlue()*highlight.getBlue() + surfSpec.specular.getBlue()*specular.getBlue() + surfSpec.emissive.getBlue());
                               }
-                            lastAddColor = tempColor[0].getERGB();
+                            lastAddColor = context.tempColor[0].getERGB();
                             lastMultColor = surfSpec.transparent.getERGB();
                           }
-                        recordFragment(index+i, lastAddColor, lastMultColor, zl, material, isBackface);
+                        context.fragment[i] = createFragment(lastAddColor, lastMultColor, zl, material, isBackface);
                         repeat = doSubsample;
                       }
                     else
+                    {
+                      context.fragment[i] = null;
                       repeat = false;
+                    }
                     z += dz;
                     u += du;
                     v += dv;
@@ -2363,6 +2402,7 @@ public class Raster implements Runnable
                     normy += dnormy;
                     normz += dnormz;
                   }
+                recordRow(y, left, right, context);
               }
             xstart += mx1;
             zstart += mz1;
@@ -2548,28 +2588,31 @@ public class Raster implements Runnable
                             tri.getTextureSpec(surfSpec, viewdot, ul, vl, wl, smoothScale*z, time);
                             if (surfSpec.hilight.getRed() == 0.0f && surfSpec.hilight.getGreen() == 0.0f && surfSpec.hilight.getBlue() == 0.0f &&
                                 surfSpec.specular.getRed() == 0.0f && surfSpec.specular.getGreen() == 0.0f && surfSpec.specular.getBlue() == 0.0f)
-                              tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.emissive.getRed(),
+                              context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.emissive.getRed(),
                                 surfSpec.diffuse.getGreen()*difgreen + surfSpec.emissive.getGreen(),
                                 surfSpec.diffuse.getBlue()*difblue + surfSpec.emissive.getBlue());
                             else
                               {
                                 if (positionNeeded)
-                                  tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
-                                tempVec[3].set(normx, normy, normz);
-                                tempVec[3].normalize();
-                                calcLight(tempVec[2], tempVec[3], viewdir, faceNorm, surfSpec.roughness, null, specular, highlight);
-                                tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
+                                  context.tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
+                                context.tempVec[3].set(normx, normy, normz);
+                                context.tempVec[3].normalize();
+                                calcLight(context.tempVec[2], context.tempVec[3], viewdir, faceNorm, surfSpec.roughness, null, specular, highlight, context);
+                                context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*difred + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
                                   surfSpec.diffuse.getGreen()*difgreen + surfSpec.hilight.getGreen()*highlight.getGreen() + surfSpec.specular.getGreen()*specular.getGreen() + surfSpec.emissive.getGreen(),
                                   surfSpec.diffuse.getBlue()*difblue + surfSpec.hilight.getBlue()*highlight.getBlue() + surfSpec.specular.getBlue()*specular.getBlue() + surfSpec.emissive.getBlue());
                               }
-                            lastAddColor = tempColor[0].getERGB();
+                            lastAddColor = context.tempColor[0].getERGB();
                             lastMultColor = surfSpec.transparent.getERGB();
                           }
-                        recordFragment(index+i, lastAddColor, lastMultColor, zl, material, isBackface);
+                        context.fragment[i] = createFragment(lastAddColor, lastMultColor, zl, material, isBackface);
                         repeat = doSubsample;
                       }
                     else
+                    {
+                      context.fragment[i] = null;
                       repeat = false;
+                    }
                     z += dz;
                     u += du;
                     v += dv;
@@ -2580,6 +2623,7 @@ public class Raster implements Runnable
                     normy += dnormy;
                     normz += dnormz;
                   }
+                recordRow(y, left, right, context);
               }
             xstart += mx1;
             zstart += mz1;
@@ -2609,13 +2653,13 @@ public class Raster implements Runnable
 
   /** Render a triangle mesh with Phong shading. */
 
-  private void renderMeshPhong(RenderingMesh mesh, Vec3 viewdir, boolean cullBackfaces, boolean bumpMap, ObjectMaterialInfo material)
+  private void renderMeshPhong(RenderingMesh mesh, Vec3 viewdir, boolean cullBackfaces, boolean bumpMap, ObjectMaterialInfo material, RasterContext context)
   {
     Vec3 vert[] = mesh.vert, norm[] = mesh.norm, clipNorm[] = new Vec3 [4];
     Vec2 pos[] = new Vec2 [vert.length];
-    float z[] = new float [vert.length], clip = (float) theCamera.getClipDistance(), clipz[] = new float [4];
+    float z[] = new float [vert.length], clip = (float) context.camera.getClipDistance(), clipz[] = new float [4];
     double clipu[] = new double [4], clipv[] = new double [4];
-    Mat4 toView = theCamera.getObjectToView(), toScreen = theCamera.getObjectToScreen();
+    Mat4 toView = context.camera.getObjectToView(), toScreen = context.camera.getObjectToScreen();
     RenderingTriangle tri;
     int i, v1, v2, v3, n1, n2, n3;
     boolean backface;
@@ -2641,7 +2685,7 @@ public class Raster implements Runnable
         backface = ((pos[v2].x-pos[v1].x)*(pos[v3].y-pos[v1].y) - (pos[v2].y-pos[v1].y)*(pos[v3].x-pos[v1].x) > 0.0);
         if (z[v1] < clip || z[v2] < clip || z[v3] < clip)
           {
-            Vec3 clipPos[] = clipTriangle(vert[v1], vert[v2], vert[v3], z[v1], z[v2], z[v3], clipz, clipu, clipv);
+            Vec3 clipPos[] = clipTriangle(vert[v1], vert[v2], vert[v3], z[v1], z[v2], z[v3], clipz, clipu, clipv, context);
             Vec2 clipPos2D[] = new Vec2 [clipPos.length];
             for (int j = clipPos.length-1; j >= 0; j--)
               {
@@ -2653,12 +2697,12 @@ public class Raster implements Runnable
             renderTrianglePhong(clipPos2D[0], clipz[0], clipPos[0], clipNorm[0], clipu[0], clipv[0],
                 clipPos2D[1], clipz[1], clipPos[1], clipNorm[1], clipu[1], clipv[1],
                 clipPos2D[2], clipz[2], clipPos[2], clipNorm[2], clipu[2], clipv[2],
-                tri, viewdir, mesh.faceNorm[i], clip, bumpMap, backface, material);
+                tri, viewdir, mesh.faceNorm[i], clip, bumpMap, backface, material, context);
             if (clipPos.length == 4)
               renderTrianglePhong(clipPos2D[1], clipz[1], clipPos[1], clipNorm[1], clipu[1], clipv[1],
                 clipPos2D[2], clipz[2], clipPos[2], clipNorm[2], clipu[2], clipv[2],
                 clipPos2D[3], clipz[3], clipPos[3], clipNorm[3], clipu[3], clipv[3],
-                tri, viewdir, mesh.faceNorm[i], clip, bumpMap, backface, material);
+                tri, viewdir, mesh.faceNorm[i], clip, bumpMap, backface, material, context);
           }
         else
           {
@@ -2667,7 +2711,7 @@ public class Raster implements Runnable
             renderTrianglePhong(pos[v1], z[v1], vert[v1], norm[n1], 1.0, 0.0,
                 pos[v2], z[v2], vert[v2], norm[n2], 0.0, 1.0,
                 pos[v3], z[v3], vert[v3], norm[n3], 0.0, 0.0,
-                tri, viewdir, mesh.faceNorm[i], clip, bumpMap, backface, material);
+                tri, viewdir, mesh.faceNorm[i], clip, bumpMap, backface, material, context);
           }
       }
   }
@@ -2677,7 +2721,7 @@ public class Raster implements Runnable
   private void renderTrianglePhong(Vec2 pos1, float zf1, Vec3 vert1, Vec3 normf1, double uf1, double vf1,
                                    Vec2 pos2, float zf2, Vec3 vert2, Vec3 normf2, double uf2, double vf2,
                                    Vec2 pos3, float zf3, Vec3 vert3, Vec3 normf3, double uf3, double vf3,
-                                   RenderingTriangle tri, Vec3 viewdir, Vec3 faceNorm, double clip, boolean bumpMap, boolean isBackface, ObjectMaterialInfo material)
+                                   RenderingTriangle tri, Vec3 viewdir, Vec3 faceNorm, double clip, boolean bumpMap, boolean isBackface, ObjectMaterialInfo material, RasterContext context)
   {
     double x1, x2, x3, y1, y2, y3;
     double dx1, dx2, dy1, dy2, mx1, mx2;
@@ -2685,8 +2729,8 @@ public class Raster implements Runnable
     float z1, z2, z3, dz1, dz2, mz1, mz2, zstart, zend, z, zl, dz;
     double u1, u2, u3, v1, v2, v3, du1, du2, dv1, dv2, mu1, mu2, mv1, mv2;
     double ustart, uend, vstart, vend, u, v, ul, vl, wl, du, dv;
-    RGBColor diffuse = tempColor[1], specular = tempColor[2], highlight = tempColor[3];
-    Vec3 norm1, norm2, norm3, normal = tempVec[3];
+    RGBColor diffuse = context.tempColor[1], specular = context.tempColor[2], highlight = context.tempColor[3];
+    Vec3 norm1, norm2, norm3, normal = context.tempVec[3];
     double dnormx1, dnormx2, dnormy1, dnormy2, dnormz1, dnormz2;
     double mnormx1, mnormx2, mnormy1, mnormy2, mnormz1, mnormz2;
     double normxstart, normxend, normystart, normyend, normzstart, normzend;
@@ -2694,6 +2738,7 @@ public class Raster implements Runnable
     float denom;
     int left, right, i, index, yend, y, lastAddColor = 0, lastMultColor = 0;
     boolean doSubsample = (subsample > 1), repeat;
+    TextureSpec surfSpec = context.surfSpec;
 
     // Order the three vertices by y coordinate.
 
@@ -2996,7 +3041,7 @@ public class Raster implements Runnable
                             vl = v*zl;
                             wl = 1.0-ul-vl;
                             if (positionNeeded)
-                              tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
+                              context.tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
                             normal.set(normx, normy, normz);
                             normal.normalize();
                             tri.getTextureSpec(surfSpec, viewdir.dot(normal), ul, vl, wl, smoothScale*z, time);
@@ -3009,26 +3054,29 @@ public class Raster implements Runnable
                             if (surfSpec.hilight.getRed() == 0.0f && surfSpec.hilight.getGreen() == 0.0f && surfSpec.hilight.getBlue() == 0.0f &&
                                 surfSpec.specular.getRed() == 0.0f && surfSpec.specular.getGreen() == 0.0f && surfSpec.specular.getBlue() == 0.0f)
                               {
-                                calcLight(tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, null, null);
-                                tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.emissive.getRed(),
+                                calcLight(context.tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, null, null, context);
+                                context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.emissive.getRed(),
                                   surfSpec.diffuse.getGreen()*diffuse.getGreen() + surfSpec.emissive.getGreen(),
                                   surfSpec.diffuse.getBlue()*diffuse.getBlue() + surfSpec.emissive.getBlue());
                               }
                             else
                               {
-                                calcLight(tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, specular, highlight);
-                                tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
+                                calcLight(context.tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, specular, highlight, context);
+                                context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
                                   surfSpec.diffuse.getGreen()*diffuse.getGreen() + surfSpec.hilight.getGreen()*highlight.getGreen() + surfSpec.specular.getGreen()*specular.getGreen() + surfSpec.emissive.getGreen(),
                                   surfSpec.diffuse.getBlue()*diffuse.getBlue() + surfSpec.hilight.getBlue()*highlight.getBlue() + surfSpec.specular.getBlue()*specular.getBlue() + surfSpec.emissive.getBlue());
                               }
-                            lastAddColor = tempColor[0].getERGB();
+                            lastAddColor = context.tempColor[0].getERGB();
                             lastMultColor = surfSpec.transparent.getERGB();
                           }
-                        recordFragment(index+i, lastAddColor, lastMultColor, zl, material, isBackface);
+                        context.fragment[i] = createFragment(lastAddColor, lastMultColor, zl, material, isBackface);
                         repeat = doSubsample;
                       }
                     else
+                    {
+                      context.fragment[i] = null;
                       repeat = false;
+                    }
                     z += dz;
                     u += du;
                     v += dv;
@@ -3036,6 +3084,7 @@ public class Raster implements Runnable
                     normy += dnormy;
                     normz += dnormz;
                   }
+                recordRow(y, left, right, context);
               }
             xstart += mx1;
             zstart += mz1;
@@ -3180,7 +3229,7 @@ public class Raster implements Runnable
                             vl = v*zl;
                             wl = 1.0-ul-vl;
                             if (positionNeeded)
-                              tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
+                              context.tempVec[2].set(ul*vert1.x+vl*vert2.x+wl*vert3.x, ul*vert1.y+vl*vert2.y+wl*vert3.y, ul*vert1.z+vl*vert2.z+wl*vert3.z);
                             normal.set(normx, normy, normz);
                             normal.normalize();
                             tri.getTextureSpec(surfSpec, viewdir.dot(normal), ul, vl, wl, smoothScale*z, time);
@@ -3193,26 +3242,29 @@ public class Raster implements Runnable
                             if (surfSpec.hilight.getRed() == 0.0f && surfSpec.hilight.getGreen() == 0.0f && surfSpec.hilight.getBlue() == 0.0f &&
                                 surfSpec.specular.getRed() == 0.0f && surfSpec.specular.getGreen() == 0.0f && surfSpec.specular.getBlue() == 0.0f)
                               {
-                                calcLight(tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, null, null);
-                                tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.emissive.getRed(),
+                                calcLight(context.tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, null, null, context);
+                                context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.emissive.getRed(),
                                   surfSpec.diffuse.getGreen()*diffuse.getGreen() + surfSpec.emissive.getGreen(),
                                   surfSpec.diffuse.getBlue()*diffuse.getBlue() + surfSpec.emissive.getBlue());
                               }
                             else
                               {
-                                calcLight(tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, specular, highlight);
-                                tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
+                                calcLight(context.tempVec[2], normal, viewdir, faceNorm, surfSpec.roughness, diffuse, specular, highlight, context);
+                                context.tempColor[0].setRGB(surfSpec.diffuse.getRed()*diffuse.getRed() + surfSpec.hilight.getRed()*highlight.getRed() + surfSpec.specular.getRed()*specular.getRed() + surfSpec.emissive.getRed(),
                                   surfSpec.diffuse.getGreen()*diffuse.getGreen() + surfSpec.hilight.getGreen()*highlight.getGreen() + surfSpec.specular.getGreen()*specular.getGreen() + surfSpec.emissive.getGreen(),
                                   surfSpec.diffuse.getBlue()*diffuse.getBlue() + surfSpec.hilight.getBlue()*highlight.getBlue() + surfSpec.specular.getBlue()*specular.getBlue() + surfSpec.emissive.getBlue());
                               }
-                            lastAddColor = tempColor[0].getERGB();
+                            lastAddColor = context.tempColor[0].getERGB();
                             lastMultColor = surfSpec.transparent.getERGB();
                           }
-                        recordFragment(index+i, lastAddColor, lastMultColor, zl, material, isBackface);
+                        context.fragment[i] = createFragment(lastAddColor, lastMultColor, zl, material, isBackface);
                         repeat = doSubsample;
                       }
                     else
+                    {
+                      context.fragment[i] = null;
                       repeat = false;
+                    }
                     z += dz;
                     u += du;
                     v += dv;
@@ -3220,6 +3272,7 @@ public class Raster implements Runnable
                     normy += dnormy;
                     normz += dnormz;
                   }
+                recordRow(y, left, right, context);
               }
             xstart += mx1;
             zstart += mz1;
@@ -3244,10 +3297,10 @@ public class Raster implements Runnable
   /** Render a displacement mapped triangle mesh by recursively subdividing the triangles
      until they are sufficiently small. */
 
-  private void renderMeshDisplaced(RenderingMesh mesh, Vec3 viewdir, double tol, boolean cullBackfaces, boolean bumpMap, ObjectMaterialInfo material)
+  private void renderMeshDisplaced(RenderingMesh mesh, Vec3 viewdir, double tol, boolean cullBackfaces, boolean bumpMap, ObjectMaterialInfo material, RasterContext context)
   {
     Vec3 vert[] = mesh.vert, norm[] = mesh.norm;
-    Mat4 toView = theCamera.getObjectToView(), toScreen = theCamera.getObjectToScreen();
+    Mat4 toView = context.camera.getObjectToView(), toScreen = context.camera.getObjectToScreen();
     int v1, v2, v3, n1, n2, n3;
     double dist1, dist2, dist3;
     RenderingTriangle tri;
@@ -3267,16 +3320,16 @@ public class Raster implements Runnable
 
         // Calculate the gradient vectors for u and v.
 
-        tempVec[0].set(vert[v1].x-vert[v3].x, vert[v1].y-vert[v3].y, vert[v1].z-vert[v3].z);
-        tempVec[1].set(vert[v3].x-vert[v2].x, vert[v3].y-vert[v2].y, vert[v3].z-vert[v2].z);
-        Vec3 vgrad = tempVec[0].cross(mesh.faceNorm[i]);
-        Vec3 ugrad = tempVec[1].cross(mesh.faceNorm[i]);
-        vgrad.scale(-1.0/vgrad.dot(tempVec[1]));
-        ugrad.scale(1.0/ugrad.dot(tempVec[0]));
-        DisplacedVertex dv1 = new DisplacedVertex(tri, vert[v1], norm[n1], 1.0, 0.0, toView, toScreen);
-        DisplacedVertex dv2 = new DisplacedVertex(tri, vert[v2], norm[n2], 0.0, 1.0, toView, toScreen);
-        DisplacedVertex dv3 = new DisplacedVertex(tri, vert[v3], norm[n3], 0.0, 0.0, toView, toScreen);
-        renderDisplacedTriangle(tri, dv1, dist1, dv2, dist2, dv3, dist3, viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+        context.tempVec[0].set(vert[v1].x-vert[v3].x, vert[v1].y-vert[v3].y, vert[v1].z-vert[v3].z);
+        context.tempVec[1].set(vert[v3].x-vert[v2].x, vert[v3].y-vert[v2].y, vert[v3].z-vert[v2].z);
+        Vec3 vgrad = context.tempVec[0].cross(mesh.faceNorm[i]);
+        Vec3 ugrad = context.tempVec[1].cross(mesh.faceNorm[i]);
+        vgrad.scale(-1.0/vgrad.dot(context.tempVec[1]));
+        ugrad.scale(1.0/ugrad.dot(context.tempVec[0]));
+        DisplacedVertex dv1 = new DisplacedVertex(tri, vert[v1], norm[n1], 1.0, 0.0, toView, toScreen, context);
+        DisplacedVertex dv2 = new DisplacedVertex(tri, vert[v2], norm[n2], 0.0, 1.0, toView, toScreen, context);
+        DisplacedVertex dv3 = new DisplacedVertex(tri, vert[v3], norm[n3], 0.0, 0.0, toView, toScreen, context);
+        renderDisplacedTriangle(tri, dv1, dist1, dv2, dist2, dv3, dist3, viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
       }
   }
 
@@ -3284,9 +3337,10 @@ public class Raster implements Runnable
 
   private void renderDisplacedTriangle(RenderingTriangle tri, DisplacedVertex dv1,
                                        double dist1, DisplacedVertex dv2, double dist2, DisplacedVertex dv3, double dist3,
-                                       Vec3 viewdir, Vec3 ugrad, Vec3 vgrad, double tol, boolean cullBackfaces, boolean bumpMap, ObjectMaterialInfo material)
+                                       Vec3 viewdir, Vec3 ugrad, Vec3 vgrad, double tol, boolean cullBackfaces, boolean bumpMap,
+                                       ObjectMaterialInfo material, RasterContext context)
   {
-    Mat4 toView = theCamera.getObjectToView(), toScreen = theCamera.getObjectToScreen();
+    Mat4 toView = context.camera.getObjectToView(), toScreen = context.camera.getObjectToScreen();
     DisplacedVertex midv1 = null, midv2 = null, midv3 = null;
     double halfdist1 = 0, halfdist2 = 0, halfdist3 = 0;
     boolean split1 = dist1 > tol, split2 = dist2 > tol, split3 = dist3 > tol;
@@ -3296,7 +3350,7 @@ public class Raster implements Runnable
       {
         midv1 = new DisplacedVertex(tri, new Vec3(0.5*(dv1.vert.x+dv2.vert.x), 0.5*(dv1.vert.y+dv2.vert.y), 0.5*(dv1.vert.z+dv2.vert.z)),
           new Vec3(0.5*(dv1.norm.x+dv2.norm.x), 0.5*(dv1.norm.y+dv2.norm.y), 0.5*(dv1.norm.z+dv2.norm.z)),
-          0.5*(dv1.u+dv2.u), 0.5*(dv1.v+dv2.v), toView, toScreen);
+          0.5*(dv1.u+dv2.u), 0.5*(dv1.v+dv2.v), toView, toScreen, context);
         halfdist1 = 0.5*dist1;
         count++;
       }
@@ -3304,7 +3358,7 @@ public class Raster implements Runnable
       {
         midv2 = new DisplacedVertex(tri, new Vec3(0.5*(dv2.vert.x+dv3.vert.x), 0.5*(dv2.vert.y+dv3.vert.y), 0.5*(dv2.vert.z+dv3.vert.z)),
           new Vec3(0.5*(dv2.norm.x+dv3.norm.x), 0.5*(dv2.norm.y+dv3.norm.y), 0.5*(dv2.norm.z+dv3.norm.z)),
-          0.5*(dv2.u+dv3.u), 0.5*(dv2.v+dv3.v), toView, toScreen);
+          0.5*(dv2.u+dv3.u), 0.5*(dv2.v+dv3.v), toView, toScreen, context);
         halfdist2 = 0.5*dist2;
         count++;
       }
@@ -3312,7 +3366,7 @@ public class Raster implements Runnable
       {
         midv3 = new DisplacedVertex(tri, new Vec3(0.5*(dv3.vert.x+dv1.vert.x), 0.5*(dv3.vert.y+dv1.vert.y), 0.5*(dv3.vert.z+dv1.vert.z)),
           new Vec3(0.5*(dv3.norm.x+dv1.norm.x), 0.5*(dv3.norm.y+dv1.norm.y), 0.5*(dv3.norm.z+dv1.norm.z)),
-          0.5*(dv3.u+dv1.u), 0.5*(dv3.v+dv1.v), toView, toScreen);
+          0.5*(dv3.u+dv1.u), 0.5*(dv3.v+dv1.v), toView, toScreen, context);
         halfdist3 = 0.5*dist3;
         count++;
       }
@@ -3327,25 +3381,25 @@ public class Raster implements Runnable
           {
             double d = dv3.vert.distance(midv1.vert);
             renderDisplacedTriangle(tri, dv1, halfdist1, midv1, d, dv3, dist3,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, midv1, halfdist1, dv2, dist2, dv3, d,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
           }
         else if (split2)
           {
             double d = dv1.vert.distance(midv2.vert);
             renderDisplacedTriangle(tri, dv2, halfdist2, midv2, d, dv1, dist1,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, midv2, halfdist2, dv3, dist3, dv1, d,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
           }
         else
           {
             double d = dv1.vert.distance(midv3.vert);
             renderDisplacedTriangle(tri, dv3, halfdist3, midv3, d, dv2, dist2,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, midv3, halfdist3, dv1, dist1, dv2, d,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
           }
         return;
       }
@@ -3357,31 +3411,31 @@ public class Raster implements Runnable
           {
             double d1 = midv2.vert.distance(dv1.vert), d2 = midv2.vert.distance(midv3.vert);
             renderDisplacedTriangle(tri, dv1, dist1, dv2, halfdist2, midv2, d1,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, dv1, d1, midv2, d2, midv3, halfdist3,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, dv3, halfdist3, midv3, d2, midv2, halfdist2,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
           }
         else if (!split2)
           {
             double d1 = midv3.vert.distance(dv2.vert), d2 = midv3.vert.distance(midv1.vert);
             renderDisplacedTriangle(tri, dv2, dist2, dv3, halfdist3, midv3, d1,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, dv2, d1, midv3, d2, midv1, halfdist1,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, dv1, halfdist1, midv1, d2, midv3, halfdist3,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
           }
         else
           {
             double d1 = midv1.vert.distance(dv3.vert), d2 = midv1.vert.distance(midv2.vert);
             renderDisplacedTriangle(tri, dv3, dist3, dv1, halfdist1, midv1, d1,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, dv3, d1, midv1, d2, midv2, halfdist2,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
             renderDisplacedTriangle(tri, dv2, halfdist2, midv2, d2, midv1, halfdist1,
-                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+                viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
           }
         return;
       }
@@ -3391,19 +3445,19 @@ public class Raster implements Runnable
 
         double d1 = midv1.vert.distance(midv2.vert), d2 = midv2.vert.distance(midv3.vert), d3 = midv3.vert.distance(midv1.vert);
         renderDisplacedTriangle(tri, dv1, halfdist1, midv1, d3, midv3, halfdist3,
-            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
         renderDisplacedTriangle(tri, dv2, halfdist2, midv2, d1, midv1, halfdist1,
-            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
         renderDisplacedTriangle(tri, dv3, halfdist3, midv3, d2, midv2, halfdist2,
-            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
         renderDisplacedTriangle(tri, midv1, d1, midv2, d2, midv3, d3,
-            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material);
+            viewdir, ugrad, vgrad, tol, cullBackfaces, bumpMap, material, context);
         return;
       }
 
     // The triangle is small enough that it does not need to be split any more, so render it.
 
-    float clip = (float) theCamera.getClipDistance();
+    float clip = (float) context.camera.getClipDistance();
     if (dv1.z < clip && dv2.z < clip && dv3.z < clip)
       return;
     if (dv1.z <= 0.0f || dv2.z < 0.0f || dv3.z < 0.0f)
@@ -3412,11 +3466,11 @@ public class Raster implements Runnable
     if (cullBackfaces && backface)
       return;
     if (dv1.dispnorm == null)
-      dv1.prepareToRender(tri, viewdir, ugrad, vgrad, shading);
+      dv1.prepareToRender(tri, viewdir, ugrad, vgrad, shading, context);
     if (dv2.dispnorm == null)
-      dv2.prepareToRender(tri, viewdir, ugrad, vgrad, shading);
+      dv2.prepareToRender(tri, viewdir, ugrad, vgrad, shading, context);
     if (dv3.dispnorm == null)
-      dv3.prepareToRender(tri, viewdir, ugrad, vgrad, shading);
+      dv3.prepareToRender(tri, viewdir, ugrad, vgrad, shading, context);
     Vec3 closestNorm = null;
     if (dv1.z < dv2.z && dv1.z < dv3.z)
       closestNorm = dv1.dispnorm;
@@ -3428,17 +3482,17 @@ public class Raster implements Runnable
       renderTriangleGouraud(dv1.pos, dv1.z, dv1.u, dv1.v, dv1.diffuse, dv1.specular,
         dv2.pos, dv2.z, dv2.u, dv2.v, dv2.diffuse, dv2.specular,
         dv3.pos, dv3.z, dv3.u, dv3.v, dv3.diffuse, dv3.specular,
-        tri, (float) theCamera.getClipDistance(), viewdir.dot(closestNorm), backface, material);
+        tri, clip, viewdir.dot(closestNorm), backface, material, context);
     else if (shading == HYBRID)
       renderTriangleHybrid(dv1.pos, dv1.z, dv1.dispvert, dv1.dispnorm, dv1.u, dv1.v, dv1.diffuse,
         dv2.pos, dv2.z, dv2.dispvert, dv2.dispnorm, dv2.u, dv2.v, dv2.diffuse,
         dv3.pos, dv3.z, dv3.dispvert, dv3.dispnorm, dv3.u, dv3.v, dv3.diffuse,
-        tri, viewdir, closestNorm, (float) theCamera.getClipDistance(), viewdir.dot(closestNorm), backface, material);
+        tri, viewdir, closestNorm, clip, viewdir.dot(closestNorm), backface, material, context);
     else
       renderTrianglePhong(dv1.pos, dv1.z, dv1.dispvert, dv1.dispnorm, dv1.u, dv1.v,
         dv2.pos, dv2.z, dv2.dispvert, dv2.dispnorm, dv2.u, dv2.v,
         dv3.pos, dv3.z, dv3.dispvert, dv3.dispnorm, dv3.u, dv3.v,
-        tri, viewdir, closestNorm, (float) theCamera.getClipDistance(), bumpMap, backface, material);
+        tri, viewdir, closestNorm, clip, bumpMap, backface, material, context);
   }
 
   /** This is an inner class for keeping track of information about vertices when 
@@ -3453,14 +3507,14 @@ public class Raster implements Runnable
     public RGBColor diffuse, specular, highlight;
 
     public DisplacedVertex(RenderingTriangle tri, Vec3 vert, Vec3 norm, double u, double v,
-                           Mat4 toView, Mat4 toScreen)
+                           Mat4 toView, Mat4 toScreen, RasterContext context)
     {
       this.vert = vert;
       this.norm = norm;
       this.u = u;
       this.v = v;
       basez = (float) toView.timesZ(vert);
-      tol = (basez > theCamera.getDistToScreen()) ? smoothScale*basez : smoothScale;
+      tol = (basez > context.camera.getDistToScreen()) ? smoothScale*basez : smoothScale;
       disp = tri.getDisplacement(u, v, 1.0-u-v, tol, 0.0);
       dispvert = new Vec3(vert.x+disp*norm.x, vert.y+disp*norm.y, vert.z+disp*norm.z);
       z = (float) toView.timesZ(dispvert);
@@ -3469,7 +3523,7 @@ public class Raster implements Runnable
 
     /** Calculate all the properties which are necessary for rendering this point. */
 
-    public final void prepareToRender(RenderingTriangle tri, Vec3 viewdir, Vec3 ugrad, Vec3 vgrad, int shading)
+    public final void prepareToRender(RenderingTriangle tri, Vec3 viewdir, Vec3 ugrad, Vec3 vgrad, int shading, RasterContext context)
     {
       // Find the derivatives of the displacement map, and use them to find the 
       // local normal vector.
@@ -3478,14 +3532,14 @@ public class Raster implements Runnable
       double dhdu = (tri.getDisplacement(u+(1e-5), v, w-(1e-5), tol, 0.0)-disp)*1e5;
       double dhdv = (tri.getDisplacement(u, v+(1e-5), w-(1e-5), tol, 0.0)-disp)*1e5;
       dispnorm = new Vec3(norm);
-      tempVec[0].set(dhdu*ugrad.x+dhdv*vgrad.x, dhdu*ugrad.y+dhdv*vgrad.y, dhdu*ugrad.z+dhdv*vgrad.z);
-      dispnorm.scale(tempVec[0].dot(dispnorm)+1.0);
-      dispnorm.subtract(tempVec[0]);
+      context.tempVec[0].set(dhdu*ugrad.x+dhdv*vgrad.x, dhdu*ugrad.y+dhdv*vgrad.y, dhdu*ugrad.z+dhdv*vgrad.z);
+      dispnorm.scale(context.tempVec[0].dot(dispnorm)+1.0);
+      dispnorm.subtract(context.tempVec[0]);
       dispnorm.normalize();
 
       // Find the screen position and lighting.
 
-      tol = (z > theCamera.getDistToScreen()) ? smoothScale*z : smoothScale;
+      tol = (z > context.camera.getDistToScreen()) ? smoothScale*z : smoothScale;
       if (shading == GOURAUD)
       {
         specular = new RGBColor();
@@ -3494,11 +3548,19 @@ public class Raster implements Runnable
       if (shading != PHONG)
         {
           diffuse = new RGBColor();
-          tri.getTextureSpec(surfSpec, viewdir.dot(dispnorm), u, v, w, tol, time);
-          calcLight(dispvert, dispnorm, viewdir, dispnorm, surfSpec.roughness, diffuse, specular, highlight);
+          tri.getTextureSpec(context.surfSpec, viewdir.dot(dispnorm), u, v, w, tol, time);
+          calcLight(dispvert, dispnorm, viewdir, dispnorm, context.surfSpec.roughness, diffuse, specular, highlight, context);
           if (specular != null)
             specular.add(highlight);
         }
     }
+  }
+
+  /**
+   * This class is used for the lock objects on individual rows.
+   */
+
+  private static class RowLock
+  {
   }
 }

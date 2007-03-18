@@ -45,7 +45,7 @@ public class Raster implements Runnable
   private Vec3 lightPosition[], lightDirection[];
   private RGBColor ambColor, envColor, fogColor;
   private TextureMapping envMapping;
-  private ThreadLocal threadContext;
+  private ThreadLocal threadRasterContext, threadCompositingContext;
   private RowLock lock[];
   private double time, smoothing = 1.0, smoothScale, depthOfField, focalDist, surfaceError = 0.02, fogDist;
   private boolean fog, transparentBackground = false, adaptive = true, hideBackfaces = true, generateHDR = false, positionNeeded, depthNeeded, needCopyToUI = true;
@@ -62,10 +62,16 @@ public class Raster implements Runnable
 
   public Raster()
   {
-    threadContext = new ThreadLocal() {
+    threadRasterContext = new ThreadLocal() {
       protected Object initialValue()
       {
         return new RasterContext(theCamera.duplicate(), width);
+      }
+    };
+    threadCompositingContext = new ThreadLocal() {
+      protected Object initialValue()
+      {
+        return new CompositingContext(theCamera.duplicate());
       }
     };
   }
@@ -401,7 +407,7 @@ public class Raster implements Runnable
     ThreadManager threads = new ThreadManager(sortedObjects.length, new ThreadManager.Task() {
       public void execute(int index)
       {
-        RasterContext context = (RasterContext) threadContext.get();
+        RasterContext context = (RasterContext) threadRasterContext.get();
         ObjectInfo obj = sortedObjects[index];
         context.camera.setObjectTransform(obj.coords.fromLocal());
         renderObject(obj, orig, viewdir, obj.coords.toLocal(), context, thisThread);
@@ -415,7 +421,7 @@ public class Raster implements Runnable
       }
       public void cleanup()
       {
-        ((RasterContext) threadContext.get()).cleanup();
+        ((RasterContext) threadRasterContext.get()).cleanup();
       }
     });
     threads.run();
@@ -495,129 +501,146 @@ public class Raster implements Runnable
     updateTime = System.currentTimeMillis();
   }
 
+  /** Update the image being displayed during compositing. */
+
+  private synchronized void updateFinalImage()
+  {
+    if (System.currentTimeMillis()-updateTime < 5000)
+      return;
+    imageSource.newPixels();
+    listener.imageUpdated(img);
+    updateTime = System.currentTimeMillis();
+  }
+
   /** Create the final version of the image. */
 
-  private ComplexImage createFinalImage(Vec3 center, Vec3 orig, Vec3 hvec, Vec3 vvec)
+  private ComplexImage createFinalImage(final Vec3 center, final Vec3 orig, final Vec3 hvec, final Vec3 vvec)
   {
-    Thread currentThread = Thread.currentThread();
-    int n = samplesPerPixel*samplesPerPixel;
-    RasterContext context = new RasterContext(theCamera.duplicate(), 0);
-    Vec3 dir = context.tempVec[1];
-    RGBColor addColor = new RGBColor(), multColor = new RGBColor(), subpixelMult = new RGBColor();
-    RGBColor subpixelColor = new RGBColor(), totalColor = new RGBColor(), totalTransparency = new RGBColor();
-    ArrayList materialStack = new ArrayList();
-    float hdrImage[][] = null;
-
-    if (generateHDR)
-      hdrImage = new float[3][imageWidth*imageHeight];
-    for (int i1 = 0, i2 = 0; i1 < imageHeight; i1++, i2 += samplesPerPixel)
-    {
-      for (int j1 = 0, j2 = 0; j1 < imageWidth; j1++, j2 += samplesPerPixel)
+    final Thread thisThread = Thread.currentThread();
+    final int n = samplesPerPixel*samplesPerPixel;
+    final float hdrImage[][] = (generateHDR ? new float[3][imageWidth*imageHeight] : null);
+    ThreadManager threads = new ThreadManager(imageHeight, new ThreadManager.Task() {
+      public void execute(int i1)
       {
-        totalColor.setRGB(0.0f, 0.0f, 0.0f);
-        totalTransparency.setRGB(0.0f, 0.0f, 0.0f);
-        for (int k = 0; k < samplesPerPixel; k++)
+        CompositingContext context = (CompositingContext) threadCompositingContext.get();
+        Vec3 dir = context.tempVec[1];
+        RGBColor totalColor = context.totalColor;
+        RGBColor totalTransparency = context.totalTransparency;
+        RGBColor addColor = context.addColor;
+        RGBColor multColor = context.multColor;
+        RGBColor subpixelColor = context.subpixelColor;
+        RGBColor subpixelMult = context.subpixelMult;
+        ArrayList materialStack = context.materialStack;
+        TextureSpec surfSpec = context.surfSpec;
+        int i2 = i1*samplesPerPixel;
+        for (int j1 = 0, j2 = 0; j1 < imageWidth; j1++, j2 += samplesPerPixel)
         {
-          int base = width*(i2+k)+j2;
-          for (int m = 0; m < samplesPerPixel; m++)
+          totalColor.setRGB(0.0f, 0.0f, 0.0f);
+          totalTransparency.setRGB(0.0f, 0.0f, 0.0f);
+          for (int k = 0; k < samplesPerPixel; k++)
           {
-            // Find the overall color of this subpixel.
-
-            subpixelColor.setRGB(0.0f, 0.0f, 0.0f);
-            subpixelMult.setRGB(1.0f, 1.0f, 1.0f);
-            Fragment f = fragment[base+m];
-            float lastDepth = 0;
-            while (true)
+            int base = width*(i2+k)+j2;
+            for (int m = 0; m < samplesPerPixel; m++)
             {
-              // Factor in materials.
+              // Find the overall color of this subpixel.
 
-              ObjectMaterialInfo fragmentMaterial = f.getMaterialMapping();
-              ObjectMaterialInfo currentMaterial = null;
-              if (materialStack.size() > 0)
-                currentMaterial = (ObjectMaterialInfo) materialStack.get(materialStack.size()-1);
-              adjustColorsForMaterial(currentMaterial, j2+m, i2+k, lastDepth, f.getDepth(), addColor, multColor, context);
-              addColor.multiply(subpixelMult);
-              subpixelColor.add(addColor);
-              subpixelMult.multiply(multColor);
-              if (fragmentMaterial != null)
+              subpixelColor.setRGB(0.0f, 0.0f, 0.0f);
+              subpixelMult.setRGB(1.0f, 1.0f, 1.0f);
+              Fragment f = fragment[base+m];
+              float lastDepth = 0;
+              while (true)
               {
-                if (f.isEntering())
-                  materialStack.add(fragmentMaterial);
-                else
-                  materialStack.remove(fragmentMaterial);
-              }
-              lastDepth = f.getDepth();
+                // Factor in materials.
 
-              // If we've reached the end, factor in the background.
-
-              if (f == BACKGROUND_FRAGMENT)
-              {
-                if (transparentBackground)
+                ObjectMaterialInfo fragmentMaterial = f.getMaterialMapping();
+                ObjectMaterialInfo currentMaterial = null;
+                if (materialStack.size() > 0)
+                  currentMaterial = (ObjectMaterialInfo) materialStack.get(materialStack.size()-1);
+                adjustColorsForMaterial(currentMaterial, j2+m, i2+k, lastDepth, f.getDepth(), addColor, context.multColor, context);
+                addColor.multiply(subpixelMult);
+                subpixelColor.add(addColor);
+                subpixelMult.multiply(multColor);
+                if (fragmentMaterial != null)
                 {
-                  // Just make it invisible.
-
-                  addColor.setRGB(0.0f, 0.0f, 0.0f);
-                }
-                else if (envMode == Scene.ENVIRON_SOLID)
-                  addColor.copy(envColor);
-                else
-                {
-                  // Find the background color.
-
-                  double h = j2+k-width/2.0, v = i2+m-height/2.0;
-                  dir.x = center.x + h*hvec.x + v*vvec.x;
-                  dir.y = center.y + h*hvec.y + v*vvec.y;
-                  dir.z = center.z + h*hvec.z + v*vvec.z;
-                  dir.subtract(orig);
-                  dir.normalize();
-                  envMapping.getTextureSpec(dir, context.surfSpec, 1.0, smoothScale, time, null);
-                  if (envMode == Scene.ENVIRON_DIFFUSE)
-                    addColor.copy(context.surfSpec.diffuse);
+                  if (f.isEntering())
+                    materialStack.add(fragmentMaterial);
                   else
-                    addColor.copy(context.surfSpec.emissive);
+                    materialStack.remove(fragmentMaterial);
                 }
-              }
-              else
-                f.getAdditiveColor(addColor);
+                lastDepth = f.getDepth();
 
-              // Factor in the fragment color.
+                // If we've reached the end, factor in the background.
 
-              addColor.multiply(subpixelMult);
-              subpixelColor.add(addColor);
-              if (f.isOpaque())
-              {
-                if (f != BACKGROUND_FRAGMENT || !transparentBackground)
-                  subpixelMult.setRGB(0.0f, 0.0f, 0.0f);
-                break;
+                if (f == BACKGROUND_FRAGMENT)
+                {
+                  if (transparentBackground)
+                  {
+                    // Just make it invisible.
+
+                    addColor.setRGB(0.0f, 0.0f, 0.0f);
+                  }
+                  else if (envMode == Scene.ENVIRON_SOLID)
+                    addColor.copy(envColor);
+                  else
+                  {
+                    // Find the background color.
+
+                    double h = j2+k-width/2.0, v = i2+m-height/2.0;
+                    dir.x = center.x + h*hvec.x + v*vvec.x;
+                    dir.y = center.y + h*hvec.y + v*vvec.y;
+                    dir.z = center.z + h*hvec.z + v*vvec.z;
+                    dir.subtract(orig);
+                    dir.normalize();
+                    envMapping.getTextureSpec(dir, surfSpec, 1.0, smoothScale, time, null);
+                    if (envMode == Scene.ENVIRON_DIFFUSE)
+                      addColor.copy(surfSpec.diffuse);
+                    else
+                      addColor.copy(surfSpec.emissive);
+                  }
+                }
+                else
+                  f.getAdditiveColor(addColor);
+
+                // Factor in the fragment color.
+
+                addColor.multiply(subpixelMult);
+                subpixelColor.add(addColor);
+                if (f.isOpaque())
+                {
+                  if (f != BACKGROUND_FRAGMENT || !transparentBackground)
+                    subpixelMult.setRGB(0.0f, 0.0f, 0.0f);
+                  break;
+                }
+                f.getMultiplicativeColor(multColor);
+                subpixelMult.multiply(multColor);
+                f = f.getNextFragment();
               }
-              f.getMultiplicativeColor(multColor);
-              subpixelMult.multiply(multColor);
-              f = f.getNextFragment();
+              totalColor.add(subpixelColor);
+              totalTransparency.add(subpixelMult);
+              materialStack.clear();
             }
-            totalColor.add(subpixelColor);
-            totalTransparency.add(subpixelMult);
-            materialStack.clear();
+          }
+          totalColor.scale(1.0f/n);
+          totalTransparency.scale(1.0f/n);
+          imagePixel[i1*imageWidth+j1] = calcARGB(totalColor, totalTransparency);
+          if (generateHDR)
+          {
+            hdrImage[0][i1*imageWidth+j1] = totalColor.getRed();
+            hdrImage[1][i1*imageWidth+j1] = totalColor.getGreen();
+            hdrImage[2][i1*imageWidth+j1] = totalColor.getBlue();
           }
         }
-        totalColor.scale(1.0f/n);
-        totalTransparency.scale(1.0f/n);
-        imagePixel[i1*imageWidth+j1] = calcARGB(totalColor, totalTransparency);
-        if (generateHDR)
-        {
-          hdrImage[0][i1*imageWidth+j1] = totalColor.getRed();
-          hdrImage[1][i1*imageWidth+j1] = totalColor.getGreen();
-          hdrImage[2][i1*imageWidth+j1] = totalColor.getBlue();
-        }
+        if (renderThread != thisThread)
+          return;
+        if (System.currentTimeMillis()-updateTime > 5000)
+          updateFinalImage();
       }
-      if (renderThread != currentThread)
-        return null;
-      if (System.currentTimeMillis()-updateTime > 5000)
+      public void cleanup()
       {
-        imageSource.newPixels();
-        listener.imageUpdated(img);
-        updateTime = System.currentTimeMillis();
+        ((CompositingContext) threadCompositingContext.get()).cleanup();
       }
-    }
+    });
+    threads.run();
 
     // Create the ComplexImage.
 
@@ -658,7 +681,7 @@ public class Raster implements Runnable
    * passing through.
    */
 
-  private void adjustColorsForMaterial(ObjectMaterialInfo material, int x, int y, float startDepth, float endDepth, RGBColor addColor, RGBColor multColor, RasterContext context)
+  private void adjustColorsForMaterial(ObjectMaterialInfo material, int x, int y, float startDepth, float endDepth, RGBColor addColor, RGBColor multColor, CompositingContext context)
   {
     if (material == null)
     {

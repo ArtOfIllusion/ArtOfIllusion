@@ -15,31 +15,38 @@ import artofillusion.texture.*;
 import artofillusion.material.*;
 import artofillusion.*;
 
+import java.util.*;
+
 /**
- * This class holds temporary information used during raster rendering.  One instance of it is
- * created for every worker thread.
+ * This class holds temporary information used while compositing fragments to form the final
+ * image.  One instance of it is created for every worker thread.
  */
 
-public class RasterContext
+public class CompositingContext
 {
   public Vec3 tempVec[];
-  public RGBColor tempColor[];
-  public TextureSpec surfSpec, surfSpec2;
+  public TextureSpec surfSpec;
+  public MaterialSpec matSpec;
   public Camera camera;
-  public Fragment fragment[];
+  public RGBColor addColor, multColor, subpixelMult;
+  public RGBColor subpixelColor, totalColor, totalTransparency;
+  public ArrayList materialStack;
 
-  public RasterContext(Camera camera, int width)
+  public CompositingContext(Camera camera)
   {
     this.camera = camera;
     surfSpec = new TextureSpec();
-    surfSpec2 = new TextureSpec();
-    tempColor = new RGBColor [4];
-    for (int i = 0; i < tempColor.length; i++)
-      tempColor[i] = new RGBColor(0.0f, 0.0f, 0.0f);
+    matSpec = new MaterialSpec();
     tempVec = new Vec3 [4];
     for (int i = 0; i < tempVec.length; i++)
       tempVec[i] = new Vec3();
-    fragment = new Fragment[width];
+    addColor = new RGBColor();
+    multColor = new RGBColor();
+    subpixelMult = new RGBColor();
+    subpixelColor = new RGBColor();
+    totalColor = new RGBColor();
+    totalTransparency = new RGBColor();
+    materialStack = new ArrayList();
   }
 
   /**
@@ -49,9 +56,15 @@ public class RasterContext
   public void cleanup()
   {
     tempVec = null;
-    tempColor = null;
     surfSpec = null;
-    surfSpec2 = null;
+    matSpec = null;
     camera = null;
+    addColor = null;
+    multColor = null;
+    subpixelMult = null;
+    subpixelColor = null;
+    totalColor = null;
+    totalTransparency = null;
+    materialStack = null;
   }
 }

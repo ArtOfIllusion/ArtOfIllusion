@@ -119,7 +119,9 @@ public class PhotonMap
     photonList = new ArrayList((int) (1.1*numWanted));
     int iteration = 0;
     ThreadManager threads = new ThreadManager();
-    while (photonList.size() < numWanted)
+    try
+    {
+      while (photonList.size() < numWanted)
       {
         for (int i = 0; i < source.length; i++)
           {
@@ -139,7 +141,11 @@ public class PhotonMap
           currentIntensity = (numWanted-photonList.size())*totalIntensity/photonList.size();
         iteration++;
       }
-    threads.finish();
+    }
+    finally
+    {
+      threads.finish();
+    }
     lightScale = totalSourceIntensity/totalRequested;
     if (filter == 2)
       lightScale *= 3.0f;

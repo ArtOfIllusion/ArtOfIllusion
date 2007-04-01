@@ -22,6 +22,7 @@ import buoy.widget.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
+import java.util.List;
 
 /** Raytracer is a Renderer which generates images by raytracing. */
 
@@ -671,24 +672,30 @@ public class Raytracer implements Runnable
 
   /** Construct the list of RTObjects and lights in the scene. */
 
-  private void buildScene(Scene theScene, Camera theCamera)
+  private void buildScene(final Scene theScene, final Camera theCamera)
   {
-    ArrayList obj = new ArrayList(), lt = new ArrayList();
-    double distToScreen = theCamera.getDistToScreen();
-    Thread thisThread = Thread.currentThread();
-    ObjectInfo info;
-    int i;
-    
-    for (i = 0; i < theScene.getNumObjects(); i++)
+    final List obj = Collections.synchronizedList(new ArrayList()), lt = Collections.synchronizedList(new ArrayList());
+    final double distToScreen = theCamera.getDistToScreen();
+    final Thread mainThread = Thread.currentThread();
+
+    ThreadManager threads = new ThreadManager(theScene.getNumObjects(), new ThreadManager.Task()
     {
-      info = theScene.getObject(i);
-      if (info.visible)
-        addObject(obj, lt, info, theCamera, distToScreen, info.coords.toLocal(), info.coords.fromLocal());
-      if (renderThread != thisThread)
-        return;
-    }
+      public void execute(int index)
+      {
+        if (renderThread != mainThread)
+          return;
+        ObjectInfo info = theScene.getObject(index);
+        if (info.visible)
+          addObject(obj, lt, info, theCamera, distToScreen, info.coords.toLocal(), info.coords.fromLocal(), mainThread);
+      }
+      public void cleanup()
+      {
+      }
+    });
+    threads.run();
+    threads.finish();
     sceneObject = new RTObject [obj.size()];
-    for (i = 0; i < sceneObject.length; i++)
+    for (int i = 0; i < sceneObject.length; i++)
     {
       sceneObject[i] = (RTObject) obj.get(i);
       sceneObject[i].index = i;
@@ -701,7 +708,7 @@ public class Raytracer implements Runnable
       }
     }
     light = new ObjectInfo [lt.size()];
-    for (i = 0; i < light.length; i++)
+    for (int i = 0; i < light.length; i++)
       light[i] = (ObjectInfo) lt.get(i);
     ambColor = theScene.getAmbientColor();
     envColor = theScene.getEnvironmentColor();
@@ -712,25 +719,21 @@ public class Raytracer implements Runnable
     fogDist = theScene.getFogDistance();
     ParameterValue envParam[] = theScene.getEnvironmentParameterValues();
     envParamValue = new double [envParam.length];
-    for (i = 0; i < envParamValue.length; i++)
+    for (int i = 0; i < envParamValue.length; i++)
       envParamValue[i] = envParam[i].getAverageValue();
   }
   
   /** Add a single object to the scene. */
   
-  private void addObject(ArrayList obj, ArrayList lt, ObjectInfo info, Camera camera, double distToScreen,
-                Mat4 toLocal, Mat4 fromLocal)
+  private void addObject(List obj, List lt, ObjectInfo info, Camera camera, double distToScreen,
+                Mat4 toLocal, Mat4 fromLocal, Thread mainThread)
   {
-    Thread thisThread = Thread.currentThread();
-    Vec3 cameraOrig = camera.getCameraCoordinates().getOrigin();
-    Vec3 cameraZDir = camera.getCameraCoordinates().getZDirection();
     double dist;
     Object3D theObject = info.object;
     boolean displaced = false;
     double tol;
-    int i;
-    
-    if (renderThread != thisThread)
+
+    if (renderThread != mainThread)
       return;
     if (theObject instanceof Light)
     {
@@ -747,10 +750,11 @@ public class Raytracer implements Runnable
           continue;
         CoordinateSystem coords = elem.coords.duplicate();
         coords.transformCoordinates(fromLocal);
-        addObject(obj, lt, elem, camera, distToScreen, coords.toLocal(), coords.fromLocal());
+        addObject(obj, lt, elem, camera, distToScreen, coords.toLocal(), coords.fromLocal(), mainThread);
       }
       return;
     }
+    Vec3 cameraOrig = camera.getCameraCoordinates().getOrigin();
     if (adaptive)
     {
       dist = info.getBounds().distanceToPoint(toLocal.times(cameraOrig));
@@ -814,9 +818,10 @@ public class Raytracer implements Runnable
     RenderingTriangle t[] = mesh.triangle;
     if (displaced)
     {
+      Vec3 cameraZDir = camera.getCameraCoordinates().getZDirection();
       double vertTol[] = new double [vert.length];
       if (adaptive)
-        for (i = 0; i < vert.length; i++)
+        for (int i = 0; i < vert.length; i++)
         {
           Vec3 offset = vert[i].minus(cameraOrig);
           double vertDist = offset.length();
@@ -824,7 +829,7 @@ public class Raytracer implements Runnable
             vertDist = -vertDist;
           vertTol[i] = (vertDist < distToScreen ? surfaceError : surfaceError*vertDist/distToScreen);
         }
-      for (i = 0; i < t.length; i++)
+      for (int i = 0; i < t.length; i++)
       {
         RenderingTriangle tri = mesh.triangle[i];
         if (mesh.faceNorm[i].length() < TOL)
@@ -859,12 +864,12 @@ public class Raytracer implements Runnable
           else
             ((RTDisplacedTriangle) dt).setTolerance(surfaceError*dist/distToScreen);
         }
-        if (renderThread != thisThread)
+        if (renderThread != mainThread)
           return;
       }
     }
     else
-      for (i = 0; i < t.length; i++)
+      for (int i = 0; i < t.length; i++)
       {
         RenderingTriangle tri = mesh.triangle[i];
         if (mesh.faceNorm[i].length() < TOL)
@@ -937,18 +942,17 @@ public class Raytracer implements Runnable
   {
     if (giMode != GI_PHOTON && giMode != GI_HYBRID && !caustics && scatterMode != SCATTER_PHOTONS && scatterMode != SCATTER_BOTH)
       return;
-    RaytracerContext context = new RaytracerContext(this);
     PhotonMap shared = null;
     if (giMode == GI_PHOTON)
     {
       listener.statusChanged("Building Global Photon Map");
-      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, false, false, true, false, this, context, rootNode, 1, null);
+      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, false, false, true, false, this, rootNode, 1, null);
       generatePhotons(globalMap);
     }
     else if (giMode == GI_HYBRID)
     {
       listener.statusChanged("Building Global Photon Map");
-      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, true, true, true, false, this, context, rootNode, 0, null);
+      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, true, true, true, false, this, rootNode, 0, null);
       generatePhotons(globalMap);
     }
     if (caustics)
@@ -971,7 +975,7 @@ public class Raytracer implements Runnable
       if (bounds == null)
         bounds = new BoundingBox(0, 0, 0, 0, 0, 0);
       listener.statusChanged("Building Caustics Photon Map");
-      causticsMap = shared = new PhotonMap(causticsPhotons, causticsNeighborPhotons, true, false, false, false, this, context, bounds, 2, shared);
+      causticsMap = shared = new PhotonMap(causticsPhotons, causticsNeighborPhotons, true, false, false, false, this, bounds, 2, shared);
       generatePhotons(causticsMap);
     }
     if (scatterMode == SCATTER_PHOTONS || scatterMode == SCATTER_BOTH)
@@ -994,10 +998,9 @@ public class Raytracer implements Runnable
       if (bounds == null)
         bounds = new BoundingBox(0, 0, 0, 0, 0, 0);
       listener.statusChanged("Building Volume Photon Map");
-      volumeMap = new PhotonMap(volumePhotons, volumeNeighborPhotons, false, scatterMode == SCATTER_PHOTONS, true, true, this, context, bounds, 0, shared);
+      volumeMap = new PhotonMap(volumePhotons, volumeNeighborPhotons, false, scatterMode == SCATTER_PHOTONS, true, true, this, bounds, 0, shared);
       generatePhotons(volumeMap);
     }
-    context.cleanup();
   }
 
   /** Find all the photon sources in the scene, and generate the photons in a PhotonMap. */
@@ -1015,6 +1018,7 @@ public class Raytracer implements Runnable
       else if (light[i].object instanceof SpotLight)
         sources.add(new SpotlightPhotonSource((SpotLight) light[i].object, light[i].coords, bounds));
     }
+    ArrayList objectSources = new ArrayList();
     for (int i = 0; i < sceneObject.length; i++)
     {
       if (!sceneObject[i].getTextureMapping().getTexture().hasComponent(Texture.EMISSIVE_COLOR_COMPONENT))
@@ -1033,8 +1037,10 @@ public class Raytracer implements Runnable
       else
         continue;
       if (src.getTotalIntensity() > 0.0)
-        sources.add(src);
+        objectSources.add(src);
     }
+    if (objectSources.size() > 0)
+      sources.add(new CompoundPhotonSource((PhotonSource[]) objectSources.toArray(new PhotonSource[objectSources.size()])));
     sources.add(new EnvironmentPhotonSource(theScene, bounds));
     PhotonSource src[] = (PhotonSource []) sources.toArray(new PhotonSource [sources.size()]);
     map.generatePhotons(src);

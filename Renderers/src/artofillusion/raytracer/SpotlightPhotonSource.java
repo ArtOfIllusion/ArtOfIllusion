@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.*;
 
 /** This is a PhotonSource corresponding to a spotlight. */
 
@@ -62,24 +63,22 @@ public class SpotlightPhotonSource implements PhotonSource
   }
   
   /** Generate photons and add them to a map.
-      @param map          the PhotonMap to add the Photons to
-      @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   @param map          the PhotonMap to add the Photons to
+    * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   * @param threads
   */
   
-  public void generatePhotons(PhotonMap map, double intensity)
+  public void generatePhotons(final PhotonMap map, double intensity, ThreadManager threads)
   {
-    Thread currentThread = Thread.currentThread();
-    Vec3 pos = coords.getOrigin();
-    Vec3 xdir = coords.fromLocal().timesDirection(Vec3.vx());
-    Vec3 ydir = coords.fromLocal().timesDirection(Vec3.vy());
-    Vec3 zdir = coords.getZDirection();
-    double exp = light.getExponent()+1.0, expInv = 1.0/exp;
-    double maxu = 1.0/exp;
-    double usize = maxu-minu;
-    boolean randomizeOrigin = map.getRaytracer().penumbra;
-    Ray r = new Ray(map.getContext());
-    Vec3 orig = r.getOrigin();
-    Vec3 dir = r.getDirection();
+    final Thread currentThread = Thread.currentThread();
+    final Vec3 pos = coords.getOrigin();
+    final Vec3 xdir = coords.fromLocal().timesDirection(Vec3.vx());
+    final Vec3 ydir = coords.fromLocal().timesDirection(Vec3.vy());
+    final Vec3 zdir = coords.getZDirection();
+    final double exp = light.getExponent()+1.0, expInv = 1.0/exp;
+    final double maxu = 1.0/exp;
+    final double usize = maxu-minu;
+    final boolean randomizeOrigin = map.getRaytracer().penumbra;
     int num = (int) intensity;
 
     // Send out the photons.  To reduce noise, we use stratified sampling.  Repeatedly find the largest
@@ -88,34 +87,41 @@ public class SpotlightPhotonSource implements PhotonSource
 
     while (num > 0)
       {
-        int n = (int) Math.sqrt(num);
-        if (n == 0)
-          n = 1;
-        double du = usize/n, dv = 2.0*Math.PI/n;
-        double baseu = minu;
-        for (int i = 0; i < n; i++)
+        final int n = Math.max((int) Math.sqrt(num), 1);
+        final double du = usize/n, dv = 2.0*Math.PI/n;
+        threads.setNumIndices(n*n);
+        threads.setTask(new ThreadManager.Task()
+        {
+          public void execute(int index)
           {
-            double basev = 0.0;
-            for (int j = 0; j < n; j++)
-              {
-                if (map.getRaytracer().renderThread != currentThread)
-                  return;
-                double u = baseu+map.random.nextDouble()*du, v = basev+map.random.nextDouble()*dv;
-                double ctheta = Math.pow(u*exp, expInv);
-                double stheta = Math.sqrt(1.0-ctheta*ctheta);
-                double cphi = Math.cos(v);
-                double sphi = Math.sin(v);
-                double x = stheta*sphi, y = stheta*cphi, z = ctheta;
-                dir.set(x*xdir.x+y*ydir.x+z*zdir.x, x*xdir.y+y*ydir.y+z*zdir.y, x*xdir.z+y*ydir.z+z*zdir.z);
-                orig.set(pos);
-                if (randomizeOrigin)
-                  map.randomizePoint(orig, light.getRadius());
-                r.newID();
-                map.spawnPhoton(r, color, false);
-                basev += dv;
-              }
-            baseu += du;
+            if (map.getRaytracer().renderThread != currentThread)
+              return;
+            int i = index/n;
+            int j = index-(i*n);
+            double baseu = minu+i*du;
+            double basev = j+dv;
+            Ray r = new Ray(map.getContext());
+            Vec3 orig = r.getOrigin();
+            Vec3 dir = r.getDirection();
+            double u = baseu+map.random.nextDouble()*du, v = basev+map.random.nextDouble()*dv;
+            double ctheta = Math.pow(u*exp, expInv);
+            double stheta = Math.sqrt(1.0-ctheta*ctheta);
+            double cphi = Math.cos(v);
+            double sphi = Math.sin(v);
+            double x = stheta*sphi, y = stheta*cphi, z = ctheta;
+            dir.set(x*xdir.x+y*ydir.x+z*zdir.x, x*xdir.y+y*ydir.y+z*zdir.y, x*xdir.z+y*ydir.z+z*zdir.z);
+            orig.set(pos);
+            if (randomizeOrigin)
+              map.randomizePoint(orig, light.getRadius());
+            r.newID();
+            map.spawnPhoton(r, color, false);
           }
+          public void cleanup()
+          {
+            map.getContext().cleanup();
+          }
+        });
+        threads.run();
         num -= n*n;
       }
   }

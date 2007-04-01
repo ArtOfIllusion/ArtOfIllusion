@@ -12,6 +12,7 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 import artofillusion.texture.*;
+import artofillusion.*;
 
 /** This is a PhotonSource corresponding to an RTCylinder. */
 
@@ -70,11 +71,12 @@ public class CylinderPhotonSource implements PhotonSource
   }
   
   /** Generate photons and add them to a map.
-      @param map          the PhotonMap to add the Photons to
-      @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   @param map          the PhotonMap to add the Photons to
+    * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   * @param threads
   */
   
-  public void generatePhotons(PhotonMap map, double intensity)
+  public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     Thread currentThread = Thread.currentThread();
     Ray r = new Ray(map.getContext());

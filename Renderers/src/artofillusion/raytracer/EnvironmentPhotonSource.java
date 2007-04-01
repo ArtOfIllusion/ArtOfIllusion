@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ public class EnvironmentPhotonSource implements PhotonSource
   private float lightIntensity;
   private double radius;
 
-  /** Create a PointPhotonSource. */
+  /** Create an EnvironmentPhotonSource. */
   
   public EnvironmentPhotonSource(Scene scene, BoundingBox sceneBounds)
   {
@@ -74,35 +74,40 @@ public class EnvironmentPhotonSource implements PhotonSource
     return lightIntensity;
   }
   
-  /** Generate photons and add them to a map.
-      @param map          the PhotonMap to add the Photons to
-      @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
-  */
-  
-  public void generatePhotons(PhotonMap map, double intensity)
+  /**
+   * Generate photons and add them to a map.
+   *
+   * @param map          the PhotonMap to add the Photons to
+   * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
+   */
+
+  public void generatePhotons(final PhotonMap map, final double intensity, final ThreadManager threads)
   {
-    Thread currentThread = Thread.currentThread();
-    Raytracer rt = map.getRaytracer();
-    TextureSpec spec = map.getContext().surfSpec[0];
-    Ray r = new Ray(map.getContext());
-    Vec3 orig = r.getOrigin();
-    Vec3 dir = r.getDirection();
-    double emittedIntensity = 0.0;
+    final Thread currentThread = Thread.currentThread();
+    final Raytracer rt = map.getRaytracer();
+    final double emittedIntensity[] = new double[] {0.0};
 
     // Send out the photons.
-    
-    for (int i = 0; emittedIntensity < intensity; i++)
+
+    threads.setNumIndices(1024);
+    threads.setTask(new ThreadManager.Task()
+    {
+      public void execute(int index)
       {
         if (rt.renderThread != currentThread)
           return;
 
         // Select an origin and direction.
-        
-        double ctheta = ((i&3)-2+map.random.nextDouble())*0.5;
+
+        double ctheta = ((index&3)-2+map.random.nextDouble())*0.5;
         double stheta = Math.sqrt(1.0-ctheta*ctheta);
-        double phi = (((i>>2)&3)+map.random.nextDouble())*0.5*Math.PI;
+        double phi = (((index>>2)&3)+map.random.nextDouble())*0.5*Math.PI;
         double sphi = Math.sin(phi);
         double cphi = Math.cos(phi);
+        Ray r = new Ray(map.getContext());
+        Vec3 orig = r.getOrigin();
+        Vec3 dir = r.getDirection();
         orig.set(stheta*sphi, stheta*cphi, ctheta);
         double dot;
         do
@@ -120,32 +125,49 @@ public class EnvironmentPhotonSource implements PhotonSource
         orig.add(center);
 
         // Determine the photon color.
-        
+
+        double photonIntensity;
         if (envMode == Scene.ENVIRON_DIFFUSE || envMode == Scene.ENVIRON_EMISSIVE)
           {
+            TextureSpec spec = map.getContext().surfSpec[0];
             envMapping.getTextureSpec(dir.times(-1.0), spec, 1.0, rt.smoothScale*rt.extraGIEnvSmoothing, rt.time, null);
             if (envMode == Scene.ENVIRON_DIFFUSE)
               color.copy(spec.diffuse);
             else
               color.copy(spec.emissive);
-            float sum = color.getRed()+color.getGreen()+color.getBlue();
-            emittedIntensity += sum;
-            if (sum < 1.0)
+            photonIntensity = color.getRed()+color.getGreen()+color.getBlue();
+            if (photonIntensity < 1.0)
               {
                 // Use Russian Roulette sampling.
-              
-                if (sum < map.random.nextFloat())
-                  continue;
-                color.scale(1.0f/sum);
+
+                if (photonIntensity < map.random.nextFloat())
+                  photonIntensity = 0.0;
+                color.scale(1.0f/photonIntensity);
               }
           }
         else
-          emittedIntensity += 1.0;
-        
+          photonIntensity = 1.0;
+        synchronized (emittedIntensity)
+        {
+          if (emittedIntensity[0] >= intensity)
+          {
+            threads.cancel();
+            return;
+          }
+          emittedIntensity[0] += photonIntensity;
+        }
+
         // Send out the photon.
-      
+
         r.newID();
         map.spawnPhoton(r, color, true);
       }
+      public void cleanup()
+      {
+        map.getContext().cleanup();
+      }
+    });
+    while (emittedIntensity[0] < intensity)
+      threads.run();
   }
 }

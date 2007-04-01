@@ -13,6 +13,8 @@ package artofillusion.raytracer;
 import artofillusion.math.*;
 import artofillusion.material.*;
 import artofillusion.texture.*;
+import artofillusion.*;
+
 import java.util.*;
 
 /** This class is a three dimensional data structure containing the photons in a scene.  The map can
@@ -26,7 +28,6 @@ import java.util.*;
 public class PhotonMap
 {
   private Raytracer rt;
-  private RaytracerContext context;
   private ArrayList photonList;
   private Photon photon[], workspace[];
   private int numWanted, filter, numEstimate;
@@ -45,13 +46,12 @@ public class PhotonMap
    * @param includeIndirect     true if this PhotonMap should include photons that represent indirect illumination
    * @param includeVolume
    * @param raytracer           the Raytracer for which this PhotonMap is being generated
-   * @param context             contains information for the thread currently being executed
    * @param bounds              a bounding box enclosing all objects at which photons should be directed
    * @param filter              specifies which type of filter to apply to the photon intensities
    * @param shared              another PhotonMap with which this one may share data structures to save memory (may be null)
    */
   
-  public PhotonMap(int totalPhotons, int numEstimate, boolean includeCaustics, boolean includeDirect, boolean includeIndirect, boolean includeVolume, Raytracer raytracer, RaytracerContext context, BoundingBox bounds, int filter, PhotonMap shared)
+  public PhotonMap(int totalPhotons, int numEstimate, boolean includeCaustics, boolean includeDirect, boolean includeIndirect, boolean includeVolume, Raytracer raytracer, BoundingBox bounds, int filter, PhotonMap shared)
   {
     numWanted = totalPhotons;
     this.bounds = bounds;
@@ -60,7 +60,6 @@ public class PhotonMap
     this.includeIndirect = includeIndirect;
     this.includeVolume = includeVolume;
     this.filter = filter;
-    this.context = context;
     this.numEstimate = numEstimate;
     rt = raytracer;
     if (shared != null)
@@ -81,7 +80,7 @@ public class PhotonMap
 
   public RaytracerContext getContext()
   {
-    return context;
+    return (RaytracerContext) getRaytracer().threadContext.get();
   }
 
   /** Get a bounding box enclosing all objects at which photons should be directed. */
@@ -119,13 +118,14 @@ public class PhotonMap
     
     photonList = new ArrayList((int) (1.1*numWanted));
     int iteration = 0;
+    ThreadManager threads = new ThreadManager();
     while (photonList.size() < numWanted)
       {
         for (int i = 0; i < source.length; i++)
           {
             if (rt.renderThread != currentThread)
               return;
-            source[i].generatePhotons(this, currentIntensity*sourceIntensity[i]/totalSourceIntensity);
+            source[i].generatePhotons(this, currentIntensity*sourceIntensity[i]/totalSourceIntensity, threads);
             totalRequested += currentIntensity*sourceIntensity[i]/totalSourceIntensity;
           }
         if (photonList.size() >= numWanted*0.9)
@@ -139,6 +139,7 @@ public class PhotonMap
           currentIntensity = (numWanted-photonList.size())*totalIntensity/photonList.size();
         iteration++;
       }
+    threads.finish();
     lightScale = totalSourceIntensity/totalRequested;
     if (filter == 2)
       lightScale *= 3.0f;
@@ -229,6 +230,7 @@ public class PhotonMap
   {
     RTObject second = null;
     double dist, truedot, n = 1.0, beta = 0.0, d;
+    RaytracerContext context = (RaytracerContext) getRaytracer().threadContext.get();
     Vec3 intersectionPoint = context.pos[treeDepth], norm = context.normal[treeDepth], trueNorm = context.trueNormal[treeDepth];
     TextureSpec spec = context.surfSpec[treeDepth];
     MaterialMapping nextMaterial, oldMaterial;
@@ -613,7 +615,7 @@ public class PhotonMap
               randomizePoint(newdir, 1.0);
               newdir.normalize();
             }
-            tracePhoton(context.ray[treeDepth+1], rayIntensity, treeDepth+1, node, first, material, prevMaterial, currentMatTrans, prevMatTrans, totalDist, true, caustic);
+            tracePhoton(r.rt.ray[treeDepth+1], rayIntensity, treeDepth+1, node, first, material, prevMaterial, currentMatTrans, prevMatTrans, totalDist, true, caustic);
           }
         }
         color.setRGB(0.0, 0.0, 0.0);
@@ -635,7 +637,10 @@ public class PhotonMap
   private void addPhoton(Vec3 pos, Vec3 dir, RGBColor color)
   {
     Photon p = new Photon(pos, dir, color);
-    photonList.add(p);
+    synchronized (this)
+    {
+      photonList.add(p);
+    }
     if (direction[p.direction&0xFFFF] == null)
     {
       int i = (p.direction>>8) & 0xFF;

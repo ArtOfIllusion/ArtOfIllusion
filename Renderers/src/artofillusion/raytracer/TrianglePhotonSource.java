@@ -12,6 +12,7 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 import artofillusion.texture.*;
+import artofillusion.*;
 
 /** This is a PhotonSource corresponding to an RTTriangle. */
 
@@ -60,12 +61,15 @@ public class TrianglePhotonSource implements PhotonSource
     return lightIntensity;
   }
   
-  /** Generate photons and add them to a map.
-      @param map          the PhotonMap to add the Photons to
-      @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
-  */
+  /**
+   * Generate photons and add them to a map.
+   *
+   * @param map          the PhotonMap to add the Photons to
+   * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
+   */
   
-  public void generatePhotons(PhotonMap map, double intensity)
+  public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     Thread currentThread = Thread.currentThread();
     Raytracer rt = map.getRaytracer();
@@ -80,7 +84,7 @@ public class TrianglePhotonSource implements PhotonSource
     double emittedIntensity = 0.0;
 
     // Send out the photons.
-    
+
     while (emittedIntensity < intensity)
       {
         if (rt.renderThread != currentThread)

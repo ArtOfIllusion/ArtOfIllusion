@@ -10,7 +10,7 @@
 
 package artofillusion.raytracer;
 
-import artofillusion.math.*;
+import artofillusion.*;
 
 /** This interface defines an object which can generate photons. */
 
@@ -20,10 +20,13 @@ public interface PhotonSource
 
   public double getTotalIntensity();
   
-  /** Generate photons and add them to a map.
-      @param map          the PhotonMap to add the Photons to
-      @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
-  */
+  /**
+   * Generate photons and add them to a map.
+   *
+   * @param map          the PhotonMap to add the Photons to
+   * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
+   */
   
-  public void generatePhotons(PhotonMap map, double intensity);
+  public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads);
 }

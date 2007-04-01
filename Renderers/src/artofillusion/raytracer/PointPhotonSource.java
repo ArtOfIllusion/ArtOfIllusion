@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.*;
 
 /** This is a PhotonSource corresponding to a point light. */
 
@@ -57,18 +58,18 @@ public class PointPhotonSource implements PhotonSource
     return lightIntensity;
   }
   
-  /** Generate photons and add them to a map.
-      @param map          the PhotonMap to add the Photons to
-      @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
-  */
+  /**
+   * Generate photons and add them to a map.
+   *
+   * @param map          the PhotonMap to add the Photons to
+   * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+   * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
+   */
   
-  public void generatePhotons(PhotonMap map, double intensity)
+  public void generatePhotons(final PhotonMap map, double intensity, ThreadManager threads)
   {
-    Thread currentThread = Thread.currentThread();
-    boolean randomizeOrigin = map.getRaytracer().penumbra;
-    Ray r = new Ray(map.getContext());
-    Vec3 orig = r.getOrigin();
-    Vec3 dir = r.getDirection();
+    final Thread currentThread = Thread.currentThread();
+    final boolean randomizeOrigin = map.getRaytracer().penumbra;
     int num = (int) intensity;
 
     // Send out the photons.  To reduce noise, we use stratified sampling.  Repeatedly find the largest
@@ -77,29 +78,38 @@ public class PointPhotonSource implements PhotonSource
 
     while (num > 0)
       {
-        int n = (int) Math.sqrt(num);
-        double du = 2.0/n, dphi = 2.0*Math.PI/n;
-        double baseu = -1.0;
-        for (int i = 0; i < n; i++)
+        final int n = (int) Math.sqrt(num);
+        final double du = 2.0/n, dphi = 2.0*Math.PI/n;
+        threads.setNumIndices(n*n);
+        threads.setTask(new ThreadManager.Task()
+        {
+          public void execute(int index)
           {
-            double basephi = 0.0;
-            for (int j = 0; j < n; j++)
-              {
-                if (map.getRaytracer().renderThread != currentThread)
-                  return;
-                orig.set(pos);
-                if (randomizeOrigin)
-                  map.randomizePoint(orig, light.getRadius());
-                double ctheta = baseu+map.random.nextDouble()*du, phi = basephi+map.random.nextDouble()*dphi;
-                double stheta = Math.sqrt(1.0-ctheta*ctheta);
-                double cphi = Math.cos(phi), sphi = Math.sin(phi);
-                dir.set(stheta*sphi, stheta*cphi, ctheta);
-                r.newID();
-                map.spawnPhoton(r, color, false);
-                basephi += dphi;
-              }
-            baseu += du;
+            if (map.getRaytracer().renderThread != currentThread)
+              return;
+            int i = index/n;
+            int j = index-(i*n);
+            double baseu = -1.0+i*du;
+            double basephi = j*dphi;
+            Ray r = new Ray(map.getContext());
+            Vec3 orig = r.getOrigin();
+            Vec3 dir = r.getDirection();
+            orig.set(pos);
+            if (randomizeOrigin)
+              map.randomizePoint(orig, light.getRadius());
+            double ctheta = baseu+map.random.nextDouble()*du, phi = basephi+map.random.nextDouble()*dphi;
+            double stheta = Math.sqrt(1.0-ctheta*ctheta);
+            double cphi = Math.cos(phi), sphi = Math.sin(phi);
+            dir.set(stheta*sphi, stheta*cphi, ctheta);
+            r.newID();
+            map.spawnPhoton(r, color, false);
           }
+          public void cleanup()
+          {
+            map.getContext().cleanup();
+          }
+        });
+        threads.run();
         num -= n*n;
       }
   }

@@ -11,11 +11,11 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
-import artofillusion.math.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
 
@@ -41,6 +41,14 @@ public class ProcedureEditor extends CustomWidget
   private Object preview;
   private ByteArrayOutputStream undoBuffer, cancelBuffer;
 
+  private final Color darkLinkColor = Color.darkGray;
+  private final Color blueLinkColor = new Color(40, 40, 255);
+  private final Color selectedLinkColor = new Color(255, 50, 50);
+  private final Color outputBackgroundColor = new Color(210, 210, 240);
+  private final static float BEZIER_HARDNESS = 0.5f; //increase hardness to a have a more pronouced shape
+  private final static Stroke normal = new BasicStroke();
+  private final static Stroke bold = new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+  
   private static ClipboardSelection clipboard;
 
   public ProcedureEditor(Procedure proc, ProcedureOwner owner, Scene scene)
@@ -107,12 +115,12 @@ public class ProcedureEditor extends CustomWidget
         if (output[i].getBounds().width > widest)
           widest = output[i].getBounds().width;
       }
-    int x = size.width-widest, y = 10;
+    int x = size.width-widest, y = 15;
     for (i = 0; i < output.length; i++)
       {
         output[i].setWidth(widest);
-        output[i].setPosition(x, y);
-        y += output[i].getBounds().height+10;
+        output[i].setPosition(x - 15, y);
+        y += output[i].getBounds().height+15;
       }
     
     // Add the menu bar.
@@ -295,54 +303,41 @@ public class ProcedureEditor extends CustomWidget
     OutputModule output[] = proc.getOutputModules();
     Module module[] = proc.getModules();
     Link link[] = proc.getLinks();
-    int divider = output[0].getBounds().x-1;
+    int divider = output[0].getBounds().x-5;
 
+    // Draw the line marking off the output modules.
+    
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g.setColor(outputBackgroundColor);
+    g.fillRoundRect(divider, 5, size.width - divider - 10, size.height - 10, 8, 8);
+    
     // Draw the output modules.
 
     for (int i = 0; i < output.length; i++)
-      output[i].draw(g);
+      output[i].draw(g, false);
     
-    // Draw the unselected modules.
-    
-    for (int i = 0; i < module.length; i++)
-      if (!selectedModule[i])
-        module[i].draw(g);
-    
-    // Draw the selected modules.
+    // Draw the modules.
     
     for (int i = 0; i < module.length; i++)
-      if (selectedModule[i])
-        {
-          g.setColor(Color.RED);
-          Rectangle rect = module[i].getBounds();
-          g.drawRect(rect.x-1, rect.y-1, rect.width+2, rect.height+2);
-          module[i].draw(g);
-        }
+      module[i].draw(g, selectedModule[i]);
     
     // Draw the unselected links.
     
+    g.setStroke(bold);
     for (int i = 0; i < link.length; i++)
       if (!selectedLink[i])
         {
-          g.setColor(link[i].from.getValueType() == IOPort.NUMBER ? Color.BLACK : Color.BLUE);
-          Point p1 = link[i].from.getPosition(), p2 = link[i].to.getPosition();
-          g.drawLine(p1.x, p1.y, p2.x, p2.y);
+          g.setColor(link[i].from.getValueType() == IOPort.NUMBER ? darkLinkColor : blueLinkColor);
+          g.draw(createBezierCurve(link[i]));
         }
     
     // Draw the selected links.
-    
-    g.setColor(Color.RED);
+
+    g.setColor(selectedLinkColor);
     for (int i = 0; i < link.length; i++)
       if (selectedLink[i])
-        {
-          Point p1 = link[i].from.getPosition(), p2 = link[i].to.getPosition();
-          g.drawLine(p1.x, p1.y, p2.x, p2.y);
-        }
-    
-    // Draw the line marking off the output modules.
-    
-    g.setColor(Color.BLACK);
-    g.drawLine(divider, 0, divider, size.height);
+        g.draw(createBezierCurve(link[i]));
+    g.setStroke(normal);
     
     // If we are in the middle of dragging something, draw the thing being dragged.
     
@@ -382,7 +377,37 @@ public class ProcedureEditor extends CustomWidget
             }
       }
   }
-  
+
+  private Shape createBezierCurve(Link link)
+  {
+    int x1 = link.from.getPosition().x;
+    int y1 = link.from.getPosition().y;
+    int x2 = link.to.getPosition().x;
+    int y2 = link.to.getPosition().y;
+    float ctrlx1, ctrly1, ctrlx2, ctrly2;
+    if (link.from.getLocation() == IOPort.LEFT || link.from.getLocation() == IOPort.RIGHT)
+    {
+      ctrlx1 = (x2-x1)*BEZIER_HARDNESS + x1;
+      ctrly1 = y1;
+    }
+    else
+    {
+      ctrlx1 = x1;
+      ctrly1 = (y2-y1)*BEZIER_HARDNESS + y1;
+    }
+    if (link.to.getLocation() == IOPort.LEFT || link.to.getLocation() == IOPort.RIGHT)
+    {
+      ctrlx2 = (1 - BEZIER_HARDNESS)*(x2-x1) + x1;
+      ctrly2 = y2;
+    }
+    else
+    {
+      ctrlx2 = x2;
+      ctrly2 = (1 - BEZIER_HARDNESS)*(y2-y1) + y1;
+    }
+    return new CubicCurve2D.Float(x1, y1, ctrlx1, ctrly1, ctrlx2, ctrly2, x2, y2);
+  }
+
   /** Update the items in the Edit menu whenever the selection changes. */
   
   private void updateMenus()
@@ -789,38 +814,13 @@ public class ProcedureEditor extends CustomWidget
     
     for (i = 0; i < link.length; i++)
       {
-        Point p1 = link[i].from.getPosition();
-        Point p2 = link[i].to.getPosition();
         int tol = 2;
-        
-        if (clickPos.x < p1.x-tol && clickPos.x < p2.x-tol)
+        if (!createBezierCurve(link[i]).intersects(new Rectangle(clickPos.x - tol, clickPos.y - tol, 2*tol, 2*tol)))
           continue;
-        if (clickPos.x > p1.x+tol && clickPos.x > p2.x+tol)
-          continue;
-        if (clickPos.y < p1.y-tol && clickPos.y < p2.y-tol)
-          continue;
-        if (clickPos.y > p1.y+tol && clickPos.y > p2.y+tol)
-          continue;
-        Vec2 v1 = new Vec2(p2.x-p1.x, p2.y-p1.y);
-        Vec2 v2 = new Vec2(clickPos.x-p1.x, clickPos.y-p1.y);
-        v1.normalize();
-        double dot = v1.dot(v2);
-        v1.scale(dot);
-        v2.subtract(v1);
-        if (v2.length2() <= tol*tol)
-          {
-            if (!e.isShiftDown() && !selectedLink[i])
-              {
-                for (j = 0; j < selectedModule.length; j++)
-                  selectedModule[j] = false;
-                for (j = 0; j < selectedLink.length; j++)
-                  selectedLink[j] = false;
-              }
-            selectedLink[i] = true;
-            repaint();
-            updateMenus();
-            return;
-          }
+        selectedLink[i] = true;
+        repaint();
+        updateMenus();
+        return;
       }
 
     // Erase the selection if the shift key is not held down.
@@ -878,7 +878,7 @@ public class ProcedureEditor extends CustomWidget
     {
       saveState(false);
       draggingModule = false;
-      int dx = pos.x-clickPos.x, dy = pos.y-clickPos.y, lastdx, lastdy;
+      int dx = pos.x-clickPos.x, dy = pos.y-clickPos.y;
       Module module[] = proc.getModules();
       for (int i = 0; i < selectedModule.length; i++)
         if (selectedModule[i])
@@ -1068,22 +1068,21 @@ public class ProcedureEditor extends CustomWidget
     
     Module module[] = proc.getModules();
     Link link[] = proc.getLinks();
-    int num = 0, i, j;
-    for (i = 0; i < selectedLink.length; i++)
-      for (j = 0; j < selectedModule.length; j++)
+    for (int i = 0; i < selectedLink.length; i++)
+      for (int j = 0; j < selectedModule.length; j++)
         if ((module[j] == link[i].from.getModule() && selectedModule[j]) || 
             (module[j] == link[i].to.getModule() && selectedModule[j]))
         selectedLink[i] = true;
     
     // Delete any selected links.
     
-    for (i = selectedLink.length-1; i >= 0; i--)
+    for (int i = selectedLink.length-1; i >= 0; i--)
       if (selectedLink[i])
         proc.deleteLink(i);
     
     // Now delete any selected modules.
 
-    for (i = selectedModule.length-1; i >= 0; i--)
+    for (int i = selectedModule.length-1; i >= 0; i--)
       if (selectedModule[i])
         proc.deleteModule(i);
     selectedModule = new boolean [proc.getModules().length];

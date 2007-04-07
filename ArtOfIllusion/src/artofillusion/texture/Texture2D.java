@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2002,2003 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,8 @@
 package artofillusion.texture;
 
 import artofillusion.math.*;
+import artofillusion.*;
+
 import java.awt.*;
 import java.awt.image.*;
 
@@ -64,42 +66,57 @@ public abstract class Texture2D extends Texture
   /** Create an Image which represents a particular component of this texture.
       The arguments specify the region of the texture to represent (U and V ranges),
       the image size, the component to represent (one of the constants defined
-      in this class), and the time and texture parameters. */
+      in the Texture class), and the time and texture parameters. */
   
-  public Image createComponentImage(double minu, double maxu, double minv, double maxv,
-      int width, int height, int component, double time, double param[])
+  public Image createComponentImage(final double minu, double maxu, double minv, final double maxv,
+      final int width, final int height, final int component, final double time, final double param[])
   {
-    int pixel[] = new int [width*height];
-    double uscale = (maxu-minu)/width;
-    double vscale = (maxv-minv)/height;
-    TextureSpec spec = new TextureSpec();
-    
-    for (int i = 0; i < width; i++)
-      for (int j = 0; j < height; j++)
+    final int pixel[] = new int [width*height];
+    final double uscale = (maxu-minu)/width;
+    final double vscale = (maxv-minv)/height;
+    final ThreadLocal textureSpec = new ThreadLocal() {
+      protected Object initialValue()
+      {
+        return new TextureSpec();
+      }
+    };
+    ThreadManager threads = new ThreadManager(width, new ThreadManager.Task()
+    {
+      public void execute(int i)
+      {
+        TextureSpec spec = (TextureSpec) textureSpec.get();
+        for (int j = 0; j < height; j++)
         {
           double u = minu+i*uscale;
           double v = maxv-j*vscale;
           getTextureSpec(spec, u, v, uscale, vscale, 1.0, time, param);
           int index = i+j*width;
           switch (component)
-            {
-              case DIFFUSE_COLOR_COMPONENT:
-                pixel[index] = spec.diffuse.getARGB();
-                break;
-              case SPECULAR_COLOR_COMPONENT:
-                pixel[index] = spec.specular.getARGB();
-                break;
-              case TRANSPARENT_COLOR_COMPONENT:
-                pixel[index] = spec.transparent.getARGB();
-                break;
-              case HILIGHT_COLOR_COMPONENT:
-                pixel[index] = spec.hilight.getARGB();
-                break;
-              case EMISSIVE_COLOR_COMPONENT:
-                pixel[index] = spec.emissive.getARGB();
-                break;
-            }
+          {
+            case DIFFUSE_COLOR_COMPONENT:
+              pixel[index] = spec.diffuse.getARGB();
+              break;
+            case SPECULAR_COLOR_COMPONENT:
+              pixel[index] = spec.specular.getARGB();
+              break;
+            case TRANSPARENT_COLOR_COMPONENT:
+              pixel[index] = spec.transparent.getARGB();
+              break;
+            case HILIGHT_COLOR_COMPONENT:
+              pixel[index] = spec.hilight.getARGB();
+              break;
+            case EMISSIVE_COLOR_COMPONENT:
+              pixel[index] = spec.emissive.getARGB();
+              break;
+          }
         }
+      }
+      public void cleanup()
+      {
+      }
+    });
+    threads.run();
+    threads.finish();
     MemoryImageSource src = new MemoryImageSource(width, height, pixel, 0, width);
     return Toolkit.getDefaultToolkit().createImage(src);
   }

@@ -127,6 +127,12 @@ public class ThreadManager
 
   public void run()
   {
+    synchronized (this)
+    {
+      controllerWaiting = false;
+      nextIndex = 0;
+      numWaiting = 0;
+    }
     if (thread == null)
       createThreads();
     if (thread.length == 1)
@@ -142,9 +148,6 @@ public class ThreadManager
 
     synchronized (this)
     {
-      controllerWaiting = false;
-      nextIndex = 0;
-      numWaiting = 0;
       notifyAll();
     }
     synchronized (controller)

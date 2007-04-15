@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
    Some parts copyright (C) 2005 by Nik Trevallyn-Jones
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -247,11 +247,18 @@ public class VRMLExporter
     if (obj instanceof DirectionalLight)
       {
         RGBColor color = ((Light) obj).getColor();
+        boolean ambient = (((Light) obj).getType() == Light.TYPE_AMBIENT);
         Vec3 dir = coords.getZDirection();
         write("DirectionalLight {", out, indent);
         write("direction "+dir.x+" "+dir.y+" "+dir.z, out, indent+1);
         write("color "+color.getRed()+" "+color.getGreen()+" "+color.getBlue(), out, indent+1);
-        write("intensity "+((Light) obj).getIntensity(), out, indent+1);
+        if (ambient)
+          {
+            write("ambientIntensity "+((Light) obj).getIntensity(), out, indent+1);
+            write("intensity 0", out, indent+1);
+          }
+        else
+          write("intensity "+((Light) obj).getIntensity(), out, indent+1);
         write("}", out, indent);
         return;
       }
@@ -259,7 +266,7 @@ public class VRMLExporter
       {
         RGBColor color = ((Light) obj).getColor();
         float decay = ((Light) obj).getDecayRate();
-        boolean ambient = ((Light) obj).isAmbient();
+        boolean ambient = (((Light) obj).getType() == Light.TYPE_AMBIENT);
         Vec3 dir = coords.getZDirection();
         double inner = Math.acos(Math.pow(0.9, 1.0/((SpotLight) obj).getExponent()));
         double outer = Math.acos(Math.pow(0.1, 1.0/((SpotLight) obj).getExponent()));
@@ -288,7 +295,7 @@ public class VRMLExporter
       {
         RGBColor color = ((Light) obj).getColor();
         float decay = ((Light) obj).getDecayRate();
-        boolean ambient = ((Light) obj).isAmbient();
+        boolean ambient = (((Light) obj).getType() == Light.TYPE_AMBIENT);
         write("PointLight {", out, indent);
         write("location "+pos[0]+" "+pos[1]+" "+pos[2], out, indent+1);
         write("color "+color.getRed()+" "+color.getGreen()+" "+color.getBlue(), out, indent+1);

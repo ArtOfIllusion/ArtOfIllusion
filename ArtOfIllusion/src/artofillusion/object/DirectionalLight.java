@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,8 @@ public class DirectionalLight extends Light
   static final int SEGMENTS = 8;
   private static final Property PROPERTIES[] = new Property [] {
     new Property(Translate.text("lightColor"), new RGBColor(1.0, 1.0, 1.0)),
-    new Property(Translate.text("Intensity"), -Double.MAX_VALUE, Double.MAX_VALUE, 1.0)
+    new Property(Translate.text("Intensity"), -Double.MAX_VALUE, Double.MAX_VALUE, 1.0),
+    new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
   };
 
   static {
@@ -66,7 +67,7 @@ public class DirectionalLight extends Light
   
   public DirectionalLight(RGBColor theColor, float theIntensity)
   {
-    setParameters(theColor.duplicate(), theIntensity, false, 0.5f);
+    setParameters(theColor.duplicate(), theIntensity, TYPE_NORMAL, 0.5f);
   }
   
   public Object3D duplicate()
@@ -78,7 +79,7 @@ public class DirectionalLight extends Light
   {
     DirectionalLight lt = (DirectionalLight) obj;
 
-    setParameters(lt.color.duplicate(), lt.intensity, lt.ambient, lt.decayRate);
+    setParameters(lt.color.duplicate(), lt.intensity, lt.type, lt.decayRate);
   }
 
   public BoundingBox getBounds()
@@ -126,9 +127,9 @@ public class DirectionalLight extends Light
     super(in, theScene);
 
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("");
-    setParameters(new RGBColor(in), in.readFloat(), false, 0.0f);
+    setParameters(new RGBColor(in), in.readFloat(), version == 0 ? TYPE_NORMAL : in.readShort(), 0.0f);
     bounds = new BoundingBox(-0.15, 0.15, -0.15, 0.15, -0.15, 0.25);
   }
 
@@ -136,15 +137,18 @@ public class DirectionalLight extends Light
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(0);
+    out.writeShort(1);
     color.writeToFile(out);
     out.writeFloat(intensity);
+    out.writeShort(type);
   }
 
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     final Widget patch = color.getSample(50, 30);
     ValueField intensityField = new ValueField(intensity, ValueField.NONE);
+    BComboBox typeChoice = new BComboBox(new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")});
+    typeChoice.setSelectedIndex(type);
     RGBColor oldColor = color.duplicate();
     final BFrame parentFrame = parent.getFrame();
     
@@ -156,13 +160,13 @@ public class DirectionalLight extends Light
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"), 
-	new Widget [] {patch, intensityField}, new String [] {Translate.text("Color"), Translate.text("Intensity")});
+	new Widget [] {patch, intensityField, typeChoice}, new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("lightType")});
     if (!dlg.clickedOk())
     {
       color.copy(oldColor);
       return;
     }
-    setParameters(color, (float) intensityField.getValue(), ambient, decayRate);
+    setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(), decayRate);
     cb.run();
   }
 
@@ -179,6 +183,8 @@ public class DirectionalLight extends Light
         return color.duplicate();
       case 1:
         return new Double(intensity);
+      case 2:
+        return PROPERTIES[index].getAllowedValues()[type];
     }
     return null;
   }
@@ -189,6 +195,13 @@ public class DirectionalLight extends Light
       color = ((RGBColor) value).duplicate();
     else if (index == 1)
       intensity = ((Double) value).floatValue();
+    else if (index == 2)
+    {
+      Object values[] = PROPERTIES[index].getAllowedValues();
+      for (int i = 0; i < values.length; i++)
+        if (values[i].equals(value))
+          type = i;
+    }
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
@@ -204,7 +217,7 @@ public class DirectionalLight extends Light
   {
     DirectionalLightKeyframe key = (DirectionalLightKeyframe) k;
     
-    setParameters(key.color.duplicate(), key.intensity, ambient, 0.5f);
+    setParameters(key.color.duplicate(), key.intensity, type, 0.5f);
   }
   
   /** This will be called whenever a new pose track is created for this object.  It allows

@@ -2019,7 +2019,7 @@ public class Raytracer implements Runnable
 
         // Now scan through the list of objects, and see if the light is blocked.
 
-        if (lt.isAmbient())
+        if (lt.getType() == Light.TYPE_AMBIENT)
           dot = 1.0;
         else
           dot = sign*dir.dot(normal);
@@ -2036,7 +2036,7 @@ public class Raytracer implements Runnable
                 lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen()) < minRayIntensity &&
                 lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue()) < minRayIntensity)
               continue;
-            if (lt.isAmbient() || traceLightRay(r, lt, treeDepth+1, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
+            if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(r, lt, treeDepth+1, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
               {
                 RGBColor tempColor = rt.tempColor;
                 tempColor.copy(lightColor);
@@ -2584,7 +2584,7 @@ public class Raytracer implements Runnable
           if (exponent > 0.0)
             lightColor.scale(Math.pow(fatt, exponent));
         }
-        if (eccentricity != 0.0 && !lt.isAmbient())
+        if (eccentricity != 0.0 && lt.getType() != Light.TYPE_AMBIENT)
           {
             dot = dir.dot(viewDir);
             fatt = (1.0-ec2)/Math.pow(1.0+ec2-2.0*eccentricity*dot, 1.5);
@@ -2593,7 +2593,7 @@ public class Raytracer implements Runnable
         if (lightColor.getRed() < minRayIntensity && lightColor.getGreen() < minRayIntensity &&
             lightColor.getBlue() < minRayIntensity)
           continue;
-        if (lt.isAmbient() || traceLightRay(r, lt, treeDepth, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
+        if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(r, lt, treeDepth, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
           rt.tempColor2.add(lightColor);
       }
     rt.color[treeDepth].copy(rt.tempColor2);

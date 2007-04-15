@@ -947,7 +947,7 @@ public class Raster implements Runnable
           if (exponent > 0.0)
             outputColor.scale(Math.pow(fatt, exponent));
         }
-        if (lt.isAmbient())
+        if (lt.getType() == Light.TYPE_AMBIENT)
           {
             if (diffuse != null)
               diffuse.add(outputColor.getRed(), outputColor.getGreen(), outputColor.getBlue());

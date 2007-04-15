@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,7 +31,7 @@ public class PointLight extends Light
     new Property(Translate.text("Intensity"), -Double.MAX_VALUE, Double.MAX_VALUE, 1.0),
     new Property(Translate.text("decayRate"), 0.0, Double.MAX_VALUE, 0.25),
     new Property(Translate.text("Radius"), 0.0, Double.MAX_VALUE, 0.1),
-    new Property(Translate.text("Ambient"), false)
+    new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
   };
 
   static
@@ -87,12 +87,12 @@ public class PointLight extends Light
   
   public PointLight(RGBColor theColor, float theIntensity, double theRadius)
   {
-    this(theColor, theIntensity, theRadius, false, 0.25f);
+    this(theColor, theIntensity, theRadius, TYPE_NORMAL, 0.25f);
   }
   
-  public PointLight(RGBColor theColor, float theIntensity, double theRadius, boolean isAmbient, float decay)
+  public PointLight(RGBColor theColor, float theIntensity, double theRadius, int type, float decay)
   {
-    setParameters(theColor.duplicate(), theIntensity, isAmbient, decay);
+    setParameters(theColor.duplicate(), theIntensity, type, decay);
     setRadius(theRadius);
     bounds = new BoundingBox(-0.25, 0.25, -0.25, 0.25, -0.25, 0.25);
   }
@@ -109,14 +109,14 @@ public class PointLight extends Light
   
   public Object3D duplicate()
   {
-    return new PointLight(color, intensity, radius, ambient, decayRate);
+    return new PointLight(color, intensity, radius, type, decayRate);
   }
   
   public void copyObject(Object3D obj)
   {
     PointLight lt = (PointLight) obj;
 
-    setParameters(lt.color.duplicate(), lt.intensity, lt.ambient, lt.decayRate);
+    setParameters(lt.color.duplicate(), lt.intensity, lt.type, lt.decayRate);
     setRadius(lt.radius);
   }
 
@@ -153,7 +153,8 @@ public class PointLight extends Light
     ValueField intensityField = new ValueField(intensity, ValueField.NONE);
     ValueField radiusField = new ValueField(radius, ValueField.NONNEGATIVE);
     ValueField decayField = new ValueField(decayRate, ValueField.NONNEGATIVE);
-    BCheckBox ambientBox = new BCheckBox(Translate.text("Ambient"), ambient);
+    BComboBox typeChoice = new BComboBox(new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")});
+    typeChoice.setSelectedIndex(type);
     RGBColor oldColor = color.duplicate();
     final BFrame parentFrame = parent.getFrame();
     
@@ -165,14 +166,14 @@ public class PointLight extends Light
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"), 
-	new Widget [] {patch, intensityField, radiusField, decayField, ambientBox}, 
-	new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("decayRate"), null});
+	new Widget [] {patch, intensityField, radiusField, decayField, typeChoice},
+	new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("decayRate"), Translate.text("lightType")});
     if (!dlg.clickedOk())
     {
       color.copy(oldColor);
       return;
     }
-    setParameters(color, (float) intensityField.getValue(), ambientBox.getState(), 
+    setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(),
         (float) decayField.getValue());
     setRadius(radiusField.getValue());
     cb.run();
@@ -187,9 +188,9 @@ public class PointLight extends Light
     super(in, theScene);
 
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("");
-    setParameters(new RGBColor(in), in.readFloat(), in.readBoolean(), in.readFloat());
+    setParameters(new RGBColor(in), in.readFloat(), version == 0 ? (in.readBoolean() ? TYPE_AMBIENT : TYPE_NORMAL) : in.readShort(), in.readFloat());
     setRadius(in.readDouble());
   }
 
@@ -197,10 +198,10 @@ public class PointLight extends Light
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(0);
+    out.writeShort(1);
     color.writeToFile(out);
     out.writeFloat(intensity);
-    out.writeBoolean(ambient);
+    out.writeShort(type);
     out.writeFloat(decayRate);
     out.writeDouble(radius);
   }
@@ -223,7 +224,7 @@ public class PointLight extends Light
       case 3:
         return new Double(radius);
       case 4:
-        return Boolean.valueOf(ambient);
+        return PROPERTIES[index].getAllowedValues()[type];
     }
     return null;
   }
@@ -239,7 +240,12 @@ public class PointLight extends Light
     else if (index == 3)
       radius = ((Double) value).doubleValue();
     else if (index == 4)
-      ambient = ((Boolean) value).booleanValue();
+    {
+      Object values[] = PROPERTIES[index].getAllowedValues();
+      for (int i = 0; i < values.length; i++)
+        if (values[i].equals(value))
+          type = i;
+    }
   }
 
   /** Return a Keyframe which describes the current pose of this object. */
@@ -255,7 +261,7 @@ public class PointLight extends Light
   {
     PointLightKeyframe key = (PointLightKeyframe) k;
     
-    setParameters(key.color.duplicate(), key.intensity, ambient, key.decayRate);
+    setParameters(key.color.duplicate(), key.intensity, type, key.decayRate);
     setRadius(key.radius);
   }
   

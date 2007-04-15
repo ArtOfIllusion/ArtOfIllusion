@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2006 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,7 +36,7 @@ public class SpotLight extends Light
     new Property(Translate.text("falloffRate"), 0.0, 1.0, 0.0),
     new Property(Translate.text("decayRate"), 0.0, Double.MAX_VALUE, 0.25),
     new Property(Translate.text("Radius"), 0.0, Double.MAX_VALUE, 0.1),
-    new Property(Translate.text("Ambient"), false)
+    new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
   };
 
   static {
@@ -48,8 +48,8 @@ public class SpotLight extends Light
     bounds = new BoundingBox(-0.2, 0.2, -0.2, 0.2, -0.2, 0.2);
     for (i = 0; i < SEGMENTS; i++)
       {
-	sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
-	cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
+        sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
+        cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
       }
     vert = new Vec3 [SEGMENTS*3+1];
     from = new int [SEGMENTS*3];
@@ -57,27 +57,27 @@ public class SpotLight extends Light
     vert[SEGMENTS*3] = new Vec3(0.0, 0.0, -0.2);
     for (i = 0; i < SEGMENTS; i++)
       {
-	vert[i] = new Vec3(0.075*cosine[i], 0.075*sine[i], -0.05);
-	vert[i+SEGMENTS] = new Vec3(0.1*cosine[i], 0.1*sine[i], 0.0);
-	vert[i+2*SEGMENTS] = new Vec3(0.2*cosine[i], 0.2*sine[i], 0.2);
-	from[i] = SEGMENTS*3;
-	to[i] = i;
-	from[i+SEGMENTS] = i;
-	to[i+SEGMENTS] = (i+1)%SEGMENTS;
-	from[i+2*SEGMENTS] = i+SEGMENTS;
-	to[i+2*SEGMENTS] = i+2*SEGMENTS;
+        vert[i] = new Vec3(0.075*cosine[i], 0.075*sine[i], -0.05);
+        vert[i+SEGMENTS] = new Vec3(0.1*cosine[i], 0.1*sine[i], 0.0);
+        vert[i+2*SEGMENTS] = new Vec3(0.2*cosine[i], 0.2*sine[i], 0.2);
+        from[i] = SEGMENTS*3;
+        to[i] = i;
+        from[i+SEGMENTS] = i;
+        to[i+SEGMENTS] = (i+1)%SEGMENTS;
+        from[i+2*SEGMENTS] = i+SEGMENTS;
+        to[i+2*SEGMENTS] = i+2*SEGMENTS;
       }
     mesh = new WireframeMesh(vert, from, to);
   }
 
   public SpotLight(RGBColor theColor, float theIntensity, double theAngle, double falloffRate, double theRadius)
   {
-    this(theColor, theIntensity, theAngle, falloffRate, theRadius, false, 0.25f);
+    this(theColor, theIntensity, theAngle, falloffRate, theRadius, TYPE_NORMAL, 0.25f);
   }
   
-  public SpotLight(RGBColor theColor, float theIntensity, double theAngle, double falloffRate, double theRadius, boolean isAmbient, float decay)
+  public SpotLight(RGBColor theColor, float theIntensity, double theAngle, double falloffRate, double theRadius, int type, float decay)
   {
-    setParameters(theColor.duplicate(), theIntensity, isAmbient, decay);
+    setParameters(theColor.duplicate(), theIntensity, type, decay);
     setRadius(theRadius);
     setAngle(theAngle);
     setFalloff(falloffRate);
@@ -127,14 +127,14 @@ public class SpotLight extends Light
   
   public Object3D duplicate()
   {
-    return new SpotLight(color, intensity, angle, falloff, radius, ambient, decayRate);
+    return new SpotLight(color, intensity, angle, falloff, radius, type, decayRate);
   }
   
   public void copyObject(Object3D obj)
   {
     SpotLight lt = (SpotLight) obj;
 
-    setParameters(lt.color.duplicate(), lt.intensity, lt.ambient, lt.decayRate);
+    setParameters(lt.color.duplicate(), lt.intensity, lt.type, lt.decayRate);
     setRadius(lt.radius);
     setAngle(lt.angle);
     setFalloff(lt.falloff);
@@ -176,9 +176,9 @@ public class SpotLight extends Light
     super(in, theScene);
 
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("");
-    setParameters(new RGBColor(in), in.readFloat(), in.readBoolean(), in.readFloat());
+    setParameters(new RGBColor(in), in.readFloat(), version == 0 ? (in.readBoolean() ? TYPE_AMBIENT : TYPE_NORMAL) : in.readShort(), in.readFloat());
     setRadius(in.readDouble());
     setAngle(in.readDouble());
     setFalloff(in.readDouble());
@@ -189,10 +189,10 @@ public class SpotLight extends Light
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(0);
+    out.writeShort(1);
     color.writeToFile(out);
     out.writeFloat(intensity);
-    out.writeBoolean(ambient);
+    out.writeShort(type);
     out.writeFloat(decayRate);
     out.writeDouble(radius);
     out.writeDouble(angle);
@@ -207,7 +207,8 @@ public class SpotLight extends Light
     final ValueField decayField = new ValueField(decayRate, ValueField.NONNEGATIVE);
     final ValueSlider angleSlider = new ValueSlider(0.0, 180.0, 180, angle);
     final ValueSlider falloffSlider = new ValueSlider(0.0, 1.0, 100, falloff);
-    final BCheckBox ambientBox = new BCheckBox(Translate.text("Ambient"), ambient);
+    final BComboBox typeChoice = new BComboBox(new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")});
+    typeChoice.setSelectedIndex(type);
     final Preview preview = new Preview(100);
     final RGBColor oldColor = color.duplicate();
     final BFrame parentFrame = parent.getFrame();
@@ -224,43 +225,44 @@ public class SpotLight extends Light
     content.add(Translate.label("Intensity"), 0, 4, labelLayout);
     content.add(Translate.label("Radius"), 0, 5, labelLayout);
     content.add(Translate.label("decayRate"), 0, 6, labelLayout);
+    content.add(Translate.label("lightType"), 0, 7, labelLayout);
     content.add(angleSlider, 1, 1, widgetLayout);
     content.add(falloffSlider, 1, 2, widgetLayout);
     content.add(patch, 1, 3, widgetLayout);
     content.add(intensityField, 1, 4, widgetLayout);
     content.add(radiusField, 1, 5, widgetLayout);
     content.add(decayField, 1, 6, widgetLayout);
-    content.add(ambientBox, 1, 7, widgetLayout);
+    content.add(typeChoice, 1, 7, widgetLayout);
     content.add(preview, 2, 1, 1, 7);
     RowContainer buttons = new RowContainer();
     content.add(buttons, 0, 8, 3, 1);
     BButton okButton = Translate.button("ok", new Object() {
       void processEvent()
       {
-	setParameters(color, (float) intensityField.getValue(), ambientBox.getState(), 
-	    (float) decayField.getValue());
-	setRadius(radiusField.getValue());
-	setAngle(angleSlider.getValue());
-	setFalloff(falloffSlider.getValue());
-	dlg.dispose();
-	cb.run();
+        setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(),
+            (float) decayField.getValue());
+        setRadius(radiusField.getValue());
+        setAngle(angleSlider.getValue());
+        setFalloff(falloffSlider.getValue());
+        dlg.dispose();
+        cb.run();
       }
     }, "processEvent");
     buttons.add(okButton);
     BButton cancelButton = Translate.button("cancel", new Object() {
       void processEvent()
       {
-	color.copy(oldColor);
-	dlg.dispose();
+        color.copy(oldColor);
+        dlg.dispose();
       }
     }, "processEvent");
     buttons.add(cancelButton);
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-	new ColorChooser(parentFrame, Translate.text("lightColor"), color);
-	patch.setBackground(color.getColor());
-	preview.updateImage(angleSlider.getValue(), falloffSlider.getValue());
+        new ColorChooser(parentFrame, Translate.text("lightColor"), color);
+        patch.setBackground(color.getColor());
+        preview.updateImage(angleSlider.getValue(), falloffSlider.getValue());
       }
     });
     Object listener = new Object() {
@@ -298,7 +300,7 @@ public class SpotLight extends Light
       case 5:
         return new Double(radius);
       case 6:
-        return Boolean.valueOf(ambient);
+        return PROPERTIES[index].getAllowedValues()[type];
     }
     return null;
   }
@@ -318,7 +320,12 @@ public class SpotLight extends Light
     else if (index == 5)
       radius = ((Double) value).doubleValue();
     else if (index == 6)
-      ambient = ((Boolean) value).booleanValue();
+    {
+      Object values[] = PROPERTIES[index].getAllowedValues();
+      for (int i = 0; i < values.length; i++)
+        if (values[i].equals(value))
+          type = i;
+    }
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
@@ -334,7 +341,7 @@ public class SpotLight extends Light
   {
     SpotLightKeyframe key = (SpotLightKeyframe) k;
     
-    setParameters(key.color.duplicate(), key.intensity, ambient, key.decayRate);
+    setParameters(key.color.duplicate(), key.intensity, type, key.decayRate);
     setRadius(key.radius);
     setAngle(key.angle);
     setFalloff(key.falloff);
@@ -389,29 +396,29 @@ public class SpotLight extends Light
     BButton okButton = Translate.button("ok", new Object() {
       void processEvent()
       {
-	key.intensity = (float) intensityField.getValue(); 
-	key.decayRate = (float) decayField.getValue();
-	key.radius = radiusField.getValue();
-	key.angle = angleSlider.getValue();
-	key.falloff = falloffSlider.getValue();
-	dlg.dispose();
+        key.intensity = (float) intensityField.getValue();
+        key.decayRate = (float) decayField.getValue();
+        key.radius = radiusField.getValue();
+        key.angle = angleSlider.getValue();
+        key.falloff = falloffSlider.getValue();
+        dlg.dispose();
       }
     }, "processEvent");
     buttons.add(okButton);
     BButton cancelButton = Translate.button("cancel", new Object() {
       void processEvent()
       {
-	key.color.copy(oldColor);
-	dlg.dispose();
+        key.color.copy(oldColor);
+        dlg.dispose();
       }
     }, "processEvent");
     buttons.add(cancelButton);
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-	new ColorChooser(parentFrame, Translate.text("lightColor"), key.color);
-	patch.setBackground(key.color.getColor());
-	preview.updateImage(angleSlider.getValue(), falloffSlider.getValue());
+        new ColorChooser(parentFrame, Translate.text("lightColor"), key.color);
+        patch.setBackground(key.color.getColor());
+        preview.updateImage(angleSlider.getValue(), falloffSlider.getValue());
       }
     });
     Object listener = new Object() {

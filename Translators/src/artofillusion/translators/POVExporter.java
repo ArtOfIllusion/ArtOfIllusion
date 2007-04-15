@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Norbert Krieg and Peter Eastman
+/* Copyright (C) 2002-2007 by Norbert Krieg and Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -379,7 +379,7 @@ public class POVExporter
 	    write("light_source {",out,0);
 	    write(getVec3String(orig),out,1);
 	    write("color <"+color.getRed()+","+color.getGreen()+","+color.getBlue()+">",out,1);
-	    if (light.isAmbient()) write("shadowless",out,1);
+	    if (light.getType() != Light.TYPE_NORMAL) write("shadowless",out,1);
 	    write("fade_distance "+fadeDistance,out,1);
 	    write("fade_power "+fadePower,out,1);
 	    write("}",out,0);
@@ -425,7 +425,7 @@ public class POVExporter
 	    write("radius "+radius,out,1);
 	    write("falloff "+falloff,out,1);
 	    write("tightness "+TIGHTNESS,out,1); // simulates the AoI's behavior
-	    if (light.isAmbient()) write("shadowless",out,1);
+	    if (light.getType() != Light.TYPE_NORMAL) write("shadowless",out,1);
 	    write("fade_distance "+fadeDistance,out,1);
 	    write("fade_power "+fadePower,out,1);
 	    write("}",out,0);
@@ -439,7 +439,7 @@ public class POVExporter
 		System.err.println("// Radius:\t"+radius);
 		System.err.println("// Falloff:\t"+falloff);
 		System.err.println("// Tightness:\t"+TIGHTNESS);
-		if (light.isAmbient()) System.err.println("shadowless");
+		if (light.getType() != Light.TYPE_NORMAL) System.err.println("shadowless");
 		System.err.println("// FadeDistance:\t"+fadeDistance);
 		System.err.println("// FadePower:\t"+fadePower);
 	    }

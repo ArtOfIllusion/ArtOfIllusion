@@ -201,7 +201,7 @@ public class ThreadManager
       if (numWaiting == thread.length)
       {
         while (!controllerWaiting)
-          wait();
+          wait(1);
         synchronized (controller)
         {
           controller.notify();

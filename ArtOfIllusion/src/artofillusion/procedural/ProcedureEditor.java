@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2004 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -798,12 +798,10 @@ public class ProcedureEditor extends CustomWidget
         {
           draggingModule = true;
           if (!e.isShiftDown())
-            {
-              for (j = 0; j < selectedModule.length; j++)
-                selectedModule[j] = false;
-              for (j = 0; j < selectedLink.length; j++)
-                selectedLink[j] = false;
-            }
+          {
+            Arrays.fill(selectedModule, false);
+            Arrays.fill(selectedLink, false);
+          }
           selectedModule[i] = true;
           repaint();
           updateMenus();
@@ -817,6 +815,11 @@ public class ProcedureEditor extends CustomWidget
         int tol = 2;
         if (!createBezierCurve(link[i]).intersects(new Rectangle(clickPos.x - tol, clickPos.y - tol, 2*tol, 2*tol)))
           continue;
+        if (!e.isShiftDown())
+        {
+          Arrays.fill(selectedModule, false);
+          Arrays.fill(selectedLink, false);
+        }
         selectedLink[i] = true;
         repaint();
         updateMenus();
@@ -826,12 +829,10 @@ public class ProcedureEditor extends CustomWidget
     // Erase the selection if the shift key is not held down.
     
     if (!e.isShiftDown())
-      {
-        for (i = 0; i < selectedModule.length; i++)
-          selectedModule[i] = false;
-        for (i = 0; i < selectedLink.length; i++)
-          selectedLink[i] = false;
-      }
+    {
+      Arrays.fill(selectedModule, false);
+      Arrays.fill(selectedLink, false);
+    }
     draggingBox = true;
     repaint();
     updateMenus();

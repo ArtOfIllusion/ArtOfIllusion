@@ -12,6 +12,7 @@ package artofillusion;
 
 import artofillusion.animation.*;
 import artofillusion.image.*;
+import artofillusion.image.filter.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
@@ -27,6 +28,7 @@ import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.List;
 import java.util.zip.*;
 import java.lang.reflect.*;
 import javax.swing.*;
@@ -37,8 +39,8 @@ import javax.swing.*;
 
 public class ModellingApp
 {
-  public static final String MAJOR_VERSION = "2.4";
-  public static final String VERSION = MAJOR_VERSION+".1";
+  public static final String MAJOR_VERSION = "2.5";
+  public static final String VERSION = MAJOR_VERSION+"ea1";
   public static final double DIST_TO_SCREEN = 20.0;
   public static final Color APP_BACKGROUND_COLOR = new Color(228, 228, 243);
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
@@ -53,17 +55,6 @@ public class ModellingApp
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
   private static Vector windows = new Vector();
-  private static URLClassLoader pluginLoader[];
-  private static Vector renderers = new Vector();
-  private static Vector translators = new Vector();
-  private static Vector modellingTools = new Vector();
-  private static Vector textures = new Vector();
-  private static Vector materials = new Vector();
-  private static Vector textureMappings = new Vector();
-  private static Vector materialMappings = new Vector();
-  private static Vector plugins = new Vector();
-  private static Vector filters = new Vector();
-  private static Vector modules = new Vector();
   private static Hashtable classTranslations = new Hashtable();
   private static int numNewWindows = 0;
 
@@ -171,45 +162,49 @@ public class ModellingApp
       // Don't worry about it.
     }
     TitleWindow title = new TitleWindow();
-    try
-    {
-      textures.addElement(Class.forName("artofillusion.texture.UniformTexture"));
-      textures.addElement(Class.forName("artofillusion.texture.ImageMapTexture"));
-      textures.addElement(Class.forName("artofillusion.texture.ProceduralTexture2D"));
-      textures.addElement(Class.forName("artofillusion.texture.ProceduralTexture3D"));
-      materials.addElement(Class.forName("artofillusion.material.UniformMaterial"));
-      materials.addElement(Class.forName("artofillusion.material.ProceduralMaterial3D"));
-      textureMappings.addElement(Class.forName("artofillusion.texture.UniformMapping"));
-      textureMappings.addElement(Class.forName("artofillusion.texture.ProjectionMapping"));
-      textureMappings.addElement(Class.forName("artofillusion.texture.CylindricalMapping"));
-      textureMappings.addElement(Class.forName("artofillusion.texture.SphericalMapping"));
-      textureMappings.addElement(Class.forName("artofillusion.texture.UVMapping"));
-      textureMappings.addElement(Class.forName("artofillusion.texture.LinearMapping3D"));
-      materialMappings.addElement(Class.forName("artofillusion.material.LinearMaterialMapping"));
-      filters.addElement(Class.forName("artofillusion.image.filter.BrightnessFilter"));
-      filters.addElement(Class.forName("artofillusion.image.filter.SaturationFilter"));
-      filters.addElement(Class.forName("artofillusion.image.filter.ExposureFilter"));
-      filters.addElement(Class.forName("artofillusion.image.filter.TintFilter"));
-      filters.addElement(Class.forName("artofillusion.image.filter.BlurFilter"));
-      filters.addElement(Class.forName("artofillusion.image.filter.GlowFilter"));
-      filters.addElement(Class.forName("artofillusion.image.filter.OutlineFilter"));
-    }
-    catch (ClassNotFoundException ex)
-    {
-    }
-    if (pluginLoader == null)
-      scanPlugins();
+    PluginRegistry.addCategory(Plugin.class);
+    PluginRegistry.addCategory(Renderer.class);
+    PluginRegistry.addCategory(Translator.class);
+    PluginRegistry.addCategory(ModellingTool.class);
+    PluginRegistry.addCategory(Texture.class);
+    PluginRegistry.addCategory(Material.class);
+    PluginRegistry.addCategory(TextureMapping.class);
+    PluginRegistry.addCategory(MaterialMapping.class);
+    PluginRegistry.addCategory(ImageFilter.class);
+    PluginRegistry.addCategory(Module.class);
+    PluginRegistry.registerPlugin(new UniformTexture());
+    PluginRegistry.registerPlugin(new ImageMapTexture());
+    PluginRegistry.registerPlugin(new ProceduralTexture2D());
+    PluginRegistry.registerPlugin(new ProceduralTexture3D());
+    PluginRegistry.registerPlugin(new UniformMaterial());
+    PluginRegistry.registerPlugin(new ProceduralMaterial3D());
+    PluginRegistry.registerPlugin(new UniformMapping(null));
+    PluginRegistry.registerPlugin(new ProjectionMapping(null));
+    PluginRegistry.registerPlugin(new CylindricalMapping(null));
+    PluginRegistry.registerPlugin(new SphericalMapping(null));
+    PluginRegistry.registerPlugin(new UVMapping(null));
+    PluginRegistry.registerPlugin(new LinearMapping3D(null));
+    PluginRegistry.registerPlugin(new LinearMaterialMapping(null));
+    PluginRegistry.registerPlugin(new BrightnessFilter());
+    PluginRegistry.registerPlugin(new SaturationFilter());
+    PluginRegistry.registerPlugin(new ExposureFilter());
+    PluginRegistry.registerPlugin(new TintFilter());
+    PluginRegistry.registerPlugin(new BlurFilter());
+    PluginRegistry.registerPlugin(new GlowFilter());
+    PluginRegistry.registerPlugin(new OutlineFilter());
+    PluginRegistry.scanPlugins();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();
+    List plugins = PluginRegistry.getPlugins(Plugin.class);
     for (int i = 0; i < plugins.size(); i++)
     {
       try
       {
-        ((Plugin) plugins.elementAt(i)).processMessage(Plugin.APPLICATION_STARTING, new Object [0]);
+        ((Plugin) plugins.get(i)).processMessage(Plugin.APPLICATION_STARTING, new Object [0]);
       }
       catch (Throwable tx)
       {
-        String name = plugins.elementAt(i).getClass().getName();
+        String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", name)), BStandardDialog.ERROR).showMessageDialog(null);
       }
@@ -242,160 +237,164 @@ public class ModellingApp
 
   public static Renderer[] getRenderers()
   {
-    Renderer r[] = new Renderer [renderers.size()];
-    renderers.copyInto(r);
-    return r;
+    return (Renderer[]) PluginRegistry.getPlugins(Renderer.class).toArray(new Renderer[0]);
   }
   
   /** Get a list of all installed Plugins. */
 
   public static Plugin[] getPlugins()
   {
-    Plugin p[] = new Plugin [plugins.size()];
-    plugins.copyInto(p);
-    return p;
+    return (Plugin[]) PluginRegistry.getPlugins(Plugin.class).toArray(new Plugin[0]);
   }
 
   /** Get a list of all available Translators. */
 
   public static Translator[] getTranslators()
   {
-    Translator t[] = new Translator [translators.size()];
-    translators.copyInto(t);
-    return t;
+    return (Translator[]) PluginRegistry.getPlugins(Translator.class).toArray(new Translator[0]);
   }
   
   /** Get a list of all available ModellingTools. */
   
   public static ModellingTool[] getModellingTools()
   {
-    ModellingTool t[] = new ModellingTool [modellingTools.size()];
-    modellingTools.copyInto(t);
-    return t;
+    return (ModellingTool[]) PluginRegistry.getPlugins(ModellingTool.class).toArray(new ModellingTool[0]);
   }
   
   /** Get a list of all available Texture classes. */
 
   public static Class[] getTextureTypes()
   {
-    Class t[] = new Class [textures.size()];
-    textures.copyInto(t);
-    return t;
+    List instances = PluginRegistry.getPlugins(Texture.class);
+    Class classes[] = new Class[instances.size()];
+    for (int i = 0; i < classes.length; i++)
+      classes[i] = instances.get(i).getClass();
+    return classes;
   }
   
   /** Get a list of all available Material classes. */
 
   public static Class[] getMaterialTypes()
   {
-    Class m[] = new Class [materials.size()];
-    materials.copyInto(m);
-    return m;
+    List instances = PluginRegistry.getPlugins(Material.class);
+    Class classes[] = new Class[instances.size()];
+    for (int i = 0; i < classes.length; i++)
+      classes[i] = instances.get(i).getClass();
+    return classes;
   }
   
   /** Get a list of all available TextureMapping classes. */
 
   public static Class[] getTextureMappings()
   {
-    Class t[] = new Class [textureMappings.size()];
-    textureMappings.copyInto(t);
-    return t;
+    List instances = PluginRegistry.getPlugins(TextureMapping.class);
+    Class classes[] = new Class[instances.size()];
+    for (int i = 0; i < classes.length; i++)
+      classes[i] = instances.get(i).getClass();
+    return classes;
   }
   
   /** Get a list of all available MaterialMapping classes. */
 
   public static Class[] getMaterialMappings()
   {
-    Class m[] = new Class [materialMappings.size()];
-    materialMappings.copyInto(m);
-    return m;
+    List instances = PluginRegistry.getPlugins(MaterialMapping.class);
+    Class classes[] = new Class[instances.size()];
+    for (int i = 0; i < classes.length; i++)
+      classes[i] = instances.get(i).getClass();
+    return classes;
   }
   
   /** Get a list of all available ImageFilter classes. */
 
   public static Class[] getImageFilters()
   {
-    Class f[] = new Class [filters.size()];
-    filters.copyInto(f);
-    return f;
+    List instances = PluginRegistry.getPlugins(ImageFilter.class);
+    Class classes[] = new Class[instances.size()];
+    for (int i = 0; i < classes.length; i++)
+      classes[i] = instances.get(i).getClass();
+    return classes;
   }
 
   /** Get a list of all plugin-defined procedural Module classes. */
 
   public static Class[] getModules()
   {
-    Class m[] = new Class [modules.size()];
-    modules.copyInto(m);
-    return m;
+    List instances = PluginRegistry.getPlugins(Module.class);
+    Class classes[] = new Class[instances.size()];
+    for (int i = 0; i < classes.length; i++)
+      classes[i] = instances.get(i).getClass();
+    return classes;
   }
   
   /** Add a new Renderer the list of available ones. */
   
   public static void registerRenderer(Renderer o)
   {
-    renderers.addElement(o);
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new Translator the list of available ones. */
   
   public static void registerTranslator(Translator o)
   {
-    translators.addElement(o);
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new ModellingTool the list of available ones. */
   
   public static void registerModellingTool(ModellingTool o)
   {
-    modellingTools.addElement(o);
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new Texture the list of available ones. */
   
   public static void registerTexture(Texture o)
   {
-    textures.addElement(o.getClass());
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new Material the list of available ones. */
   
   public static void registerMaterial(Material o)
   {
-    materials.addElement(o.getClass());
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new TextureMapping the list of available ones. */
   
   public static void registerTextureMapping(TextureMapping o)
   {
-    textureMappings.addElement(o.getClass());
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new MaterialMapping the list of available ones. */
   
   public static void registerMaterialMapping(MaterialMapping o)
   {
-    materialMappings.addElement(o.getClass());
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new Plugin the list of available ones. */
   
   public static void registerPlugin(Plugin o)
   {
-    plugins.addElement(o);
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new ImageFilter to the list of available ones. */
   
-  public static void registerImageFilter(artofillusion.image.filter.ImageFilter o)
+  public static void registerImageFilter(ImageFilter o)
   {
-    filters.addElement(o.getClass());
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Add a new Module to the list of available ones. */
   
   public static void registerModule(Module o)
   {
-    modules.addElement(o.getClass());
+    PluginRegistry.registerPlugin(o);
   }
   
   /** Create a new Scene, and display it in a window. */
@@ -427,15 +426,16 @@ public class ModellingApp
       {
         LayoutWindow fr = new LayoutWindow(theScene);
         windows.addElement(fr);
+        List plugins = PluginRegistry.getPlugins(Plugin.class);
         for (int i = 0; i < plugins.size(); i++)
         {
           try
           {
-            ((Plugin) plugins.elementAt(i)).processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
+            ((Plugin) plugins.get(i)).processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
           }
           catch (Throwable tx)
           {
-            String name = plugins.elementAt(i).getClass().getName();
+            String name = plugins.get(i).getClass().getName();
             name = name.substring(name.lastIndexOf('.')+1);
             new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
           }
@@ -472,19 +472,22 @@ public class ModellingApp
       {
         windows.removeElement(win);
         if (win instanceof LayoutWindow)
+        {
+          List plugins = PluginRegistry.getPlugins(Plugin.class);
           for (int i = 0; i < plugins.size(); i++)
           {
             try
             {
-              ((Plugin) plugins.elementAt(i)).processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
+              ((Plugin) plugins.get(i)).processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
             }
             catch (Throwable tx)
             {
-              String name = plugins.elementAt(i).getClass().getName();
+              String name = plugins.get(i).getClass().getName();
               name = name.substring(name.lastIndexOf('.')+1);
               new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
             }
           }
+        }
       }
     if (windows.size() ==  0)
       quit();
@@ -510,122 +513,21 @@ public class ModellingApp
       if (windows.contains(win))
         return;
     }
+    List plugins = PluginRegistry.getPlugins(Plugin.class);
     for (int i = 0; i < plugins.size(); i++)
     {
       try
       {
-        ((Plugin) plugins.elementAt(i)).processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
+        ((Plugin) plugins.get(i)).processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
       }
       catch (Throwable tx)
       {
-        String name = plugins.elementAt(i).getClass().getName();
+        String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
       }
     }
     System.exit(0);
-  }
-  
-  private static void scanPlugins()
-  {
-    File dir = new File(PLUGIN_DIRECTORY);
-    String files[], name;
-    ZipFile zf = null;
-    ZipEntry ze;
-    BufferedReader in;
-    Object instance;
-    int i, j;
-    
-    if (!dir.exists())
-    {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
-      pluginLoader = new URLClassLoader [0];
-      return;
-    }
-    files = dir.list();
-    pluginLoader = new URLClassLoader [files.length];
-    for (i = j = 0; i < files.length; i++)
-    {
-      // Open the zip file.
-
-      File f = new File(PLUGIN_DIRECTORY, files[i]);
-      try
-      {
-        zf = new ZipFile(f);
-      }
-      catch (IOException ex)
-      {
-        continue;  // Not a zip file.
-      }
-      try
-      {
-        pluginLoader[j++] = new URLClassLoader(new URL [] {f.toURL()});
-
-        // Find the plugin directory file, and record any plugin classes.
-
-        ze = zf.getEntry("plugins");
-        if (ze != null)
-        {
-          in = new BufferedReader(new InputStreamReader(zf.getInputStream(ze)));
-          name = in.readLine();
-          while  (name != null)
-          {
-            try
-            {
-              instance = pluginLoader[j-1].loadClass(name).newInstance();
-              if (instance instanceof Plugin)
-                plugins.addElement(instance);
-              if (instance instanceof Renderer)
-                renderers.addElement(instance);
-              if (instance instanceof Translator)
-                translators.addElement(instance);
-              if (instance instanceof ModellingTool)
-                modellingTools.addElement(instance);
-              if (instance instanceof Texture)
-                textures.addElement(instance.getClass());
-              if (instance instanceof Material)
-                materials.addElement(instance.getClass());
-              if (instance instanceof TextureMapping)
-                textureMappings.addElement(instance.getClass());
-              if (instance instanceof MaterialMapping)
-                materialMappings.addElement(instance.getClass());
-              if (instance instanceof artofillusion.image.filter.ImageFilter)
-                filters.addElement(instance.getClass());
-              if (instance instanceof Module)
-                modules.addElement(instance.getClass());
-            }
-            catch (ClassNotFoundException ex)
-            {
-            }
-            catch (IllegalAccessException ex)
-            {
-            }
-            catch (InstantiationException ex)
-            {
-            }
-            catch (Throwable tx)
-            {
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", name)), BStandardDialog.ERROR).showMessageDialog(null);
-            }
-            name = in.readLine();
-          }
-        }
-      }
-      catch (IOException ex)
-      {
-        System.out.println("Error reading plugin file "+files[i]);
-      }
-    }
-
-    // Shorten the array if some files turned out not to be zip files.
-
-    if (j < files.length)
-      {
-        URLClassLoader temp[] = new URLClassLoader [j];
-        for (i = 0; i < j; i++)
-          temp[i] = pluginLoader[i];
-        pluginLoader = temp;
-      }
   }
   
   /** Execute all startup scripts. */
@@ -684,15 +586,16 @@ public class ModellingApp
     catch (ClassNotFoundException ex)
     {
     }
-    for (int i = 0; i < pluginLoader.length; i++)
+    List pluginLoaders = PluginRegistry.getPluginClassLoaders();
+    for (int i = 0; i < pluginLoaders.size(); i++)
       {
         try
           {
-            return pluginLoader[i].loadClass(name);
+            return ((ClassLoader) pluginLoaders.get(i)).loadClass(name);
           }
         catch (ClassNotFoundException ex)
           {
-            if (i == pluginLoader.length-1)
+            if (i == pluginLoaders.size()-1)
               throw ex;
           }
       }
@@ -758,15 +661,16 @@ public class ModellingApp
     {
       File f = new File(sc.getDirectory(), sc.getName());
       sc.writeToFile(f);
+      List plugins = PluginRegistry.getPlugins(Plugin.class);
       for (int i = 0; i < plugins.size(); i++)
       {
         try
         {
-          ((Plugin) plugins.elementAt(i)).processMessage(Plugin.SCENE_SAVED, new Object [] {f, fr});
+          ((Plugin) plugins.get(i)).processMessage(Plugin.SCENE_SAVED, new Object [] {f, fr});
         }
         catch (Throwable tx)
         {
-          String name = plugins.elementAt(i).getClass().getName();
+          String name = plugins.get(i).getClass().getName();
           name = name.substring(name.lastIndexOf('.')+1);
           new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
         }

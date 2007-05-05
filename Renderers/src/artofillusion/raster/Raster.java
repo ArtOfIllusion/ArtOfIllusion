@@ -25,7 +25,7 @@ import java.util.*;
 
 /** Raster is a Renderer which generates images with a scanline algorithm. */
 
-public class Raster implements Runnable
+public class Raster implements Renderer, Runnable
 {
   private ObjectInfo light[];
   private FormContainer configPanel;
@@ -77,6 +77,11 @@ public class Raster implements Runnable
   }
 
   /* Methods from the Renderer interface. */
+
+  public String getName()
+  {
+    return "Raster";
+  }
 
   public synchronized void renderScene(Scene theScene, Camera camera, RenderListener rl, SceneCamera sceneCamera)
   {

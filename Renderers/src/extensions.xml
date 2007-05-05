@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<extension name="Renderers" version="2.5">
+  <author>Peter Eastman</author>
+  <date>2007</date>
+  <description>
+This plugin contains the standard renderers (Raster and Raytracer) which are included with Art of Illusion.
+  </description>
+  <comments>
+  </comments>
+  <proxy class="artofillusion.raster.Raster" interface="artofillusion.Renderer">
+    <method name="getName" value="Raster"/>
+  </proxy>
+  <proxy class="artofillusion.raytracer.Raytracer" interface="artofillusion.Renderer">
+    <method name="getName" value="Raytracer"/>
+  </proxy>
+</extension>
+

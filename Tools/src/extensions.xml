@@ -1,0 +1,17 @@
+<?xml version="1.0" standalone="yes"?>
+<extension name="Tools" version="2.5">
+  <author>Peter Eastman</author>
+  <date>2007</date>
+  <description>
+This plugin contains the standard modeling tools which are included with Art of Illusion.
+  </description>
+  <comments>
+  </comments>
+  <plugin class="artofillusion.tools.ArrayTool"/>
+  <plugin class="artofillusion.tools.CSGTool"/>
+  <plugin class="artofillusion.tools.ExtrudeTool"/>
+  <plugin class="artofillusion.tools.LatheTool"/>
+  <plugin class="artofillusion.tools.SkinTool"/>
+  <plugin class="artofillusion.tools.TubeTool"/>
+</extension>
+

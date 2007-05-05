@@ -26,7 +26,7 @@ import java.util.List;
 
 /** Raytracer is a Renderer which generates images by raytracing. */
 
-public class Raytracer implements Runnable
+public class Raytracer implements Renderer, Runnable
 {
   RTObject sceneObject[];
   ObjectInfo light[];
@@ -119,6 +119,11 @@ public class Raytracer implements Runnable
   }
   
   /** Methods from the Renderer interface. */
+
+  public String getName()
+  {
+    return "Raytracer";
+  }
 
   public synchronized void renderScene(Scene theScene, Camera theCamera, RenderListener rl, SceneCamera sceneCamera)
   {

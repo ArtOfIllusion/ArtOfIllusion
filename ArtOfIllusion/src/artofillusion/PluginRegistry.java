@@ -32,6 +32,7 @@ public class PluginRegistry
   private static final ArrayList pluginLoaders = new ArrayList();
   private static final HashSet categories = new HashSet();
   private static final HashMap categoryClasses = new HashMap();
+  private static final HashMap resources = new HashMap();
 
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
@@ -60,6 +61,11 @@ public class PluginRegistry
       catch (IOException ex)
       {
         // Not a zip file.
+      }
+      catch (Exception ex)
+      {
+        System.err.println("*** Exception loading plugin file "+files[i]);
+        ex.printStackTrace(System.err);
       }
     }
 
@@ -129,6 +135,11 @@ public class PluginRegistry
         ProxyInfo info = (ProxyInfo) jar.proxies.get(i);
         Object proxy = Proxy.newProxyInstance(jar.loader, info.getInterfaces(jar.loader), new ProxyHandler(info.target, jar.loader, info.values));
         registerPlugin(proxy);
+      }
+      for (int i = 0; i < jar.resources.size(); i++)
+      {
+        ResourceInfo info = (ResourceInfo) jar.resources.get(i);
+        registerResource(info.type, info.id, jar.loader, info.name, info.locale);
       }
     }
     catch (Exception ex)
@@ -207,6 +218,61 @@ public class PluginRegistry
   }
 
   /**
+   * Register a new resource.  You can then call {@link #getResource(String, String)} to look up
+   * a particular resource, or {@link #getResources(String)} to find all registered resources of
+   * a particular type.
+   *
+   * @param type        the type of resource being registered
+   * @param id          the id of this resource
+   * @param loader      the ClassLoader with which to load the resource
+   * @param name        the fully qualified name of the resource, that should be passed to
+   *                    <code>loader.getResource()</code> to load it
+   * @param locale      the locale this resource represents (may be null)
+   * @throws IllegalArgumentException if there is already a registered resource with the same type, id, and locale
+   */
+
+  public static void registerResource(String type, String id, ClassLoader loader, String name, Locale locale) throws IllegalArgumentException
+  {
+    Map resourcesForType = (Map) resources.get(type);
+    if (resourcesForType == null)
+    {
+      resourcesForType = new HashMap();
+      resources.put(type, resourcesForType);
+    }
+    PluginResource resource = (PluginResource) resourcesForType.get(id);
+    if (resource == null)
+    {
+      resource = new PluginResource(type, id);
+      resourcesForType.put(id, resource);
+    }
+    resource.addResource(name, loader, locale);
+  }
+
+  /**
+   * Get a list of all registered PluginResources of a particular type.
+   */
+
+  public static List getResources(String type)
+  {
+    Map resourcesForType = (Map) resources.get(type);
+    if (resourcesForType == null)
+      return new ArrayList();
+    return new ArrayList(resourcesForType.values());
+  }
+
+  /**
+   * Get the PluginResource with a particular type and id, or null if there is no such resource.
+   */
+
+  public static PluginResource getResource(String type, String id)
+  {
+    Map resourcesForType = (Map) resources.get(type);
+    if (resourcesForType == null)
+      return null;
+    return (PluginResource) resourcesForType.get(id);
+  }
+
+  /**
    * This class is used to store information about the content of a jar file during initialization.
    */
 
@@ -277,6 +343,27 @@ public class PluginRegistry
                 }
               proxies.add(proxy);
             }
+            NodeList resourceList = doc.getElementsByTagName("resource");
+            for (int i = 0; i < resourceList.getLength(); i++)
+            {
+              Node resourceNode = resourceList.item(i);
+              ResourceInfo resource = new ResourceInfo();
+              resource.type = resourceNode.getAttributes().getNamedItem("type").getNodeValue();
+              resource.id = resourceNode.getAttributes().getNamedItem("id").getNodeValue();
+              resource.name = resourceNode.getAttributes().getNamedItem("name").getNodeValue();
+              Node localeNode = resourceNode.getAttributes().getNamedItem("locale");
+              if (localeNode != null)
+              {
+                String[] parts = localeNode.getNodeValue().split("_");
+                if (parts.length == 1)
+                  resource.locale = new Locale(parts[0]);
+                else if (parts.length == 2)
+                  resource.locale = new Locale(parts[0], parts[1]);
+                else if (parts.length == 3)
+                  resource.locale = new Locale(parts[0], parts[1], parts[2]);
+              }
+              resources.add(resource);
+            }
           }
           catch (Exception ex)
           {
@@ -307,6 +394,133 @@ public class PluginRegistry
     }
   }
 
+  /**
+   * A PluginResource represents a resource that was loaded from a plugin.  Each PluginResource
+   * is identified by a type and an id.  Typically the type indicates the purpose for which a
+   * resource is to be used, and the id designates a specific resource of that type.
+   * <p>
+   * It is also possible for several different localized versions of a resource to be available,
+   * possibly provided by different plugins.  A single PluginResource object represents all
+   * the different localized resources that share the same type and id.  When you invoke one of
+   * the methods to access the resource's contents, the localized version that most closely matches the
+   * currently selected locale is used.
+   */
+
+  public static class PluginResource
+  {
+    private String type, id;
+    private ArrayList names, loaders, locales;
+
+    private PluginResource(String type, String id)
+    {
+      this.type = type;
+      this.id = id;
+      names = new ArrayList();
+      loaders = new ArrayList();
+      locales = new ArrayList();
+    }
+
+    private void addResource(String name, ClassLoader loader, Locale locale) throws IllegalArgumentException
+    {
+      if (locales.contains(locale))
+        throw new IllegalArgumentException("Multiple resource definitions for type="+type+", name="+ id +", locale="+locale);
+      names.add(name);
+      loaders.add(loader);
+      locales.add(locale);
+    }
+
+    /**
+     * Get the type of this PluginResource.
+     */
+
+    public String getType()
+    {
+      return type;
+    }
+
+    /**
+     * Get the id of this PluginResource.
+     */
+
+    public String getId()
+    {
+      return id;
+    }
+
+    /**
+     * Find which localized version of the resource best matches a locale.
+     */
+
+    private int findLocalizedVersion(Locale locale)
+    {
+      int bestMatch = 0, bestMatchedLevels = 0;
+      for (int i = 0; i < locales.size(); i++)
+      {
+        Locale loc = (Locale) locales.get(i);
+        int matchedLevels = 0;
+        if (loc != null && loc.getLanguage() == locale.getLanguage())
+        {
+          matchedLevels++;
+          if (loc.getCountry() == locale.getCountry())
+          {
+            matchedLevels++;
+            if (loc.getVariant() == locale.getVariant())
+              matchedLevels++;
+          }
+        }
+        if (matchedLevels > bestMatchedLevels)
+        {
+          bestMatch = i;
+          bestMatchedLevels = matchedLevels;
+        }
+      }
+      return bestMatch;
+    }
+
+    /**
+     * Get an InputStream for reading this resource.  If there are multiple localized versions,
+     * the version which best matches the currently selected locale is used.
+     */
+
+    public InputStream getInputStream()
+    {
+      int index = findLocalizedVersion(Translate.getLocale());
+      return ((ClassLoader) loaders.get(index)).getResourceAsStream((String) names.get(index));
+    }
+
+    /**
+     * Get a URL for reading this resource.  If there are multiple localized versions,
+     * the version which best matches the currently selected locale is used.
+     */
+
+    public URL getURL()
+    {
+      int index = findLocalizedVersion(Translate.getLocale());
+      return ((ClassLoader) loaders.get(index)).getResource((String) names.get(index));
+    }
+
+    /**
+     * Get the fully qualified name of the resource this represents.  If there are multiple localized
+     * versions, the version which best matches the currently selected locale is used.
+     */
+
+    public String getName()
+    {
+      int index = findLocalizedVersion(Translate.getLocale());
+      return (String) names.get(index);
+    }
+
+    /**
+     * Get the ClassLoader responsible for loading this resource.  If there are multiple localized
+     * versions, the version which best matches the currently selected locale is used.
+     */
+
+    public ClassLoader getClassLoader()
+    {
+      int index = findLocalizedVersion(Translate.getLocale());
+      return (ClassLoader) loaders.get(index);
+    }
+  }
 
   /**
    * This class is used to store information about a "proxy" record in an XML file.
@@ -324,6 +538,17 @@ public class PluginRegistry
         cls[i] = loader.loadClass(interfaces[i]);
       return cls;
     }
+  }
+
+  /**
+   * This class is used to store information about a "resource" record in an XML file.
+   */
+
+  private static class ResourceInfo
+  {
+    String type, id, name;
+    Locale locale;
+    HashMap values = new HashMap();
   }
 
   /**

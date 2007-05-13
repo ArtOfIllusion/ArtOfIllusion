@@ -249,6 +249,15 @@ public class PluginRegistry
   }
 
   /**
+   * Get a list of all type identifiers for which there are PluginResources available.
+   */
+
+  public static List getResourceTypes()
+  {
+    return new ArrayList(resources.keySet());
+  }
+
+  /**
    * Get a list of all registered PluginResources of a particular type.
    */
 
@@ -316,32 +325,39 @@ public class PluginRegistry
               categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
             }
             NodeList pluginList = doc.getElementsByTagName("plugin");
+            NodeList valueList = doc.getElementsByTagName("method");
             for (int i = 0; i < pluginList.getLength(); i++)
             {
               Node plugin = pluginList.item(i);
-              plugins.add(plugin.getAttributes().getNamedItem("class").getNodeValue());
+
+              // See whether a proxy should be created for this plugin.
+
+              ProxyInfo proxy = null;
+              NodeList children = plugin.getChildNodes();
+              for (int k = 0; k < children.getLength() && proxy == null; k++)
+              {
+                Node proxyNode = children.item(k);
+                if (!"proxy".equals(proxyNode.getNodeName()))
+                  continue;
+                proxy = new ProxyInfo();
+                proxy.target = plugin.getAttributes().getNamedItem("class").getNodeValue();
+                proxy.interfaces = proxyNode.getAttributes().getNamedItem("interface").getNodeValue().split(";");
+                for (int j = 0; j < valueList.getLength(); j++)
+                  if (valueList.item(j).getParentNode() == proxyNode)
+                  {
+                    NamedNodeMap attributes  = valueList.item(j).getAttributes();
+                    proxy.values.put(attributes.getNamedItem("name").getNodeValue(), attributes.getNamedItem("value").getNodeValue());
+                  }
+                proxies.add(proxy);
+              }
+              if (proxy == null)
+                plugins.add(plugin.getAttributes().getNamedItem("class").getNodeValue());
             }
             NodeList importList = doc.getElementsByTagName("import");
             for (int i = 0; i < importList.getLength(); i++)
             {
               Node importNode = importList.item(i);
               imports.add(importNode.getAttributes().getNamedItem("name").getNodeValue());
-            }
-            NodeList proxyList = doc.getElementsByTagName("proxy");
-            NodeList valueList = doc.getElementsByTagName("method");
-            for (int i = 0; i < proxyList.getLength(); i++)
-            {
-              Node proxyNode = proxyList.item(i);
-              ProxyInfo proxy = new ProxyInfo();
-              proxy.target = proxyNode.getAttributes().getNamedItem("class").getNodeValue();
-              proxy.interfaces = proxyNode.getAttributes().getNamedItem("interface").getNodeValue().split(";");
-              for (int j = 0; j < valueList.getLength(); j++)
-                if (valueList.item(j).getParentNode() == proxyNode)
-                {
-                  NamedNodeMap attributes  = valueList.item(j).getAttributes();
-                  proxy.values.put(attributes.getNamedItem("name").getNodeValue(), attributes.getNamedItem("value").getNodeValue());
-                }
-              proxies.add(proxy);
             }
             NodeList resourceList = doc.getElementsByTagName("resource");
             for (int i = 0; i < resourceList.getLength(); i++)

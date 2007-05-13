@@ -7,11 +7,15 @@ This plugin contains the standard renderers (Raster and Raytracer) which are inc
   </description>
   <comments>
   </comments>
-  <proxy class="artofillusion.raster.Raster" interface="artofillusion.Renderer">
-    <method name="getName" value="Raster"/>
-  </proxy>
-  <proxy class="artofillusion.raytracer.Raytracer" interface="artofillusion.Renderer">
-    <method name="getName" value="Raytracer"/>
-  </proxy>
+  <plugin class="artofillusion.raster.Raster">
+    <proxy interface="artofillusion.Renderer">
+      <method name="getName" value="Raster"/>
+    </proxy>
+  </plugin>
+  <plugin class="artofillusion.raytracer.Raytracer">
+    <proxy interface="artofillusion.Renderer">
+      <method name="getName" value="Raytracer"/>
+    </proxy>
+  </plugin>
 </extension>
 

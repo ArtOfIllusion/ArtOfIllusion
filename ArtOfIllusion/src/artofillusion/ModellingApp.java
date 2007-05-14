@@ -192,6 +192,7 @@ public class ModellingApp
     PluginRegistry.registerPlugin(new BlurFilter());
     PluginRegistry.registerPlugin(new GlowFilter());
     PluginRegistry.registerPlugin(new OutlineFilter());
+    PluginRegistry.registerResource("TranslateBundle", "artofillusion", ModellingApp.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.scanPlugins();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();

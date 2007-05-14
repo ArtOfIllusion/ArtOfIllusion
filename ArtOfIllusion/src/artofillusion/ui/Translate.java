@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,20 +15,47 @@ import buoy.widget.*;
 import java.text.*;
 import java.util.*;
 
-/** This class provides utilites for localizing text so that it can be
-    translated into different languages. */
+import artofillusion.*;
+
+/**
+ * This class provides utilities for localizing text so that it can be translated into
+ * different languages.  It does this by loading strings from a resource bundle, and
+ * using them to create properly localized widgets.
+ * <p>
+ * The resource bundle is created from a {@link artofillusion.PluginRegistry.PluginResource PluginResource}
+ * of type "TranslateBundle" provided by the {@link artofillusion.PluginRegistry PluginRegistry}.
+ * By default it uses the PluginResource with ID "artofillusion" which is built into the application,
+ * but you can specify a
+ * different one by prefixing its ID to the property name passed to any method of this class.
+ * This allows plugins to provide their own ResourceBundles for localizing their strings.  To do
+ * this, the plugin should include a set of properties files that define the localized versions
+ * of its strings, such as:
+ * <p>
+ * com/mycompany/myplugin.properties<br>
+ * com/mycompany/myplugin_fr.properties
+ * com/mycompany/myplugin_es.properties
+ * <p>
+ * In its extensions.xml file, it then provides a reference to these files:
+ * <p>
+ * &lt;resource type="TranslateBundle" id="myplugin" name="com.mycompany.myplugin"/&gt;
+ * <p>
+ * To look up keys from that bundle, prefix the key with the ID specified in the &lt;resource&gt;
+ * tag:
+ * <p>
+ * BLabel instructions = Translate.label("myplugin:instructionsLabel");
+ */
 
 public class Translate
 {
   private static Locale locale = Locale.getDefault();
-  private static ResourceBundle resources;
+  private static Map bundles = new HashMap();
   
   /** Set the locale to be used for generating text. */
   
   public static void setLocale(Locale l)
   {
     locale = l;
-    resources = ResourceBundle.getBundle("artofillusion", locale);
+    bundles.clear();
   }
   
   /** Get the locale currently used for generating text. */
@@ -52,7 +79,44 @@ public class Translate
       new Locale("pt", "BR"),
       new Locale("es", "ES"),
       new Locale("sv", "SE")
-};
+    };
+  }
+
+  /**
+   * Look up the value corresponding to a resource key.
+   *
+   * @param key        the key specified by the user
+   * @param prefix     an optional prefix to prepend to the key
+   * @param suffix     an optional suffix to append to the key
+   */
+
+  private static String getValue(String key, String prefix, String suffix) throws MissingResourceException
+  {
+    String bundle;
+    int colon = key.indexOf(':');
+    if (colon == -1)
+      bundle = "artofillusion";
+    else
+    {
+      bundle = key.substring(0, colon);
+      key = key.substring(colon+1);
+    }
+    if (prefix != null && suffix != null)
+      key = prefix+key+suffix;
+    else if (prefix != null)
+      key = prefix+key;
+    else if (suffix != null)
+      key = key+suffix;
+    ResourceBundle resources = (ResourceBundle) bundles.get(bundle);
+    if (resources == null)
+    {
+      PluginRegistry.PluginResource plugin = PluginRegistry.getResource("TranslateBundle", bundle);
+      if (plugin == null)
+        throw new MissingResourceException("No TranslateBundle defined", bundle, key);
+      resources = ResourceBundle.getBundle(plugin.getName(), locale, plugin.getClassLoader());
+      bundles.put(bundle, resources);
+    }
+    return resources.getString(key);
   }
   
   /** Get a BMenu whose text is given by the property "menu.(name)". */
@@ -61,7 +125,7 @@ public class Translate
   {
     try
     {
-      return new BMenu(resources.getString("menu."+name));
+      return new BMenu(getValue(name, "menu.", null));
     }
     catch (MissingResourceException ex)
     {
@@ -80,7 +144,7 @@ public class Translate
     String command = name;
     try
     {
-      command = resources.getString("menu."+name);
+      command = getValue(name, "menu.", null);
     }
     catch (MissingResourceException ex)
     {
@@ -89,7 +153,7 @@ public class Translate
     item.setActionCommand(name);
     try
     {
-      String shortcut = resources.getString("menu."+name+".shortcut");
+      String shortcut = getValue(name, "menu.", ".shortcut");
       if (shortcut.length() > 1 && shortcut.charAt(0) == '^')
         item.setShortcut(new Shortcut(shortcut.charAt(1), Shortcut.DEFAULT_MASK|Shortcut.SHIFT_MASK));
       else if (shortcut.length() > 0)
@@ -103,7 +167,7 @@ public class Translate
     return item;
   }
 
-  /**  Get a BMenuItem whose text is given by the property "menu.(name)".
+  /** Get a BMenuItem whose text is given by the property "menu.(name)".
       If listener is not null, the specified method of it will be added to the BMenuItem as an
       event link for CommandEvents, and the menu item's action command will be set to
       (name).  This form of the method allows you to explicitly specify
@@ -115,7 +179,7 @@ public class Translate
     String command = name;
     try
     {
-      command = resources.getString("menu."+name);
+      command = getValue(name, "menu.", null);
     }
     catch (MissingResourceException ex)
     {
@@ -138,7 +202,7 @@ public class Translate
     String command = name;
     try
     {
-      command = resources.getString("menu."+name);
+      command = getValue(name, "menu.", null);
     }
     catch (MissingResourceException ex)
     {
@@ -147,7 +211,7 @@ public class Translate
     item.setActionCommand(name);
     try
     {
-      String shortcut = resources.getString("menu."+name+".shortcut");
+      String shortcut = getValue(name, "menu.", ".shortcut");
       if (shortcut.length() > 1 && shortcut.charAt(0) == '^')
         item.setShortcut(new Shortcut(shortcut.charAt(1), Shortcut.DEFAULT_MASK|Shortcut.SHIFT_MASK));
       else if (shortcut.length() > 0)
@@ -181,7 +245,7 @@ public class Translate
     String command = name;
     try
     {
-      command = resources.getString("button."+name);
+      command = getValue(name, "button.", null);
     }
     catch (MissingResourceException ex)
     {
@@ -210,7 +274,7 @@ public class Translate
   {
     try
     {
-      name = resources.getString(name);
+      name = getValue(name, null, null);
     }
     catch (MissingResourceException ex)
     {
@@ -227,7 +291,7 @@ public class Translate
   {
     try
     {
-      return resources.getString(name);
+      return getValue(name, null, null);
     }
     catch (MissingResourceException ex)
     {
@@ -245,7 +309,7 @@ public class Translate
     String pattern = name;
     try
     {
-      pattern = resources.getString(name);
+      pattern = getValue(name, null, null);
     }
     catch (MissingResourceException ex)
     {
@@ -263,7 +327,7 @@ public class Translate
     String pattern = name;
     try
     {
-      pattern = resources.getString(name);
+      pattern = getValue(name, null, null);
     }
     catch (MissingResourceException ex)
     {
@@ -281,7 +345,7 @@ public class Translate
     String pattern = name;
     try
     {
-      pattern = resources.getString(name);
+      pattern = getValue(name, null, null);
     }
     catch (MissingResourceException ex)
     {

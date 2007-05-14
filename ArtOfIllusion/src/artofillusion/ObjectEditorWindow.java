@@ -38,6 +38,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   protected BMenuBar menubar;
   protected UndoStack undoStack;
   protected Preferences preferences;
+  private boolean hasNotifiedPlugins;
 
   protected static boolean lastShowAxes, lastShowGrid, lastSnapToGrid;
   protected static int lastNumViews = 4, lastGridSubdivisions = 10;
@@ -393,4 +394,32 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   /** This will be called when the user clicks the Cancel button. */
 
   protected abstract void doCancel();
+
+  /**
+   * This is overridden to notify all plugins when the window is shown for the first time.
+   */
+
+  public void setVisible(boolean visible)
+  {
+    if (visible && !hasNotifiedPlugins)
+    {
+      hasNotifiedPlugins = true;
+      Plugin plugins[] = ModellingApp.getPlugins();
+      for (int i = 0; i < plugins.length; i++)
+        plugins[i].processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
+    }
+    super.setVisible(visible);
+  }
+
+  /**
+   * This is overridden to notify all plugins when the window is closed.
+   */
+
+  public void dispose()
+  {
+    super.dispose();
+    Plugin plugins[] = ModellingApp.getPlugins();
+    for (int i = 0; i < plugins.length; i++)
+      plugins[i].processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
+  }
 }

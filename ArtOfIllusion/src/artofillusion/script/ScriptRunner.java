@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Peter Eastman
+/* Copyright (C) 2002-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +11,7 @@
 package artofillusion.script;
 
 import artofillusion.*;
-import artofillusion.ui.*;
+import artofillusion.util.*;
 import bsh.*;
 import buoy.widget.*;
 import java.io.*;
@@ -52,6 +52,11 @@ public class ScriptRunner
         PrintStream out = new PrintStream(new ScriptOutputWindow());
         interp.setOut(out);
         interp.setErr(out);
+        SearchlistClassLoader loader = new SearchlistClassLoader(ScriptRunner.class.getClassLoader());
+        List plugins = PluginRegistry.getPluginClassLoaders();
+        for (int i = 0; i < plugins.size(); i++)
+        loader.add((ClassLoader) plugins.get(i));
+        interp.setClassLoader(loader);
       }
     return interp;
   }

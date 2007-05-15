@@ -376,7 +376,6 @@ public class SearchlistClassLoader extends ClassLoader
 	}
 
 	if (url != null) recent = loader;
-	else System.out.println("not found: " + path);
 
 	return url;
     }

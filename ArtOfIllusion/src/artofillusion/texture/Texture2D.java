@@ -11,7 +11,7 @@
 package artofillusion.texture;
 
 import artofillusion.math.*;
-import artofillusion.*;
+import artofillusion.util.*;
 
 import java.awt.*;
 import java.awt.image.*;

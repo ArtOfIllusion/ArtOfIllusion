@@ -13,7 +13,7 @@ package artofillusion.raytracer;
 import artofillusion.math.*;
 import artofillusion.material.*;
 import artofillusion.texture.*;
-import artofillusion.*;
+import artofillusion.util.*;
 
 import java.util.*;
 

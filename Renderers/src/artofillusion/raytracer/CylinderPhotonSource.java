@@ -12,7 +12,7 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 import artofillusion.texture.*;
-import artofillusion.*;
+import artofillusion.util.*;
 
 /** This is a PhotonSource corresponding to an RTCylinder. */
 

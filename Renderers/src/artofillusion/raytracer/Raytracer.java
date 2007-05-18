@@ -11,6 +11,7 @@
 package artofillusion.raytracer;
 
 import artofillusion.*;
+import artofillusion.util.*;
 import artofillusion.image.*;
 import artofillusion.material.*;
 import artofillusion.math.*;

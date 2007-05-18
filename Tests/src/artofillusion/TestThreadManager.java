@@ -14,6 +14,8 @@ import junit.framework.*;
 
 import java.util.concurrent.atomic.*;
 
+import artofillusion.util.ThreadManager;
+
 public class TestThreadManager extends TestCase
 {
   public void testRun()
@@ -22,7 +24,7 @@ public class TestThreadManager extends TestCase
     for (int i = 0; i < flags.length; i++)
       flags[i] = new AtomicBoolean();
     final AtomicBoolean error = new AtomicBoolean();
-    ThreadManager tm = new ThreadManager(flags.length, new ThreadManager.Task()
+    ThreadManager tm = new ThreadManager(flags.length, new artofillusion.util.ThreadManager.Task()
     {
       public void execute(int index)
       {

@@ -10,7 +10,7 @@
 
 package artofillusion.raytracer;
 
-import artofillusion.*;
+import artofillusion.util.*;
 
 /**
  * This class is a PhotonSource that simply represents a collection of other PhotonSources.

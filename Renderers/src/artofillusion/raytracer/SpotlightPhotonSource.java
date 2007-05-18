@@ -12,7 +12,7 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.*;
+import artofillusion.util.*;
 
 /** This is a PhotonSource corresponding to a spotlight. */
 

@@ -10,7 +10,7 @@
 
 package artofillusion.raytracer;
 
-import artofillusion.*;
+import artofillusion.util.*;
 
 /** This interface defines an object which can generate photons. */
 

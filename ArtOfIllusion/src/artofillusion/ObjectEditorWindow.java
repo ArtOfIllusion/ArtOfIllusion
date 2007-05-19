@@ -150,7 +150,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
     if (w instanceof WidgetContainer)
       {
-        Iterator children = ((WidgetContainer) w).getChildren();
+        Iterator children = ((WidgetContainer) w).getChildren().iterator();
         while (children.hasNext())
           recursivelyAddListeners((Widget) children.next());
       }

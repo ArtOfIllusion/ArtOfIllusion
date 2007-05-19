@@ -102,7 +102,7 @@ public class PanelDialog extends BDialog
     w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
     if (w instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren();
+      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
       while (iter.hasNext())
         addAsListener((Widget) iter.next());
     }
@@ -115,7 +115,7 @@ public class PanelDialog extends BDialog
     w.removeEventLink(KeyPressedEvent.class, this);
     if (w instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren();
+      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
       while (iter.hasNext())
         removeAsListener((Widget) iter.next());
     }

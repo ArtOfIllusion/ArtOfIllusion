@@ -108,7 +108,7 @@ public class TransformPointsDialog extends BDialog
     w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
     if (w instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren();
+      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
       while (iter.hasNext())
         addAsListener((Widget) iter.next());
     }

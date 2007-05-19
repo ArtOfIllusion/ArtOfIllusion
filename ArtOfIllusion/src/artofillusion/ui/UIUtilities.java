@@ -65,7 +65,7 @@ public class UIUtilities
     w.setFont(ModellingApp.defaultFont);
     if (w instanceof WidgetContainer && !(w instanceof BMenuBar))
     {
-      Iterator children = ((WidgetContainer) w).getChildren();
+      Iterator children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
         applyDefaultFont((Widget) children.next());
     }
@@ -85,7 +85,7 @@ public class UIUtilities
     if (w instanceof WidgetContainer)
     {
       w.setBackground(color);
-      Iterator children = ((WidgetContainer) w).getChildren();
+      Iterator children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
         applyBackground((Widget) children.next(), color);
     }
@@ -162,7 +162,7 @@ public class UIUtilities
     w.setEnabled(enabled);
     if (w instanceof WidgetContainer)
     {
-      Iterator children = ((WidgetContainer) w).getChildren();
+      Iterator children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
         setEnabled((Widget) children.next(), enabled);
     }

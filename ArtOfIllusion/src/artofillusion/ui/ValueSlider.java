@@ -147,12 +147,12 @@ public class ValueSlider extends WidgetContainer
    * Get an Iterator listing all child Widgets.
    */
   
-  public Iterator getChildren()
+  public Collection getChildren()
   {
     ArrayList children = new ArrayList(2);
     children.add(field);
     children.add(slider);
-    return children.iterator();
+    return children;
   }
   
   /**

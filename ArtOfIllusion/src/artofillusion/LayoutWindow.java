@@ -62,6 +62,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private boolean modified, sceneChangePending;
   private KeyEventPostProcessor keyEventHandler;
   private SceneChangedEvent sceneChangedEvent;
+  private ModellingTool modellingTools[];
 
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
@@ -498,15 +499,20 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   private void createToolsMenu()
   {
-    ModellingTool tools[] = ModellingApp.getModellingTools();
-    BMenuItem item;
-
+    modellingTools = ModellingApp.getModellingTools();
+    Arrays.sort(modellingTools, new Comparator() {
+      public int compare(Object o1, Object o2)
+      {
+        return (((ModellingTool) o1).getName().compareTo(((ModellingTool) o2).getName()));
+      }
+    });
     toolsMenu = Translate.menu("tools");
     menubar.add(toolsMenu);
-    toolsMenuItem = new BMenuItem [tools.length];
-    for (int i = 0; i < tools.length; i++)
+    toolsMenuItem = new BMenuItem [modellingTools.length];
+    for (int i = 0; i < modellingTools.length; i++)
       {
-        toolsMenu.add(item = new BMenuItem(tools[i].getName()));
+        BMenuItem item = new BMenuItem(modellingTools[i].getName());
+        toolsMenu.add(item);
         item.setActionCommand("modellingTool");
         item.addEventLink(CommandEvent.class, this, "modellingToolCommand");
         toolsMenuItem[i] = item;
@@ -1419,11 +1425,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   void modellingToolCommand(CommandEvent ev)
   {
     Widget item = ev.getWidget();
-    ModellingTool tools[] = ModellingApp.getModellingTools();
-
     for (int i = 0; i < toolsMenuItem.length; i++)
       if (toolsMenuItem[i] == item)
-        tools[i].commandSelected(this);
+        modellingTools[i].commandSelected(this);
   }
 
   public void saveCommand()

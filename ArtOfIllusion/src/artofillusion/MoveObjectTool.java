@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ import java.util.Vector;
 
 public class MoveObjectTool extends EditingTool
 {
-  static Image icon, selectedIcon;
   Point clickPoint;
   Vec3 objectPos[];
   Vector toMove;
@@ -32,8 +31,7 @@ public class MoveObjectTool extends EditingTool
   public MoveObjectTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("move.gif");
-    selectedIcon = loadImage("selected/move.gif");
+    initButton("move");
   }
 
   public void activate()
@@ -50,16 +48,6 @@ public class MoveObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

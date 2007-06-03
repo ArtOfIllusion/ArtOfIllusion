@@ -76,8 +76,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       view.setFreehandSelection(lastFreehand);
     }
     toolsContainer.add(modes = new ToolPalette(1, 2), 0, 1);
-    modes.addTool(new GenericTool(this, "point.gif", "selected/point.gif", Translate.text("pointSelectionModeTool.tipText")));
-    modes.addTool(new GenericTool(this, "curve.gif", "selected/curve.gif", Translate.text("curveSelectionModeTool.tipText")));
+    modes.addTool(new GenericTool(this, "point", Translate.text("pointSelectionModeTool.tipText")));
+    modes.addTool(new GenericTool(this, "curve", Translate.text("curveSelectionModeTool.tipText")));
     setSelectionMode(modes.getSelection());
     createEditMenu();
     createMeshMenu((SplineMesh) obj.object);

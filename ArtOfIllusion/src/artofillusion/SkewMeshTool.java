@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,14 +27,12 @@ public class SkewMeshTool extends MeshEditingTool
   private UndoRecord undo;
   private final NinePointManipulator manipulator;
 
-  private static Image icon, selectedIcon;
   public static final int HANDLE_SIZE = 5;
 
   public SkewMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    icon = loadImage("skewPoints.gif");
-    selectedIcon = loadImage("selected/skewPoints.gif");
+    initButton("skewPoints");
     manipulator = new NinePointManipulator(new Image[] {
       NinePointManipulator.ARROWS_S_E, NinePointManipulator.ARROWS_E_W, NinePointManipulator.ARROWS_S_W,
       NinePointManipulator.ARROWS_N_S, null, NinePointManipulator.ARROWS_N_S,
@@ -52,16 +50,6 @@ public class SkewMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,6 @@ public class RotateMeshTool extends MeshEditingTool
   private int lastSelectionDistance[];
 
   public static final int HANDLE_SIZE = 5;
-  private static Image icon, selectedIcon;
   private static final double DRAG_SCALE = Math.PI/360.0;
   private static final int XAXIS = 0;
   private static final int YAXIS = 1;
@@ -39,8 +38,7 @@ public class RotateMeshTool extends MeshEditingTool
   public RotateMeshTool(EditingWindow fr, MeshEditController controller, boolean only2D)
   {
     super(fr, controller);
-    icon = loadImage("rotatePoints.gif");
-    selectedIcon = loadImage("selected/rotatePoints.gif");
+    initButton("rotatePoints");
     if (only2D)
       manipulator = new NinePointManipulator(new Image[] {
         NinePointManipulator.ROTATE_TOPLEFT, null, NinePointManipulator.ROTATE_TOPRIGHT,
@@ -94,16 +92,6 @@ public class RotateMeshTool extends MeshEditingTool
       rotCenter = new Vec3((bounds.minx+bounds.maxx)/2.0, (bounds.miny+bounds.maxy)/2.0, (bounds.minz+bounds.maxz)/2.0);
       rotCenter = cam.getViewToWorld().times(rotCenter);
     }
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

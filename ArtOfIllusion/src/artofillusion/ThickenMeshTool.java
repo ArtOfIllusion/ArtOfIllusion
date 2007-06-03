@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2005 by Peter Eastman
+/* Copyright (C) 2001-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,13 +29,10 @@ public class ThickenMeshTool extends MeshEditingTool
   private UndoRecord undo;
   private final NinePointManipulator manipulator;
 
-  private static Image icon, selectedIcon;
-
   public ThickenMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    icon = loadImage("outsetPoints.gif");
-    selectedIcon = loadImage("selected/outsetPoints.gif");
+    initButton("outsetPoints");
     manipulator = new NinePointManipulator(new Image[] {null, null, null, null, NinePointManipulator.ARROWS_N_S, null, null, null, null});
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
@@ -45,16 +42,6 @@ public class ThickenMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

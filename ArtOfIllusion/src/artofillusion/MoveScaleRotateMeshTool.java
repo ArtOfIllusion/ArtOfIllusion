@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,7 +15,6 @@ import artofillusion.ui.Compound3DManipulator.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 
-import java.awt.*;
 import java.awt.event.*;
 
 import buoy.event.*;
@@ -34,7 +33,6 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   private final Compound3DManipulator manipulator;
   private boolean tooltipsEnabled, tooltipsAdded;
 
-  private static Image icon, selectedIcon;
   private static BToolTip ROTATE_TIP = new BToolTip(Translate.text("moveScaleRotateMeshTool.rotateTipText"));
   private static BToolTip MOVE_TIP = new BToolTip(Translate.text("moveScaleRotateMeshTool.moveTipText"));
   private static BToolTip SCALE_TIP = new BToolTip(Translate.text("moveScaleRotateMeshTool.scaleTipText"));
@@ -42,8 +40,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   public MoveScaleRotateMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    icon = loadImage("moveScaleRotate.png");
-    selectedIcon = loadImage("selected/moveScaleRotate.png");
+    initButton("moveScaleRotate");
     manipulator = new Compound3DManipulator();
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
@@ -58,16 +55,6 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

@@ -74,11 +74,11 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     scroll.addEventLink(ValueChangedEvent.class, this, "scrollbarChanged");
     viewTools = new ToolPalette(1, 3);
     modeTools = new ToolPalette(1, 2);
-    viewTools.addTool(new GenericTool(this, "trackMode.gif", "selected/trackMode.gif", Translate.text("trackModeTool.tipText")));
-    viewTools.addTool(new GenericTool(this, "singleMode.gif", "selected/singleMode.gif", Translate.text("singleGraphModeTool.tipText")));
-    viewTools.addTool(new GenericTool(this, "multiMode.gif", "selected/multiMode.gif", Translate.text("multiGraphModeTool.tipText")));
-    modeTools.addTool(new GenericTool(this, "moveKey.gif", "selected/moveKey.gif", Translate.text("moveKeyframeTool.tipText")));
-    modeTools.addTool(new GenericTool(this, "panTrack.gif", "selected/panTrack.gif", Translate.text("moveScoreTool.tipText")));
+    viewTools.addTool(new GenericTool(this, "trackMode", Translate.text("trackModeTool.tipText")));
+    viewTools.addTool(new GenericTool(this, "singleMode", Translate.text("singleGraphModeTool.tipText")));
+    viewTools.addTool(new GenericTool(this, "multiMode", Translate.text("multiGraphModeTool.tipText")));
+    modeTools.addTool(new GenericTool(this, "moveKey", Translate.text("moveKeyframeTool.tipText")));
+    modeTools.addTool(new GenericTool(this, "panTrack", Translate.text("moveScoreTool.tipText")));
     BorderContainer treeContainer = new BorderContainer();
     treeContainer.add(new Spacer(theList, theAxis), BorderContainer.NORTH);
     treeContainer.add(theList, BorderContainer.CENTER);

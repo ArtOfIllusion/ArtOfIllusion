@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ import java.awt.*;
 
 public class CreateSplineMeshTool extends EditingTool
 {
-  static Image icon, selectedIcon;
   static int counter = 1;
   static final int FLAT = 0;
   static final int CYLINDER = 1;
@@ -36,8 +35,7 @@ public class CreateSplineMeshTool extends EditingTool
   public CreateSplineMeshTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("splineMesh.gif");
-    selectedIcon = loadImage("selected/splineMesh.gif");
+    initButton("splineMesh");
   }
 
   public void activate()
@@ -67,16 +65,6 @@ public class CreateSplineMeshTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

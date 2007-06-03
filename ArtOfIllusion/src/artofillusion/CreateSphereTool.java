@@ -21,7 +21,6 @@ import java.awt.*;
 
 public class CreateSphereTool extends EditingTool
 {
-  static Image icon, selectedIcon;
   static int counter = 1;
   private boolean shiftDown;
   private Point clickPoint;
@@ -30,8 +29,7 @@ public class CreateSphereTool extends EditingTool
   public CreateSphereTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("sphere.gif");
-    selectedIcon = loadImage("selected/sphere.gif");
+    initButton("sphere");
   }
 
   public void activate()
@@ -43,16 +41,6 @@ public class CreateSphereTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

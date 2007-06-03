@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,7 +23,6 @@ import java.util.Vector;
 
 public class CreateCurveTool extends EditingTool
 {
-  Image icon, selectedIcon;
   static int counter = 1;
   private Vector clickPoint, smoothness;
   private int smoothing;
@@ -36,15 +35,9 @@ public class CreateCurveTool extends EditingTool
   {
     super(fr);
     if (smoothingMethod == Curve.INTERPOLATING)
-      {
-        icon = loadImage("interpCurve.gif");
-        selectedIcon = loadImage("selected/interpCurve.gif");
-      }
+      initButton("interpCurve");
     else
-      {
-        icon = loadImage("approxCurve.gif");
-        selectedIcon = loadImage("selected/approxCurve.gif");
-      }
+      initButton("approxCurve");
     smoothing = smoothingMethod;
   }
 
@@ -56,22 +49,13 @@ public class CreateCurveTool extends EditingTool
 
   public void deactivate()
   {
+    super.deactivate();
     addToScene();
   }
 
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

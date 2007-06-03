@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ import java.awt.*;
 
 public class CreatePolygonTool extends EditingTool
 {
-  private static Image icon, selectedIcon;
   private static int counter = 1, sides = 3, shape = 0;
   private Point clickPoint;
   private Vec2 points[];
@@ -32,8 +31,7 @@ public class CreatePolygonTool extends EditingTool
   public CreatePolygonTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("polygon.gif");
-    selectedIcon = loadImage("selected/polygon.gif");
+    initButton("polygon");
     tabulateSines();
   }
 
@@ -58,16 +56,6 @@ public class CreatePolygonTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

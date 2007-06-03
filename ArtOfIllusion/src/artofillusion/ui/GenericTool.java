@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2000 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,28 +10,18 @@
 
 package artofillusion.ui;
 
-import java.awt.*;
-import java.util.Vector;
-
 /** GenericTool is an EditingTool which performs no operations.  It is generally used simply
     as a button, for allowing the user to select various options.  The constructor takes
     the name of an image file, which is used as the tool's icon. */
 
 public class GenericTool extends EditingTool
 {
-  private Image icon, selectedIcon;
   private String tipText;
 
-  public GenericTool(EditingWindow fr, String image, String selectedImage)
-  {
-    this(fr, image, selectedImage, null);
-  }
-  
-  public GenericTool(EditingWindow fr, String image, String selectedImage, String tipText)
+  public GenericTool(EditingWindow fr, String imageName, String tipText)
   {
     super(fr);
-    icon = loadImage(image);
-    selectedIcon = loadImage(selectedImage);
+    initButton(imageName);
     this.tipText = tipText;
   }
 
@@ -45,16 +35,6 @@ public class GenericTool extends EditingTool
     return HANDLE_CLICKS;
   }
 
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
-  }
-  
   public String getToolTipText()
   {
     return tipText;

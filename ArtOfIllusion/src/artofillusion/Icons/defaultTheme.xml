@@ -1,0 +1,46 @@
+<?xml version="1.0" standalone="yes" ?>
+
+<theme>
+  <name>Default</name>
+  <author>Peter Eastman</author>
+  <description>The default user interface theme.</description>
+  <buttonmargin value="0"/>
+  <palettemargin value="1"/>
+
+  <colorset name="White Background">
+  	<applicationbackground R="228" G="228" B="242"/>
+  	<palettebackground R="160" G="160" B="200"/>
+  	<viewerbackground R="255" G="255" B="255" />
+  	<viewerline R="0" G="0" B="0"/>
+  	<viewerhandle R="255" G="0" B="0"/>
+  	<viewerhighlight R="255" G="0" B="255"/>
+  	<viewerspecialhighlight R="0" G="255" B="0"/>
+  	<viewerdisabled R="168" G="168" B="168"/>
+
+  	<viewersurface R="204" G="204" B="255"/>
+  	<viewertransparent R="204" G="204" B="255"/>
+  	<dockablebarcolor2 R="200" G="200" B="200"/>
+  	<dockablebarcolor1 R="255" G="255" B="255"/>
+  	<dockabletitlecolor R="0" G="0" B="0"/>
+  	<textcolor R="0" G="0" B="0"/>
+  </colorset>
+  <colorset name="Gray Background">
+  	<applicationbackground R="228" G="228" B="242"/>
+
+  	<palettebackground R="160" G="160" B="200"/>
+  	<viewerbackground R="40" G="40" B="40" />
+  	<viewerline R="255" G="255" B="255"/>
+  	<viewerhandle R="255" G="0" B="0"/>
+  	<viewerhighlight R="255" G="0" B="255"/>
+  	<viewerspecialhighlight R="0" G="255" B="0"/>
+  	<viewerdisabled R="168" G="168" B="168"/>
+  	<viewersurface R="204" G="204" B="255"/>
+  	<viewertransparent R="38" G="38" B="71"/>
+
+  	<dockablebarcolor2 R="200" G="200" B="200"/>
+  	<dockablebarcolor1 R="255" G="255" B="255"/>
+  	<dockabletitlecolor R="0" G="0" B="0"/>
+  	<textcolor R="0" G="0" B="0"/>
+  </colorset>
+  <button class="artofillusion.ui.DefaultToolButton"/>
+</theme>

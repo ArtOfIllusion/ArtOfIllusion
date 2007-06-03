@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2006 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,7 +23,6 @@ import java.awt.*;
 public class BevelExtrudeTool extends MeshEditingTool
 {
   private boolean dragInProgress, separateFaces;
-  private static Image icon, selectedIcon;
   private TriangleMesh origMesh;
   private TriMeshBeveler beveler;
   private Point clickPoint;
@@ -33,10 +32,7 @@ public class BevelExtrudeTool extends MeshEditingTool
   public BevelExtrudeTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    if (icon == null)
-      icon = loadImage("bevel.gif");
-    if (selectedIcon == null)
-      selectedIcon = loadImage("selected/bevel.gif");
+    initButton("bevel");
     manipulator = new NinePointManipulator(new Image[] {null, null, null, null, NinePointManipulator.ARROWS_ALL, null, null, null, null});
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
@@ -51,16 +47,6 @@ public class BevelExtrudeTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

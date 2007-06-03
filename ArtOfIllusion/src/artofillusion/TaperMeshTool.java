@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,13 +30,11 @@ public class TaperMeshTool extends MeshEditingTool
   private final NinePointManipulator manipulator;
 
   public static final int HANDLE_SIZE = 5;
-  private static Image icon, selectedIcon;
 
   public TaperMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    icon = loadImage("taperPoints.gif");
-    selectedIcon = loadImage("selected/taperPoints.gif");
+    initButton("taperPoints");
     manipulator = new NinePointManipulator(new Image[] {
       NinePointManipulator.ARROWS_S_E, null, NinePointManipulator.ARROWS_S_W,
       null, null, null,
@@ -54,16 +52,6 @@ public class TaperMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

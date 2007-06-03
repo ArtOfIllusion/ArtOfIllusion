@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ import java.awt.*;
 
 public class CreateCylinderTool extends EditingTool
 {
-  static Image icon, selectedIcon;
   static int counter = 1;
   private boolean shiftDown;
   private Point clickPoint;
@@ -32,8 +31,7 @@ public class CreateCylinderTool extends EditingTool
   public CreateCylinderTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("cylinder.gif");
-    selectedIcon = loadImage("selected/cylinder.gif");
+    initButton("cylinder");
   }
 
   public void activate()
@@ -45,16 +43,6 @@ public class CreateCylinderTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

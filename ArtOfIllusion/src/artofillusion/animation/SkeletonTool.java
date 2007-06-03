@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,6 @@ public class SkeletonTool extends EditingTool
   private static final int UNLOCKED_HANDLES = 1;
   private static final int ALL_HANDLES = 2;
 
-  private static Image icon, selectedIcon;
   private static int whichHandles = UNLOCKED_HANDLES;
   private Point clickPoint;
   private Vec3 clickPos, handlePos[];
@@ -46,8 +45,7 @@ public class SkeletonTool extends EditingTool
   {
     super(fr);
     this.allowCreating = allowCreating;
-    icon = loadImage("skeleton.gif");
-    selectedIcon = loadImage("selected/skeleton.gif");
+    initButton("skeleton");
     clickedHandle = -1;
     helpText = Translate.text(allowCreating ? "skeletonTool.helpText" : "skeletonTool.helpTextNoCreate");
   }
@@ -61,16 +59,6 @@ public class SkeletonTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

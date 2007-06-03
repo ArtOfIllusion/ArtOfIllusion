@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,6 @@ import java.awt.*;
 
 public class CreateVertexTool extends MeshEditingTool
 {
-  private static Image icon, selectedIcon;
   private Point clickPoint;
   private Vec3 clickPos, constrainDir;
   private int target;
@@ -30,8 +29,7 @@ public class CreateVertexTool extends MeshEditingTool
   public CreateVertexTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    icon = loadImage("createVertex.gif");
-    selectedIcon = loadImage("selected/createVertex.gif");
+    initButton("createVertex");
   }
 
   public void activate()
@@ -58,16 +56,6 @@ public class CreateVertexTool extends MeshEditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

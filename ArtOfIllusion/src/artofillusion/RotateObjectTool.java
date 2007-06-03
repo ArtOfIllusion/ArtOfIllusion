@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,7 +33,6 @@ public class RotateObjectTool extends EditingTool
 
   static final double DRAG_SCALE = Math.PI/360.0;
 
-  static Image icon, selectedIcon;
   Point clickPoint;
   Vector toMove;
   ObjectInfo clickedObject;
@@ -45,8 +44,7 @@ public class RotateObjectTool extends EditingTool
   public RotateObjectTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("rotate.gif");
-    selectedIcon = loadImage("selected/rotate.gif");
+    initButton("rotate");
   }
 
   public void activate()
@@ -63,16 +61,6 @@ public class RotateObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

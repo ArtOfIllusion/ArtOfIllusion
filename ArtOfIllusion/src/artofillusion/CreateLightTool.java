@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ import java.awt.geom.*;
 
 public class CreateLightTool extends EditingTool
 {
-  static Image icon, selectedIcon;
   static int counter = 2;
   Point clickPoint, dragPoint;
   boolean controlDown;
@@ -30,8 +29,7 @@ public class CreateLightTool extends EditingTool
   public CreateLightTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("light.gif");
-    selectedIcon = loadImage("selected/light.gif");
+    initButton("light");
   }
 
   public void activate()
@@ -43,16 +41,6 @@ public class CreateLightTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

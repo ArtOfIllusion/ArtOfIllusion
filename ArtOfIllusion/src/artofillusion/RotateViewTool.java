@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ public class RotateViewTool extends EditingTool
 {
   private static final double DRAG_SCALE = 0.01;
 
-  private static Image icon, selectedIcon;
   private Point clickPoint;
   private Mat4 viewToWorld;
   private boolean controlDown, useSelectionCenter;
@@ -32,11 +31,7 @@ public class RotateViewTool extends EditingTool
   public RotateViewTool(EditingWindow fr)
   {
     super(fr);
-    if (icon == null)
-      {
-        icon = loadImage("rotateView.gif");
-        selectedIcon = loadImage("selected/rotateView.gif");
-      }
+    initButton("rotateView");
   }
 
   public void activate()
@@ -56,16 +51,6 @@ public class RotateViewTool extends EditingTool
       return false;
     else*/
       return true;
-  }
-  
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

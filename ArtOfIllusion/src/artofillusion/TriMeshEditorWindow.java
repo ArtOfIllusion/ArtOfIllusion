@@ -92,9 +92,9 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     projectOntoSurface = lastProjectOntoSurface;
     showQuads = lastShowQuads;
     toolsContainer.add(modes = new ToolPalette(1, 3), 0, 1);
-    modes.addTool(new GenericTool(this, "point.gif", "selected/point.gif", Translate.text("pointSelectionModeTool.tipText")));
-    modes.addTool(new GenericTool(this, "edge.gif", "selected/edge.gif", Translate.text("edgeSelectionModeTool.tipText")));
-    modes.addTool(new GenericTool(this, "face.gif", "selected/face.gif", Translate.text("faceSelectionModeTool.tipText")));
+    modes.addTool(new GenericTool(this, "point", Translate.text("pointSelectionModeTool.tipText")));
+    modes.addTool(new GenericTool(this, "edge", Translate.text("edgeSelectionModeTool.tipText")));
+    modes.addTool(new GenericTool(this, "face", Translate.text("faceSelectionModeTool.tipText")));
     setSelectionMode(modes.getSelection());
     createEditMenu((TriangleMesh) obj.object);
     createMeshMenu((TriangleMesh) obj.object);

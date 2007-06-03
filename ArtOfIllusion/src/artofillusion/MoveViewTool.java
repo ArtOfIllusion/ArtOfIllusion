@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +20,6 @@ import java.awt.*;
 
 public class MoveViewTool extends EditingTool
 {
-  private static Image icon, selectedIcon;
   private Point clickPoint;
   private Mat4 viewToWorld;
   private Vec3 clickPos;
@@ -31,11 +30,7 @@ public class MoveViewTool extends EditingTool
   public MoveViewTool(EditingWindow fr)
   {
     super(fr);
-    if (icon == null)
-      {
-        icon = loadImage("moveView.gif");
-        selectedIcon = loadImage("selected/moveView.gif");
-      }
+    initButton("moveView");
   }
   
   public void activate()
@@ -55,16 +50,6 @@ public class MoveViewTool extends EditingTool
       return false;
     else*/
       return true;
-  }
-  
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

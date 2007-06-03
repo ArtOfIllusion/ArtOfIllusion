@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,6 @@ import java.awt.*;
 
 public class MoveUVViewTool extends EditingTool
 {
-  private static Image icon, selectedIcon;
   private Point clickPoint;
   private boolean controlDown;
   private double minu, maxu, minv, maxv;
@@ -28,8 +27,7 @@ public class MoveUVViewTool extends EditingTool
   public MoveUVViewTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("moveView.gif");
-    selectedIcon = loadImage("selected/moveView.gif");
+    initButton("moveView");
   }
 
   public void activate()
@@ -46,16 +44,6 @@ public class MoveUVViewTool extends EditingTool
   public boolean hilightSelection()
   {
     return true;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

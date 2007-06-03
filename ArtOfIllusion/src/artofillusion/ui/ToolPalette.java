@@ -68,12 +68,17 @@ public class ToolPalette extends CustomWidget
       tool[i] = tool[i-1];
     tool[position] = t;
     numTools++;
-    int w = t.getIcon().getWidth(null);
-    int h = t.getIcon().getHeight(null);
+    int buttonMargin = ThemeManager.getThemeManager().getButtonMargin();
+    int paletteMargin = ThemeManager.getThemeManager().getPaletteMargin();
+    int w = t.getButton().getWidth() + 2*buttonMargin;
+    int h = t.getButton().getHeight() + 2*buttonMargin;
     if (w > maxsize.width)
       maxsize.width = w;
     if (h > maxsize.height)
       maxsize.height = h;
+    for (int i = 0; i < numTools; i++)
+      tool[i].getButton().setPosition((i%width)*maxsize.width + paletteMargin + buttonMargin,
+          (i/width)*maxsize.height + paletteMargin + buttonMargin);
     if (numTools == 1)
       t.activate();
   }
@@ -124,16 +129,24 @@ public class ToolPalette extends CustomWidget
 
   private void paint(RepaintEvent ev)
   {
-    Graphics g = ev.getGraphics();
+    Graphics2D g = ev.getGraphics();
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    int paletteMargin = ThemeManager.getThemeManager().getPaletteMargin();
+    g.setColor(ThemeManager.getThemeManager().getPaletteBackgroundColor());
+    g.fillRoundRect(0, 0, width*maxsize.width + 2*paletteMargin, height*maxsize.height + 2*paletteMargin, 8, 8);
+    //So as to ensure graphical consistency, buttons must be drawn following a certain order:
+    //normal buttons first
     for (int i = 0; i < numTools; i++)
-    {
-      if (i == selected)
-        g.drawImage(tool[i].getSelectedIcon(), (i%width)*maxsize.width, (i/width)*maxsize.height, null);
-      else
-        g.drawImage(tool[i].getIcon(), (i%width)*maxsize.width, (i/width)*maxsize.height, null);
-    }
-    g.drawLine(0, 0, width*maxsize.width, 0);
-    g.drawLine(0, height*maxsize.height, width*maxsize.width, height*maxsize.height);
+      if (!tool[i].getButton().isSelected() && !tool[i].getButton().isHighlighted())
+          tool[i].getButton().paint(g);
+    //highlighted buttons next
+    for (int i = 0; i < numTools; i++)
+      if (!tool[i].getButton().isSelected() && tool[i].getButton().isHighlighted())
+          tool[i].getButton().paint(g);
+    //then the selected one.
+    for (int i = 0; i < numTools; i++)
+      if (tool[i].getButton().isSelected())
+          tool[i].getButton().paint(g);
   }
 
   private void showToolTip(ToolTipEvent ev)

@@ -40,7 +40,7 @@ import javax.swing.*;
 public class ModellingApp
 {
   public static final String MAJOR_VERSION = "2.5";
-  public static final String VERSION = MAJOR_VERSION+"ea1";
+  public static final String VERSION = MAJOR_VERSION+"ea2";
   public static final double DIST_TO_SCREEN = 20.0;
   public static final Color APP_BACKGROUND_COLOR = new Color(228, 228, 243);
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
@@ -193,6 +193,7 @@ public class ModellingApp
     PluginRegistry.registerPlugin(new GlowFilter());
     PluginRegistry.registerPlugin(new OutlineFilter());
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ModellingApp.class.getClassLoader(), "artofillusion", null);
+    PluginRegistry.registerResource("UITheme", "default", ModellingApp.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();

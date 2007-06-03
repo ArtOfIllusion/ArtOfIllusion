@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,8 +34,6 @@ public class ScaleObjectTool extends EditingTool
   static final int OPMODE_SCALE = 0;
   static final int OPMODE_MOVE = 1;
 
-  static Image icon, selectedIcon;
-  
   private BoundingBox bounds[];
   private Point clickPoint;
   private Vec3 objectPos[], scaleCenter[];
@@ -52,8 +50,7 @@ public class ScaleObjectTool extends EditingTool
   public ScaleObjectTool(EditingWindow fr)
   {
     super(fr);
-    icon = loadImage("resize.gif");
-    selectedIcon = loadImage("selected/resize.gif");
+    initButton("resize");
   }
 
   public void activate()
@@ -70,16 +67,6 @@ public class ScaleObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

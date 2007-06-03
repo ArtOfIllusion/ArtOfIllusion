@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,8 +13,6 @@ package artofillusion.ui;
 import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
-import java.awt.image.*;
 
 /**
  * EditingTool is the superclass of tools for editing objects or scenes.  An EditingTool
@@ -50,6 +48,7 @@ public abstract class EditingTool
 {
   protected EditingWindow theWindow;
   protected BFrame theFrame;
+  protected ToolButton button;
   
   public EditingTool(EditingWindow win)
   {
@@ -64,63 +63,19 @@ public abstract class EditingTool
   {
     return theWindow;
   }
-  
-  protected Image loadImage(String name)
-  {
-    ImageProducer ip;
-    Image im;
-    
-    if (theFrame == null)
-      return null;
-    try
-    {
-      ip = (ImageProducer) getClass().getResource("/artofillusion/Icons/"+name).getContent();
-    }
-    catch (Exception e)
-    {
-      new BStandardDialog("", Translate.text("errorLoadingIcon", name), BStandardDialog.ERROR).showMessageDialog(theFrame);
-      return null;
-    }
-    im = theFrame.getComponent().createImage(ip);
-    MediaTracker mt = new MediaTracker(theFrame.getComponent());
-    mt.addImage(im, 0);
-    try
-    {
-      mt.waitForID(0);
-    }
-    catch (InterruptedException ex)
-    {
-      new BStandardDialog("", Translate.text("errorLoadingIcon", name), BStandardDialog.ERROR).showMessageDialog(theFrame);
-      return null;
-    }
-    return im;
-  }
-  
-  protected Image createSelectedImage()
-  {
-    ImageProducer ip = new FilteredImageSource(getIcon().getSource(), new HighlightFilter());
-    Image im = theFrame.getComponent().createImage(ip);
-    MediaTracker mt = new MediaTracker(theFrame.getComponent());
-    mt.addImage(im, 0);
-    try
-    {
-      mt.waitForID(0);
-    }
-    catch (InterruptedException ex)
-    {
-      return null;
-    }
-    return im;
-  }
-  
-  /** Get the icon to display for this tool. */
-  
-  public abstract Image getIcon();
 
-  /** Get the icon to display for this tool when it is selected. */
-  
-  public abstract Image getSelectedIcon();
-  
+  /** Get the ToolButton used to represent this tool in a ToolPalette. */
+
+  public ToolButton getButton()
+  {
+    return button;
+  }
+
+  protected void initButton(String name)
+  {
+    button = ThemeManager.getThemeManager().getPaletteButton(this, name);
+  }
+
   /** Get the tool tip text to display for this tool (or null if it does not have a tool tip). */
   
   public String getToolTipText()
@@ -197,32 +152,15 @@ public abstract class EditingTool
   public void activate()
   {
     theWindow.setTool(this);
+    button.setSelected(true);
   }
   
   public void deactivate()
   {
+    button.setSelected(false);
   }
 
   public void iconDoubleClicked()
   {
-  }
-  
-  class HighlightFilter extends RGBImageFilter
-  {
-    public HighlightFilter()
-    {
-      super();
-      canFilterIndexColorModel = true;
-    }
-    
-    public int filterRGB(int x, int y, int rgb)
-    {
-      int r = (rgb>>16) & 0xFF;
-      int g = (rgb>>8) & 0xFF;
-      int b = rgb & 0xFF;
-      r = (r+g+b)/3;
-      g = b = g/3;
-      return (rgb & 0xFF000000) + (r<<16) + (g<<8) + b;
-    }
   }
 }

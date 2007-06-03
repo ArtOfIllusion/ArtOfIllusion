@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,14 +23,11 @@ public class ReshapeMeshTool extends MeshEditingTool
   private Point clickPoint;
   private Vec3 clickPos, baseVertPos[];
   private UndoRecord undo;
-  
-  private static Image icon, selectedIcon;
-  
+
   public ReshapeMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    icon = loadImage("movePoints.gif");
-    selectedIcon = loadImage("selected/movePoints.gif");
+    initButton("movePoints");
   }
 
   public void activate()
@@ -47,16 +44,6 @@ public class ReshapeMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  public Image getIcon()
-  {
-    return icon;
-  }
-
-  public Image getSelectedIcon()
-  {
-    return selectedIcon;
   }
 
   public String getToolTipText()

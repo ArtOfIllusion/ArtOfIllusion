@@ -38,6 +38,9 @@ public class ToolPalette extends CustomWidget
     maxsize = new Dimension(0, 0);
     addEventLink(MousePressedEvent.class, this, "mousePressed");
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
+    addEventLink(MouseEnteredEvent.class, this, "mouseEntered");
+    addEventLink(MouseExitedEvent.class, this, "mouseExited");
+    addEventLink(MouseMovedEvent.class, this, "mouseMoved");
     addEventLink(RepaintEvent.class, this, "paint");
     addEventLink(ToolTipEvent.class, this, "showToolTip");
     setBackground(ModellingApp.APP_BACKGROUND_COLOR);
@@ -68,8 +71,8 @@ public class ToolPalette extends CustomWidget
       tool[i] = tool[i-1];
     tool[position] = t;
     numTools++;
-    int buttonMargin = ThemeManager.getThemeManager().getButtonMargin();
-    int paletteMargin = ThemeManager.getThemeManager().getPaletteMargin();
+    int buttonMargin = ThemeManager.getButtonMargin();
+    int paletteMargin = ThemeManager.getPaletteMargin();
     int w = t.getButton().getWidth() + 2*buttonMargin;
     int h = t.getButton().getHeight() + 2*buttonMargin;
     if (w > maxsize.width)
@@ -131,8 +134,8 @@ public class ToolPalette extends CustomWidget
   {
     Graphics2D g = ev.getGraphics();
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    int paletteMargin = ThemeManager.getThemeManager().getPaletteMargin();
-    g.setColor(ThemeManager.getThemeManager().getPaletteBackgroundColor());
+    int paletteMargin = ThemeManager.getPaletteMargin();
+    g.setColor(ThemeManager.getPaletteBackgroundColor());
     g.fillRoundRect(0, 0, width*maxsize.width + 2*paletteMargin, height*maxsize.height + 2*paletteMargin, 8, 8);
     //So as to ensure graphical consistency, buttons must be drawn following a certain order:
     //normal buttons first
@@ -152,7 +155,7 @@ public class ToolPalette extends CustomWidget
   private void showToolTip(ToolTipEvent ev)
   {
     int i = findClickedTool(ev.getPoint());
-    if (i < numTools)
+    if (i > -1 && i < numTools)
     {
       String text = tool[i].getToolTipText();
       if (text == null)
@@ -175,7 +178,7 @@ public class ToolPalette extends CustomWidget
   private void mousePressed(MousePressedEvent e)
   {
     int i = findClickedTool(e.getPoint());
-    if (i < numTools && i != selected)
+    if (i > -1 && i < numTools && i != selected)
     {
       if (selected < tool.length)
         tool[selected].deactivate();
@@ -188,13 +191,47 @@ public class ToolPalette extends CustomWidget
   private void mouseClicked(MouseClickedEvent e)
   {
     int i = findClickedTool(e.getPoint());
-    if (i < numTools && e.getClickCount() == 2)
+    if (i > -1 && i < numTools && e.getClickCount() == 2)
       tool[i].iconDoubleClicked();
+  }
+
+  private void mouseEntered(MouseEnteredEvent ev)
+  {
+    int t = findClickedTool(ev.getPoint());
+    for (int i = 0; i < numTools; i++)
+      tool[i].getButton().setHighlighted(t == i);
+    repaint();
+  }
+
+  private void mouseExited()
+  {
+    for (int i = 0; i < numTools; i++)
+	  tool[i].getButton().setHighlighted(false);
+    repaint();
+  }
+
+  private void mouseMoved(MouseMovedEvent ev)
+  {
+    int t = findClickedTool(ev.getPoint());
+    for (int i = 0; i < numTools; i++)
+      tool[i].getButton().setHighlighted(t == i);
+    repaint();
   }
 
   private int findClickedTool(Point p)
   {
-    return (p.x/maxsize.width) + ((p.y-1)/maxsize.height)*width;
+    Rectangle r = new Rectangle();
+    for (int i = 0; i < numTools; i++)
+    {
+      Point pos = tool[i].getButton().getPosition();
+      r.x = pos.x;
+      r.y = pos.y;
+      r.width = tool[i].getButton().getWidth();
+      r.height = tool[i].getButton().getHeight();
+      if (r.contains(p))
+        return i;
+    }
+    return -1;
   }
 
   /** Change the currently selected tool. */

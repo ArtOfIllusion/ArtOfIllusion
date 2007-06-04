@@ -21,27 +21,26 @@ import javax.swing.ImageIcon;
  *
  */
 public class DefaultToolButton extends ToolButton {
-	protected ImageIcon icon;
-	protected ImageIcon selectedIcon;
+    protected ImageIcon icon;
+    protected ImageIcon selectedIcon;
 
-	public DefaultToolButton(Object owner, String iconFileName) {
-		super(owner);
-		ThemeManager theme = ThemeManager.getThemeManager();
-		icon = theme.getIcon(iconFileName);
-		selectedIcon = theme.getIcon("selected/"+iconFileName);
-		height = icon.getIconHeight();
-		width = icon.getIconWidth();
-	}
+    public DefaultToolButton(Object owner, String iconFileName, String selectedIconFilename) {
+        super(owner);
+        icon = ThemeManager.getIcon(iconFileName);
+        selectedIcon = ThemeManager.getIcon(selectedIconFilename);
+        height = icon.getIconHeight();
+        width = icon.getIconWidth();
+    }
 
-	public void paint(Graphics2D g) {
-		switch(state) {
-		case NORMAL_STATE:
-		case HIGHLIGHTED_STATE:
-			g.drawImage(icon.getImage(), position.x, position.y, null);
-			break;
-		case SELECTED_STATE:
-			g.drawImage(selectedIcon.getImage(), position.x, position.y, null);
-			break;
-		}
-	}
+    public void paint(Graphics2D g) {
+        switch(state) {
+        case NORMAL_STATE:
+        case HIGHLIGHTED_STATE:
+            g.drawImage(icon.getImage(), position.x, position.y, null);
+            break;
+        case SELECTED_STATE:
+            g.drawImage(selectedIcon.getImage(), position.x, position.y, null);
+            break;
+        }
+    }
 }

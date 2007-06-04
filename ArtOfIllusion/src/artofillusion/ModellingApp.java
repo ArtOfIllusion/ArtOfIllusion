@@ -197,6 +197,7 @@ public class ModellingApp
     PluginRegistry.scanPlugins();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();
+    ThemeManager.initThemes();
     List plugins = PluginRegistry.getPlugins(Plugin.class);
     for (int i = 0; i < plugins.size(); i++)
     {

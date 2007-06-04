@@ -73,7 +73,7 @@ public abstract class EditingTool
 
   protected void initButton(String name)
   {
-    button = ThemeManager.getThemeManager().getPaletteButton(this, name);
+    button = ThemeManager.getToolButton(this, name, "selected/"+name);
   }
 
   /** Get the tool tip text to display for this tool (or null if it does not have a tool tip). */

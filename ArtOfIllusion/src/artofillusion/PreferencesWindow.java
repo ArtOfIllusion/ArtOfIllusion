@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Peter Eastman
+/* Copyright (C) 2002-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,14 +13,17 @@ package artofillusion;
 import artofillusion.ui.*;
 import artofillusion.keystroke.*;
 import buoy.widget.*;
+import buoy.event.*;
+
 import java.util.*;
+import java.util.List;
 import java.awt.*;
 
 /** This is the window for editing application-wide preferences. */
 
 public class PreferencesWindow
 {
-  private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, displayChoice, localeChoice, colorChoice, toolChoice;
+  private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, displayChoice, localeChoice, themeChoice, colorChoice, toolChoice;
   private ValueField interactiveTolField, undoField;
   private BCheckBox glBox, backupBox;
   private static int lastTab;
@@ -58,17 +61,20 @@ public class PreferencesWindow
       prefs.setTexturePreviewRenderer(renderers[texRendChoice.getSelectedIndex()]);
     }
     prefs.setDefaultDisplayMode(displayChoice.getSelectedIndex());
-    prefs.setColorScheme(colorChoice.getSelectedIndex());
     prefs.setInteractiveSurfaceError(interactiveTolField.getValue());
     prefs.setUndoLevels((int) undoField.getValue());
     if (!prefs.getLocale().equals(languages[localeChoice.getSelectedIndex()]))
       new BStandardDialog("", UIUtilities.breakString(Translate.text("languageChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
     if (prefs.getUseOpenGL() != glBox.getState())
       new BStandardDialog("", UIUtilities.breakString(Translate.text("glChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
+    if (!ThemeManager.getSelectedTheme().name.equals(themeChoice.getSelectedValue()))
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("themeChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
     prefs.setLocale(languages[localeChoice.getSelectedIndex()]);
     prefs.setUseOpenGL(glBox.getState());
     prefs.setKeepBackupFiles(backupBox.getState());
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
+    ThemeManager.setSelectedTheme((ThemeManager.ThemeInfo) ThemeManager.getThemes().get(themeChoice.getSelectedIndex()));
+    ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[colorChoice.getSelectedIndex()]);
     prefs.savePreferences();
     keystrokePanel.saveChanges();
   }
@@ -109,11 +115,25 @@ public class PreferencesWindow
       Translate.text("menu.texturedDisplay")
     });
     displayChoice.setSelectedIndex(prefs.getDefaultDisplayMode());
-    colorChoice = new BComboBox(new String [] {
-      Translate.text("White"),
-      Translate.text("Gray")
+    final List themes = ThemeManager.getThemes();
+    String themeNames[] = new String[themes.size()];
+    for (int i = 0; i < themeNames.length; i++)
+      themeNames[i] = ((ThemeManager.ThemeInfo) themes.get(i)).name;
+    themeChoice = new BComboBox(themeNames);
+    ThemeManager.ThemeInfo selectedTheme = ThemeManager.getSelectedTheme();
+    themeChoice.setSelectedValue(selectedTheme.name);
+    colorChoice = new BComboBox();
+    buildColorSetMenu(selectedTheme);
+    themeChoice.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        buildColorSetMenu((ThemeManager.ThemeInfo) themes.get(themeChoice.getSelectedIndex()));
+      }
     });
-    colorChoice.setSelectedIndex(prefs.getColorScheme());
+    ThemeManager.ColorSet[] colorSets = selectedTheme.getColorSets();
+    for (int i = 0; i < colorSets.length; i++)
+      if (colorSets[i] == ThemeManager.getSelectedColorSet())
+        colorChoice.setSelectedIndex(i);
     toolChoice = new BComboBox(new String [] {
       Translate.text("Move"),
       Translate.text("compoundMoveScaleRotate")
@@ -130,7 +150,7 @@ public class PreferencesWindow
 
     // Layout the panel.
 
-    FormContainer panel = new FormContainer(2, 11);
+    FormContainer panel = new FormContainer(2, 12);
     panel.setColumnWeight(1, 1.0);
     LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null);
     LayoutInfo widgetLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null);
@@ -139,22 +159,33 @@ public class PreferencesWindow
     panel.add(Translate.label("objPreviewRenderer"), 0, 1, labelLayout);
     panel.add(Translate.label("texPreviewRenderer"), 0, 2, labelLayout);
     panel.add(Translate.label("defaultDisplayMode"), 0, 3, labelLayout);
-    panel.add(Translate.label("backgroundColor"), 0, 4, labelLayout);
-    panel.add(Translate.label("defaultMeshEditingTool"), 0, 5, labelLayout);
-    panel.add(Translate.label("interactiveSurfError"), 0, 6, labelLayout);
-    panel.add(Translate.label("maxUndoLevels"), 0, 7, labelLayout);
-    panel.add(Translate.label("language"), 0, 10, labelLayout);
+    panel.add(Translate.label("selectedTheme"), 0, 4, labelLayout);
+    panel.add(Translate.label("themeColorSet"), 0, 5, labelLayout);
+    panel.add(Translate.label("defaultMeshEditingTool"), 0, 6, labelLayout);
+    panel.add(Translate.label("interactiveSurfError"), 0, 7, labelLayout);
+    panel.add(Translate.label("maxUndoLevels"), 0, 8, labelLayout);
+    panel.add(Translate.label("language"), 0, 11, labelLayout);
     panel.add(defaultRendChoice, 1, 0, widgetLayout);
     panel.add(objectRendChoice, 1, 1, widgetLayout);
     panel.add(texRendChoice, 1, 2, widgetLayout);
     panel.add(displayChoice, 1, 3, widgetLayout);
-    panel.add(colorChoice, 1, 4, widgetLayout);
-    panel.add(toolChoice, 1, 5, widgetLayout);
-    panel.add(interactiveTolField, 1, 6, widgetLayout);
-    panel.add(undoField, 1, 7, widgetLayout);
-    panel.add(glBox, 0, 8, 2, 1, centerLayout);
-    panel.add(backupBox, 0, 9, 2, 1, centerLayout);
-    panel.add(localeChoice, 1, 10, widgetLayout);
+    panel.add(themeChoice, 1, 4, widgetLayout);
+    panel.add(colorChoice, 1, 5, widgetLayout);
+    panel.add(toolChoice, 1, 6, widgetLayout);
+    panel.add(interactiveTolField, 1, 7, widgetLayout);
+    panel.add(undoField, 1, 8, widgetLayout);
+    panel.add(glBox, 0, 9, 2, 1, centerLayout);
+    panel.add(backupBox, 0, 10, 2, 1, centerLayout);
+    panel.add(localeChoice, 1, 11, widgetLayout);
     return panel;
+  }
+
+  private void buildColorSetMenu(ThemeManager.ThemeInfo theme)
+  {
+    ThemeManager.ColorSet colorSets[] = theme.getColorSets();
+    String names[] = new String[colorSets.length];
+    for (int i = 0; i < names.length; i++)
+      names[i] = colorSets[i].name;
+    colorChoice.setContents(names);
   }
 }

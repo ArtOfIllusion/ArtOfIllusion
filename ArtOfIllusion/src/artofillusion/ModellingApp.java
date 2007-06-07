@@ -195,9 +195,9 @@ public class ModellingApp
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ModellingApp.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ModellingApp.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();
+    ThemeManager.initThemes();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();
-    ThemeManager.initThemes();
     List plugins = PluginRegistry.getPlugins(Plugin.class);
     for (int i = 0; i < plugins.size(); i++)
     {

@@ -259,6 +259,15 @@ public class ThemeManager {
       return Collections.unmodifiableList(Arrays.asList(themeList));
     }
 
+    /**
+     * Get the default theme.
+     */
+
+    public static ThemeInfo getDefaultTheme()
+    {
+      return defaultTheme;
+    }
+
     private static void applyThemeColors() {
         ColorSet set = selectedColorSet;
         ViewerCanvas.backgroundColor = new Color(set.viewerBackground.getRed(),

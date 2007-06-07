@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2006 by Peter Eastman
+/* Copyright (C) 2002-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,22 +15,17 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.io.*;
 import java.util.*;
-import java.awt.*;
+import java.util.List;
 
 /** This class keeps track of program-wide user preferences. */
 
 public class ApplicationPreferences
 {
   private Properties properties;
-  private int defaultDisplayMode, undoLevels, colorScheme;
+  private int defaultDisplayMode, undoLevels;
   private double interactiveTol;
   private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
-
-  private static final Color COLORS[][] = new Color [][] {
-    {Color.WHITE, Color.BLACK, Color.RED, Color.MAGENTA, Color.GREEN, Color.GRAY, new Color(0.8f, 0.8f, 1.0f), new Color(0.8f, 0.8f, 1.0f)},
-    {new Color(40, 40, 40), Color.WHITE, Color.RED, Color.MAGENTA, Color.GREEN, Color.GRAY, new Color(0.8f, 0.8f, 1.0f), new Color(0.15f, 0.15f, 0.28f)}
-  };
 
   public ApplicationPreferences()
   {
@@ -74,6 +69,13 @@ public class ApplicationPreferences
 
   public void savePreferences()
   {
+    // Copy over preferences that are stored in other classes.
+
+    properties.put("theme", ThemeManager.getSelectedTheme().name);
+    properties.put("themeColorSet", ThemeManager.getSelectedColorSet().name);
+
+    // Write the preferences to a file.
+
     File f = new File(getPreferencesDirectory(), "aoiprefs");
     try
       {
@@ -110,8 +112,6 @@ public class ApplicationPreferences
     useOpenGL = true;
     keepBackupFiles = false;
     useCompoundMeshTool = false;
-    colorScheme = 0;
-    applyColorScheme();
   }
 
   /** Parse the properties loaded from the preferences file. */
@@ -128,8 +128,33 @@ public class ApplicationPreferences
     keepBackupFiles = parseBooleanProperty("keepBackupFiles", keepBackupFiles);
     useCompoundMeshTool = parseBooleanProperty("useCompoundMeshTool", useCompoundMeshTool);
     Translate.setLocale(parseLocaleProperty("language"));
-    colorScheme = parseIntProperty("colorScheme", colorScheme);
-    applyColorScheme();
+    if (properties.getProperty("theme") == null)
+    {
+      ThemeManager.setSelectedTheme(ThemeManager.getDefaultTheme());
+      ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[parseIntProperty("colorScheme", 0)]);
+    }
+    else
+    {
+      String themeName = properties.getProperty("theme");
+      List themes = ThemeManager.getThemes();
+      for (int i = 0; i < themes.size(); i++)
+      {
+        ThemeManager.ThemeInfo theme = (ThemeManager.ThemeInfo) themes.get(i);
+        if (theme.name.equals(themeName))
+        {
+          ThemeManager.setSelectedTheme(theme);
+          String colorSetName = properties.getProperty("themeColorSet");
+          ThemeManager.ColorSet colorSets[] = theme.getColorSets();
+          for (int j = 0; j < colorSets.length; j++)
+            if (colorSets[j].name.equals(colorSetName))
+            {
+              ThemeManager.setSelectedColorSet(colorSets[j]);
+              break;
+            }
+          break;
+        }
+      }
+    }
   }
 
   /** Parse an integer valued property. */
@@ -371,37 +396,5 @@ public class ApplicationPreferences
   {
     useCompoundMeshTool = use;
     properties.put("useCompoundMeshTool", Boolean.toString(use));
-  }
-
-  /** Get the selected color scheme. */
-
-  public final int getColorScheme()
-  {
-    return colorScheme;
-  }
-
-  /** Set the selected color scheme. */
-
-  public final void setColorScheme(int scheme)
-  {
-    colorScheme = scheme;
-    properties.put("colorScheme", Integer.toString(scheme));
-    applyColorScheme();
-  }
-
-  /** Apply the selected color scheme. */
-
-  private void applyColorScheme()
-  {
-    Color schemeColors[] = COLORS[colorScheme];
-    ViewerCanvas.backgroundColor = schemeColors[0];
-    ViewerCanvas.lineColor = schemeColors[1];
-    ViewerCanvas.handleColor = schemeColors[2];
-    ViewerCanvas.highlightColor = schemeColors[3];
-    ViewerCanvas.specialHighlightColor = schemeColors[4];
-    ViewerCanvas.disabledColor = schemeColors[5];
-    ViewerCanvas.surfaceColor = schemeColors[6];
-    ViewerCanvas.surfaceRGBColor = new RGBColor(schemeColors[6].getRed()/255.0, schemeColors[6].getGreen()/255.0, schemeColors[6].getBlue()/255.0);
-    ViewerCanvas.transparentColor = new RGBColor(schemeColors[7].getRed()/255.0, schemeColors[7].getGreen()/255.0, schemeColors[7].getBlue()/255.0);
   }
 }

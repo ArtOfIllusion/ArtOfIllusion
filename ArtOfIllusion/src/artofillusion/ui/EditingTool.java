@@ -160,6 +160,16 @@ public abstract class EditingTool
     button.setSelected(false);
   }
 
+  /**
+   * Get whether this tool opens a configuration dialog when double-clicked.
+   */
+
+  public boolean isEditable()
+  {
+    return false;
+  }
+
+
   public void iconDoubleClicked()
   {
   }

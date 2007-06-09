@@ -71,8 +71,11 @@ public class ApplicationPreferences
   {
     // Copy over preferences that are stored in other classes.
 
-    properties.put("theme", ThemeManager.getSelectedTheme().name);
-    properties.put("themeColorSet", ThemeManager.getSelectedColorSet().name);
+    properties.put("theme", ThemeManager.getSelectedTheme().resource.getId());
+    ThemeManager.ColorSet colorSets[] = ThemeManager.getSelectedTheme().getColorSets();
+    for (int i = 0; i < colorSets.length; i++)
+      if (colorSets[i] == ThemeManager.getSelectedColorSet())
+        properties.put("themeColorSet", Integer.toString(i));
 
     // Write the preferences to a file.
 
@@ -135,22 +138,18 @@ public class ApplicationPreferences
     }
     else
     {
-      String themeName = properties.getProperty("theme");
+      String themeId = properties.getProperty("theme");
       List themes = ThemeManager.getThemes();
       for (int i = 0; i < themes.size(); i++)
       {
         ThemeManager.ThemeInfo theme = (ThemeManager.ThemeInfo) themes.get(i);
-        if (theme.name.equals(themeName))
+        if (theme.resource.getId().equals(themeId))
         {
           ThemeManager.setSelectedTheme(theme);
-          String colorSetName = properties.getProperty("themeColorSet");
+          int colorSetIndex = parseIntProperty("themeColorSet", 0);
           ThemeManager.ColorSet colorSets[] = theme.getColorSets();
-          for (int j = 0; j < colorSets.length; j++)
-            if (colorSets[j].name.equals(colorSetName))
-            {
-              ThemeManager.setSelectedColorSet(colorSets[j]);
-              break;
-            }
+          if (colorSetIndex > -1 && colorSetIndex < colorSets.length)
+            ThemeManager.setSelectedColorSet(colorSets[colorSetIndex]);
           break;
         }
       }

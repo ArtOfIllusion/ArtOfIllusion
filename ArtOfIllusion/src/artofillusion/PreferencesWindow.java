@@ -67,7 +67,7 @@ public class PreferencesWindow
       new BStandardDialog("", UIUtilities.breakString(Translate.text("languageChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
     if (prefs.getUseOpenGL() != glBox.getState())
       new BStandardDialog("", UIUtilities.breakString(Translate.text("glChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
-    if (!ThemeManager.getSelectedTheme().name.equals(themeChoice.getSelectedValue()))
+    if (!ThemeManager.getSelectedTheme().getName().equals(themeChoice.getSelectedValue()))
       new BStandardDialog("", UIUtilities.breakString(Translate.text("themeChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
     prefs.setLocale(languages[localeChoice.getSelectedIndex()]);
     prefs.setUseOpenGL(glBox.getState());
@@ -118,10 +118,10 @@ public class PreferencesWindow
     final List themes = ThemeManager.getThemes();
     String themeNames[] = new String[themes.size()];
     for (int i = 0; i < themeNames.length; i++)
-      themeNames[i] = ((ThemeManager.ThemeInfo) themes.get(i)).name;
+      themeNames[i] = ((ThemeManager.ThemeInfo) themes.get(i)).getName();
     themeChoice = new BComboBox(themeNames);
     ThemeManager.ThemeInfo selectedTheme = ThemeManager.getSelectedTheme();
-    themeChoice.setSelectedValue(selectedTheme.name);
+    themeChoice.setSelectedValue(selectedTheme.getName());
     colorChoice = new BComboBox();
     buildColorSetMenu(selectedTheme);
     themeChoice.addEventLink(ValueChangedEvent.class, new Object() {
@@ -185,7 +185,7 @@ public class PreferencesWindow
     ThemeManager.ColorSet colorSets[] = theme.getColorSets();
     String names[] = new String[colorSets.length];
     for (int i = 0; i < names.length; i++)
-      names[i] = colorSets[i].name;
+      names[i] = colorSets[i].getName();
     colorChoice.setContents(names);
   }
 }

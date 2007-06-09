@@ -66,7 +66,7 @@ public class ThemeManager {
         public final Color dockableBarColor2;
         public final Color dockableTitleColor;
         public final Color textColor;
-        public final String name;
+        private final String name;
 
         private ColorSet(Node node)
         {
@@ -101,6 +101,11 @@ public class ThemeManager {
           node = getNodeFromNodeList(list, "textcolor");
           textColor = getColorFromNode(node);
         }
+
+      public String getName()
+      {
+        return Translate.text(name);
+      }
     }
 
     /**
@@ -113,7 +118,7 @@ public class ThemeManager {
      */
     public static class ThemeInfo
     {
-      public final String name;
+      private final String name;
       public final String author;
       public final String description;
       public final Class buttonClass;
@@ -200,6 +205,11 @@ public class ThemeManager {
         }
       }
 
+      public String getName()
+      {
+        return Translate.text(name);
+      }
+
       public ColorSet[] getColorSets()
       {
         return (ColorSet[]) colorSets.clone();
@@ -209,7 +219,7 @@ public class ThemeManager {
     private static ThemeInfo selectedTheme, defaultTheme;
     private static ColorSet selectedColorSet;
     private static ThemeInfo[] themeList;
-    private static Map themeNameMap;
+    private static Map themeIdMap;
     private static DocumentBuilderFactory documentBuilderFactory; //XML parsing
 
     /**
@@ -325,7 +335,7 @@ public class ThemeManager {
       int colon = name.indexOf(':');
       if (colon > -1)
       {
-        defaultSource = (ThemeInfo) themeNameMap.get(name.substring(0, colon));
+        defaultSource = (ThemeInfo) themeIdMap.get(name.substring(0, colon));
         name = name.substring(colon+1);
       }
       URL url = null;
@@ -435,7 +445,7 @@ public class ThemeManager {
     {
       if (themeList != null)
         throw new IllegalStateException("The themes have already been initialized.");
-      themeNameMap = new HashMap();
+      themeIdMap = new HashMap();
       documentBuilderFactory = DocumentBuilderFactory.newInstance();
       List resources = PluginRegistry.getResources("UITheme");
       ArrayList list = new ArrayList();
@@ -453,7 +463,7 @@ public class ThemeManager {
       }
       themeList = (ThemeInfo[]) list.toArray(new ThemeInfo[list.size()]);
       for (int i = 0; i < themeList.length; i++)
-        themeNameMap.put(themeList[i].name, themeList[i]);
+        themeIdMap.put(themeList[i].resource.getId(), themeList[i]);
       defaultTheme = themeList[0];
       setSelectedTheme(themeList[0]);
     }

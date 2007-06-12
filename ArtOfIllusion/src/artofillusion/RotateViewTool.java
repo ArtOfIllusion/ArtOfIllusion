@@ -149,8 +149,8 @@ public class RotateViewTool extends EditingTool
   {
     mouseDragged(e, view);
     Point dragPoint = e.getPoint();
-    if (dragPoint.x != clickPoint.x || dragPoint.y != clickPoint.y)
-      view.orientationChanged();
+    if ((dragPoint.x != clickPoint.x || dragPoint.y != clickPoint.y) && view.getBoundCamera() == null)
+      view.setOrientation(ViewerCanvas.VIEW_OTHER);
     if (theWindow != null)
       {
         ObjectInfo bound = view.getBoundCamera();

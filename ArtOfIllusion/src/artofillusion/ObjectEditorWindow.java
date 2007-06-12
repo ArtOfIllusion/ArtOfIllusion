@@ -120,8 +120,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       theView[i].setGrid(lastGridSpacing, lastGridSubdivisions, lastShowGrid, lastSnapToGrid);
       theView[i].addEventLink(MousePressedEvent.class, listen);
     }
-    theView[1].selectOrientation(2);
-    theView[2].selectOrientation(4);
+    theView[1].setOrientation(2);
+    theView[2].setOrientation(4);
     theView[3].setPerspective(true);
     theView[currentView].setDrawFocus(true);
     viewsContainer.add(viewPanel[0], 0, 0);

@@ -49,53 +49,55 @@ public class SceneViewer extends ViewerCanvas
     setRenderMode(ModellingApp.getPreferences().getDefaultDisplayMode());
   }
 
+  /** Get the EditingWindow in which this canvas is displayed. */
+
+  public EditingWindow getEditingWindow()
+  {
+    return parentFrame;
+  }
+
   /** Add all SceneCameras in the scene to list of available views. */
   
   public void rebuildCameraList()
   {
-    int i = viewChoice.getItemCount()-2, selected = viewChoice.getSelectedIndex();
-    
-    while (i > 5)
-      viewChoice.remove(i--);
+    for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
+    {
+      Widget w = (Widget) iter.next();
+      if (w instanceof ViewerOrientationControl.OrientationChoice)
+        ((ViewerOrientationControl.OrientationChoice) w).rebuildCameraList();
+    }
     cameras.removeAllElements();
-    for (i = 0; i < theScene.getNumObjects(); i++)
+    for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo obj = theScene.getObject(i);
       if (obj.object instanceof SceneCamera)
-      {
         cameras.addElement(obj);
-        viewChoice.add(viewChoice.getItemCount()-1, obj.name);
-        if (obj == boundCamera)
-          selected = viewChoice.getItemCount()-2;
-      }
     }
-    if (selected < viewChoice.getItemCount())
-      viewChoice.setSelectedIndex(selected);
-    else
-      viewChoice.setSelectedIndex(viewChoice.getItemCount()-1);
-    if (viewChoice.getParent() != null)
-      viewChoice.getParent().layoutChildren();
+  }
+
+  /** Get the list of cameras in the scene which can be used as predefined orientations. */
+
+  public ObjectInfo[] getCameras()
+  {
+    return (ObjectInfo[]) cameras.toArray(new ObjectInfo[cameras.size()]);
   }
 
   /** Deal with selecting a SceneCamera from the choice menu. */
   
-  public void selectOrientation(int which)
+  public void setOrientation(int which)
   {
-    super.selectOrientation(which);
-    if (which > 5 && which < viewChoice.getItemCount()-1)
+    super.setOrientation(which);
+    if (which > 5 && which < 6+cameras.size())
     {
       boundCamera = (ObjectInfo) cameras.elementAt(which-6);
       CoordinateSystem coords = theCamera.getCameraCoordinates();
       coords.copyCoords(boundCamera.coords);
       theCamera.setCameraCoordinates(coords);
+      dispatchEvent(viewChangedEvent);
+      repaint();
     }
     else
       boundCamera = null;
-  }
-  
-  public int getOrientationChoice()
-  {
-    return viewChoice.getSelectedIndex();
   }
   
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -130,7 +132,7 @@ public class SceneViewer extends ViewerCanvas
     Vec3 viewdir;
     int i;
 
-    adjustCamera(perspectiveChoice.getSelectedIndex() == 0);
+    adjustCamera(isPerspective());
     super.updateImage();
     
     // Draw the objects.
@@ -600,16 +602,5 @@ public class SceneViewer extends ViewerCanvas
 	  }
 	} );
     }
-  }
-
-  /** Turn the grid on or off when the perspective changes. */
-  
-  protected void choiceChanged(WidgetEvent ev)
-  {
-    if (snapToGrid)
-      theCamera.setGrid(gridSpacing/gridSubdivisions);
-    else
-      theCamera.setGrid(0.0);
-    super.choiceChanged(ev);
   }
 }

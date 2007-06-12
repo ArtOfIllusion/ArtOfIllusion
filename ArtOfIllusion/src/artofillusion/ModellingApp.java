@@ -21,6 +21,7 @@ import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import artofillusion.keystroke.*;
+import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
@@ -198,6 +199,9 @@ public class ModellingApp
     ThemeManager.initThemes();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();
+    ViewerCanvas.addViewerControl(new ViewerOrientationControl());
+    ViewerCanvas.addViewerControl(new ViewerPerspectiveControl());
+    ViewerCanvas.addViewerControl(new ViewerScaleControl());
     List plugins = PluginRegistry.getPlugins(Plugin.class);
     for (int i = 0; i < plugins.size(); i++)
     {

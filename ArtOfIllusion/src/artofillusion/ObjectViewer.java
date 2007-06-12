@@ -97,7 +97,7 @@ public abstract class ObjectViewer extends ViewerCanvas
 
   public synchronized void updateImage()
   {
-    adjustCamera(perspectiveChoice.getSelectedIndex() == 0);
+    adjustCamera(isPerspective());
     super.updateImage();
     if (controller.getObject() == null)
       return;
@@ -404,6 +404,6 @@ public abstract class ObjectViewer extends ViewerCanvas
     rend.configurePreview();
     ObjectInfo cameraInfo = new ObjectInfo(new SceneCamera(), theCamera.getCameraCoordinates(), "");
     new RenderingDialog(UIUtilities.findFrame(this), rend, sc, theCamera, cameraInfo);
-    adjustCamera(perspectiveChoice.getSelectedIndex() == 0);
+    adjustCamera(isPerspective());
   }
 }

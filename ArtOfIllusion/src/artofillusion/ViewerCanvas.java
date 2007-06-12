@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,6 +20,8 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.text.*;
+import java.util.*;
+import java.util.List;
 
 /** ViewerCanvas is the abstract superclass of all components which display objects, and allow
     the user to manipulate them with EditingTools. */
@@ -29,18 +31,20 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Camera theCamera;
   protected ObjectInfo boundCamera;
   protected EditingTool currentTool, activeTool, metaTool, altTool;
-  protected BComboBox viewChoice, perspectiveChoice;
-  protected ValueField scaleField;
   protected PopupMenuManager popupManager;
-  protected int renderMode, gridSubdivisions;
-  protected double gridSpacing;
-  protected boolean hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
+  protected int renderMode, gridSubdivisions, orientation;
+  protected double gridSpacing, scale;
+  protected boolean perspective, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected ActionProcessor mouseProcessor;
   protected Image templateImage;
   protected CanvasDrawer drawer;
   protected Dimension prefSize;
+  protected Map controlMap;
+
+  protected final ViewChangedEvent viewChangedEvent;
   
   private static boolean openGLAvailable;
+  private static List controls = new ArrayList();
   
   static
   {
@@ -76,6 +80,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int VIEW_RIGHT = 3;
   public static final int VIEW_TOP = 4;
   public static final int VIEW_BOTTOM = 5;
+  public static final int VIEW_OTHER = Integer.MAX_VALUE;
 
   public ViewerCanvas()
   {
@@ -85,7 +90,8 @@ public abstract class ViewerCanvas extends CustomWidget
   public ViewerCanvas(boolean useOpenGL)
   {
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, ModellingApp.DIST_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
-
+    viewChangedEvent = new ViewChangedEvent(this);
+    controlMap = new HashMap();
     theCamera = new Camera();
     theCamera.setCameraCoordinates(coords);
     setBackground(backgroundColor);
@@ -111,6 +117,9 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseMovedEvent.class, this, "processMouseDragged"); // Workaround for Mac OS X bug
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
+    orientation = 0;
+    perspective = false;
+    scale = 100.0;
   }
   
   /** Get the CanvasDrawer which is rendering the image for this canvas. */
@@ -125,27 +134,13 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected void buildChoices(RowContainer row)
   {
-    row.add(viewChoice = new BComboBox(new String [] {
-      Translate.text("Front"),
-      Translate.text("Back"),
-      Translate.text("Left"),
-      Translate.text("Right"),
-      Translate.text("Top"),
-      Translate.text("Bottom"),
-      Translate.text("Other"),
-    }));
-    viewChoice.setSelectedIndex(0);
-    viewChoice.addEventLink(ValueChangedEvent.class, this, "choiceChanged");
-    row.add(perspectiveChoice = new BComboBox(new String [] {
-      Translate.text("Perspective"),
-      Translate.text("Parallel")
-    }));
-    perspectiveChoice.setSelectedIndex(1);
-    perspectiveChoice.addEventLink(ValueChangedEvent.class, this, "choiceChanged");
-    row.add(scaleField = new ValueField(100.0, ValueField.POSITIVE, 5));
-    scaleField.setText("100");
-    scaleField.setMinDecimalPlaces(1);
-    scaleField.addEventLink(ValueChangedEvent.class, this, "scaleChanged");
+    for (int i = 0; i < controls.size(); i++)
+    {
+      Widget w = ((ViewerControl) controls.get(i)).createWidget(this);
+      row.add(w);
+      controlMap.put(controls.get(i), w);
+    }
+    dispatchEvent(viewChangedEvent);
   }
   
   private void processMousePressed(WidgetMouseEvent ev)
@@ -276,8 +271,8 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public void setPerspective(boolean perspective)
   {
-    perspectiveChoice.setSelectedIndex(perspective ? 0 : 1);
-    scaleField.setEnabled(!perspective);
+    this.perspective = perspective;
+    dispatchEvent(viewChangedEvent);
     repaint();
   }
   
@@ -285,7 +280,7 @@ public abstract class ViewerCanvas extends CustomWidget
   
   public boolean isPerspective()
   {
-    return (perspectiveChoice.getSelectedIndex() == 0);
+    return perspective;
   }
   
   /** Get the current scale factor for the view. */
@@ -294,7 +289,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     if (isPerspective())
       return 100.0;
-    return scaleField.getValue();
+    return scale;
   }
   
   /** Set the scale factor for the view. */
@@ -302,7 +297,8 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setScale(double scale)
   {
     if (scale > 0.0)
-      scaleField.setValue(scale);
+      this.scale = scale;
+    dispatchEvent(viewChangedEvent);
     repaint();
   }
   
@@ -473,7 +469,7 @@ public abstract class ViewerCanvas extends CustomWidget
     // Move the camera so that it points at the center of the box, and is well outside it. 
        
     Rectangle bounds = getBounds();
-    if (perspectiveChoice.getSelectedIndex() == 0)
+    if (isPerspective())
       theCamera.setScreenParams(0, 100.0, bounds.width, bounds.height);
     else
       theCamera.setScreenParamsParallel(100.0, bounds.width, bounds.height);  
@@ -490,19 +486,19 @@ public abstract class ViewerCanvas extends CustomWidget
     Rectangle screenBounds = theCamera.findScreenBounds(bb);
     double scalex = bounds.width/(double) screenBounds.width;
     double scaley = bounds.height/(double) screenBounds.height;
-    double scale = (scalex < scaley ? scalex : scaley);
-    if (perspectiveChoice.getSelectedIndex() == 0)
+    double minScale = (scalex < scaley ? scalex : scaley);
+    if (isPerspective())
     {
       // Perspective mode, so adjust the camera position.
       
-      coords.setOrigin(boxCenter.minus(coords.getZDirection().times(1.1*startDist/scale)));
-      scaleField.setValue(100.0);
+      coords.setOrigin(boxCenter.minus(coords.getZDirection().times(1.1*startDist/minScale)));
+      setScale(100.0);
     }
     else
     {
       // Parallel mode, so adjust the magnification.
       
-      scaleField.setValue(scale*100.0);
+      setScale(minScale*100.0);
     }
     theCamera.setCameraCoordinates(coords);
 
@@ -551,7 +547,7 @@ public abstract class ViewerCanvas extends CustomWidget
       Color minorColor = new Color(lineColor.getRed()*scale2 +backgroundColor.getRed()*scale1,
           lineColor.getGreen()*scale2 +backgroundColor.getGreen()*scale1,
           lineColor.getBlue()*scale2 +backgroundColor.getBlue()*scale1);
-      if (perspectiveChoice.getSelectedIndex() == 1)
+      if (!isPerspective())
       {
         // Parallel mode, so draw a flat grid.
         
@@ -726,40 +722,30 @@ public abstract class ViewerCanvas extends CustomWidget
     Vec3 v;
     Vec2 v2;
     
-    if (!snapToGrid || perspectiveChoice.getSelectedIndex() == 0)
+    if (!snapToGrid || isPerspective())
       return;
     v = theCamera.convertScreenToWorld(pos, theCamera.getDistToScreen());
     v2 = theCamera.getWorldToScreen().timesXY(v);
     e.translatePoint((int) v2.x - pos.x, (int) v2.y - pos.y);
   }
 
-  /** Deal with the various choice menus. */
-  
-  protected void choiceChanged(WidgetEvent ev)
+  /**
+   * Get the current orientation mode.
+   */
+
+  public int getOrientation()
   {
-    if (ev.getWidget() == viewChoice)
-      selectOrientation(viewChoice.getSelectedIndex());
-    else
-      setPerspective(perspectiveChoice.getSelectedIndex() == 0);
-  }
-  
-  /** Deal with changes to the scale. */
-  
-  protected void scaleChanged()
-  {
-    repaint();
+    return orientation;
   }
 
   /** Set the view orientation to any of the values shown in the choice menu. */
   
-  public void selectOrientation(int which)
+  public void setOrientation(int which)
   {
-    if (which > viewChoice.getItemCount()-2)
-      return; // Do not allow "other" to be selected, since it does not represent a specific orientation.
-    if (viewChoice.getSelectedIndex() != which)
-      viewChoice.setSelectedIndex(which);
+    orientation = which;
+    if (which > 5 && which != VIEW_OTHER)
+      return;
     CoordinateSystem coords = theCamera.getCameraCoordinates();
-    boolean perspective = (perspectiveChoice.getSelectedIndex() == 0);
     double dist = (perspective ? coords.getOrigin().length() : ModellingApp.DIST_TO_SCREEN);
         
     if (which == 0)             // Front
@@ -775,6 +761,7 @@ public abstract class ViewerCanvas extends CustomWidget
     else if (which == 5)        // Bottom
       coords = new CoordinateSystem(new Vec3(0.0, -dist, 0.0), Vec3.vy(), Vec3.vz());
     theCamera.setCameraCoordinates(coords);
+    dispatchEvent(viewChangedEvent);
     repaint();
   }
   
@@ -787,15 +774,6 @@ public abstract class ViewerCanvas extends CustomWidget
     CoordinateSystem coords = theCamera.getCameraCoordinates();
     coords.copyCoords(boundCamera.coords);
     theCamera.setCameraCoordinates(coords);
-  }
-  
-  /** The following method is called by RotateViewTool when the user has manually moved the
-      viewpoint.  This allows the SceneViewer to set the viewpoint choice menu to "Other". */
-
-  public void orientationChanged()
-  {
-    if (viewChoice != null && viewChoice.getSelectedIndex() < 6)
-      viewChoice.setSelectedIndex(viewChoice.getItemCount()-1);
   }
   
   /** Show feedback to the user in response to a mouse drag, by drawing a Shape over the
@@ -930,5 +908,58 @@ public abstract class ViewerCanvas extends CustomWidget
   public static boolean isOpenGLAvailable()
   {
     return openGLAvailable;
-  }  
+  }
+
+  /**
+   * Get the list of ViewerControls which will be added to each new ViewerCanvas.
+   */
+
+  public static List getViewerControls()
+  {
+    return Collections.unmodifiableList(controls);
+  }
+
+  /**
+   * Add a new ViewerControl that will be added to each new ViewerCanvas.
+   *
+   * @param control     the ViewerControl to add
+   */
+
+  public static void addViewerControl(ViewerControl control)
+  {
+    controls.add(control);
+  }
+
+  /**
+   * Add a new ViewerControl that will be added to each new ViewerCanvas.
+   *
+   * @param index       the position (from left to right) at which the new control should be added
+   * @param control     the ViewerControl to add
+   */
+
+  public static void addViewerControl(int index, ViewerControl control)
+  {
+    controls.add(index, control);
+  }
+
+  /**
+   * Remove a ViewerControl from the list of ones to be added to each new ViewerCanvas.
+   *
+   * @param control     the ViewerControl to remove
+   */
+
+  public static void removeViewerControl(ViewerControl control)
+  {
+    controls.remove(control);
+  }
+
+  /**
+   * Get a Map whose keys are the defined ViewerControls, and whose values are the corresponding
+   * Widgets for this canvas.
+   */
+
+  public Map getViewerControlWidgets()
+  {
+    return Collections.unmodifiableMap(controlMap);
+  }
 }

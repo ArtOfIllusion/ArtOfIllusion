@@ -137,8 +137,11 @@ public abstract class ViewerCanvas extends CustomWidget
     for (int i = 0; i < controls.size(); i++)
     {
       Widget w = ((ViewerControl) controls.get(i)).createWidget(this);
-      row.add(w);
-      controlMap.put(controls.get(i), w);
+      if (w != null)
+      {
+        row.add(w);
+        controlMap.put(controls.get(i), w);
+      }
     }
     dispatchEvent(viewChangedEvent);
   }

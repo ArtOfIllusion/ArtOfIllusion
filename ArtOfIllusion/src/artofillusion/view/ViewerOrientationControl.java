@@ -27,6 +27,12 @@ public class ViewerOrientationControl implements ViewerControl
     return new OrientationChoice(view);
   }
 
+
+  public String getName()
+  {
+    return Translate.text("ViewDirection");
+  }
+
   public static class OrientationChoice extends BComboBox
   {
     private final ViewerCanvas view;

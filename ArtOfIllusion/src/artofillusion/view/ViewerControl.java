@@ -26,7 +26,16 @@ public interface ViewerControl
   /**
    * This is invoked each time a new ViewerCanvas is created.  It should create a Widget
    * which is then added to the canvas' toolbar.
+   * <p>
+   * It is permitted for this method to return null.  This allows a ViewerControl to only
+   * add Widgets to particular types of ViewerCanvases.
    */
 
   Widget createWidget(ViewerCanvas view);
+
+  /**
+   * Get the name of this ViewerControl, as it should be displayed in the user interface.
+   */
+
+  String getName();
 }

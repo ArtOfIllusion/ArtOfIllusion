@@ -44,4 +44,9 @@ public class ViewerPerspectiveControl implements ViewerControl
     });
     return perspectiveChoice;
   }
+
+  public String getName()
+  {
+    return Translate.text("Perspective");
+  }
 }

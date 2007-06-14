@@ -47,4 +47,10 @@ public class ViewerScaleControl implements ViewerControl
     });
     return scaleField;
   }
+
+
+  public String getName()
+  {
+    return Translate.text("Magnification");
+  }
 }

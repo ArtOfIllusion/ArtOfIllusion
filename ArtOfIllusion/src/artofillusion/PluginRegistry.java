@@ -18,7 +18,6 @@ import java.util.zip.*;
 import java.util.*;
 import java.net.*;
 import java.lang.reflect.*;
-import java.lang.reflect.Proxy;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
@@ -141,12 +140,6 @@ public class PluginRegistry
         ExportInfo info = (ExportInfo) jar.exports.get(i);
         info.plugin = classNameMap.get(info.className);
         registerExportedMethod(info);
-      }
-      for (int i = 0; i < jar.proxies.size(); i++)
-      {
-        ProxyInfo info = (ProxyInfo) jar.proxies.get(i);
-        Object proxy = Proxy.newProxyInstance(jar.loader, info.getInterfaces(jar.loader), new ProxyHandler(info.target, jar.loader, info.values));
-        registerPlugin(proxy);
       }
       for (int i = 0; i < jar.resources.size(); i++)
       {
@@ -385,7 +378,7 @@ public class PluginRegistry
   {
     File file;
     String name, version;
-    ArrayList imports, plugins, categories, resources, proxies, exports;
+    ArrayList imports, plugins, categories, resources, exports;
     ClassLoader loader;
 
     JarInfo(File file) throws IOException
@@ -395,7 +388,6 @@ public class PluginRegistry
       plugins = new ArrayList();
       categories = new ArrayList();
       resources = new ArrayList();
-      proxies = new ArrayList();
       exports = new ArrayList();
       ZipFile zf = new ZipFile(file);
       try
@@ -422,17 +414,16 @@ public class PluginRegistry
               categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
             }
             NodeList pluginList = doc.getElementsByTagName("plugin");
-            NodeList valueList = doc.getElementsByTagName("method");
             for (int i = 0; i < pluginList.getLength(); i++)
             {
               Node plugin = pluginList.item(i);
 
-              // Check for other tags inside the <plugin> tag.
+              // Check for <export> tags inside the <plugin> tag.
 
-              ProxyInfo proxy = null;
               String className = plugin.getAttributes().getNamedItem("class").getNodeValue();
+              plugins.add(className);
               NodeList children = plugin.getChildNodes();
-              for (int k = 0; k < children.getLength() && proxy == null; k++)
+              for (int k = 0; k < children.getLength(); k++)
               {
                 Node childNode = children.item(k);
                 if ("export".equals(childNode.getNodeName()))
@@ -440,25 +431,10 @@ public class PluginRegistry
                   ExportInfo export = new ExportInfo();
                   export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
                   export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
-                  export.className = plugin.getAttributes().getNamedItem("class").getNodeValue();
+                  export.className = className;
                   exports.add(export);
                 }
-                if ("proxy".equals(childNode.getNodeName()))
-                {
-                  proxy = new ProxyInfo();
-                  proxy.target = className;
-                  proxy.interfaces = childNode.getAttributes().getNamedItem("interface").getNodeValue().split(";");
-                  for (int j = 0; j < valueList.getLength(); j++)
-                    if (valueList.item(j).getParentNode() == childNode)
-                    {
-                      NamedNodeMap attributes  = valueList.item(j).getAttributes();
-                      proxy.values.put(attributes.getNamedItem("name").getNodeValue(), attributes.getNamedItem("value").getNodeValue());
-                    }
-                  proxies.add(proxy);
-                }
               }
-              if (proxy == null)
-                plugins.add(className);
             }
             NodeList importList = doc.getElementsByTagName("import");
             for (int i = 0; i < importList.getLength(); i++)
@@ -656,24 +632,6 @@ public class PluginRegistry
   }
 
   /**
-   * This class is used to store information about a "proxy" record in an XML file.
-   */
-
-  private static class ProxyInfo
-  {
-    String target, interfaces[];
-    HashMap values = new HashMap();
-
-    Class[] getInterfaces(ClassLoader loader) throws ClassNotFoundException
-    {
-      Class cls[] = new Class[interfaces.length];
-      for (int i = 0; i < cls.length; i++)
-        cls[i] = loader.loadClass(interfaces[i]);
-      return cls;
-    }
-  }
-
-  /**
    * This class is used to store information about a "resource" record in an XML file.
    */
 
@@ -682,104 +640,5 @@ public class PluginRegistry
     String type, id, name;
     Locale locale;
     HashMap values = new HashMap();
-  }
-
-  /**
-   * This is the InvocationHandler for automatically generated proxies.
-   */
-
-  private static class ProxyHandler implements InvocationHandler
-  {
-    protected String type;
-    protected ClassLoader loader;
-    protected Object target;
-    protected Map map;
-
-    public ProxyHandler(String type, ClassLoader loader, Map map)
-    {
-      this.type = type;
-      this.loader = loader;
-      this.map = map;
-    }
-
-    public Object invoke(Object proxy, Method method, Object[] args)
-    {
-      String name = method.getName();
-      try
-      {
-        if ((args == null || args.length == 0) && map.containsKey(name))
-        {
-          String value = (String) map.get(name);
-          Class valType = method.getReturnType();
-
-          // If the return type is String, simply return in.
-
-          if (valType == String.class)
-            return value;
-          if (valType.isPrimitive())
-          {
-            // Deal with primitive types.
-
-            if (valType == int.class)
-              return new Integer(value);
-            if (valType == boolean.class)
-              return Boolean.valueOf(value);
-            if (valType == float.class)
-              return new Float(value);
-            if (valType == long.class)
-              return new Long(value);
-            if (valType == double.class)
-              return new Double(value);
-            if (valType == byte.class)
-              return new Byte(value);
-            if (valType == char.class)
-              return (value == null || value.length() == 0 ? new Character('\0') : new Character(value.charAt(0)));
-            if (valType == short.class)
-              return new Short(value);
-          }
-
-          // See if there is a static valueOf(String) method.
-
-          try
-          {
-            Method valueOf = valType.getMethod("valueOf", new Class[] {String.class});
-            if (Modifier.isStatic(valueOf.getModifiers()))
-              return valueOf.invoke(null, new Object[] {value});
-          }
-          catch (NoSuchMethodException ex)
-          {
-          }
-
-          // See if there is a constructor that takes a String.
-
-          try
-          {
-            Constructor ctor = valType.getConstructor(new Class[] {String.class});
-            return ctor.newInstance(new Object[] {value});
-          }
-          catch (NoSuchMethodException ex)
-          {
-          }
-
-          // Give up and just invoke the method on the target.
-
-          System.out.println("PluginRegistry: unable to create a value of type "+valType.getName()+" for proxy method");
-        }
-      }
-      catch (Exception e)
-      {
-        System.out.println("PluginRegistry: error invoking proxy method "+name);
-      }
-      try
-      {
-        if (target == null)
-          target = loader.loadClass(type).newInstance();
-        return method.invoke(target, args);
-      }
-      catch (Exception ex)
-      {
-        return null;
-      }
-    }
   }
 }

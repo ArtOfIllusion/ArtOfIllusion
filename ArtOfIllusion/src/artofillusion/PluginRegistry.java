@@ -33,6 +33,7 @@ public class PluginRegistry
   private static final HashSet categories = new HashSet();
   private static final HashMap categoryClasses = new HashMap();
   private static final HashMap resources = new HashMap();
+  private static final HashMap exports = new HashMap();
 
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
@@ -124,12 +125,23 @@ public class PluginRegistry
           loader.add(((JarInfo) nameMap.get(importIterator.next())).loader);
       }
       pluginLoaders.add(jar.loader);
+      HashMap classNameMap = new HashMap();
       if (jar.name != null && jar.name.length() > 0)
         nameMap.put(jar.name, jar);
       for (int i = 0; i < jar.categories.size(); i++)
         addCategory(jar.loader.loadClass((String) jar.categories.get(i)));
       for (int i = 0; i < jar.plugins.size(); i++)
-        registerPlugin(jar.loader.loadClass((String) jar.plugins.get(i)).newInstance());
+      {
+        Object plugin = jar.loader.loadClass((String) jar.plugins.get(i)).newInstance();
+        registerPlugin(plugin);
+        classNameMap.put(jar.plugins.get(i), plugin);
+      }
+      for (int i = 0; i < jar.exports.size(); i++)
+      {
+        ExportInfo info = (ExportInfo) jar.exports.get(i);
+        info.plugin = classNameMap.get(info.className);
+        registerExportedMethod(info);
+      }
       for (int i = 0; i < jar.proxies.size(); i++)
       {
         ProxyInfo info = (ProxyInfo) jar.proxies.get(i);
@@ -282,6 +294,90 @@ public class PluginRegistry
   }
 
   /**
+   * Register a method which may be invoked on a plugin object.  This allows external code to easily
+   * use features of a plugin without needing to directly import that plugin or use reflection.
+   * Use {@link #getExportedMethodIds()} to get a list of all exported methods that have been
+   * registered, and {@link #invokeExportedMethod(String, Object[])} to invoke one.
+   *
+   * @param plugin     the plugin object on which the method should be invoked
+   * @param method     the name of the method to invoke
+   * @param id         a unique identifier which may be passed to <code>invokeExportedMethod()</code>
+   *                   to identify this method
+   */
+
+  public static void registerExportedMethod(Object plugin, String method, String id) throws IllegalArgumentException
+  {
+    ExportInfo info = new ExportInfo();
+    info.plugin = plugin;
+    info.method = method;
+    info.id = id;
+    registerExportedMethod(info);
+  }
+
+  private static void registerExportedMethod(ExportInfo export) throws IllegalArgumentException
+  {
+    if (exports.containsKey(export.id))
+      throw new IllegalArgumentException("Multiple exported methods with id="+export.id);
+    exports.put(export.id, export);
+  }
+
+  /**
+   * Get a list of the identifiers of all exported methods which have been registered.
+   */
+
+  public static List getExportedMethodIds()
+  {
+    return new ArrayList(exports.keySet());
+  }
+
+  /**
+   * Invoke an exported method of a plugin object.
+   *
+   * @param id       the unique identifier of the method to invoke
+   * @param args     the list of arguments to pass to the method
+   * @return the value returned by the method after it was invoked
+   * @throws NoSuchMethodException if there is no exported method with the specified ID, or if there
+   * is no form of the exported method whose arguments are compatible with the specified args array.
+   * @throws InvocationTargetException if the method threw an exception when it was invoked.
+   */
+
+  public static Object invokeExportedMethod(String id, Object args[]) throws NoSuchMethodException, InvocationTargetException
+  {
+    ExportInfo info = (ExportInfo) exports.get(id);
+    if (info == null)
+      throw new NoSuchMethodException("There is no exported method with id="+id);
+
+    // Try to find a method to invoke.
+
+    Method methods[] = info.plugin.getClass().getMethods();
+    for (int i = 0; i < methods.length; i++)
+    {
+      if (!methods[i].getName().equals(info.method))
+        continue;
+      Class types[] = methods[i].getParameterTypes();
+      if (types.length != args.length)
+        continue;
+      boolean valid = true;
+      for (int j = 0; valid && j < types.length; j++)
+        valid = (args[j] == null || types[j].isInstance(args[j]));
+      if (valid)
+      {
+        try
+        {
+          return methods[i].invoke(info.plugin, args);
+        }
+        catch (IllegalAccessException ex)
+        {
+          // This should be impossible, since getMethods() only returns public methods.
+
+          throw new InvocationTargetException(ex);
+        }
+      }
+    }
+    throw new NoSuchMethodException("No method found which matches the specified name and argument types.");
+  }
+
+  /**
    * This class is used to store information about the content of a jar file during initialization.
    */
 
@@ -289,7 +385,7 @@ public class PluginRegistry
   {
     File file;
     String name, version;
-    ArrayList imports, plugins, categories, resources, proxies;
+    ArrayList imports, plugins, categories, resources, proxies, exports;
     ClassLoader loader;
 
     JarInfo(File file) throws IOException
@@ -300,6 +396,7 @@ public class PluginRegistry
       categories = new ArrayList();
       resources = new ArrayList();
       proxies = new ArrayList();
+      exports = new ArrayList();
       ZipFile zf = new ZipFile(file);
       try
       {
@@ -330,28 +427,38 @@ public class PluginRegistry
             {
               Node plugin = pluginList.item(i);
 
-              // See whether a proxy should be created for this plugin.
+              // Check for other tags inside the <plugin> tag.
 
               ProxyInfo proxy = null;
+              String className = plugin.getAttributes().getNamedItem("class").getNodeValue();
               NodeList children = plugin.getChildNodes();
               for (int k = 0; k < children.getLength() && proxy == null; k++)
               {
-                Node proxyNode = children.item(k);
-                if (!"proxy".equals(proxyNode.getNodeName()))
-                  continue;
-                proxy = new ProxyInfo();
-                proxy.target = plugin.getAttributes().getNamedItem("class").getNodeValue();
-                proxy.interfaces = proxyNode.getAttributes().getNamedItem("interface").getNodeValue().split(";");
-                for (int j = 0; j < valueList.getLength(); j++)
-                  if (valueList.item(j).getParentNode() == proxyNode)
-                  {
-                    NamedNodeMap attributes  = valueList.item(j).getAttributes();
-                    proxy.values.put(attributes.getNamedItem("name").getNodeValue(), attributes.getNamedItem("value").getNodeValue());
-                  }
-                proxies.add(proxy);
+                Node childNode = children.item(k);
+                if ("export".equals(childNode.getNodeName()))
+                {
+                  ExportInfo export = new ExportInfo();
+                  export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
+                  export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
+                  export.className = plugin.getAttributes().getNamedItem("class").getNodeValue();
+                  exports.add(export);
+                }
+                if ("proxy".equals(childNode.getNodeName()))
+                {
+                  proxy = new ProxyInfo();
+                  proxy.target = className;
+                  proxy.interfaces = childNode.getAttributes().getNamedItem("interface").getNodeValue().split(";");
+                  for (int j = 0; j < valueList.getLength(); j++)
+                    if (valueList.item(j).getParentNode() == childNode)
+                    {
+                      NamedNodeMap attributes  = valueList.item(j).getAttributes();
+                      proxy.values.put(attributes.getNamedItem("name").getNodeValue(), attributes.getNamedItem("value").getNodeValue());
+                    }
+                  proxies.add(proxy);
+                }
               }
               if (proxy == null)
-                plugins.add(plugin.getAttributes().getNamedItem("class").getNodeValue());
+                plugins.add(className);
             }
             NodeList importList = doc.getElementsByTagName("import");
             for (int i = 0; i < importList.getLength(); i++)
@@ -536,6 +643,16 @@ public class PluginRegistry
       int index = findLocalizedVersion(Translate.getLocale());
       return (ClassLoader) loaders.get(index);
     }
+  }
+
+  /**
+   * This class is used to store information about an "export" record in an XML file.
+   */
+
+  private static class ExportInfo
+  {
+    String method, id, className;
+    Object plugin;
   }
 
   /**

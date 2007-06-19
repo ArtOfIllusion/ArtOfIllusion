@@ -33,6 +33,7 @@ public class PluginRegistry
   private static final HashMap categoryClasses = new HashMap();
   private static final HashMap resources = new HashMap();
   private static final HashMap exports = new HashMap();
+  private static final HashMap classMap = new HashMap();
 
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
@@ -194,6 +195,7 @@ public class PluginRegistry
 
   public static void registerPlugin(Object plugin)
   {
+    classMap.put(plugin.getClass().getName(), plugin);
     for (Iterator categoryIterator = categories.iterator(); categoryIterator.hasNext(); )
     {
       Class category = (Class) categoryIterator.next();
@@ -220,6 +222,21 @@ public class PluginRegistry
     if (plugins == null)
       return new ArrayList();
     return new ArrayList(plugins);
+  }
+
+  /**
+   * Get the registered plugin object of a particular class.  Unlike {@link #getPlugins(Class)},
+   * the specified class name must be the exact class of the object, not a superclass or interface.
+   * If multiple plugins of the same class have been registered, this returns the most recently
+   * registered one.
+   *
+   * @param classname    the fully qualified name of the class of the plugin object to return
+   * @return the plugin object of the specified class, or null if no matching plugin has been registered
+   */
+
+  public static Object getPluginObject(String classname)
+  {
+    return classMap.get(classname);
   }
 
   /**
@@ -327,7 +344,8 @@ public class PluginRegistry
    * Invoke an exported method of a plugin object.
    *
    * @param id       the unique identifier of the method to invoke
-   * @param args     the list of arguments to pass to the method
+   * @param args     the list of arguments to pass to the method.  If the method has no arguments,
+   *                 this may be null.
    * @return the value returned by the method after it was invoked
    * @throws NoSuchMethodException if there is no exported method with the specified ID, or if there
    * is no form of the exported method whose arguments are compatible with the specified args array.
@@ -342,13 +360,14 @@ public class PluginRegistry
 
     // Try to find a method to invoke.
 
+    int numArgs = (args == null ? 0 : args.length);
     Method methods[] = info.plugin.getClass().getMethods();
     for (int i = 0; i < methods.length; i++)
     {
       if (!methods[i].getName().equals(info.method))
         continue;
       Class types[] = methods[i].getParameterTypes();
-      if (types.length != args.length)
+      if (types.length != numArgs)
         continue;
       boolean valid = true;
       for (int j = 0; valid && j < types.length; j++)

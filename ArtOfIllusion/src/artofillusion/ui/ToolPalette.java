@@ -167,7 +167,8 @@ public class ToolPalette extends CustomWidget
 
   public Dimension getPreferredSize()
   {
-    return new Dimension(width*maxsize.width, height*maxsize.height+2);
+    int paletteMargin = ThemeManager.getPaletteMargin();
+    return new Dimension(width*maxsize.width+2*paletteMargin, height*maxsize.height+2*paletteMargin);
   }
 
   public Dimension getMinimumSize()

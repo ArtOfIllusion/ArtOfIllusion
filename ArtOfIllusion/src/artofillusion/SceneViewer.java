@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,6 +54,15 @@ public class SceneViewer extends ViewerCanvas
   public EditingWindow getEditingWindow()
   {
     return parentFrame;
+  }
+
+  /**
+   * Get the Scene displayed in this canvas.
+   */
+
+  public Scene getScene()
+  {
+    return theScene;
   }
 
   /** Add all SceneCameras in the scene to list of available views. */
@@ -144,7 +153,7 @@ public class SceneViewer extends ViewerCanvas
       if (obj == boundCamera)
         continue;
       theCamera.setObjectTransform(obj.coords.fromLocal());
-      renderObject(obj, viewdir);
+      obj.object.renderObject(obj, this, viewdir);
     }
 
     // Hilight the selection.
@@ -191,60 +200,6 @@ public class SceneViewer extends ViewerCanvas
     drawBorder();
     if (showAxes)
       drawCoordinateAxes();
-  }
-  
-  /** Render a single object into the scene.  viewdir is the
-      direction from which the object is being viewed in world coordinates. */
-  
-  private void renderObject(ObjectInfo obj, Vec3 viewdir)
-  {
-    RenderingMesh mesh;
-
-    if (!obj.visible)
-      return;
-    if (theCamera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
-      return;
-    if (obj.object instanceof ObjectCollection)
-    {
-      Mat4 m = theCamera.getObjectToWorld();
-      Enumeration enm = ((ObjectCollection) obj.object).getObjects(obj, true, theScene);
-      while (enm.hasMoreElements())
-      {
-        ObjectInfo info = (ObjectInfo) enm.nextElement();
-        CoordinateSystem coords = info.coords.duplicate();
-        coords.transformCoordinates(m);
-        theCamera.setObjectTransform(coords.fromLocal());
-        renderObject(info, info.coords.toLocal().timesDirection(viewdir));
-      }
-      return;
-    }
-    if (renderMode == RENDER_WIREFRAME)
-    {
-      renderWireframe(obj.getWireframePreview(), theCamera, lineColor);
-      return;
-    }
-    mesh = obj.getPreviewMesh();
-    if (mesh != null)
-    {
-      VertexShader shader;
-      if (renderMode == RENDER_TRANSPARENT)
-      {
-        shader = new ConstantVertexShader(transparentColor);
-        renderMeshTransparent(mesh, shader, theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
-      }
-      else
-      {
-        if (renderMode == RENDER_FLAT)
-          shader = new FlatVertexShader(mesh, obj.object, theScene.getTime(), obj.coords.toLocal().timesDirection(viewdir));
-        else if (renderMode == RENDER_SMOOTH)
-          shader = new SmoothVertexShader(mesh, obj.object, theScene.getTime(), obj.coords.toLocal().timesDirection(viewdir));
-        else
-          shader = new TexturedVertexShader(mesh, obj.object, theScene.getTime(), obj.coords.toLocal().timesDirection(viewdir)).optimize();
-        renderMesh(mesh, shader, theCamera, obj.object.isClosed(), null);
-      }
-    }
-    else
-      renderWireframe(obj.getWireframePreview(), theCamera, lineColor);
   }
 
   /** Begin dragging a box.  The variable square determines whether the box should be

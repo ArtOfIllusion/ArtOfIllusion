@@ -241,6 +241,16 @@ public abstract class ViewerCanvas extends CustomWidget
     return theCamera;
   }
 
+  /**
+   * Get the Scene being displayed in this canvas.  The default implementation returns null.
+   * Subclasses may override it to return an appropriate Scene.
+   */
+
+  public Scene getScene()
+  {
+    return null;
+  }
+
   /** Set the currently selected tool. */
 
   public void setTool(EditingTool tool)

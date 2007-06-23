@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,7 +12,6 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.view.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -106,10 +105,14 @@ public abstract class ObjectViewer extends ViewerCanvas
     
     if (showScene && theScene != null)
     {
+      Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo obj = theScene.getObject(i);
-        drawSceneObject(obj, obj.coords);
+        if (obj == thisObjectInScene)
+          continue;
+        theCamera.setObjectTransform(obj.coords.fromLocal());
+        obj.object.renderObject(obj, this, viewdir);//drawSceneObject(obj, obj.coords);
       }
     }
 
@@ -123,54 +126,6 @@ public abstract class ObjectViewer extends ViewerCanvas
     drawBorder();
     if (showAxes)
       drawCoordinateAxes();
-  }
-  
-  /** Draw one object in the scene. */
-  
-  private void drawSceneObject(ObjectInfo obj, CoordinateSystem coords)
-  {
-    if (obj == thisObjectInScene || !obj.visible)
-      return;
-    if (obj.object instanceof ObjectCollection)
-    {
-      Enumeration enm = ((ObjectCollection) obj.object).getObjects(obj, true, theScene);
-      while (enm.hasMoreElements())
-      {
-        ObjectInfo elem = (ObjectInfo) enm.nextElement();
-        CoordinateSystem elemCoords = elem.coords.duplicate();
-        elemCoords.transformCoordinates(coords.fromLocal());
-        drawSceneObject(elem, elemCoords);
-      }
-      return;
-    }
-    if (useWorldCoords)
-      theCamera.setObjectTransform(coords.fromLocal());
-    else
-      theCamera.setObjectTransform(thisObjectInScene.coords.toLocal().times(coords.fromLocal()));
-    if (theCamera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
-      return;
-    if (renderMode == RENDER_WIREFRAME)
-      renderWireframe(obj.getWireframePreview(), theCamera, lineColor);
-    else
-    {
-      RenderingMesh mesh = obj.getPreviewMesh();
-      if (mesh == null)
-        renderWireframe(obj.getWireframePreview(), theCamera, lineColor);
-      else if (renderMode == RENDER_TRANSPARENT)
-        renderMeshTransparent(mesh, new ConstantVertexShader(transparentColor), theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
-      else
-      {
-        Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-        VertexShader shader;
-        if (renderMode == RENDER_FLAT)
-          shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);
-        else if (renderMode == RENDER_SMOOTH)
-          shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
-        else
-          shader = new TexturedVertexShader(mesh, obj.object, 0.0, viewDir).optimize();
-        renderMesh(mesh, shader, theCamera, obj.object.isClosed(), null);
-      }
-    }
   }
   
   protected abstract void drawObject();

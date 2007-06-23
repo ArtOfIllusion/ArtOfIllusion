@@ -229,7 +229,16 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     m = dragTransform.times(m);
     m = Mat4.translation(origin.x, origin.y, origin.z).times(m);
     theCamera.setObjectTransform(m);
-    Object3D.draw(g, theCamera, info.object.getWireframeMesh(), info.object.getBounds());
+    WireframeMesh mesh = info.object.getWireframeMesh();
+    int from[] = mesh.from, to[] = mesh.to, last = -1;
+    Vec3 vert[] = mesh.vert;
+    for (int i = 0; i < mesh.from.length; i++)
+    {
+      if (from[i] == last)
+        theCamera.drawClippedLineTo(g, vert[(last=to[i])]);
+      else
+        theCamera.drawClippedLine(g, vert[from[i]], vert[(last=to[i])]);
+    }
   }
   
   /** Rotate the object to show a specific side. */

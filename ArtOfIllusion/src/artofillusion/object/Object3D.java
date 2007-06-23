@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,13 +11,13 @@
 package artofillusion.object;
 
 import artofillusion.*;
+import artofillusion.view.*;
 import artofillusion.animation.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
 
@@ -58,33 +58,6 @@ public abstract class Object3D
       dimensions specified in setSize(). */
 
   public abstract void setSize(double xsize, double ysize, double zsize);
-
-  /** Draw a wireframe representation of an object. */
-
-  public static void draw(Graphics g, Camera cam, WireframeMesh mesh, BoundingBox bounds)
-  {
-    int i, vis = cam.visibility(bounds), from[] = mesh.from, to[] = mesh.to, last = -1;
-    Vec3 vert[] = mesh.vert;    
-    
-    if (vis == Camera.NOT_VISIBLE)
-      return;
-    if (vis == Camera.NEEDS_CLIPPING)
-      for (i = 0; i < mesh.from.length; i++)
-        {
-          if (from[i] == last)
-            cam.drawClippedLineTo(g, vert[(last=to[i])]);
-          else
-            cam.drawClippedLine(g, vert[from[i]], vert[(last=to[i])]);
-        }
-    else
-      for (i = 0; i < mesh.from.length; i++)
-        {
-          if (from[i] == last)
-            cam.drawLineTo(g, vert[(last=to[i])]);
-          else
-            cam.drawLine(g, vert[from[i]], vert[(last=to[i])]);
-        }
-  }
 
   /** Tells whether the object is closed.  For curves, this means it has no endpoints.  For
       surface, it means the surface has no boundary. */
@@ -376,6 +349,55 @@ public abstract class Object3D
       in other rendering modes. */
   
   public abstract WireframeMesh getWireframeMesh();
+
+  /**
+   * Render this object into a ViewerCanvas.  The default implementation is sufficient for most
+   * objects, but subclasses may override this to customize how they are displayed.
+   *
+   * @param obj      the ObjectInfo for this object
+   * @param canvas   the canvas in which to render this object
+   * @param viewDir  the direction from which this object is being viewed
+   */
+
+  public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
+  {
+    if (!obj.visible)
+      return;
+    Camera theCamera = canvas.getCamera();
+    if (theCamera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
+      return;
+    int renderMode = canvas.getRenderMode();
+    if (renderMode == ViewerCanvas.RENDER_WIREFRAME)
+    {
+      canvas.renderWireframe(obj.getWireframePreview(), theCamera, ViewerCanvas.lineColor);
+      return;
+    }
+    RenderingMesh mesh = obj.getPreviewMesh();
+    if (mesh != null)
+    {
+      VertexShader shader;
+      if (renderMode == ViewerCanvas.RENDER_TRANSPARENT)
+      {
+        shader = new ConstantVertexShader(ViewerCanvas.transparentColor);
+        canvas.renderMeshTransparent(mesh, shader, theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
+      }
+      else
+      {
+        double time = 0.0;
+        if (canvas.getScene() != null)
+          time = canvas.getScene().getTime();
+        if (renderMode == ViewerCanvas.RENDER_FLAT)
+          shader = new FlatVertexShader(mesh, obj.object, time, obj.coords.toLocal().timesDirection(viewDir));
+        else if (renderMode == ViewerCanvas.RENDER_SMOOTH)
+          shader = new SmoothVertexShader(mesh, obj.object, time, obj.coords.toLocal().timesDirection(viewDir));
+        else
+          shader = new TexturedVertexShader(mesh, obj.object, time, obj.coords.toLocal().timesDirection(viewDir)).optimize();
+        canvas.renderMesh(mesh, shader, theCamera, obj.object.isClosed(), null);
+      }
+    }
+    else
+      canvas.renderWireframe(obj.getWireframePreview(), theCamera, ViewerCanvas.lineColor);
+  }
 
   /** The following method writes the object's data to an output stream.  Subclasses should
       override this method, but also call super.writeToFile() to save information about

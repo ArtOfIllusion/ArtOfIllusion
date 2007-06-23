@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,7 +16,6 @@ import artofillusion.animation.distortion.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
-import java.awt.*;
 
 /** ObjectInfo represents information about an object within a Scene: its position, 
     orientation, name, visibility, etc.  The internal properties (i.e. geometry) of
@@ -367,12 +366,5 @@ public class ObjectInfo
   public Skeleton getSkeleton()
   {
     return object.getSkeleton();
-  }
-
-  /** Draw a wireframe image of the object. */
-  
-  public void draw(Graphics g, Camera cam)
-  {
-    Object3D.draw(g, cam, getWireframePreview(), getBounds());
   }
 }

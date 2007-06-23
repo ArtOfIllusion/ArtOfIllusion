@@ -128,6 +128,25 @@ public abstract class ObjectCollection extends Object3D
     return new WireframeMesh(new Vec3 [0], new int [0], new int [0]);
   }
 
+  /**
+   * RenderObject is overridden to render each component object individually.
+   */
+
+  public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
+  {
+    Camera theCamera = canvas.getCamera();
+    Mat4 m = theCamera.getObjectToWorld();
+    Enumeration enm = ((ObjectCollection) obj.object).getObjects(obj, true, canvas.getScene());
+    while (enm.hasMoreElements())
+    {
+      ObjectInfo info = (ObjectInfo) enm.nextElement();
+      CoordinateSystem coords = info.coords.duplicate();
+      coords.transformCoordinates(m);
+      theCamera.setObjectTransform(coords.fromLocal());
+      info.object.renderObject(info, canvas, info.coords.toLocal().timesDirection(viewDir));
+    }
+  }
+
   /** For simplicity, just assume that the object can be converted approximately. */
   
   public int canConvertToTriangleMesh()

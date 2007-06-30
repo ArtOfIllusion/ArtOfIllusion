@@ -43,7 +43,7 @@ public class ToolPalette extends CustomWidget
     addEventLink(MouseMovedEvent.class, this, "mouseMoved");
     addEventLink(RepaintEvent.class, this, "paint");
     addEventLink(ToolTipEvent.class, this, "showToolTip");
-    setBackground(ModellingApp.APP_BACKGROUND_COLOR);
+    setBackground(ThemeManager.getPaletteBackgroundColor());
   }
 
   /** Add a new tool. */

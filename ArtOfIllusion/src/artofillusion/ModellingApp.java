@@ -43,7 +43,6 @@ public class ModellingApp
   public static final String MAJOR_VERSION = "2.5";
   public static final String VERSION = MAJOR_VERSION+"ea2";
   public static final double DIST_TO_SCREEN = 20.0;
-  public static final Color APP_BACKGROUND_COLOR = new Color(228, 228, 243);
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
   public static final ImageIcon APP_ICON;

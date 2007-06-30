@@ -75,7 +75,7 @@ public class UIUtilities
   
   public static void applyDefaultBackground(Widget w)
   {
-    applyBackground(w, ModellingApp.APP_BACKGROUND_COLOR);
+    applyBackground(w, ThemeManager.getAppBackgroundColor());
   }
 
   /** Set up a Widget and all of its children to have a specific background color. */

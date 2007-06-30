@@ -161,15 +161,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     ObjectPropertiesPanel propertiesPanel = new ObjectPropertiesPanel(this);
     BScrollPane propertiesScroller = new BScrollPane(propertiesPanel, BScrollPane.SCROLLBAR_NEVER, BScrollPane.SCROLLBAR_AS_NEEDED);
     propertiesScroller.getVerticalScrollBar().setUnitIncrement(10);
-    propertiesScroller.setBackground(ModellingApp.APP_BACKGROUND_COLOR);
-    getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DockableWidget(itemTreeScroller, Translate.text("Objects")));
-    getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DockableWidget(propertiesScroller, Translate.text("Properties")), 0, 1);
-    getDockingContainer(BTabbedPane.BOTTOM).addDockableWidget(new DockableWidget(theScore, Translate.text("Score")));
+    propertiesScroller.setBackground(ThemeManager.getAppBackgroundColor());
+    getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DefaultDockableWidget(itemTreeScroller, Translate.text("Objects")));
+    getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DefaultDockableWidget(propertiesScroller, Translate.text("Properties")), 0, 1);
+    getDockingContainer(BTabbedPane.BOTTOM).addDockableWidget(new DefaultDockableWidget(theScore, Translate.text("Score")));
     numViewsShown = 1;
 
     // Build the tool palette.
 
-    tools = new ToolPalette(2, 7);
     EditingTool metaTool, altTool, defaultTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));

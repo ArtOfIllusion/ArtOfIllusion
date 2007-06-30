@@ -1617,6 +1617,22 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     }
   }
 
+  /**
+   * Render an image onto the canvas.
+   *
+   * @param image  the image to render
+   * @param p1     the coordinates of the first corner of the image
+   * @param p2     the coordinates of the second corner of the image
+   * @param p3     the coordinates of the third corner of the image
+   * @param p4     the coordinates of the fourth corner of the image
+   * @param camera the camera from which to draw the image
+   */
+
+  public void renderImage(Image image, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, Camera camera)
+  {
+
+  }
+
   /** This inner class represents an image to be drawn on the canvas. */
 
   private static class ImageRecord

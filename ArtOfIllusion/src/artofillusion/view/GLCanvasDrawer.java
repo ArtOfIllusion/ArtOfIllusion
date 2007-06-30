@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2006 by Peter Eastman
+/* Copyright (C) 2005-2007 by Peter Eastman
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -39,6 +39,9 @@ public class GLCanvasDrawer implements CanvasDrawer
   private FloatBuffer vertBuffer, normBuffer;
   private Shape draggedShape;
   private GLImage template;
+  private WeakHashMap textureMap = new WeakHashMap();
+  private ReferenceQueue textureCleanupQueue = new ReferenceQueue();
+  private HashSet textureReferences = new HashSet();
 
   private static final float COLOR_SCALE = 1.0f/255.0f;
   private static HashMap textImageMap = new HashMap();
@@ -623,6 +626,63 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   public void drawImage(Image image, int x, int y)
   {
+    try
+    {
+      drawImage(getCachedImage(image), x, y);
+    }
+    catch (InterruptedException ex)
+    {
+      ex.printStackTrace();
+      return;
+    }
+  }
+
+  /**
+   * Render an image onto the canvas.
+   *
+   * @param image  the image to render
+   * @param p1     the coordinates of the first corner of the image
+   * @param p2     the coordinates of the second corner of the image
+   * @param p3     the coordinates of the third corner of the image
+   * @param p4     the coordinates of the fourth corner of the image
+   * @param camera the camera from which to draw the image
+   */
+
+  public void renderImage(Image image, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, Camera camera)
+  {
+    GLTexture record;
+    try
+    {
+      record = getCachedTexture(image);
+    }
+    catch (InterruptedException ex)
+    {
+      ex.printStackTrace();
+      return;
+    }
+    prepareView3D(camera);
+    prepareDepthTest(true);
+    prepareCulling(false);
+    prepareShading(false);
+    gl.glEnable(GL.GL_TEXTURE_RECTANGLE_ARB);
+    gl.glBindTexture(GL.GL_TEXTURE_RECTANGLE_ARB, record.getTextureId());
+    gl.glBegin(GL.GL_QUADS);
+    gl.glVertex3d(p1.x, p1.y, p1.z);
+    gl.glTexCoord2d(record.width, 0.0);
+    gl.glVertex3d(p2.x, p2.y, p2.z);
+    gl.glTexCoord2d(record.width, record.height);
+    gl.glVertex3d(p3.x, p3.y, p3.z);
+    gl.glTexCoord2d(0.0, record.height);
+    gl.glVertex3d(p4.x, p4.y, p4.z);
+    gl.glTexCoord2d(0.0, 0.0);
+    gl.glEnd();
+    gl.glDisable(GL.GL_TEXTURE_RECTANGLE_ARB);
+  }
+
+  /** Get a GLImage for an Image, attempting to reuse objects for efficiency. */
+
+  private GLImage getCachedImage(Image image) throws InterruptedException
+  {
     GLImage record = null;
     SoftReference ref = (SoftReference) imageMap.get(image);
     if (ref != null)
@@ -631,18 +691,25 @@ public class GLCanvasDrawer implements CanvasDrawer
     {
       // Grab the pixels from the image and cache them.
 
-      try
-      {
-        record = new GLImage(image);
-        imageMap.put(image, new SoftReference(record));
-      }
-      catch (InterruptedException ex)
-      {
-        ex.printStackTrace();
-        return;
-      }
+      record = new GLImage(image);
+      imageMap.put(image, new SoftReference(record));
     }
-    drawImage(record, x, y);
+    return record;
+  }
+
+  /** Get a GLTexture for an Image, attempting to reuse objects for efficiency. */
+
+  private GLTexture getCachedTexture(Image image) throws InterruptedException
+  {
+    GLTexture record = (GLTexture) textureMap.get(image);
+    if (record == null)
+    {
+      // Create a texture from the image and cache it.
+
+      record = new GLTexture(image);
+      textureMap.put(image, record);
+    }
+    return record;
   }
 
   /** Draw an image into the rendered image. */
@@ -762,6 +829,15 @@ public class GLCanvasDrawer implements CanvasDrawer
       if (draggedShape != null)
         drawShape(draggedShape, ViewerCanvas.lineColor);
       draggedShape = null;
+
+      // Clean up unused textures.
+
+      Reference ref;
+      while ((ref = textureCleanupQueue.poll()) != null)
+      {
+        gl.glDeleteTextures(1, new int[] {((TextureReference) ref).textureId}, 0);
+        textureReferences.remove(ref);
+      }
     }
 
     public void displayChanged(GLAutoDrawable drawable, boolean arg1, boolean arg2)
@@ -771,7 +847,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** This inner class represents an image that is ready to be drawn into the GLCanvas. */
 
-  private class GLImage
+  private static class GLImage
   {
     public ByteBuffer data;
     public int width, height;
@@ -800,6 +876,52 @@ public class GLCanvasDrawer implements CanvasDrawer
           dataArray[pos++] = (byte) (argb>>24);
         }
       data = ByteBuffer.wrap(dataArray);
+    }
+  }
+
+  /** This inner class represents an image that is ready to be used as a texture in the GLCanvas. */
+
+  private class GLTexture
+  {
+    public int width, height;
+    private int textureId[];
+
+    /** Create a GLTexture from a regular Image object. */
+
+    public GLTexture(Image image) throws InterruptedException
+    {
+      GLImage glImage = getCachedImage(image);
+      width = glImage.width;
+      height = glImage.height;
+      textureId = new int[1];
+      gl.glGenTextures(1, textureId, 0);
+      gl.glBindTexture(GL.GL_TEXTURE_RECTANGLE_ARB, textureId[0]);
+      gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
+      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
+      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
+      gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+      gl.glTexImage2D(GL.GL_TEXTURE_RECTANGLE_ARB, 0, GL.GL_RGBA, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, glImage.data);
+      textureReferences.add(new TextureReference(this));
+    }
+
+    public int getTextureId()
+    {
+      return textureId[0];
+    }
+  }
+
+  /** This inner class is used for cleaning up textures once they are no longer needed. */
+
+  private class TextureReference extends PhantomReference
+  {
+    private int textureId;
+
+    TextureReference(GLTexture texture)
+    {
+      super(texture, textureCleanupQueue);
+      textureId = texture.getTextureId();
     }
   }
 }

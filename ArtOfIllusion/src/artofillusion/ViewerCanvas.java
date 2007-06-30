@@ -902,6 +902,22 @@ public abstract class ViewerCanvas extends CustomWidget
     drawer.drawImage(image, x, y);
   }
 
+  /**
+   * Render an image onto the canvas.  The image is drawn as a planar rectangle in 3D space,
+   * which you specify by its four corners in clockwise order, starting from the top left.
+   *
+   * @param image  the image to render
+   * @param p1     the coordinates of the first corner of the image
+   * @param p2     the coordinates of the second corner of the image
+   * @param p3     the coordinates of the third corner of the image
+   * @param p4     the coordinates of the fourth corner of the image
+   */
+
+  public void renderImage(Image image, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4)
+  {
+    drawer.renderImage(image, p1, p2, p3, p4, theCamera);
+  }
+
   /** Draw the outline of a Shape into the canvas. */
 
   public void drawShape(Shape shape, Color color)

@@ -32,6 +32,7 @@ import java.util.*;
 import buoyx.docking.*;
 
 import javax.swing.text.*;
+import javax.swing.*;
 
 /** The LayoutWindow class represents the main window for creating and laying out scenes. */
 
@@ -494,6 +495,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     createMenu.add(Translate.menuItem("directionalLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("spotLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("camera", this, "createObjectCommand"));
+    createMenu.add(Translate.menuItem("referenceImage", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("null", this, "createObjectCommand"));
   }
 
@@ -2194,6 +2196,23 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       obj = new SceneCamera();
       name = "Camera "+(CreateCameraTool.counter++);
+    }
+    else if ("referenceImage".equals(type))
+    {
+      BFileChooser fc = new ImageFileChooser(Translate.text("selectReferenceImage"));
+      if (!fc.showDialog(this))
+        return;
+      File f = fc.getSelectedFile();
+      Image image = new ImageIcon(f.getAbsolutePath()).getImage();
+      if (image == null || image.getWidth(null) <= 0 || image.getHeight(null) <= 0)
+      {
+        new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), BStandardDialog.ERROR).showMessageDialog(this);
+        return;
+      }
+      obj = new ReferenceImage(image);
+      name = f.getName();
+      if (name.lastIndexOf('.') > -1)
+        name = name.substring(0, name.lastIndexOf('.'));
     }
     else
     {

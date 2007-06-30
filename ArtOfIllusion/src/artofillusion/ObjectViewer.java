@@ -111,8 +111,11 @@ public abstract class ObjectViewer extends ViewerCanvas
         ObjectInfo obj = theScene.getObject(i);
         if (obj == thisObjectInScene)
           continue;
-        theCamera.setObjectTransform(obj.coords.fromLocal());
-        obj.object.renderObject(obj, this, viewdir);//drawSceneObject(obj, obj.coords);
+        Mat4 objectTransform = obj.coords.fromLocal();
+        if (!useWorldCoords && thisObjectInScene != null)
+          objectTransform = thisObjectInScene.coords.toLocal().times(objectTransform);
+        theCamera.setObjectTransform(objectTransform);
+        obj.object.renderObject(obj, this, viewdir);
       }
     }
 

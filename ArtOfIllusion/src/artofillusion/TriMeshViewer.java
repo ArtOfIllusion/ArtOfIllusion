@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -154,33 +154,15 @@ public class TriMeshViewer extends MeshViewer
     // First, draw any unselected portions of the object.
 
     boolean selected[] = controller.getSelection();
-    if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-      {
-        for (int i = 0; i < v.length; i++)
-          if (!selected[i] && visible[i])
-            drawBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, unselectedColor);
-      }
-    else
-      {
-        for (int i = 0; i < v.length; i++)
-          if (!selected[i] && visible[i])
-            renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, unselectedColor);
-      }
+      for (int i = 0; i < v.length; i++)
+        if (!selected[i] && visible[i])
+          renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, unselectedColor);
 
     // Now draw the selected portions.
 
-    if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-      {
-        for (int i = 0; i < v.length; i++)
-          if (selected[i] && visible[i])
-            drawBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, selectedColor);
-      }
-    else
-      {
-        for (int i = 0; i < v.length; i++)
-          if (selected[i] && visible[i])
-            renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, selectedColor);
-      }
+      for (int i = 0; i < v.length; i++)
+        if (selected[i] && visible[i])
+          renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, selectedColor);
   }
   
   /** Draw the edges of the control mesh. */
@@ -220,12 +202,7 @@ public class TriMeshViewer extends MeshViewer
         Color color = (showSelected ? selectedColor : unselectedColor);
         for (int i = 0; i < e.length; i++)
           if (showSelected == isSelected[i] && !hideEdge[i] && visible[e[i].v1] && visible[e[i].v2])
-          {
-            if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-              drawLine(screenVert[e[i].v1], screenVert[e[i].v2], color);
-            else
-              renderLine(p[e[i].v1], screenZ[e[i].v1]-0.01, p[e[i].v2], screenZ[e[i].v2]-0.01, theCamera, color);
-          }
+            renderLine(p[e[i].v1], screenZ[e[i].v1]-0.01, p[e[i].v2], screenZ[e[i].v2]-0.01, theCamera, color);
       }
     }
     else
@@ -254,12 +231,7 @@ public class TriMeshViewer extends MeshViewer
         {
           int index = projectedEdge[i];
           if (index > -1 && showSelected == isSelected[index] && !hideEdge[index] && visible[e[index].v1] && visible[e[index].v2])
-          {
-            if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-              drawLine(divScreenVert[divEdge[i].v1], divScreenVert[divEdge[i].v2], color);
-            else
-              renderLine(divPos[divEdge[i].v1], divScreenZ[divEdge[i].v1]-0.01, divPos[divEdge[i].v2], divScreenZ[divEdge[i].v2]-0.01, theCamera, color);
-          }
+            renderLine(divPos[divEdge[i].v1], divScreenZ[divEdge[i].v1]-0.01, divPos[divEdge[i].v2], divScreenZ[divEdge[i].v2]-0.01, theCamera, color);
         }
       }
     }

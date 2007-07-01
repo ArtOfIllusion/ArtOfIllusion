@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -135,33 +135,15 @@ public class SplineMeshViewer extends MeshViewer
     // First, draw any unselected portions of the object.
 
     boolean selected[] = controller.getSelection();
-    if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-      {
-        for (int i = 0; i < v.length; i++)
-          if (!selected[i] && visible[i])
-            drawBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, unselectedColor);
-      }
-    else
-      {
-        for (int i = 0; i < v.length; i++)
-          if (!selected[i] && visible[i])
-            renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, unselectedColor);
-      }
+    for (int i = 0; i < v.length; i++)
+      if (!selected[i] && visible[i])
+        renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, unselectedColor);
 
     // Now draw the selected portions.
 
-    if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-      {
-        for (int i = 0; i < v.length; i++)
-          if (selected[i] && visible[i])
-            drawBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, selectedColor);
-      }
-    else
-      {
-        for (int i = 0; i < v.length; i++)
-          if (selected[i] && visible[i])
-            renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, selectedColor);
-      }
+    for (int i = 0; i < v.length; i++)
+      if (selected[i] && visible[i])
+        renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, selectedColor);
   }
   
   /** Draw the edges of the control mesh. */
@@ -178,127 +160,63 @@ public class SplineMeshViewer extends MeshViewer
     int i, j, usize = mesh.getUSize(), vsize = mesh.getVSize();
     boolean uclosed = mesh.isUClosed(), vclosed = mesh.isVClosed();
     boolean selected[] = controller.getSelection();
-    if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
+    if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
       {
-        if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
+        for (i = 0; i < usize; i++)
           {
-            for (i = 0; i < usize; i++)
-              {
-                for (j = 0; j < vsize-1; j++)
-                  drawLine(screenVert[i+j*usize], screenVert[i+(j+1)*usize], unselectedColor);
-                if (vclosed)
-                  drawLine(screenVert[i+j*usize], screenVert[i], unselectedColor);
-              }
-            for (j = 0; j < vsize; j++)
-              {
-                for (i = 0; i < usize-1; i++)
-                  drawLine(screenVert[i+j*usize], screenVert[i+1+j*usize], unselectedColor);
-                if (uclosed)
-                  drawLine(screenVert[i+j*usize], screenVert[j*usize], unselectedColor);
-              }
+            for (j = 0; j < vsize-1; j++)
+              renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
+            if (vclosed)
+              renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
           }
-        else
+        for (j = 0; j < vsize; j++)
           {
-            for (i = 0; i < usize; i++)
-              if (!selected[i])
-                {
-                  for (j = 0; j < vsize-1; j++)
-                    drawLine(screenVert[i+j*usize], screenVert[i+(j+1)*usize], unselectedColor);
-                  if (vclosed)
-                    drawLine(screenVert[i+j*usize], screenVert[i], unselectedColor);
-                }
-            for (j = 0; j < vsize; j++)
-              if (!selected[j+usize])
-                {
-                  for (i = 0; i < usize-1; i++)
-                    drawLine(screenVert[i+j*usize], screenVert[i+1+j*usize], unselectedColor);
-                  if (uclosed)
-                    drawLine(screenVert[i+j*usize], screenVert[j*usize], unselectedColor);
-                }
+            for (i = 0; i < usize-1; i++)
+              renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
+            if (uclosed)
+              renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
           }
       }
     else
       {
-        if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
-          {
-            for (i = 0; i < usize; i++)
-              {
-                for (j = 0; j < vsize-1; j++)
-                  renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
-                if (vclosed)
-                  renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
-              }
-            for (j = 0; j < vsize; j++)
-              {
-                for (i = 0; i < usize-1; i++)
-                  renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
-                if (uclosed)
-                  renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
-              }
-          }
-        else
-          {
-            for (i = 0; i < usize; i++)
-              if (!selected[i])
-                {
-                  for (j = 0; j < vsize-1; j++)
-                    renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
-                  if (vclosed)
-                    renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
-                }
-            for (j = 0; j < vsize; j++)
-              if (!selected[j+usize])
-                {
-                  for (i = 0; i < usize-1; i++)
-                    renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
-                  if (uclosed)
-                    renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
-                }
-          }
+        for (i = 0; i < usize; i++)
+          if (!selected[i])
+            {
+              for (j = 0; j < vsize-1; j++)
+                renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
+              if (vclosed)
+                renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
+            }
+        for (j = 0; j < vsize; j++)
+          if (!selected[j+usize])
+            {
+              for (i = 0; i < usize-1; i++)
+                renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
+              if (uclosed)
+                renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
+            }
       }
 
     // Now draw the selected portions.
 
     if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
       return;
-    if (renderMode == RENDER_WIREFRAME || renderMode == RENDER_TRANSPARENT)
-      {
-        for (i = 0; i < usize; i++)
-          if (selected[i])
-            {
-              for (j = 0; j < vsize-1; j++)
-                drawLine(screenVert[i+j*usize], screenVert[i+(j+1)*usize], selectedColor);
-              if (vclosed)
-                drawLine(screenVert[i+j*usize], screenVert[i], selectedColor);
-            }
-        for (j = 0; j < vsize; j++)
-          if (selected[j+usize])
-            {
-              for (i = 0; i < usize-1; i++)
-                drawLine(screenVert[i+j*usize], screenVert[i+1+j*usize], selectedColor);
-              if (uclosed)
-                drawLine(screenVert[i+j*usize], screenVert[j*usize], selectedColor);
-            }
-      }
-    else
-      {
-        for (i = 0; i < usize; i++)
-          if (selected[i])
-            {
-              for (j = 0; j < vsize-1; j++)
-                renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, selectedColor);
-              if (vclosed)
-                renderLine(v[i+j*usize].r, v[i].r, theCamera, selectedColor);
-            }
-        for (j = 0; j < vsize; j++)
-          if (selected[j+usize])
-            {
-              for (i = 0; i < usize-1; i++)
-                renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, selectedColor);
-              if (uclosed)
-                renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, selectedColor);
-            }
-      }
+    for (i = 0; i < usize; i++)
+      if (selected[i])
+        {
+          for (j = 0; j < vsize-1; j++)
+            renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, selectedColor);
+          if (vclosed)
+            renderLine(v[i+j*usize].r, v[i].r, theCamera, selectedColor);
+        }
+    for (j = 0; j < vsize; j++)
+      if (selected[j+usize])
+        {
+          for (i = 0; i < usize-1; i++)
+            renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, selectedColor);
+          if (uclosed)
+            renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, selectedColor);
+        }
   }
 
   /** When the user presses the mouse, forward events to the current tool as appropriate.

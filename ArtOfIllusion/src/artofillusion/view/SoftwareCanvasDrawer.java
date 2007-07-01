@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion.view;
 
 import artofillusion.*;
+import artofillusion.texture.*;
 import artofillusion.math.*;
 import buoy.event.*;
 
@@ -33,6 +34,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   private static Vec2 reuseVec2[];
   private static WeakHashMap imageMap = new WeakHashMap();
+  private static WeakHashMap imageMeshMap = new WeakHashMap();
 
   private static final int MODE_COPY = 0;
   private static final int MODE_ADD = 1;
@@ -1576,25 +1578,9 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   public void drawImage(Image image, int x, int y)
   {
-    ImageRecord record = null;
-    SoftReference ref = (SoftReference) imageMap.get(image);
-    if (ref != null)
-      record = (ImageRecord) ref.get();
+    ImageRecord record = getCachedImage(image);
     if (record == null)
-    {
-      // Grab the pixels from the image and cache them.
-
-      try
-      {
-        record = new ImageRecord(image);
-        imageMap.put(image, new SoftReference(record));
-      }
-      catch (InterruptedException ex)
-      {
-        ex.printStackTrace();
-        return;
-      }
-    }
+      return;
 
     // Draw the image onto the canvas.
 
@@ -1618,7 +1604,12 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   }
 
   /**
-   * Render an image onto the canvas.
+   * Render an image onto the canvas.  This method uses a ridiculously inefficient method for
+   * rendering the image.  So why does it work that way?  First, because I was lazy and didn't
+   * want to take the trouble to actually write a proper rasterizer.  Second, because most
+   * people will be using the OpenGL renderer instead.  And third, because renderImage() is currently
+   * only used for reference images, all of which means that the speed of this method won't be very
+   * important for very many people.
    *
    * @param image  the image to render
    * @param p1     the coordinates of the first corner of the image
@@ -1630,7 +1621,90 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   public void renderImage(Image image, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, Camera camera)
   {
+    // Get a cached ImageRecord for this image.
 
+    final ImageRecord record = getCachedImage(image);
+    if (record == null)
+      return;
+
+    // Get a cached RenderingMesh for this image.
+
+    RenderingMesh mesh = null;
+    SoftReference ref = (SoftReference) imageMeshMap.get(image);
+    if (ref != null)
+      mesh = (RenderingMesh) ref.get();
+    if (mesh == null)
+    {
+      // We don't have a cached one, so we need to create a new one.
+
+      int width = record.width+1;
+      int height = record.height+1;
+      Vec3 vert[] = new Vec3[width*height];
+      Vec3 norm[] = new Vec3[] {new Vec3()};
+      RenderingTriangle tri[] = new RenderingTriangle[2*record.width*record.height];
+      Vec3 dx = p2.minus(p1).times(1.0/record.width);
+      Vec3 dy = p4.minus(p1).times(1.0/record.height);
+      for (int i = 0; i < width; i++)
+      {
+        for (int j = 0; j < height; j++)
+          vert[i+j*width] = p1.plus(dx.times(i)).plus(dy.times(j));
+      }
+      for (int i = 0; i < record.width; i++)
+        for (int j = 0; j < record.height; j++)
+        {
+          int index = 2*(i+(record.height-j-1)*record.width);
+          tri[index] = new UniformTriangle(i+j*width, i+1+j*width, i+1+(j+1)*width, 0, 0, 0);
+          tri[index+1] = new UniformTriangle(i+j*width, i+1+(j+1)*width, i+(j+1)*width, 0, 0, 0);
+        }
+      mesh = new RenderingMesh(vert, norm, tri, null, null);
+      imageMeshMap.put(image, new SoftReference(mesh));
+    }
+
+    // Render the image.
+
+    renderMesh(mesh, new VertexShader() {
+      public void getColor(int face, int vertex, RGBColor color)
+      {
+        color.setARGB(record.pixel[face/2]);
+      }
+      public boolean isUniformFace(int face)
+      {
+        return true;
+      }
+      public boolean isUniformTexture()
+      {
+        return false;
+      }
+      public void getTextureSpec(TextureSpec spec)
+      {
+      }
+    }, camera, false, null);
+  }
+
+  /** Get an ImageRecord for an Image, attempting to cache objects for efficiency. */
+
+  private ImageRecord getCachedImage(Image image)
+  {
+    ImageRecord record = null;
+    SoftReference ref = (SoftReference) imageMap.get(image);
+    if (ref != null)
+      record = (ImageRecord) ref.get();
+    if (record == null)
+    {
+      // Grab the pixels from the image and cache them.
+
+      try
+      {
+        record = new ImageRecord(image);
+        imageMap.put(image, new SoftReference(record));
+      }
+      catch (InterruptedException ex)
+      {
+        ex.printStackTrace();
+        return null;
+      }
+    }
+    return record;
   }
 
   /** This inner class represents an image to be drawn on the canvas. */

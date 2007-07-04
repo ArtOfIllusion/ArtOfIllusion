@@ -360,30 +360,24 @@ public class PluginRegistry
 
     // Try to find a method to invoke.
 
-    int numArgs = (args == null ? 0 : args.length);
     Method methods[] = info.plugin.getClass().getMethods();
     for (int i = 0; i < methods.length; i++)
     {
       if (!methods[i].getName().equals(info.method))
         continue;
-      Class types[] = methods[i].getParameterTypes();
-      if (types.length != numArgs)
-        continue;
-      boolean valid = true;
-      for (int j = 0; valid && j < types.length; j++)
-        valid = (args[j] == null || types[j].isInstance(args[j]));
-      if (valid)
+      try
       {
-        try
-        {
-          return methods[i].invoke(info.plugin, args);
-        }
-        catch (IllegalAccessException ex)
-        {
-          // This should be impossible, since getMethods() only returns public methods.
+        return methods[i].invoke(info.plugin, args);
+      }
+      catch (IllegalArgumentException ex)
+      {
+        // Possibly the wrong version of an overloaded method, so keep trying.
+      }
+      catch (IllegalAccessException ex)
+      {
+        // This should be impossible, since getMethods() only returns public methods.
 
-          throw new InvocationTargetException(ex);
-        }
+        throw new InvocationTargetException(ex);
       }
     }
     throw new NoSuchMethodException("No method found which matches the specified name and argument types.");

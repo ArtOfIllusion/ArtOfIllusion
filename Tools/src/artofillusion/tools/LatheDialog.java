@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2005 by Peter Eastman
+/* Copyright (C) 2001-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -118,10 +118,29 @@ public class LatheDialog extends BDialog
   
   private void makeObject()
   {
+    int segments = (int) segmentsField.getValue();
+    double angle = angleSlider.getValue(), radius = radiusField.getValue();
+    int axis;
+    if (axisGroup.getSelection() == xBox)
+      axis = LatheTool.X_AXIS;
+    else if (axisGroup.getSelection() == yBox)
+      axis = LatheTool.Y_AXIS;
+    else if (axisGroup.getSelection() == zBox)
+      axis = LatheTool.Z_AXIS;
+    else
+      axis = LatheTool.AXIS_THROUGH_ENDS;
+    SplineMesh mesh = (SplineMesh) latheCurve(theCurve, axis, segments, angle, radius);
+    Texture tex = window.getScene().getDefaultTexture();
+    mesh.setTexture(tex, tex.getDefaultMapping());
+    preview.setObject(mesh);
+    preview.repaint();
+  }
+
+  protected static Mesh latheCurve(Curve theCurve, int latheAxis, int segments, double angle, double latheRadius)
+  {
     MeshVertex vert[] = theCurve.getVertices();
     Vec3 axis, radius, center = new Vec3();
-    int segments = (int) segmentsField.getValue();
-    double angle = angleSlider.getValue(), angleStep = angle*Math.PI/(segments*180.0);
+    double angleStep = angle*Math.PI/(segments*180.0);
     boolean closed = false;
 
     if (angle == 360.0)
@@ -130,23 +149,23 @@ public class LatheDialog extends BDialog
       segments++;
 
     // Determine the rotation axis.
-    
-    if (axisGroup.getSelection() == xBox)
+
+    if (latheAxis == LatheTool.X_AXIS)
       {
         axis = Vec3.vx();
         radius = Vec3.vy();
       }
-    else if (axisGroup.getSelection() == yBox)
+    else if (latheAxis == LatheTool.Y_AXIS)
       {
         axis = Vec3.vy();
         radius = Vec3.vx();
       }
-    else if (axisGroup.getSelection() == zBox)
+    else if (latheAxis == LatheTool.Z_AXIS)
       {
         axis = Vec3.vz();
         radius = Vec3.vx();
       }
-    else
+    else if (latheAxis == LatheTool.AXIS_THROUGH_ENDS)
       {
         axis = vert[0].r.minus(vert[vert.length-1].r);
         axis.normalize();
@@ -159,10 +178,12 @@ public class LatheDialog extends BDialog
         radius.subtract(axis.times(axis.dot(center)));
         radius.normalize();
       }
-    center.add(radius.times(-radiusField.getValue()));
+    else
+      throw new IllegalArgumentException("Illegal value specified for lathe axis");
+    center.add(radius.times(-latheRadius));
 
     // Calculate the vertices of the lathed surface.
-    
+
     Vec3 v[][] = new Vec3 [segments][vert.length], cm = new Vec3();
     CoordinateSystem coords = new CoordinateSystem(center, axis, radius);
     for (int i = 0; i < segments; i++)
@@ -174,9 +195,9 @@ public class LatheDialog extends BDialog
             cm.add(v[i][j]);
           }
       }
-    
+
     // Create the arrays of smoothness values.
-    
+
     float usmooth[] = new float [segments], vsmooth[] = new float [vert.length];
     float s[] = theCurve.getSmoothness();
     for (int i = 0; i < segments; i++)
@@ -195,16 +216,13 @@ public class LatheDialog extends BDialog
         vsmooth[i] = s[i];
 
     // Center it.
-    
+
     cm.scale(1.0/(segments*vert.length));
     for (int i = 0; i < v.length; i++)
       for (int j = 0; j < v[i].length; j++)
         v[i][j].subtract(cm);
     SplineMesh mesh = new SplineMesh(v, usmooth, vsmooth, smoothMethod, closed, theCurve.isClosed());
-    Texture tex = window.getScene().getDefaultTexture();
-    mesh.setTexture(tex, tex.getDefaultMapping());
     mesh.makeRightSideOut();
-    preview.setObject(mesh);
-    preview.repaint();
+    return mesh;
   }
 }

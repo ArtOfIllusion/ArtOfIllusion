@@ -9,8 +9,13 @@ This plugin contains the standard modeling tools which are included with Art of 
   </comments>
   <plugin class="artofillusion.tools.ArrayTool"/>
   <plugin class="artofillusion.tools.CSGTool"/>
-  <plugin class="artofillusion.tools.ExtrudeTool"/>
-  <plugin class="artofillusion.tools.LatheTool"/>
+  <plugin class="artofillusion.tools.ExtrudeTool">
+    <export method="extrudeCurve" id="artofillusion.tools.ExtrudeTool.extrudeCurve"/>
+    <export method="extrudeMesh" id="artofillusion.tools.ExtrudeTool.extrudeMesh"/>
+  </plugin>
+  <plugin class="artofillusion.tools.LatheTool">
+    <export method="latheCurve" id="artofillusion.tools.LatheTool.latheCurve"/>
+  </plugin>
   <plugin class="artofillusion.tools.SkinTool"/>
   <plugin class="artofillusion.tools.TubeTool"/>
 </extension>

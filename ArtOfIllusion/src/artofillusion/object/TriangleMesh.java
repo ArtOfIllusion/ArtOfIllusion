@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -3569,7 +3569,7 @@ groups:     do
     public Keyframe duplicate(Object owner)
     {
       TriangleMeshKeyframe k = new TriangleMeshKeyframe();
-      k.mesh = (TriangleMesh) owner;
+      k.mesh = (TriangleMesh) ((ObjectInfo) owner).object;
       k.skeleton = skeleton.duplicate();
       k.vertPos = new Vec3 [vertPos.length];
       k.vertSmoothness = new float [vertSmoothness.length];

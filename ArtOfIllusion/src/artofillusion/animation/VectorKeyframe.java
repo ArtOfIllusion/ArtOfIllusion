@@ -1,5 +1,3 @@
-/* This class is a vector valued keyframe. */
-
 /* Copyright (C) 2001-2002 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,9 +10,10 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.io.*;
+
+/** This class is a vector valued keyframe. */
 
 public class VectorKeyframe extends Vec3 implements Keyframe
 {

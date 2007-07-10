@@ -1,6 +1,3 @@
-/* This is a keyframes which contains no information.  It is occasionally useful as a
-   placeholder. */
-
 /* Copyright (C) 2001-2002 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -13,8 +10,10 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import java.io.*;
+
+/** This is a keyframes which contains no information.  It is occasionally useful as a
+    placeholder. */
 
 public class NullKeyframe implements Keyframe
 {

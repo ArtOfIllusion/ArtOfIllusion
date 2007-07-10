@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2003 by Peter Eastman
+/* Copyright (C) 2001-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -379,9 +379,10 @@ public class CSGObject extends Object3D
   public void applyPoseKeyframe(Keyframe k)
   {
     CSGKeyframe key = (CSGKeyframe) k;
-    
-    obj1.object.applyPoseKeyframe(key.key1);
-    obj2.object.applyPoseKeyframe(key.key2);
+    if (key.key1 != null)
+      obj1.object.applyPoseKeyframe(key.key1);
+    if (key.key2 != null)
+      obj2.object.applyPoseKeyframe(key.key2);
     obj1.coords.copyCoords(key.coords1);
     obj2.coords.copyCoords(key.coords2);
     cachedMesh = null;
@@ -390,7 +391,7 @@ public class CSGObject extends Object3D
   
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
-  public void editKeyframe(EditingWindow parent, final Keyframe k, ObjectInfo info)
+  public void editKeyframe(EditingWindow parent, final Keyframe k, final ObjectInfo info)
   {
     final CSGObject copy = (CSGObject) duplicate();
     copy.applyPoseKeyframe(k);
@@ -398,7 +399,7 @@ public class CSGObject extends Object3D
       public void run()
       {
         CSGKeyframe original = (CSGKeyframe) k;
-        CSGKeyframe edited = (CSGKeyframe) copy.getPoseKeyframe().duplicate(this);
+        CSGKeyframe edited = (CSGKeyframe) copy.getPoseKeyframe().duplicate(info);
         original.coords1 = edited.coords1;
         original.coords2 = edited.coords2;
         original.key1 = edited.key1;
@@ -434,7 +435,8 @@ public class CSGObject extends Object3D
   
     public Keyframe duplicate(Object owner)
     {
-      return new CSGKeyframe(key1.duplicate(owner), key2.duplicate(owner), coords1.duplicate(), coords2.duplicate());
+      CSGObject csg = (CSGObject) ((ObjectInfo) owner).object;
+      return new CSGKeyframe(key1.duplicate(csg.obj1), key2.duplicate(csg.obj2), coords1.duplicate(), coords2.duplicate());
     }
   
     /** Get the list of graphable values for this keyframe. */
@@ -594,9 +596,9 @@ public class CSGObject extends Object3D
       if (!(k instanceof CSGKeyframe))
         return false;
       CSGKeyframe key = (CSGKeyframe) k;
-      if (!key1.equals(key.key1))
+      if (key1 != key.key1 && (key1 == null || key.key1 == null || !key1.equals(key.key1)))
         return false;
-      if (!key2.equals(key.key2))
+      if (key2 != key.key2 && (key2 == null || key.key2 == null || !key2.equals(key.key2)))
         return false;
       if (!coords1.getOrigin().equals(key.coords1.getOrigin()))
         return false;

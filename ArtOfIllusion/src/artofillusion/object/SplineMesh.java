@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1376,7 +1376,7 @@ public class SplineMesh extends Object3D implements Mesh
     public Keyframe duplicate(Object owner)
     {
       SplineMeshKeyframe k = new SplineMeshKeyframe();
-      k.mesh = (SplineMesh) owner;
+      k.mesh = (SplineMesh) ((ObjectInfo) owner).object;
       k.skeleton = skeleton.duplicate();
       k.vertPos = new Vec3 [vertPos.length];
       k.usmoothness = new float [usmoothness.length];

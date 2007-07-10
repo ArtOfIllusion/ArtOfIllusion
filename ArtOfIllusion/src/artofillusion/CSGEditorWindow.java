@@ -216,15 +216,22 @@ public class CSGEditorWindow extends ObjectEditorWindow
   void editObjectCommand()
   {
     int sel[] = theScene.getSelection();
-    Object3D obj;
-    
+
     if (sel.length != 1)
       return;
-    obj = theScene.getObject(sel[0]).object;
+    final Object3D obj = theScene.getObject(sel[0]).object;
     if (obj.isEditable())
     {
-      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
-      obj.edit(this, theScene.getObject(sel[0]), null);
+      final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
+      obj.edit(this, theScene.getObject(sel[0]), new Runnable() {
+        public void run()
+        {
+          setUndoRecord(undo);
+          theScene.objectModified(obj);
+          updateImage();
+          updateMenus();
+        }
+      } );
     }
   }
   

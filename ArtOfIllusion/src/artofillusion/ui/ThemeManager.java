@@ -136,6 +136,7 @@ public class ThemeManager {
       public final boolean classicToolBarButtons;
       public final PluginRegistry.PluginResource resource;
       public final String pathRoot;
+      public final boolean selectable;
 
       private ThemeInfo(PluginRegistry.PluginResource resource) throws IOException, SAXException, ParserConfigurationException
       {
@@ -160,6 +161,8 @@ public class ThemeManager {
         author = (node != null ? node.getFirstChild().getNodeValue() : "");
         node = getNodeFromNodeList(themeNodeList, "description");
         description = (node != null ? node.getFirstChild().getNodeValue() : "");
+        node = getNodeFromNodeList(themeNodeList, "selectable");
+        selectable = (node != null ? Boolean.valueOf(node.getFirstChild().getNodeValue()).booleanValue() : true);
         node = getNodeFromNodeList(themeNodeList, "button");
         if (node != null) {
             String className = getAttribute(node, "class");
@@ -176,7 +179,7 @@ public class ThemeManager {
             buttonClass = cls;
             buttonProperties = properties;
             s = getAttribute(node, "useintoolbars");
-            classicToolBarButtons = (s != null ? !Boolean.parseBoolean(s) : false);
+            classicToolBarButtons = (s != null ? !Boolean.valueOf(s).booleanValue() : false);
         }
         else
         {

@@ -26,6 +26,7 @@ public class PreferencesWindow
   private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, displayChoice, localeChoice, themeChoice, colorChoice, toolChoice;
   private ValueField interactiveTolField, undoField;
   private BCheckBox glBox, backupBox;
+  private List themes;
   private static int lastTab;
 
   public PreferencesWindow(BFrame parent)
@@ -73,7 +74,7 @@ public class PreferencesWindow
     prefs.setUseOpenGL(glBox.getState());
     prefs.setKeepBackupFiles(backupBox.getState());
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
-    ThemeManager.setSelectedTheme((ThemeManager.ThemeInfo) ThemeManager.getThemes().get(themeChoice.getSelectedIndex()));
+    ThemeManager.setSelectedTheme((ThemeManager.ThemeInfo) themes.get(themeChoice.getSelectedIndex()));
     ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[colorChoice.getSelectedIndex()]);
     prefs.savePreferences();
     keystrokePanel.saveChanges();
@@ -115,7 +116,21 @@ public class PreferencesWindow
       Translate.text("menu.texturedDisplay")
     });
     displayChoice.setSelectedIndex(prefs.getDefaultDisplayMode());
-    final List themes = ThemeManager.getThemes();
+    List allThemes = ThemeManager.getThemes();
+    themes = new ArrayList();
+    for (int i = 0; i < allThemes.size(); i++)
+    {
+      ThemeManager.ThemeInfo theme = (ThemeManager.ThemeInfo) allThemes.get(i);
+      if (theme.selectable)
+        themes.add(theme);
+    }
+    Collections.sort(themes, new Comparator()
+    {
+      public int compare(Object o1, Object o2)
+      {
+        return ((ThemeManager.ThemeInfo) o1).getName().compareTo(((ThemeManager.ThemeInfo) o2).getName());
+      }
+    });
     String themeNames[] = new String[themes.size()];
     for (int i = 0; i < themeNames.length; i++)
       themeNames[i] = ((ThemeManager.ThemeInfo) themes.get(i)).getName();

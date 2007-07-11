@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,7 +23,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.zip.*;
 
-/** The Scene class describes a collection of objects, arranged relative to each other. */
+/** The Scene class describes a collection of objects, arranged relative to each other to
+    form a scene, as well as the available textures and materials, environment options, etc. */
 
 public class Scene
 {
@@ -61,7 +62,7 @@ public class Scene
     ambientColor = new RGBColor(0.3f, 0.3f, 0.3f);
     environColor = new RGBColor(0.0f, 0.0f, 0.0f);
     environTexture = defTex;
-    environMapping = defTex.getDefaultMapping();
+    environMapping = defTex.getDefaultMapping(new Sphere(1.0, 1.0, 1.0));
     environParamValue = new ParameterValue [0];
     environMode = ENVIRON_SOLID;
     fogColor = new RGBColor(0.3f, 0.3f, 0.3f);
@@ -425,7 +426,7 @@ public class Scene
         info.addTrack(new RotationTrack(info), 1);
       }
     if (info.object.canSetTexture() && info.object.getTextureMapping() == null)
-      info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping());
+      info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping(info.object));
     info.object.sceneChanged(info, this);
     objects.insertElementAt(info, index);
     if (undo != null)
@@ -526,7 +527,7 @@ public class Scene
       {
         ObjectInfo obj = (ObjectInfo) objects.elementAt(i);
         if (obj.object.getTexture() == tex)
-          obj.setTexture(def, def.getDefaultMapping());
+          obj.setTexture(def, def.getDefaultMapping(obj.object));
       }
   }
   
@@ -1098,7 +1099,7 @@ public class Scene
       {
         environColor = new RGBColor(in);
         environTexture = (Texture) textures.elementAt(0);
-        environMapping = environTexture.getDefaultMapping();
+        environMapping = environTexture.getDefaultMapping(new Sphere(1.0, 1.0, 1.0));
         environParamValue = new ParameterValue [0];
       }
     else
@@ -1107,12 +1108,13 @@ public class Scene
         if (texIndex == -1)
           {
             // This is a layered texture.
-            
-            environTexture = new LayeredTexture();
+
+            Object3D sphere = new Sphere(1.0, 1.0, 1.0);
+            environTexture = new LayeredTexture(sphere);
             String mapClassName = in.readUTF();
             if (!LayeredMapping.class.getName().equals(mapClassName))
               throw new InvalidObjectException("");
-            environMapping = environTexture.getDefaultMapping();
+            environMapping = environTexture.getDefaultMapping(sphere);
             ((LayeredMapping) environMapping).readFromFile(in, this);
           }
         else

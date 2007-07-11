@@ -11,6 +11,7 @@
 package artofillusion.texture;
 
 import artofillusion.*;
+import artofillusion.object.*;
 import artofillusion.image.*;
 import buoy.widget.*;
 import java.io.*;
@@ -23,15 +24,16 @@ public class LayeredTexture extends Texture
 {
   LayeredMapping mapping;
   
-  public LayeredTexture()
+  public LayeredTexture(Object3D obj)
   {
-    mapping = new LayeredMapping(this);
+    mapping = new LayeredMapping(obj, this);
     name = "";
   }
     
   public LayeredTexture(LayeredMapping map)
   {
     mapping = map;
+    mapping.theTexture = this;
     name = "";
   }
 
@@ -56,7 +58,7 @@ public class LayeredTexture extends Texture
 
   /** Every LayeredTexture has a unique LayeredMapping object associated with it. */
 
-  public TextureMapping getDefaultMapping()
+  public TextureMapping getDefaultMapping(Object3D object)
   {
     return mapping;
   }

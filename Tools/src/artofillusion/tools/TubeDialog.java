@@ -93,7 +93,7 @@ public class TubeDialog extends BDialog
     theTube = new Tube(theCurve, thickness, endsStyle);
     ObjectInfo tubeInfo = new ObjectInfo(theTube, new CoordinateSystem(), "");
     Texture tex = window.getScene().getDefaultTexture();
-    tubeInfo.setTexture(tex, tex.getDefaultMapping());
+    tubeInfo.setTexture(tex, tex.getDefaultMapping(theTube));
     preview.setObject(theTube);
     preview.repaint();
   }

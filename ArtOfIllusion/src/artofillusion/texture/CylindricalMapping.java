@@ -30,9 +30,9 @@ public class CylindricalMapping extends NonlinearMapping2D
   boolean transform;
   TextureParameter xparam, yparam, zparam;
 
-  public CylindricalMapping(Texture theTexture)
+  public CylindricalMapping(Object3D obj, Texture theTexture)
   {
-    super(theTexture);
+    super(obj, theTexture);
     coords = new CoordinateSystem(new Vec3(), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = 360.0;
     yscale = 1.0;
@@ -311,12 +311,12 @@ public class CylindricalMapping extends NonlinearMapping2D
 
   public TextureMapping duplicate()
   {
-    return duplicate(texture);
+    return duplicate(object, texture);
   }
 
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    CylindricalMapping map = new CylindricalMapping(tex);
+    CylindricalMapping map = new CylindricalMapping(obj, tex);
     
     map.coords = coords.duplicate();
     map.dy = dy;
@@ -384,9 +384,9 @@ public class CylindricalMapping extends NonlinearMapping2D
     return new Editor(obj, preview);
   }
   
-  public CylindricalMapping(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+  public CylindricalMapping(DataInputStream in, Object3D obj, Texture theTexture) throws IOException, InvalidObjectException
   {
-    super(theTexture);
+    super(obj, theTexture);
 
     short version = in.readShort();
     if (version < 0 || version > 1)

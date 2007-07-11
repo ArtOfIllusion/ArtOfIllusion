@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2002-2005 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,9 +31,9 @@ public class ProjectionMapping extends Mapping2D
   int numTextureParams;
   TextureParameter xparam, yparam, zparam;
 
-  public ProjectionMapping(Texture theTexture)
+  public ProjectionMapping(Object3D theObject, Texture theTexture)
   {
-    super(theTexture);
+    super(theObject, theTexture);
     coords = new CoordinateSystem(new Vec3(), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = yscale = 1.0;
     dx = dy = -0.5;
@@ -263,12 +263,12 @@ public class ProjectionMapping extends Mapping2D
 
   public TextureMapping duplicate()
   {
-    return duplicate(texture);
+    return duplicate(object, texture);
   }
 
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    ProjectionMapping map = new ProjectionMapping(tex);
+    ProjectionMapping map = new ProjectionMapping(obj, tex);
     
     map.coords = coords.duplicate();
     map.dx = dx;
@@ -338,9 +338,9 @@ public class ProjectionMapping extends Mapping2D
     return new Editor(obj, preview);
   }
   
-  public ProjectionMapping(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+  public ProjectionMapping(DataInputStream in, Object3D theObject, Texture theTexture) throws IOException, InvalidObjectException
   {
-    super(theTexture);
+    super(theObject, theTexture);
 
     short version = in.readShort();
     if (version < 0 || version > 1)
@@ -386,7 +386,6 @@ public class ProjectionMapping extends Mapping2D
       
       // Add the various components to the Panel.
       
-      LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
       setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
       add(new BLabel(Translate.text("Scale")+":"), 0, 0, 6, 1);
       add(new BLabel("X"), 0, 1);

@@ -131,7 +131,7 @@ public class LatheDialog extends BDialog
       axis = LatheTool.AXIS_THROUGH_ENDS;
     SplineMesh mesh = (SplineMesh) latheCurve(theCurve, axis, segments, angle, radius);
     Texture tex = window.getScene().getDefaultTexture();
-    mesh.setTexture(tex, tex.getDefaultMapping());
+    mesh.setTexture(tex, tex.getDefaultMapping(mesh));
     preview.setObject(mesh);
     preview.repaint();
   }

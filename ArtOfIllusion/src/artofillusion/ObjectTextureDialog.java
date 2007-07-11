@@ -76,8 +76,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     else
     {
-      layeredTex = new LayeredTexture();
-      layeredMap = (LayeredMapping) layeredTex.getDefaultMapping();
+      layeredTex = new LayeredTexture(editObj.object);
+      layeredMap = (LayeredMapping) layeredTex.getDefaultMapping(editObj.object);
     }
 
     // Add the title and combo box at the top.
@@ -429,7 +429,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].object, obj[i].object.duplicate()});
       if (editObj.object.getTexture() instanceof LayeredTexture)
       {
-        LayeredMapping m = (LayeredMapping) editObj.object.getTextureMapping().duplicate();
+        LayeredMapping m = (LayeredMapping) editObj.object.getTextureMapping().duplicate(obj[i].object, editObj.object.getTexture());
         obj[i].setTexture(new LayeredTexture(m), m);
       }
       else
@@ -489,7 +489,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     {
       texList.setSelected(0, true);
       Texture tex = scene.getDefaultTexture();
-      editObj.setTexture(tex, tex.getDefaultMapping());
+      editObj.setTexture(tex, tex.getDefaultMapping(editObj.object));
       updateComponents();
       layoutSimple();
       pack();
@@ -539,7 +539,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       if (tex == oldTexture)
         editObj.setTexture(tex, oldMapping.duplicate());
       else
-        editObj.setTexture(tex, tex.getDefaultMapping());
+        editObj.setTexture(tex, tex.getDefaultMapping(editObj.object));
       preview.setTexture(tex, editObj.object.getTextureMapping());
     }
     renderPreview();
@@ -624,7 +624,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     else if (editObj.object.getTexture() == tex)
     {
-      editObj.setTexture(scene.getDefaultTexture(), scene.getDefaultTexture().getDefaultMapping());
+      editObj.setTexture(scene.getDefaultTexture(), scene.getDefaultTexture().getDefaultMapping(editObj.object));
       preview.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
       renderPreview();
       updateComponents();

@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,9 +29,9 @@ public class LinearMaterialMapping extends MaterialMapping
   double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
   double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
 
-  public LinearMaterialMapping(Material3D theMaterial)
+  public LinearMaterialMapping(Object3D theObject, Material3D theMaterial)
   {
-    super(theMaterial);
+    super(theObject, theMaterial);
     coords = new CoordinateSystem(new Vec3(), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = yscale = zscale = 1.0;
     dx = dy = dz = 0.0;
@@ -129,9 +129,7 @@ public class LinearMaterialMapping extends MaterialMapping
 
   public void getMaterialSpec(Vec3 pos, MaterialSpec spec, double size, double time)
   {
-    double s, t;
-    
-    ((Material3D) material).getMaterialSpec(spec, pos.x*ax+pos.y*bx+pos.z*cx-dx, 
+    ((Material3D) material).getMaterialSpec(spec, pos.x*ax+pos.y*bx+pos.z*cx-dx,
 	pos.x*ay+pos.y*by+pos.z*cy-dy, 
 	pos.x*az+pos.y*bz+pos.z*cz-dz, 
 	size*matScaleX, size*matScaleY, size*matScaleZ, time);
@@ -139,12 +137,12 @@ public class LinearMaterialMapping extends MaterialMapping
 
   public MaterialMapping duplicate()
   {
-    return duplicate(material);
+    return duplicate(object, material);
   }
   
-  public MaterialMapping duplicate(Material mat)
+  public MaterialMapping duplicate(Object3D obj, Material mat)
   {
-    LinearMaterialMapping map = new LinearMaterialMapping((Material3D) mat);
+    LinearMaterialMapping map = new LinearMaterialMapping(obj, (Material3D) mat);
     
     map.coords = coords.duplicate();
     map.dx = dx;
@@ -176,9 +174,9 @@ public class LinearMaterialMapping extends MaterialMapping
     return new Editor(obj, preview);
   }
   
-  public LinearMaterialMapping(DataInputStream in, Material theMaterial) throws IOException, InvalidObjectException
+  public LinearMaterialMapping(DataInputStream in, Object3D theObject, Material theMaterial) throws IOException, InvalidObjectException
   {
-    super(theMaterial);
+    super(theObject, theMaterial);
 
     short version = in.readShort();
     if (version != 0)

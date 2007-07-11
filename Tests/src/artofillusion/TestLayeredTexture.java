@@ -12,6 +12,7 @@ package artofillusion;
 
 import junit.framework.*;
 import artofillusion.texture.*;
+import artofillusion.object.*;
 
 public class TestLayeredTexture extends TestCase
 {
@@ -19,8 +20,9 @@ public class TestLayeredTexture extends TestCase
   {
     // Create a layered texture.
 
-    LayeredTexture tex = new LayeredTexture();
-    LayeredMapping map = new LayeredMapping(tex);
+    Object3D obj = new Sphere(1.0, 1.0, 1.0);
+    LayeredTexture tex = new LayeredTexture(obj);
+    LayeredMapping map = new LayeredMapping(obj, tex);
     tex.setMapping(map);
     UniformTexture t1 = new UniformTexture();
     UniformTexture t2 = new UniformTexture();

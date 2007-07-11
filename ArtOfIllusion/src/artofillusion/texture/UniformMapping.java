@@ -22,16 +22,23 @@ import java.io.*;
 
 public class UniformMapping extends TextureMapping
 {
+  Object3D object;
   UniformTexture texture;
   
-  public UniformMapping(Texture theTexture)
+  public UniformMapping(Object3D theObject, Texture theTexture)
   {
+    object = theObject;
     texture = (UniformTexture) theTexture;
   }
 
   public Texture getTexture()
   {
     return texture;
+  }
+
+  public Object3D getObject()
+  {
+    return object;
   }
 
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
@@ -76,14 +83,14 @@ public class UniformMapping extends TextureMapping
 
   public TextureMapping duplicate()
   {
-    UniformMapping map = new UniformMapping(texture);
+    UniformMapping map = new UniformMapping(object, texture);
     map.setAppliesTo(appliesTo());
     return map;
   }
   
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    UniformMapping map = new UniformMapping(tex);
+    UniformMapping map = new UniformMapping(obj, tex);
     map.setAppliesTo(appliesTo());
     return map;
   }
@@ -115,7 +122,7 @@ public class UniformMapping extends TextureMapping
     return row;
   }
   
-  public UniformMapping(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+  public UniformMapping(DataInputStream in, Object3D theObject, Texture theTexture) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
     
@@ -123,6 +130,7 @@ public class UniformMapping extends TextureMapping
       throw new InvalidObjectException("");
     if (version == 1)
       setAppliesTo(in.readShort());
+    object = theObject;
     texture = (UniformTexture) theTexture;
   }
   

@@ -1,7 +1,4 @@
-/* Mapping2D is an abstract class describing a linear mapping between 2D texture coordinates
-   and 3D space. */
-
-/* Copyright (C) 2000,2002 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,22 +10,32 @@
 
 package artofillusion.texture;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 
+/** Mapping2D is an abstract class describing a linear mapping between 2D texture coordinates
+    and 3D space. */
+
 public abstract class Mapping2D extends TextureMapping
 {
+  Object3D object;
   Texture2D texture;
   
-  public Mapping2D(Texture theTexture)
+  public Mapping2D(Object3D theObject, Texture theTexture)
   {
+    object = theObject;
     texture = (Texture2D) theTexture;
   }
 
   public Texture getTexture()
   {
     return texture;
+  }
+
+
+  public Object3D getObject()
+  {
+    return object;
   }
 
   public static boolean legalMapping(Object3D obj, Texture tex)

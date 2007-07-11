@@ -24,6 +24,7 @@ import java.util.*;
 
 public class LayeredMapping extends TextureMapping
 {
+  Object3D theObject;
   LayeredTexture theTexture;
   Texture texture[];
   TextureMapping mapping[];
@@ -33,8 +34,9 @@ public class LayeredMapping extends TextureMapping
   public static final int OVERLAY_BLEND_BUMPS = 1;
   public static final int OVERLAY_ADD_BUMPS = 2;
 
-  public LayeredMapping(Texture tex)
+  public LayeredMapping(Object3D obj, Texture tex)
   {
+    theObject = obj;
     theTexture = (LayeredTexture) tex;
     texture = new Texture [0];
     mapping = new TextureMapping [0];
@@ -162,7 +164,7 @@ public class LayeredMapping extends TextureMapping
     int i;
     
     newtexture[0] = tex;
-    newmapping[0] = tex.getDefaultMapping();
+    newmapping[0] = tex.getDefaultMapping(theObject);
     newblendMode[0] = BLEND;
     newFractParamID[0] = TextureParameter.getUniqueID();
     for (i = 0; i < texture.length; i++)
@@ -261,8 +263,8 @@ public class LayeredMapping extends TextureMapping
         try
           {
             Class mapClass = ModellingApp.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Texture.class});
-            mapping[i] = (TextureMapping) con.newInstance(new Object [] {in, texture[i]});
+            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Texture.class});
+            mapping[i] = (TextureMapping) con.newInstance(new Object [] {in, theObject, texture[i]});
           }
         catch (Exception ex)
           {
@@ -523,20 +525,25 @@ public class LayeredMapping extends TextureMapping
   {
     return theTexture;
   }
-  
+
+  public Object3D getObject()
+  {
+    return theObject;
+  }
+
   /** Create a new TextureMapping which is identical to this one. */
   
   public TextureMapping duplicate()
   {
-    return duplicate(theTexture);
+    return duplicate(theObject, theTexture);
   }
   
   /** Create a new TextureMapping which is identical to this one, but for a
      different Texture. */
   
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    LayeredMapping map = new LayeredMapping(null);
+    LayeredMapping map = new LayeredMapping(obj, null);
     int layers = texture.length;
 
     map.theTexture = new LayeredTexture(map);

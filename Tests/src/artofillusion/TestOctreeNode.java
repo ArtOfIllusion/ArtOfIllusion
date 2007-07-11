@@ -74,7 +74,7 @@ public class TestOctreeNode extends TestCase
   private RTSphere createSphere(Vec3 pos, Texture tex)
   {
     Sphere sphere = new Sphere(0.5, 0.5, 0.5);
-    sphere.setTexture(tex, tex.getDefaultMapping());
+    sphere.setTexture(tex, tex.getDefaultMapping(sphere));
     return new RTSphere(sphere, Mat4.translation(pos.x, pos.y, pos.z), Mat4.translation(-pos.x, -pos.y, -pos.z), new double[0]);
   }
 

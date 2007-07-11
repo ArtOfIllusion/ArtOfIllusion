@@ -106,7 +106,7 @@ public class CSGDialog extends BDialog
       modeller = new CSGModeller(mesh1, mesh2, theObject.getObject1().coords, theObject.getObject2().coords);
     }
     TriangleMesh trimesh = modeller.getMesh(operation[opChoice.getSelectedIndex()], texture);
-    trimesh.setTexture(texture, texture.getDefaultMapping());
+    trimesh.setTexture(texture, texture.getDefaultMapping(trimesh));
     preview.setObject(trimesh);
     preview.repaint();
   }

@@ -2091,7 +2091,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (mesh.getTexture() == null)
     {
       Texture tex = theScene.getDefaultTexture();
-      mesh.setTexture(tex, tex.getDefaultMapping());
+      mesh.setTexture(tex, tex.getDefaultMapping(mesh));
     }
     theScene.replaceObject(obj, mesh, undo);
     setUndoRecord(undo);
@@ -2222,7 +2222,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     CoordinateSystem coords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
     ObjectInfo info = new ObjectInfo(obj, coords, name);
     if (obj.canSetTexture())
-      info.setTexture(theScene.getDefaultTexture(), theScene.getDefaultTexture().getDefaultMapping());
+      info.setTexture(theScene.getDefaultTexture(), theScene.getDefaultTexture().getDefaultMapping(obj));
     Vec3 orig = coords.getOrigin();
     double angles[] = coords.getRotationAngles();
     Vec3 size = info.getBounds().getSize();

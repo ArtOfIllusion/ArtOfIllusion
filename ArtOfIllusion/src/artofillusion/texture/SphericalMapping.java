@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2006 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,9 +30,9 @@ public class SphericalMapping extends NonlinearMapping2D
   boolean transform;
   TextureParameter xparam, yparam, zparam;
 
-  public SphericalMapping(Texture theTexture)
+  public SphericalMapping(Object3D theObject, Texture theTexture)
   {
-    super(theTexture);
+    super(theObject, theTexture);
     coords = new CoordinateSystem(new Vec3(), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = 360.0;
     yscale = 180.0;
@@ -341,12 +341,12 @@ public class SphericalMapping extends NonlinearMapping2D
 
   public TextureMapping duplicate()
   {
-    return duplicate(texture);
+    return duplicate(object, texture);
   }
 
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    SphericalMapping map = new SphericalMapping(tex);
+    SphericalMapping map = new SphericalMapping(obj, tex);
     
     map.coords = coords.duplicate();
     map.offset = offset;
@@ -414,9 +414,9 @@ public class SphericalMapping extends NonlinearMapping2D
     return new Editor(obj, preview);
   }
 
-  public SphericalMapping(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+  public SphericalMapping(DataInputStream in, Object3D theObject, Texture theTexture) throws IOException, InvalidObjectException
   {
-    super(theTexture);
+    super(theObject, theTexture);
 
     short version = in.readShort();
     if (version < 0 || version > 1)

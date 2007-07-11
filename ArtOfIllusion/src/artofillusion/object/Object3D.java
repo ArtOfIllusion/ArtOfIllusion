@@ -298,9 +298,9 @@ public abstract class Object3D
   public void copyTextureAndMaterial(Object3D obj)
   {
     if (obj.getTextureMapping() != null)
-      setTexture(obj.getTexture(), obj.getTextureMapping().duplicate());
+      setTexture(obj.getTexture(), obj.getTextureMapping().duplicate(this, obj.getTexture()));
     if (obj.getMaterialMapping() != null)
-      setMaterial(obj.getMaterial(), obj.getMaterialMapping().duplicate());
+      setMaterial(obj.getMaterial(), obj.getMaterialMapping().duplicate(this, obj.getMaterial()));
     else
       setMaterial(null, null);
     TextureParameter objParam[] = obj.getParameters();
@@ -457,9 +457,9 @@ public abstract class Object3D
         try
           {
             Class mapClass = ModellingApp.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Material.class});
+            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Material.class});
             theMaterial = theScene.getMaterial(i);
-            setMaterial(theMaterial, (MaterialMapping) con.newInstance(new Object [] {in, theMaterial}));
+            setMaterial(theMaterial, (MaterialMapping) con.newInstance(new Object [] {in, this, theMaterial}));
           }
         catch (Exception ex)
           {
@@ -472,9 +472,9 @@ public abstract class Object3D
         try
           {
             Class mapClass = ModellingApp.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Texture.class});
+            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Texture.class});
             theTexture = theScene.getTexture(i);
-            setTexture(theTexture, (TextureMapping) con.newInstance(new Object [] {in, theTexture}));
+            setTexture(theTexture, (TextureMapping) con.newInstance(new Object [] {in, this, theTexture}));
           }
         catch (Exception ex)
           {
@@ -486,8 +486,8 @@ public abstract class Object3D
       {
         // This is a layered texture.
         
-        LayeredTexture tex = new LayeredTexture();
-        LayeredMapping map = (LayeredMapping) tex.getDefaultMapping();
+        LayeredTexture tex = new LayeredTexture(this);
+        LayeredMapping map = (LayeredMapping) tex.getDefaultMapping(this);
         map.readFromFile(in, theScene);
         setTexture(tex, map);
       }

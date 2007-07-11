@@ -182,7 +182,7 @@ public class SkinDialog extends BDialog
     centerOffset = center;
     SplineMesh mesh = new SplineMesh(v, us, vs, smoothMethod, false, closed);
     Texture tex = window.getScene().getDefaultTexture();
-    mesh.setTexture(tex, tex.getDefaultMapping());
+    mesh.setTexture(tex, tex.getDefaultMapping(mesh));
     mesh.makeRightSideOut();
     preview.setObject(mesh);
     preview.repaint();

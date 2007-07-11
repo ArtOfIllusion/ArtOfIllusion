@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,18 +35,18 @@ public abstract class TextureMapping
   public static final short BACK_ONLY = 2;
   
   /** Every subclass of TextureMapping must define a constructor which takes a Texture
-      object as its only argument:
+      and an Object3D as its arguments:
       <p>
-      public MappingSubclass(Texture theTexture)
+      public MappingSubclass(Object3D obj, Texture texture)
       <p>
       In addition, every subclass must include a method of the form
       <p>
-      public static boolean legalMapping(Object3D obj, Texture tex)
+      public static boolean legalMapping(Object3D obj, Texture texture)
       <p>
       which returns true if the mapping can be used with the specified object and Texture.  
       Finally, every subclass must include a constructor with the signature
       <p>
-      public MappingSubclass(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+      public MappingSubclass(DataInputStream in, Object3D obj, Texture texture) throws IOException, InvalidObjectException
       <p>
       which reconstructs the mapping by reading its data from an input stream.  The following
       method writes the object's data to an output stream. */
@@ -56,6 +56,10 @@ public abstract class TextureMapping
   /** Get the Texture associated with this TextureMapping. */
   
   public abstract Texture getTexture();
+
+  /** Get the object this mapping is applied to. */
+
+  public abstract Object3D getObject();
 
   /** Get the name of this type of mapping.  Subclasses should override this method to return
       an appropriate name. */
@@ -110,9 +114,9 @@ public abstract class TextureMapping
   public abstract TextureMapping duplicate();
   
   /** Create a new TextureMapping which is identical to this one, but for a
-      different texture. */
+      different object and texture. */
   
-  public abstract TextureMapping duplicate(Texture tex);
+  public abstract TextureMapping duplicate(Object3D obj, Texture tex);
   
   /** Make this mapping identical to another one. */
   

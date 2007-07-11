@@ -80,9 +80,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   {
     if (tex == null)
       tex = UniformTexture.invisibleTexture();
-    objInfo.setTexture(tex, tex.getDefaultMapping());
+    objInfo.setTexture(tex, tex.getDefaultMapping(objInfo.object));
     if (mat != null)
-      objInfo.setMaterial(mat, mat.getDefaultMapping());
+      objInfo.setMaterial(mat, mat.getDefaultMapping(objInfo.object));
   }
   
   /** Initialize the MaterialPreviewer. */
@@ -108,7 +108,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     coords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
     theScene.addObject(tri = new TriangleMesh(vert, face), coords, "", null);
     Texture tex = theScene.getDefaultTexture();
-    tri.setTexture(tex, tex.getDefaultMapping());
+    tri.setTexture(tex, tex.getDefaultMapping(tri));
     info = obj;
     objectCoords = info.coords = new CoordinateSystem();
     theScene.addObject(info, null);
@@ -158,7 +158,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     if (tex == null)
       tex = UniformTexture.invisibleTexture();
     if (map == null)
-      map = tex.getDefaultMapping();
+      map = tex.getDefaultMapping(info.object);
     info.setTexture(tex, map);
   }
   

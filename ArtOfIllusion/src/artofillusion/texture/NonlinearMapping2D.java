@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion.texture;
 
 import artofillusion.math.*;
+import artofillusion.object.*;
 
 /** NonlinearMapping2D is an abstract class describing a nonlinear mapping between 2D texture 
     coordinates and 3D space.  When called on to map a triangle, it first performs any initial
@@ -24,9 +25,9 @@ public abstract class NonlinearMapping2D extends Mapping2D
   boolean coordsFromParams;
   int numTextureParams;
   
-  public NonlinearMapping2D(Texture theTexture)
+  public NonlinearMapping2D(Object3D theObject, Texture theTexture)
   {
-    super(theTexture);
+    super(theObject, theTexture);
   }
 
   /** Get the linear transform which maps from object coordinates to intermediate coordinates. */

@@ -13,6 +13,7 @@
 package artofillusion.texture;
 
 import artofillusion.math.*;
+import artofillusion.object.*;
 
 public abstract class Texture3D extends Texture
 {  
@@ -37,23 +38,23 @@ public abstract class Texture3D extends Texture
 
   public abstract void getTransparency(RGBColor trans, double x, double y, double z, double xsize, double ysize, double zsize, double angle, double t, double param[]);
 
-  /* For the default mapping, use a basic projection. */
+  /** For the default mapping, use a basic projection. */
   
-  public TextureMapping getDefaultMapping()
+  public TextureMapping getDefaultMapping(Object3D object)
   {
-    return new LinearMapping3D(this);
+    return new LinearMapping3D(object, this);
   }
   
-  /* Texture which use displacement mapping should override this method to return the
-     displacement at the given point. */
+  /** Textures which use displacement mapping should override this method to return the
+      displacement at the given point. */
 
   public double getDisplacement(double x, double y, double z, double xsize, double ysize, double zsize, double t, double param[])
   {
     return Double.NaN;
   }
 
-  /* Determine whether the texture is displacement mapped based on the value returned by
-     getDisplacement(). */
+  /** Determine whether the texture is displacement mapped based on the value returned by
+      getDisplacement(). */
 
   public boolean displacementMapped()
   {

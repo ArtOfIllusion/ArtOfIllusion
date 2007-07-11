@@ -11,6 +11,7 @@
 package artofillusion.texture;
 
 import artofillusion.*;
+import artofillusion.object.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -86,9 +87,9 @@ public class UniformTexture extends Texture
   
   /** The only TextureMapping which can be used for a UniformTexture is a UniformMapping. */
   
-  public TextureMapping getDefaultMapping()
+  public TextureMapping getDefaultMapping(Object3D object)
   {
-    return new UniformMapping(this);
+    return new UniformMapping(object, this);
   }
 
   /** Create a duplicate of the texture. */

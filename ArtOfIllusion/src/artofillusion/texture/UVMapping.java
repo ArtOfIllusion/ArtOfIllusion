@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Peter Eastman
+/* Copyright (C) 2002-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,9 +26,9 @@ public class UVMapping extends Mapping2D
   int numTextureParams;
   TextureParameter uparam, vparam;
 
-  public UVMapping(Texture theTexture)
+  public UVMapping(Object3D theObject, Texture theTexture)
   {
-    super(theTexture);
+    super(theObject, theTexture);
   }
 
   public static String getName()
@@ -226,12 +226,12 @@ public class UVMapping extends Mapping2D
 
   public TextureMapping duplicate()
   {
-    return duplicate(texture);
+    return duplicate(object, texture);
   }
 
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    UVMapping map = new UVMapping(tex);
+    UVMapping map = new UVMapping(obj, tex);
     
     map.numTextureParams = numTextureParams;
     map.uparam = uparam;
@@ -276,9 +276,9 @@ public class UVMapping extends Mapping2D
     return new Editor(obj, preview);
   }
   
-  public UVMapping(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+  public UVMapping(DataInputStream in, Object3D theObject, Texture theTexture) throws IOException, InvalidObjectException
   {
-    super(theTexture);
+    super(theObject, theTexture);
 
     short version = in.readShort();
     if (version != 0)

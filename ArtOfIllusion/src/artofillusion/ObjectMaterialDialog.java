@@ -183,7 +183,7 @@ public class ObjectMaterialDialog extends BDialog implements ListChangeListener
     if (mat == oldMaterial)
       firstObj.setMaterial(mat, oldMapping.duplicate());
     else
-      firstObj.setMaterial(mat, mat.getDefaultMapping());
+      firstObj.setMaterial(mat, mat.getDefaultMapping(firstObj));
     mapButton.setEnabled(!(mat instanceof UniformMaterial));
     preview.setMaterial(mat, firstObj.getMaterialMapping());
     preview.render();

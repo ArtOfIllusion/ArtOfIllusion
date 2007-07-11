@@ -252,7 +252,7 @@ public class CSGModeller
       f[i] = (int []) faceIndex.elementAt(i);
     TriangleMesh mesh = new TriangleMesh(v, f);
     if (texture != null)
-      mesh.setTexture(texture, texture.getDefaultMapping());
+      mesh.setTexture(texture, texture.getDefaultMapping(mesh));
     
     // Copy over the smoothness values.
     

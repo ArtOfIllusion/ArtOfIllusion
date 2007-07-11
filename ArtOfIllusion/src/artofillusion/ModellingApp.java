@@ -178,13 +178,13 @@ public class ModellingApp
     PluginRegistry.registerPlugin(new ProceduralTexture3D());
     PluginRegistry.registerPlugin(new UniformMaterial());
     PluginRegistry.registerPlugin(new ProceduralMaterial3D());
-    PluginRegistry.registerPlugin(new UniformMapping(null));
-    PluginRegistry.registerPlugin(new ProjectionMapping(null));
-    PluginRegistry.registerPlugin(new CylindricalMapping(null));
-    PluginRegistry.registerPlugin(new SphericalMapping(null));
-    PluginRegistry.registerPlugin(new UVMapping(null));
-    PluginRegistry.registerPlugin(new LinearMapping3D(null));
-    PluginRegistry.registerPlugin(new LinearMaterialMapping(null));
+    PluginRegistry.registerPlugin(new UniformMapping(null, null));
+    PluginRegistry.registerPlugin(new ProjectionMapping(null, null));
+    PluginRegistry.registerPlugin(new CylindricalMapping(null, null));
+    PluginRegistry.registerPlugin(new SphericalMapping(null, null));
+    PluginRegistry.registerPlugin(new UVMapping(null, null));
+    PluginRegistry.registerPlugin(new LinearMapping3D(null, null));
+    PluginRegistry.registerPlugin(new LinearMaterialMapping(null, null));
     PluginRegistry.registerPlugin(new BrightnessFilter());
     PluginRegistry.registerPlugin(new SaturationFilter());
     PluginRegistry.registerPlugin(new ExposureFilter());
@@ -755,7 +755,7 @@ public class ModellingApp
                 dup.setID(layer[j].getID());
                 textures.addElement(dup);
                 map.setLayer(j, dup);
-                map.setLayerMapping(j, map.getLayerMapping(j).duplicate(dup));
+                map.setLayerMapping(j, map.getLayerMapping(j).duplicate(obj[i].object, dup));
               }
           }
         else if (tex != null)
@@ -763,7 +763,7 @@ public class ModellingApp
             Texture dup = tex.duplicate();
             dup.setID(tex.getID());
             textures.addElement(dup);
-            obj[i].object.setTexture(dup, obj[i].object.getTextureMapping().duplicate(dup));
+            obj[i].object.setTexture(dup, obj[i].object.getTextureMapping().duplicate(obj[i].object, dup));
           }
       }
 
@@ -778,7 +778,7 @@ public class ModellingApp
             Material dup = mat.duplicate();
             dup.setID(mat.getID());
             materials.addElement(dup);
-            obj[i].object.setMaterial(dup, obj[i].object.getMaterialMapping().duplicate(dup));
+            obj[i].object.setMaterial(dup, obj[i].object.getMaterialMapping().duplicate(obj[i].object, dup));
           }
       }
     
@@ -848,7 +848,7 @@ public class ModellingApp
           {
             Texture current = clipboardObject[j].object.getTexture();
             if (current == clipboardTexture[i])
-              clipboardObject[j].setTexture(newtex, clipboardObject[j].object.getTextureMapping().duplicate(newtex));
+              clipboardObject[j].setTexture(newtex, clipboardObject[j].object.getTextureMapping().duplicate(clipboardObject[j].object, newtex));
             else if (current instanceof LayeredTexture)
               {
                 LayeredMapping map = (LayeredMapping) clipboardObject[j].object.getTextureMapping();
@@ -859,7 +859,7 @@ public class ModellingApp
                   if (layer[k] == clipboardTexture[i])
                     {
                       map.setLayer(k, newtex);
-                      map.setLayerMapping(k, map.getLayerMapping(k).duplicate(newtex));
+                      map.setLayerMapping(k, map.getLayerMapping(k).duplicate(clipboardObject[j].object, newtex));
                     }
               }
           }
@@ -884,7 +884,7 @@ public class ModellingApp
           {
             Material current = clipboardObject[j].object.getMaterial();
             if (current == clipboardMaterial[i])
-              clipboardObject[j].setMaterial(newmat, clipboardObject[j].object.getMaterialMapping().duplicate(newmat));
+              clipboardObject[j].setMaterial(newmat, clipboardObject[j].object.getMaterialMapping().duplicate(clipboardObject[j].object, newmat));
           }
       }
     

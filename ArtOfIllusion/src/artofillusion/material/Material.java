@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion.material;
 
 import artofillusion.*;
+import artofillusion.object.*;
 import artofillusion.image.*;
 import buoy.widget.*;
 import java.io.*;
@@ -109,7 +110,7 @@ public abstract class Material
 
   /** Get a default MaterialMapping for the material. */
   
-  public abstract MaterialMapping getDefaultMapping();
+  public abstract MaterialMapping getDefaultMapping(Object3D obj);
 
   /** Create a duplicate of the material. */
   

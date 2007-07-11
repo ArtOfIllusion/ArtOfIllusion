@@ -12,6 +12,7 @@ package artofillusion.texture;
 
 import artofillusion.math.*;
 import artofillusion.util.*;
+import artofillusion.object.*;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -42,9 +43,9 @@ public abstract class Texture2D extends Texture
 
   /** For the default mapping, use a basic projection. */
   
-  public TextureMapping getDefaultMapping()
+  public TextureMapping getDefaultMapping(Object3D object)
   {
-    return new ProjectionMapping(this);
+    return new ProjectionMapping(object, this);
   }
   
   /** Textures which use displacement mapping should override this method to return the

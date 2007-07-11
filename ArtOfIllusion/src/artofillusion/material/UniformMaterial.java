@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion.material;
 
 import artofillusion.*;
+import artofillusion.object.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -85,9 +86,9 @@ public class UniformMaterial extends Material
   
   /* The only MaterialMapping which can be used for a UniformMaterial is a UniformMapping. */
   
-  public MaterialMapping getDefaultMapping()
+  public MaterialMapping getDefaultMapping(Object3D obj)
   {
-    return new UniformMaterialMapping(this);
+    return new UniformMaterialMapping(obj, this);
   }
 
   /* Create a duplicate of the material. */

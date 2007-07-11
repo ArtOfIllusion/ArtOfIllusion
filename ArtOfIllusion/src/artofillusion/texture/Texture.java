@@ -11,6 +11,7 @@
 package artofillusion.texture;
 
 import artofillusion.*;
+import artofillusion.object.*;
 import artofillusion.image.*;
 import buoy.widget.*;
 import java.io.*;
@@ -107,7 +108,7 @@ public abstract class Texture
 
   /** Get a default TextureMapping for the texture. */
   
-  public abstract TextureMapping getDefaultMapping();
+  public abstract TextureMapping getDefaultMapping(Object3D object);
 
   /** Create a duplicate of the texture. */
   

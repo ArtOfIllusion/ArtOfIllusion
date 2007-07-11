@@ -10,6 +10,8 @@
 
 package artofillusion.material;
 
+import artofillusion.object.*;
+
 /** Material3D represents a Material whose properties are defined in 3D. */
 
 public abstract class Material3D extends Material
@@ -22,8 +24,8 @@ public abstract class Material3D extends Material
 
   /** The default mapping is a LinearMaterialMapping. */
   
-  public MaterialMapping getDefaultMapping()
+  public MaterialMapping getDefaultMapping(Object3D obj)
   {
-    return new LinearMaterialMapping(this);
+    return new LinearMaterialMapping(obj, this);
   }
 }

@@ -463,7 +463,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         if (objects[i].object.getTexture() != tex)
         {
           undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].object, objects[i].object.duplicate()});
-          objects[i].setTexture(tex, tex.getDefaultMapping());
+          objects[i].setTexture(tex, tex.getDefaultMapping(objects[i].object));
         }
       window.setUndoRecord(undo);
       window.updateImage();
@@ -496,7 +496,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         if (objects[i].object.getMaterial() != mat)
         {
           undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].object, objects[i].object.duplicate()});
-          objects[i].setMaterial(mat, noMaterial ? null : mat.getDefaultMapping());
+          objects[i].setMaterial(mat, noMaterial ? null : mat.getDefaultMapping(objects[i].object));
         }
       window.setUndoRecord(undo);
       window.updateImage();

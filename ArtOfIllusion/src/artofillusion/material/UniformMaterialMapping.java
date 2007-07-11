@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2004 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,9 +20,9 @@ import java.io.*;
 
 public class UniformMaterialMapping extends MaterialMapping
 {
-  public UniformMaterialMapping(Material theMaterial)
+  public UniformMaterialMapping(Object3D theObject, Material theMaterial)
   {
-    super(theMaterial);
+    super(theObject, theMaterial);
   }
   
   public double getStepSize()
@@ -42,12 +42,12 @@ public class UniformMaterialMapping extends MaterialMapping
 
   public MaterialMapping duplicate()
   {
-    return new UniformMaterialMapping(material);
+    return new UniformMaterialMapping(object, material);
   }
   
-  public MaterialMapping duplicate(Material mat)
+  public MaterialMapping duplicate(Object3D obj, Material mat)
   {
-    return new UniformMaterialMapping(mat);
+    return new UniformMaterialMapping(obj, mat);
   }
   
   public void copy(MaterialMapping map)
@@ -60,9 +60,9 @@ public class UniformMaterialMapping extends MaterialMapping
     return new CustomWidget();
   }
   
-  public UniformMaterialMapping(DataInputStream in, Material theMaterial) throws IOException, InvalidObjectException
+  public UniformMaterialMapping(DataInputStream in, Object3D theObject, Material theMaterial) throws IOException, InvalidObjectException
   {
-    super(theMaterial);
+    super(theObject, theMaterial);
     
     short version = in.readShort();
     

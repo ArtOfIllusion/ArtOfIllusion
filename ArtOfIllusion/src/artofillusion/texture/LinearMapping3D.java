@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,9 +33,9 @@ public class LinearMapping3D extends Mapping3D
   int numTextureParams;
   TextureParameter xparam, yparam, zparam;
   
-  public LinearMapping3D(Texture theTexture)
+  public LinearMapping3D(Object3D obj, Texture theTexture)
   {
-    super(theTexture);
+    super(obj, theTexture);
     coords = new CoordinateSystem(new Vec3(), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = yscale = zscale = 1.0;
     dx = dy = dz = 0.0;
@@ -239,12 +239,12 @@ public class LinearMapping3D extends Mapping3D
 
   public TextureMapping duplicate()
   {
-    return duplicate(texture);
+    return duplicate(object, texture);
   }
   
-  public TextureMapping duplicate(Texture tex)
+  public TextureMapping duplicate(Object3D obj, Texture tex)
   {
-    LinearMapping3D map = new LinearMapping3D(tex);
+    LinearMapping3D map = new LinearMapping3D(obj, tex);
     
     map.coords = coords.duplicate();
     map.dx = dx;
@@ -317,10 +317,10 @@ public class LinearMapping3D extends Mapping3D
   {
     return new Editor(obj, preview);
   }
-  
-  public LinearMapping3D(DataInputStream in, Texture theTexture) throws IOException, InvalidObjectException
+
+  public LinearMapping3D(DataInputStream in, Object3D obj, Texture theTexture) throws IOException, InvalidObjectException
   {
-    super(theTexture);
+    super(obj, theTexture);
 
     short version = in.readShort();
     if (version < 0 || version > 1)

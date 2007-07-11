@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2004 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,21 +24,23 @@ import java.io.*;
 
 public abstract class MaterialMapping
 {
+  Object3D object;
   Material material;
   
-  protected MaterialMapping(Material mat)
+  protected MaterialMapping(Object3D obj, Material mat)
   {
+    object = obj;
     material = mat;
   }
   
   /** Every subclass of MaterialMapping must define a constructor which takes a Material
-      object as its only argument:
+      and an Object3D as its arguments:
       <p>
-      public MappingSubclass(Material theMaterial)
+      public MappingSubclass(Object3D theObject, Material theMaterial)
       <p>
       In addition, every subclass must include a constructor with the signature
       <p>
-      public MappingSubclass(DataInputStream in, Material theMaterial) throws IOException, InvalidObjectException
+      public MappingSubclass(DataInputStream in, Object3D theObject, Material theMaterial) throws IOException, InvalidObjectException
       <p>
       which reconstructs the mapping by reading its data from an input stream.  The following
       method writes the object's data to an output stream. */
@@ -85,7 +87,14 @@ public abstract class MaterialMapping
     return material;
   }
 
-  /** Given a point inside the object for which this mapping is being used, find the 
+  /** Get the object to which the material is applied. */
+
+  public Object3D getObject()
+  {
+    return object;
+  }
+
+  /** Given a point inside the object for which this mapping is being used, find the
       corresponding material properties.  The properties should be averaged over a region of 
       width size. */
   
@@ -96,9 +105,9 @@ public abstract class MaterialMapping
   public abstract MaterialMapping duplicate();
   
   /** Create a new MaterialMapping which is identical to this one, but for a
-      different Material. */
+      different object and Material. */
   
-  public abstract MaterialMapping duplicate(Material mat);
+  public abstract MaterialMapping duplicate(Object3D obj, Material mat);
   
   /** Make this mapping identical to another one. */
   

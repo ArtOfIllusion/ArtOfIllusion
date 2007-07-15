@@ -467,8 +467,8 @@ public class ThemeManager {
       themeList = (ThemeInfo[]) list.toArray(new ThemeInfo[list.size()]);
       for (int i = 0; i < themeList.length; i++)
         themeIdMap.put(themeList[i].resource.getId(), themeList[i]);
-      defaultTheme = themeList[0];
-      setSelectedTheme(themeList[0]);
+      defaultTheme = (ThemeInfo) themeIdMap.get("default");
+      setSelectedTheme(defaultTheme);
     }
 
     private static int getIntegerValueFromNode(Node node) {

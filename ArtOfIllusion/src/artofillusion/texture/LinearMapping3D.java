@@ -25,13 +25,13 @@ import java.io.*;
 
 public class LinearMapping3D extends Mapping3D
 {
-  CoordinateSystem coords;
-  double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
-  double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
-  Mat4 fromLocal;
-  boolean transform, coordsFromParams;
-  int numTextureParams;
-  TextureParameter xparam, yparam, zparam;
+  protected CoordinateSystem coords;
+  protected double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
+  protected double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
+  protected Mat4 fromLocal;
+  protected boolean transform, coordsFromParams, scaleToObject;
+  protected int numTextureParams;
+  protected TextureParameter xparam, yparam, zparam;
   
   public LinearMapping3D(Object3D obj, Texture theTexture)
   {
@@ -135,7 +135,19 @@ public class LinearMapping3D extends Mapping3D
     coordsFromParams = bound;
   }
 
-  /* Methods from TextureMapping. */
+  /** Get whether the texture is scaled based on the size of the object. */
+
+  public boolean isScaledToObject()
+  {
+    return scaleToObject;
+  }
+
+  /** Set whether the texture is scaled based on the size of the object. */
+
+  public void setScaledToObject(boolean scaled)
+  {
+    scaleToObject = scaled;
+  }
 
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
@@ -143,10 +155,43 @@ public class LinearMapping3D extends Mapping3D
     
     if (coordsFromParams)
       return new UVWMappedTriangle(v1, v2, v3, n1, n2, n3);
-    else
-      return new Linear3DTriangle(v1, v2, v3, n1, n2, n3, c1.x*ax+c1.y*bx+c1.z*cx-dx, c1.x*ay+c1.y*by+c1.z*cy-dy, c1.x*az+c1.y*bz+c1.z*cz-dz, 
-            c2.x*ax+c2.y*bx+c2.z*cx-dx, c2.x*ay+c2.y*by+c2.z*cy-dy, c2.x*az+c2.y*bz+c2.z*cz-dz,
-            c3.x*ax+c3.y*bx+c3.z*cx-dx, c3.x*ay+c3.y*by+c3.z*cy-dy, c3.x*az+c3.y*bz+c3.z*cz-dz);
+    double x1 = c1.x;
+    double y1 = c1.y;
+    double z1 = c1.z;
+    double x2 = c2.x;
+    double y2 = c2.y;
+    double z2 = c2.z;
+    double x3 = c3.x;
+    double y3 = c3.y;
+    double z3 = c3.z;
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        x1 *= scale;
+        x2 *= scale;
+        x3 *= scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        y1 *= scale;
+        y2 *= scale;
+        y3 *= scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        z1 *= scale;
+        z2 *= scale;
+        z3 *= scale;
+      }
+    }
+    return new Linear3DTriangle(v1, v2, v3, n1, n2, n3, (float) (x1*ax+y1*bx+z1*cx-dx), (float) (x1*ay+y1*by+z1*cy-dy), (float) (x1*az+y1*bz+z1*cz-dz),
+        (float) (x2*ax+y2*bx+z2*cx-dx), (float) (x2*ay+y2*by+z2*cy-dy), (float) (x2*az+y2*bz+z2*cz-dz),
+        (float) (x3*ax+y3*bx+z3*cx-dx), (float) (x3*ay+y3*by+z3*cy-dy), (float) (x3*az+y3*bz+z3*cz-dz));
   }
 
   /** This method is called once the texture parameters for the vertices of a triangle
@@ -166,6 +211,31 @@ public class LinearMapping3D extends Mapping3D
     double x3 = p3[numTextureParams];
     double y3 = p3[numTextureParams+1];
     double z3 = p3[numTextureParams+2];
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        x1 *= scale;
+        x2 *= scale;
+        x3 *= scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        y1 *= scale;
+        y2 *= scale;
+        y3 *= scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        z1 *= scale;
+        z2 *= scale;
+        z3 *= scale;
+      }
+    }
     uvw.setTextureCoordinates((float) (x1*ax+y1*bx+z1*cx-dx), (float) (x1*ay+y1*by+z1*cy-dy), (float) (x1*az+y1*bz+z1*cz-dz),
         (float) (x2*ax+y2*bx+z2*cx-dx), (float) (x2*ay+y2*by+z2*cy-dy), (float) (x2*az+y2*bz+z2*cz-dz),
         (float) (x3*ax+y3*bx+z3*cx-dx), (float) (x3*ay+y3*by+z3*cy-dy), (float) (x3*az+y3*bz+z3*cz-dz),
@@ -184,18 +254,47 @@ public class LinearMapping3D extends Mapping3D
         spec.bumpGrad.set(0.0, 0.0, 0.0);
         return;
       }
+    double x, y, z;
+    double sizex = size, sizey = size, sizez = size;
     if (coordsFromParams && numTextureParams < param.length && param[numTextureParams] != Double.MAX_VALUE)
-      {
-        double x = param[numTextureParams];
-        double y = param[numTextureParams+1];
-        double z = param[numTextureParams+2];
-        texture.getTextureSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, 
-          x*az+y*bz+z*cz-dz, size*matScaleX, size*matScaleY, size*matScaleZ, angle, time, param);
-      }
+    {
+      x = param[numTextureParams];
+      y = param[numTextureParams+1];
+      z = param[numTextureParams+2];
+    }
     else
-      texture.getTextureSpec(spec, pos.x*ax+pos.y*bx+pos.z*cx-dx, 
-        pos.x*ay+pos.y*by+pos.z*cy-dy, pos.x*az+pos.y*bz+pos.z*cz-dz, 
-        size*matScaleX, size*matScaleY, size*matScaleZ, angle, time, param);
+    {
+      x = pos.x;
+      y = pos.y;
+      z = pos.z;
+    }
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        x *= scale;
+        sizex = size*scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        y *= scale;
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        z *= scale;
+        sizez = size*scale;
+      }
+    }
+    texture.getTextureSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
+        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
+        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
+        Math.sqrt(az*sizex*az*sizex+bz*sizey*bz*sizey+cz*sizez*cz*sizez)*matScaleZ,
+        angle, time, param);
     if (transform && texture.hasComponent(Texture.BUMP_COMPONENT))
       fromLocal.transformDirection(spec.bumpGrad);
   }
@@ -207,33 +306,92 @@ public class LinearMapping3D extends Mapping3D
         trans.setRGB(1.0f, 1.0f, 1.0f);
         return;
       }
+    double x, y, z;
+    double sizex = size, sizey = size, sizez = size;
     if (coordsFromParams && numTextureParams < param.length && param[numTextureParams] != Double.MAX_VALUE)
-      {
-        double x = param[numTextureParams];
-        double y = param[numTextureParams+1];
-        double z = param[numTextureParams+2];
-        texture.getTransparency(trans, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, 
-          x*az+y*bz+z*cz-dz, size*matScaleX, size*matScaleY, size*matScaleZ, angle, time, param);
-      }
+    {
+      x = param[numTextureParams];
+      y = param[numTextureParams+1];
+      z = param[numTextureParams+2];
+    }
     else
-      texture.getTransparency(trans, pos.x*ax+pos.y*bx+pos.z*cx-dx, 
-        pos.x*ay+pos.y*by+pos.z*cy-dy, pos.x*az+pos.y*bz+pos.z*cz-dz, 
-        size*matScaleX, size*matScaleY, size*matScaleZ, angle, time, param);
+    {
+      x = pos.x;
+      y = pos.y;
+      z = pos.z;
+    }
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        x *= scale;
+        sizex = size*scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        y *= scale;
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        z *= scale;
+        sizez = size*scale;
+      }
+    }
+    texture.getTransparency(trans, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
+        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
+        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
+        Math.sqrt(az*sizex*az*sizex+bz*sizey*bz*sizey+cz*sizez*cz*sizez)*matScaleZ,
+        angle, time, param);
   }
 
   public double getDisplacement(Vec3 pos, double size, double time, double param[])
   {
+    double x, y, z;
+    double sizex = size, sizey = size, sizez = size;
     if (coordsFromParams && numTextureParams < param.length && param[numTextureParams] != Double.MAX_VALUE)
+    {
+      x = param[numTextureParams];
+      y = param[numTextureParams+1];
+      z = param[numTextureParams+2];
+    }
+    else
+    {
+      x = pos.x;
+      y = pos.y;
+      z = pos.z;
+    }
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
       {
-        double x = param[numTextureParams];
-        double y = param[numTextureParams+1];
-        double z = param[numTextureParams+2];
-        return texture.getDisplacement(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, 
-          x*az+y*bz+z*cz-dz, size*matScaleX, size*matScaleY, size*matScaleZ, time, param);
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        x *= scale;
+        sizex = size*scale;
       }
-    return texture.getDisplacement(pos.x*ax+pos.y*bx+pos.z*cx-dx, 
-        pos.x*ay+pos.y*by+pos.z*cy-dy, pos.x*az+pos.y*bz+pos.z*cz-dz, 
-        size*matScaleX, size*matScaleY, size*matScaleZ, time, param);
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        y *= scale;
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        z *= scale;
+        sizez = size*scale;
+      }
+    }
+    return texture.getDisplacement(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
+        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
+        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
+        Math.sqrt(az*sizex*az*sizex+bz*sizey*bz*sizey+cz*sizez*cz*sizez)*matScaleZ,
+        time, param);
   }
 
 
@@ -256,6 +414,7 @@ public class LinearMapping3D extends Mapping3D
     map.findCoefficients();
     map.coordsFromParams = coordsFromParams;
     map.numTextureParams = numTextureParams;
+    map.scaleToObject = scaleToObject;
     map.setAppliesTo(appliesTo());
     map.xparam = xparam;
     map.yparam = yparam;
@@ -277,6 +436,7 @@ public class LinearMapping3D extends Mapping3D
     findCoefficients();
     coordsFromParams = map.coordsFromParams;
     numTextureParams = map.numTextureParams;
+    scaleToObject = map.scaleToObject;
     setAppliesTo(map.appliesTo());
     xparam = map.xparam;
     yparam = map.yparam;
@@ -323,7 +483,7 @@ public class LinearMapping3D extends Mapping3D
     super(obj, theTexture);
 
     short version = in.readShort();
-    if (version < 0 || version > 1)
+    if (version < 0 || version > 2)
       throw new InvalidObjectException("");
     coords = new CoordinateSystem(in);
     dx = in.readDouble();
@@ -334,13 +494,14 @@ public class LinearMapping3D extends Mapping3D
     zscale = in.readDouble();
     findCoefficients();
     coordsFromParams = in.readBoolean();
-    if (version == 1)
+    if (version > 0)
       setAppliesTo(in.readShort());
+    scaleToObject = (version > 1 ? in.readBoolean() : false);
   }
   
   public void writeToFile(DataOutputStream out) throws IOException
   {
-    out.writeShort(1);
+    out.writeShort(2);
     coords.writeToFile(out);
     out.writeDouble(dx);
     out.writeDouble(dy);
@@ -350,6 +511,7 @@ public class LinearMapping3D extends Mapping3D
     out.writeDouble(zscale);
     out.writeBoolean(coordsFromParams);
     out.writeShort(appliesTo());
+    out.writeBoolean(scaleToObject);
   }
   
   /* Editor is an inner class for editing the mapping. */
@@ -357,14 +519,14 @@ public class LinearMapping3D extends Mapping3D
   class Editor extends FormContainer
   {
     ValueField xrotField, yrotField, zrotField, xscaleField, yscaleField, zscaleField, xtransField, ytransField, ztransField;
-    BCheckBox coordsFromParamsBox;
+    BCheckBox coordsFromParamsBox, scaleToObjectBox;
     BComboBox applyToChoice;
     Object3D theObject;
     MaterialPreviewer preview;
 
     public Editor(Object3D obj, MaterialPreviewer preview)
     {
-      super(6, 8);
+      super(6, 9);
       theObject = obj;
       this.preview = preview;
       
@@ -403,6 +565,7 @@ public class LinearMapping3D extends Mapping3D
       add(applyRow, 0, 6, 6, 1);
       applyToChoice.setSelectedIndex(appliesTo());
       add(coordsFromParamsBox = new BCheckBox("Bind Texture Coordinates to Surface", coordsFromParams), 0, 7, 6, 1);
+      add(scaleToObjectBox = new BCheckBox(Translate.text("scaleTexToObject"), scaleToObject), 0, 8, 6, 1);
       coordsFromParamsBox.setEnabled(theObject instanceof Mesh ||  theObject instanceof Actor);
       xscaleField.addEventLink(ValueChangedEvent.class, this);
       yscaleField.addEventLink(ValueChangedEvent.class, this);
@@ -414,6 +577,7 @@ public class LinearMapping3D extends Mapping3D
       yrotField.addEventLink(ValueChangedEvent.class, this);
       zrotField.addEventLink(ValueChangedEvent.class, this);
       coordsFromParamsBox.addEventLink(ValueChangedEvent.class, this);
+      scaleToObjectBox.addEventLink(ValueChangedEvent.class, this);
       applyToChoice.addEventLink(ValueChangedEvent.class, this);
     }
 
@@ -428,6 +592,7 @@ public class LinearMapping3D extends Mapping3D
       coords.setOrientation(xrotField.getValue(), yrotField.getValue(), zrotField.getValue());
       findCoefficients();
       coordsFromParams = coordsFromParamsBox.getState();
+      scaleToObject = scaleToObjectBox.getState();
       setAppliesTo((short) applyToChoice.getSelectedIndex());
       preview.setTexture(getTexture(), LinearMapping3D.this);
       preview.render();

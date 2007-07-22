@@ -134,10 +134,10 @@ public class TextureMappingDialog extends BDialog
       Class cls = (Class) mappings.elementAt(mapChoice.getSelectedIndex());
       if (cls == map.getClass())
         return;
-      Constructor con = cls.getConstructor(new Class [] {Texture.class});
+      Constructor con = cls.getConstructor(new Class [] {Object3D.class, Texture.class});
       Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) 
           : editObj.getTexture();
-      setMapping((TextureMapping) con.newInstance(new Object [] {tex}));
+      setMapping((TextureMapping) con.newInstance(new Object [] {editObj, tex}));
       content.remove(editingPanel);
       content.add(editingPanel = map.getEditingPanel(editObj, preview), 0, 2);
       pack();

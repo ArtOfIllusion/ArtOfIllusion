@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -62,8 +62,31 @@ public class Linear3DTriangle extends RenderingTriangle
       spec.bumpGrad.set(0.0, 0.0, 0.0);
       return;
     }
-    ((Texture3D) map.getTexture()).getTextureSpec(spec, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w, 
-        size*map.matScaleX, size*map.matScaleY, size*map.matScaleZ, angle, time, getParameters(u, v, w));
+    double sizex = size, sizey = size, sizez = size;
+    if (map.scaleToObject)
+    {
+      BoundingBox bounds = map.getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        sizex = size*scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        sizez = size*scale;
+      }
+    }
+    ((Texture3D) map.getTexture()).getTextureSpec(spec, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w,
+        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
+        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
+        Math.sqrt(map.az*sizex*map.az*sizex+map.bz*sizey*map.bz*sizey+map.cz*sizez*map.cz*sizez)*map.matScaleZ,
+        angle, time, getParameters(u, v, w));
     if (map.transform && map.getTexture().hasComponent(Texture.BUMP_COMPONENT))
       map.fromLocal.transformDirection(spec.bumpGrad);
   }
@@ -75,13 +98,59 @@ public class Linear3DTriangle extends RenderingTriangle
       trans.setRGB(1.0f, 1.0f, 1.0f);
       return;
     }
-    ((Texture3D) map.getTexture()).getTransparency(trans, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w, 
-        size*map.matScaleX, size*map.matScaleY, size*map.matScaleZ, angle, time, getParameters(u, v, w));
+    double sizex = size, sizey = size, sizez = size;
+    if (map.scaleToObject)
+    {
+      BoundingBox bounds = map.getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        sizex = size*scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        sizez = size*scale;
+      }
+    }
+    ((Texture3D) map.getTexture()).getTransparency(trans, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w,
+        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
+        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
+        Math.sqrt(map.az*sizex*map.az*sizex+map.bz*sizey*map.bz*sizey+map.cz*sizez*map.cz*sizez)*map.matScaleZ,
+        angle, time, getParameters(u, v, w));
   }
 
   public double getDisplacement(double u, double v, double w, double size, double time)
   {
-    return ((Texture3D) map.getTexture()).getDisplacement(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w, 
-        size*map.matScaleX, size*map.matScaleY, size*map.matScaleZ, time, getParameters(u, v, w));
+    double sizex = size, sizey = size, sizez = size;
+    if (map.scaleToObject)
+    {
+      BoundingBox bounds = map.getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        sizex = size*scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        sizez = size*scale;
+      }
+    }
+    return ((Texture3D) map.getTexture()).getDisplacement(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w,
+        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
+        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
+        Math.sqrt(map.az*sizex*map.az*sizex+map.bz*sizey*map.bz*sizey+map.cz*sizez*map.cz*sizez)*map.matScaleZ,
+        time, getParameters(u, v, w));
   }
 }

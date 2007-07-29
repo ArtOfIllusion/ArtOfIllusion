@@ -99,6 +99,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     content.add(label2 = new BLabel(Translate.text("elapsedTime", "0:00")), 0, 1);
     content.add(closeButton = Translate.button("cancel", this, "doCancel"), 1, 0);
     content.add(saveButton = Translate.button("save", this, "doSave"), 1, 1);
+    closeButton.setFocusable(false);
     saveButton.setVisible(false);
     canvas = new CustomWidget();
     canvas.setPreferredSize(new Dimension(w, h));

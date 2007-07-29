@@ -37,6 +37,7 @@ public class ProjectionMapping extends Mapping2D
     coords = new CoordinateSystem(new Vec3(), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = yscale = 1.0;
     dx = dy = -0.5;
+    scaleToObject = true;
     findCoefficients();
   }
 
@@ -283,8 +284,8 @@ public class ProjectionMapping extends Mapping2D
       }
     }
     texture.getTextureSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy,
-        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
-        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
         angle, time, param);
     if (texture.hasComponent(Texture.BUMP_COMPONENT))
       {
@@ -338,8 +339,8 @@ public class ProjectionMapping extends Mapping2D
       }
     }
     texture.getTransparency(trans, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy,
-        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
-        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
         angle, time, param);
   }
 
@@ -382,9 +383,18 @@ public class ProjectionMapping extends Mapping2D
       }
     }
     return texture.getDisplacement(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy,
-        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
-        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
         time, param);
+  }
+
+  /**
+   * Return the length of a vector defined by three components.
+   */
+
+  private double length(double x, double y, double z)
+  {
+    return Math.sqrt(x*x+y*y+z*z);
   }
 
   /** Given a Mesh to which this mapping has been applied, return the texture coordinates at

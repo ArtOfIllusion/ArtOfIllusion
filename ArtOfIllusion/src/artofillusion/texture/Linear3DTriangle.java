@@ -18,7 +18,7 @@ import artofillusion.math.*;
 
 public class Linear3DTriangle extends RenderingTriangle
 {
-  double x1, x2, x3, y1, y2, y3, z1, z2, z3;
+  private double x1, x2, x3, y1, y2, y3, z1, z2, z3;
   private LinearMapping3D map;
 
   public Linear3DTriangle(int v1, int v2, int v3, int n1, int n2, int n3,
@@ -83,9 +83,9 @@ public class Linear3DTriangle extends RenderingTriangle
       }
     }
     ((Texture3D) map.getTexture()).getTextureSpec(spec, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w,
-        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
-        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
-        Math.sqrt(map.az*sizex*map.az*sizex+map.bz*sizey*map.bz*sizey+map.cz*sizez*map.cz*sizez)*map.matScaleZ,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
+        length(map.az*sizex, map.bz*sizey, map.cz*sizez)*map.matScaleZ,
         angle, time, getParameters(u, v, w));
     if (map.transform && map.getTexture().hasComponent(Texture.BUMP_COMPONENT))
       map.fromLocal.transformDirection(spec.bumpGrad);
@@ -119,9 +119,9 @@ public class Linear3DTriangle extends RenderingTriangle
       }
     }
     ((Texture3D) map.getTexture()).getTransparency(trans, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w,
-        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
-        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
-        Math.sqrt(map.az*sizex*map.az*sizex+map.bz*sizey*map.bz*sizey+map.cz*sizez*map.cz*sizez)*map.matScaleZ,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
+        length(map.az*sizex, map.bz*sizey, map.cz*sizez)*map.matScaleZ,
         angle, time, getParameters(u, v, w));
   }
 
@@ -148,9 +148,18 @@ public class Linear3DTriangle extends RenderingTriangle
       }
     }
     return ((Texture3D) map.getTexture()).getDisplacement(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w,
-        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
-        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
-        Math.sqrt(map.az*sizex*map.az*sizex+map.bz*sizey*map.bz*sizey+map.cz*sizez*map.cz*sizez)*map.matScaleZ,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
+        length(map.az*sizex, map.bz*sizey, map.cz*sizez)*map.matScaleZ,
         time, getParameters(u, v, w));
+  }
+
+  /**
+   * Return the length of a vector defined by three components.
+   */
+
+  private double length(double x, double y, double z)
+  {
+    return Math.sqrt(x*x+y*y+z*z);
   }
 }

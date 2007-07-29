@@ -291,9 +291,9 @@ public class LinearMapping3D extends Mapping3D
       }
     }
     texture.getTextureSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
-        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
-        Math.sqrt(az*sizex*az*sizex+bz*sizey*bz*sizey+cz*sizez*cz*sizez)*matScaleZ,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ,
         angle, time, param);
     if (transform && texture.hasComponent(Texture.BUMP_COMPONENT))
       fromLocal.transformDirection(spec.bumpGrad);
@@ -343,9 +343,9 @@ public class LinearMapping3D extends Mapping3D
       }
     }
     texture.getTransparency(trans, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
-        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
-        Math.sqrt(az*sizex*az*sizex+bz*sizey*bz*sizey+cz*sizez*cz*sizez)*matScaleZ,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ,
         angle, time, param);
   }
 
@@ -388,12 +388,20 @@ public class LinearMapping3D extends Mapping3D
       }
     }
     return texture.getDisplacement(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        Math.sqrt(ax*sizex*ax*sizex+bx*sizey*bx*sizey+cx*sizez*cx*sizez)*matScaleX,
-        Math.sqrt(ay*sizex*ay*sizex+by*sizey*by*sizey+cy*sizez*cy*sizez)*matScaleY,
-        Math.sqrt(az*sizex*az*sizex+bz*sizey*bz*sizey+cz*sizez*cz*sizez)*matScaleZ,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ,
         time, param);
   }
 
+  /**
+   * Return the length of a vector defined by three components.
+   */
+
+  private double length(double x, double y, double z)
+  {
+    return Math.sqrt(x*x+y*y+z*z);
+  }
 
   public TextureMapping duplicate()
   {
@@ -564,7 +572,7 @@ public class LinearMapping3D extends Mapping3D
       }));
       add(applyRow, 0, 6, 6, 1);
       applyToChoice.setSelectedIndex(appliesTo());
-      add(coordsFromParamsBox = new BCheckBox("Bind Texture Coordinates to Surface", coordsFromParams), 0, 7, 6, 1);
+      add(coordsFromParamsBox = new BCheckBox(Translate.text("bindTexToSurface"), coordsFromParams), 0, 7, 6, 1);
       add(scaleToObjectBox = new BCheckBox(Translate.text("scaleTexToObject"), scaleToObject), 0, 8, 6, 1);
       coordsFromParamsBox.setEnabled(theObject instanceof Mesh ||  theObject instanceof Actor);
       xscaleField.addEventLink(ValueChangedEvent.class, this);

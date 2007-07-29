@@ -25,9 +25,10 @@ import java.io.*;
 
 public class LinearMaterialMapping extends MaterialMapping
 {
-  CoordinateSystem coords;
-  double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
-  double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
+  protected CoordinateSystem coords;
+  protected double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
+  protected double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
+  protected boolean scaleToObject;
 
   public LinearMaterialMapping(Object3D theObject, Material3D theMaterial)
   {
@@ -101,7 +102,21 @@ public class LinearMaterialMapping extends MaterialMapping
     zscale = scale.z;
     findCoefficients();
   }
-  
+
+  /** Get whether the material is scaled based on the size of the object. */
+
+  public boolean isScaledToObject()
+  {
+    return scaleToObject;
+  }
+
+  /** Set whether the material is scaled based on the size of the object. */
+
+  public void setScaledToObject(boolean scaled)
+  {
+    scaleToObject = scaled;
+  }
+
   /** Get a vector whose components contain the rotation angles for the mapping. */
   
   public Vec3 getRotations()
@@ -122,6 +137,21 @@ public class LinearMaterialMapping extends MaterialMapping
   
   public double getStepSize()
   {
+    if (scaleToObject)
+    {
+      double sizex, sizey, sizez;
+      sizex = sizey = sizez = material.getStepSize();
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+        sizex /= bounds.maxx-bounds.minx;
+      if (bounds.maxy > bounds.miny)
+        sizey /= bounds.maxy-bounds.miny;
+      if (bounds.maxz > bounds.minz)
+        sizez /= bounds.maxz-bounds.minz;
+      return Math.abs(Math.min(Math.min(length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+          length(ay*sizex, by*sizey, cy*sizez)*matScaleY),
+          length(az*sizex, bz*sizey, cz*sizez)*matScaleZ));
+    }
     return Math.abs(material.getStepSize()*Math.min(Math.min(matScaleX, matScaleY), matScaleZ));
   }
 
@@ -129,10 +159,43 @@ public class LinearMaterialMapping extends MaterialMapping
 
   public void getMaterialSpec(Vec3 pos, MaterialSpec spec, double size, double time)
   {
-    ((Material3D) material).getMaterialSpec(spec, pos.x*ax+pos.y*bx+pos.z*cx-dx,
-	pos.x*ay+pos.y*by+pos.z*cy-dy, 
-	pos.x*az+pos.y*bz+pos.z*cz-dz, 
-	size*matScaleX, size*matScaleY, size*matScaleZ, time);
+    double x = pos.x, y = pos.y, z = pos.z;
+    double sizex = size, sizey = size, sizez = size;
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+      {
+        double scale = 1.0/(bounds.maxx-bounds.minx);
+        x *= scale;
+        sizex = size*scale;
+      }
+      if (bounds.maxy > bounds.miny)
+      {
+        double scale = 1.0/(bounds.maxy-bounds.miny);
+        y *= scale;
+        sizey = size*scale;
+      }
+      if (bounds.maxz > bounds.minz)
+      {
+        double scale = 1.0/(bounds.maxz-bounds.minz);
+        z *= scale;
+        sizez = size*scale;
+      }
+    }
+    ((Material3D) material).getMaterialSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
+        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
+        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ, time);
+  }
+
+  /**
+   * Return the length of a vector defined by three components.
+   */
+
+  private double length(double x, double y, double z)
+  {
+    return Math.sqrt(x*x+y*y+z*z);
   }
 
   public MaterialMapping duplicate()
@@ -151,6 +214,7 @@ public class LinearMaterialMapping extends MaterialMapping
     map.xscale = xscale;
     map.yscale = yscale;
     map.zscale = zscale;
+    map.scaleToObject = scaleToObject;
     map.findCoefficients();
     return map;
   }
@@ -166,6 +230,7 @@ public class LinearMaterialMapping extends MaterialMapping
     xscale = map.xscale;
     yscale = map.yscale;
     zscale = map.zscale;
+    scaleToObject = map.scaleToObject;
     findCoefficients();
   }
 
@@ -179,7 +244,7 @@ public class LinearMaterialMapping extends MaterialMapping
     super(theObject, theMaterial);
 
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     coords = new CoordinateSystem(in);
     dx = in.readDouble();
@@ -188,12 +253,13 @@ public class LinearMaterialMapping extends MaterialMapping
     xscale = in.readDouble();
     yscale = in.readDouble();
     zscale = in.readDouble();
+    scaleToObject = (version > 0 ? in.readBoolean() : false);
     findCoefficients();
   }
   
   public void writeToFile(DataOutputStream out) throws IOException
   {
-    out.writeShort(0);
+    out.writeShort(1);
     coords.writeToFile(out);
     out.writeDouble(dx);
     out.writeDouble(dy);
@@ -201,6 +267,7 @@ public class LinearMaterialMapping extends MaterialMapping
     out.writeDouble(xscale);
     out.writeDouble(yscale);
     out.writeDouble(zscale);
+    out.writeBoolean(scaleToObject);
   }
   
   /** Editor is an inner class for editing the mapping. */
@@ -208,12 +275,13 @@ public class LinearMaterialMapping extends MaterialMapping
   private class Editor extends FormContainer
   {
     ValueField xrotField, yrotField, zrotField, xscaleField, yscaleField, zscaleField, xtransField, ytransField, ztransField;
+    BCheckBox scaleToObjectBox;
     Object3D theObject;
     MaterialPreviewer preview;
 
     public Editor(Object3D obj, MaterialPreviewer preview)
     {
-      super(6, 6);
+      super(6, 7);
       theObject = obj;
       this.preview = preview;
       
@@ -242,6 +310,7 @@ public class LinearMaterialMapping extends MaterialMapping
       add(yrotField = new ValueField(angles[1], ValueField.NONE, 5), 3, 5);
       add(new BLabel("Z"), 4, 5);
       add(zrotField = new ValueField(angles[2], ValueField.NONE, 5), 5, 5);
+      add(scaleToObjectBox = new BCheckBox(Translate.text("scaleMatToObject"), scaleToObject), 0, 6, 6, 1);
       xscaleField.addEventLink(ValueChangedEvent.class, this);
       yscaleField.addEventLink(ValueChangedEvent.class, this);
       zscaleField.addEventLink(ValueChangedEvent.class, this);
@@ -251,6 +320,7 @@ public class LinearMaterialMapping extends MaterialMapping
       xrotField.addEventLink(ValueChangedEvent.class, this);
       yrotField.addEventLink(ValueChangedEvent.class, this);
       zrotField.addEventLink(ValueChangedEvent.class, this);
+      scaleToObjectBox.addEventLink(ValueChangedEvent.class, this);
     }
 
     private void processEvent()
@@ -262,6 +332,7 @@ public class LinearMaterialMapping extends MaterialMapping
       dy = ytransField.getValue();
       dz = ztransField.getValue();
       coords.setOrientation(xrotField.getValue(), yrotField.getValue(), zrotField.getValue());
+      scaleToObject = scaleToObjectBox.getState();
       findCoefficients();
       preview.render();
     }

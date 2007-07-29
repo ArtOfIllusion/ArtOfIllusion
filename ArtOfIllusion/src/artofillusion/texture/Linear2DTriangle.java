@@ -18,8 +18,8 @@ import artofillusion.math.*;
 
 public class Linear2DTriangle extends RenderingTriangle
 {
-  double x1, x2, x3, y1, y2, y3;
-  boolean bumpMapped;
+  private double x1, x2, x3, y1, y2, y3;
+  private boolean bumpMapped;
   private ProjectionMapping map;
 
   public Linear2DTriangle(int v1, int v2, int v3, int n1, int n2, int n3,
@@ -83,8 +83,8 @@ public class Linear2DTriangle extends RenderingTriangle
       }
     }
     ((Texture2D) map.getTexture()).getTextureSpec(spec, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w,
-        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
-        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
         angle, time, getParameters(u, v, w));
     if (bumpMapped)
     {
@@ -122,8 +122,8 @@ public class Linear2DTriangle extends RenderingTriangle
       }
     }
     ((Texture2D) map.getTexture()).getTransparency(trans, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w,
-        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
-        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
         angle, time, getParameters(u, v, w));
   }
 
@@ -150,8 +150,17 @@ public class Linear2DTriangle extends RenderingTriangle
       }
     }
     return ((Texture2D) map.getTexture()).getDisplacement(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w,
-        Math.sqrt(map.ax*sizex*map.ax*sizex+map.bx*sizey*map.bx*sizey+map.cx*sizez*map.cx*sizez)*map.matScaleX,
-        Math.sqrt(map.ay*sizex*map.ay*sizex+map.by*sizey*map.by*sizey+map.cy*sizez*map.cy*sizez)*map.matScaleY,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
         time, getParameters(u, v, w));
+  }
+
+  /**
+   * Return the length of a vector defined by three components.
+   */
+
+  private double length(double x, double y, double z)
+  {
+    return Math.sqrt(x*x+y*y+z*z);
   }
 }

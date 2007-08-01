@@ -41,7 +41,7 @@ import javax.swing.*;
 public class ModellingApp
 {
   public static final String MAJOR_VERSION = "2.5";
-  public static final String VERSION = MAJOR_VERSION+"ea2";
+  public static final String VERSION = MAJOR_VERSION+"beta";
   public static final double DIST_TO_SCREEN = 20.0;
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
@@ -230,6 +230,20 @@ public class ModellingApp
     if (numNewWindows == 0)
       newWindow();
     title.dispose();
+  }
+
+  /** Get the complete version number of Art of Illusion. */
+
+  public static String getVersion()
+  {
+    return VERSION;
+  }
+
+  /** Get the major part of the version number of Art of Illusion. */
+
+  public static String getMajorVersion()
+  {
+    return MAJOR_VERSION;
   }
 
   /** Get the application preferences object. */

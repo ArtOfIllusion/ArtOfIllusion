@@ -16,6 +16,7 @@ import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
+import artofillusion.ui.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -40,6 +41,7 @@ public class Scene
   private TexturesDialog texDlg;
   private MaterialsDialog matDlg;
   private ParameterValue environParamValue[];
+  private StringBuffer loadingErrors;
   
   public static final int HANDLE_SIZE = 4;
   public static final int ENVIRON_SOLID = 0;
@@ -929,6 +931,13 @@ public class Scene
     return errorsLoading;
   }
 
+  /** Get a description of any errors which occurred while loading the scene. */
+
+  public String getLoadingErrors()
+  {
+    return (loadingErrors == null ? "" : loadingErrors.toString());
+  }
+
   /** The following constructor is used for reading files.  If fullScene is false, only the
       Textures and Materials are read. */
   
@@ -961,6 +970,7 @@ public class Scene
 
     if (version < 0 || version > 3)
       throw new InvalidObjectException("");
+    loadingErrors = new StringBuffer();
     ambientColor = new RGBColor(in);
     fogColor = new RGBColor(in);
     fog = in.readBoolean();
@@ -1021,6 +1031,10 @@ public class Scene
             catch (Exception ex)
               {
                 ex.printStackTrace();
+                if (ex instanceof ClassNotFoundException)
+                  loadingErrors.append(Translate.text("errorFindingClass", classname)).append('\n');
+                else
+                  loadingErrors.append(Translate.text("errorInstantiatingClass", classname)).append('\n');
                 UniformMaterial m = new UniformMaterial();
                 m.setName("<unreadable>");
                 materials.addElement(m);
@@ -1057,6 +1071,10 @@ public class Scene
             catch (Exception ex)
               {
                 ex.printStackTrace();
+                if (ex instanceof ClassNotFoundException)
+                  loadingErrors.append(Translate.text("errorFindingClass", classname)).append('\n');
+                else
+                  loadingErrors.append(Translate.text("errorInstantiatingClass", classname)).append('\n');
                 UniformTexture t = new UniformTexture();
                 t.setName("<unreadable>");
                 textures.addElement(t);
@@ -1176,6 +1194,10 @@ public class Scene
                   ((InvocationTargetException) ex).getTargetException().printStackTrace();
                 else
                   ex.printStackTrace();
+                if (ex instanceof ClassNotFoundException)
+                  loadingErrors.append(info.name).append(": ").append(Translate.text("errorFindingClass", classname)).append('\n');
+                else
+                  loadingErrors.append(info.name).append(": ").append(Translate.text("errorInstantiatingClass", classname)).append('\n');
                 obj = new NullObject();
                 info.name = "<unreadable> "+info.name;
                 errorsLoading = true;

@@ -719,7 +719,7 @@ public class ModellingApp
       sc.setName(f.getName());
       sc.setDirectory(f.getParent());
       if (sc.errorsOccurredInLoading())
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingScenePart")), BStandardDialog.ERROR).showMessageDialog(fr);
+        new BStandardDialog("", new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new BScrollPane(new BTextArea(sc.getLoadingErrors()))}, BStandardDialog.ERROR).showMessageDialog(fr);
       newWindow(sc);
       in.close();
       RecentFiles.addRecentFile(f);

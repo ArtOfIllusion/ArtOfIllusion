@@ -1056,6 +1056,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     return theView[currentView];
   }
+  
+  /** Get all ViewerCanvases contained in this window. */
+
+  public ViewerCanvas[] getAllViews()
+  {
+    return (ViewerCanvas[]) theView.clone();
+  }
 
   /** Get the Score for this window. */
 

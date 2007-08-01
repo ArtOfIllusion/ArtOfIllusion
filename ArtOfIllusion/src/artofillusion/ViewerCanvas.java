@@ -341,6 +341,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setShowAxes(boolean show)
   {
     showAxes = show;
+    dispatchEvent(viewChangedEvent);
   }
   
   /** Determine whether the template image is currently showing. */
@@ -355,6 +356,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setShowTemplate(boolean show)
   {
     showTemplate = show;
+    dispatchEvent(viewChangedEvent);
   }
   
   /** Get the template image. */
@@ -370,6 +372,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     templateImage = im;
     drawer.setTemplateImage(im);
+    dispatchEvent(viewChangedEvent);
   }
   
   /** Set the template image based on an image file. */
@@ -440,6 +443,7 @@ public abstract class ViewerCanvas extends CustomWidget
       theCamera.setGrid(spacing/subdivisions);
     else
       theCamera.setGrid(0.0);
+    dispatchEvent(viewChangedEvent);
   }
 
   /** Get whether the grid is shown. */
@@ -723,6 +727,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setRenderMode(int mode)
   {
     renderMode = mode;
+    dispatchEvent(viewChangedEvent);
     repaint();
   }
   

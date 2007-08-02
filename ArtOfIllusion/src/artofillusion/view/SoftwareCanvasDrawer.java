@@ -1633,17 +1633,17 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     SoftReference ref = (SoftReference) imageMeshMap.get(image);
     if (ref != null)
       mesh = (RenderingMesh) ref.get();
+    int width = record.width+1;
+    int height = record.height+1;
+    Vec3 dx = p2.minus(p1).times(1.0/record.width);
+    Vec3 dy = p4.minus(p1).times(1.0/record.height);
     if (mesh == null)
     {
       // We don't have a cached one, so we need to create a new one.
 
-      int width = record.width+1;
-      int height = record.height+1;
       Vec3 vert[] = new Vec3[width*height];
       Vec3 norm[] = new Vec3[] {new Vec3()};
       RenderingTriangle tri[] = new RenderingTriangle[2*record.width*record.height];
-      Vec3 dx = p2.minus(p1).times(1.0/record.width);
-      Vec3 dy = p4.minus(p1).times(1.0/record.height);
       for (int i = 0; i < width; i++)
       {
         for (int j = 0; j < height; j++)
@@ -1658,6 +1658,16 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
         }
       mesh = new RenderingMesh(vert, norm, tri, null, null);
       imageMeshMap.put(image, new SoftReference(mesh));
+    }
+    else
+    {
+      // Just position the vertices correctly.
+
+      for (int i = 0; i < width; i++)
+      {
+        for (int j = 0; j < height; j++)
+          mesh.vert[i+j*width] = p1.plus(dx.times(i)).plus(dy.times(j));
+      }
     }
 
     // Render the image.

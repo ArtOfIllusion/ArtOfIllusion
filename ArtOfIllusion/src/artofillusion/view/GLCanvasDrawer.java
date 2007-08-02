@@ -47,6 +47,8 @@ public class GLCanvasDrawer implements CanvasDrawer
   private static HashMap textImageMap = new HashMap();
   private static WeakHashMap imageMap = new WeakHashMap();
   private static Color lastTextColor;
+  private static int imageRenderMode = -1;
+  private static boolean useTextureRectangle;
 
   public GLCanvasDrawer(ViewerCanvas view)
   {
@@ -628,7 +630,7 @@ public class GLCanvasDrawer implements CanvasDrawer
   {
     try
     {
-      drawImage(getCachedImage(image), x, y);
+      drawImage(getCachedImage(image, false), x, y);
     }
     catch (InterruptedException ex)
     {
@@ -664,24 +666,26 @@ public class GLCanvasDrawer implements CanvasDrawer
     prepareDepthTest(true);
     prepareCulling(false);
     prepareShading(false);
-    gl.glEnable(GL.GL_TEXTURE_RECTANGLE_ARB);
-    gl.glBindTexture(GL.GL_TEXTURE_RECTANGLE_ARB, record.getTextureId());
+    double width = (useTextureRectangle ? record.width : 1.0);
+    double height = (useTextureRectangle ? record.height : 1.0);
+    gl.glEnable(imageRenderMode);
+    gl.glBindTexture(imageRenderMode, record.getTextureId());
     gl.glBegin(GL.GL_QUADS);
     gl.glVertex3d(p1.x, p1.y, p1.z);
-    gl.glTexCoord2d(record.width, 0.0);
+    gl.glTexCoord2d(width, 0.0);
     gl.glVertex3d(p2.x, p2.y, p2.z);
-    gl.glTexCoord2d(record.width, record.height);
+    gl.glTexCoord2d(width, height);
     gl.glVertex3d(p3.x, p3.y, p3.z);
-    gl.glTexCoord2d(0.0, record.height);
+    gl.glTexCoord2d(0.0, height);
     gl.glVertex3d(p4.x, p4.y, p4.z);
     gl.glTexCoord2d(0.0, 0.0);
     gl.glEnd();
-    gl.glDisable(GL.GL_TEXTURE_RECTANGLE_ARB);
+    gl.glDisable(imageRenderMode);
   }
 
   /** Get a GLImage for an Image, attempting to reuse objects for efficiency. */
 
-  private GLImage getCachedImage(Image image) throws InterruptedException
+  private GLImage getCachedImage(Image image, boolean texture) throws InterruptedException
   {
     GLImage record = null;
     SoftReference ref = (SoftReference) imageMap.get(image);
@@ -689,9 +693,27 @@ public class GLCanvasDrawer implements CanvasDrawer
       record = (GLImage) ref.get();
     if (record == null)
     {
+      Image sourceImage = image;
+      if (texture && !useTextureRectangle)
+      {
+        // Scale the image so its dimensions are powers of 2.
+
+        int width = image.getWidth(null);
+        int height = image.getHeight(null);
+        int newWidth = (int) Math.pow(2, Math.ceil(Math.log(width)/Math.log(2)));
+        int newHeight = (int) Math.pow(2, Math.ceil(Math.log(height)/Math.log(2)));
+        if (newWidth != width || newHeight != height)
+        {
+          sourceImage = image.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
+          MediaTracker mt = new MediaTracker(canvas);
+          mt.addImage(sourceImage, 0);
+          mt.waitForID(0);
+        }
+      }
+
       // Grab the pixels from the image and cache them.
 
-      record = new GLImage(image);
+      record = new GLImage(sourceImage);
       imageMap.put(image, new SoftReference(record));
     }
     return record;
@@ -788,6 +810,21 @@ public class GLCanvasDrawer implements CanvasDrawer
       gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
       gl.glEnableClientState(GL.GL_NORMAL_ARRAY);
       gl.glAlphaFunc(GL.GL_GREATER, 0.0f);
+      if (imageRenderMode == -1)
+      {
+        // Determine whether non-power-of-2 textures are supported.
+
+        if (gl.glGetString(GL.GL_EXTENSIONS).indexOf("GL_EXT_texture_rectangle") > -1)
+        {
+          imageRenderMode = GL.GL_TEXTURE_RECTANGLE_ARB;
+          useTextureRectangle = true;
+        }
+        else
+        {
+          imageRenderMode = GL.GL_TEXTURE_2D;
+          useTextureRectangle = false;
+        }
+      }
     }
 
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
@@ -890,19 +927,19 @@ public class GLCanvasDrawer implements CanvasDrawer
 
     public GLTexture(Image image) throws InterruptedException
     {
-      GLImage glImage = getCachedImage(image);
+      GLImage glImage = getCachedImage(image, true);
       width = glImage.width;
       height = glImage.height;
       textureId = new int[1];
       gl.glGenTextures(1, textureId, 0);
-      gl.glBindTexture(GL.GL_TEXTURE_RECTANGLE_ARB, textureId[0]);
+      gl.glBindTexture(imageRenderMode, textureId[0]);
       gl.glPixelStorei(GL.GL_UNPACK_ALIGNMENT, 1);
-      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
-      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
-      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
-      gl.glTexParameteri(GL.GL_TEXTURE_RECTANGLE_ARB, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
+      gl.glTexParameteri(imageRenderMode, GL.GL_TEXTURE_WRAP_S, GL.GL_CLAMP);
+      gl.glTexParameteri(imageRenderMode, GL.GL_TEXTURE_WRAP_T, GL.GL_CLAMP);
+      gl.glTexParameteri(imageRenderMode, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+      gl.glTexParameteri(imageRenderMode, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
       gl.glTexEnvf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
-      gl.glTexImage2D(GL.GL_TEXTURE_RECTANGLE_ARB, 0, GL.GL_RGBA, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, glImage.data);
+      gl.glTexImage2D(imageRenderMode, 0, GL.GL_RGBA, width, height, 0, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, glImage.data);
       textureReferences.add(new TextureReference(this));
     }
 

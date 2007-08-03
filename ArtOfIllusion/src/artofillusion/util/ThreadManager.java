@@ -88,6 +88,11 @@ public class ThreadManager
                 task.cleanup();
                 return;
               }
+              catch (Exception ex)
+              {
+                cancel();
+                ex.printStackTrace();
+              }
             }
           }
         };

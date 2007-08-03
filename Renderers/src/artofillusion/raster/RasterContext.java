@@ -30,7 +30,7 @@ public class RasterContext
 
   public RasterContext(Camera camera, int width)
   {
-    this.camera = camera;
+    this.camera = (camera == null ? null : camera.duplicate());
     surfSpec = new TextureSpec();
     surfSpec2 = new TextureSpec();
     tempColor = new RGBColor [4];

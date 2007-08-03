@@ -34,7 +34,7 @@ public class CompositingContext
 
   public CompositingContext(Camera camera)
   {
-    this.camera = camera;
+    this.camera = (camera == null ? null : camera.duplicate());
     surfSpec = new TextureSpec();
     matSpec = new MaterialSpec();
     tempVec = new Vec3 [4];

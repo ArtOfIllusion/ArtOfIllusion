@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2005 by Peter Eastman
+/* Copyright (C) 2001-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -66,13 +66,13 @@ public class Raster implements Renderer, Runnable
     threadRasterContext = new ThreadLocal() {
       protected Object initialValue()
       {
-        return new RasterContext(theCamera.duplicate(), width);
+        return new RasterContext(theCamera, width);
       }
     };
     threadCompositingContext = new ThreadLocal() {
       protected Object initialValue()
       {
-        return new CompositingContext(theCamera.duplicate());
+        return new CompositingContext(theCamera);
       }
     };
   }
@@ -418,10 +418,7 @@ public class Raster implements Renderer, Runnable
         context.camera.setObjectTransform(obj.coords.fromLocal());
         renderObject(obj, orig, viewdir, obj.coords.toLocal(), context, thisThread);
         if (thisThread != renderThread)
-          {
-            finish(null);
-            return;
-          }
+          return;
         if (System.currentTimeMillis()-updateTime > 5000)
           updateImage();
       }
@@ -431,6 +428,7 @@ public class Raster implements Renderer, Runnable
       }
     });
     threads.run();
+    threads.finish();
     finish(createFinalImage(center, orig, hvec, vvec));
   }
 
@@ -523,6 +521,8 @@ public class Raster implements Renderer, Runnable
   private ComplexImage createFinalImage(final Vec3 center, final Vec3 orig, final Vec3 hvec, final Vec3 vvec)
   {
     final Thread thisThread = Thread.currentThread();
+    if (renderThread != thisThread)
+      return null;
     final int n = samplesPerPixel*samplesPerPixel;
     final float hdrImage[][] = (generateHDR ? new float[3][imageWidth*imageHeight] : null);
     ThreadManager threads = new ThreadManager(imageHeight, new ThreadManager.Task() {
@@ -647,6 +647,7 @@ public class Raster implements Renderer, Runnable
       }
     });
     threads.run();
+    threads.finish();
 
     // Create the ComplexImage.
 
@@ -779,7 +780,6 @@ public class Raster implements Renderer, Runnable
     imagePixel = null;
     fragment = null;
     RenderListener rl = listener;
-    Thread t = renderThread;
     listener = null;
     renderThread = null;
     if (rl != null && finalImage != null)

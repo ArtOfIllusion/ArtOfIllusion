@@ -1141,8 +1141,8 @@ public class Scene
             try
               {
                 Class mapClass = ModellingApp.getClass(in.readUTF());
-                con = mapClass.getConstructor(new Class [] {DataInputStream.class, Texture.class});
-                environMapping = (TextureMapping) con.newInstance(new Object [] {in, environTexture});
+                con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Texture.class});
+                environMapping = (TextureMapping) con.newInstance(new Object [] {in, new Sphere(1.0, 1.0, 1.0), environTexture});
               }
             catch (Exception ex)
               {

@@ -1376,7 +1376,10 @@ public class SplineMesh extends Object3D implements Mesh
     public Keyframe duplicate(Object owner)
     {
       SplineMeshKeyframe k = new SplineMeshKeyframe();
-      k.mesh = (SplineMesh) ((ObjectInfo) owner).object;
+      if (owner instanceof SplineMesh)
+        k.mesh = (SplineMesh) owner;
+      else
+        k.mesh = (SplineMesh) ((ObjectInfo) owner).object;
       k.skeleton = skeleton.duplicate();
       k.vertPos = new Vec3 [vertPos.length];
       k.usmoothness = new float [usmoothness.length];

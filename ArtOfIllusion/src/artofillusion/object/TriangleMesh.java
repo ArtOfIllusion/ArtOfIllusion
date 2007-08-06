@@ -3569,7 +3569,10 @@ groups:     do
     public Keyframe duplicate(Object owner)
     {
       TriangleMeshKeyframe k = new TriangleMeshKeyframe();
-      k.mesh = (TriangleMesh) ((ObjectInfo) owner).object;
+      if (owner instanceof TriangleMesh)
+        k.mesh = (TriangleMesh) owner;
+      else
+        k.mesh = (TriangleMesh) ((ObjectInfo) owner).object;
       k.skeleton = skeleton.duplicate();
       k.vertPos = new Vec3 [vertPos.length];
       k.vertSmoothness = new float [vertSmoothness.length];

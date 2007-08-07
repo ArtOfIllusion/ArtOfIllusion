@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 by Peter Eastman
+/* Copyright (C) 2004-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,22 +12,24 @@ package artofillusion;
 
 import artofillusion.ui.*;
 import buoy.widget.*;
-import buoy.event.*;
 
 import java.awt.*;
 import java.util.*;
+import java.beans.*;
 import javax.swing.*;
 
 /** TitleWindow displays a window containing the title and credits. */
 
 public class TitleWindow extends BWindow
 {
+  private PropertyChangeListener activeWindowListener;
+
   public TitleWindow()
   {
     int imageNumber = new Random(System.currentTimeMillis()).nextInt(8);
     ImageIcon image = new ImageIcon(getClass().getResource("/artofillusion/titleImages/titleImage"+imageNumber+".jpg"));
     String text = "<html><div align=\"center\">"+
-        "Art of Illusion v"+ModellingApp.VERSION+
+        "Art of Illusion v"+ModellingApp.getVersion()+
         "<br>Copyright 1999-2007 by Peter Eastman and others"+
         "<br>(See the README file for details.)"+
         "<br>This program may be freely distributed under"+
@@ -48,5 +50,24 @@ public class TitleWindow extends BWindow
     setBounds(bounds); // Workaround for Windows bug
     UIUtilities.centerWindow(this);
     setVisible(true);
+    activeWindowListener = new PropertyChangeListener()
+    {
+      public void propertyChange(PropertyChangeEvent evt)
+      {
+        // Hide this window if a dialog is shown in front of it.
+
+        if (evt.getNewValue() instanceof Dialog)
+          setVisible(false);
+        else if (!isVisible())
+          setVisible(true);
+      }
+    };
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("activeWindow", activeWindowListener);
+  }
+
+  public void dispose()
+  {
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().removePropertyChangeListener("activeWindow", activeWindowListener);
+    super.dispose();
   }
 }

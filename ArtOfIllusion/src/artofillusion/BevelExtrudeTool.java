@@ -115,8 +115,6 @@ public class BevelExtrudeTool extends MeshEditingTool
     Vec3 dragVec = cam.convertScreenToWorld(dragPoint, cam.getDistToScreen()).minus(cam.convertScreenToWorld(clickPoint, cam.getDistToScreen()));
     width = 0.5*dragVec.x;
     height = dragVec.y;
-    width = (dragPoint.x-clickPoint.x)/cam.getScale();
-    height = (clickPoint.y-dragPoint.y)/cam.getScale();
     if (controller.getSelectionMode() == MeshEditController.FACE_MODE)
     {
       if (ev.getMouseEvent().isShiftDown())

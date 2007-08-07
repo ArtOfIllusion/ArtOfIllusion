@@ -63,8 +63,8 @@ public abstract class ObjectViewer extends ViewerCanvas
     double dy = bounds.maxy-bounds.miny;
     double dz = bounds.maxz-bounds.minz;
     double size = 0.5*Math.sqrt(dx*dx+dy*dy+dz*dz);
-    Vec3 origin = getDisplayCoordinates().getOrigin();
-    double depth = toView.times(info.coords.getOrigin()).z;
+    Vec3 origin = getDisplayCoordinates().fromLocal().times(bounds.getCenter());
+    double depth = toView.times(origin).z;
     double min = depth-size, max = depth+size;
 
     // Now check the rest of the scene.
@@ -81,10 +81,10 @@ public abstract class ObjectViewer extends ViewerCanvas
         dy = bounds.maxy-bounds.miny;
         dz = bounds.maxz-bounds.minz;
         size = 0.5*Math.sqrt(dx*dx+dy*dy+dz*dz);
-        origin = info.coords.getOrigin();
+        origin = info.coords.fromLocal().times(bounds.getCenter());
         if (!useWorldCoords)
           origin = thisObjectInScene.coords.toLocal().times(origin);
-        depth = toView.times(info.coords.getOrigin()).z;
+        depth = toView.times(origin).z;
         if (depth-size < min)
           min = depth-size;
         if (depth+size > max)

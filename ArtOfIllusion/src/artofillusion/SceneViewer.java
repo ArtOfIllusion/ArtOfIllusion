@@ -69,18 +69,18 @@ public class SceneViewer extends ViewerCanvas
   
   public void rebuildCameraList()
   {
-    for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
-    {
-      Widget w = (Widget) iter.next();
-      if (w instanceof ViewerOrientationControl.OrientationChoice)
-        ((ViewerOrientationControl.OrientationChoice) w).rebuildCameraList();
-    }
     cameras.removeAllElements();
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo obj = theScene.getObject(i);
       if (obj.object instanceof SceneCamera)
         cameras.addElement(obj);
+    }
+    for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
+    {
+      Widget w = (Widget) iter.next();
+      if (w instanceof ViewerOrientationControl.OrientationChoice)
+        ((ViewerOrientationControl.OrientationChoice) w).rebuildCameraList();
     }
   }
 

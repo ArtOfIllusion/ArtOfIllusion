@@ -531,6 +531,11 @@ public class Scene
         if (obj.object.getTexture() == tex)
           obj.setTexture(def, def.getDefaultMapping(obj.object));
       }
+    if (environTexture == tex)
+    {
+      environTexture = def;
+      environMapping = def.getDefaultMapping(new Sphere(1.0, 1.0, 1.0));
+    }
   }
   
   /** This method should be called after a Material has been edited.  It notifies 

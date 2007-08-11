@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 by Peter Eastman
+/* Copyright (C) 2004-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -71,11 +71,12 @@ public class UIUtilities
     }
   }
   
-  /** Set up a Widget and all of its children to have the default background color for the program. */
+  /** Set up a Widget and all of its children to have the default background and text colors for the program. */
   
   public static void applyDefaultBackground(Widget w)
   {
     applyBackground(w, ThemeManager.getAppBackgroundColor());
+    applyTextColor(w, ThemeManager.getTextColor());
   }
 
   /** Set up a Widget and all of its children to have a specific background color. */
@@ -94,7 +95,21 @@ public class UIUtilities
     else if (w instanceof BButton || w instanceof BComboBox || w instanceof BCheckBox || w instanceof BRadioButton)
       ((JComponent) w.getComponent()).setOpaque(false);
   }
-  
+
+  /** Set up a Widget and all of its children to have a specific text color. */
+
+  public static void applyTextColor(Widget w, Color color)
+  {
+    if (w instanceof WidgetContainer)
+    {
+      Iterator children = ((WidgetContainer) w).getChildren().iterator();
+      while (children.hasNext())
+        applyTextColor((Widget) children.next(), color);
+    }
+    else if (w instanceof BLabel || w instanceof BCheckBox || w instanceof BRadioButton)
+      w.getComponent().setForeground(color);
+  }
+
   /** Given an BList, create an appropriate container for it.  This involves a properly configured
       BScrollPane, with an outline around it. */
   

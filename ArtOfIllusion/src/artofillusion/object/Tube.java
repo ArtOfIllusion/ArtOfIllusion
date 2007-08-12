@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2005 by Peter Eastman
+/* Copyright (C) 2002-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -630,7 +630,10 @@ public class Tube extends Curve
     xdir = new Vec3 [subdiv.length];
     zdir = new Vec3 [subdiv.length];
     updir = new Vec3 [subdiv.length];
-    xdir[0] = subdiv[1].minus(subdiv[0]);
+    if (t.closed)
+      xdir[0] = subdiv[1].minus(subdiv[subdiv.length-1]);
+    else
+      xdir[0] = subdiv[1].minus(subdiv[0]);
     xdir[0].normalize();
     if (Math.abs(xdir[0].y) > Math.abs(xdir[0].z))
       zdir[0] = xdir[0].cross(Vec3.vz());

@@ -175,7 +175,7 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
-  private void processMouseScrolled(MouseScrolledEvent ev)
+  protected void processMouseScrolled(MouseScrolledEvent ev)
   {
     int amount = ev.getWheelRotation();
     if (ev.isAltDown())

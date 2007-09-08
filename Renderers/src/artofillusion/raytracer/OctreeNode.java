@@ -201,6 +201,7 @@ public class OctreeNode extends BoundingBox
   public OctreeNode findNextNode(Ray r)
   {
     double maxt = Double.MAX_VALUE;
+    double dx = 0.0, dy = 0.0, dz = 0.0;
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
 
     if (parent == null)
@@ -208,165 +209,101 @@ public class OctreeNode extends BoundingBox
 
     // Find the last point on the ray which is inside this node.
 
-    int side = -1;
     if (dir.x > Raytracer.TOL)
     {
+      dx = Raytracer.TOL;
       double t = (maxx-orig.x)/dir.x;
       if (t < maxt)
-      {
-        side = 0;
         maxt = t;
-      }
     }
     else if (dir.x < -Raytracer.TOL)
     {
+      dx = -Raytracer.TOL;
       double t = (minx-orig.x)/dir.x;
       if (t < maxt)
-      {
-        side = 1;
         maxt = t;
-      }
     }
     if (dir.y > Raytracer.TOL)
     {
+      dy = Raytracer.TOL;
       double t = (maxy-orig.y)/dir.y;
       if (t < maxt)
-      {
-        side = 2;
         maxt = t;
-      }
     }
     else if (dir.y < -Raytracer.TOL)
     {
+      dy = -Raytracer.TOL;
       double t = (miny-orig.y)/dir.y;
       if (t < maxt)
-      {
-        side = 3;
         maxt = t;
-      }
     }
     if (dir.z > Raytracer.TOL)
     {
+      dz = Raytracer.TOL;
       double t = (maxz-orig.z)/dir.z;
       if (t < maxt)
-      {
-        side = 4;
         maxt = t;
-      }
     }
     else if (dir.z < -Raytracer.TOL)
     {
+      dz = -Raytracer.TOL;
       double t = (minz-orig.z)/dir.z;
       if (t < maxt)
-      {
-        side = 5;
         maxt = t;
-      }
     }
 
     // Push it just outside this node, then move up the tree to find a node that
     // contains it.
 
     Vec3 nextPos = r.tempVec1;
-    nextPos.set(orig.x+dir.x*maxt, orig.y+dir.y*maxt, orig.z+dir.z*maxt);
+    nextPos.set(orig.x+dir.x*maxt+dx, orig.y+dir.y*maxt+dy, orig.z+dir.z*maxt+dz);
     OctreeNode current = parent;
-    switch (side)
+    while (!current.contains(nextPos))
     {
-      case 0:
-        nextPos.x += Raytracer.TOL;
-        while (current.maxx < nextPos.x)
-        {
-          current = current.parent;
-          if (current == null)
-            return null;
-        }
-        break;
-      case 1:
-        nextPos.x -= Raytracer.TOL;
-        while (current.minx > nextPos.x)
-        {
-          current = current.parent;
-          if (current == null)
-            return null;
-        }
-        break;
-      case 2:
-        nextPos.y += Raytracer.TOL;
-        while (current.maxy < nextPos.y)
-        {
-          current = current.parent;
-          if (current == null)
-            return null;
-        }
-        break;
-      case 3:
-        nextPos.y -= Raytracer.TOL;
-        while (current.miny > nextPos.y)
-        {
-          current = current.parent;
-          if (current == null)
-            return null;
-        }
-        break;
-      case 4:
-        nextPos.z += Raytracer.TOL;
-        while (current.maxz < nextPos.z)
-        {
-          current = current.parent;
-          if (current == null)
-            return null;
-        }
-        break;
-      case 5:
-        nextPos.z -= Raytracer.TOL;
-        while (current.minz > nextPos.z)
-        {
-          current = current.parent;
-          if (current == null)
-            return null;
-        }
-        break;
+      current = current.parent;
+      if (current == null)
+        return null;
     }
 
     // Now move back down the tree until we reach a terminal node.
 
     while (current.obj == null)
+    {
+      if (nextPos.x > current.midx)
       {
-        if (nextPos.x > current.midx)
-          {
-            if (nextPos.y > current.midy)
-              {
-                if (nextPos.z > current.midz)
-                  current = current.child7;
-                else
-                  current = current.child6;
-              }
-            else
-              {
-                if (nextPos.z > current.midz)
-                  current = current.child5;
-                else
-                  current = current.child4;
-              }
-          }
+        if (nextPos.y > current.midy)
+        {
+          if (nextPos.z > current.midz)
+            current = current.child7;
+          else
+            current = current.child6;
+        }
         else
-          {
-            if (nextPos.y > current.midy)
-              {
-                if (nextPos.z > current.midz)
-                  current = current.child3;
-                else
-                  current = current.child2;
-              }
-            else
-              {
-                if (nextPos.z > current.midz)
-                  current = current.child1;
-                else
-                  current = current.child0;
-              }
-          }
+        {
+          if (nextPos.z > current.midz)
+            current = current.child5;
+          else
+            current = current.child4;
+        }
       }
+      else
+      {
+        if (nextPos.y > current.midy)
+        {
+          if (nextPos.z > current.midz)
+            current = current.child3;
+          else
+            current = current.child2;
+        }
+        else
+        {
+          if (nextPos.z > current.midz)
+            current = current.child1;
+          else
+            current = current.child0;
+        }
+      }
+    }
     return current;
   }
   

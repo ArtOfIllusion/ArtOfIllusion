@@ -142,7 +142,7 @@ public class EnvironmentPhotonSource implements PhotonSource
                 // Use Russian Roulette sampling.
 
                 if (photonIntensity < map.random.nextFloat())
-                  photonIntensity = 0.0;
+                  return;
                 color.scale(1.0f/photonIntensity);
               }
           }

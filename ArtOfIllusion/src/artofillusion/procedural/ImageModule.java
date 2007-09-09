@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -586,8 +586,15 @@ public class ImageModule extends Module
     tiley = in.readBoolean();
     mirrorx = in.readBoolean();
     mirrory = in.readBoolean();
-    maxComponent = (map == null ? 0 : map.getComponentCount()-1);
     colorModel = (version == -2 ? in.readInt() : RGB_MODEL);
+    if (map == null)
+      maxComponent = 0;
+    else if (colorModel == RGB_MODEL)
+      maxComponent = map.getComponentCount()-1;
+    else if (map.getComponentCount() > 3)
+      maxComponent = 3;
+    else
+      maxComponent = 2;
     setupOutputs();
   }
 }

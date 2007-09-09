@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2005 by Peter Eastman
+/* Copyright (C) 2001-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +14,7 @@ import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import artofillusion.view.*;
-import buoy.event.RepaintEvent;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.awt.image.*;
@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.text.*;
 
 import javax.imageio.ImageIO;
-import javax.swing.*;
 
 /** This class generates a wireframe preview of an animation. */
 
@@ -142,6 +141,7 @@ public class AnimationPreviewer implements Runnable
     UIUtilities.centerDialog(display, window);
     display.setResizable(false);
     previewThread = new Thread(this);
+    previewThread.setPriority(Thread.NORM_PRIORITY-1);
     previewThread.start();
     display.setVisible(true);
   }
@@ -155,7 +155,6 @@ public class AnimationPreviewer implements Runnable
       totalFrames = 1;
     imageData = new byte [totalFrames][];
     Camera cam = canvas.getCamera();
-    final Graphics2D canvasGraphics = (Graphics2D) canvas.getComponent().getGraphics();
     long lastUpdate = 0L, ms, delay = 1000/fps;
     
     // In the first loop, we render all of the images.
@@ -172,12 +171,14 @@ public class AnimationPreviewer implements Runnable
         final int frame = i;
         try
         {
-          SwingUtilities.invokeAndWait(new Runnable() {
+          EventQueue.invokeAndWait(new Runnable() {
             public void run()
             {
               setLabels(time, frame);
               SoftwareCanvasDrawer drawer = (SoftwareCanvasDrawer) canvas.getCanvasDrawer();
+              Graphics2D canvasGraphics = (Graphics2D) canvas.getComponent().getGraphics();
               drawer.paint(new RepaintEvent(canvas, canvasGraphics));
+              canvasGraphics.dispose();
               imageData[frame] = recordImage(drawer.getImage());
             }
           });
@@ -214,11 +215,13 @@ public class AnimationPreviewer implements Runnable
           final Image image = retrieveImage(imageData[i]);
           try
           {
-            SwingUtilities.invokeAndWait(new Runnable() {
+            EventQueue.invokeAndWait(new Runnable() {
               public void run()
               {
                 setLabels(time, frame);
+                Graphics2D canvasGraphics = (Graphics2D) canvas.getComponent().getGraphics();
                 canvasGraphics.drawImage(image, 0, 0, null);
+                canvasGraphics.dispose();
               }
             });
           }
@@ -245,10 +248,6 @@ public class AnimationPreviewer implements Runnable
     catch (IOException ex)
     {
       ex.printStackTrace();
-    }
-    finally
-    {
-      canvasGraphics.dispose();
     }
   }
   

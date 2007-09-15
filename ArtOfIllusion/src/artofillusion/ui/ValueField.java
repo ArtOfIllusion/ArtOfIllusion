@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -169,25 +169,33 @@ public class ValueField extends BTextField
   {
     if (val == value)
       return;
-    String text;
-    if (Double.isNaN(val))
-      text = "";
-    else if ((constraints & INTEGER) != 0)
-      text = Integer.toString((int) val);
-    else if (val == 0.0 || val == -0.0)
-      text = "0.0";
-    else
-      {
-        // Make sure at least three significant digits are visible.
-        
-        int digits = (int) Math.floor(Math.log(Math.abs(val))/Math.log(10.0));
-        double scale = Math.pow(10.0, digits < 0 ? decimalPlaces-1-digits : decimalPlaces);
-        text = Double.toString(Math.round(val*scale)/scale);
-      }
+    String text = convertNumberToString(val);
+    if (text.equals(convertNumberToString(value)))
+      return;
     value = val;
     setText(text);
   }
-  
+
+  /** Get the text representation of a number. */
+
+  private String convertNumberToString(double val)
+  {
+    if (Double.isNaN(val))
+      return "";
+    else if ((constraints & INTEGER) != 0)
+      return Integer.toString((int) val);
+    else if (val == 0.0 || val == -0.0)
+      return "0.0";
+    else
+      {
+        // Make sure at least three significant digits are visible.
+
+        int digits = (int) Math.floor(Math.log(Math.abs(val))/Math.log(10.0));
+        double scale = Math.pow(10.0, digits < 0 ? decimalPlaces-1-digits : decimalPlaces);
+        return Double.toString(Math.round(val*scale)/scale);
+      }
+  }
+
   /** Set the minimum number of decimal places to display. */
   
   public void setMinDecimalPlaces(int decimals)

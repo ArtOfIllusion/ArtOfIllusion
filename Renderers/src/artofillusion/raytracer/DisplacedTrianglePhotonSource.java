@@ -70,7 +70,6 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
   
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Thread currentThread = Thread.currentThread();
     Raytracer rt = map.getRaytracer();
     TextureSpec spec = map.getContext().surfSpec[0];
     Ray r = new Ray(map.getContext());
@@ -90,9 +89,6 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
     
     while (emittedIntensity < intensity)
       {
-        if (rt.renderThread != currentThread)
-          return;
-        
         // Select an origin.
 
         double u, v, w;

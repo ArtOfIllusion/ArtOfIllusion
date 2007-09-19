@@ -122,7 +122,6 @@ public class EllipsoidPhotonSource implements PhotonSource
   
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Thread currentThread = Thread.currentThread();
     Ray r = new Ray(map.getContext());
     Vec3 orig = r.getOrigin();
     Vec3 norm = new Vec3();
@@ -131,9 +130,6 @@ public class EllipsoidPhotonSource implements PhotonSource
 
     while (emittedIntensity < intensity)
       {
-        if (map.getRaytracer().renderThread != currentThread)
-          return;
-
         // Select an origin and direction.
         
         double ctheta = (map.random.nextDouble()-0.5)*2.0;

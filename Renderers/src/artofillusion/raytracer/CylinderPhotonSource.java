@@ -78,7 +78,6 @@ public class CylinderPhotonSource implements PhotonSource
   
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Thread currentThread = Thread.currentThread();
     Ray r = new Ray(map.getContext());
     Vec3 orig = r.getOrigin();
     Vec3 norm = new Vec3();
@@ -90,8 +89,6 @@ public class CylinderPhotonSource implements PhotonSource
     double emittedIntensity = 0.0;
     while (emittedIntensity < intensity)
       {
-        if (map.getRaytracer().renderThread != currentThread)
-          return;
         double p = map.random.nextDouble();
         if (p < prob1)
           {

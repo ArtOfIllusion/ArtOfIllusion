@@ -25,9 +25,13 @@ public class DefaultToolButton extends ToolButton {
     protected ImageIcon selectedIcon;
 
     public DefaultToolButton(Object owner, String iconFileName, String selectedIconFilename) {
+        this(owner, ThemeManager.getIcon(iconFileName), ThemeManager.getIcon(selectedIconFilename));
+    }
+
+    public DefaultToolButton(Object owner, ImageIcon icon, ImageIcon selectedIcon) {
         super(owner);
-        icon = ThemeManager.getIcon(iconFileName);
-        selectedIcon = ThemeManager.getIcon(selectedIconFilename);
+        this.icon = icon;
+        this.selectedIcon = selectedIcon;
         height = icon.getIconHeight();
         width = icon.getIconWidth();
     }

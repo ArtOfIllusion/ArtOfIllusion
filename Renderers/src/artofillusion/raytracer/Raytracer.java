@@ -1040,6 +1040,8 @@ public class Raytracer implements Renderer, Runnable
         src = new EllipsoidPhotonSource((RTSphere) sceneObject[i], map);
       else if (sceneObject[i] instanceof RTCylinder)
         src = new CylinderPhotonSource((RTCylinder) sceneObject[i], map);
+      else if (sceneObject[i] instanceof RTCube)
+        src = new CubePhotonSource((RTCube) sceneObject[i], map);
       else
         continue;
       if (src.getTotalIntensity() > 0.0)

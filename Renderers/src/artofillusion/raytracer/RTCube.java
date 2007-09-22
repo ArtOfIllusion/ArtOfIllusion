@@ -21,10 +21,10 @@ import artofillusion.texture.*;
 public class RTCube extends RTObject
 {
   private Cube theCube;
-  private double minx, miny, minz, maxx, maxy, maxz;
-  private double param[];
+  protected double minx, miny, minz, maxx, maxy, maxz;
+  protected double param[];
   private boolean bumpMapped, transform;
-  private Mat4 toLocal, fromLocal;
+  protected Mat4 toLocal, fromLocal;
   
   public static final double TOL = 1e-12;
 

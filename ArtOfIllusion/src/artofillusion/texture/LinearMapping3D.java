@@ -27,7 +27,7 @@ public class LinearMapping3D extends Mapping3D
 {
   protected CoordinateSystem coords;
   protected double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
-  protected double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
+  protected double xscale, yscale, zscale;
   protected Mat4 fromLocal;
   protected boolean transform, coordsFromParams, scaleToObject;
   protected int numTextureParams;
@@ -62,9 +62,6 @@ public class LinearMapping3D extends Mapping3D
     az = zdir.x/zscale;
     bz = zdir.y/zscale;
     cz = zdir.z/zscale;
-    matScaleX = 1.0/xscale;
-    matScaleY = 1.0/yscale;
-    matScaleZ = 1.0/zscale;
     fromLocal = coords.fromLocal();
     transform = (fromLocal.m11 != 1.0 || fromLocal.m22 != 1.0 || fromLocal.m33 != 1.0);
   }
@@ -291,9 +288,9 @@ public class LinearMapping3D extends Mapping3D
       }
     }
     texture.getTextureSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
-        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ,
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
+        length(az*sizex, bz*sizey, cz*sizez),
         angle, time, param);
     if (transform && texture.hasComponent(Texture.BUMP_COMPONENT))
       fromLocal.transformDirection(spec.bumpGrad);
@@ -343,9 +340,9 @@ public class LinearMapping3D extends Mapping3D
       }
     }
     texture.getTransparency(trans, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
-        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ,
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
+        length(az*sizex, bz*sizey, cz*sizez),
         angle, time, param);
   }
 
@@ -388,9 +385,9 @@ public class LinearMapping3D extends Mapping3D
       }
     }
     return texture.getDisplacement(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
-        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ,
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
+        length(az*sizex, bz*sizey, cz*sizez),
         time, param);
   }
 

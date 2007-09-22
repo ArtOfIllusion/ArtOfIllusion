@@ -26,7 +26,7 @@ public class ProjectionMapping extends Mapping2D
 {
   protected CoordinateSystem coords;
   protected double ax, bx, cx, dx, ay, by, cy, dy;
-  protected double xscale, yscale, matScaleX, matScaleY;
+  protected double xscale, yscale;
   protected boolean coordsFromParams, scaleToObject;
   protected int numTextureParams;
   protected TextureParameter xparam, yparam, zparam;
@@ -58,8 +58,6 @@ public class ProjectionMapping extends Mapping2D
     ay = ydir.x/yscale;
     by = ydir.y/yscale;
     cy = ydir.z/yscale;
-    matScaleX = Math.abs(1.0/xscale);
-    matScaleY = Math.abs(1.0/yscale);
   }
   
   /** Get a vector whose components contain the center position for the mapping. */
@@ -284,8 +282,8 @@ public class ProjectionMapping extends Mapping2D
       }
     }
     texture.getTextureSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
         angle, time, param);
     if (texture.hasComponent(Texture.BUMP_COMPONENT))
       {
@@ -339,8 +337,8 @@ public class ProjectionMapping extends Mapping2D
       }
     }
     texture.getTransparency(trans, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
         angle, time, param);
   }
 
@@ -383,8 +381,8 @@ public class ProjectionMapping extends Mapping2D
       }
     }
     return texture.getDisplacement(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
         time, param);
   }
 

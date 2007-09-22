@@ -83,8 +83,8 @@ public class Linear2DTriangle extends RenderingTriangle
       }
     }
     ((Texture2D) map.getTexture()).getTextureSpec(spec, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w,
-        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
-        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez),
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez),
         angle, time, getParameters(u, v, w));
     if (bumpMapped)
     {
@@ -122,8 +122,8 @@ public class Linear2DTriangle extends RenderingTriangle
       }
     }
     ((Texture2D) map.getTexture()).getTransparency(trans, x1*u+x2*v+x3*w, y1*u+y2*v+y3*w,
-        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
-        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez),
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez),
         angle, time, getParameters(u, v, w));
   }
 
@@ -150,8 +150,8 @@ public class Linear2DTriangle extends RenderingTriangle
       }
     }
     return ((Texture2D) map.getTexture()).getDisplacement(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w,
-        length(map.ax*sizex, map.bx*sizey, map.cx*sizez)*map.matScaleX,
-        length(map.ay*sizex, map.by*sizey, map.cy*sizez)*map.matScaleY,
+        length(map.ax*sizex, map.bx*sizey, map.cx*sizez),
+        length(map.ay*sizex, map.by*sizey, map.cy*sizez),
         time, getParameters(u, v, w));
   }
 

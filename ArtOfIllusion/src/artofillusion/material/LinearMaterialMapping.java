@@ -27,7 +27,7 @@ public class LinearMaterialMapping extends MaterialMapping
 {
   protected CoordinateSystem coords;
   protected double ax, bx, cx, dx, ay, by, cy, dy, az, bz, cz, dz;
-  protected double xscale, yscale, zscale, matScaleX, matScaleY, matScaleZ;
+  protected double xscale, yscale, zscale;
   protected boolean scaleToObject;
 
   public LinearMaterialMapping(Object3D theObject, Material3D theMaterial)
@@ -64,9 +64,6 @@ public class LinearMaterialMapping extends MaterialMapping
     az = zdir.x/zscale;
     bz = zdir.y/zscale;
     cz = zdir.z/zscale;
-    matScaleX = 1.0/xscale;
-    matScaleY = 1.0/yscale;
-    matScaleZ = 1.0/zscale;
   }
   
   /** Get a vector whose components contain the center position for the mapping. */
@@ -148,11 +145,11 @@ public class LinearMaterialMapping extends MaterialMapping
         sizey /= bounds.maxy-bounds.miny;
       if (bounds.maxz > bounds.minz)
         sizez /= bounds.maxz-bounds.minz;
-      return Math.abs(Math.min(Math.min(length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-          length(ay*sizex, by*sizey, cy*sizez)*matScaleY),
-          length(az*sizex, bz*sizey, cz*sizez)*matScaleZ));
+      return Math.abs(Math.min(Math.min(length(ax*sizex, bx*sizey, cx*sizez),
+          length(ay*sizex, by*sizey, cy*sizez)),
+          length(az*sizex, bz*sizey, cz*sizez)));
     }
-    return Math.abs(material.getStepSize()*Math.min(Math.min(matScaleX, matScaleY), matScaleZ));
+    return Math.abs(material.getStepSize()/Math.max(Math.max(xscale, yscale), zscale));
   }
 
   /* Methods from MaterialMapping. */
@@ -184,9 +181,9 @@ public class LinearMaterialMapping extends MaterialMapping
       }
     }
     ((Material3D) material).getMaterialSpec(spec, x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy, x*az+y*bz+z*cz-dz,
-        length(ax*sizex, bx*sizey, cx*sizez)*matScaleX,
-        length(ay*sizex, by*sizey, cy*sizez)*matScaleY,
-        length(az*sizex, bz*sizey, cz*sizez)*matScaleZ, time);
+        length(ax*sizex, bx*sizey, cx*sizez),
+        length(ay*sizex, by*sizey, cy*sizez),
+        length(az*sizex, bz*sizey, cz*sizez), time);
   }
 
   /**

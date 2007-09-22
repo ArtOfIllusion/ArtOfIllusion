@@ -380,7 +380,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   public void editProperties(ProcedureEditor editor)
   {
-    ValueField aliasField = new ValueField(antialiasing, ValueField.NONNEGATIVE);
+    ValueField aliasField = new ValueField(antialiasing, ValueField.POSITIVE);
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("editTextureTitle"), 
       new Widget [] {aliasField,},
       new String [] {Translate.text("Antialiasing")});

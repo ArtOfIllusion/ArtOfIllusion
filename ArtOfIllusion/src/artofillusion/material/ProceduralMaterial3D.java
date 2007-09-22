@@ -330,7 +330,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   {
     ValueField refractField = new ValueField(indexOfRefraction(), ValueField.POSITIVE);
     ValueField stepField = new ValueField(stepSize, ValueField.POSITIVE);
-    ValueField aliasField = new ValueField(antialiasing, ValueField.NONNEGATIVE);
+    ValueField aliasField = new ValueField(antialiasing, ValueField.POSITIVE);
     BCheckBox shadowBox = new BCheckBox(Translate.text("CastsShadows"), shadows);
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("editMaterialTitle"), 
       new Widget [] {refractField, stepField, aliasField, shadowBox},

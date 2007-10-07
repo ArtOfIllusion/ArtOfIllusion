@@ -1,7 +1,4 @@
-/* This is a Module which compares two numbers, and outputs either 0 or 1 depending on
-   which is greater. */
-
-/* Copyright (C) 2000,2002 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,9 +10,11 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.awt.*;
+
+/** This is a Module which compares two numbers, and outputs either 0 or 1 depending on
+    which is greater. */
 
 public class CompareModule extends Module
 {
@@ -55,27 +54,32 @@ public class CompareModule extends Module
     double min1 = value1-error1, max1 = value1+error1;
     double min2 = value2-error2, max2 = value2+error2;
 
-    if (min1 > max2)
-      {
-        value = 1.0;
-        error = 0.0;
-      }
+    if (error1 == 0.0 && error2 == 0.0)
+    {
+      value = (value1 > value2 ? 1.0 : 0.0);
+      error = 0.0;
+    }
+    else if (min1 > max2)
+    {
+      value = 1.0;
+      error = 0.0;
+    }
     else if (min2 > max1)
-      {
-        value = 0.0;
-        error = 0.0;
-      }
+    {
+      value = 0.0;
+      error = 0.0;
+    }
     else if (value1 > value2)
-      {
-        error = 0.5*(max2-min1)/(max1-min2);
-        value = 1.0-error;
-        deriv = 1.0/(error1 > error2 ? error1 : error2);
-      }
+    {
+      error = 0.5*(max2-min1)/(max1-min2);
+      value = 1.0-error;
+      deriv = 1.0/(error1 > error2 ? error1 : error2);
+    }
     else
-      {
-        value = error = 0.5*(max1-min2)/(max2-min1);
-        deriv = 1.0/(error1 > error2 ? error1 : error2);
-      }
+    {
+      value = error = 0.5*(max1-min2)/(max2-min1);
+      deriv = 1.0/(error1 > error2 ? error1 : error2);
+    }
     return value;
   }
 

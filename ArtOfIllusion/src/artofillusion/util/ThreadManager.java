@@ -64,40 +64,37 @@ public class ThreadManager
 
   private void createThreads()
   {
+    // Create a worker thread for each processor.
+
     thread = new Thread [Runtime.getRuntime().availableProcessors()];
-    if (thread.length > 1)
+    for (int i = 0; i < thread.length; i++)
     {
-      // Create a worker thread for each processor.
+      thread[i] = new Thread("Worker thread "+(i+1)) {
+        public void run()
+        {
+          // Repeatedly perform the task until we are finished.
 
-      for (int i = 0; i < thread.length; i++)
-      {
-        thread[i] = new Thread("Worker thread "+(i+1)) {
-          public void run()
+          while (true)
           {
-            // Repeatedly perform the task until we are finished.
-
-            while (true)
+            try
             {
-              try
-              {
-                int index = nextIndex();
-                task.execute(index);
-              }
-              catch (InterruptedException ex)
-              {
-                task.cleanup();
-                return;
-              }
-              catch (Exception ex)
-              {
-                cancel();
-                ex.printStackTrace();
-              }
+              int index = nextIndex();
+              task.execute(index);
+            }
+            catch (InterruptedException ex)
+            {
+              task.cleanup();
+              return;
+            }
+            catch (Exception ex)
+            {
+              cancel();
+              ex.printStackTrace();
             }
           }
-        };
-        thread[i].start();
-      }
+        }
+      };
+      thread[i].start();
     }
   }
 
@@ -140,14 +137,6 @@ public class ThreadManager
     }
     if (thread == null)
       createThreads();
-    if (thread.length == 1)
-    {
-      // There is only one processor, so just invoke the task directly.
-
-      for (int i = 0; i < numIndices; i++)
-        task.execute(i);
-      return;
-    }
 
     // Notify all the worker threads, then wait for them to finish.
 

@@ -39,12 +39,12 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Image templateImage;
   protected CanvasDrawer drawer;
   protected Dimension prefSize;
-  protected Map controlMap;
+  protected Map<ViewerControl,Widget> controlMap;
 
   protected final ViewChangedEvent viewChangedEvent;
   
   private static boolean openGLAvailable;
-  private static List controls = new ArrayList();
+  private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
   
   static
   {
@@ -91,7 +91,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, ModellingApp.DIST_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     viewChangedEvent = new ViewChangedEvent(this);
-    controlMap = new HashMap();
+    controlMap = new HashMap<ViewerControl,Widget>();
     theCamera = new Camera();
     theCamera.setCameraCoordinates(coords);
     setBackground(backgroundColor);
@@ -136,7 +136,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     for (int i = 0; i < controls.size(); i++)
     {
-      Widget w = ((ViewerControl) controls.get(i)).createWidget(this);
+      Widget w = controls.get(i).createWidget(this);
       if (w != null)
       {
         row.add(w);
@@ -579,13 +579,13 @@ public abstract class ViewerCanvas extends CustomWidget
         else if (Math.abs(horizDir.y) >= Math.abs(horizDir.x) && Math.abs(horizDir.y) >= Math.abs(horizDir.z))
           horizSign = (horizDir.y > 0 ? -1 : 1);
         else
-          horizSign = (horizDir.z > 0 ? 1 : -1);
+          horizSign = (horizDir.z > 0 ? -1 : 1);
         if (Math.abs(vertDir.x) >= Math.abs(vertDir.y) && Math.abs(vertDir.x) >= Math.abs(vertDir.z))
           vertSign = (vertDir.x > 0 ? -1 : 1);
         else if (Math.abs(vertDir.y) >= Math.abs(vertDir.x) && Math.abs(vertDir.y) >= Math.abs(vertDir.z))
           vertSign = (vertDir.y > 0 ? -1 : 1);
         else
-          vertSign = (vertDir.z > 0 ? 1 : -1);
+          vertSign = (vertDir.z > 0 ? -1 : 1);
         int decimals = 2;
         if (Math.abs(gridSpacing-Math.round(gridSpacing)) < 1e-5)
           decimals = 0;

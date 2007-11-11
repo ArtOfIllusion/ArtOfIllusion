@@ -28,10 +28,11 @@ public abstract class RTObject
   
   public abstract MaterialMapping getMaterialMapping();
   
-  /** Determine whether a ray intersects this object.  This is called by intersects(), which
-      is designed to be very short so it can be inlined. */
+  /** Determine whether a ray intersects this object.  In most cases, this method should not
+      be called directly.  Instead, call {@link Ray#findIntersection(RTObject)} on a Ray,
+      which provides caching to avoid repeated intersection calculations. */
 
-  protected abstract SurfaceIntersection checkIntersection(Ray r);
+  public abstract SurfaceIntersection checkIntersection(Ray r);
 
   /** Get a bounding box for this object. */
   

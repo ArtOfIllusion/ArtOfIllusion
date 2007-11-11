@@ -121,7 +121,7 @@ public class RTCube extends RTObject
 
   /** Determine whether the given ray intersects this cube. */
 
-  protected SurfaceIntersection checkIntersection(Ray r)
+  public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 rorig = r.getOrigin(), rdir = r.getDirection();
     Vec3 origin, direction;

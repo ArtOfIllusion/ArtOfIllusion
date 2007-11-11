@@ -119,7 +119,7 @@ public class RTTriangle extends RTObject
 
   /** Determine whether the given ray intersects this triangle. */
 
-  protected SurfaceIntersection checkIntersection(Ray r)
+  public SurfaceIntersection checkIntersection(Ray r)
   {
     double vd, v0, vx, vy;
     Vec3 orig = r.getOrigin(), dir = r.getDirection();

@@ -123,7 +123,7 @@ public class RTCylinder extends RTObject
 
   /** Determine whether the given ray intersects this cylinder. */
 
-  protected SurfaceIntersection checkIntersection(Ray r)
+  public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 orig = r.getOrigin(), rdir = r.getDirection();
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2, dir = r.tempVec3;

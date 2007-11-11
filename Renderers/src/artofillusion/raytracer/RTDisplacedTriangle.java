@@ -242,7 +242,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether the given ray intersects this triangle. */
 
-  protected SurfaceIntersection checkIntersection(Ray r)
+  public SurfaceIntersection checkIntersection(Ray r)
   {
     DisplacedTriangleIntersection dti = (DisplacedTriangleIntersection) r.rt.rtDispTriPool.getObject();
     dti.init(this, r);

@@ -1,8 +1,4 @@
-/* This abstract class represents an Object3D which is actually composed of
-   other objects.  Typically, these objects are procedurally generated,
-   such as by a script. */
-
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +14,10 @@ import artofillusion.*;
 import artofillusion.math.*;
 import java.io.*;
 import java.util.*;
+
+/** This abstract class represents an Object3D which is actually composed of
+    other objects.  Typically, these objects are procedurally generated,
+    such as by a script. */
 
 public abstract class ObjectCollection extends Object3D
 {
@@ -136,7 +136,7 @@ public abstract class ObjectCollection extends Object3D
   {
     Camera theCamera = canvas.getCamera();
     Mat4 m = theCamera.getObjectToWorld();
-    Enumeration enm = ((ObjectCollection) obj.object).getObjects(obj, true, canvas.getScene());
+    Enumeration enm = getObjects(obj, true, canvas.getScene());
     while (enm.hasMoreElements())
     {
       ObjectInfo info = (ObjectInfo) enm.nextElement();
@@ -158,8 +158,8 @@ public abstract class ObjectCollection extends Object3D
 
   public TriangleMesh convertToTriangleMesh(double tol)
   {
-    Vector allVert = new Vector();
-    Vector allFace = new Vector();
+    Vector<Vec3> allVert = new Vector<Vec3>();
+    Vector<int[]> allFace = new Vector<int[]>();
     int start = 0;
     Enumeration objects = getObjects(new ObjectInfo(this, lastCoords, ""), false, lastScene);
     while (objects.hasMoreElements())

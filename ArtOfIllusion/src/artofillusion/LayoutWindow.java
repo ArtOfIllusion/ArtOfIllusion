@@ -1422,6 +1422,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       return;
     ExternalObject obj = new ExternalObject(fc.getSelectedFile(), "");
     ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(), "External Object");
+    if (obj.getTexture() == null)
+      obj.setTexture(getScene().getDefaultTexture(), getScene().getDefaultTexture().getDefaultMapping(obj));
     UndoRecord undo = new UndoRecord(this, false);
     int sel[] = theScene.getSelection();
     addObject(info, undo);

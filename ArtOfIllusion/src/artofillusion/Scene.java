@@ -789,6 +789,19 @@ public class Scene
     return null;
   }
 
+  /** Get the object with the specified ID, or null if there is none. */
+
+  public ObjectInfo getObjectById(int id)
+  {
+    for (int i = 0; i < objects.size(); i++)
+    {
+      ObjectInfo info = (ObjectInfo) objects.elementAt(i);
+      if (info.id == id)
+        return info;
+    }
+    return null;
+  }
+
   /** Get the index of the specified object. */
   
   public int indexOf(ObjectInfo info)

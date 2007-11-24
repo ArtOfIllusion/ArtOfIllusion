@@ -1,4 +1,4 @@
-/* Copyright (C) 2004 by Peter Eastman
+/* Copyright (C) 2004-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,23 +12,20 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
-import artofillusion.material.*;
 import artofillusion.math.*;
-import artofillusion.texture.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
-import java.awt.*;
 import java.io.*;
-import java.lang.reflect.*;
-import java.util.Vector;
+import java.util.*;
 
 /** ExternalObject is an Object3D that is stored in a separate file. */
 
 public class ExternalObject extends ObjectWrapper
 {
   private File externalFile;
+  private int objectId;
   private String objectName;
   private String loadingError;
+  private boolean includeChildren;
   
   /** Create an ExternalObject from a file.
       @param file    the scene file containing the object
@@ -40,6 +37,7 @@ public class ExternalObject extends ObjectWrapper
     externalFile = file;
     objectName = name;
     theObject = new NullObject();
+    includeChildren = true;
   }
   
   /** This constructor is used internally. */
@@ -62,7 +60,35 @@ public class ExternalObject extends ObjectWrapper
   {
     objectName = name;
   }
-  
+
+  /** Get the id of the object in the external scene. */
+
+  public int getExternalObjectId()
+  {
+    return objectId;
+  }
+
+  /** Set the id of the object in the external scene. */
+
+  public void setExternalObjectId(int id)
+  {
+    objectId = id;
+  }
+
+  /** Get whether to include children of the external object. */
+
+  public boolean getIncludeChildren()
+  {
+    return includeChildren;
+  }
+
+  /** Set whether to include children of the external object. */
+
+  public void setIncludeChildren(boolean include)
+  {
+    includeChildren = include;
+  }
+
   /** Get the path to the external scene file. */
   
   public File getExternalSceneFile()
@@ -99,22 +125,35 @@ public class ExternalObject extends ObjectWrapper
         return;
       }
       Scene scene = new Scene(externalFile, true);
-      boolean found = false;
+      ObjectInfo foundObject = null;
       for (int i = 0; i < scene.getNumObjects(); i++)
       {
         ObjectInfo info = scene.getObject(i);
         if (!info.name.equals(objectName))
           continue;
-        if (found)
+        if (info.id == objectId)
         {
-          loadingError = Translate.text("externalObject.multipleObjectsFound", externalFile.getAbsolutePath(), objectName);
-          return;
+          foundObject = info;
+          break;
         }
-        theObject = info.object;
-        found = true;
+        if (foundObject == null)
+          foundObject = info; // Right name but wrong ID.  Tentatively accept it, but keep looking.
       }
-      if (!found)
+      if (foundObject == null)
         loadingError = Translate.text("externalObject.objectNotFound", externalFile.getAbsolutePath(), objectName);
+      else
+      {
+        if (includeChildren && foundObject.children.length > 0)
+        {
+          // Create an ObjectCollection containing the object and all its children.
+
+          ArrayList<ObjectInfo> allObjects = new ArrayList<ObjectInfo>();
+          addObjectsToList(foundObject, allObjects, foundObject.coords.toLocal());
+          theObject = new ExternalObjectCollection(allObjects);
+        }
+        else
+          theObject = foundObject.object;
+      }
     }
     catch (Exception ex)
     {
@@ -123,6 +162,16 @@ public class ExternalObject extends ObjectWrapper
       ex.printStackTrace();
       loadingError = ex.getMessage();
     }
+  }
+
+  /** Add an object and all its children to a list. */
+
+  private void addObjectsToList(ObjectInfo obj, ArrayList<ObjectInfo> allObjects, Mat4 transform)
+  {
+    obj.coords.transformCoordinates(transform);
+    allObjects.add(obj);
+    for (ObjectInfo child : obj.children)
+      addObjectsToList(child, allObjects, transform);
   }
   
   /** Create a new object which is an exact duplicate of this one. */
@@ -133,6 +182,7 @@ public class ExternalObject extends ObjectWrapper
     obj.externalFile = externalFile;
     obj.objectName = objectName;
     obj.theObject = theObject;
+    obj.includeChildren = includeChildren;
     return obj;
   }
   
@@ -145,6 +195,7 @@ public class ExternalObject extends ObjectWrapper
     externalFile = eo.externalFile;
     objectName = eo.objectName;
     theObject = eo.theObject;
+    includeChildren = eo.includeChildren;
   }
 
   /** ExternalObjects cannot be resized, since they are entirely defined by a separate file. */
@@ -163,7 +214,7 @@ public class ExternalObject extends ObjectWrapper
   
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    new ExternalObjectEditingWindow(parent, this, info);
+    new ExternalObjectEditingWindow(parent, this, info, cb);
   }
 
   /** This method tells whether textures can be assigned to the object.  Objects for which
@@ -196,10 +247,12 @@ public class ExternalObject extends ObjectWrapper
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
-    out.writeShort(0);
+    out.writeShort(1);
     out.writeUTF(externalFile.getAbsolutePath());
     out.writeUTF(findRelativePath(theScene));
     out.writeUTF(objectName);
+    out.writeInt(objectId);
+    out.writeBoolean(includeChildren);
   }
   
   /** Find the relative path from the scene file containing this object to the external scene. */
@@ -230,7 +283,7 @@ public class ExternalObject extends ObjectWrapper
     for (numCommon = 0; numCommon < scenePathParts.length && numCommon < externalPathParts.length && scenePathParts[numCommon].equals(externalPathParts[numCommon]); numCommon++);
     StringBuffer relPath = new StringBuffer();
     for (int i = numCommon; i < scenePathParts.length; i++)
-      relPath.append(".."+File.separator);
+      relPath.append("..").append(File.separator);
     for (int i = numCommon; i < externalPathParts.length; i++)
     {
       if (i > numCommon)
@@ -246,7 +299,7 @@ public class ExternalObject extends ObjectWrapper
   {
     super(in, theScene);
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("Unknown version: "+version);
     externalFile = new File(in.readUTF());
     String relPath = in.readUTF();
@@ -257,6 +310,48 @@ public class ExternalObject extends ObjectWrapper
         externalFile = f;
     }
     objectName = in.readUTF();
+    objectId = (version > 0 ? in.readInt() : -1);
+    includeChildren = (version > 0 ? in.readBoolean() : false);
     reloadObject();
+  }
+
+  /** This class is the ObjectCollection used to represent a set of external objects. */
+
+  private class ExternalObjectCollection extends ObjectCollection
+  {
+    private ArrayList<ObjectInfo> objects;
+
+    ExternalObjectCollection(ArrayList<ObjectInfo> objects)
+    {
+      this.objects = objects;
+    }
+
+    protected Enumeration enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
+    {
+      return Collections.enumeration(objects);
+    }
+
+    public Object3D duplicate()
+    {
+      return new ExternalObjectCollection(objects);
+    }
+
+    public void copyObject(Object3D obj)
+    {
+      objects = ((ExternalObjectCollection) obj).objects;
+    }
+
+    public void setSize(double xsize, double ysize, double zsize)
+    {
+    }
+
+    public Keyframe getPoseKeyframe()
+    {
+      return null;
+    }
+
+    public void applyPoseKeyframe(Keyframe k)
+    {
+    }
   }
 }

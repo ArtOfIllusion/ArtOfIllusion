@@ -344,10 +344,16 @@ public class ObjectInfo
         double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedBounds = obj.getBounds();
-        if (lastPreviewWasWireframe && cachedWire == null && !(object instanceof ObjectCollection))
-          cachedWire = obj.getWireframeMesh();
-        else if (!lastPreviewWasWireframe && cachedMesh == null && !(object instanceof ObjectCollection))
-          cachedMesh = obj.getRenderingMesh(tol, true, this);
+        Object3D realObject = object;
+        while (realObject instanceof ObjectWrapper)
+          realObject = ((ObjectWrapper) realObject).getWrappedObject();
+        if (!(realObject instanceof ObjectCollection))
+        {
+          if (lastPreviewWasWireframe && cachedWire == null)
+            cachedWire = obj.getWireframeMesh();
+          else if (!lastPreviewWasWireframe && cachedMesh == null)
+            cachedMesh = obj.getRenderingMesh(tol, true, this);
+        }
       }
     return cachedBounds;
   }

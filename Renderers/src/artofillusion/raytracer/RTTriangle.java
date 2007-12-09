@@ -43,7 +43,7 @@ public class RTTriangle extends RTObject
     trueNorm = mesh.faceNorm[which];
     this.fromLocal = fromLocal;
     this.toLocal = toLocal;
-    if (tri.n1 != tri.n2 || tri.n1 != tri.n3);
+    if (tri.n1 != tri.n2 || tri.n1 != tri.n3)
     {
       flags |= INTERP_NORMALS;
       Vec3 norm1 = mesh.norm[tri.n1];

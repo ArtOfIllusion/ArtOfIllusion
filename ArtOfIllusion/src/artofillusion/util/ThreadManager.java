@@ -176,13 +176,8 @@ public class ThreadManager
   public void finish()
   {
     if (thread != null)
-    {
-      if (thread.length > 1)
-        for (int i = 0; i < thread.length; i++)
-          thread[i].interrupt();
-      else
-        task.cleanup();
-    }
+      for (int i = 0; i < thread.length; i++)
+        thread[i].interrupt();
   }
 
   private synchronized int nextIndex() throws InterruptedException

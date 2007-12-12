@@ -105,7 +105,7 @@ public class LayeredMapping extends TextureMapping
   
   public TextureParameter[] getParameters()
   {
-    Vector param = new Vector();
+    Vector<TextureParameter> param = new Vector<TextureParameter>();
     TextureParameter p[];
     int i, j;
     
@@ -130,14 +130,17 @@ public class LayeredMapping extends TextureMapping
         numParams[i] = p.length;
         paramStartIndex[i] = param.size();
         for (j = 0; j < p.length; j++)
-          param.addElement(p[j]);
+        {
+          param.addElement(p[j].duplicate(texture[i]));
+          param.lastElement().setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
+        }
         if (p.length > maxParams)
           maxParams = p.length;
       }
     }
     p = new TextureParameter [param.size()];
     for (i = 0; i < p.length; i++)
-      p[i] = (TextureParameter) param.elementAt(i);
+      p[i] = param.elementAt(i);
     return p;
   }
 
@@ -145,11 +148,11 @@ public class LayeredMapping extends TextureMapping
   
   public TextureParameter [] getLayerParameters(int which)
   {
-    TextureParameter p[] = mapping[which].getParameters();
-    TextureParameter param[] = new TextureParameter [p.length+1];
-    param[0] = new TextureParameter(this, texture[which].getName()+" fraction", 0.0f, 1.0f, 1.0f);
-    param[0].setID(fractParamID[which]);
-    System.arraycopy(p, 0, param, 1, p.length);
+    TextureParameter p[] = getParameters();
+    TextureParameter param[] = new TextureParameter [numParams[which]+1];
+    param[0] = p[fractParamIndex[which]];
+    for (int i = 1; i < param.length; i++)
+      param[i] = p[i+paramStartIndex[which]-1];
     return param;
   }
 
@@ -263,8 +266,8 @@ public class LayeredMapping extends TextureMapping
         try
           {
             Class mapClass = ModellingApp.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Texture.class});
-            mapping[i] = (TextureMapping) con.newInstance(new Object [] {in, theObject, texture[i]});
+            Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
+            mapping[i] = (TextureMapping) con.newInstance(in, theObject, texture[i]);
           }
         catch (Exception ex)
           {

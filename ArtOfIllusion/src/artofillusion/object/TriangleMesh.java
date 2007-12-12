@@ -690,7 +690,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
           return subdivideButterfly(this, split, tol);
         return subdivideLoop(this, split, tol);
       }
-    return this;
+    return (TriangleMesh) duplicate();
   }
 
   public WireframeMesh getWireframeMesh()

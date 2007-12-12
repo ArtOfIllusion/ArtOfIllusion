@@ -21,7 +21,7 @@ import java.io.*;
 public class ParameterModule extends Module
 {
   double minVal, maxVal, defaultVal;
-  int index;
+  int index, id;
   PointInfo point;
 
   public ParameterModule(Point position)
@@ -32,6 +32,7 @@ public class ParameterModule extends Module
     minVal = 0.0f;
     maxVal = 1.0f;
     defaultVal = 0.0f;
+    id = TextureParameter.getUniqueID();
   }
   
   /** Get the name of the parameter. */
@@ -117,7 +118,9 @@ public class ParameterModule extends Module
   
   public TextureParameter getParameter(Object owner)
   {
-    return new TextureParameter(owner, name, minVal, maxVal, defaultVal);
+    TextureParameter param = new TextureParameter(owner, name, minVal, maxVal, defaultVal);
+    param.setID(id);
+    return param;
   }
 
   /* Allow the user to set the parameters. */
@@ -162,6 +165,7 @@ public class ParameterModule extends Module
     mod.maxVal = maxVal;
     mod.defaultVal = defaultVal;
     mod.index = index;
+    mod.id = id;
     mod.layout();
     return mod;
   }

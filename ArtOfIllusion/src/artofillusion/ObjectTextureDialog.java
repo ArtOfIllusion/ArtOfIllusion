@@ -158,11 +158,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       preview.setTexture(oldTexture, oldMapping);
     }
     preview.setMaterial(editObj.object.getMaterial(), editObj.object.getMaterialMapping());
-    double paramAvgVal[] = editObj.object.getAverageParameterValues();
-    ParameterValue paramValue[] = new ParameterValue [paramAvgVal.length];
-    for (int i = 0; i < paramValue.length; i++)
-      paramValue[i] = new ConstantParameterValue(paramAvgVal[i]);
-    preview.getObject().object.setParameterValues(paramValue);
+    updatePreviewParameterValues();
 
     // Add the buttons at the bottom.
 
@@ -194,6 +190,19 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     updateComponents();
     scene.addTextureListener(this);
     setVisible(true);
+  }
+
+  /**
+   * Set the values of texture parameters on the preview object.
+   */
+
+  private void updatePreviewParameterValues()
+  {
+    double paramAvgVal[] = editObj.object.getAverageParameterValues();
+    ParameterValue paramValue[] = new ParameterValue [paramAvgVal.length];
+    for (int i = 0; i < paramValue.length; i++)
+      paramValue[i] = new ConstantParameterValue(paramAvgVal[i]);
+    preview.getObject().object.setParameterValues(paramValue);
   }
 
   public void dispose()
@@ -305,7 +314,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       paramsContainer.add(paramValueWidget[i] = new ValueSelector(val, params[i].minVal, params[i].maxVal, 0.005), 2, i);
       paramValueWidget[i].setEnabled(perObject);
       paramValueWidget[i].addEventLink(ValueChangedEvent.class, new Object() {
-        void processEvent(ValueChangedEvent ev)
+        void processEvent()
         {
           if (whichParam >= paramValue.length)
             return;
@@ -349,8 +358,10 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   {
     int index = layerList.getSelectedIndex();
     new TextureMappingDialog(window, editObj.object, index);
+    preview.cancelRendering();
     editObj.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
     preview.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
+    updatePreviewParameterValues();
     renderPreview();
   }
   
@@ -361,7 +372,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     if (!layered)
     {
       texList.setSelected(scene.indexOf(tex), true);
-      selectionChanged();
+      selectionChanged(new SelectionChangedEvent(texList));
     }
   }
   
@@ -516,7 +527,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     renderPreview();
   }
   
-  private void selectionChanged()
+  private void selectionChanged(SelectionChangedEvent ev)
   {
     boolean layered = (typeChoice.getSelectedIndex() == 1);
     boolean anyselection;
@@ -529,21 +540,25 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       updateComponents();
       return;
     }
-    Texture tex;
-    if (layered)
-      tex = layeredMap.getLayer(layerList.getSelectedIndex());
-    else
-      tex = scene.getTexture(texList.getSelectedIndex());
-    if (!layered)
+    preview.cancelRendering();
+    if (ev.getWidget() != layerList)
     {
-      if (tex == oldTexture)
-        editObj.setTexture(tex, oldMapping.duplicate());
+      Texture tex;
+      if (layered)
+        tex = layeredMap.getLayer(layerList.getSelectedIndex());
       else
-        editObj.setTexture(tex, tex.getDefaultMapping(editObj.object));
-      preview.setTexture(tex, editObj.object.getTextureMapping());
+        tex = scene.getTexture(texList.getSelectedIndex());
+      if (!layered)
+      {
+        if (tex == oldTexture)
+          editObj.setTexture(tex, oldMapping.duplicate());
+        else
+          editObj.setTexture(tex, tex.getDefaultMapping(editObj.object));
+        preview.setTexture(tex, editObj.object.getTextureMapping());
+      }
     }
-    renderPreview();
     updateComponents();
+    renderPreview();
   }
   
   /* Utility routine.  This should be called whenever the list of texture parameters
@@ -564,7 +579,6 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   {
     boolean layered = (typeChoice.getSelectedIndex() == 1);
     boolean anyselection = (texList.getSelectedIndex() > -1);
-    Texture tex;
 
     buildParamList();
     if (layered)
@@ -580,7 +594,6 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
         blendChoice.setEnabled(false);
         return;
       }
-      tex = layeredMap.getLayer(index);
       mapButton.setEnabled(true);
       deleteLayerButton.setEnabled(true);
       moveUpButton.setEnabled(index > 0);
@@ -589,10 +602,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       blendChoice.setSelectedIndex(layeredMap.getLayerMode(index));
     }
     else if (anyselection)
-    {
       mapButton.setEnabled(true);
-      tex = scene.getTexture(texList.getSelectedIndex());
-    }
     else
       mapButton.setEnabled(false);
   }
@@ -610,6 +620,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     Texture tex = (Texture) obj;
     
     texList.remove(index);
+    preview.cancelRendering();
     if (editObj.object.getTextureMapping() instanceof LayeredMapping)
     {
       Texture layers[] = layeredMap.getLayers();

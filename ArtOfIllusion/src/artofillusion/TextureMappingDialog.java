@@ -83,7 +83,8 @@ public class TextureMappingDialog extends BDialog
     while (previewObj instanceof ObjectWrapper)
       previewObj = ((ObjectWrapper) previewObj).getWrappedObject();
     previewObj = previewObj.duplicate();
-    content.add(preview = new MaterialPreviewer(obj.getTexture(), obj.getMaterial(), obj.duplicate(), 160, 160), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(0, 50, 0, 50), null));
+    Texture tex = (layered ? map.getTexture() : obj.getTexture());
+    content.add(preview = new MaterialPreviewer(tex, obj.getMaterial(), obj.duplicate(), 160, 160), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(0, 50, 0, 50), null));
     setPreviewMapping(map);
     RowContainer choiceRow = new RowContainer();
     content.add(choiceRow, 0, 1);
@@ -206,7 +207,8 @@ public class TextureMappingDialog extends BDialog
   
   public void setPreviewMapping(TextureMapping newmap)
   {
-    preview.setTexture(editObj.getTexture(), newmap);
+    Texture tex = (layered ? map.getTexture() : editObj.getTexture());
+    preview.setTexture(tex, newmap);
     Object3D mesh = editObj;
     while (mesh instanceof ObjectWrapper)
       mesh = ((ObjectWrapper) mesh).getWrappedObject();

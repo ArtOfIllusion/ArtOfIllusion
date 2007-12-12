@@ -45,12 +45,21 @@ public class TextureParameter
   
   public TextureParameter duplicate()
   {
+    return duplicate(owner);
+  }
+
+  /**
+   * Create a TextureParameter which is a duplicate of an existing one, but with a different owner.
+   */
+
+  public TextureParameter duplicate(Object owner)
+  {
     TextureParameter tp = new TextureParameter(owner, name, minVal, maxVal, defaultVal);
     tp.identifier = identifier;
     tp.type = type;
     return tp;
   }
-  
+
   public boolean equals(Object o)
   {
     if (!(o instanceof TextureParameter))
@@ -70,17 +79,25 @@ public class TextureParameter
       return (param.name.equals(name));
     return (identifier == param.identifier);
   }
-  
+
+
+  public int hashCode()
+  {
+    if (identifier == -1)
+      return name.hashCode();
+    return identifier;
+  }
+
   /** Assign a new ID number to this parameter. */
   
   public void assignNewID()
   {
-    identifier = nextID++;
+    identifier = getUniqueID();
   }
   
   /** Get a unique ID number which can be assigned to a parameter. */
   
-  public static int getUniqueID()
+  public static synchronized int getUniqueID()
   {
     return (nextID++);
   }

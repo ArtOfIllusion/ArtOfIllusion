@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,9 @@ package artofillusion;
 import junit.framework.*;
 import artofillusion.texture.*;
 import artofillusion.object.*;
+import artofillusion.procedural.*;
+
+import java.awt.*;
 
 public class TestLayeredTexture extends TestCase
 {
@@ -49,5 +52,66 @@ public class TestLayeredTexture extends TestCase
     assertTrue(tex.hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
     map.setLayerMode(1, LayeredMapping.OVERLAY_ADD_BUMPS);
     assertTrue(tex.hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
+  }
+
+  public void testParameters()
+  {
+    // Create two textures, each with two parameters.
+
+    ProceduralTexture2D tex1 = new ProceduralTexture2D();
+    tex1.getProcedure().addModule(new ParameterModule(new Point()));
+    tex1.getProcedure().addModule(new ParameterModule(new Point()));
+    ProceduralTexture2D tex2 = new ProceduralTexture2D();
+    tex2.getProcedure().addModule(new ParameterModule(new Point()));
+    tex2.getProcedure().addModule(new ParameterModule(new Point()));
+
+    // Create a layered texture containing two copies of the first texture and one of the second.
+
+    Object3D obj = new Sphere(1.0, 1.0, 1.0);
+    LayeredTexture tex = new LayeredTexture(obj);
+    LayeredMapping map = new LayeredMapping(obj, tex);
+    tex.setMapping(map);
+    map.addLayer(tex1);
+    map.addLayer(tex2);
+    map.addLayer(tex2);
+    obj.setTexture(tex, map);
+
+    // Call getParameters() twice and make sure the results are consistent.
+
+    TextureParameter[] param = map.getParameters();
+    TextureParameter[] param2 = map.getParameters();
+    assertEquals(9, param.length);
+    assertEquals(9, param2.length);
+    for (int i = 0; i < param.length; i++)
+      for (int j = 0; j < param2.length; j++)
+      {
+        if (i == j)
+          assertEquals(param[i], param2[j]);
+        else
+          assertFalse(param[i].equals(param2[j]));
+      }
+
+    // Now request the parameters for each layer separately and make sure they match the full list.
+
+    for (int i = 0; i < 3; i++)
+    {
+      TextureParameter[] layerParam = map.getLayerParameters(i);
+      assertEquals(3, layerParam.length);
+      for (int j = 0; j < layerParam.length; j++)
+        for (int k = 0; k < param.length; k++)
+        {
+          if (k == j+i*3)
+            assertEquals(param[k], layerParam[j]);
+          else
+            assertFalse(param[k].equals(layerParam[j]));
+        }
+    }
+
+    // Set the values of all parameters, the make sure they are correct.
+
+    for (int i = 0; i < param.length; i++)
+      obj.setParameterValue(param[i], new ConstantParameterValue(i));
+    for (int i = 0; i < param.length; i++)
+      assertEquals(i, obj.getParameterValue(param[i]).getAverageValue(), 0.0);
   }
 }

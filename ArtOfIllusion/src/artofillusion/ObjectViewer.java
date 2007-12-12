@@ -357,7 +357,8 @@ public abstract class ObjectViewer extends ViewerCanvas
     if (rend == null)
       return;
     sc.addObject(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), theCamera.getCameraCoordinates(), "", null);
-    sc.addObject(getController().getObject(), null);
+    ObjectInfo obj = getController().getObject();
+    sc.addObject(obj.duplicate(obj.object.duplicate()), null);
     adjustCamera(true);
     rend.configurePreview();
     ObjectInfo cameraInfo = new ObjectInfo(new SceneCamera(), theCamera.getCameraCoordinates(), "");

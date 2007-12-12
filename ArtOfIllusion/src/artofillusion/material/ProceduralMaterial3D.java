@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,6 +16,8 @@ import artofillusion.math.*;
 import artofillusion.procedural.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
+import buoy.event.*;
+
 import java.awt.*;
 import java.io.*;
 
@@ -266,8 +268,22 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   public Object getPreview(ProcedureEditor editor)
   {
     FloatingDialog dlg = new FloatingDialog(editor.getParentFrame(), "Preview", false);
-    MaterialPreviewer preview = new MaterialPreviewer(null, this, 200, 160);
-    dlg.setContent(preview);
+    BorderContainer content = new BorderContainer();
+    final MaterialPreviewer preview = new MaterialPreviewer(null, this, 200, 160);
+    content.add(preview, BorderContainer.CENTER);
+    RowContainer row = new RowContainer();
+    content.add(row, BorderContainer.SOUTH, new LayoutInfo());
+    row.add(Translate.label("Time", ":"));
+    final ValueField value = new ValueField(0.0, ValueField.NONE);
+    row.add(value);
+    value.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        preview.getScene().setTime(value.getValue());
+        preview.render();
+      }
+    });
+    dlg.setContent(content);
     dlg.pack();
     Rectangle parentBounds = editor.getParentFrame().getBounds();
     Rectangle location = dlg.getBounds();
@@ -290,7 +306,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   public void disposePreview(Object preview)
   {
-    ((FloatingDialog) ((MaterialPreviewer) preview).getParent()).dispose();
+    UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
   }
   
   /** Determine whether the procedure may contain View Angle modules. */

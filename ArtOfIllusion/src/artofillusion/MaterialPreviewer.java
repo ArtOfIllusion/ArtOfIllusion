@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2007 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -149,6 +149,13 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   public ObjectInfo getObject()
   {
     return info;
+  }
+
+  /** Get the scene being rendererd as the preview. */
+
+  public Scene getScene()
+  {
+    return theScene;
   }
   
   /* The following methods are used to modify the properties of the object being displayed. */

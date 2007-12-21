@@ -10,6 +10,8 @@
 
 package artofillusion.util;
 
+import java.util.concurrent.atomic.*;
+
 /**
  * This class coordinates threads for multi-threaded operations.  The execution model
  * provided by this class is a single "task" (e.g. tracing a ray through a single pixel)
@@ -26,7 +28,8 @@ package artofillusion.util;
 
 public class ThreadManager
 {
-  private int numIndices, nextIndex, numWaiting;
+  private int numIndices, numWaiting;
+  private AtomicInteger nextIndex;
   private Thread thread[];
   private Task task;
   private Object controller;
@@ -53,7 +56,7 @@ public class ThreadManager
   {
     this.numIndices = numIndices;
     this.task = task;
-    nextIndex = numIndices;
+    nextIndex = new AtomicInteger(numIndices);
     controller = new Object();
     controllerWaiting = false;
   }
@@ -103,10 +106,10 @@ public class ThreadManager
    * thread that instantiated the ThreadManager and that calls run().
    */
 
-  public synchronized void setNumIndices(int numIndices)
+  public void setNumIndices(int numIndices)
   {
     this.numIndices = numIndices;
-    nextIndex = numIndices;
+    nextIndex.set(numIndices);
   }
 
   /**
@@ -115,7 +118,7 @@ public class ThreadManager
    * must be invoked from the same thread that instantiated the ThreadManager and that calls run().
    */
 
-  public synchronized void setTask(Task task)
+  public void setTask(Task task)
   {
     this.task = task;
   }
@@ -129,12 +132,9 @@ public class ThreadManager
 
   public void run()
   {
-    synchronized (this)
-    {
-      controllerWaiting = false;
-      nextIndex = 0;
-      numWaiting = 0;
-    }
+    controllerWaiting = false;
+    nextIndex.set(0);
+    numWaiting = 0;
     if (thread == null)
       createThreads();
 
@@ -164,9 +164,9 @@ public class ThreadManager
    * run() is called.
    */
 
-  public synchronized void cancel()
+  public void cancel()
   {
-    nextIndex = numIndices;
+    nextIndex.set(numIndices);
   }
 
   /**
@@ -180,25 +180,29 @@ public class ThreadManager
         thread[i].interrupt();
   }
 
-  private synchronized int nextIndex() throws InterruptedException
+  private int nextIndex() throws InterruptedException
   {
-    while (nextIndex >= numIndices)
+    int index;
+    while ((index = nextIndex.getAndIncrement()) >= numIndices)
     {
       // Wait until run() is called again.
-      
-      numWaiting++;
-      if (numWaiting == thread.length)
+
+      synchronized (this)
       {
-        while (!controllerWaiting)
-          wait(1);
-        synchronized (controller)
+        numWaiting++;
+        if (numWaiting == thread.length)
         {
-          controller.notify();
+          while (!controllerWaiting)
+            wait(1);
+          synchronized (controller)
+          {
+            controller.notify();
+          }
         }
+        wait();
       }
-      wait();
     }
-    return (nextIndex++);
+    return index;
   }
 
   /**

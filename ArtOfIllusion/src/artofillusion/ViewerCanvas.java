@@ -53,8 +53,10 @@ public abstract class ViewerCanvas extends CustomWidget
       Class.forName("javax.media.opengl.GLCanvas");
       openGLAvailable = true;
     }
-    catch (ClassNotFoundException ex)
+    catch (Throwable t)
     {
+      System.out.println("Error loading GLCanvas class: "+t);
+      System.out.println("java.library.path: "+System.getProperty("java.library.path"));
     }
   }
 
@@ -104,6 +106,7 @@ public abstract class ViewerCanvas extends CustomWidget
       }
       catch (Throwable t)
       {
+        System.out.println("Error creating GLCanvasDrawer: "+t);
         openGLAvailable = false;
       }
     }

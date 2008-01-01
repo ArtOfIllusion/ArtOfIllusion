@@ -267,7 +267,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   public Object getPreview(ProcedureEditor editor)
   {
-    FloatingDialog dlg = new FloatingDialog(editor.getParentFrame(), "Preview", false);
+    BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
     BorderContainer content = new BorderContainer();
     final MaterialPreviewer preview = new MaterialPreviewer(null, this, 200, 160);
     content.add(preview, BorderContainer.CENTER);

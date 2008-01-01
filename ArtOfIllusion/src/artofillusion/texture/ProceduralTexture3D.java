@@ -320,7 +320,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   
   public Object getPreview(ProcedureEditor editor)
   {
-    FloatingDialog dlg = new FloatingDialog(editor.getParentFrame(), "Preview", false);
+    final BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
     BorderContainer content = new BorderContainer();
     final MaterialPreviewer preview = new MaterialPreviewer(this, null, 200, 160);
     content.add(preview, BorderContainer.CENTER);

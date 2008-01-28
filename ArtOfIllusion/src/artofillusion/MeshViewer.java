@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,15 +22,15 @@ public abstract class MeshViewer extends ObjectViewer
 {
   public static final int HANDLE_SIZE = 5;
   protected boolean showMesh, showSurface, showSkeleton;
+  protected TextureParameter surfaceColoringParameter;
   private int selectedJoint;
   private boolean detachSkeleton;
-  private Vector lockedJoints;
+  private Vector<Integer> lockedJoints;
 
   public MeshViewer(MeshEditController controller, RowContainer p)
   {
     super(controller, p);
-    lockedJoints = new Vector();
-    Skeleton s = controller.getObject().object.getSkeleton();
+    lockedJoints = new Vector<Integer>();
   }
   
   /** Get the ID of the selected joint. */
@@ -57,7 +57,7 @@ public abstract class MeshViewer extends ObjectViewer
     boolean b[] = new boolean [s.getNumJoints()];
     for (int i = 0; i < lockedJoints.size(); i++)
     {
-      int index = s.findJointIndex(((Integer) lockedJoints.elementAt(i)).intValue());
+      int index = s.findJointIndex(lockedJoints.elementAt(i).intValue());
       if (index > -1 && index < b.length)
         b[index] = true;
     }
@@ -69,7 +69,7 @@ public abstract class MeshViewer extends ObjectViewer
   public boolean isJointLocked(int id)
   {
     for (int i = 0; i < lockedJoints.size(); i++)
-      if (((Integer) lockedJoints.elementAt(i)).intValue() == id)
+      if (lockedJoints.elementAt(i).intValue() == id)
         return true;
     return false;
   }
@@ -78,7 +78,7 @@ public abstract class MeshViewer extends ObjectViewer
   
   public void lockJoint(int id)
   {
-    Integer i = new Integer(id);
+    Integer i = Integer.valueOf(id);
     if (lockedJoints.indexOf(i) == -1)
       lockedJoints.addElement(i);
   }
@@ -87,7 +87,7 @@ public abstract class MeshViewer extends ObjectViewer
   
   public void unlockJoint(int id)
   {
-    lockedJoints.removeElement(new Integer(id));
+    lockedJoints.removeElement(Integer.valueOf(id));
   }
 
   /** Get whether the control mesh is visible. */
@@ -144,5 +144,19 @@ public abstract class MeshViewer extends ObjectViewer
   public void setSkeletonDetached(boolean detached)
   {
     detachSkeleton = detached;
+  }
+
+  /** Get the parameter by which the surface is colored. */
+
+  public TextureParameter getSurfaceTextureParameter()
+  {
+    return surfaceColoringParameter;
+  }
+
+  /** Set the parameter by which the surface is colored. */
+
+  public void setSurfaceTextureParameter(TextureParameter param)
+  {
+    surfaceColoringParameter = param;
   }
 }

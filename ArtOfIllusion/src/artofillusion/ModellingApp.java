@@ -40,8 +40,8 @@ import javax.swing.*;
 
 public class ModellingApp
 {
-  public static final String MAJOR_VERSION = "2.5";
-  public static final String VERSION = MAJOR_VERSION+".1";
+  public static final String MAJOR_VERSION = "2.6";
+  public static final String VERSION = MAJOR_VERSION+"ea1";
   public static final double DIST_TO_SCREEN = 20.0;
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
@@ -54,8 +54,8 @@ public class ModellingApp
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
-  private static Vector windows = new Vector();
-  private static Hashtable classTranslations = new Hashtable();
+  private static ArrayList<EditingWindow> windows = new ArrayList<EditingWindow>();
+  private static HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
   static
@@ -152,10 +152,10 @@ public class ModellingApp
 
       Class popup = PopupFactory.class;
       Field heavyweight = popup.getDeclaredField("HEAVY_WEIGHT_POPUP");
-      Method setPopupType = popup.getDeclaredMethod("setPopupType", new Class [] {Integer.TYPE});
+      Method setPopupType = popup.getDeclaredMethod("setPopupType", Integer.TYPE);
       heavyweight.setAccessible(true);
       setPopupType.setAccessible(true);
-      setPopupType.invoke(PopupFactory.getSharedInstance(), new Object [] {heavyweight.get(null)});
+      setPopupType.invoke(PopupFactory.getSharedInstance(), heavyweight.get(null));
     }
     catch (Exception ex)
     {
@@ -445,7 +445,7 @@ public class ModellingApp
       public void run()
       {
         LayoutWindow fr = new LayoutWindow(theScene);
-        windows.addElement(fr);
+        windows.add(fr);
         List plugins = PluginRegistry.getPlugins(Plugin.class);
         for (int i = 0; i < plugins.size(); i++)
         {
@@ -467,9 +467,9 @@ public class ModellingApp
         // scene window.
         
         for (int i = windows.size()-2; i >= 0; i--)
-          if (windows.elementAt(i) instanceof LayoutWindow)
+          if (windows.get(i) instanceof LayoutWindow)
           {
-            LayoutWindow win = (LayoutWindow) windows.elementAt(i);
+            LayoutWindow win = (LayoutWindow) windows.get(i);
             if (win.getScene().getName() == null && !win.isModified())
               closeWindow(win);
           }
@@ -481,7 +481,7 @@ public class ModellingApp
   
   public static void addWindow(EditingWindow win)
   {
-    windows.addElement(win);
+    windows.add(win);
   }
   
   /** Close a window. */
@@ -490,7 +490,7 @@ public class ModellingApp
   {
     if (win.confirmClose())
       {
-        windows.removeElement(win);
+        windows.remove(win);
         if (win instanceof LayoutWindow)
         {
           List plugins = PluginRegistry.getPlugins(Plugin.class);
@@ -517,9 +517,7 @@ public class ModellingApp
   
   public static EditingWindow[] getWindows()
   {
-    EditingWindow w[] = new EditingWindow [windows.size()];
-    windows.copyInto(w);
-    return w;
+    return windows.toArray(new EditingWindow[windows.size()]);
   }
   
   /** Quit Art of Illusion. */
@@ -528,7 +526,7 @@ public class ModellingApp
   {
     for (int i = windows.size()-1; i >= 0; i--)
     {
-      EditingWindow win = (EditingWindow) windows.elementAt(i);
+      EditingWindow win = windows.get(i);
       closeWindow(win);
       if (windows.contains(win))
         return;
@@ -585,12 +583,12 @@ public class ModellingApp
       int i = name.indexOf('$');
       if (i == -1)
       {
-        String newName = (String) classTranslations.get(name);
+        String newName = classTranslations.get(name);
         if (newName == null)
           throw ex;
         return lookupClass(newName);
       }
-      String newName = (String) classTranslations.get(name.substring(0, i));
+      String newName = classTranslations.get(name.substring(0, i));
       if (newName == null)
         throw ex;
       return lookupClass(newName+name.substring(i));
@@ -600,25 +598,25 @@ public class ModellingApp
   private static Class lookupClass(String name) throws ClassNotFoundException
   {
     try
-      {
-        return Class.forName(name);
-      }
+    {
+      return Class.forName(name);
+    }
     catch (ClassNotFoundException ex)
     {
     }
     List pluginLoaders = PluginRegistry.getPluginClassLoaders();
     for (int i = 0; i < pluginLoaders.size(); i++)
+    {
+      try
       {
-        try
-          {
-            return ((ClassLoader) pluginLoaders.get(i)).loadClass(name);
-          }
-        catch (ClassNotFoundException ex)
-          {
-            if (i == pluginLoaders.size()-1)
-              throw ex;
-          }
+        return ((ClassLoader) pluginLoaders.get(i)).loadClass(name);
       }
+      catch (ClassNotFoundException ex)
+      {
+        if (i == pluginLoaders.size()-1)
+          throw ex;
+      }
+    }
     return null;
   }
   
@@ -755,7 +753,7 @@ public class ModellingApp
   {
     // First make a list of all textures used by the objects.
     
-    Vector textures = new Vector();
+    ArrayList<Texture> textures = new ArrayList<Texture>();
     for (int i = 0; i < obj.length; i++)
       {
         Texture tex = obj[i].object.getTexture();
@@ -767,7 +765,7 @@ public class ModellingApp
               {
                 Texture dup = layer[j].duplicate();
                 dup.setID(layer[j].getID());
-                textures.addElement(dup);
+                textures.add(dup);
                 map.setLayer(j, dup);
                 map.setLayerMapping(j, map.getLayerMapping(j).duplicate(obj[i].object, dup));
               }
@@ -776,14 +774,14 @@ public class ModellingApp
           {
             Texture dup = tex.duplicate();
             dup.setID(tex.getID());
-            textures.addElement(dup);
+            textures.add(dup);
             obj[i].object.setTexture(dup, obj[i].object.getTextureMapping().duplicate(obj[i].object, dup));
           }
       }
 
     // Next make a list of all materials used by the objects.
     
-    Vector materials = new Vector();
+    ArrayList<Material> materials = new ArrayList<Material>();
     for (int i = 0; i < obj.length; i++)
       {
         Material mat = obj[i].object.getMaterial();
@@ -791,35 +789,32 @@ public class ModellingApp
           {
             Material dup = mat.duplicate();
             dup.setID(mat.getID());
-            materials.addElement(dup);
+            materials.add(dup);
             obj[i].object.setMaterial(dup, obj[i].object.getMaterialMapping().duplicate(obj[i].object, dup));
           }
       }
     
     // Now make a list of all ImageMaps used by any of them.
 
-    Vector images = new Vector();
+    ArrayList<ImageMap> images = new ArrayList<ImageMap>();
     for (int i = 0; i < scene.getNumImages(); i++)
       {
         ImageMap map = scene.getImage(i);
         boolean used = false;
         for (int j = 0; j < textures.size() && !used; j++)
-          used = ((Texture) textures.elementAt(j)).usesImage(map);
+          used = textures.get(j).usesImage(map);
         for (int j = 0; j < materials.size() && !used; j++)
-          used = ((Material) materials.elementAt(j)).usesImage(map);
+          used = materials.get(j).usesImage(map);
         if (used)
-          images.addElement(map);
+          images.add(map);
       }
     
     // Save all of them to the appropriate arrays.
     
     clipboardObject = obj;
-    clipboardTexture = new Texture [textures.size()];
-    textures.copyInto(clipboardTexture);
-    clipboardMaterial = new Material [materials.size()];
-    materials.copyInto(clipboardMaterial);
-    clipboardImage = new ImageMap [images.size()];
-    images.copyInto(clipboardImage);
+    clipboardTexture = textures.toArray(new Texture[textures.size()]);
+    clipboardMaterial = materials.toArray(new Material[materials.size()]);
+    clipboardImage = images.toArray(new ImageMap[images.size()]);
   }
   
   /** Paste the contents of the clipboard into a window. */

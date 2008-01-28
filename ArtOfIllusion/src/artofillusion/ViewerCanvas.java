@@ -69,6 +69,8 @@ public abstract class ViewerCanvas extends CustomWidget
   public static Color surfaceColor;
   public static RGBColor surfaceRGBColor;
   public static RGBColor transparentColor;
+  public static RGBColor lowValueColor;
+  public static RGBColor highValueColor;
 
   public static final int RENDER_WIREFRAME = 0;
   public static final int RENDER_FLAT = 1;

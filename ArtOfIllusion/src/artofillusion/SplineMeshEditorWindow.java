@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,10 +29,11 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   private BMenuItem editMenuItem[], meshMenuItem[], skeletonMenuItem[];
   private BCheckBoxMenuItem smoothItem[], closedItem[];
   private Runnable onClose;
-  private int selectionDistance[], maxDistance, selectMode;
+  private int selectionDistance[], maxDistance, selectMode, lastSelectedJoint;
   private boolean topology;
   boolean selected[];
-  
+  private TextureParameter jointWeightParam;
+
   public SplineMeshEditorWindow(EditingWindow parent, String title, ObjectInfo obj, Runnable onClose, boolean allowTopology)
   {
     super(parent, title, obj);
@@ -92,6 +93,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     tools.requestFocus();
     selected = new boolean [((Mesh) objInfo.object).getVertices().length];
     findSelectionDistance();
+    addExtraParameters();
     updateMenus();
   }
 
@@ -325,6 +327,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         selected = new boolean [obj.getUSize()+obj.getVSize()];
       ((SplineMeshViewer) theView[i]).visible = new boolean [obj.getVertices().length];
     }
+    updateJointWeightParam();
     findSelectionDistance();
     currentTool.getWindow().updateMenus();
   }
@@ -349,7 +352,14 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       currentTool = tool;
     }
   }
-  
+
+  public void updateImage()
+  {
+    if (lastSelectedJoint != ((MeshViewer) theView[currentView]).getSelectedJoint())
+      updateJointWeightParam();
+    super.updateImage();
+  }
+
   public void updateMenus()
   {
     super.updateMenus();
@@ -387,6 +397,90 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     skeletonMenuItem[4].setEnabled(count > 0);
   }
 
+  /** Add an extra texture parameter to the mesh which will be used for keeping track of
+      joint weights. */
+
+  private void addExtraParameters()
+  {
+    if (jointWeightParam != null)
+      return;
+    jointWeightParam = new TextureParameter(this, "Joint Weight", 0.0, 1.0, 0.0);
+    SplineMesh mesh = (SplineMesh) getObject().object;
+    TextureParameter params[] = mesh.getParameters();
+    TextureParameter newparams[] = new TextureParameter [params.length+1];
+    ParameterValue values[] = mesh.getParameterValues();
+    ParameterValue newvalues[] = new ParameterValue [values.length+1];
+    for (int i = 0; i < params.length; i++)
+    {
+      newparams[i] = params[i];
+      newvalues[i] = values[i];
+    }
+    newparams[params.length] = jointWeightParam;
+    newvalues[values.length] = new VertexParameterValue(mesh, jointWeightParam);
+    mesh.setParameters(newparams);
+    mesh.setParameterValues(newvalues);
+    getObject().clearCachedMeshes();
+    updateJointWeightParam();
+  }
+
+  /** Remove the extra texture parameter from the mesh which was used for keeping track of
+      joint weights. */
+
+  public void removeExtraParameters()
+  {
+    if (jointWeightParam == null)
+      return;
+    jointWeightParam = null;
+    SplineMesh mesh = (SplineMesh) getObject().object;
+    TextureParameter params[] = mesh.getParameters();
+    TextureParameter newparams[] = new TextureParameter [params.length-1];
+    ParameterValue values[] = mesh.getParameterValues();
+    ParameterValue newvalues[] = new ParameterValue [values.length-1];
+    for (int i = 0; i < newparams.length; i++)
+    {
+      newparams[i] = params[i];
+      newvalues[i] = values[i];
+    }
+    mesh.setParameters(newparams);
+    mesh.setParameterValues(newvalues);
+    getObject().clearCachedMeshes();
+  }
+
+  /** Update the parameter which records weights for the currently selected joint. */
+
+  private void updateJointWeightParam()
+  {
+    MeshVertex vert[] = ((SplineMesh) getObject().object).getVertices();
+    double jointWeight[] = new double [vert.length];
+    int selJointId = ((MeshViewer) theView[currentView]).getSelectedJoint();
+    Joint selJoint = getObject().getSkeleton().getJoint(selJointId);
+    for (int i = 0; i < jointWeight.length; i++)
+    {
+      Joint vertJoint = getObject().getSkeleton().getJoint(vert[i].ikJoint);
+      if (selJoint == null)
+        jointWeight[i] = 0.0;
+      else if (vert[i].ikJoint == selJointId)
+        jointWeight[i] = (selJoint.parent == null ? 1.0 : vert[i].ikWeight);
+      else if (vertJoint != null && vertJoint.parent == selJoint)
+        jointWeight[i] = 1.0-vert[i].ikWeight;
+      else
+        jointWeight[i] = 0.0;
+    }
+    VertexParameterValue value = (VertexParameterValue) getObject().object.getParameterValue(jointWeightParam);
+    value.setValue(jointWeight);
+    getObject().object.setParameterValues(getObject().object.getParameterValues());
+    lastSelectedJoint = selJointId;
+    objInfo.clearCachedMeshes();
+  }
+
+  /** Get the extra texture parameter which was added to the mesh to keep track of
+      joint weighting. */
+
+  public TextureParameter getJointWeightParam()
+  {
+    return jointWeightParam;
+  }
+
   protected void doOk()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.object;
@@ -404,6 +498,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       else
         theMesh.setMaterial(((SplineMesh) oldMesh).getMaterial(), ((SplineMesh) oldMesh).getMaterialMapping());
     }
+    removeExtraParameters();
     oldMesh.copyObject(theMesh);
     oldMesh = null;
     dispose();
@@ -443,7 +538,25 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     for (int i = 0; i < theView.length; i++)
       ((SplineMeshViewer) theView[i]).setSkeletonDetached(((BCheckBoxMenuItem) skeletonMenuItem[5]).getState());
   }
-    
+
+  /** This is overridden to update jointWeightParam after weights are changed. */
+
+  public void bindSkeletonCommand()
+  {
+    super.bindSkeletonCommand();
+    updateJointWeightParam();
+    updateImage();
+  }
+
+  /** This is overridden to update jointWeightParam after weights are changed. */
+
+  public void setPointsCommand()
+  {
+    super.setPointsCommand();
+    updateJointWeightParam();
+    updateImage();
+  }
+
   /** Select the entire mesh. */
   
   public void selectAllCommand()

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1053,6 +1053,22 @@ public class SplineMesh extends Object3D implements Mesh
     super.setTexture(tex, mapping);
     cachedMesh = null;
     cachedWire = null;
+  }
+
+  /** When setting texture parameters, we need to clear the caches. */
+
+  public void setParameterValues(ParameterValue val[])
+  {
+    super.setParameterValues(val);
+    cachedMesh = null;
+  }
+
+  /** When setting texture parameters, we need to clear the caches. */
+
+  public void setParameterValue(TextureParameter param, ParameterValue val)
+  {
+    super.setParameterValue(param, val);
+    cachedMesh = null;
   }
 
   /** Get the skeleton for the object. */

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -115,6 +115,17 @@ public class SplineMeshViewer extends MeshViewer
       VertexShader shader;
       if (renderMode == RENDER_FLAT)
         shader = new FlatVertexShader(mesh, surfaceRGB, viewDir);
+      else if (surfaceColoringParameter != null)
+      {
+        shader = null;
+        TextureParameter params[] = objInfo.object.getParameters();
+        for (int i = 0; i < params.length; i++)
+          if (params[i] == surfaceColoringParameter)
+          {
+            shader = new ParameterVertexShader(mesh, mesh.param[i], lowValueColor, highValueColor, surfaceColoringParameter.minVal, surfaceColoringParameter.maxVal, viewDir);
+            break;
+          }
+      }
       else if (renderMode == RENDER_SMOOTH)
         shader = new SmoothVertexShader(mesh, surfaceRGB, viewDir);
       else

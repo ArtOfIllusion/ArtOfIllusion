@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,9 +27,9 @@ import java.util.*;
 public abstract class MeshEditorWindow extends ObjectEditorWindow implements MeshEditController, EditingWindow
 {
   protected Mesh oldMesh;
-  protected BMenu viewMenu;
+  protected BMenu viewMenu, colorSurfaceMenu;
   protected BMenuItem undoItem, redoItem, templateItem, axesItem, splitViewItem;
-  protected BCheckBoxMenuItem displayItem[], coordsItem[], showItem[];
+  protected BCheckBoxMenuItem displayItem[], coordsItem[], showItem[], colorSurfaceItem[];
   protected int meshTension, tensionDistance;
 
   protected static int lastMeshTension = 2;
@@ -95,6 +95,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
     displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
     displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_TRANSPARENT));
+    if (getObject().object.canSetTexture())
+      viewMenu.add(colorSurfaceMenu = createColorSurfaceMenu());
     viewMenu.add(createShowMenu());
     viewMenu.add(coordsMenu = Translate.menu("coordinateSystem"));
     coordsItem = new BCheckBoxMenuItem [2];
@@ -121,6 +123,25 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     menu.add(showItem[1] = Translate.checkboxMenuItem("surface", this, "shownItemChanged", view.getSurfaceVisible()));
     menu.add(showItem[2] = Translate.checkboxMenuItem("skeleton", this, "shownItemChanged", view.getSkeletonVisible()));
     menu.add(showItem[3] = Translate.checkboxMenuItem("entireScene", this, "shownItemChanged", view.getSceneVisible()));
+    return menu;
+  }
+
+  protected BMenu createColorSurfaceMenu()
+  {
+    BMenu menu = Translate.menu("colorSurfaceBy");
+    TextureParameter params[] = getObject().object.getParameters();
+    int numParams = (params == null ? 0 : params.length);
+    colorSurfaceItem = new BCheckBoxMenuItem [numParams+2];
+    MeshViewer view = (MeshViewer) theView[currentView];
+    menu.add(colorSurfaceItem[0] = Translate.checkboxMenuItem("default", this, "surfaceColoringChanged", view.getSurfaceTextureParameter() == null));
+    menu.add(colorSurfaceItem[1] = Translate.checkboxMenuItem("boneWeight", this, "surfaceColoringChanged", view.getSurfaceTextureParameter() == getJointWeightParam()));
+    BMenu paramMenu = Translate.menu("parameter");
+    menu.add(paramMenu);
+    for (int i = 0; i < numParams; i++)
+    {
+      paramMenu.add(colorSurfaceItem[i+2] = new BCheckBoxMenuItem(params[i].name, view.getSurfaceTextureParameter() == params[i]));
+      colorSurfaceItem[i+2].addEventLink(CommandEvent.class, this, "surfaceColoringChanged");
+    }
     return menu;
   }
 
@@ -224,6 +245,16 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       showItem[2].setState(view.getSkeletonVisible());
     if (showItem[3] != null)
       showItem[3].setState(view.getSceneVisible());
+    if (colorSurfaceMenu != null)
+      colorSurfaceMenu.setEnabled(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH || view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
+    if (colorSurfaceItem != null)
+    {
+      colorSurfaceItem[0].setState(view.getSurfaceTextureParameter() == null);
+      colorSurfaceItem[1].setState(view.getSurfaceTextureParameter() == getJointWeightParam());
+      TextureParameter params[] = getObject().object.getParameters();
+      for (int i = 2; i < colorSurfaceItem.length; i++)
+        colorSurfaceItem[i].setState(view.getSurfaceTextureParameter() == params[i-2]);
+    }
   }
 
   private void displayModeChanged(WidgetEvent ev)
@@ -242,6 +273,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     else if (source == displayItem[4])
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
     savePreferences();
+    updateMenus();
   }
 
   private void coordinateSystemChanged(WidgetEvent ev)
@@ -270,6 +302,25 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       view.setSceneVisible(lastShowScene[currentView] = showItem[3].getState());
     savePreferences();
     updateImage();
+  }
+
+  private void surfaceColoringChanged(WidgetEvent ev)
+  {
+    Widget source = ev.getWidget();
+    MeshViewer view = (MeshViewer) theView[currentView];
+    for (int i = 0; i < colorSurfaceItem.length; i++)
+      if (source == colorSurfaceItem[i])
+      {
+        if (i == 0)
+          view.setSurfaceTextureParameter(null);
+        else if (i == 1)
+          view.setSurfaceTextureParameter(getJointWeightParam());
+        else
+          view.setSurfaceTextureParameter(getObject().object.getParameters()[i-2]);
+      }
+    savePreferences();
+    updateImage();
+    updateMenus();
   }
 
   /** Determine whether to use freehand selection mode. */
@@ -607,9 +658,25 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       face indices in the editor.  By default this returns null.  Subclasses which use
       an extra parameter to keep track of face indices should override it. */
 
-  public TextureParameter getExtraParameter()
+  public TextureParameter getFaceIndexParameter()
   {
     return null;
+  }
+
+  /** Get the extra texture parameter which was added to the mesh to keep track of
+      joint weighting.  By default this returns null.  Subclasses which use
+      an extra parameter to keep track of joint weights should override it. */
+
+  public TextureParameter getJointWeightParam()
+  {
+    return null;
+  }
+
+  /** Determine whether a TextureParameter was added to the mesh by the editor */
+
+  public boolean isExtraParameter(TextureParameter param)
+  {
+    return (param == getFaceIndexParameter() || param == getJointWeightParam());
   }
 
   /** Allow the user to set the texture parameters for selected vertices. */
@@ -643,11 +710,13 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       int num = 0;
       for (i = 0; i < param.length; i++)
         if (paramValue[i] instanceof VertexParameterValue)
-          num++;
+          if (!isExtraParameter(param[i]))
+            num++;
       paramIndex = new int [num];
       for (i = 0, k = 0; k < param.length; k++)
         if (paramValue[k] instanceof VertexParameterValue)
-          paramIndex[i++] = k;
+          if (!isExtraParameter(param[i]))
+            paramIndex[i++] = k;
     }
     if (paramIndex == null || paramIndex.length == 0)
     {
@@ -913,12 +982,12 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       int num = 0;
       for (i = 0; i < param.length; i++)
         if (paramValue[i] instanceof FaceParameterValue || paramValue[i] instanceof FaceVertexParameterValue)
-          if (param[i] != getExtraParameter())
+          if (!isExtraParameter(param[i]))
             num++;
       paramIndex = new int [num];
       for (i = 0, k = 0; k < param.length; k++)
         if (paramValue[k] instanceof FaceParameterValue || paramValue[k] instanceof FaceVertexParameterValue)
-          if (param[k] != getExtraParameter())
+          if (!isExtraParameter(param[k]))
             paramIndex[i++] = k;
     }
     if (paramIndex == null || paramIndex.length == 0)
@@ -1110,7 +1179,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     Joint joint[] = s.getJoints();
     boolean isChild[] = new boolean [joint.length];
     markChildJoints(s, j, isChild);
-    Vector options = new Vector();
+    Vector<Joint> options = new Vector<Joint>();
     for (int i = 0; i < isChild.length; i++)
       if (!isChild[i])
         options.addElement(joint[i]);
@@ -1123,7 +1192,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     ls.setSelected(0, true);
     for (int i = 0; i < options.size(); i++)
     {
-      ls.add(((Joint) options.elementAt(i)).name);
+      ls.add(options.elementAt(i).name);
       if (options.elementAt(i) == j.parent)
         ls.setSelected(i+1, true);
     }
@@ -1138,7 +1207,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     if (ls.getSelectedIndex() == 0)
       s.setJointParent(j, null);
     else
-      s.setJointParent(j, (Joint) options.elementAt(ls.getSelectedIndex()-1));
+      s.setJointParent(j, options.elementAt(ls.getSelectedIndex()-1));
 
     // Adjust the coordinate system.
 
@@ -1230,10 +1299,9 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     // Find the position and axis vectors for each joint.
 
     Joint joint[] = s.getJoints();
-    Vec3 pos[] = new Vec3 [joint.length], axis[] = new Vec3 [joint.length];
+    Vec3 axis[] = new Vec3 [joint.length];
     for (i = 0; i < joint.length; i++)
     {
-      pos[i] = joint[i].coords.getOrigin();
       if (joint[i].parent == null || joint[i].length.pos == 0.0)
         continue;
       axis[i] = joint[i].coords.getZDirection();

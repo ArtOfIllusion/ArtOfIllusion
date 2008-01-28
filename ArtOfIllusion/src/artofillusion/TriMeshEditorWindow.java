@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,7 +35,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   private boolean topology, projectOntoSurface;
   boolean hideVert[], hideFace[], hideEdge[], selected[], showQuads, tolerant;
   private int selectionDistance[], maxDistance, selectMode, boundary[][], projectedEdge[];
-  private TextureParameter hideFaceParam;
+  private int lastSelectedJoint;
+  private TextureParameter faceIndexParam, jointWeightParam;
 
   protected static boolean lastProjectOntoSurface, lastTolerant, lastShowQuads;
 
@@ -110,7 +111,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     selected = new boolean [mesh.getVertices().length];
     findQuads();
     findSelectionDistance();
-    addExtraParameter();
+    addExtraParameters();
     updateMenus();
   }
 
@@ -269,7 +270,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     if (hideFace != null)
     {
       boolean oldHideFace[] = hideFace;
-      FaceParameterValue val = (FaceParameterValue) getObject().object.getParameterValue(hideFaceParam);
+      FaceParameterValue val = (FaceParameterValue) getObject().object.getParameterValue(faceIndexParam);
       double param[] = val.getValue();
       hideFace = new boolean [obj.getFaces().length];
       for (int i = 0; i < param.length; i++)
@@ -280,6 +281,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       }
     }
     setHiddenFaces(hideFace);
+    updateJointWeightParam();
     findSelectionDistance();
     boundary = null;
     currentTool.getWindow().updateMenus();
@@ -313,7 +315,14 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       currentTool = tool;
     }
   }
-  
+
+  public void updateImage()
+  {
+    if (lastSelectedJoint != ((MeshViewer) theView[currentView]).getSelectedJoint())
+      updateJointWeightParam();
+    super.updateImage();
+  }
+
   public void updateMenus()
   {
     super.updateMenus();
@@ -406,59 +415,64 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       for (int i = 0; i < hideVert.length; i++)
         hideVert[i] = false;
     }
-    FaceParameterValue val = (FaceParameterValue) objInfo.object.getParameterValue(hideFaceParam);
+    FaceParameterValue val = (FaceParameterValue) objInfo.object.getParameterValue(faceIndexParam);
     double param[] = val.getValue();
     for (int i = 0; i < param.length; i++)
       param[i] = i;
     val.setValue(param);
-    objInfo.object.setParameterValue(hideFaceParam, val);
+    objInfo.object.setParameterValue(faceIndexParam, val);
     objInfo.clearCachedMeshes();
     findQuads();
     updateImage();
   }
   
-  /** Add an extra texture parameter to the mesh which will be used for keeping track of which
-      faces are hidden. */
+  /** Add extra texture parameters to the mesh which will be used for keeping track of face
+      and vertex indices. */
   
-  private void addExtraParameter()
+  private void addExtraParameters()
   {
-    if (hideFaceParam != null)
+    if (faceIndexParam != null)
       return;
-    hideFaceParam = new TextureParameter(this, "Hide Face", 0.0, 1.0, 0.0);
+    faceIndexParam = new TextureParameter(this, "Face Index", 0.0, Double.MAX_VALUE, 0.0);
+    jointWeightParam = new TextureParameter(this, "Joint Weight", 0.0, 1.0, 0.0);
     TriangleMesh mesh = (TriangleMesh) getObject().object;
     TextureParameter params[] = mesh.getParameters();
-    TextureParameter newparams[] = new TextureParameter [params.length+1];
+    TextureParameter newparams[] = new TextureParameter [params.length+2];
     ParameterValue values[] = mesh.getParameterValues();
-    ParameterValue newvalues[] = new ParameterValue [values.length+1];
+    ParameterValue newvalues[] = new ParameterValue [values.length+2];
     for (int i = 0; i < params.length; i++)
     {
       newparams[i] = params[i];
       newvalues[i] = values[i];
     }
-    newparams[params.length] = hideFaceParam;
-    newvalues[values.length] = new FaceParameterValue(mesh, hideFaceParam);
-    double index[] = new double [mesh.getFaces().length];
-    for (int i = 0; i < index.length; i++)
-      index[i] = i;
-    ((FaceParameterValue) newvalues[values.length]).setValue(index);
+    newparams[params.length] = faceIndexParam;
+    newvalues[values.length] = new FaceParameterValue(mesh, faceIndexParam);
+    double faceIndex[] = new double [mesh.getFaces().length];
+    for (int i = 0; i < faceIndex.length; i++)
+      faceIndex[i] = i;
+    ((FaceParameterValue) newvalues[values.length]).setValue(faceIndex);
+    newparams[params.length+1] = jointWeightParam;
+    newvalues[values.length+1] = new VertexParameterValue(mesh, jointWeightParam);
     mesh.setParameters(newparams);
     mesh.setParameterValues(newvalues);
     getObject().clearCachedMeshes();
+    updateJointWeightParam();
   }
 
-  /** Remove the extra texture parameter from the mesh which was used for keeping track of which
-      faces are hidden. */
+  /** Remove the extra texture parameters from the mesh which were used for keeping track of
+      face and vertex indices. */
   
-  public void removeExtraParameter()
+  public void removeExtraParameters()
   {
-    if (hideFaceParam == null)
+    if (faceIndexParam == null)
       return;
-    hideFaceParam = null;
+    faceIndexParam = null;
+    jointWeightParam = null;
     TriangleMesh mesh = (TriangleMesh) getObject().object;
     TextureParameter params[] = mesh.getParameters();
-    TextureParameter newparams[] = new TextureParameter [params.length-1];
+    TextureParameter newparams[] = new TextureParameter [params.length-2];
     ParameterValue values[] = mesh.getParameterValues();
-    ParameterValue newvalues[] = new ParameterValue [values.length-1];
+    ParameterValue newvalues[] = new ParameterValue [values.length-2];
     for (int i = 0; i < newparams.length; i++)
     {
       newparams[i] = params[i];
@@ -469,12 +483,47 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     getObject().clearCachedMeshes();
   }
 
+  /** Update the parameter which records weights for the currently selected joint. */
+
+  private void updateJointWeightParam()
+  {
+    MeshVertex vert[] = mesh.getVertices();
+    double jointWeight[] = new double [vert.length];
+    int selJointId = ((MeshViewer) theView[currentView]).getSelectedJoint();
+    Joint selJoint = getObject().getSkeleton().getJoint(selJointId);
+    for (int i = 0; i < jointWeight.length; i++)
+    {
+      Joint vertJoint = getObject().getSkeleton().getJoint(vert[i].ikJoint);
+      if (selJoint == null)
+        jointWeight[i] = 0.0;
+      else if (vert[i].ikJoint == selJointId)
+        jointWeight[i] = (selJoint.parent == null ? 1.0 : vert[i].ikWeight);
+      else if (vertJoint != null && vertJoint.parent == selJoint)
+        jointWeight[i] = 1.0-vert[i].ikWeight;
+      else
+        jointWeight[i] = 0.0;
+    }
+    VertexParameterValue value = (VertexParameterValue) getObject().object.getParameterValue(jointWeightParam);
+    value.setValue(jointWeight);
+    getObject().object.setParameterValues(getObject().object.getParameterValues());
+    lastSelectedJoint = selJointId;
+    objInfo.clearCachedMeshes();    
+  }
+
   /** Get the extra texture parameter which was added to the mesh to keep track of
       face indices in the editor. */
-  
-  public TextureParameter getExtraParameter()
+
+  public TextureParameter getFaceIndexParameter()
   {
-    return hideFaceParam;
+    return faceIndexParam;
+  }
+
+  /** Get the extra texture parameter which was added to the mesh to keep track of
+      joint weighting. */
+
+  public TextureParameter getJointWeightParam()
+  {
+    return jointWeightParam;
   }
 
   /** Get whether the control mesh is displayed projected onto the surface. */
@@ -516,7 +565,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
     divMesh = mesh.convertToTriangleMesh(ModellingApp.getPreferences().getInteractiveSurfaceError());
     Edge divEdge[] = divMesh.getEdges();
-    double param[] = ((FaceParameterValue) divMesh.getParameterValue(getExtraParameter())).getValue();
+    double param[] = ((FaceParameterValue) divMesh.getParameterValue(getFaceIndexParameter())).getValue();
     projectedEdge = new int [divEdge.length];
 
     // Loop over the edges and try to figure out each one.
@@ -602,12 +651,12 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
         // Now trace along the edges to find the other one.
 
-        ArrayList sequential = new ArrayList();
+        ArrayList<Integer> sequential = new ArrayList<Integer>();
         int currentEdge = specialEdge[i];
         int v2 = -1;
         while (true)
         {
-          sequential.add(new Integer(currentEdge));
+          sequential.add(currentEdge);
           if (thisEdge.v1 != v1 && thisEdge.v1 < numOriginalVert)
           {
             v2 = thisEdge.v1;
@@ -639,7 +688,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         // Record this for all of the subdivided edges.
 
         for (int j = 0; j < sequential.size(); j++)
-          projectedEdge[((Integer) sequential.get(j)).intValue()] = originalEdge;
+          projectedEdge[sequential.get(j)] = originalEdge;
       }
     }
     return projectedEdge;
@@ -670,7 +719,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       else
         theMesh.setMaterial(((TriangleMesh) oldMesh).getMaterial(), ((TriangleMesh) oldMesh).getMaterialMapping());
     }
-    removeExtraParameter();
+    removeExtraParameters();
     oldMesh.copyObject(theMesh);
     oldMesh = null;
     dispose();
@@ -777,7 +826,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
           return 0;
         }
       }
-    Vector scoreVec = new Vector(e.length);
+    Vector<EdgeScore> scoreVec = new Vector<EdgeScore>(e.length);
     Vec3 temp0 = new Vec3(), temp1 = new Vec3(), temp2 = new Vec3();
     for (int i = 0; i < e.length; i++)
       {
@@ -1039,7 +1088,25 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     for (int i = 0; i < theView.length; i++)
       ((TriMeshViewer) theView[i]).setSkeletonDetached(((BCheckBoxMenuItem) skeletonMenuItem[5]).getState());
   }
-  
+
+  /** This is overridden to update jointWeightParam after weights are changed. */
+
+  public void bindSkeletonCommand()
+  {
+    super.bindSkeletonCommand();
+    updateJointWeightParam();
+    updateImage();
+  }
+
+  /** This is overridden to update jointWeightParam after weights are changed. */
+
+  public void setPointsCommand()
+  {
+    super.setPointsCommand();
+    updateJointWeightParam();
+    updateImage();
+  }
+
   /** Select the entire mesh. */
   
   public void selectAllCommand()
@@ -1198,7 +1265,6 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     Edge edge[] = theMesh.getEdges();
     Face face[] = theMesh.getFaces();
     boolean deleteVert[] = new boolean [vert.length];
-    boolean deleteEdge[] = new boolean [edge.length];
     boolean deleteFace[] = new boolean [face.length];
 
     // Determine which parts of the mesh to delete.
@@ -1207,8 +1273,6 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     {
       for (int i = 0; i < deleteVert.length; i++)
         deleteVert[i] = selected[i];
-      for (int i = 0; i < deleteEdge.length; i++)
-        deleteEdge[i] = (deleteVert[edge[i].v1] || deleteVert[edge[i].v2]);
       for (int i = 0; i < deleteFace.length; i++)
         deleteFace[i] = (deleteVert[face[i].v1] || deleteVert[face[i].v2] || deleteVert[face[i].v3]);
     }
@@ -1216,8 +1280,6 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     {
       for (int i = 0; i < deleteFace.length; i++)
         deleteFace[i] = (selected[face[i].e1] || selected[face[i].e2] || selected[face[i].e3]);
-      for (int i = 0; i < deleteEdge.length; i++)
-        deleteEdge[i] = (deleteFace[edge[i].f1] && (edge[i].f2 == -1 || deleteFace[edge[i].f2]));
       for (int i = 0; i < deleteVert.length; i++)
         deleteVert[i] = true;
       for (int i = 0; i < deleteFace.length; i++)
@@ -1228,8 +1290,6 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     {
       for (int i = 0; i < deleteFace.length; i++)
         deleteFace[i] = selected[i];
-      for (int i = 0; i < deleteEdge.length; i++)
-        deleteEdge[i] = (deleteFace[edge[i].f1] && (edge[i].f2 == -1 || deleteFace[edge[i].f2]));
       for (int i = 0; i < deleteVert.length; i++)
         deleteVert[i] = true;
       for (int i = 0; i < deleteFace.length; i++)
@@ -1578,14 +1638,14 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       return new int [0][0];
     if (boundary == null)
       boundary = ((TriangleMesh) getObject().object).findBoundaryEdges();
-    Vector all = new Vector();
+    Vector<int[]> all = new Vector<int[]>();
     for (int i = 0; i < boundary.length; i++)
     {
       // Add one "selected boundary" for every continuous run of selected edges.
       
       int start;
       for (start = boundary[i].length-1; start > 0 && selected[boundary[i][start]]; start--);
-      Vector current = null;
+      Vector<Integer> current = null;
       int j = start;
       do
       {
@@ -1593,8 +1653,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         if (isSelected)
         {
           if (current == null)
-            current = new Vector();
-          current.addElement(new Integer(boundary[i][j]));
+            current = new Vector<Integer>();
+          current.addElement(boundary[i][j]);
         }
         if (++j == boundary[i].length)
           j = 0;
@@ -1602,7 +1662,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         {
           int edgeList[] = new int [current.size()];
           for (int k = 0; k < edgeList.length; k++)
-            edgeList[k] = ((Integer) current.elementAt(k)).intValue();
+            edgeList[k] = current.elementAt(k);
           all.addElement(edgeList);
           current = null;
         }
@@ -1995,7 +2055,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         double newval[] = new double [newface.length];
         for (int j = 0; j < oldval.length; j++)
           newval[j] = oldval[j];
-        if (param[i] == getExtraParameter()) // The parameter added by the editor window to record face indices
+        if (param[i] == getFaceIndexParameter()) // The parameter added by the editor window to record face indices
           for (int j = oldval.length; j < newval.length; j++)
             newval[j] = j;
         else
@@ -2041,7 +2101,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     TriangleMesh theMesh = (TriangleMesh) objInfo.object;
     Vertex vt[] = (Vertex []) theMesh.getVertices();
     Edge ed[] = theMesh.getEdges();
-    Vector edges = new Vector();
+    Vector<Edge> edges = new Vector<Edge>();
     int i;
 
     if (selectMode != EDGE_MODE)
@@ -2054,15 +2114,15 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         edges.addElement(ed[i]);
     if (edges.size() == 0)
       return;
-    Edge first = (Edge) edges.elementAt(0), last = first;
-    Vector ordered = new Vector();
+    Edge first = edges.elementAt(0), last = first;
+    Vector<Edge> ordered = new Vector<Edge>();
     ordered.addElement(first);
     edges.removeElementAt(0);
     while (edges.size() > 0)
     {
       for (i = 0; i < edges.size(); i++)
       {
-        Edge e = (Edge) edges.elementAt(i);
+        Edge e = edges.elementAt(i);
         if (e.v1 == first.v1 || e.v2 == first.v1 || e.v1 == first.v2 || e.v2 == first.v2)
         {
           ordered.insertElementAt(e, 0);
@@ -2089,7 +2149,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     boolean closed = (ordered.size() > 2 && (last.v1 == first.v1 || last.v2 == first.v1 || last.v1 == first.v2 || last.v2 == first.v2));
     Vec3 v[] = new Vec3 [closed ? ordered.size() : ordered.size()+1];
     float smoothness[] = new float [v.length];
-    Edge second = (ordered.size() == 1 ? first : (Edge) ordered.elementAt(1));
+    Edge second = (ordered.size() == 1 ? first : ordered.elementAt(1));
     int prev;
     if (first.v1 == second.v1 || first.v1 == second.v2)
       prev = first.v2;
@@ -2097,7 +2157,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       prev = first.v1;
     for (i = 0; i < ordered.size(); i++)
     {
-      Edge e = (Edge) ordered.elementAt(i);
+      Edge e = ordered.elementAt(i);
       v[i] = new Vec3(vt[prev].r);
       smoothness[i] = vt[prev].smoothness;
       prev = (e.v1 == prev ? e.v2 : e.v1);

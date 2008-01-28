@@ -1,4 +1,4 @@
-/* Copyright (C) 2004 by Peter Eastman
+/* Copyright (C) 2004-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,7 @@ public class TexturedVertexShader implements VertexShader
   private boolean cache;
   private int textureID;
 
-  private static final WeakHashMap cachedShaderMap = new WeakHashMap();
+  private static final WeakHashMap<RenderingMesh, SoftReference<TexturedVertexShader>> cachedShaderMap = new WeakHashMap<RenderingMesh, SoftReference<TexturedVertexShader>>();
 
   /** Create a TexturedVertexShader for a mesh.
       @param mesh      the mesh to render
@@ -77,19 +77,19 @@ public class TexturedVertexShader implements VertexShader
       color.clip();
       return new SmoothVertexShader(mesh, color, viewDir);
     }
-    if (cache = true)
+    if (cache)
     {
       // See if we already have a cached shader for this mesh.  To ensure that we never tie up memory with this
       // cache, the key is stored behind a weak reference and the value behind a soft reference.
 
-      SoftReference ref = (SoftReference) cachedShaderMap.get(mesh);
+      SoftReference<TexturedVertexShader> ref = cachedShaderMap.get(mesh);
       if (ref != null)
       {
-        TexturedVertexShader shader = (TexturedVertexShader) ref.get();
+        TexturedVertexShader shader = ref.get();
         if (shader != null && shader.textureID == textureID)
           return shader;
       }
-      cachedShaderMap.put(mesh, new SoftReference(this));
+      cachedShaderMap.put(mesh, new SoftReference<TexturedVertexShader>(this));
     }
     return this;
   }

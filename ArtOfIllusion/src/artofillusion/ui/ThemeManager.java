@@ -62,6 +62,8 @@ public class ThemeManager {
         public final Color viewerDisabled;
         public final Color viewerSurface;
         public final Color viewerTransparent;
+        public final Color viewerLowValue;
+        public final Color viewerHighValue;
         public final Color dockableBarColor1;
         public final Color dockableBarColor2;
         public final Color dockableTitleColor;
@@ -90,6 +92,10 @@ public class ThemeManager {
           viewerDisabled = getColorFromNode(node);
           node = getNodeFromNodeList(list, "viewersurface");
           viewerSurface = getColorFromNode(node);
+          node = getNodeFromNodeList(list, "viewerlowvalue");
+          viewerLowValue = getColorFromNode(node);
+          node = getNodeFromNodeList(list, "viewerhighvalue");
+          viewerHighValue = getColorFromNode(node);
           node = getNodeFromNodeList(list, "viewertransparent");
           viewerTransparent = getColorFromNode(node);
           node = getNodeFromNodeList(list, "dockablebarcolor1");
@@ -170,8 +176,8 @@ public class ThemeManager {
             Class cls = DefaultToolButton.class;
             try {
               cls = resource.getClassLoader().loadClass(className);
-              Method m = cls.getMethod("readPropertiesFromXMLNode", new Class[] { Node.class } );
-                properties = m.invoke(className, new Object[] { node } );
+              Method m = cls.getMethod("readPropertiesFromXMLNode", Node.class);
+                properties = m.invoke(className, node);
             } catch (NoSuchMethodException ex) {
             } catch (Exception e) {
                 e.printStackTrace();
@@ -222,7 +228,7 @@ public class ThemeManager {
     private static ThemeInfo selectedTheme, defaultTheme;
     private static ColorSet selectedColorSet;
     private static ThemeInfo[] themeList;
-    private static Map themeIdMap;
+    private static Map<String,ThemeInfo> themeIdMap;
     private static DocumentBuilderFactory documentBuilderFactory; //XML parsing
 
     /**
@@ -307,17 +313,25 @@ public class ThemeManager {
         Color viewerTransparent = new Color(set.viewerTransparent.getRed(),
                 set.viewerTransparent.getGreen(),
                 set.viewerTransparent.getBlue());
+        Color viewerLowValue = new Color(set.viewerLowValue.getRed(),
+                set.viewerLowValue.getGreen(),
+                set.viewerLowValue.getBlue());
+        Color viewerHighValue = new Color(set.viewerHighValue.getRed(),
+              set.viewerHighValue.getGreen(),
+              set.viewerHighValue.getBlue());
         ViewerCanvas.surfaceColor = viewerSurface;
         ViewerCanvas.surfaceRGBColor = new RGBColor(viewerSurface.getRed()/255.0, viewerSurface.getGreen()/255.0, viewerSurface.getBlue()/255.0);
         ViewerCanvas.transparentColor = new RGBColor(viewerTransparent.getRed()/255.0, viewerTransparent.getGreen()/255.0, viewerTransparent.getBlue()/255.0);
+        ViewerCanvas.lowValueColor = new RGBColor(viewerLowValue.getRed()/255.0, viewerLowValue.getGreen()/255.0, viewerLowValue.getBlue()/255.0);
+        ViewerCanvas.highValueColor = new RGBColor(viewerHighValue.getRed()/255.0, viewerHighValue.getGreen()/255.0, viewerHighValue.getBlue()/255.0);
     }
 
     private static void applyButtonProperties() {
         if (selectedTheme.buttonProperties != null) {
             Class buttonClass = selectedTheme.buttonClass;
             try {
-                Method m = buttonClass.getMethod("setProperties", new Class[] { Object.class } );
-                m.invoke(buttonClass, new Object[] { selectedTheme.buttonProperties } );
+                Method m = buttonClass.getMethod("setProperties", Object.class);
+                m.invoke(buttonClass, selectedTheme.buttonProperties);
             } catch (SecurityException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
@@ -363,8 +377,8 @@ public class ThemeManager {
         Class buttonClass = selectedTheme.buttonClass;
         Constructor contructor;
         try {
-            contructor = buttonClass.getConstructor(new Class[] { Object.class, String.class, String.class } );
-            return (ToolButton) contructor.newInstance( new Object[] { owner, iconName, selectedIconName } );
+            contructor = buttonClass.getConstructor(Object.class, String.class, String.class);
+            return (ToolButton) contructor.newInstance(owner, iconName, selectedIconName);
         } catch (SecurityException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -448,10 +462,10 @@ public class ThemeManager {
     {
       if (themeList != null)
         throw new IllegalStateException("The themes have already been initialized.");
-      themeIdMap = new HashMap();
+      themeIdMap = new HashMap<String, ThemeInfo>();
       documentBuilderFactory = DocumentBuilderFactory.newInstance();
       List resources = PluginRegistry.getResources("UITheme");
-      ArrayList list = new ArrayList();
+      ArrayList<ThemeInfo> list = new ArrayList<ThemeInfo>();
       for (int i = 0; i < resources.size(); i++)
       {
         try
@@ -464,10 +478,10 @@ public class ThemeManager {
           ex.printStackTrace();
         }
       }
-      themeList = (ThemeInfo[]) list.toArray(new ThemeInfo[list.size()]);
+      themeList = list.toArray(new ThemeInfo[list.size()]);
       for (int i = 0; i < themeList.length; i++)
         themeIdMap.put(themeList[i].resource.getId(), themeList[i]);
-      defaultTheme = (ThemeInfo) themeIdMap.get("default");
+      defaultTheme = themeIdMap.get("default");
       setSelectedTheme(defaultTheme);
     }
 

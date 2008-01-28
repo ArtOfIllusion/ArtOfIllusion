@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -102,10 +102,14 @@ public class TriMeshViewer extends MeshViewer
     boolean hide[] = null;
     int faceIndex[] = null;
     ObjectInfo objInfo = controller.getObject();
-    if (controller instanceof TriMeshEditorWindow && ((TriMeshEditorWindow) controller).getExtraParameter() != null)
+    if (controller instanceof TriMeshEditorWindow && ((TriMeshEditorWindow) controller).getFaceIndexParameter() != null)
     {
       RenderingMesh mesh = objInfo.getPreviewMesh();
-      double param[] = ((FaceParameterValue) mesh.param[mesh.param.length-1]).getValue();
+      TextureParameter faceIndexParameter = ((TriMeshEditorWindow) controller).getFaceIndexParameter();
+      double param[] = null;
+      for (int i = 0; i < mesh.param.length; i++)
+        if (objInfo.object.getParameters()[i] == faceIndexParameter)
+          param = ((FaceParameterValue) mesh.param[i]).getValue();
       faceIndex = new int [param.length];
       for (int i = 0; i < faceIndex.length; i++)
         faceIndex[i] = (int) param[i];
@@ -133,6 +137,17 @@ public class TriMeshViewer extends MeshViewer
       VertexShader shader;
       if (renderMode == RENDER_FLAT)
         shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);
+      else if (surfaceColoringParameter != null)
+      {
+        shader = null;
+        TextureParameter params[] = objInfo.object.getParameters();
+        for (int i = 0; i < params.length; i++)
+          if (params[i] == surfaceColoringParameter)
+          {
+            shader = new ParameterVertexShader(mesh, mesh.param[i], lowValueColor, highValueColor, surfaceColoringParameter.minVal, surfaceColoringParameter.maxVal, viewDir);
+            break;
+          }
+      }
       else if (renderMode == RENDER_SMOOTH)
         shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
       else
@@ -212,13 +227,11 @@ public class TriMeshViewer extends MeshViewer
       TriangleMesh divMesh = ((TriMeshEditorWindow) controller).getSubdividedMesh();
       MeshVertex divVert[] = divMesh.getVertices();
       Edge divEdge[] = divMesh.getEdges();
-      Point divScreenVert[] = new Point [divVert.length];
       double divScreenZ[] = new double [divVert.length];
       Vec2 divPos[] = new Vec2 [divVert.length];
       for (int i = 0; i < divVert.length; i++)
       {
         divPos[i] = theCamera.getObjectToScreen().timesXY(divVert[i].r);
-        divScreenVert[i] = new Point((int) divPos[i].x, (int) divPos[i].y);
         divScreenZ[i] = theCamera.getObjectToView().timesZ(divVert[i].r);
       }
       for (int j = 0; j < 2; j++)
@@ -620,8 +633,8 @@ public class TriMeshViewer extends MeshViewer
       if (controller instanceof TriMeshEditorWindow)
       {
         TriMeshEditorWindow win = (TriMeshEditorWindow) controller;
-        if (win.getExtraParameter() != null)
-          param = ((FaceParameterValue) mesh.getParameterValue(win.getExtraParameter())).getValue();
+        if (win.getFaceIndexParameter() != null)
+          param = ((FaceParameterValue) mesh.getParameterValue(win.getFaceIndexParameter())).getValue();
         hideFace = win.hideFace;
       }
       for (int i = 0; i < fc.length; i++)

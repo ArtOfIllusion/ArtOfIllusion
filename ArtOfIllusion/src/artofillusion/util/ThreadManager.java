@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2007 by Peter Eastman
+/* Copyright (C) 2005-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion.util;
 
 import java.util.concurrent.atomic.*;
+import java.util.*;
 
 /**
  * This class coordinates threads for multi-threaded operations.  The execution model
@@ -28,9 +29,10 @@ import java.util.concurrent.atomic.*;
 
 public class ThreadManager
 {
-  private int numIndices, numWaiting;
+  private int numIndices;
   private AtomicInteger nextIndex;
   private Thread thread[];
+  private HashSet<Thread> waitingThreads;
   private Task task;
   private Object controller;
   private boolean controllerWaiting;
@@ -59,6 +61,7 @@ public class ThreadManager
     nextIndex = new AtomicInteger(numIndices);
     controller = new Object();
     controllerWaiting = false;
+    waitingThreads = new HashSet<Thread>();
   }
 
   /**
@@ -134,7 +137,7 @@ public class ThreadManager
   {
     controllerWaiting = false;
     nextIndex.set(0);
-    numWaiting = 0;
+    waitingThreads.clear();
     if (thread == null)
       createThreads();
 
@@ -189,8 +192,8 @@ public class ThreadManager
 
       synchronized (this)
       {
-        numWaiting++;
-        if (numWaiting == thread.length)
+        waitingThreads.add(Thread.currentThread());
+        if (waitingThreads.size() == thread.length)
         {
           while (!controllerWaiting)
             wait(1);

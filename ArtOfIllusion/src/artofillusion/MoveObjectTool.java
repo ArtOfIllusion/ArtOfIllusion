@@ -24,7 +24,7 @@ public class MoveObjectTool extends EditingTool
 {
   Point clickPoint;
   Vec3 objectPos[];
-  Vector toMove;
+  Vector<ObjectInfo> toMove;
   ObjectInfo clickedObject;
   boolean dragged, applyToChildren = true;
   
@@ -60,7 +60,7 @@ public class MoveObjectTool extends EditingTool
     Scene theScene = theWindow.getScene();
     int i, sel[];
 
-    toMove = new Vector();
+    toMove = new Vector<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -191,12 +191,23 @@ public class MoveObjectTool extends EditingTool
       dx *= 10;
       dy *= 10;
     }
+    CoordinateSystem cameraCoords = cam.getCameraCoordinates();
     if (e.isControlDown())
-      v = cam.getCameraCoordinates().getZDirection().times(-dy*0.01);
+      v = cameraCoords.getZDirection().times(-dy*0.01);
     else
-      v = cam.findDragVector(theScene.getObject(sel[0]).coords.getOrigin(), dx, dy);
+    {
+      Vec3 origin = theScene.getObject(sel[0]).coords.getOrigin();
+      if (Math.abs(origin.minus(cameraCoords.getOrigin()).dot(cameraCoords.getZDirection())) < 1e-10)
+      {
+        // The object being moved is in the plane of the camera, so use a slightly
+        // different point to avoid dividing by zero.
+
+        origin = origin.plus(cameraCoords.getZDirection().times(cam.getClipDistance()));
+      }
+      v = cam.findDragVector(origin, dx, dy);
+    }
     theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
-    toMove = new Vector();
+    toMove = new Vector<ObjectInfo>();
     for (i = 0; i < sel.length; i++)
       toMove.addElement(theScene.getObject(sel[i]));
     for (i = 0; i < toMove.size(); i++)

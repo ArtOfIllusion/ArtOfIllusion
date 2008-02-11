@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -67,7 +67,7 @@ public interface Renderer
   
   /** Get a Map containing all current configuration options for the renderer. */
 
-  public Map getConfiguration();
+  public Map<String, Object> getConfiguration();
   
   /** Set the value of a configuration option for the renderer. */
 

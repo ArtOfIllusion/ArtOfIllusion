@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -557,9 +557,9 @@ public class Raytracer implements Renderer, Runnable
     return true;
   }
   
-  public Map getConfiguration()
+  public Map<String, Object> getConfiguration()
   {
-    HashMap map = new HashMap();
+    HashMap<String, Object> map = new HashMap<String, Object>();
     map.put("maxRayDepth", new Integer(maxRayDepth));
     map.put("minRayIntensity", new Float(minRayIntensity));
     map.put("materialStepSize", new Double(stepSize));
@@ -680,9 +680,10 @@ public class Raytracer implements Renderer, Runnable
 
   private void buildScene(final Scene theScene, final Camera theCamera)
   {
-    final List obj = Collections.synchronizedList(new ArrayList()), lt = Collections.synchronizedList(new ArrayList());
-    final double distToScreen = theCamera.getDistToScreen();
+    final List<RTObject> obj = Collections.synchronizedList(new ArrayList<RTObject>());
+    final List<ObjectInfo> lt = Collections.synchronizedList(new ArrayList<ObjectInfo>());
     final Thread mainThread = Thread.currentThread();
+    final List<RTObjectFactory> factories = PluginRegistry.getPlugins(RTObjectFactory.class);
 
     ThreadManager threads = new ThreadManager(theScene.getNumObjects(), new ThreadManager.Task()
     {
@@ -692,7 +693,7 @@ public class Raytracer implements Renderer, Runnable
           return;
         ObjectInfo info = theScene.getObject(index);
         if (info.visible)
-          addObject(obj, lt, info, theCamera, distToScreen, info.coords.toLocal(), info.coords.fromLocal(), mainThread);
+          addObject(obj, lt, info, theCamera, mainThread, factories);
       }
       public void cleanup()
       {
@@ -731,16 +732,26 @@ public class Raytracer implements Renderer, Runnable
   
   /** Add a single object to the scene. */
   
-  private void addObject(List obj, List lt, ObjectInfo info, Camera camera, double distToScreen,
-                Mat4 toLocal, Mat4 fromLocal, Thread mainThread)
+  private void addObject(List<RTObject> obj, List<ObjectInfo> lt, ObjectInfo info, Camera camera,
+                Thread mainThread, List<RTObjectFactory> factories)
   {
-    double dist;
-    Object3D theObject = info.object;
     boolean displaced = false;
     double tol;
 
     if (renderThread != mainThread)
       return;
+
+    // First give plugins a chance to handle the object.
+
+    for (RTObjectFactory factory : factories)
+      if (factory.processObject(info, theScene, camera, obj, lt))
+        return;
+
+    // Handle it in the default way.
+
+    Object3D theObject = info.object;
+    Mat4 toLocal = info.coords.toLocal();
+    Mat4 fromLocal = info.coords.fromLocal();
     if (theObject instanceof Light)
     {
       lt.add(info);
@@ -754,16 +765,17 @@ public class Raytracer implements Renderer, Runnable
         ObjectInfo elem = (ObjectInfo) enm.nextElement();
         if (!elem.visible)
           continue;
-        CoordinateSystem coords = elem.coords.duplicate();
-        coords.transformCoordinates(fromLocal);
-        addObject(obj, lt, elem, camera, distToScreen, coords.toLocal(), coords.fromLocal(), mainThread);
+        ObjectInfo copy = elem.duplicate();
+        copy.coords.transformCoordinates(fromLocal);
+        addObject(obj, lt, copy, camera, mainThread, factories);
       }
       return;
     }
     Vec3 cameraOrig = camera.getCameraCoordinates().getOrigin();
+    double distToScreen = theCamera.getDistToScreen();
     if (adaptive)
     {
-      dist = info.getBounds().distanceToPoint(toLocal.times(cameraOrig));
+      double dist = info.getBounds().distanceToPoint(toLocal.times(cameraOrig));
       if (dist < distToScreen)
         tol = surfaceError;
       else
@@ -864,7 +876,7 @@ public class Raytracer implements Renderer, Runnable
         obj.add(dt);
         if (adaptive && dt instanceof RTDisplacedTriangle)
         {
-          dist = dt.getBounds().distanceToPoint(cameraOrig);
+          double dist = dt.getBounds().distanceToPoint(cameraOrig);
           if (dist < distToScreen)
             ((RTDisplacedTriangle) dt).setTolerance(surfaceError);
           else
@@ -1013,20 +1025,48 @@ public class Raytracer implements Renderer, Runnable
   
   private void generatePhotons(PhotonMap map)
   {
-    BoundingBox bounds = map.getBounds();
-    ArrayList sources = new ArrayList();
+    List<PhotonSourceFactory> factories = PluginRegistry.getPlugins(PhotonSourceFactory.class);
+    ArrayList<PhotonSource> sources = new ArrayList<PhotonSource>();
     for (int i = 0; i < light.length; i++)
     {
+      // First give plugins a chance to handle it.
+
+      boolean processed = false;
+      for (PhotonSourceFactory factory : factories)
+        if (factory.processLight(light[i], map, sources))
+        {
+          processed = true;
+          break;
+        }
+      if (processed)
+        continue;
+
+      // Process it in the default way.
+
       if (light[i].object instanceof DirectionalLight)
-        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].object, light[i].coords, bounds));
+        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].object, light[i].coords, map));
       else if (light[i].object instanceof PointLight)
-        sources.add(new PointPhotonSource((PointLight) light[i].object, light[i].coords, bounds));
+        sources.add(new PointPhotonSource((PointLight) light[i].object, light[i].coords, map));
       else if (light[i].object instanceof SpotLight)
-        sources.add(new SpotlightPhotonSource((SpotLight) light[i].object, light[i].coords, bounds));
+        sources.add(new SpotlightPhotonSource((SpotLight) light[i].object, light[i].coords, map));
     }
-    ArrayList objectSources = new ArrayList();
+    ArrayList<PhotonSource> objectSources = new ArrayList<PhotonSource>();
     for (int i = 0; i < sceneObject.length; i++)
     {
+      // First give plugins a chance to handle it.
+
+      boolean processed = false;
+      for (PhotonSourceFactory factory : factories)
+        if (factory.processObject(sceneObject[i], map, sources))
+        {
+          processed = true;
+          break;
+        }
+      if (processed)
+        continue;
+
+      // Process it in the default way.
+
       if (!sceneObject[i].getTextureMapping().getTexture().hasComponent(Texture.EMISSIVE_COLOR_COMPONENT))
         continue;
       PhotonSource src;
@@ -1049,7 +1089,7 @@ public class Raytracer implements Renderer, Runnable
     }
     if (objectSources.size() > 0)
       sources.add(new CompoundPhotonSource((PhotonSource[]) objectSources.toArray(new PhotonSource[objectSources.size()])));
-    sources.add(new EnvironmentPhotonSource(theScene, bounds));
+    sources.add(new EnvironmentPhotonSource(theScene, map));
     PhotonSource src[] = (PhotonSource []) sources.toArray(new PhotonSource [sources.size()]);
     map.generatePhotons(src);
   }

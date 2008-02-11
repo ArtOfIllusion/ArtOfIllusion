@@ -1,5 +1,5 @@
 <?xml version="1.0" standalone="yes"?>
-<extension name="Renderers" version="2.5">
+<extension name="Renderers" version="2.6">
   <author>Peter Eastman</author>
   <date>2007</date>
   <description>
@@ -7,6 +7,8 @@ This plugin contains the standard renderers (Raster and Raytracer) which are inc
   </description>
   <comments>
   </comments>
+  <category class="artofillusion.raytracer.RTObjectFactory"/>
+  <category class="artofillusion.raytracer.PhotonSourceFactory"/>
   <plugin class="artofillusion.raster.Raster"/>
   <plugin class="artofillusion.raytracer.Raytracer"/>
 </extension>

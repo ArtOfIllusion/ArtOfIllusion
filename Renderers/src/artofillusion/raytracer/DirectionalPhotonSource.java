@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,10 +26,10 @@ public class DirectionalPhotonSource implements PhotonSource
 
   /** Create a DirectionalPhotonSource. */
   
-  public DirectionalPhotonSource(DirectionalLight light, CoordinateSystem coords, BoundingBox sceneBounds)
+  public DirectionalPhotonSource(DirectionalLight light, CoordinateSystem coords, PhotonMap map)
   {
     this.coords = coords;
-    BoundingBox bounds = sceneBounds.transformAndOutset(coords.toLocal());
+    BoundingBox bounds = map.getBounds().transformAndOutset(coords.toLocal());
     minx = bounds.minx;
     maxx = bounds.maxx;
     miny = bounds.miny;

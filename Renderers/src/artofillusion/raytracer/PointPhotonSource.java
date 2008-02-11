@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ public class PointPhotonSource implements PhotonSource
 
   /** Create a PointPhotonSource. */
   
-  public PointPhotonSource(PointLight light, CoordinateSystem coords, BoundingBox sceneBounds)
+  public PointPhotonSource(PointLight light, CoordinateSystem coords, PhotonMap map)
   {
     this.light = light;
     pos = coords.getOrigin();
@@ -33,7 +33,7 @@ public class PointPhotonSource implements PhotonSource
     // Because the light does not fall off exactly as 1/r^2, the "intensity" varies with distance.
     // Select an average intensity based on the size of the scene.
 
-    Vec3 corner[] = sceneBounds.getCorners();
+    Vec3 corner[] = map.getBounds().getCorners();
     double maxDist2 = 0.0;
     for (int i = 0; i < corner.length; i++)
       {

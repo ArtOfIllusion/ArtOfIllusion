@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,7 @@ public class SpotlightPhotonSource implements PhotonSource
 
   /** Create a SpotlightPhotonSource. */
   
-  public SpotlightPhotonSource(SpotLight light, CoordinateSystem coords, BoundingBox sceneBounds)
+  public SpotlightPhotonSource(SpotLight light, CoordinateSystem coords, PhotonMap map)
   {
     this.light = light;
     this.coords = coords;
@@ -36,7 +36,7 @@ public class SpotlightPhotonSource implements PhotonSource
     // Because the light does not fall off exactly as 1/r^2, the "intensity" varies with distance.
     // Select an effective intensity based on the furthest point in the scene from the light.
 
-    Vec3 corner[] = sceneBounds.getCorners();
+    Vec3 corner[] = map.getBounds().getCorners();
     Vec3 pos = coords.getOrigin();
     double maxDist2 = 0.0;
     for (int i = 0; i < corner.length; i++)

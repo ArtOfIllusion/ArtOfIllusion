@@ -1687,6 +1687,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       obj[0].object.setSize(size.x, size.y, size.z);
       theScene.objectModified(obj[0].object);
       obj[0].object.sceneChanged(obj[0], theScene);
+      theScene.applyTracksAfterModification(Collections.singleton(obj[0]));
     }
     else
     {
@@ -1721,11 +1722,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         obj[i].coords.setOrientation(angles[0], angles[1], angles[2]);
         obj[i].object.setSize(size.x, size.y, size.z);
       }
-      for (i = 0; i < sel.length; i++)
-      {
-        theScene.objectModified(obj[i].object);
-        obj[i].object.sceneChanged(obj[i], theScene);
-      }
+      ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+      for (int index : sel)
+        modified.add(theScene.getObject(index));
+      theScene.applyTracksAfterModification(modified);
     }
     setUndoRecord(undo);
     updateImage();
@@ -1830,8 +1830,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       info = theScene.getObject(sel[i]);
       theScene.objectModified(info.object);
-      info.object.sceneChanged(info, theScene);
     }
+    ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+    for (int index : sel)
+      modified.add(theScene.getObject(index));
+    theScene.applyTracksAfterModification(modified);
     setUndoRecord(undo);
     updateImage();
   }
@@ -1964,11 +1967,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         orig.z += alignTo.z-orig.z;
       coords.setOrigin(orig);
     }
-    for (i = 0; i < sel.length; i++)
-    {
-      info = theScene.getObject(sel[i]);
-      info.object.sceneChanged(info, theScene);
-    }
+    ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+    for (int index : sel)
+      modified.add(theScene.getObject(index));
+    theScene.applyTracksAfterModification(modified);
     setUndoRecord(undo);
     updateImage();
   }

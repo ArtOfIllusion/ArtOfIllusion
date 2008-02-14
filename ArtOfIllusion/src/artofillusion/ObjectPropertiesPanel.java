@@ -408,6 +408,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       angles[2] = getNewValue(angles[2], zRotField.getValue());
       coords.setOrientation(angles[0], angles[1], angles[2]);
     }
+    window.getScene().applyTracksAfterModification(Arrays.asList(objects));
     lastEventSource = ev.getWidget();
     if (undo != null)
       window.setUndoRecord(undo);

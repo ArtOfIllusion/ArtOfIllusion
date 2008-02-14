@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -80,15 +80,15 @@ public class RotationTrack extends Track
       {
         CoordinateSystem coords = relObject.getCoords();
         if (coords != null)
-	  {
-	    pre = coords.toLocal();
+          {
+            pre = coords.toLocal();
             post = coords.fromLocal();
-	  }
+          }
       }
     else if (mode == RELATIVE && relCoords == LOCAL)
       {
-	pre = info.coords.fromLocal();
-	post = info.coords.toLocal();
+        pre = info.coords.fromLocal();
+        post = info.coords.toLocal();
       }
     rot.applyToCoordinates(info.coords, weight, pre, post, (mode == RELATIVE), enablex, enabley, enablez);
     Joint j = (joint > -1 ? info.getSkeleton().getJoint(joint) : null);
@@ -237,14 +237,14 @@ public class RotationTrack extends Track
     current = new RotationKeyframe(c);
     if (quaternion)
       {
-	double q1[] = rot.getQuaternion(), q2[] = current.getQuaternion();
-	double dot = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3];
-	if (1.0-dot < 1e-10)
-	  return null;
+        double q1[] = rot.getQuaternion(), q2[] = current.getQuaternion();
+        double dot = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3];
+        if (1.0-dot < 1e-10)
+          return null;
       }
     else if ((!enablex || Math.abs(rot.x-current.x) < 1e-10) &&
-	(!enabley || Math.abs(rot.y-current.y) < 1e-10) &&
-	(!enablez || Math.abs(rot.z-current.z) < 1e-10))
+        (!enabley || Math.abs(rot.y-current.y) < 1e-10) &&
+        (!enablez || Math.abs(rot.z-current.z) < 1e-10))
       return null;
     return setKeyframe(time, sc);
   }
@@ -439,8 +439,8 @@ public class RotationTrack extends Track
     double range[][] = new double [3][2];
     for (int i = 0; i < range.length; i++)
       {
-	range[i][0] = -Double.MAX_VALUE;
-	range[i][1] = Double.MAX_VALUE;
+        range[i][0] = -Double.MAX_VALUE;
+        range[i][1] = Double.MAX_VALUE;
       }
     return range;
   }
@@ -451,12 +451,14 @@ public class RotationTrack extends Track
   public ObjectInfo [] getDependencies()
   {
     if (relCoords == OBJECT)
-      {
-        ObjectInfo info = relObject.getObject();
-        if (info != null)
-          return new ObjectInfo [] {info};
-      }
-     return new ObjectInfo [0];
+    {
+      ObjectInfo relInfo = relObject.getObject();
+      if (relInfo != null)
+        return new ObjectInfo [] {relInfo};
+    }
+    else if (relCoords == PARENT && info.parent != null)
+      return new ObjectInfo [] {info.parent};
+    return new ObjectInfo [0];
   }
   
   /** Delete all references to the specified object from this track.  This is used when an

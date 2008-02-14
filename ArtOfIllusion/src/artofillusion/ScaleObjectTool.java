@@ -39,7 +39,7 @@ public class ScaleObjectTool extends EditingTool
   private Vec3 objectPos[], scaleCenter[];
   private Object3D oldObj[];
   private CoordinateSystem oldCoords[];
-  private Vector toMove;
+  private Vector<ObjectInfo> toMove;
   private double halfx, halfy, centerx, centery;
   private ObjectInfo clickedObject;
   private int whichSides;
@@ -83,7 +83,7 @@ public class ScaleObjectTool extends EditingTool
     int i, sel[];
 
     opmode = OPMODE_SCALE;
-    toMove = new Vector();
+    toMove = new Vector<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -224,7 +224,7 @@ public class ScaleObjectTool extends EditingTool
     int i, sel[];
 
     opmode = OPMODE_MOVE;
-    toMove = new Vector();
+    toMove = new Vector<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -336,7 +336,6 @@ public class ScaleObjectTool extends EditingTool
   
   public void mouseDraggedMoveOp(final WidgetMouseEvent e, final ViewerCanvas view)
   {
-    Scene theScene = theWindow.getScene();
     Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     CoordinateSystem c;
@@ -382,10 +381,8 @@ public class ScaleObjectTool extends EditingTool
   public void mouseDraggedScaleOp(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = theWindow.getScene();
-    Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     double size, hscale, vscale, scale[] = new double [3];
-    Mat4 m, objMat;
     
     if (!dragged)
     {
@@ -478,11 +475,7 @@ public class ScaleObjectTool extends EditingTool
 
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    for (int i = 0; i < toMove.size(); i++)
-    {
-      ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-      info.object.sceneChanged(info, theWindow.getScene());
-    }
+    theWindow.getScene().applyTracksAfterModification(toMove);
     toMove = null;
     objectPos = null;
     oldObj = null;

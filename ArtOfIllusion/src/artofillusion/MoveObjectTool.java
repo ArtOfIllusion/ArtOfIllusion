@@ -124,11 +124,7 @@ public class MoveObjectTool extends EditingTool
 
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    for (int i = 0; i < toMove.size(); i++)
-      {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        info.object.sceneChanged(info, theWindow.getScene());
-      }
+    theWindow.getScene().applyTracksAfterModification(toMove);
     theWindow.setHelpText(Translate.text("moveObjectTool.helpText"));
     toMove = null;
     objectPos = null;
@@ -216,11 +212,7 @@ public class MoveObjectTool extends EditingTool
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
       c.setOrigin(c.getOrigin().plus(v));
     }
-    for (i = 0; i < toMove.size(); i++)
-    {
-      ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-      info.object.sceneChanged(info, theWindow.getScene());
-    }
+    theWindow.getScene().applyTracksAfterModification(toMove);
     theWindow.updateImage();
   }
   

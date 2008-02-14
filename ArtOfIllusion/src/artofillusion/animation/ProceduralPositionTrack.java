@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -93,10 +93,10 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
     double weight = theWeight.getWeight(time);
     if (mode == ABSOLUTE)
       {
-	double w = 1.0-weight;
+        double w = 1.0-weight;
         v.x *= w;
-	v.y *= w;
-	v.z *= w;
+        v.y *= w;
+        v.z *= w;
       }
     if (mode == ABSOLUTE && relCoords == PARENT)
       {
@@ -318,8 +318,8 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
     double range[][] = new double [parameter.length][2];
     for (int i = 0; i < range.length; i++)
       {
-	range[i][0] = parameter[i].minVal;
-	range[i][1] = parameter[i].maxVal;
+        range[i][0] = parameter[i].minVal;
+        range[i][1] = parameter[i].maxVal;
       }
     return range;
   }
@@ -330,12 +330,14 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   public ObjectInfo [] getDependencies()
   {
     if (relCoords == OBJECT)
-      {
-        ObjectInfo info = relObject.getObject();
-        if (info != null)
-          return new ObjectInfo [] {info};
-      }
-     return new ObjectInfo [0];
+    {
+      ObjectInfo relInfo = relObject.getObject();
+      if (relInfo != null)
+        return new ObjectInfo [] {relInfo};
+    }
+    else if (relCoords == PARENT && info.parent != null)
+      return new ObjectInfo [] {info.parent};
+    return new ObjectInfo [0];
   }
   
   /* Delete all references to the specified object from this track.  This is used when an
@@ -547,24 +549,24 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
     int index[] = new int [newparams.length];
     for (int i = 0; i < newparams.length; i++)
       {
-	index[i] = -1;
-	for (int j = 0; j < parameter.length; j++)
-	  if (parameter[j].equals(newparams[i]))
-	    index[i] = j;
+        index[i] = -1;
+        for (int j = 0; j < parameter.length; j++)
+          if (parameter[j].equals(newparams[i]))
+            index[i] = j;
       }
     parameter = newparams;
     Keyframe key[] = tc.getValues();
     for (int i = 0; i < key.length; i++)
       {
-	double newval[] = new double [parameter.length];
-	for (int j = 0; j < newval.length; j++)
-	  {
-	    if (index[j] > -1)
-	      newval[j] = ((ArrayKeyframe) key[i]).val[index[j]];
-	    else
+        double newval[] = new double [parameter.length];
+        for (int j = 0; j < newval.length; j++)
+          {
+            if (index[j] > -1)
+              newval[j] = ((ArrayKeyframe) key[i]).val[index[j]];
+            else
               newval[j] = parameter[j].defaultVal;
-	  }
-	((ArrayKeyframe) key[i]).val = newval;
+          }
+        ((ArrayKeyframe) key[i]).val = newval;
       }
     ((LayoutWindow) win).getScore().finishEditingTrack(this);
   }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -70,13 +70,13 @@ public class PositionTrack extends Track
     Vec3 v = info.coords.getOrigin();
     if (mode == ABSOLUTE)
       {
-	double w = 1.0-weight;
-	if (enablex)
-	  v.x *= w;
-	if (enabley)
-	  v.y *= w;
-	if (enablez)
-	  v.z *= w;
+        double w = 1.0-weight;
+        if (enablex)
+          v.x *= w;
+        if (enabley)
+          v.y *= w;
+        if (enablez)
+          v.z *= w;
       }
     if (mode == ABSOLUTE && relCoords == PARENT)
       {
@@ -245,10 +245,9 @@ public class PositionTrack extends Track
         if (coords != null)
           current = coords.toLocal().times(current);
       }
-    boolean change = false;
     if ((enablex && Math.abs(pos.x-current.x) > 1e-10) ||
-	(enabley && Math.abs(pos.y-current.y) > 1e-10) ||
-	(enablez && Math.abs(pos.z-current.z) > 1e-10))
+        (enabley && Math.abs(pos.y-current.y) > 1e-10) ||
+        (enablez && Math.abs(pos.z-current.z) > 1e-10))
       return setKeyframe(time, sc);
     return null;
   }
@@ -422,8 +421,8 @@ public class PositionTrack extends Track
     double range[][] = new double [3][2];
     for (int i = 0; i < range.length; i++)
       {
-	range[i][0] = -Double.MAX_VALUE;
-	range[i][1] = Double.MAX_VALUE;
+        range[i][0] = -Double.MAX_VALUE;
+        range[i][1] = Double.MAX_VALUE;
       }
     return range;
   }
@@ -434,12 +433,14 @@ public class PositionTrack extends Track
   public ObjectInfo [] getDependencies()
   {
     if (relCoords == OBJECT)
-      {
-        ObjectInfo info = relObject.getObject();
-        if (info != null)
-          return new ObjectInfo [] {info};
-      }
-     return new ObjectInfo [0];
+    {
+      ObjectInfo relInfo = relObject.getObject();
+      if (relInfo != null)
+        return new ObjectInfo [] {relInfo};
+    }
+    else if (relCoords == PARENT && info.parent != null)
+      return new ObjectInfo [] {info.parent};
+    return new ObjectInfo [0];
   }
   
   /** Delete all references to the specified object from this track.  This is used when an

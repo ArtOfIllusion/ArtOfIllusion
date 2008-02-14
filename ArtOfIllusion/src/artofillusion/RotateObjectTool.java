@@ -34,7 +34,7 @@ public class RotateObjectTool extends EditingTool
   static final double DRAG_SCALE = Math.PI/360.0;
 
   Point clickPoint;
-  Vector toMove;
+  Vector<ObjectInfo> toMove;
   ObjectInfo clickedObject;
   int whichAxes, rotateAround = PARENT_CENTER;
   boolean dragged, applyToChildren = true;
@@ -74,7 +74,7 @@ public class RotateObjectTool extends EditingTool
     int i, numSelected = 0, sel[];
     Vec3 center = new Vec3();
 
-    toMove = new Vector();
+    toMove = new Vector<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -190,11 +190,7 @@ public class RotateObjectTool extends EditingTool
 
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    for (int i = 0; i < toMove.size(); i++)
-      {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        info.object.sceneChanged(info, theWindow.getScene());
-      }
+    theWindow.getScene().applyTracksAfterModification(toMove);
     theWindow.setHelpText(Translate.text("rotateObjectTool.helpText"));
     toMove = null;
     objectCoords = null;
@@ -242,7 +238,7 @@ public class RotateObjectTool extends EditingTool
       sel = theScene.getSelectionWithChildren();
     else
       sel = theScene.getSelection();
-    toMove = new Vector();
+    toMove = new Vector<ObjectInfo>();
     for (int i = 0; i < sel.length; i++)
       toMove.addElement(theScene.getObject(sel[i]));
     rotationCenter = new Vec3 [toMove.size()];
@@ -286,11 +282,7 @@ public class RotateObjectTool extends EditingTool
         undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           c.transformCoordinates(rotMatrix);
       }
-    for (int i = 0; i < toMove.size(); i++)
-      {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        info.object.sceneChanged(info, theWindow.getScene());
-      }
+    theWindow.getScene().applyTracksAfterModification(toMove);
     theWindow.updateImage();
     theWindow.setHelpText(Translate.text("rotateObjectTool.helpText"));
     toMove = null;

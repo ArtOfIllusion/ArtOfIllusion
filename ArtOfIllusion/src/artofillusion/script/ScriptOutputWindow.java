@@ -1,4 +1,4 @@
-/* Copyright (C) 2002,2004 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +15,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
+import java.awt.*;
 
 /** This class creates a window for displaying output from scripts. */
 
@@ -23,8 +24,19 @@ public class ScriptOutputWindow extends OutputStream
   BFrame window;
   BTextArea text;
   
-  public void write(int b)
+  public void write(final int b)
   {
+    if (!EventQueue.isDispatchThread())
+    {
+      EventQueue.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          write(b);
+        }
+      });
+      return;
+    }
     if (window == null)
       createWindow();
     else if (!window.isVisible())
@@ -32,8 +44,20 @@ public class ScriptOutputWindow extends OutputStream
     text.append(String.valueOf((char) b));
   }
   
-  public void write(byte b[], int off, int len)
+  public void write(byte b[], final int off, final int len)
   {
+    if (!EventQueue.isDispatchThread())
+    {
+      final byte bytes[] = b.clone();
+      EventQueue.invokeLater(new Runnable()
+      {
+        public void run()
+        {
+          write(bytes, off, len);
+        }
+      });
+      return;
+    }
     if (window == null)
       createWindow();
     else if (!window.isVisible())

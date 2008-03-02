@@ -142,7 +142,7 @@ public class TriMeshViewer extends MeshViewer
         shader = null;
         TextureParameter params[] = objInfo.object.getParameters();
         for (int i = 0; i < params.length; i++)
-          if (params[i] == surfaceColoringParameter)
+          if (params[i].equals(surfaceColoringParameter))
           {
             shader = new ParameterVertexShader(mesh, mesh.param[i], lowValueColor, highValueColor, surfaceColoringParameter.minVal, surfaceColoringParameter.maxVal, viewDir);
             break;

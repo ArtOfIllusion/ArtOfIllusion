@@ -106,6 +106,34 @@ public class ValueSelector extends RowContainer
     adjuster.repaint();
   }
 
+  /** Get the minimum allowed value. */
+
+  public double getMinimumValue()
+  {
+    return minimum;
+  }
+
+  /** Set the minimum allowed value. */
+
+  public void setMinimumValue(double min)
+  {
+    this.minimum = min;
+  }
+
+  /** Get the maximum allowed value. */
+
+  public double getMaximumValue()
+  {
+    return maximum;
+  }
+
+  /** Set the maximum allowed value. */
+
+  public void setMaximumValue(double max)
+  {
+    this.maximum = max;
+  }
+
   public void setEnabled(boolean enabled)
   {
     super.setEnabled(enabled);

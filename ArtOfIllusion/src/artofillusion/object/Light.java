@@ -66,7 +66,7 @@ public abstract class Light extends Object3D
   
   public RGBColor getColor()
   {
-    return color;
+    return color.duplicate();
   }
 
   /**

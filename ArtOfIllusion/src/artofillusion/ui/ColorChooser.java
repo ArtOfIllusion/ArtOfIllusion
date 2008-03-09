@@ -1,4 +1,4 @@
-/* Copyright (C) 1999,2000,2003,2004 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,23 +27,26 @@ public class ColorChooser extends BDialog
   private ValueSlider slider1, slider2, slider3;
   private BLabel label1, label2, label3;
   private Widget oldColorPatch, newColorPatch;
-  private BComboBox modeC;
+  private BComboBox modeC, rangeC;
   
   private static final int RECENT_COLOR_COUNT = 15;
-  private static ArrayList recentColors;
+  private static ArrayList<RGBColor> recentColors;
   private static int mode;
+  private static int rangeMode;
 
   static
   {
     try
     {
       mode = Preferences.userNodeForPackage(ColorChooser.class).getInt("defaultColorModel", 1);
+      rangeMode = Preferences.userNodeForPackage(ColorChooser.class).getInt("defaultColorRange", 0);
     }
     catch (Exception ex)
     {
       mode = 1;
+      rangeMode = 0;
     }
-    recentColors = new ArrayList();
+    recentColors = new ArrayList<RGBColor>();
     for (int i = 0; i < RECENT_COLOR_COUNT; i++)
       recentColors.add(new RGBColor(1.0, 1.0, 1.0));
   }
@@ -72,16 +75,23 @@ public class ColorChooser extends BDialog
     center.add(label2 = Translate.label("Green"), 0, 2, 2, 1);
     center.add(label3 = Translate.label("Blue"), 0, 4, 2, 1);
     LayoutInfo sliderLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(0, 0, 0, 5), null);
-    center.add(slider1 = new ValueSlider(0.0, 1.0, 100, (double) newColor.getRed()), 0, 1, 2, 1, sliderLayout);
-    center.add(slider2 = new ValueSlider(0.0, 1.0, 100, (double) newColor.getGreen()), 0, 3, 2, 1, sliderLayout);
-    center.add(slider3 = new ValueSlider(0.0, 1.0, 100, (double) newColor.getBlue()), 0, 5, 2, 1, sliderLayout);
+    double componentMax = (rangeMode == 0 ? 1.0 : 255.0);
+    center.add(slider1 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getRed()), 0, 1, 2, 1, sliderLayout);
+    center.add(slider2 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getGreen()), 0, 3, 2, 1, sliderLayout);
+    center.add(slider3 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getBlue()), 0, 5, 2, 1, sliderLayout);
     slider1.addEventLink(ValueChangedEvent.class, this, "valueChanged");
     slider2.addEventLink(ValueChangedEvent.class, this, "valueChanged");
     slider3.addEventLink(ValueChangedEvent.class, this, "valueChanged");
-    center.add(Translate.label("colorModel"), 0, 6);
-    center.add(modeC = new BComboBox(new String [] {"RGB", "HSV", "HLS"}), 1, 6, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
+    RowContainer choicesRow = new RowContainer();
+    center.add(choicesRow, 0, 6, 3, 1);
+    choicesRow.add(Translate.label("colorModel"));
+    choicesRow.add(modeC = new BComboBox(new String [] {"RGB", "HSV", "HLS"}), new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 8), null));
+    choicesRow.add(Translate.label("colorComponentRange"));
     modeC.addEventLink(ValueChangedEvent.class, this, "modeChanged");
     modeC.setSelectedIndex(mode);
+    choicesRow.add(rangeC = new BComboBox(new String [] {"0 to 1", "0 to 255"}), new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
+    rangeC.addEventLink(ValueChangedEvent.class, this, "rangeChanged");
+    rangeC.setSelectedIndex(rangeMode);
     LayoutInfo patchLayout = new LayoutInfo();
     center.add(Translate.label("originalColor"), 2, 0, patchLayout);
     center.add(oldColorPatch = oldColor.getSample(50, 30), 2, 1, patchLayout);
@@ -117,9 +127,8 @@ public class ColorChooser extends BDialog
     w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
     if (w instanceof WidgetContainer)
       {
-        Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-        while (iter.hasNext())
-          addAsListener((Widget) iter.next());
+        for (Widget child : ((WidgetContainer) w).getChildren())
+          addAsListener(child);
       }
   }
 
@@ -140,9 +149,13 @@ public class ColorChooser extends BDialog
 
   private void valueChanged()
   {
-    float values[];
-
-    values = new float [] {(float) slider1.getValue(), (float) slider2.getValue(), (float) slider3.getValue()};
+    float values[] = new float [] {(float) slider1.getValue(), (float) slider2.getValue(), (float) slider3.getValue()};
+    if (rangeMode == 1)
+    {
+      values[0] /= 255.0;
+      values[1] /= 255.0;
+      values[2] /= 255.0;
+    }
     if (mode == 0)
       newColor.setRGB(values[0], values[1], values[2]);
     else if (mode == 1)
@@ -203,9 +216,21 @@ public class ColorChooser extends BDialog
         values = newColor.getHLS();
         values[0] /= 360.0;
       }
-    slider1.setValue(values[0]);
-    slider2.setValue(values[1]);
-    slider3.setValue(values[2]);
+    double scale = (rangeMode == 0 ? 1.0 : 255.0);
+    slider1.setValue(scale*values[0]);
+    slider2.setValue(scale*values[1]);
+    slider3.setValue(scale*values[2]);
     Preferences.userNodeForPackage(ColorChooser.class).putInt("defaultColorModel", mode);
+  }
+
+  private void rangeChanged()
+  {
+    rangeMode = rangeC.getSelectedIndex();
+    double componentMax = (rangeMode == 0 ? 1.0 : 255.0);
+    slider1.setMaximumValue(componentMax);
+    slider2.setMaximumValue(componentMax);
+    slider3.setMaximumValue(componentMax);
+    Preferences.userNodeForPackage(ColorChooser.class).putInt("defaultColorRange", rangeMode);
+    modeChanged();
   }
 }

@@ -105,7 +105,35 @@ public class ValueSlider extends WidgetContainer
     slider.setValue((int) ((val-min)*increments/(max-min)));
     setText();
   }
-  
+
+  /** Get the minimum allowed value. */
+
+  public double getMinimumValue()
+  {
+    return min;
+  }
+
+  /** Set the minimum allowed value. */
+
+  public void setMinimumValue(double min)
+  {
+    this.min = min;
+  }
+
+  /** Get the maximum allowed value. */
+
+  public double getMaximumValue()
+  {
+    return max;
+  }
+
+  /** Set the maximum allowed value. */
+
+  public void setMaximumValue(double max)
+  {
+    this.max = max;
+  }
+
   /** Set the contents of the text field based on the value. */
   
   private void setText()

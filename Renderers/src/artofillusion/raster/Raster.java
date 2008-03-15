@@ -827,6 +827,8 @@ public class Raster implements Renderer, Runnable
     theObject = obj.object;
     if (context.camera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
       return;
+    while (theObject instanceof ObjectWrapper)
+      theObject = ((ObjectWrapper) theObject).getWrappedObject();
     if (theObject instanceof ObjectCollection)
       {
         Enumeration objects = ((ObjectCollection) theObject).getObjects(obj, false, theScene);
@@ -932,14 +934,14 @@ public class Raster implements Renderer, Runnable
             lightDir.set(pos);
             lightDir.subtract(lightPos);
             distToLight = lightDir.length();
-            lightDir.normalize();
+            lightDir.scale(1.0/distToLight);
           }
         else if (lt instanceof SpotLight)
           {
             lightDir.set(pos);
             lightDir.subtract(lightPos);
             distToLight = lightDir.length();
-            lightDir.normalize();
+            lightDir.scale(1.0/distToLight);
             fatt = lightDir.dot(lightDirection[i]);
             if (fatt < ((SpotLight) lt).getAngleCosine())
               continue;

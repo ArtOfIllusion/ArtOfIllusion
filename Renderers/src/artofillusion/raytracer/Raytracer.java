@@ -757,6 +757,8 @@ public class Raytracer implements Renderer, Runnable
       lt.add(info);
       return;
     }
+    while (theObject instanceof ObjectWrapper)
+      theObject = ((ObjectWrapper) theObject).getWrappedObject();
     if (theObject instanceof ObjectCollection)
     {
       Enumeration enm = ((ObjectCollection) theObject).getObjects(info, false, theScene);

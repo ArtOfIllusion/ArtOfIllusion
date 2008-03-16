@@ -1145,6 +1145,45 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       displayItem[i].setState(source == displayItem[i]);
   }
 
+  /** Get a list of the indices of all selected objects. */
+
+  public int[] getSelectedIndices()
+  {
+    return theScene.getSelection();
+  }
+
+  /** Get a collection of all selected objects. */
+
+  public Collection<ObjectInfo> getSelectedObjects()
+  {
+    ArrayList<ObjectInfo> objects = new ArrayList<ObjectInfo>();
+    for (int index : theScene.getSelection())
+      objects.add(theScene.getObject(index));
+    return objects;
+  }
+
+  /** Determine whether an object is selected. */
+
+  public boolean isObjectSelected(ObjectInfo info)
+  {
+    return info.selected;
+  }
+
+  /** Determine whether an object is selected. */
+
+  public boolean isObjectSelected(int index)
+  {
+    return theScene.getObject(index).selected;
+  }
+
+  /** Get the indices of all objects which are either selected, or are children of
+      selected objects. */
+
+  public int[] getSelectionWithChildren()
+  {
+    return theScene.getSelectionWithChildren();
+  }
+
   /** Set a single object in the scene to be selected. */
 
   public void setSelection(int which)

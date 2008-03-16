@@ -728,7 +728,10 @@ public class Scene
       }
   }
   
-  /** Set one object to be selected, deselecting all other objects. */
+  /**
+   * Set one object to be selected, deselecting all other objects.
+   * @deprecated Call setSelection() on the LayoutWindow instead.
+   */
 
   public void setSelection(int which)
   {
@@ -737,7 +740,10 @@ public class Scene
     updateSelectionInfo();
   }
 
-  /** Set a list of objects to be selected, deselecting all other objects. */
+  /**
+   * Set a list of objects to be selected, deselecting all other objects.
+   * @deprecated Call setSelection() on the LayoutWindow instead.
+   */
   
   public void setSelection(int which[])
   {
@@ -747,7 +753,10 @@ public class Scene
     updateSelectionInfo();
   }
   
-  /** Add an object to the list of selected objects. */
+  /**
+   * Add an object to the list of selected objects.
+   * @deprecated Call addToSelection() on the LayoutWindow instead.
+   */
   
   public void addToSelection(int which)
   {
@@ -758,7 +767,10 @@ public class Scene
     updateSelectionInfo();
   }
   
-  /** Deselect all objects. */
+  /**
+   * Deselect all objects.
+   * @deprecated Call clearSelection() on the LayoutWindow instead.
+   */
   
   public void clearSelection()
   {
@@ -768,7 +780,10 @@ public class Scene
     updateSelectionInfo();
   }
   
-  /** Deselect a particular object. */
+  /**
+   * Deselect a particular object.
+   * @deprecated Call removeFromSelection() on the LayoutWindow instead.
+   */
   
   public void removeFromSelection(int which)
   {
@@ -955,8 +970,11 @@ public class Scene
     return textures.elementAt(0);
   }
     
-  /** Get a list of the indices of all selected objects. */
-  
+  /**
+   * Get a list of the indices of all selected objects.
+   * @deprecated Call getSelectedIndices() or getSelectedObjects() on the LayoutWindow instead.
+   */
+
   public int [] getSelection()
   {
     int sel[] = new int [selection.size()];
@@ -966,8 +984,11 @@ public class Scene
     return sel;
   }
   
-  /** Get the indices of all objects which are either selected, or are children of
-      selected objects. */
+  /**
+   * Get the indices of all objects which are either selected, or are children of
+   * selected objects.
+   * @deprecated Call getSelectionWithChildren() on the LayoutWindow instead.
+   */
   
   public int [] getSelectionWithChildren()
   {

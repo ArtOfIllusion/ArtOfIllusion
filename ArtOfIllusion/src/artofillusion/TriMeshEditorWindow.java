@@ -1692,41 +1692,75 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     newface = new int [fc.length+count][];
     for (int i = 0; i < fc.length; i++)
       newface[i] = new int [] {fc[i].v1, fc[i].v2, fc[i].v3};
-    count = fc.length;
-    
-    // For each boundary, add a single vertex in the center, and faces surrounding it.
-    
+
+    // For each boundary, add new faces to close it.
+
+    int faceIndex = fc.length;
+    int vertIndex = vt.length;
     for (int i = 0; i < boundaryList.length; i++)
     {
       if (boundaryList[i].length < 2)
         continue;
       Edge ed0 = ed[boundaryList[i][0]];
       Edge ed1 = ed[boundaryList[i][1]];
-      int j = (ed0.v1 == ed1.v1 || ed0.v1 == ed1.v2 ? ed0.v2 : ed0.v1);
-      Vec3 center = new Vec3();
-      for (int k = 0; k < boundaryList[i].length; k++)
+      boolean closed = isBoundaryClosed(boundaryList[i]);
+      if (boundaryList[i].length == 2 || (boundaryList[i].length == 3 && closed))
       {
-        center.add(vt[j].r);
-        Edge e = ed[boundaryList[i][k]];
-        j = (e.v1 == j ? e.v2 : e.v1);
+        // Add a single new face spanning the two edges.
+
+        Face f = fc[ed0.f1];
+        int thirdVert = (ed0.v1 == ed1.v1 || ed0.v2 == ed1.v1 ? ed1.v2 : ed1.v1);
+        if ((f.v1 == ed0.v1 && f.v2 == ed0.v2) || (f.v2 == ed0.v1 && f.v3 == ed0.v2) || (f.v3 == ed0.v1 && f.v1 == ed0.v2))
+          newface[faceIndex++] = new int [] {ed0.v2, ed0.v1, thirdVert};
+        else
+          newface[faceIndex++] = new int [] {ed0.v1, ed0.v2, thirdVert};
       }
-      if (isBoundaryClosed(boundaryList[i]))
-        center.scale(1.0/boundaryList[i].length);
       else
       {
-        center.add(vt[j].r);
-        center.scale(1.0/(boundaryList[i].length+1));
-      }
-      newvert[vt.length+i] = center;
-      for (int k = 0; k < boundaryList[i].length; k++)
-      {
-        Edge e = ed[boundaryList[i][k]];
-        Face f = fc[e.f1];
-        if ((f.v1 == e.v1 && f.v2 == e.v2) || (f.v2 == e.v1 && f.v3 == e.v2) || (f.v3 == e.v1 && f.v1 == e.v2))
-          newface[count++] = new int [] {e.v2, e.v1, vt.length+i};
+        // Add a single vertex in the center, and faces surrounding it.
+
+        Vec3 center = new Vec3();
+        int j = (ed0.v1 == ed1.v1 || ed0.v1 == ed1.v2 ? ed0.v2 : ed0.v1);
+        for (int k = 0; k < boundaryList[i].length; k++)
+        {
+          center.add(vt[j].r);
+          Edge e = ed[boundaryList[i][k]];
+          j = (e.v1 == j ? e.v2 : e.v1);
+        }
+        if (closed)
+          center.scale(1.0/boundaryList[i].length);
         else
-          newface[count++] = new int [] {e.v1, e.v2, vt.length+i};
+        {
+          center.add(vt[j].r);
+          center.scale(1.0/(boundaryList[i].length+1));
+        }
+        newvert[vertIndex] = center;
+        for (int k = 0; k < boundaryList[i].length; k++)
+        {
+          Edge e = ed[boundaryList[i][k]];
+          Face f = fc[e.f1];
+          if ((f.v1 == e.v1 && f.v2 == e.v2) || (f.v2 == e.v1 && f.v3 == e.v2) || (f.v3 == e.v1 && f.v1 == e.v2))
+            newface[faceIndex++] = new int [] {e.v2, e.v1, vertIndex};
+          else
+            newface[faceIndex++] = new int [] {e.v1, e.v2, vertIndex};
+        }
+        vertIndex++;
       }
+    }
+
+    // Remove empty elements from the end of the arrays.
+
+    if (faceIndex < newface.length)
+    {
+      int newface2[][] = new int[faceIndex][];
+      System.arraycopy(newface, 0, newface2, 0, faceIndex);
+      newface = newface2;
+    }
+    if (vertIndex < newvert.length)
+    {
+      Vec3 newvert2[] = new Vec3[vertIndex];
+      System.arraycopy(newvert, 0, newvert2, 0, vertIndex);
+      newvert = newvert2;
     }
     
     // Create the new mesh.

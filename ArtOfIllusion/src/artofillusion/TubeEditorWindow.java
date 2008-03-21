@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2006 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,12 +22,14 @@ import java.awt.*;
 
 public class TubeEditorWindow extends CurveEditorWindow
 {
-  BCheckBoxMenuItem endsItem[];
-  
-  public TubeEditorWindow(EditingWindow parent, String title, ObjectInfo obj, Runnable onClose)
+  private BCheckBoxMenuItem endsItem[];
+  private boolean topology;
+
+  public TubeEditorWindow(EditingWindow parent, String title, ObjectInfo obj, Runnable onClose, boolean allowTopology)
   {
     super(parent, title, obj);
     this.onClose = onClose;
+    topology = allowTopology;
     FormContainer content = new FormContainer(new double [] {0, 1}, new double [] {1, 0, 0});
     setContent(content);
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
@@ -78,8 +80,12 @@ public class TubeEditorWindow extends CurveEditorWindow
     meshMenu = Translate.menu("tube");
     menubar.add(meshMenu);
     meshMenuItem = new BMenuItem [8];
-    meshMenu.add(meshMenuItem[0] = Translate.menuItem("deletePoints", this, "deleteCommand"));
-    meshMenu.add(meshMenuItem[1] = Translate.menuItem("subdivide", this, "subdivideCommand"));
+    meshMenuItem[0] = Translate.menuItem("deletePoints", this, "deleteCommand");
+    if (topology)
+      meshMenu.add(meshMenuItem[0]);
+    meshMenuItem[1] = Translate.menuItem("subdivide", this, "subdivideCommand");
+    if (topology)
+      meshMenu.add(meshMenuItem[1]);
     meshMenu.add(meshMenuItem[2] = Translate.menuItem("editPoints", this, "setPointsCommand"));
     meshMenu.add(meshMenuItem[3] = Translate.menuItem("transformPoints", this, "transformPointsCommand"));
     meshMenu.add(meshMenuItem[4] = Translate.menuItem("randomize", this, "randomizeCommand"));
@@ -179,6 +185,8 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   public void deleteCommand()
   {
+    if (!topology)
+      return;
     int i, j, num = 0;
     Tube theTube = (Tube) objInfo.object;
     boolean newsel[];

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion.object;
 
 import artofillusion.*;
+import artofillusion.texture.*;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
@@ -28,7 +29,7 @@ public class Curve extends Object3D implements Mesh
   protected boolean closed;
   protected int smoothingMethod;
   protected WireframeMesh cachedWire;
-  private BoundingBox bounds;
+  protected BoundingBox bounds;
 
   private static final Property PROPERTIES[] = new Property [] {
     new Property(Translate.text("menu.smoothingMethod"), new Object[] {
@@ -604,10 +605,19 @@ public class Curve extends Object3D implements Mesh
   
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    CurveEditorWindow ed = new CurveEditorWindow(parent, "Curve object '"+info.name+"'", info, cb);
+    CurveEditorWindow ed = new CurveEditorWindow(parent, "Curve object '"+info.name+"'", info, cb, true);
     ed.setVisible(true);
   }
-  
+
+  public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
+  {
+    CurveEditorWindow ed = new CurveEditorWindow(parent, "Gesture '"+info.name+"'", info, cb, false);
+    ViewerCanvas views[] = ed.getAllViews();
+    for (int i = 0; i < views.length; i++)
+      ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
+    ed.setVisible(true);
+  }
+
   /** Get a MeshViewer which can be used for viewing this mesh. */
   
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
@@ -692,12 +702,249 @@ public class Curve extends Object3D implements Mesh
   
   public Keyframe getPoseKeyframe()
   {
-    return new NullKeyframe();
+    return new CurveKeyframe(this);
   }
   
   /** Modify this object based on a pose keyframe. */
   
   public void applyPoseKeyframe(Keyframe k)
   {
+    CurveKeyframe key = (CurveKeyframe) k;
+
+    for (int i = 0; i < vertex.length; i++)
+    {
+      vertex[i].r.set(key.vertPos[i]);
+      smoothness[i] = key.vertSmoothness[i];
+    }
+    cachedWire = null;
+    bounds = null;
+  }
+
+  public boolean canConvertToActor()
+  {
+    return true;
+  }
+
+  /** Curves cannot be keyframed directly, since any change to mesh topology would
+      cause all keyframes to become invalid.  Return an actor for this mesh. */
+
+  public Object3D getPosableObject()
+  {
+    Curve m = (Curve) duplicate();
+    return new Actor(m);
+  }
+
+  /** This class represents a pose of a Curve. */
+
+  public static class CurveKeyframe extends MeshGesture
+  {
+    Vec3 vertPos[];
+    float vertSmoothness[];
+    Curve curve;
+
+    public CurveKeyframe(Curve curve)
+    {
+      this.curve = curve;
+      vertPos = new Vec3 [curve.vertex.length];
+      vertSmoothness = new float [curve.vertex.length];
+      for (int i = 0; i < vertPos.length; i++)
+      {
+        vertPos[i] = new Vec3(curve.vertex[i].r);
+        vertSmoothness[i] = curve.smoothness[i];
+      }
+    }
+
+    private CurveKeyframe()
+    {
+    }
+
+    /** Get the Mesh this Gesture belongs to. */
+
+    protected Mesh getMesh()
+    {
+      return curve;
+    }
+
+    /** Get the positions of all vertices in this Gesture. */
+
+    protected Vec3 [] getVertexPositions()
+    {
+      return vertPos;
+    }
+
+    /** Set the positions of all vertices in this Gesture. */
+
+    protected void setVertexPositions(Vec3 pos[])
+    {
+      vertPos = pos;
+    }
+
+    /** Get the skeleton for this pose (or null if it doesn't have one). */
+
+    public Skeleton getSkeleton()
+    {
+      return null;
+    }
+
+    /** Set the skeleton for this pose. */
+
+    public void setSkeleton(Skeleton s)
+    {
+    }
+
+    /** Create a duplicate of this keyframe. */
+
+    public Keyframe duplicate()
+    {
+      return duplicate(curve);
+    }
+
+    public Keyframe duplicate(Object owner)
+    {
+      CurveKeyframe k = new CurveKeyframe();
+      if (owner instanceof Curve)
+        k.curve = (Curve) owner;
+      else
+        k.curve = (Curve) ((ObjectInfo) owner).object;
+      k.vertPos = new Vec3 [vertPos.length];
+      k.vertSmoothness = new float [vertSmoothness.length];
+      for (int i = 0; i < vertPos.length; i++)
+        {
+          k.vertPos[i] = new Vec3(vertPos[i]);
+          k.vertSmoothness[i] = vertSmoothness[i];
+        }
+      return k;
+    }
+
+    /** Get the list of graphable values for this keyframe. */
+
+    public double [] getGraphValues()
+    {
+      return new double [0];
+    }
+
+    /** Set the list of graphable values for this keyframe. */
+
+    public void setGraphValues(double values[])
+    {
+    }
+
+    /** These methods return a new Keyframe which is a weighted average of this one and one,
+       two, or three others.  These methods should never be called, since Curves
+       can only be keyframed by converting them to Actors. */
+
+    public Keyframe blend(Keyframe o2, double weight1, double weight2)
+    {
+      return null;
+    }
+
+    public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
+    {
+      return null;
+    }
+
+    public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
+    {
+      return null;
+    }
+
+    /** Modify the mesh surface of a Gesture to be a weighted average of an arbitrary list of Gestures,
+        averaged about this pose.  This method only modifies the vertex positions and texture parameters,
+        not the skeleton, and all vertex positions are based on the offsets from the joints they are
+        bound to.
+        @param average   the Gesture to modify to be an average of other Gestures
+        @param p         the list of Gestures to average
+        @param weight    the weights for the different Gestures
+    */
+
+    public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
+    {
+      super.blendSurface(average, p, weight);
+      CurveKeyframe avg = (CurveKeyframe) average;
+      for (int i = 0; i < weight.length; i++)
+      {
+        CurveKeyframe key = (CurveKeyframe) p[i];
+        for (int j = 0; j < vertSmoothness.length; j++)
+          avg.vertSmoothness[j] += (float) (weight[i]*(key.vertSmoothness[j]-vertSmoothness[j]));
+      }
+
+      // Make sure all smoothness values are within legal bounds.
+
+      for (int i = 0; i < vertSmoothness.length; i++)
+      {
+        if (avg.vertSmoothness[i] < 0.0)
+          avg.vertSmoothness[i] = 0.0f;
+        if (avg.vertSmoothness[i] > 1.0)
+          avg.vertSmoothness[i] = 1.0f;
+      }
+    }
+
+    /** Determine whether this keyframe is identical to another one. */
+
+    public boolean equals(Keyframe k)
+    {
+      if (!(k instanceof CurveKeyframe))
+        return false;
+      CurveKeyframe key = (CurveKeyframe) k;
+      for (int i = 0; i < vertPos.length; i++)
+      {
+        if (!vertPos[i].equals(key.vertPos[i]))
+          return false;
+        if (vertSmoothness[i] != key.vertSmoothness[i])
+          return false;
+      }
+      return true;
+    }
+
+    /** Update the texture parameter values when the texture is changed. */
+
+    public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
+    {
+    }
+
+    /** Get the value of a per-vertex texture parameter. */
+
+    public ParameterValue getTextureParameter(TextureParameter p)
+    {
+      return null;
+    }
+
+    /** Set the value of a per-vertex texture parameter. */
+
+    public void setTextureParameter(TextureParameter p, ParameterValue value)
+    {
+    }
+
+    /** Write out a representation of this keyframe to a stream. */
+
+    public void writeToStream(DataOutputStream out) throws IOException
+    {
+      out.writeShort(0); // version
+      out.writeInt(vertPos.length);
+      for (int i = 0; i < vertPos.length; i++)
+      {
+        vertPos[i].writeToFile(out);
+        out.writeFloat(vertSmoothness[i]);
+      }
+    }
+
+    /** Reconstructs the keyframe from its serialized representation. */
+
+    public CurveKeyframe(DataInputStream in, Object parent) throws IOException, InvalidObjectException
+    {
+      this();
+      short version = in.readShort();
+      if (version != 0)
+        throw new InvalidObjectException("");
+      curve = (Curve) parent;
+      int numVert = in.readInt();
+      vertPos = new Vec3 [numVert];
+      vertSmoothness = new float [numVert];
+      for (int i = 0; i < numVert; i++)
+      {
+        vertPos[i] = new Vec3(in);
+        vertSmoothness[i] = in.readFloat();
+      }
+    }
   }
 }

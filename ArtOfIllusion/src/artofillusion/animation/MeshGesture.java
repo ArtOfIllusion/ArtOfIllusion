@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2006 by Peter Eastman
+/* Copyright (C) 2004-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -55,6 +55,8 @@ public abstract class MeshGesture implements Gesture
 
   public void blendSkeleton(MeshGesture average, MeshGesture p[], double weight[])
   {
+    if (getSkeleton() == null)
+      return;
     Skeleton s[] = new Skeleton [p.length];
     for (int i = 0; i < s.length; i++)
       s[i] = p[i].getSkeleton();
@@ -73,8 +75,8 @@ public abstract class MeshGesture implements Gesture
   public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
   {
     Skeleton skeleton = getSkeleton();
-    Joint joint[] = skeleton.getJoints();
-    Joint jt[] = average.getSkeleton().getJoints();
+    Joint joint[] = (skeleton == null ? null : skeleton.getJoints());
+    Joint jt[] = (skeleton == null ? null : average.getSkeleton().getJoints());
 
     // Initialize the vertex positions.
     
@@ -83,25 +85,28 @@ public abstract class MeshGesture implements Gesture
     MeshVertex vertex[] = mesh.getVertices();
     Vec3 vertPos[] = getVertexPositions();
     Vec3 avgPos[] = average.getVertexPositions();
-    for (int j = 0; j < vertPos.length; j++)
+    if (skeleton != null)
     {
-      MeshVertex v = vertex[j];
-      int index = skeleton.findJointIndex(v.ikJoint);
-      if (index == -1)
-        continue;
-      Joint j1 = joint[index], j2 = jt[index];
-      double wt = (j2.parent == null ? 1.0 : v.ikWeight);
-      avgPos[j].set(vertPos[j]);
-      j1.coords.toLocal().transform(avgPos[j]);
-      j2.coords.fromLocal().transform(avgPos[j]);
-      if (wt < 1.0)
+      for (int j = 0; j < vertPos.length; j++)
       {
-        avgPos[j].scale(wt);
-        temp.set(vertPos[j]);
-        j1.parent.coords.toLocal().transform(temp);
-        j2.parent.coords.fromLocal().transform(temp);
-        temp.scale(1.0-wt);
-        avgPos[j].add(temp);
+        MeshVertex v = vertex[j];
+        int index = skeleton.findJointIndex(v.ikJoint);
+        if (index == -1)
+          continue;
+        Joint j1 = joint[index], j2 = jt[index];
+        double wt = (j2.parent == null ? 1.0 : v.ikWeight);
+        avgPos[j].set(vertPos[j]);
+        j1.coords.toLocal().transform(avgPos[j]);
+        j2.coords.fromLocal().transform(avgPos[j]);
+        if (wt < 1.0)
+        {
+          avgPos[j].scale(wt);
+          temp.set(vertPos[j]);
+          j1.parent.coords.toLocal().transform(temp);
+          j2.parent.coords.fromLocal().transform(temp);
+          temp.scale(1.0-wt);
+          avgPos[j].add(temp);
+        }
       }
     }
 
@@ -115,7 +120,7 @@ public abstract class MeshGesture implements Gesture
       for (int j = 0; j < vertPos.length; j++)
       {
         MeshVertex v = vertex[j];
-        int index = skeleton.findJointIndex(v.ikJoint);
+        int index = (skeleton == null ? -1 : skeleton.findJointIndex(v.ikJoint));
         if (index == -1)
         {
           // This vertex is not bound to any joint.
@@ -150,38 +155,41 @@ public abstract class MeshGesture implements Gesture
         }
       }
       TextureParameter params[] = mesh.getParameters();
-      for (int j = 0; j < params.length; j++)
+      if (params != null)
       {
-        ParameterValue val = average.getTextureParameter(params[j]);
-        if (val instanceof ConstantParameterValue)
+        for (int j = 0; j < params.length; j++)
         {
-          ConstantParameterValue tv = (ConstantParameterValue) val;
-          ConstantParameterValue kv = (ConstantParameterValue) key.getTextureParameter(params[j]);
-          tv.setValue(tv.getValue()+weight[i]*(kv.getValue()-tv.getValue()));
-        }
-        else if (val instanceof VertexParameterValue)
-        {
-          double tv[] = ((VertexParameterValue) val).getValue();
-          double kv[] = ((VertexParameterValue) key.getTextureParameter(params[j])).getValue();
-          for (int m = 0; m < tv.length; m++)
-            tv[m] += weight[i]*(kv[m]-tv[m]);
-          ((VertexParameterValue) val).setValue(tv);
-        }
-        else if (val instanceof FaceParameterValue)
-        {
-          double tv[] = ((FaceParameterValue) val).getValue();
-          double kv[] = ((FaceParameterValue) key.getTextureParameter(params[j])).getValue();
-          for (int m = 0; m < tv.length; m++)
-            tv[m] += weight[i]*(kv[m]-tv[m]);
-          ((FaceParameterValue) val).setValue(tv);
-        }
-        else if (val instanceof FaceVertexParameterValue)
-        {
-          FaceVertexParameterValue tv = (FaceVertexParameterValue) val;
-          FaceVertexParameterValue kv = (FaceVertexParameterValue) getTextureParameter(params[j]);
-          for (int m = 0; m < tv.getFaceCount(); m++)
-            for (int n = 0; n < tv.getFaceVertexCount(m); n++)
-              tv.setValue(m, n, tv.getValue(m, n)+weight[i]*(kv.getValue(m, n)-tv.getValue(m, n)));
+          ParameterValue val = average.getTextureParameter(params[j]);
+          if (val instanceof ConstantParameterValue)
+          {
+            ConstantParameterValue tv = (ConstantParameterValue) val;
+            ConstantParameterValue kv = (ConstantParameterValue) key.getTextureParameter(params[j]);
+            tv.setValue(tv.getValue()+weight[i]*(kv.getValue()-tv.getValue()));
+          }
+          else if (val instanceof VertexParameterValue)
+          {
+            double tv[] = ((VertexParameterValue) val).getValue();
+            double kv[] = ((VertexParameterValue) key.getTextureParameter(params[j])).getValue();
+            for (int m = 0; m < tv.length; m++)
+              tv[m] += weight[i]*(kv[m]-tv[m]);
+            ((VertexParameterValue) val).setValue(tv);
+          }
+          else if (val instanceof FaceParameterValue)
+          {
+            double tv[] = ((FaceParameterValue) val).getValue();
+            double kv[] = ((FaceParameterValue) key.getTextureParameter(params[j])).getValue();
+            for (int m = 0; m < tv.length; m++)
+              tv[m] += weight[i]*(kv[m]-tv[m]);
+            ((FaceParameterValue) val).setValue(tv);
+          }
+          else if (val instanceof FaceVertexParameterValue)
+          {
+            FaceVertexParameterValue tv = (FaceVertexParameterValue) val;
+            FaceVertexParameterValue kv = (FaceVertexParameterValue) getTextureParameter(params[j]);
+            for (int m = 0; m < tv.getFaceCount(); m++)
+              for (int n = 0; n < tv.getFaceVertexCount(m); n++)
+                tv.setValue(m, n, tv.getValue(m, n)+weight[i]*(kv.getValue(m, n)-tv.getValue(m, n)));
+          }
         }
       }
     }

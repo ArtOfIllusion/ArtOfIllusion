@@ -147,24 +147,25 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     }
     if (renderMode == RENDER_WIREFRAME)
       renderWireframe(objInfo.getWireframePreview(), theCamera, lineColor);
-    else if (renderMode == RENDER_TRANSPARENT)
-    {
-      mesh = objInfo.getPreviewMesh();
-      if (mesh != null)
-        renderMeshTransparent(mesh, new ConstantVertexShader(transparentColor), theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
-    }
     else
     {
       mesh = objInfo.getPreviewMesh();
-      Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-      VertexShader shader;
-      if (renderMode == RENDER_FLAT)
-        shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);
-      else if (renderMode == RENDER_SMOOTH)
-        shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
+      if (mesh == null)
+        renderWireframe(objInfo.getWireframePreview(), theCamera, lineColor);
+      else if (renderMode == RENDER_TRANSPARENT)
+        renderMeshTransparent(mesh, new ConstantVertexShader(transparentColor), theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
       else
-        shader = new TexturedVertexShader(mesh, objInfo.object, 0.0, viewDir).optimize();
-      renderMesh(mesh, shader, theCamera, objInfo.object.isClosed(), null);
+      {
+        Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+        VertexShader shader;
+        if (renderMode == RENDER_FLAT)
+          shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);
+        else if (renderMode == RENDER_SMOOTH)
+          shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
+        else
+          shader = new TexturedVertexShader(mesh, objInfo.object, 0.0, viewDir).optimize();
+        renderMesh(mesh, shader, theCamera, objInfo.object.isClosed(), null);
+      }
     }
   }
 

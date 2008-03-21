@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -750,10 +750,19 @@ public class Tube extends Curve
   
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    TubeEditorWindow ed = new TubeEditorWindow(parent, "Tube object '"+info.name+"'", info, cb);
+    TubeEditorWindow ed = new TubeEditorWindow(parent, "Tube object '"+info.name+"'", info, cb, true);
     ed.setVisible(true);
   }
-  
+
+  public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
+  {
+    TubeEditorWindow ed = new TubeEditorWindow(parent, "Gesture '"+info.name+"'", info, cb, false);
+    ViewerCanvas views[] = ed.getAllViews();
+    for (int i = 0; i < views.length; i++)
+      ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
+    ed.setVisible(true);
+  }
+
   /** Get a MeshViewer which can be used for viewing this mesh. */
   
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
@@ -824,16 +833,269 @@ public class Tube extends Curve
     }
   }
 
-  /* Return a Keyframe which describes the current pose of this object. */
-  
+  /** Return a Keyframe which describes the current pose of this object. */
+
   public Keyframe getPoseKeyframe()
   {
-    return new NullKeyframe();
+    return new TubeKeyframe(this);
   }
-  
-  /* Modify this object based on a pose keyframe. */
-  
+
+  /** Modify this object based on a pose keyframe. */
+
   public void applyPoseKeyframe(Keyframe k)
   {
+    TubeKeyframe key = (TubeKeyframe) k;
+
+    for (int i = 0; i < vertex.length; i++)
+    {
+      vertex[i].r.set(key.vertPos[i]);
+      smoothness[i] = key.vertSmoothness[i];
+      thickness[i] = key.vertThickness[i];
+    }
+    cachedMesh = null;
+    cachedWire = null;
+    bounds = null;
+  }
+
+  public boolean canConvertToActor()
+  {
+    return true;
+  }
+
+  /** Tubes cannot be keyframed directly, since any change to mesh topology would
+      cause all keyframes to become invalid.  Return an actor for this mesh. */
+
+  public Object3D getPosableObject()
+  {
+    Tube m = (Tube) duplicate();
+    return new Actor(m);
+  }
+
+  /** This class represents a pose of a Tube. */
+
+  public static class TubeKeyframe extends MeshGesture
+  {
+    Vec3 vertPos[];
+    float vertSmoothness[];
+    double vertThickness[];
+    Tube tube;
+
+    public TubeKeyframe(Tube tube)
+    {
+      this.tube = tube;
+      vertPos = new Vec3 [tube.vertex.length];
+      vertSmoothness = new float [tube.vertex.length];
+      vertThickness = new double [tube.vertex.length];
+      for (int i = 0; i < vertPos.length; i++)
+      {
+        vertPos[i] = new Vec3(tube.vertex[i].r);
+        vertSmoothness[i] = tube.smoothness[i];
+        vertThickness[i] = tube.thickness[i];
+      }
+    }
+
+    private TubeKeyframe()
+    {
+    }
+
+    /** Get the Mesh this Gesture belongs to. */
+
+    protected Mesh getMesh()
+    {
+      return tube;
+    }
+
+    /** Get the positions of all vertices in this Gesture. */
+
+    protected Vec3 [] getVertexPositions()
+    {
+      return vertPos;
+    }
+
+    /** Set the positions of all vertices in this Gesture. */
+
+    protected void setVertexPositions(Vec3 pos[])
+    {
+      vertPos = pos;
+    }
+
+    /** Get the skeleton for this pose (or null if it doesn't have one). */
+
+    public Skeleton getSkeleton()
+    {
+      return null;
+    }
+
+    /** Set the skeleton for this pose. */
+
+    public void setSkeleton(Skeleton s)
+    {
+    }
+
+    /** Create a duplicate of this keyframe. */
+
+    public Keyframe duplicate()
+    {
+      return duplicate(tube);
+    }
+
+    public Keyframe duplicate(Object owner)
+    {
+      TubeKeyframe k = new TubeKeyframe();
+      if (owner instanceof Tube)
+        k.tube = (Tube) owner;
+      else
+        k.tube = (Tube) ((ObjectInfo) owner).object;
+      k.vertPos = new Vec3 [vertPos.length];
+      k.vertSmoothness = new float [vertSmoothness.length];
+      k.vertThickness = new double [vertThickness.length];
+      for (int i = 0; i < vertPos.length; i++)
+        {
+          k.vertPos[i] = new Vec3(vertPos[i]);
+          k.vertSmoothness[i] = vertSmoothness[i];
+          k.vertThickness[i] = vertThickness[i];
+        }
+      return k;
+    }
+
+    /** Get the list of graphable values for this keyframe. */
+
+    public double [] getGraphValues()
+    {
+      return new double [0];
+    }
+
+    /** Set the list of graphable values for this keyframe. */
+
+    public void setGraphValues(double values[])
+    {
+    }
+
+    /** These methods return a new Keyframe which is a weighted average of this one and one,
+       two, or three others.  These methods should never be called, since Tubes
+       can only be keyframed by converting them to Actors. */
+
+    public Keyframe blend(Keyframe o2, double weight1, double weight2)
+    {
+      return null;
+    }
+
+    public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
+    {
+      return null;
+    }
+
+    public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
+    {
+      return null;
+    }
+
+    /** Modify the mesh surface of a Gesture to be a weighted average of an arbitrary list of Gestures,
+        averaged about this pose.  This method only modifies the vertex positions and texture parameters,
+        not the skeleton, and all vertex positions are based on the offsets from the joints they are
+        bound to.
+        @param average   the Gesture to modify to be an average of other Gestures
+        @param p         the list of Gestures to average
+        @param weight    the weights for the different Gestures
+    */
+
+    public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
+    {
+      super.blendSurface(average, p, weight);
+      TubeKeyframe avg = (TubeKeyframe) average;
+      for (int i = 0; i < weight.length; i++)
+      {
+        TubeKeyframe key = (TubeKeyframe) p[i];
+        for (int j = 0; j < vertSmoothness.length; j++)
+          avg.vertSmoothness[j] += (float) (weight[i]*(key.vertSmoothness[j]-vertSmoothness[j]));
+        for (int j = 0; j < vertThickness.length; j++)
+          avg.vertThickness[j] += (float) (weight[i]*(key.vertThickness[j]-vertThickness[j]));
+      }
+
+      // Make sure all smoothness and thickness values are within legal bounds.
+
+      for (int i = 0; i < vertSmoothness.length; i++)
+      {
+        if (avg.vertSmoothness[i] < 0.0)
+          avg.vertSmoothness[i] = 0.0f;
+        if (avg.vertSmoothness[i] > 1.0)
+          avg.vertSmoothness[i] = 1.0f;
+        if (avg.vertThickness[i] < 0.0)
+          avg.vertThickness[i] = 0.0f;
+      }
+    }
+
+    /** Determine whether this keyframe is identical to another one. */
+
+    public boolean equals(Keyframe k)
+    {
+      if (!(k instanceof TubeKeyframe))
+        return false;
+      TubeKeyframe key = (TubeKeyframe) k;
+      for (int i = 0; i < vertPos.length; i++)
+      {
+        if (!vertPos[i].equals(key.vertPos[i]))
+          return false;
+        if (vertSmoothness[i] != key.vertSmoothness[i])
+          return false;
+        if (vertThickness[i] != key.vertThickness[i])
+          return false;
+      }
+      return true;
+    }
+
+    /** Update the texture parameter values when the texture is changed. */
+
+    public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
+    {
+    }
+
+    /** Get the value of a per-vertex texture parameter. */
+
+    public ParameterValue getTextureParameter(TextureParameter p)
+    {
+      return null;
+    }
+
+    /** Set the value of a per-vertex texture parameter. */
+
+    public void setTextureParameter(TextureParameter p, ParameterValue value)
+    {
+    }
+
+    /** Write out a representation of this keyframe to a stream. */
+
+    public void writeToStream(DataOutputStream out) throws IOException
+    {
+      out.writeShort(0); // version
+      out.writeInt(vertPos.length);
+      for (int i = 0; i < vertPos.length; i++)
+      {
+        vertPos[i].writeToFile(out);
+        out.writeFloat(vertSmoothness[i]);
+        out.writeDouble(vertThickness[i]);
+      }
+    }
+
+    /** Reconstructs the keyframe from its serialized representation. */
+
+    public TubeKeyframe(DataInputStream in, Object parent) throws IOException, InvalidObjectException
+    {
+      this();
+      short version = in.readShort();
+      if (version != 0)
+        throw new InvalidObjectException("");
+      tube = (Tube) parent;
+      int numVert = in.readInt();
+      vertPos = new Vec3 [numVert];
+      vertSmoothness = new float [numVert];
+      vertThickness = new double [numVert];
+      for (int i = 0; i < numVert; i++)
+      {
+        vertPos[i] = new Vec3(in);
+        vertSmoothness[i] = in.readFloat();
+        vertThickness[i] = in.readDouble();
+      }
+    }
   }
 }

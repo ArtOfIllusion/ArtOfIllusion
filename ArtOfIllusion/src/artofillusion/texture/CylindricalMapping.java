@@ -107,10 +107,6 @@ public class CylindricalMapping extends NonlinearMapping2D
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     Vec3 c1 = toLocal.timesDirection(vert[v1]), c2 = toLocal.timesDirection(vert[v2]), c3 = toLocal.timesDirection(vert[v3]);
-    
-    c1.y *= ay;
-    c2.y *= ay;
-    c3.y *= ay;
     return new Nonlinear2DTriangle(v1, v2, v3, n1, n2, n3, c1, c2, c3);
   }
 

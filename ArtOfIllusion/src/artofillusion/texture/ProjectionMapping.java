@@ -138,6 +138,27 @@ public class ProjectionMapping extends Mapping2D
     scaleToObject = scaled;
   }
 
+  /** Get a matrix which can be used to transform object coordinates to texture coordinates. */
+
+  public Mat4 getTransform()
+  {
+    double xscale = 1.0, yscale = 1.0, zscale = 1.0;
+    if (scaleToObject)
+    {
+      BoundingBox bounds = getObject().getBounds();
+      if (bounds.maxx > bounds.minx)
+        xscale = 1.0/(bounds.maxx-bounds.minx);
+      if (bounds.maxy > bounds.miny)
+        yscale = 1.0/(bounds.maxy-bounds.miny);
+      if (bounds.maxz > bounds.minz)
+        zscale = 1.0/(bounds.maxz-bounds.minz);
+    }
+    return new Mat4(xscale*ax, yscale*bx, zscale*cx, -dx,
+                    xscale*ay, yscale*by, zscale*cy, -dy,
+                    0, 0, 1, 0,
+                    0, 0, 0, 1);
+  }
+
   /** Create a rendering triangle with this mapping. */
 
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])

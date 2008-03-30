@@ -90,7 +90,7 @@ public class BevelExtrudeTool extends MeshEditingTool
   protected void handlePressed(HandlePressedEvent ev)
   {
     boolean selected[] = controller.getSelection();
-    TriangleMesh mesh = (TriangleMesh) controller.getObject().object;
+    TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
     origMesh = (TriangleMesh) mesh.duplicate();
     int selectMode = controller.getSelectionMode();
     int mode;
@@ -106,7 +106,7 @@ public class BevelExtrudeTool extends MeshEditingTool
   
   protected void handleDragged(HandleDraggedEvent ev)
   {
-    TriangleMesh mesh = (TriangleMesh) controller.getObject().object;
+    TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
     Camera cam = ev.getView().getCamera();
     Point dragPoint = ev.getMouseEvent().getPoint();
     
@@ -145,7 +145,7 @@ public class BevelExtrudeTool extends MeshEditingTool
   {
     if (width != 0.0 || height != 0.0)
     {
-      TriangleMesh mesh = (TriangleMesh) controller.getObject().object;
+      TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
       theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, origMesh}));
       controller.objectChanged();
     }

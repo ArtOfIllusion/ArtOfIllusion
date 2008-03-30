@@ -337,13 +337,13 @@ public class SplineMesh extends Object3D implements Mesh
 
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    SplineMeshEditorWindow ed = new SplineMeshEditorWindow(parent, "Spline Mesh '"+info.name+"'", info, cb, true);
+    SplineMeshEditorWindow ed = new SplineMeshEditorWindow(parent, "Spline Mesh '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
-    SplineMeshEditorWindow ed = new SplineMeshEditorWindow(parent, "Gesture '"+info.name+"'", info, cb, false);
+    SplineMeshEditorWindow ed = new SplineMeshEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
     ViewerCanvas views[] = ed.getAllViews();
     for (int i = 0; i < views.length; i++)
       ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
@@ -1395,7 +1395,7 @@ public class SplineMesh extends Object3D implements Mesh
       if (owner instanceof SplineMesh)
         k.mesh = (SplineMesh) owner;
       else
-        k.mesh = (SplineMesh) ((ObjectInfo) owner).object;
+        k.mesh = (SplineMesh) ((ObjectInfo) owner).getObject();
       k.skeleton = skeleton.duplicate();
       k.vertPos = new Vec3 [vertPos.length];
       k.usmoothness = new float [usmoothness.length];

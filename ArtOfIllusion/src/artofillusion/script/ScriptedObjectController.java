@@ -31,7 +31,7 @@ public class ScriptedObjectController
   ScriptedObjectController(ObjectInfo obj, ScriptedObjectEnumeration objectEnum, boolean interactive, Scene sc)
   {
     info = obj;
-    Object3D innerObject = obj.object;
+    Object3D innerObject = obj.getObject();
     while (innerObject instanceof ObjectWrapper)
       innerObject = ((ObjectWrapper) innerObject).getWrappedObject();
     object = (ScriptedObject) innerObject;
@@ -63,7 +63,7 @@ public class ScriptedObjectController
   public final CoordinateSystem getCoordinates()
   {
     object.setUsesCoords(true);
-    return info.coords;
+    return info.getCoords();
   }
   
   /** Get the current time. */
@@ -104,9 +104,9 @@ public class ScriptedObjectController
   public final void addObject(ObjectInfo info)
   {
     info.tracks = new Track [0];
-    if (info.object.canSetTexture() && info.object.getTextureMapping() == null)
+    if (info.getObject().canSetTexture() && info.getObject().getTextureMapping() == null)
       info.setTexture(object.getTexture(), object.getTextureMapping());
-    if (info.object.canSetMaterial() && info.object.getMaterialMapping() == null)
+    if (info.getObject().canSetMaterial() && info.getObject().getMaterialMapping() == null)
       info.setMaterial(object.getMaterial(), object.getMaterialMapping());
     enumeration.addObject(info);
   }

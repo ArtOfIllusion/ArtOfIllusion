@@ -49,7 +49,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     theScene = sc;
     layoutDialog(parent, cam);
     startTime = System.currentTimeMillis();
-    SceneCamera scm = (SceneCamera) sceneCamera.object;
+    SceneCamera scm = (SceneCamera) sceneCamera.getObject();
     rend.renderScene(sc, cam, this, scm);
     setVisible(true);
   }
@@ -79,8 +79,8 @@ public class RenderingDialog extends BDialog implements RenderListener
     layoutDialog(parent, cam);
     startTime = System.currentTimeMillis();
     sc.setTime(start);
-    theCamera.setCameraCoordinates(sceneCamera.coords.duplicate());
-    SceneCamera scm = (SceneCamera) sceneCamera.object;
+    theCamera.setCameraCoordinates(sceneCamera.getCoords().duplicate());
+    SceneCamera scm = (SceneCamera) sceneCamera.getObject();
     theCamera.setDistToScreen((h/200.0)/Math.tan(scm.getFieldOfView()*Math.PI/360.0));
     rend.renderScene(sc, theCamera, this, scm);
     setVisible(true);
@@ -186,11 +186,11 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   public void imageComplete(ComplexImage image)
   {
-    SceneCamera sc = (SceneCamera) sceneCamera.object;
+    SceneCamera sc = (SceneCamera) sceneCamera.getObject();
     if (sc.getImageFilters().length > 0)
     {
       statusChanged(Translate.text("applyingFilters"));
-      sc.applyImageFilters(image, theScene, sceneCamera.coords);
+      sc.applyImageFilters(image, theScene, sceneCamera.getCoords());
     }
     theImage = image;
     previewImage = theImage.getImage();
@@ -257,8 +257,8 @@ public class RenderingDialog extends BDialog implements RenderListener
       currentFrame++;
     }
     theScene.setTime(start+(currentFrame*subimages+currentSubimage)/(double) (fps*subimages));
-    theCamera.setCameraCoordinates(sceneCamera.coords.duplicate());
-    SceneCamera scm = (SceneCamera) sceneCamera.object;
+    theCamera.setCameraCoordinates(sceneCamera.getCoords().duplicate());
+    SceneCamera scm = (SceneCamera) sceneCamera.getObject();
     theCamera.setDistToScreen((h/200.0)/Math.tan(scm.getFieldOfView()*Math.PI/360.0));
     renderer.renderScene(theScene, theCamera, this, scm);
     statusChanged(Translate.text("Rendering"));

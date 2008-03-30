@@ -287,7 +287,7 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
           addButton.setEnabled(true);
           removeButton.setEnabled(false);
           Material mat = (Material) baseVec.elementAt(baseList.getSelectedIndex());
-          preview.setMaterial(mat, mat.getDefaultMapping(preview.getObject().object));
+          preview.setMaterial(mat, mat.getDefaultMapping(preview.getObject().getObject()));
           preview.render();
         }
 	else if (importList.getSelectedIndex() > -1)
@@ -297,7 +297,7 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
           addButton.setEnabled(false);
           removeButton.setEnabled(true);
           Material mat = (Material) importVec.elementAt(importList.getSelectedIndex());
-          preview.setMaterial(mat, mat.getDefaultMapping(preview.getObject().object));
+          preview.setMaterial(mat, mat.getDefaultMapping(preview.getObject().getObject()));
           preview.render();
         }
       }

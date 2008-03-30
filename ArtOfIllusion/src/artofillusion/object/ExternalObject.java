@@ -129,9 +129,9 @@ public class ExternalObject extends ObjectWrapper
       for (int i = 0; i < scene.getNumObjects(); i++)
       {
         ObjectInfo info = scene.getObject(i);
-        if (!info.name.equals(objectName))
+        if (!info.getName().equals(objectName))
           continue;
-        if (info.id == objectId)
+        if (info.getId() == objectId)
         {
           foundObject = info;
           break;
@@ -143,16 +143,16 @@ public class ExternalObject extends ObjectWrapper
         loadingError = Translate.text("externalObject.objectNotFound", externalFile.getAbsolutePath(), objectName);
       else
       {
-        if (includeChildren && foundObject.children.length > 0)
+        if (includeChildren && foundObject.getChildren().length > 0)
         {
           // Create an ObjectCollection containing the object and all its children.
 
           ArrayList<ObjectInfo> allObjects = new ArrayList<ObjectInfo>();
-          addObjectsToList(foundObject, allObjects, foundObject.coords.toLocal());
+          addObjectsToList(foundObject, allObjects, foundObject.getCoords().toLocal());
           theObject = new ExternalObjectCollection(allObjects);
         }
         else
-          theObject = foundObject.object;
+          theObject = foundObject.getObject();
       }
     }
     catch (Exception ex)
@@ -168,9 +168,9 @@ public class ExternalObject extends ObjectWrapper
 
   private void addObjectsToList(ObjectInfo obj, ArrayList<ObjectInfo> allObjects, Mat4 transform)
   {
-    obj.coords.transformCoordinates(transform);
+    obj.getCoords().transformCoordinates(transform);
     allObjects.add(obj);
-    for (ObjectInfo child : obj.children)
+    for (ObjectInfo child : obj.getChildren())
       addObjectsToList(child, allObjects, transform);
   }
   

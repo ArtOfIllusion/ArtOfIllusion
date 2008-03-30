@@ -46,7 +46,7 @@ public class LatheTool implements ModellingTool
     if (selection.length == 1)
       {
 	ObjectInfo obj = scene.getObject(selection[0]);
-	if (obj.object instanceof Curve)
+	if (obj.getObject() instanceof Curve)
 	  {
 	    new LatheDialog(window, obj);
 	    return;

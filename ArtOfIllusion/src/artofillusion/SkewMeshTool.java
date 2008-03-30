@@ -90,7 +90,7 @@ public class SkewMeshTool extends MeshEditingTool
 
   protected void handlePressed(HandlePressedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point clickPoint = ev.getMouseEvent().getPoint();
     clickX = (double) clickPoint.x;
     clickY = (double) clickPoint.y;
@@ -145,7 +145,7 @@ public class SkewMeshTool extends MeshEditingTool
   
   protected void handleDragged(HandleDraggedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
     double max, xskew, yskew;
     
@@ -172,7 +172,7 @@ public class SkewMeshTool extends MeshEditingTool
 
   protected void handleReleased(HandleReleasedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
     double max, xskew, yskew;
 

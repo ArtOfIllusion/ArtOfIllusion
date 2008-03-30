@@ -135,7 +135,7 @@ public class Scene
         applyTracksToObject(info, processed, null, i);
       }
     for (ObjectInfo obj : objects)
-      obj.object.sceneChanged(obj, this);
+      obj.getObject().sceneChanged(obj, this);
   }
   
   /** Modify an object (and any objects that depend on it) based on its tracks at the current time. */
@@ -144,7 +144,7 @@ public class Scene
   {
     applyTracksToObject(info, new boolean[objects.size()], null, 0);
     for (ObjectInfo obj : objects)
-      obj.object.sceneChanged(obj, this);
+      obj.getObject().sceneChanged(obj, this);
   }
 
   /** This should be called after one or more objects have been modified by the user.
@@ -167,13 +167,13 @@ public class Scene
       // Find Constraint and IK tracks at the top of the list and apply them.
 
       int i;
-      for (i = 0; i < info.tracks.length && (info.tracks[i] instanceof ConstraintTrack ||
-          info.tracks[i] instanceof IKTrack || info.tracks[i].isNullTrack()); i++);
+      for (i = 0; i < info.getTracks().length && (info.getTracks()[i] instanceof ConstraintTrack ||
+          info.getTracks()[i] instanceof IKTrack || info.getTracks()[i].isNullTrack()); i++);
       for (int j = i-1; j >= 0; j--)
-        if (info.tracks[j].isEnabled())
-          info.tracks[j].apply(time);
-      if (info.pose != null)
-        info.object.applyPoseKeyframe(info.pose);
+        if (info.getTracks()[j].isEnabled())
+          info.getTracks()[j].apply(time);
+      if (info.getPose() != null)
+        info.getObject().applyPoseKeyframe(info.getPose());
     }
 
     // Now apply tracks to all dependent objects.
@@ -181,7 +181,7 @@ public class Scene
     for (ObjectInfo info : objects)
       applyTracksToObject(info, processed, changed, indexOf(info));
     for (ObjectInfo info : objects)
-      info.object.sceneChanged(info, this);
+      info.getObject().sceneChanged(info, this);
   }
 
   private void applyTracksToObject(ObjectInfo info, boolean processed[], boolean changed[], int index)
@@ -190,7 +190,7 @@ public class Scene
     {
       // This object has already been updated.
 
-      info.object.sceneChanged(info, this);
+      info.getObject().sceneChanged(info, this);
       return;
     }
     processed[index] = true;
@@ -199,7 +199,7 @@ public class Scene
     // tracks it is dependent on.
     
     boolean hasPos = false, hasRot = false, hasPose = false;
-    for (Track track : info.tracks)
+    for (Track track : info.getTracks())
     {
       if (track.isNullTrack() || !track.isEnabled())
         continue;
@@ -223,24 +223,24 @@ public class Scene
       return;
     if (hasPos)
     {
-      Vec3 orig = info.coords.getOrigin();
+      Vec3 orig = info.getCoords().getOrigin();
       orig.set(0.0, 0.0, 0.0);
-      info.coords.setOrigin(orig);
+      info.getCoords().setOrigin(orig);
     }
     if (hasRot)
-      info.coords.setOrientation(0.0, 0.0, 0.0);
+      info.getCoords().setOrientation(0.0, 0.0, 0.0);
     if (hasPose)
       info.clearCachedMeshes();
-    info.pose = null;
+    info.setPose(null);
     
     // Apply the tracks.
     
     info.clearDistortion();
-    for (int j = info.tracks.length-1; j >= 0; j--)
-      if (info.tracks[j].isEnabled())
-        info.tracks[j].apply(time);
-    if (info.pose != null)
-      info.object.applyPoseKeyframe(info.pose);
+    for (int j = info.getTracks().length-1; j >= 0; j--)
+      if (info.getTracks()[j].isEnabled())
+        info.getTracks()[j].apply(time);
+    if (info.getPose() != null)
+      info.getObject().applyPoseKeyframe(info.getPose());
   }
   
   /** Get the number of frames per second. */
@@ -461,15 +461,15 @@ public class Scene
 
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {
-    info.id = nextID++;
-    if (info.tracks == null)
+    info.setId(nextID++);
+    if (info.getTracks() == null)
       {
         info.addTrack(new PositionTrack(info), 0);
         info.addTrack(new RotationTrack(info), 1);
       }
-    if (info.object.canSetTexture() && info.object.getTextureMapping() == null)
-      info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping(info.object));
-    info.object.sceneChanged(info, this);
+    if (info.getObject().canSetTexture() && info.getObject().getTextureMapping() == null)
+      info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping(info.getObject()));
+    info.getObject().sceneChanged(info, this);
     objects.insertElementAt(info, index);
     objectIndexMap = null;
     if (undo != null)
@@ -487,27 +487,27 @@ public class Scene
     objectIndexMap = null;
     if (undo != null)
       undo.addCommandAtBeginning(UndoRecord.ADD_OBJECT, new Object [] {info, Integer.valueOf(which)});
-    if (info.parent != null)
+    if (info.getParent() != null)
       {
         int j;
-        for (j = 0; info.parent.children[j] != info; j++);
+        for (j = 0; info.getParent().getChildren()[j] != info; j++);
         if (undo != null)
-          undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {info.parent, info, Integer.valueOf(j)});
-        info.parent.removeChild(j);
+          undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {info.getParent(), info, Integer.valueOf(j)});
+        info.getParent().removeChild(j);
       }
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo obj = objects.elementAt(i);
-        for (int j = 0; j < obj.tracks.length; j++)
+        for (int j = 0; j < obj.getTracks().length; j++)
           {
-            Track tr = obj.tracks[j];
+            Track tr = obj.getTracks()[j];
             ObjectInfo depends[] = tr.getDependencies();
             for (int k = 0; k < depends.length; k++)
               if (depends[k] == info)
                 {
                   if (undo != null)
                     undo.addCommandAtBeginning(UndoRecord.COPY_TRACK, new Object [] {tr, tr.duplicate(tr.getParent())});
-                  obj.tracks[j].deleteDependencies(info);
+                  obj.getTracks()[j].deleteDependencies(info);
                 }
           }
       }
@@ -535,7 +535,7 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo obj = objects.elementAt(i);
-        if (obj.object.getMaterial() == mat)
+        if (obj.getObject().getMaterial() == mat)
           obj.setMaterial(null, null);
       }
   }
@@ -570,8 +570,8 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo obj = objects.elementAt(i);
-        if (obj.object.getTexture() == tex)
-          obj.setTexture(def, def.getDefaultMapping(obj.object));
+        if (obj.getObject().getTexture() == tex)
+          obj.setTexture(def, def.getDefaultMapping(obj.getObject()));
       }
     if (environTexture == tex)
     {
@@ -590,7 +590,7 @@ public class Scene
 
     for (int i = 0; i < objects.size(); i++)
       {
-        obj = objects.elementAt(i).object;
+        obj = objects.elementAt(i).getObject();
         if (obj.getMaterial() == mat)
           obj.setMaterial(mat, obj.getMaterialMapping());
       }
@@ -608,8 +608,8 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo obj = objects.elementAt(i);
-        if (obj.object.getTexture() == tex)
-          obj.setTexture(tex, obj.object.getTextureMapping());
+        if (obj.getObject().getTexture() == tex)
+          obj.setTexture(tex, obj.getObject().getTextureMapping());
       }
     for (int i = 0; i < textureListeners.size(); i++)
       textureListeners.elementAt(i).itemChanged(which, tex);
@@ -743,11 +743,11 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo info = objects.elementAt(i);
-        if (info.object != original)
+        if (info.getObject() != original)
           continue;
         if (undo != null)
           undo.addCommand(UndoRecord.SET_OBJECT, new Object [] {info, original});
-        info.object = replaceWith;
+        info.setObject(replaceWith);
         info.clearCachedMeshes();
       }
   }
@@ -760,10 +760,10 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo info = objects.elementAt(i);
-        if (info.object == obj)
+        if (info.getObject() == obj)
           {
             info.clearCachedMeshes();
-            info.pose = null;
+            info.setPose(null);
           }
       }
   }
@@ -842,7 +842,7 @@ public class Scene
     for (int i = objects.size()-1; i >= 0; i--)
       {
         ObjectInfo info = objects.elementAt(i);
-        ObjectInfo parent = info.parent;
+        ObjectInfo parent = info.getParent();
         while (parent != null)
           {
             if (parent.selected || parent.parentSelected)
@@ -850,7 +850,7 @@ public class Scene
                 info.parentSelected = true;
                 break;
               }
-            parent = parent.parent;
+            parent = parent.getParent();
           }
       }
   }
@@ -877,7 +877,7 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo info = objects.elementAt(i);
-        if (info.name.equals(name))
+        if (info.getName().equals(name))
           return info;
       }
     return null;
@@ -890,7 +890,7 @@ public class Scene
     for (int i = 0; i < objects.size(); i++)
     {
       ObjectInfo info = objects.elementAt(i);
-      if (info.id == id)
+      if (info.getId() == id)
         return info;
     }
     return null;
@@ -1319,10 +1319,10 @@ public class Scene
     Constructor con;
     Object3D obj;
 
-    info.id = in.readInt();
-    if (info.id >= nextID)
-      nextID = info.id+1;
-    info.visible = in.readBoolean();
+    info.setId(in.readInt());
+    if (info.getId() >= nextID)
+      nextID = info.getId() +1;
+    info.setVisible(in.readBoolean());
     Integer key = in.readInt();
     obj = table.get(key);
     if (obj == null)
@@ -1346,11 +1346,11 @@ public class Scene
                 else
                   ex.printStackTrace();
                 if (ex instanceof ClassNotFoundException)
-                  loadingErrors.append(info.name).append(": ").append(Translate.text("errorFindingClass", classname)).append('\n');
+                  loadingErrors.append(info.getName()).append(": ").append(Translate.text("errorFindingClass", classname)).append('\n');
                 else
-                  loadingErrors.append(info.name).append(": ").append(Translate.text("errorInstantiatingClass", classname)).append('\n');
+                  loadingErrors.append(info.getName()).append(": ").append(Translate.text("errorInstantiatingClass", classname)).append('\n');
                 obj = new NullObject();
-                info.name = "<unreadable> "+info.name;
+                info.setName("<unreadable> "+ info.getName());
                 errorsLoading = true;
               }
             table.put(key, obj);
@@ -1361,7 +1361,7 @@ public class Scene
             throw new IOException();
           }
       }
-    info.object = obj;
+    info.setObject(obj);
     
     if (version < 2 && obj.getTexture() != null)
       {
@@ -1399,7 +1399,7 @@ public class Scene
             tr.initFromStream(in, this);
             info.addTrack(tr, i);
           }
-        if (info.tracks == null)
+        if (info.getTracks() == null)
           info.tracks = new Track [0];
       }
     catch (Exception ex)
@@ -1491,9 +1491,9 @@ public class Scene
     for (i = 0; i < objects.size(); i++)
       {
         ObjectInfo info = objects.elementAt(i);
-        out.writeInt(info.children.length);
-        for (j = 0; j < info.children.length; j++)
-          out.writeInt(indexOf(info.children[j]));
+        out.writeInt(info.getChildren().length);
+        for (j = 0; j < info.getChildren().length; j++)
+          out.writeInt(indexOf(info.getChildren()[j]));
       }
     
     // Save the environment mapping information.
@@ -1537,33 +1537,33 @@ public class Scene
   {
     Integer key;
 
-    info.coords.writeToFile(out);
-    out.writeUTF(info.name);
-    out.writeInt(info.id);
-    out.writeBoolean(info.visible);
-    key = table.get(info.object);
+    info.getCoords().writeToFile(out);
+    out.writeUTF(info.getName());
+    out.writeInt(info.getId());
+    out.writeBoolean(info.isVisible());
+    key = table.get(info.getObject());
     if (key == null)
       {
         out.writeInt(index);
-        out.writeUTF(info.object.getClass().getName());
+        out.writeUTF(info.getObject().getClass().getName());
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        info.object.writeToFile(new DataOutputStream(bos), this);
+        info.getObject().writeToFile(new DataOutputStream(bos), this);
         byte bytes[] = bos.toByteArray();
         out.writeInt(bytes.length);
         out.write(bytes, 0, bytes.length);
         key = Integer.valueOf(index++);
-        table.put(info.object, key);
+        table.put(info.getObject(), key);
       }
     else
       out.writeInt(key.intValue());
     
     // Write the tracks for this object.
     
-    out.writeInt(info.tracks.length);
-    for (int i = 0; i < info.tracks.length; i++)
+    out.writeInt(info.getTracks().length);
+    for (int i = 0; i < info.getTracks().length; i++)
       {
-        out.writeUTF(info.tracks[i].getClass().getName());
-        info.tracks[i].writeToStream(out, this);
+        out.writeUTF(info.getTracks()[i].getClass().getName());
+        info.getTracks()[i].writeToStream(out, this);
       }
     return index;
   }

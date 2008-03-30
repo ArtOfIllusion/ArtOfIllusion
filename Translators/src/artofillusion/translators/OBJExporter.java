@@ -130,10 +130,10 @@ public class OBJExporter
         if (!wholeScene && !info.selected)
           continue;
         FacetedMesh mesh;
-        if (!smooth && info.object instanceof FacetedMesh)
-          mesh = (FacetedMesh) info.object;
+        if (!smooth && info.getObject() instanceof FacetedMesh)
+          mesh = (FacetedMesh) info.getObject();
         else
-          mesh = info.object.convertToTriangleMesh(tol);
+          mesh = info.getObject().convertToTriangleMesh(tol);
         if (mesh == null)
           continue;
 
@@ -161,7 +161,7 @@ public class OBJExporter
         
         // Select a name for the group.
         
-        String baseName = info.name.replace(' ', '_');
+        String baseName = info.getName().replace(' ', '_');
         String name = baseName;
         int append = 1;
         while (groupNames.get(name) != null)
@@ -174,11 +174,11 @@ public class OBJExporter
         TextureImageInfo ti = null;
         if (textureExporter != null)
           {
-            ti = textureExporter.getTextureInfo(info.object.getTexture());
+            ti = textureExporter.getTextureInfo(info.getObject().getTexture());
             if (ti != null)
               out.println("usemtl "+ti.name);
           }
-        Mat4 trans = info.coords.fromLocal();
+        Mat4 trans = info.getCoords().fromLocal();
         MeshVertex vert[] = mesh.getVertices();
         for (int j = 0; j < vert.length; j++)
           {

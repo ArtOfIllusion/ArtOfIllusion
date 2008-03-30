@@ -287,7 +287,7 @@ public class TexturesDialog extends BDialog implements ListChangeListener
           addButton.setEnabled(true);
           removeButton.setEnabled(false);
           Texture tex = (Texture) baseVec.elementAt(baseList.getSelectedIndex());
-          preview.setTexture(tex, tex.getDefaultMapping(preview.getObject().object));
+          preview.setTexture(tex, tex.getDefaultMapping(preview.getObject().getObject()));
           preview.render();
         }
 	else if (importList.getSelectedIndex() > -1)
@@ -297,7 +297,7 @@ public class TexturesDialog extends BDialog implements ListChangeListener
           addButton.setEnabled(false);
           removeButton.setEnabled(true);
           Texture tex = (Texture) importVec.elementAt(importList.getSelectedIndex());
-          preview.setTexture(tex, tex.getDefaultMapping(preview.getObject().object));
+          preview.setTexture(tex, tex.getDefaultMapping(preview.getObject().getObject()));
           preview.render();
         }
       }

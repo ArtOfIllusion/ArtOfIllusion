@@ -47,8 +47,8 @@ public class TubeViewer extends CurveViewer
         else if (renderMode == RENDER_SMOOTH)
           shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
         else
-          shader = new TexturedVertexShader(mesh, objInfo.object, 0.0, viewDir).optimize();
-        renderMesh(mesh, shader, theCamera, objInfo.object.isClosed(), null);
+          shader = new TexturedVertexShader(mesh, objInfo.getObject(), 0.0, viewDir).optimize();
+        renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), null);
       }
     }
     
@@ -56,13 +56,13 @@ public class TubeViewer extends CurveViewer
 
     if (showMesh)
     {
-      MeshVertex v[] = ((Mesh) getController().getObject().object).getVertices();
+      MeshVertex v[] = ((Mesh) getController().getObject().getObject()).getVertices();
       Vec2 pos[] = new Vec2 [v.length];
       for (int i = 0; i < v.length; i++)
         pos[i] = theCamera.getObjectToScreen().timesXY(v[i].r);
       for (int i = 0; i < v.length-1; i++)
         renderLine(v[i].r, v[i+1].r, theCamera, lineColor);
-      if (((Tube) getController().getObject().object).getEndsStyle() == Tube.CLOSED_ENDS)
+      if (((Tube) getController().getObject().getObject()).getEndsStyle() == Tube.CLOSED_ENDS)
         renderLine(v[v.length-1].r, v[0].r, theCamera, lineColor);
   
       // Draw the handles for the control points.

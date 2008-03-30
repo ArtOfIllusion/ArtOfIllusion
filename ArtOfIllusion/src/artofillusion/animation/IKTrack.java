@@ -75,7 +75,7 @@ public class IKTrack extends Track
       return;
     boolean locked[] = new boolean [joint.length];
     Vec3 target[] = new Vec3 [joint.length];
-    Mat4 toLocal = info.coords.toLocal();
+    Mat4 toLocal = info.getCoords().toLocal();
     
     for (int i = 0; i < constraints.size(); i++)
     {
@@ -94,7 +94,7 @@ public class IKTrack extends Track
           target[index] = toLocal.times(coords.getOrigin());
       }
     }
-    Actor actor = Actor.getActor(info.object);
+    Actor actor = Actor.getActor(info.getObject());
     info.addDistortion(new IKDistortion(locked, target, weight, actor));
   }
   
@@ -176,7 +176,7 @@ public class IKTrack extends Track
   
   public boolean canAcceptAsParent(Object obj)
   {
-    return (obj instanceof ObjectInfo && ((ObjectInfo) obj).object instanceof Mesh);
+    return (obj instanceof ObjectInfo && ((ObjectInfo) obj).getObject() instanceof Mesh);
   }
   
   /** Get the parent object of this track. */
@@ -321,7 +321,7 @@ public class IKTrack extends Track
       constraintList.addEventLink(MouseClickedEvent.class, this, "mouseClicked");
       buildConstraintList();
       content.add(gesturesBox = new BCheckBox(Translate.text("useGesturesToShapeMesh"), useGestures), 0, 2, 2, 1);
-      gesturesBox.setEnabled(Actor.getActor(info.object) != null);
+      gesturesBox.setEnabled(Actor.getActor(info.getObject()) != null);
       RowContainer buttons = new RowContainer();
       content.add(buttons, 0, 3, 2, 1, new LayoutInfo());
       buttons.add(Translate.button("add", "...", this, "doAdd"));

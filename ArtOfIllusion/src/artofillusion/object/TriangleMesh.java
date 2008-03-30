@@ -648,13 +648,13 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   
   public void edit(final EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Triangle Mesh '"+info.name+"'", info, cb, true);
+    TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Triangle Mesh '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
-    TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Gesture '"+info.name+"'", info, cb, false);
+    TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
     ViewerCanvas views[] = ed.getAllViews();
     for (int i = 0; i < views.length; i++)
       ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
@@ -3572,7 +3572,7 @@ groups:     do
       if (owner instanceof TriangleMesh)
         k.mesh = (TriangleMesh) owner;
       else
-        k.mesh = (TriangleMesh) ((ObjectInfo) owner).object;
+        k.mesh = (TriangleMesh) ((ObjectInfo) owner).getObject();
       k.skeleton = skeleton.duplicate();
       k.vertPos = new Vec3 [vertPos.length];
       k.vertSmoothness = new float [vertSmoothness.length];

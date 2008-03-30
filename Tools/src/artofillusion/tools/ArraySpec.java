@@ -18,7 +18,7 @@ package artofillusion.tools;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.ui.*;
+
 import java.util.*;
 
 /** Parameters for creating arrays are stored in the ArraySpec class.
@@ -165,21 +165,21 @@ public class ArraySpec
 
         // create a group object, even when not grouping
         ObjectInfo info = (ObjectInfo)objectList.elementAt(0);
-        String name = "Array of " + info.name;
+        String name = "Array of " + info.getName();
 
         CoordinateSystem coords = new CoordinateSystem(new Vec3(0,0,0), Vec3.vz(), Vec3.vy());
         if (method == METHOD_CURVE && curve != null)
-                coords = curve.coords.duplicate();
+                coords = curve.getCoords().duplicate();
         else if (method == METHOD_LINEAR)
         {
                 Vec3 displacement = new Vec3(stepX, stepY, stepZ);
-                BoundingBox bounds = info.object.getBounds();
+                BoundingBox bounds = info.getObject().getBounds();
                 if (intervalX) displacement.x *= bounds.getSize().x;
                 if (intervalY) displacement.y *= bounds.getSize().y;
                 if (intervalZ) displacement.z *= bounds.getSize().z;
                 displacement = displacement.times(((double)linearCopies-1.0)/2.0);
 
-                coords = info.coords.duplicate();
+                coords = info.getCoords().duplicate();
                 Mat4 dis = Mat4.translation(displacement.x,
                                             displacement.y,
                                             displacement.z);
@@ -217,7 +217,7 @@ public class ArraySpec
 
                 // calculate displacement vector
                 Vec3 displacement = new Vec3(stepX, stepY, stepZ);
-                BoundingBox bounds = info.object.getBounds();
+                BoundingBox bounds = info.getObject().getBounds();
                 if (intervalX) displacement.x *= bounds.getSize().x;
                 if (intervalY) displacement.y *= bounds.getSize().y;
                 if (intervalZ) displacement.z *= bounds.getSize().z;
@@ -237,12 +237,12 @@ public class ArraySpec
                 return;
 
         if (curve == null) return;
-        Curve cv = (Curve)curve.object;
+        Curve cv = (Curve) curve.getObject();
 
         // map curve to global coordinate space
         MeshVertex vert[] = cv.getVertices();
         Vec3 v[] = new Vec3 [vert.length];
-        Mat4 trans = curve.coords.fromLocal();
+        Mat4 trans = curve.getCoords().fromLocal();
         for (int i = 0; i < v.length; i++)
           v[i] = trans.times(vert[i].r);
 
@@ -283,7 +283,7 @@ public class ArraySpec
 
                         CoordinateSystem curveCS = findCoordinateSystem(subdiv, cv.isClosed(), relativePos, zdir, updir);
 
-                        CoordinateSystem newCS = info.coords.duplicate();
+                        CoordinateSystem newCS = info.getCoords().duplicate();
                         if (ignoreOrigin)
                                 newCS.setOrigin(startCS.getOrigin());
                         if (ignoreOrientation)
@@ -316,7 +316,7 @@ public class ArraySpec
      If live = true then make a live duplicate instead of a copy */
   private ObjectInfo createCopy (ObjectInfo info, CoordinateSystem cs)
   {
-        Mat4 trans = cs.fromLocal().times(info.coords.toLocal());
+        Mat4 trans = cs.fromLocal().times(info.getCoords().toLocal());
         return createCopy(info, trans);
   }
 
@@ -328,17 +328,17 @@ public class ArraySpec
   {
         ObjectInfo newinfo = info.duplicate();
         if (!live)
-                newinfo.object = info.object.duplicate();
-        newinfo.coords.transformCoordinates(trans);
+                newinfo.setObject(info.object.duplicate());
+        newinfo.getCoords().transformCoordinates(trans);
         window.addObject(newinfo, undo);
         if (group)
                 arrayRoot.addChild(newinfo, 0);
 
         if (deep)
         {
-                for (int i=0; i<info.children.length;i++)
+                for (int i=0; i< info.getChildren().length;i++)
                 {
-                        newinfo.addChild(createChildCopy(info.children[i], trans),i);
+                        newinfo.addChild(createChildCopy(info.getChildren()[i], trans),i);
                 }
         }
 
@@ -352,13 +352,13 @@ public class ArraySpec
   {
         ObjectInfo newinfo = info.duplicate();
         if (!live)
-                newinfo.object = info.object.duplicate();
-        newinfo.coords.transformCoordinates(trans);
+                newinfo.setObject(info.getObject().duplicate());
+        newinfo.getCoords().transformCoordinates(trans);
         window.addObject(newinfo, undo);
         
-        for (int i=0; i<info.children.length;i++)
+        for (int i=0; i< info.getChildren().length;i++)
         {
-                newinfo.addChild(createChildCopy(info.children[i], trans),i);
+                newinfo.addChild(createChildCopy(info.getChildren()[i], trans),i);
         }
         
         return newinfo;

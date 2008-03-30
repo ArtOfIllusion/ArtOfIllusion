@@ -66,9 +66,9 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     obj = objects;
     renderProcessor = new ActionProcessor();
     editObj = obj[0].duplicate();
-    editObj.object = editObj.object.duplicate();
-    oldTexture = editObj.object.getTexture();
-    oldMapping = editObj.object.getTextureMapping();
+    editObj.setObject(editObj.object.duplicate());
+    oldTexture = editObj.getObject().getTexture();
+    oldMapping = editObj.getObject().getTextureMapping();
     if (oldTexture instanceof LayeredTexture)
     {
       layeredMap = (LayeredMapping) oldMapping;
@@ -76,8 +76,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     else
     {
-      layeredTex = new LayeredTexture(editObj.object);
-      layeredMap = (LayeredMapping) layeredTex.getDefaultMapping(editObj.object);
+      layeredTex = new LayeredTexture(editObj.getObject());
+      layeredMap = (LayeredMapping) layeredTex.getDefaultMapping(editObj.getObject());
     }
 
     // Add the title and combo box at the top.
@@ -87,7 +87,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     FormContainer northPanel = new FormContainer(1, 2);
     String title;
     if (obj.length == 1)
-      title = Translate.text("chooseTextureForSingle", obj[0].name);
+      title = Translate.text("chooseTextureForSingle", obj[0].getName());
     else
       title = Translate.text("chooseTextureForMultiple");
     northPanel.add(new BLabel(title), 0, 0);
@@ -149,15 +149,15 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     
     if (oldTexture instanceof LayeredTexture)
     {
-      preview = new MaterialPreviewer(layeredTex, editObj.object.getMaterial(), 160, 160);
+      preview = new MaterialPreviewer(layeredTex, editObj.getObject().getMaterial(), 160, 160);
       preview.setTexture(layeredTex, layeredMap);
     }
     else
     {
-      preview = new MaterialPreviewer(oldTexture, editObj.object.getMaterial(), 160, 160);
+      preview = new MaterialPreviewer(oldTexture, editObj.getObject().getMaterial(), 160, 160);
       preview.setTexture(oldTexture, oldMapping);
     }
-    preview.setMaterial(editObj.object.getMaterial(), editObj.object.getMaterialMapping());
+    preview.setMaterial(editObj.getObject().getMaterial(), editObj.getObject().getMaterialMapping());
     updatePreviewParameterValues();
 
     // Add the buttons at the bottom.
@@ -198,11 +198,11 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
   private void updatePreviewParameterValues()
   {
-    double paramAvgVal[] = editObj.object.getAverageParameterValues();
+    double paramAvgVal[] = editObj.getObject().getAverageParameterValues();
     ParameterValue paramValue[] = new ParameterValue [paramAvgVal.length];
     for (int i = 0; i < paramValue.length; i++)
       paramValue[i] = new ConstantParameterValue(paramAvgVal[i]);
-    preview.getObject().object.setParameterValues(paramValue);
+    preview.getObject().getObject().setParameterValues(paramValue);
   }
 
   public void dispose()
@@ -254,7 +254,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     for (int i = 0; i < scene.getNumTextures(); i++)
     {
       texList.add((scene.getTexture(i)).getName());
-      if (editObj.object.getTexture() == scene.getTexture(i))
+      if (editObj.getObject().getTexture() == scene.getTexture(i))
         texList.setSelected(i, true);
     }
   }
@@ -266,23 +266,23 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     // Find a list of all parameters, both for the entire texture and for the selected layer.
     
     TextureParameter params[];
-    if (editObj.object.getTexture() instanceof LayeredTexture)
+    if (editObj.getObject().getTexture() instanceof LayeredTexture)
     {
       int index = layerList.getSelectedIndex();
       if (index == -1)
         params = new TextureParameter [0];
       else
-        params = ((LayeredMapping) editObj.object.getTextureMapping()).getLayerParameters(index);
+        params = ((LayeredMapping) editObj.getObject().getTextureMapping()).getLayerParameters(index);
     }
     else
-      params = editObj.object.getParameters();
+      params = editObj.getObject().getParameters();
     paramTypeChoice = new BComboBox [params.length];
     paramValueWidget = new ValueSelector [params.length];
     fieldParamIndex = new int [params.length];
     FormContainer paramsContainer = new FormContainer(3, params.length);
     paramsContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
-    final TextureParameter texParam[] = editObj.object.getParameters();
-    final ParameterValue paramValue[] = editObj.object.getParameterValues();
+    final TextureParameter texParam[] = editObj.getObject().getParameters();
+    final ParameterValue paramValue[] = editObj.getObject().getParameterValues();
     for (int i = 0; i < params.length; i++)
     {
       if (params[i].type != TextureParameter.NORMAL_PARAMETER)
@@ -302,11 +302,11 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       paramsContainer.add(new BLabel(params[i].name), 0, i);
       paramsContainer.add(paramTypeChoice[i] = new BComboBox(), 1, i);
       paramTypeChoice[i].add(PARAM_TYPE_NAME[0]);
-      if (editObj.object instanceof Mesh)
+      if (editObj.getObject() instanceof Mesh)
         paramTypeChoice[i].add(PARAM_TYPE_NAME[1]);
-      if (editObj.object instanceof FacetedMesh)
+      if (editObj.getObject() instanceof FacetedMesh)
         paramTypeChoice[i].add(PARAM_TYPE_NAME[2]);
-      if (editObj.object instanceof FacetedMesh)
+      if (editObj.getObject() instanceof FacetedMesh)
         paramTypeChoice[i].add(PARAM_TYPE_NAME[3]);
       if (whichParam < paramValue.length)
         paramTypeChoice[i].setSelectedValue(PARAM_TYPE_NAME[parameterTypeCode(paramValue[whichParam].getClass())]);
@@ -320,8 +320,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
             return;
           double value = paramValueWidget[whichField].getValue();
           ParameterValue val = new ConstantParameterValue(value);
-          editObj.object.setParameterValue(texParam[whichParam], val);
-          preview.getObject().object.setParameterValue(texParam[whichParam], val);
+          editObj.getObject().setParameterValue(texParam[whichParam], val);
+          preview.getObject().getObject().setParameterValue(texParam[whichParam], val);
           renderPreview();
         }
       });
@@ -357,10 +357,10 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private void doEditMapping()
   {
     int index = layerList.getSelectedIndex();
-    new TextureMappingDialog(window, editObj.object, index);
+    new TextureMappingDialog(window, editObj.getObject(), index);
     preview.cancelRendering();
-    editObj.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
-    preview.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
+    editObj.setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping());
+    preview.setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping());
     updatePreviewParameterValues();
     renderPreview();
   }
@@ -432,23 +432,23 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   
   private void doOk()
   {
-    TextureParameter param[] = editObj.object.getParameters();
-    ParameterValue paramValue[] = editObj.object.getParameterValues();
+    TextureParameter param[] = editObj.getObject().getParameters();
+    ParameterValue paramValue[] = editObj.getObject().getParameterValues();
     UndoRecord undo = new UndoRecord(window, false);
     for (int i = 0; i < obj.length; i++)
     {
-      undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].object, obj[i].object.duplicate()});
-      if (editObj.object.getTexture() instanceof LayeredTexture)
+      undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].getObject(), obj[i].getObject().duplicate()});
+      if (editObj.getObject().getTexture() instanceof LayeredTexture)
       {
-        LayeredMapping m = (LayeredMapping) editObj.object.getTextureMapping().duplicate(obj[i].object, editObj.object.getTexture());
+        LayeredMapping m = (LayeredMapping) editObj.getObject().getTextureMapping().duplicate(obj[i].getObject(), editObj.getObject().getTexture());
         obj[i].setTexture(new LayeredTexture(m), m);
       }
       else
-        obj[i].setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping().duplicate());
+        obj[i].setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping().duplicate());
       for (int j = 0; j < param.length; j++)
-        obj[i].object.setParameterValue(param[j], paramValue[j].duplicate());
+        obj[i].getObject().setParameterValue(param[j], paramValue[j].duplicate());
     }
-    obj[0].object.copyObject(editObj.object);
+    obj[0].getObject().copyObject(editObj.getObject());
     window.setUndoRecord(undo);
     window.updateImage();
     window.getScore().tracksModified(false);
@@ -476,18 +476,18 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
         int index = fieldParamIndex[i];
         if (paramValueWidget[i] != null)
           paramValueWidget[i].setEnabled(type == PARAM_TYPE_NAME[CONSTANT_PARAM]);
-        TextureParameter param = editObj.object.getParameters()[index];
-        Object3D realObject = editObj.object;
+        TextureParameter param = editObj.getObject().getParameters()[index];
+        Object3D realObject = editObj.getObject();
         while (realObject instanceof ObjectWrapper)
           realObject = ((ObjectWrapper) realObject).getWrappedObject();
         if (type == PARAM_TYPE_NAME[CONSTANT_PARAM])
-          editObj.object.setParameterValue(param, new ConstantParameterValue(editObj.object.getParameterValues()[index].getAverageValue()));
+          editObj.getObject().setParameterValue(param, new ConstantParameterValue(editObj.getObject().getParameterValues()[index].getAverageValue()));
         else if (type == PARAM_TYPE_NAME[VERTEX_PARAM])
-          editObj.object.setParameterValue(param, new VertexParameterValue((Mesh) realObject, param));
+          editObj.getObject().setParameterValue(param, new VertexParameterValue((Mesh) realObject, param));
         else if (type == PARAM_TYPE_NAME[FACE_PARAM])
-          editObj.object.setParameterValue(param, new FaceParameterValue((FacetedMesh) realObject, param));
+          editObj.getObject().setParameterValue(param, new FaceParameterValue((FacetedMesh) realObject, param));
         else if (type == PARAM_TYPE_NAME[FACE_VERTEX_PARAM])
-          editObj.object.setParameterValue(param, new FaceVertexParameterValue((FacetedMesh) realObject, param));
+          editObj.getObject().setParameterValue(param, new FaceVertexParameterValue((FacetedMesh) realObject, param));
         renderPreview();
         return;
       }
@@ -500,7 +500,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     {
       texList.setSelected(0, true);
       Texture tex = scene.getDefaultTexture();
-      editObj.setTexture(tex, tex.getDefaultMapping(editObj.object));
+      editObj.setTexture(tex, tex.getDefaultMapping(editObj.getObject()));
       updateComponents();
       layoutSimple();
       pack();
@@ -553,8 +553,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
         if (tex == oldTexture)
           editObj.setTexture(tex, oldMapping.duplicate());
         else
-          editObj.setTexture(tex, tex.getDefaultMapping(editObj.object));
-        preview.setTexture(tex, editObj.object.getTextureMapping());
+          editObj.setTexture(tex, tex.getDefaultMapping(editObj.getObject()));
+        preview.setTexture(tex, editObj.getObject().getTextureMapping());
       }
     }
     updateComponents();
@@ -568,8 +568,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private void resetParameters()
   {
     preview.cancelRendering();
-    editObj.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
-    preview.getObject().setTexture(preview.getObject().object.getTexture(), preview.getObject().object.getTextureMapping());
+    editObj.setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping());
+    preview.getObject().setTexture(preview.getObject().getObject().getTexture(), preview.getObject().getObject().getTextureMapping());
     renderPreview();
   }
 
@@ -621,7 +621,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     
     texList.remove(index);
     preview.cancelRendering();
-    if (editObj.object.getTextureMapping() instanceof LayeredMapping)
+    if (editObj.getObject().getTextureMapping() instanceof LayeredMapping)
     {
       Texture layers[] = layeredMap.getLayers();
       for (int i = layers.length-1; i >= 0; i--)
@@ -633,10 +633,10 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       renderPreview();
       updateComponents();
     }
-    else if (editObj.object.getTexture() == tex)
+    else if (editObj.getObject().getTexture() == tex)
     {
-      editObj.setTexture(scene.getDefaultTexture(), scene.getDefaultTexture().getDefaultMapping(editObj.object));
-      preview.setTexture(editObj.object.getTexture(), editObj.object.getTextureMapping());
+      editObj.setTexture(scene.getDefaultTexture(), scene.getDefaultTexture().getDefaultMapping(editObj.getObject()));
+      preview.setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping());
       renderPreview();
       updateComponents();
     }

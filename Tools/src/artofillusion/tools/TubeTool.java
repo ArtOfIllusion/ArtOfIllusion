@@ -14,7 +14,6 @@ import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import java.util.*;
 
 /** The tube tool creates Tube objects from Curves. */
 
@@ -42,7 +41,7 @@ public class TubeTool implements ModellingTool
     if (selection.length == 1)
       {
         ObjectInfo info = scene.getObject(selection[0]);
-        if (info.object instanceof Curve)
+        if (info.getObject() instanceof Curve)
           {
             new TubeDialog(window, info);
             return;

@@ -59,7 +59,7 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
       point.param = params.val;
     double weight = theWeight.getWeight(time);
     if (worldCoords)
-      info.addDistortion(new CustomDistortion(proc, procVersion, point, weight, info.coords.fromLocal(), info.coords.toLocal()));
+      info.addDistortion(new CustomDistortion(proc, procVersion, point, weight, info.getCoords().fromLocal(), info.getCoords().toLocal()));
     else
       info.addDistortion(new CustomDistortion(proc, procVersion, point, weight, null, null));
   }

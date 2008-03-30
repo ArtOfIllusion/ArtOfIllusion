@@ -39,7 +39,7 @@ public class LatheDialog extends BDialog
   {
     super(window, "Lathe", true);
     this.window = window;
-    theCurve = (Curve) curve.object;
+    theCurve = (Curve) curve.getObject();
     curveInfo = curve;
 
     // Layout the window.
@@ -84,10 +84,10 @@ public class LatheDialog extends BDialog
   
   private void doOk()
   {
-    CoordinateSystem coords = curveInfo.coords.duplicate();
-    Vec3 offset = curveInfo.coords.fromLocal().times(theCurve.getVertices()[0].r).minus(coords.fromLocal().times(((Mesh) preview.getObject().object).getVertices()[0].r));
+    CoordinateSystem coords = curveInfo.getCoords().duplicate();
+    Vec3 offset = curveInfo.getCoords().fromLocal().times(theCurve.getVertices()[0].r).minus(coords.fromLocal().times(((Mesh) preview.getObject().getObject()).getVertices()[0].r));
     coords.setOrigin(coords.getOrigin().plus(offset));
-    window.addObject(preview.getObject().object, coords, "Lathed Object "+(counter++), null);
+    window.addObject(preview.getObject().getObject(), coords, "Lathed Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
     window.updateImage();

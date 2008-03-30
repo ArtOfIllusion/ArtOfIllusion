@@ -99,7 +99,7 @@ public abstract class ObjectCollection extends Object3D
     for (int i = 0; i < cachedObjects.size(); i++)
       {
         ObjectInfo info = (ObjectInfo) cachedObjects.elementAt(i);
-        if (!info.object.isClosed())
+        if (!info.getObject().isClosed())
           return false;
       }
     return true;
@@ -140,10 +140,10 @@ public abstract class ObjectCollection extends Object3D
     while (enm.hasMoreElements())
     {
       ObjectInfo info = (ObjectInfo) enm.nextElement();
-      CoordinateSystem coords = info.coords.duplicate();
+      CoordinateSystem coords = info.getCoords().duplicate();
       coords.transformCoordinates(m);
       theCamera.setObjectTransform(coords.fromLocal());
-      info.object.renderObject(info, canvas, info.coords.toLocal().timesDirection(viewDir));
+      info.getObject().renderObject(info, canvas, info.getCoords().toLocal().timesDirection(viewDir));
     }
   }
 
@@ -165,10 +165,10 @@ public abstract class ObjectCollection extends Object3D
     while (objects.hasMoreElements())
       {
         ObjectInfo obj = (ObjectInfo) objects.nextElement();
-        if (obj.object.canConvertToTriangleMesh() == CANT_CONVERT)
+        if (obj.getObject().canConvertToTriangleMesh() == CANT_CONVERT)
           continue;
-        Mat4 trans = obj.coords.fromLocal();
-        TriangleMesh tri = obj.object.convertToTriangleMesh(tol);
+        Mat4 trans = obj.getCoords().fromLocal();
+        TriangleMesh tri = obj.getObject().convertToTriangleMesh(tol);
         MeshVertex vert[] = tri.getVertices();
         for (int i = 0; i < vert.length; i++)
           allVert.addElement(trans.times(vert[i].r));
@@ -194,11 +194,11 @@ public abstract class ObjectCollection extends Object3D
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     if (cachedBounds == null || (usesTime && lastTime != scene.getTime()) ||
-        (usesCoords && !lastCoords.equals(info.coords)))
+        (usesCoords && !lastCoords.equals(info.getCoords())))
       {
         lastScene = scene;
         lastTime = scene.getTime();
-        lastCoords = info.coords.duplicate();
+        lastCoords = info.getCoords().duplicate();
         lastInfo = info;
         cachedObjects = null;
         Enumeration objects = getObjects(info, true, scene);
@@ -209,7 +209,7 @@ public abstract class ObjectCollection extends Object3D
             {
               ObjectInfo obj = (ObjectInfo) objects.nextElement();
               BoundingBox bounds = obj.getBounds();
-              bounds = bounds.transformAndOutset(obj.coords.fromLocal());
+              bounds = bounds.transformAndOutset(obj.getCoords().fromLocal());
               if (cachedBounds == null)
                 cachedBounds = bounds;
               else

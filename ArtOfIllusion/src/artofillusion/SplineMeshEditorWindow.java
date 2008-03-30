@@ -81,8 +81,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     modes.addTool(new GenericTool(this, "curve", Translate.text("curveSelectionModeTool.tipText")));
     setSelectionMode(modes.getSelection());
     createEditMenu();
-    createMeshMenu((SplineMesh) obj.object);
-    createSkeletonMenu((SplineMesh) obj.object);
+    createMeshMenu((SplineMesh) obj.getObject());
+    createSkeletonMenu((SplineMesh) obj.getObject());
     createViewMenu();
     recursivelyAddListeners(this);
     UIUtilities.applyDefaultFont(content);
@@ -91,7 +91,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     d2 = new Dimension((d1.width*3)/4, (d1.height*3)/4);
     setBounds(new Rectangle((d1.width-d2.width)/2, (d1.height-d2.height)/2, d2.width, d2.height));
     tools.requestFocus();
-    selected = new boolean [((Mesh) objInfo.object).getVertices().length];
+    selected = new boolean [((Mesh) objInfo.getObject()).getVertices().length];
     findSelectionDistance();
     addExtraParameters();
     updateMenus();
@@ -174,7 +174,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   public void setObject(Object3D obj)
   {
-    objInfo.object = obj;
+    objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
   
@@ -182,7 +182,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   public void setSelectionMode(int mode)
   {
-    SplineMesh mesh = (SplineMesh) getObject().object;
+    SplineMesh mesh = (SplineMesh) getObject().getObject();
     MeshVertex vert[] = mesh.getVertices();
     int i, j, usize = mesh.getUSize(), vsize = mesh.getVSize();
     boolean newSel[];
@@ -251,7 +251,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   void findSelectionDistance()
   {
-    SplineMesh mesh = (SplineMesh) getObject().object;
+    SplineMesh mesh = (SplineMesh) getObject().getObject();
     int i, j, k, usize = mesh.getUSize(), vsize = mesh.getVSize();
     boolean uclosed = mesh.isUClosed(), vclosed = mesh.isVClosed();
     int dist[] = new int [mesh.getVertices().length];
@@ -363,7 +363,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   public void updateMenus()
   {
     super.updateMenus();
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     boolean curvemode = (selectMode == EDGE_MODE);
     MeshViewer view = (MeshViewer) theView[currentView];
     int count = 0;
@@ -405,7 +405,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     if (jointWeightParam != null)
       return;
     jointWeightParam = new TextureParameter(this, "Joint Weight", 0.0, 1.0, 0.0);
-    SplineMesh mesh = (SplineMesh) getObject().object;
+    SplineMesh mesh = (SplineMesh) getObject().getObject();
     TextureParameter params[] = mesh.getParameters();
     TextureParameter newparams[] = new TextureParameter [params.length+1];
     ParameterValue values[] = mesh.getParameterValues();
@@ -431,7 +431,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     if (jointWeightParam == null)
       return;
     jointWeightParam = null;
-    SplineMesh mesh = (SplineMesh) getObject().object;
+    SplineMesh mesh = (SplineMesh) getObject().getObject();
     TextureParameter params[] = mesh.getParameters();
     TextureParameter newparams[] = new TextureParameter [params.length-1];
     ParameterValue values[] = mesh.getParameterValues();
@@ -450,7 +450,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   private void updateJointWeightParam()
   {
-    MeshVertex vert[] = ((SplineMesh) getObject().object).getVertices();
+    MeshVertex vert[] = ((SplineMesh) getObject().getObject()).getVertices();
     double jointWeight[] = new double [vert.length];
     int selJointId = ((MeshViewer) theView[currentView]).getSelectedJoint();
     Joint selJoint = getObject().getSkeleton().getJoint(selJointId);
@@ -466,9 +466,9 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       else
         jointWeight[i] = 0.0;
     }
-    VertexParameterValue value = (VertexParameterValue) getObject().object.getParameterValue(jointWeightParam);
+    VertexParameterValue value = (VertexParameterValue) getObject().getObject().getParameterValue(jointWeightParam);
     value.setValue(jointWeight);
-    getObject().object.setParameterValues(getObject().object.getParameterValues());
+    getObject().getObject().setParameterValues(getObject().getObject().getParameterValues());
     lastSelectedJoint = selJointId;
     objInfo.clearCachedMeshes();
   }
@@ -483,7 +483,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   protected void doOk()
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     if (((SplineMesh) oldMesh).getMaterial() != null)
     {
       if (!theMesh.isClosed())
@@ -571,7 +571,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   public void extendSelectionCommand()
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected.clone()}));
     if (selectMode == POINT_MODE)
     {
@@ -621,7 +621,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     if (!topology)
       return;
     int i, j, k, m, unum = 0, vnum = 0;
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     float us[] = theMesh.getUSmoothness(), vs[] = theMesh.getVSmoothness(), newus[], newvs[];
     MeshVertex vt[] = theMesh.getVertices(), v[][];
     int usize = theMesh.getUSize(), vsize = theMesh.getVSize();
@@ -672,7 +672,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   void subdivideCommand()
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     MeshVertex vt[] = theMesh.getVertices();
     float us[] = theMesh.getUSmoothness(), vs[] = theMesh.getVSmoothness(), newus[], newvs[];
     boolean newsel[], splitu[], splitv[];
@@ -785,7 +785,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   private void splitOneAxis(MeshVertex v[][], MeshVertex newv[][], float s[], float news[], boolean split[], double param[][][], double newparam[][][], boolean closed)
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     int method = theMesh.getSmoothingMethod();
     int numParam = param[0][0].length;
     double paramTemp[] = new double [numParam];
@@ -886,7 +886,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   void extractCurveCommand()
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     MeshVertex vt[] = theMesh.getVertices();
     int usize = theMesh.getUSize(), vsize = theMesh.getVSize();
     int i, which;
@@ -934,14 +934,14 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       parent = parent.getParent();
     if (parent != null)
     {
-      ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.coords.duplicate(), "Extracted Curve", null);
+      ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(), "Extracted Curve", null);
       ((LayoutWindow) parent).updateImage();
     }
   }
 
   void setSmoothnessCommand()
   {
-    final SplineMesh theMesh = (SplineMesh) objInfo.object;
+    final SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     SplineMesh oldMesh = (SplineMesh) theMesh.duplicate();
     final float usmoothness[] = theMesh.getUSmoothness(), vsmoothness[] = theMesh.getVSmoothness();
     float value;
@@ -989,7 +989,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   void reverseNormalsCommand()
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
     theMesh.reverseOrientation();
     objectChanged();
@@ -998,7 +998,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   void setSmoothingMethod(int method)
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
 
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
     for (int i = 0; i < smoothItem.length; i++)
@@ -1011,7 +1011,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   void setClosed(int item)
   {
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
 
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
     for (int i = 0; i < closedItem.length; i++)
@@ -1027,7 +1027,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];
-    SplineMesh theMesh = (SplineMesh) objInfo.object;
+    SplineMesh theMesh = (SplineMesh) objInfo.getObject();
     int maxDistance = getTensionDistance(), usize = theMesh.getUSize(), vsize = theMesh.getVSize();
     double tension = getMeshTension(), scale[] = new double [maxDistance+1];
 

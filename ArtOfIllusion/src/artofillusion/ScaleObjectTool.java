@@ -101,7 +101,7 @@ public class ScaleObjectTool extends EditingTool
     for (i = 0; i < objectPos.length; i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        objectPos[i] = info.coords.getOrigin();
+        objectPos[i] = info.getCoords().getOrigin();
       }
     
     // Figure out the correspondence between the object's x, y, and z axes, on the
@@ -110,7 +110,7 @@ public class ScaleObjectTool extends EditingTool
     for (i = 0; i < bounds.length; i++)
       {
         bounds[i] = ((ObjectInfo) toMove.elementAt(i)).getBounds();
-        cam.setObjectTransform(((ObjectInfo) toMove.elementAt(i)).coords.fromLocal());
+        cam.setObjectTransform(((ObjectInfo) toMove.elementAt(i)).getCoords().fromLocal());
         screenx = cam.getObjectToView().timesDirection(Vec3.vx());
         screeny = cam.getObjectToView().timesDirection(Vec3.vy());
         screenz = cam.getObjectToView().timesDirection(Vec3.vz());
@@ -155,13 +155,13 @@ public class ScaleObjectTool extends EditingTool
       {
         if (scaleAround == POSITIONS_FIXED)
           for (i = 0; i < scaleCenter.length; i++)
-            scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).coords.getOrigin();
+            scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).getCoords().getOrigin();
         else
           for (i = 0; i < scaleCenter.length; i++)
-            scaleCenter[i] = clickedObject.coords.getOrigin();
+            scaleCenter[i] = clickedObject.getCoords().getOrigin();
         for (i = 0; i < scaleCenter.length; i++)
-          scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).coords.toLocal().times(scaleCenter[i]);
-        cam.setObjectTransform(clickedObject.coords.fromLocal());
+          scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).getCoords().toLocal().times(scaleCenter[i]);
+        cam.setObjectTransform(clickedObject.getCoords().fromLocal());
         r = cam.findScreenBounds(clickedObject.getBounds());
         halfx = r.width/2.0;
         halfy = r.height/2.0;
@@ -175,18 +175,18 @@ public class ScaleObjectTool extends EditingTool
             {
               ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
               scaleCenter[i] = findBorderPos(info.getBounds(), 
-                info.coords.getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
+                info.getCoords().getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
             }
         else
           {
             for (i = 0; toMove.elementAt(i) != clickedObject; i++);
             Vec3 center = findBorderPos(clickedObject.getBounds(), 
-                clickedObject.coords.getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
-            center = clickedObject.coords.fromLocal().times(center);
+                clickedObject.getCoords().getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
+            center = clickedObject.getCoords().fromLocal().times(center);
             for (i = 0; i < scaleCenter.length; i++)
-              scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).coords.toLocal().times(center);
+              scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).getCoords().toLocal().times(center);
           }
-        cam.setObjectTransform(clickedObject.coords.fromLocal());
+        cam.setObjectTransform(clickedObject.getCoords().fromLocal());
         r = cam.findScreenBounds(clickedObject.getBounds());
         halfx = r.width/2.0;
         halfy = r.height/2.0;
@@ -236,7 +236,7 @@ public class ScaleObjectTool extends EditingTool
     for (i = 0; i < objectPos.length; i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        objectPos[i] = info.coords.getOrigin();
+        objectPos[i] = info.getCoords().getOrigin();
       }
     clickPoint = e.getPoint();
     dragged = false;
@@ -349,7 +349,7 @@ public class ScaleObjectTool extends EditingTool
         for (i = 0; i < toMove.size(); i++)
           {
             ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-            c = info.coords;
+            c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
         dragged = true;
@@ -366,11 +366,11 @@ public class ScaleObjectTool extends EditingTool
     if (e.isControlDown())
       v = cam.getCameraCoordinates().getZDirection().times(-dy*0.01);
     else
-      v = cam.findDragVector(clickedObject.coords.getOrigin(), dx, dy);
+      v = cam.findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
     for (i = 0; i < toMove.size(); i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        c = info.coords;
+        c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
     theWindow.updateImage();
@@ -393,10 +393,10 @@ public class ScaleObjectTool extends EditingTool
       for (int i = 0; i < toMove.size(); i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        oldObj[i] = info.object.duplicate();
-        oldCoords[i] = info.coords.duplicate();
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.coords, oldCoords[i]});
-        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {info.object, oldObj[i]});
+        oldObj[i] = info.getObject().duplicate();
+        oldCoords[i] = info.getCoords().duplicate();
+        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.getCoords(), oldCoords[i]});
+        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {info.getObject(), oldObj[i]});
       }
       dragged = true;
     }
@@ -444,14 +444,14 @@ public class ScaleObjectTool extends EditingTool
       }
       Vec3 oldsize = bounds[i].getSize();
       ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-      Object3D obj = info.object;
+      Object3D obj = info.getObject();
       obj.copyObject(oldObj[i]);
       obj.setSize(scale[0]*oldsize.x, scale[1]*oldsize.y, scale[2]*oldsize.z);
       Vec3 offset = new Vec3(scaleCenter[i]);
       offset.x *= 1.0-scale[0];
       offset.y *= 1.0-scale[1];
       offset.z *= 1.0-scale[2];
-      info.coords.setOrigin(oldCoords[i].fromLocal().times(offset));
+      info.getCoords().setOrigin(oldCoords[i].fromLocal().times(offset));
       theScene.objectModified(obj);
     }
     theWindow.updateImage();

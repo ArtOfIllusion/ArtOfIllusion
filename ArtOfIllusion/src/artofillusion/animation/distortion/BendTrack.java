@@ -53,7 +53,7 @@ public class BendTrack extends Track
     if (weight == 0.0)
       return;
     if (worldCoords)
-      info.addDistortion(new BendDistortion(axis, direction, angle.val*weight, forward, info.coords.fromLocal(), info.coords.toLocal()));
+      info.addDistortion(new BendDistortion(axis, direction, angle.val*weight, forward, info.getCoords().fromLocal(), info.getCoords().toLocal()));
     else
       info.addDistortion(new BendDistortion(axis, direction, angle.val*weight, forward, null, null));
   }

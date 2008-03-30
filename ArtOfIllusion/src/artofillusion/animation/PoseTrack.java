@@ -39,7 +39,7 @@ public class PoseTrack extends Track
     smoothingMethod = Timecourse.INTERPOLATING;
     theWeight = new WeightTrack(this);
     subtracks = new Track [] {theWeight};
-    info.object.configurePoseTrack(this);
+    info.getObject().configurePoseTrack(this);
   }
   
   /** Modify the pose of the object. */
@@ -52,18 +52,18 @@ public class PoseTrack extends Track
     {
       if (info.isDistorted())
       {
-        Actor actor = Actor.getActor(info.object);
+        Actor actor = Actor.getActor(info.getObject());
         info.addDistortion(new PoseDistortion(theWeight.getWeight(time), pose, actor, relative));
       }
-      else if (info.pose == null)
-        info.pose = pose;
+      else if (info.getPose() == null)
+        info.setPose(pose);
       else
       {
         double weight = theWeight.getWeight(time);
         if (relative)
-          info.pose = info.pose.blend(pose, 1.0, weight);
+          info.setPose(info.pose.blend(pose, 1.0, weight));
         else
-          info.pose = info.pose.blend(pose, 1.0-weight, weight);
+          info.setPose(info.pose.blend(pose, 1.0-weight, weight));
       }
     }
     for (int i = 0; i < subtracks.length; i++)
@@ -128,7 +128,7 @@ public class PoseTrack extends Track
   
   public Keyframe setKeyframe(double time, Scene sc)
   {
-    Keyframe pose = info.object.getPoseKeyframe();
+    Keyframe pose = info.getObject().getPoseKeyframe();
     
     tc.addTimepoint(pose, time, new Smoothness());
     return pose;
@@ -145,7 +145,7 @@ public class PoseTrack extends Track
     if (tc.getTimes().length == 0)
       return setKeyframe(time, sc);
     Keyframe pose1 = tc.evaluate(time, smoothingMethod);
-    Keyframe pose2 = info.pose == null ? info.object.getPoseKeyframe() : info.pose;
+    Keyframe pose2 = info.getPose() == null ? info.getObject().getPoseKeyframe() : info.getPose();
     if (!pose1.equals(pose2))
       return setKeyframe(time, sc);
     return null;
@@ -183,7 +183,7 @@ public class PoseTrack extends Track
   
   public boolean canAcceptAsParent(Object obj)
   {
-    return (obj instanceof ObjectInfo && ((ObjectInfo) obj).object == info.object);
+    return (obj instanceof ObjectInfo && ((ObjectInfo) obj).getObject() == info.getObject());
   }
   
   /** Get the parent object of this track. */
@@ -338,7 +338,7 @@ public class PoseTrack extends Track
           }
       }
     tc = new Timecourse(v, t, s);
-    info.object.configurePoseTrack(this);
+    info.getObject().configurePoseTrack(this);
     if (version == 0)
       theWeight.initFromStream(in, scene);
     else
@@ -350,7 +350,7 @@ public class PoseTrack extends Track
   
   public void editKeyframe(LayoutWindow win, int which)
   {
-    info.object.editKeyframe(win, tc.getValues()[which], info);
+    info.getObject().editKeyframe(win, tc.getValues()[which], info);
   }
 
   /** This method presents a window in which the user can edit the track. */

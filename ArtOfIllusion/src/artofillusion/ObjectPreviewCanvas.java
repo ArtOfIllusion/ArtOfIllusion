@@ -42,8 +42,8 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     if (obj != null)
     {
       objInfo = obj.duplicate();
-      objInfo.coords.setOrigin(new Vec3());
-      objInfo.coords.setOrientation(Vec3.vz(), Vec3.vy());
+      objInfo.getCoords().setOrigin(new Vec3());
+      objInfo.getCoords().setOrientation(Vec3.vz(), Vec3.vy());
       objInfo.clearDistortion();
     }
     buildChoices(p);
@@ -75,7 +75,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     if (objInfo == null)
       objInfo = new ObjectInfo(obj, new CoordinateSystem(), "");
     else
-      objInfo.object = obj;
+      objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
   
@@ -108,7 +108,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
 
     // Draw the object.
 
-    theCamera.setObjectTransform(objInfo.coords.fromLocal());
+    theCamera.setObjectTransform(objInfo.getCoords().fromLocal());
     renderObject();
 
     // Finish up.
@@ -139,7 +139,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
       // When the canvas first comes up, calculate an initial scale that allows the entire object to be seen.
       
       Rectangle dim = getBounds();
-      Vec3 objSize = objInfo.object.getBounds().getSize();
+      Vec3 objSize = objInfo.getObject().getBounds().getSize();
       double scale = 0.8*Math.min(dim.width, dim.height)/Math.max(Math.max(objSize.x, objSize.y), objSize.z);
       setScale(scale);
       theCamera.setScreenParams(0, scale, dim.width, dim.height);
@@ -163,8 +163,8 @@ public class ObjectPreviewCanvas extends ViewerCanvas
         else if (renderMode == RENDER_SMOOTH)
           shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
         else
-          shader = new TexturedVertexShader(mesh, objInfo.object, 0.0, viewDir).optimize();
-        renderMesh(mesh, shader, theCamera, objInfo.object.isClosed(), null);
+          shader = new TexturedVertexShader(mesh, objInfo.getObject(), 0.0, viewDir).optimize();
+        renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), null);
       }
     }
   }

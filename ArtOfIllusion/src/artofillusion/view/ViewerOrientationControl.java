@@ -84,7 +84,7 @@ public class ViewerOrientationControl implements ViewerControl
       ObjectInfo cameras[] = ((SceneViewer) view).getCameras();
       for (i = 0; i < cameras.length; i++)
       {
-        add(getItemCount()-1, cameras[i].name);
+        add(getItemCount()-1, cameras[i].getName());
         if (cameras[i] == view.getBoundCamera())
           selected = getItemCount()-2;
       }

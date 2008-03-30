@@ -37,7 +37,7 @@ public class TextureTrack extends Track
     tc = new Timecourse(new Keyframe [0], new double [0], new Smoothness [0]);
     smoothingMethod = Timecourse.INTERPOLATING;
     theWeight = new WeightTrack(this);
-    param = info.object.getParameters();
+    param = info.getObject().getParameters();
   }
   
   /* Modify the parameters of the object. */
@@ -47,8 +47,8 @@ public class TextureTrack extends Track
     ArrayKeyframe val = (ArrayKeyframe) tc.evaluate(time, smoothingMethod);
     if (val == null)
       return;
-    TextureParameter texParam[] = info.object.getParameters();
-    ParameterValue paramValue[] = info.object.getParameterValues();
+    TextureParameter texParam[] = info.getObject().getParameters();
+    ParameterValue paramValue[] = info.getObject().getParameterValues();
     double weight = theWeight.getWeight(time);
     for (int i = 0; i < texParam.length; i++)
       for (int j = 0; j < param.length; j++)
@@ -66,7 +66,7 @@ public class TextureTrack extends Track
 	    v = texParam[i].maxVal;
 	  paramValue[i] = new ConstantParameterValue(v);
 	}
-    info.object.setParameterValues(paramValue);
+    info.getObject().setParameterValues(paramValue);
   }
   
   /* Create a duplicate of this track. */
@@ -125,8 +125,8 @@ public class TextureTrack extends Track
   
   public Keyframe setKeyframe(double time, Scene sc)
   {
-    TextureParameter texParam[] = info.object.getParameters();
-    ParameterValue paramValue[] = info.object.getParameterValues();
+    TextureParameter texParam[] = info.getObject().getParameters();
+    ParameterValue paramValue[] = info.getObject().getParameterValues();
     double d[] = new double [param.length];
 
     for (int i = 0; i < texParam.length; i++)
@@ -144,8 +144,8 @@ public class TextureTrack extends Track
   
   public Keyframe setKeyframeIfModified(double time, Scene sc)
   {
-    TextureParameter texParam[] = info.object.getParameters();
-    ParameterValue paramValue[] = info.object.getParameterValues();
+    TextureParameter texParam[] = info.getObject().getParameters();
+    ParameterValue paramValue[] = info.getObject().getParameterValues();
     double d[] = new double [param.length];
     boolean change = false;
     ArrayKeyframe key = (ArrayKeyframe) tc.evaluate(time, smoothingMethod);
@@ -244,8 +244,8 @@ public class TextureTrack extends Track
   
   public double [] getDefaultGraphValues()
   {
-    TextureParameter texParam[] = info.object.getParameters();
-    ParameterValue paramValue[] = info.object.getParameterValues();
+    TextureParameter texParam[] = info.getObject().getParameters();
+    ParameterValue paramValue[] = info.getObject().getParameterValues();
     double d[] = new double [param.length];
 
     for (int i = 0; i < texParam.length; i++)
@@ -291,7 +291,7 @@ public class TextureTrack extends Track
   
   public void parametersChanged()
   {
-    TextureParameter texParam[] = info.object.getParameters();
+    TextureParameter texParam[] = info.getObject().getParameters();
     boolean exists[] = new boolean [param.length];
     int num = 0;
     
@@ -331,7 +331,7 @@ public class TextureTrack extends Track
   
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
-    TextureParameter texParam[] = info.object.getParameters();
+    TextureParameter texParam[] = info.getObject().getParameters();
     double t[] = tc.getTimes();
     Smoothness s[] = tc.getSmoothness();
     Keyframe v[] = tc.getValues();
@@ -370,7 +370,7 @@ public class TextureTrack extends Track
     smoothingMethod = in.readInt();
     int numParams = in.readShort();
     param = new TextureParameter [numParams];
-    TextureParameter texParam[] = info.object.getParameters();
+    TextureParameter texParam[] = info.getObject().getParameters();
     for (int i = 0; i < param.length; i++)
       param[i] = texParam[in.readShort()];
     int keys = in.readInt();
@@ -458,11 +458,11 @@ public class TextureTrack extends Track
     
     // Create a tree of all the texture parameters.
     
-    TextureParameter texParam[] = info.object.getParameters();
-    ParameterValue paramValue[] = info.object.getParameterValues();
-    if (info.object.getTextureMapping() instanceof LayeredMapping)
+    TextureParameter texParam[] = info.getObject().getParameters();
+    ParameterValue paramValue[] = info.getObject().getParameterValues();
+    if (info.getObject().getTextureMapping() instanceof LayeredMapping)
     {
-      LayeredMapping map = (LayeredMapping) info.object.getTextureMapping();
+      LayeredMapping map = (LayeredMapping) info.getObject().getTextureMapping();
       Texture layer[] = map.getLayers();
       for (int i = 0; i < layer.length; i++)
       {

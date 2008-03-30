@@ -73,7 +73,7 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo obj = theScene.getObject(i);
-      if (obj.object instanceof SceneCamera)
+      if (obj.getObject() instanceof SceneCamera)
         cameras.addElement(obj);
     }
     for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
@@ -100,7 +100,7 @@ public class SceneViewer extends ViewerCanvas
     {
       boundCamera = (ObjectInfo) cameras.elementAt(which-6);
       CoordinateSystem coords = theCamera.getCameraCoordinates();
-      coords.copyCoords(boundCamera.coords);
+      coords.copyCoords(boundCamera.getCoords());
       theCamera.setCameraCoordinates(coords);
       dispatchEvent(viewChangedEvent);
       repaint();
@@ -126,7 +126,7 @@ public class SceneViewer extends ViewerCanvas
       double dy = bounds.maxy-bounds.miny;
       double dz = bounds.maxz-bounds.minz;
       double size = 0.5*Math.sqrt(dx*dx+dy*dy+dz*dz);
-      double depth = toView.times(info.coords.getOrigin()).z;
+      double depth = toView.times(info.getCoords().getOrigin()).z;
       if (depth-size < min)
         min = depth-size;
       if (depth+size > max)
@@ -152,8 +152,8 @@ public class SceneViewer extends ViewerCanvas
       obj = theScene.getObject(i);
       if (obj == boundCamera)
         continue;
-      theCamera.setObjectTransform(obj.coords.fromLocal());
-      obj.object.renderObject(obj, this, viewdir);
+      theCamera.setObjectTransform(obj.getCoords().fromLocal());
+      obj.getObject().renderObject(obj, this, viewdir);
     }
 
     // Hilight the selection.
@@ -179,7 +179,7 @@ public class SceneViewer extends ViewerCanvas
         }
         else
           continue;
-        theCamera.setObjectTransform(obj.coords.fromLocal());
+        theCamera.setObjectTransform(obj.getCoords().fromLocal());
         bounds = theCamera.findScreenBounds(obj.getBounds());
         if (bounds != null)
         {
@@ -255,7 +255,7 @@ public class SceneViewer extends ViewerCanvas
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);
-      theCamera.setObjectTransform(info.coords.fromLocal());
+      theCamera.setObjectTransform(info.getCoords().fromLocal());
       bounds = theCamera.findScreenBounds(info.getBounds());
       if (bounds != null && pointInRectangle(p, bounds))
       {
@@ -339,9 +339,9 @@ public class SceneViewer extends ViewerCanvas
     for (i = 0; i < theScene.getNumObjects(); i++)
     {
       info = theScene.getObject(i);
-      if (info.visible)
+      if (info.isVisible())
       {
-        theCamera.setObjectTransform(info.coords.fromLocal());
+        theCamera.setObjectTransform(info.getCoords().fromLocal());
         bounds = theCamera.findScreenBounds(info.getBounds());
         if (bounds != null && pointInRectangle(p, bounds))
           if (bounds.width*bounds.height < minarea)
@@ -482,9 +482,9 @@ public class SceneViewer extends ViewerCanvas
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         info = theScene.getObject(i);
-        if (info.visible)
+        if (info.isVisible())
         {
-          theCamera.setObjectTransform(info.coords.fromLocal());
+          theCamera.setObjectTransform(info.getCoords().fromLocal());
           b = theCamera.findScreenBounds(info.getBounds());
           if (b != null && b.x < r.x+r.width && b.y < r.y+r.height && r.x < b.x+b.width && r.y < b.y+b.height)
           {
@@ -544,9 +544,9 @@ public class SceneViewer extends ViewerCanvas
   
   public void mouseClicked(MouseClickedEvent e)
   {
-    if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.object.isEditable())
+    if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
-      final Object3D obj = clickedObject.object;
+      final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
 	  public void run()
@@ -568,7 +568,7 @@ public class SceneViewer extends ViewerCanvas
 
       UndoRecord undo = new UndoRecord(getEditingWindow(), false);
       super.processMouseScrolled(ev);
-      moveChildren(boundCamera, theCamera.getCameraCoordinates().fromLocal().times(boundCamera.coords.toLocal()), undo);
+      moveChildren(boundCamera, theCamera.getCameraCoordinates().fromLocal().times(boundCamera.getCoords().toLocal()), undo);
       getEditingWindow().setUndoRecord(undo);
       getEditingWindow().updateImage();
     }
@@ -580,11 +580,11 @@ public class SceneViewer extends ViewerCanvas
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)
   {
-    CoordinateSystem coords = obj.coords;
+    CoordinateSystem coords = obj.getCoords();
     CoordinateSystem oldCoords = coords.duplicate();
     coords.transformCoordinates(transform);
     undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
-    for (int i = 0; i < obj.children.length; i++)
-      moveChildren(obj.children[i], transform, undo);
+    for (int i = 0; i < obj.getChildren().length; i++)
+      moveChildren(obj.getChildren()[i], transform, undo);
   }
 }

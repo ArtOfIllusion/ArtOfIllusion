@@ -48,7 +48,7 @@ public class ScaleTrack extends Track
       return;
     double weight = theWeight.getWeight(time), w2 = 1.0-weight;
     if (worldCoords)
-      info.addDistortion(new ScaleDistortion(scale.x*weight+w2, scale.y*weight+w2, scale.z*weight+w2, info.coords.fromLocal(), info.coords.toLocal()));
+      info.addDistortion(new ScaleDistortion(scale.x*weight+w2, scale.y*weight+w2, scale.z*weight+w2, info.getCoords().fromLocal(), info.getCoords().toLocal()));
     else
       info.addDistortion(new ScaleDistortion(scale.x*weight+w2, scale.y*weight+w2, scale.z*weight+w2, null, null));
   }

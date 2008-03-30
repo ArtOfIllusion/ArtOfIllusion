@@ -72,7 +72,7 @@ public class MoveObjectTool extends EditingTool
     for (i = 0; i < objectPos.length; i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        objectPos[i] = info.coords.getOrigin();
+        objectPos[i] = info.getCoords().getOrigin();
       }
     clickPoint = e.getPoint();
     dragged = false;
@@ -93,7 +93,7 @@ public class MoveObjectTool extends EditingTool
         for (i = 0; i < toMove.size(); i++)
           {
             ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-            c = info.coords;
+            c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
         dragged = true;
@@ -110,11 +110,11 @@ public class MoveObjectTool extends EditingTool
     if (e.isControlDown())
       v = cam.getCameraCoordinates().getZDirection().times(-dy*0.01);
     else
-      v = cam.findDragVector(clickedObject.coords.getOrigin(), dx, dy);
+      v = cam.findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
     for (i = 0; i < toMove.size(); i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        c = info.coords;
+        c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
     theWindow.updateImage();
@@ -192,7 +192,7 @@ public class MoveObjectTool extends EditingTool
       v = cameraCoords.getZDirection().times(-dy*0.01);
     else
     {
-      Vec3 origin = theScene.getObject(sel[0]).coords.getOrigin();
+      Vec3 origin = theScene.getObject(sel[0]).getCoords().getOrigin();
       if (Math.abs(origin.minus(cameraCoords.getOrigin()).dot(cameraCoords.getZDirection())) < 1e-10)
       {
         // The object being moved is in the plane of the camera, so use a slightly
@@ -208,7 +208,7 @@ public class MoveObjectTool extends EditingTool
       toMove.addElement(theScene.getObject(sel[i]));
     for (i = 0; i < toMove.size(); i++)
     {
-      c = ((ObjectInfo) toMove.elementAt(i)).coords;
+      c = ((ObjectInfo) toMove.elementAt(i)).getCoords();
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
       c.setOrigin(c.getOrigin().plus(v));
     }

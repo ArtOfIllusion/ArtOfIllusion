@@ -144,7 +144,7 @@ public class ScaleMeshTool extends MeshEditingTool
         scaleCenter.y = (bounds.miny+bounds.maxy)/2.0;
       }
     scaleAll = ev.getMouseEvent().isShiftDown();
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     baseVertPos = mesh.getVertexPositions();
   }
   
@@ -152,7 +152,7 @@ public class ScaleMeshTool extends MeshEditingTool
   {
     if (undo == null)
     {
-      Mesh mesh = (Mesh) controller.getObject().object;
+      Mesh mesh = (Mesh) controller.getObject().getObject();
       undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
     }
     Vec3 scale = scaleMesh(ev);
@@ -185,7 +185,7 @@ public class ScaleMeshTool extends MeshEditingTool
   private Vec3 scaleMesh(HandleEvent ev)
   {
     Point dragPoint = ev.getMouseEvent().getPoint();
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     double size, xscale, yscale, zscale;
 
     // Figure out how much to scale by.

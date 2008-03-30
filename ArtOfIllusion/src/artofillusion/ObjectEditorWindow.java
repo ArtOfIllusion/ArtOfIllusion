@@ -48,9 +48,9 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   {
     super(title);
     parentWindow = parent;
-    objInfo = obj.duplicate(obj.object.duplicate());
-    objInfo.coords.setOrigin(new Vec3());
-    objInfo.coords.setOrientation(Vec3.vz(), Vec3.vy());
+    objInfo = obj.duplicate(obj.getObject().duplicate());
+    objInfo.getCoords().setOrigin(new Vec3());
+    objInfo.getCoords().setOrientation(Vec3.vz(), Vec3.vy());
     objInfo.clearDistortion();
   }
 

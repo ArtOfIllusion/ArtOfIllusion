@@ -46,7 +46,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   {
     super(parent, title, obj);
     initialize();
-    oldMesh = (Mesh) obj.object;
+    oldMesh = (Mesh) obj.getObject();
     meshTension = lastMeshTension;
     tensionDistance = lastTensionDistance;
   }
@@ -71,7 +71,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   protected ViewerCanvas createViewerCanvas(int index, RowContainer controls)
   {
-    MeshViewer view = ((Mesh) objInfo.object).createMeshViewer(this, controls);
+    MeshViewer view = ((Mesh) objInfo.getObject()).createMeshViewer(this, controls);
     view.setRenderMode(lastRenderMode[index]);
     view.setMeshVisible(lastShowMesh[index]);
     view.setSurfaceVisible(lastShowSurface[index]);
@@ -95,7 +95,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
     displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
     displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_TRANSPARENT));
-    if (getObject().object.canSetTexture())
+    if (getObject().getObject().canSetTexture())
       viewMenu.add(colorSurfaceMenu = createColorSurfaceMenu());
     viewMenu.add(createShowMenu());
     viewMenu.add(coordsMenu = Translate.menu("coordinateSystem"));
@@ -129,7 +129,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   protected BMenu createColorSurfaceMenu()
   {
     BMenu menu = Translate.menu("colorSurfaceBy");
-    TextureParameter params[] = getObject().object.getParameters();
+    TextureParameter params[] = getObject().getObject().getParameters();
     int numParams = (params == null ? 0 : params.length);
     colorSurfaceItem = new BCheckBoxMenuItem [numParams+2];
     MeshViewer view = (MeshViewer) theView[currentView];
@@ -214,13 +214,13 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   public void undoCommand()
   {
     super.undoCommand();
-    setMesh((Mesh) getObject().object);
+    setMesh((Mesh) getObject().getObject());
   }
 
   public void redoCommand()
   {
     super.redoCommand();
-    setMesh((Mesh) getObject().object);
+    setMesh((Mesh) getObject().getObject());
   }
 
   public void updateMenus()
@@ -251,7 +251,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     {
       colorSurfaceItem[0].setState(view.getSurfaceTextureParameter() == null);
       colorSurfaceItem[1].setState(view.getSurfaceTextureParameter() == getJointWeightParam());
-      TextureParameter params[] = getObject().object.getParameters();
+      TextureParameter params[] = getObject().getObject().getParameters();
       for (int i = 2; i < colorSurfaceItem.length; i++)
         colorSurfaceItem[i].setState(view.getSurfaceTextureParameter() == params[i-2]);
     }
@@ -316,7 +316,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
         else if (i == 1)
           view.setSurfaceTextureParameter(getJointWeightParam());
         else
-          view.setSurfaceTextureParameter(getObject().object.getParameters()[i-2]);
+          view.setSurfaceTextureParameter(getObject().getObject().getParameters()[i-2]);
       }
     savePreferences();
     updateImage();
@@ -345,13 +345,13 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   public void setPointsCommand()
   {
     int i, j = 0, num = 0;
-    final Mesh theMesh = (Mesh) getObject().object;
+    final Mesh theMesh = (Mesh) getObject().getObject();
     Mesh oldMesh = (Mesh) theMesh.duplicate();
     Skeleton s = theMesh.getSkeleton();
     Joint jt[] = null;
     final int selectDist[] = getSelectionDistance();
     final MeshViewer view = (MeshViewer) theView[currentView];
-    final CoordinateSystem coords = view.thisObjectInScene.coords;
+    final CoordinateSystem coords = view.thisObjectInScene.getCoords();
     final MeshVertex vert[] = theMesh.getVertices();
     final Vec3 points[] = new Vec3 [vert.length];
     final ValueField xField, yField, zField;
@@ -475,12 +475,12 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   public void transformPointsCommand()
   {
     int i, j;
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     int selectDist[] = getSelectionDistance();
     MeshVertex vert[] = theMesh.getVertices();
     Vec3 points[] = new Vec3 [vert.length], center;
     MeshViewer view = (MeshViewer) theView[currentView];
-    CoordinateSystem coords = view.thisObjectInScene.coords;
+    CoordinateSystem coords = view.thisObjectInScene.getCoords();
 
     for (i = 0; i < selectDist.length && selectDist[i] == -1; i++);
     if (i == selectDist.length)
@@ -553,10 +553,10 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   public void randomizeCommand()
   {
     int i;
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     int selectDist[] = getSelectionDistance();
     MeshViewer view = (MeshViewer) theView[currentView];
-    CoordinateSystem coords = view.thisObjectInScene.coords;
+    CoordinateSystem coords = view.thisObjectInScene.getCoords();
     MeshVertex vert[] = theMesh.getVertices();
     Vec3 points[] = new Vec3 [vert.length];
     ValueField xfield, yfield, zfield;
@@ -595,10 +595,10 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   public void centerCommand()
   {
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     MeshVertex vert[] = theMesh.getVertices();
     MeshViewer view = (MeshViewer) theView[currentView];
-    CoordinateSystem coords = view.thisObjectInScene.coords;
+    CoordinateSystem coords = view.thisObjectInScene.getCoords();
     Vec3 center = theMesh.getBounds().getCenter(), points[] = new Vec3 [vert.length];
 
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {theMesh, theMesh.getVertexPositions()}));
@@ -692,10 +692,10 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   protected void setVertexParametersCommand()
   {
     ObjectInfo info = getObject();
-    Mesh theMesh = (Mesh) info.object;
+    Mesh theMesh = (Mesh) info.getObject();
     final MeshVertex vert[] = theMesh.getVertices();
-    TextureParameter param[] = info.object.getParameters();
-    final ParameterValue paramValue[] = info.object.getParameterValues();
+    TextureParameter param[] = info.getObject().getParameters();
+    final ParameterValue paramValue[] = info.getObject().getParameterValues();
     int i, j, k, paramIndex[] = null;
     final int selectDist[] = getSelectionDistance();
     double value[];
@@ -834,11 +834,11 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     LayoutInfo indent2 = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 20, 0, 0), null);
     RowContainer coordsPanel = null;
     ResetButton reset = null;
-    if (info.object.getTexture() instanceof LayeredTexture)
+    if (info.getObject().getTexture() instanceof LayeredTexture)
     {
       // This is a layered texture, so we want to group the parameters by layer.
 
-      LayeredMapping map = (LayeredMapping) info.object.getTextureMapping();
+      LayeredMapping map = (LayeredMapping) info.getObject().getTextureMapping();
       Texture layer[] = map.getLayers();
       for (k = 0; k < layer.length; k++)
       {
@@ -900,7 +900,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     {
       // This is a simple texture, so just list off all the parameters.
 
-      content.add(new BLabel(Translate.text("Texture")+": "+info.object.getTexture().getName()));
+      content.add(new BLabel(Translate.text("Texture")+": "+ info.getObject().getTexture().getName()));
       for (i = 0; i < paramIndex.length; i++)
       {
         TextureParameter pm = param[paramIndex[i]];
@@ -956,7 +956,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
         ((VertexParameterValue) paramValue[paramIndex[j]]).setValue(val);
       }
     }
-    info.object.setParameterValues(paramValue);
+    info.getObject().setParameterValues(paramValue);
     info.clearCachedMeshes();
     updateImage();
   }
@@ -965,9 +965,9 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   protected void setFaceParametersCommand()
   {
-    FacetedMesh theMesh = (FacetedMesh) objInfo.object;
-    TextureParameter param[] = objInfo.object.getParameters();
-    final ParameterValue paramValue[] = objInfo.object.getParameterValues();
+    FacetedMesh theMesh = (FacetedMesh) objInfo.getObject();
+    TextureParameter param[] = objInfo.getObject().getParameters();
+    final ParameterValue paramValue[] = objInfo.getObject().getParameterValues();
     boolean selected[] = getSelection();
     int i, j, k, paramIndex[] = null;
     double value[][];
@@ -1030,11 +1030,11 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     Widget editWidget[][] = new Widget [paramIndex.length][3];
     LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 10, 0, 5), null);
     FormContainer content;
-    if (objInfo.object.getTexture() instanceof LayeredTexture)
+    if (objInfo.getObject().getTexture() instanceof LayeredTexture)
     {
       // This is a layered texture, so we want to group the parameters by layer.
 
-      LayeredMapping map = (LayeredMapping) objInfo.object.getTextureMapping();
+      LayeredMapping map = (LayeredMapping) objInfo.getObject().getTextureMapping();
       Texture layer[] = map.getLayers();
       content = new FormContainer(2, paramIndex.length*3+layer.length);
       content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
@@ -1076,7 +1076,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
       content = new FormContainer(2, paramIndex.length*3+1);
       content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-      content.add(new BLabel(Translate.text("Texture")+": "+objInfo.object.getTexture().getName()), 0, 0);
+      content.add(new BLabel(Translate.text("Texture")+": "+ objInfo.getObject().getTexture().getName()), 0, 0);
       int line = 1;
       for (i = 0; i < paramIndex.length; i++)
       {
@@ -1140,7 +1140,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   public void deleteJointCommand()
   {
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     Skeleton s = theMesh.getSkeleton();
 
     if (s == null)
@@ -1165,7 +1165,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   public void setJointParentCommand()
   {
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     Skeleton s = theMesh.getSkeleton();
 
     if (s == null)
@@ -1257,7 +1257,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   public void editJointCommand()
   {
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     Skeleton s = theMesh.getSkeleton();
 
     if (s == null)
@@ -1274,7 +1274,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   public void bindSkeletonCommand()
   {
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     Skeleton s = theMesh.getSkeleton();
     if (s == null)
       return;
@@ -1408,8 +1408,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       {
         super(info, parent, tree, false);
         selectable = (info != ((MeshViewer) theView[currentView]).thisObjectInScene && info.getSkeleton() != null);
-        for (int i = 0; i < info.children.length; i++)
-          children.addElement(new TreeElem(info.children[i], this, tree));
+        for (int i = 0; i < info.getChildren().length; i++)
+          children.addElement(new TreeElem(info.getChildren()[i], this, tree));
       }
       public boolean isGray()
       {
@@ -1423,7 +1423,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
-      if (info.parent == null)
+      if (info.getParent() == null)
         tree.addElement(new TreeElem(info, null, tree));
     }
     tree.setUpdateEnabled(true);
@@ -1435,10 +1435,10 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("selectImportSkeleton"), new Widget [] {sp}, new String [] {null});
     if (!dlg.clickedOk() || tree.getSelectedObjects().length == 0)
       return;
-    Mesh theMesh = (Mesh) getObject().object;
+    Mesh theMesh = (Mesh) getObject().getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_SKELETON, new Object [] {theMesh.getSkeleton(), theMesh.getSkeleton().duplicate()}));
     ObjectInfo info = (ObjectInfo) tree.getSelectedObjects()[0];
-    theMesh.getSkeleton().addAllJoints(info.object.getSkeleton());
+    theMesh.getSkeleton().addAllJoints(info.getObject().getSkeleton());
     updateImage();
     updateMenus();
   }

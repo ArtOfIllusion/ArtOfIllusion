@@ -92,12 +92,12 @@ public class ObjectPropertiesPanel extends ColumnContainer
       objects[i] = scene.getObject(sel[i]);
     boolean objectsChanged = (previousObjects == null || objects.length != previousObjects.length);
     for (int i = 0; i < objects.length && !objectsChanged; i++)
-      objectsChanged |= (objects[i].object != previousObjects[i]);
+      objectsChanged |= (objects[i].getObject() != previousObjects[i]);
     if (objectsChanged)
     {
       previousObjects = new Object3D[objects.length];
       for (int i = 0; i < objects.length; i++)
-        previousObjects[i] = objects[i].object;
+        previousObjects[i] = objects[i].getObject();
     }
 
     // If nothing is selected, just place a message in the panel.
@@ -119,25 +119,25 @@ public class ObjectPropertiesPanel extends ColumnContainer
     // Set the name.
 
     if (objects.length == 1)
-      nameField.setText(objects[0].name);
+      nameField.setText(objects[0].getName());
 
     // Set the position and orientation.
 
-    Vec3 origin = objects[0].coords.getOrigin();
+    Vec3 origin = objects[0].getCoords().getOrigin();
     xPosField.setValue(origin.x);
     yPosField.setValue(origin.y);
     zPosField.setValue(origin.z);
-    double angles[] = objects[0].coords.getRotationAngles();
+    double angles[] = objects[0].getCoords().getRotationAngles();
     xRotField.setValue(angles[0]);
     yRotField.setValue(angles[1]);
     zRotField.setValue(angles[2]);
     for (int i = 1; i < objects.length; i++)
     {
-      origin = objects[i].coords.getOrigin();
+      origin = objects[i].getCoords().getOrigin();
       checkFieldValue(xPosField, origin.x);
       checkFieldValue(yPosField, origin.y);
       checkFieldValue(zPosField, origin.z);
-      angles = objects[i].coords.getRotationAngles();
+      angles = objects[i].getCoords().getRotationAngles();
       checkFieldValue(xRotField, angles[0]);
       checkFieldValue(yRotField, angles[1]);
       checkFieldValue(zRotField, angles[2]);
@@ -145,15 +145,15 @@ public class ObjectPropertiesPanel extends ColumnContainer
 
     // Set the texture.
 
-    Texture tex = objects[0].object.getTexture();
-    boolean canSetTexture = objects[0].object.canSetTexture();
+    Texture tex = objects[0].getObject().getTexture();
+    boolean canSetTexture = objects[0].getObject().canSetTexture();
     boolean sameTexture = true;
     for (int i = 1; i < objects.length; i++)
     {
-      Texture thisTex = objects[i].object.getTexture();
+      Texture thisTex = objects[i].getObject().getTexture();
       if (thisTex != tex)
         sameTexture = false;
-      canSetTexture &= objects[i].object.canSetTexture();
+      canSetTexture &= objects[i].getObject().canSetTexture();
     }
     if (canSetTexture)
     {
@@ -182,15 +182,15 @@ public class ObjectPropertiesPanel extends ColumnContainer
 
     // Set the material.
 
-    Material mat = objects[0].object.getMaterial();
-    boolean canSetMaterial = objects[0].object.canSetMaterial();
+    Material mat = objects[0].getObject().getMaterial();
+    boolean canSetMaterial = objects[0].getObject().canSetMaterial();
     boolean sameMaterial = true;
     for (int i = 1; i < objects.length; i++)
     {
-      Material thisMat = objects[i].object.getMaterial();
+      Material thisMat = objects[i].getObject().getMaterial();
       if (thisMat != mat)
         sameMaterial = false;
-      canSetMaterial &= objects[i].object.canSetMaterial();
+      canSetMaterial &= objects[i].getObject().canSetMaterial();
     }
     if (canSetMaterial)
     {
@@ -330,10 +330,10 @@ public class ObjectPropertiesPanel extends ColumnContainer
 
   private void findProperties()
   {
-    properties = objects[0].object.getProperties();
+    properties = objects[0].getObject().getProperties();
     for (int i = 1; i < objects.length; i++)
     {
-      Property otherProperty[] = objects[i].object.getProperties();
+      Property otherProperty[] = objects[i].getObject().getProperties();
       boolean same = (properties.length == otherProperty.length);
       for (int j = 0; j < properties.length && same; j++)
         if (!properties[j].equals(otherProperty[j]))
@@ -356,11 +356,11 @@ public class ObjectPropertiesPanel extends ColumnContainer
       return;
     Object values[] = new Object [propSelector.length];
     for (int i = 0; i < values.length; i++)
-      values[i] = objects[0].object.getPropertyValue(i);
+      values[i] = objects[0].getObject().getPropertyValue(i);
     for (int i = 1; i < objects.length; i++)
     {
       for (int j = 0; j < values.length; j++)
-        if (values[j] != null && !values[j].equals(objects[i].object.getPropertyValue(j)))
+        if (values[j] != null && !values[j].equals(objects[i].getObject().getPropertyValue(j)))
           values[j] = null;
     }
     for (int i = 0; i < propSelector.length; i++)
@@ -392,11 +392,11 @@ public class ObjectPropertiesPanel extends ColumnContainer
       ignoreNextChange = true;
       undo = new UndoRecord(window, false);
       for (int i = 0; i < objects.length; i++)
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {objects[i].coords, objects[i].coords.duplicate()});
+        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {objects[i].getCoords(), objects[i].getCoords().duplicate()});
     }
     for (int i = 0; i < objects.length; i++)
     {
-      CoordinateSystem coords = objects[i].coords;
+      CoordinateSystem coords = objects[i].getCoords();
       Vec3 origin = coords.getOrigin();
       origin.x = getNewValue(origin.x, xPosField.getValue());
       origin.y = getNewValue(origin.y, yPosField.getValue());
@@ -431,10 +431,10 @@ public class ObjectPropertiesPanel extends ColumnContainer
     lastEventSource = ev.getWidget();
     if (ev instanceof KeyPressedEvent && ((KeyPressedEvent) ev).getKeyCode() != KeyEvent.VK_ENTER)
       return;
-    if (objects.length == 0 || objects[0].name.equals(nameField.getText()))
+    if (objects.length == 0 || objects[0].getName().equals(nameField.getText()))
       return;
     int which = window.getScene().indexOf(objects[0]);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.RENAME_OBJECT, new Object [] {new Integer(which), objects[0].name}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.RENAME_OBJECT, new Object [] {new Integer(which), objects[0].getName()}));
     window.setObjectName(which, nameField.getText());
     if (ev instanceof KeyPressedEvent)
       window.getView().requestFocus(); // This is where they'll probably expect it to go
@@ -461,10 +461,10 @@ public class ObjectPropertiesPanel extends ColumnContainer
     {
       UndoRecord undo = new UndoRecord(window, false);
       for (int i = 0; i < objects.length; i++)
-        if (objects[i].object.getTexture() != tex)
+        if (objects[i].getObject().getTexture() != tex)
         {
-          undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].object, objects[i].object.duplicate()});
-          objects[i].setTexture(tex, tex.getDefaultMapping(objects[i].object));
+          undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].getObject(), objects[i].getObject().duplicate()});
+          objects[i].setTexture(tex, tex.getDefaultMapping(objects[i].getObject()));
         }
       window.setUndoRecord(undo);
       window.updateImage();
@@ -494,10 +494,10 @@ public class ObjectPropertiesPanel extends ColumnContainer
     {
       UndoRecord undo = new UndoRecord(window, false);
       for (int i = 0; i < objects.length; i++)
-        if (objects[i].object.getMaterial() != mat)
+        if (objects[i].getObject().getMaterial() != mat)
         {
-          undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].object, objects[i].object.duplicate()});
-          objects[i].setMaterial(mat, noMaterial ? null : mat.getDefaultMapping(objects[i].object));
+          undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].getObject(), objects[i].getObject().duplicate()});
+          objects[i].setMaterial(mat, noMaterial ? null : mat.getDefaultMapping(objects[i].getObject()));
         }
       window.setUndoRecord(undo);
       window.updateImage();
@@ -543,7 +543,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       ignoreNextChange = true;
       undo = new UndoRecord(window, false);
       for (int i = 0; i < objects.length; i++)
-        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].object, objects[i].object.duplicate()});
+        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].getObject(), objects[i].getObject().duplicate()});
     }
     boolean changed = false;
     for (int i = 0; i < objects.length; i++)
@@ -564,13 +564,13 @@ public class ObjectPropertiesPanel extends ColumnContainer
             value = ((ColorSelector) propSelector[j]).getColor();
           else if (propSelector[j] instanceof BComboBox)
             value = ((BComboBox) propSelector[j]).getSelectedValue();
-          if (!objects[i].object.getPropertyValue(j).equals(value))
+          if (!objects[i].getObject().getPropertyValue(j).equals(value))
           {
-            objects[i].object.setPropertyValue(j, value);
+            objects[i].getObject().setPropertyValue(j, value);
             changed = true;
           }
         }
-      window.getScene().objectModified(objects[i].object);
+      window.getScene().objectModified(objects[i].getObject());
     }
     lastEventSource = ev.getWidget();
     if (undo != null && changed)

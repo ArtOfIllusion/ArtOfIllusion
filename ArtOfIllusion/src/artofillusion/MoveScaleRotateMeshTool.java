@@ -71,7 +71,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
 
       Vec3 avgNorm = new Vec3();
       int selection[] = controller.getSelectionDistance();
-      Mesh mesh = (Mesh) controller.getObject().object;
+      Mesh mesh = (Mesh) controller.getObject().getObject();
       Vec3 normal[] = mesh.getNormals();
       for (int i = 0; i < selection.length; i++)
         if (selection[i] == 0)
@@ -107,7 +107,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
 
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Vec3 vert = mesh.getVertices()[handle].r;
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
     if (selectionBounds != null)
@@ -129,7 +129,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
 
   protected void handlePressed(HandlePressedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     baseVertPos = mesh.getVertexPositions();
   }
 
@@ -137,7 +137,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   {
     if (undo == null)
     {
-      Mesh mesh = (Mesh) controller.getObject().object;
+      Mesh mesh = (Mesh) controller.getObject().getObject();
       undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
     }
 
@@ -186,7 +186,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
       ((MeshEditorWindow) theFrame).adjustDeltas(v);
     for (int i = 0; i < v.length; i++)
       v[i].add(baseVertPos[i]);
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     mesh.setVertexPositions(v);
     controller.objectChanged();
   }
@@ -226,7 +226,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
 
     // Handle arrow keys.
 
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     baseVertPos = mesh.getVertexPositions();
     int i, selectDist[] = controller.getSelectionDistance();
     int key = e.getKeyCode();

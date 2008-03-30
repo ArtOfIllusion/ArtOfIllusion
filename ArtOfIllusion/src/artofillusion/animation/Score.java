@@ -261,7 +261,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
-        if (!info.selected || info.tracks.length == 0)
+        if (!info.selected || info.getTracks().length == 0)
           continue;
         ObjectTreeElement el = (ObjectTreeElement) theList.findElement(info);
         el.addTracks();
@@ -667,8 +667,8 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           if (tr.getParent() instanceof ObjectInfo)
             {
               ObjectInfo info = (ObjectInfo) tr.getParent();
-              for (int j = 0; j < info.tracks.length; j++)
-                if (info.tracks[j] == tr)
+              for (int j = 0; j < info.getTracks().length; j++)
+                if (info.getTracks()[j] == tr)
                   undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, new Integer(j), tr.duplicate(info)});
             }
           Keyframe k = tr.setKeyframe(time, theScene);
@@ -702,9 +702,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
         ObjectInfo info = theScene.getObject(sel[i]);
         boolean posx = false, posy = false, posz = false;
         boolean rotx = false, roty = false, rotz = false;
-        for (int j = 0; j < info.tracks.length; j++)
+        for (int j = 0; j < info.getTracks().length; j++)
           {
-            Track tr = info.tracks[j];
+            Track tr = info.getTracks()[j];
             if (!tr.isEnabled())
               continue;
             if (tr instanceof PositionTrack && posx && posy && posz)
@@ -762,11 +762,11 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           ObjectInfo info = (ObjectInfo) tr.getParent();
           if (modifiedObj.indexOf(info) < 0)
             {
-              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.tracks});
+              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()});
               modifiedObj.addElement(info);
             }
-          for (int j = 0; j < info.tracks.length; j++)
-            if (info.tracks[j] == tr)
+          for (int j = 0; j < info.getTracks().length; j++)
+            if (info.getTracks()[j] == tr)
               {
                 Track newtr = tr.duplicate(info);
                 newtr.setName("Copy of "+tr.getName());
@@ -803,7 +803,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           ObjectInfo info = (ObjectInfo) tr.getParent();
           if (modifiedObj.indexOf(info) < 0)
             {
-              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.tracks});
+              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()});
               modifiedObj.addElement(info);
             }
           info.removeTrack(tr);
@@ -861,20 +861,20 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               ObjectInfo info = (ObjectInfo) obj[i];
               if (trackClass == PoseTrack.class)
                 {
-                  Object3D posable = info.object.getPosableObject();
+                  Object3D posable = info.getObject().getPosableObject();
                   if (posable == null)
                     continue;
-                  if (posable != info.object)
+                  if (posable != info.getObject())
                     {
                       String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
-                      BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("mustConvertToActor", info.name)), BStandardDialog.QUESTION);
+                      BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("mustConvertToActor", info.getName())), BStandardDialog.QUESTION);
                       int choice = dlg.showOptionDialog(window, options, options[0]);
                       if (choice == 1)
                         continue;
-                      theScene.replaceObject(info.object, posable, undo);
+                      theScene.replaceObject(info.getObject(), posable, undo);
                     }
                 }
-              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.tracks});
+              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()});
               args[0] = info;
               Track newtrack = (Track) con[which].newInstance(args);
               info.addTrack(newtrack, 0);

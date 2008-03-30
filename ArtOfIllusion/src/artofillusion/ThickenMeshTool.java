@@ -84,7 +84,7 @@ public class ThickenMeshTool extends MeshEditingTool
 
   protected void handlePressed(HandlePressedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     clickPoint = ev.getMouseEvent().getPoint();
     norm = mesh.getNormals();
     baseVertPos = mesh.getVertexPositions();
@@ -92,7 +92,7 @@ public class ThickenMeshTool extends MeshEditingTool
   
   protected void handleDragged(HandleDraggedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
 
     if (undo == null)
@@ -112,7 +112,7 @@ public class ThickenMeshTool extends MeshEditingTool
 
   protected void handleReleased(HandleReleasedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
 
     if (undo != null)

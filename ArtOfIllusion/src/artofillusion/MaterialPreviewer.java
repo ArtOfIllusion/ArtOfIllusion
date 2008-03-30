@@ -80,9 +80,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   {
     if (tex == null)
       tex = UniformTexture.invisibleTexture();
-    objInfo.setTexture(tex, tex.getDefaultMapping(objInfo.object));
+    objInfo.setTexture(tex, tex.getDefaultMapping(objInfo.getObject()));
     if (mat != null)
-      objInfo.setMaterial(mat, mat.getDefaultMapping(objInfo.object));
+      objInfo.setMaterial(mat, mat.getDefaultMapping(objInfo.getObject()));
   }
   
   /** Initialize the MaterialPreviewer. */
@@ -110,7 +110,8 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     Texture tex = theScene.getDefaultTexture();
     tri.setTexture(tex, tex.getDefaultMapping(tri));
     info = obj;
-    objectCoords = info.coords = new CoordinateSystem();
+    info.setCoords(new CoordinateSystem());
+    objectCoords = info.getCoords();
     theScene.addObject(info, null);
     setPreferredSize(new Dimension(width, height));
     addEventLink(MousePressedEvent.class, this, "mousePressed");
@@ -165,7 +166,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     if (tex == null)
       tex = UniformTexture.invisibleTexture();
     if (map == null)
-      map = tex.getDefaultMapping(info.object);
+      map = tex.getDefaultMapping(info.getObject());
     info.setTexture(tex, map);
   }
   
@@ -236,7 +237,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     m = dragTransform.times(m);
     m = Mat4.translation(origin.x, origin.y, origin.z).times(m);
     theCamera.setObjectTransform(m);
-    WireframeMesh mesh = info.object.getWireframeMesh();
+    WireframeMesh mesh = info.getObject().getWireframeMesh();
     int from[] = mesh.from, to[] = mesh.to, last = -1;
     Vec3 vert[] = mesh.vert;
     for (int i = 0; i < mesh.from.length; i++)
@@ -269,9 +270,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   
   private void changeObject(int object)
   {
-    shape[object].setTexture(info.object.getTexture(), info.object.getTextureMapping());
-    shape[object].setMaterial(info.object.getMaterial(), info.object.getMaterialMapping());
-    info.object = shape[object];
+    shape[object].setTexture(info.getObject().getTexture(), info.getObject().getTextureMapping());
+    shape[object].setMaterial(info.getObject().getMaterial(), info.getObject().getMaterialMapping());
+    info.setObject(shape[object]);
     render();
   }
 
@@ -420,14 +421,14 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     else
     {
       for (int i = 0; i < shape.length; i++)
-      if (shape[i] == info.object)
+      if (shape[i] == info.getObject())
         shapeChoice.setSelectedIndex(i);
       dlg = new ComponentsDialog(UIUtilities.findWindow(this), Translate.text("configurePreview"),
           new Widget [] {shapeChoice, viewChoice}, new String [] {Translate.text("Shape"), Translate.text("resetViewTo")});
     }
     if (!dlg.clickedOk())
       return;
-    if (shape != null && shape[shapeChoice.getSelectedIndex()] != info.object)
+    if (shape != null && shape[shapeChoice.getSelectedIndex()] != info.getObject())
       changeObject(shapeChoice.getSelectedIndex());
     if (viewChoice.getSelectedIndex() > 0)
       changeView(viewChoice.getSelectedIndex()-1);

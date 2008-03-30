@@ -119,9 +119,9 @@ public class CreateCubeTool extends EditingTool
 
     // Update the size and position, and redraw the display.
     
-    ((Cube) objInfo.object).setSize(xsize, ysize, zsize);
-    objInfo.coords.setOrigin(orig);
-    objInfo.coords.setOrientation(zdir, ydir);
+    ((Cube) objInfo.getObject()).setSize(xsize, ysize, zsize);
+    objInfo.getCoords().setOrigin(orig);
+    objInfo.getCoords().setOrientation(zdir, ydir);
     objInfo.clearCachedMeshes();
     theWindow.updateImage();
   }

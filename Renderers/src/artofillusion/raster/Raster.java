@@ -359,14 +359,14 @@ public class Raster implements Renderer, Runnable
     for (i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
-        if (info.object instanceof Light && info.visible)
+        if (info.getObject() instanceof Light && info.isVisible())
           lt.addElement(info);
       }
     light = new ObjectInfo [lt.size()];
     for (i = 0; i < light.length; i++)
       {
         light[i] = (ObjectInfo) lt.elementAt(i);
-        if (!(light[i].object instanceof DirectionalLight))
+        if (!(light[i].getObject() instanceof DirectionalLight))
           positionNeeded = true;
       }
     lightPosition = new Vec3 [light.length];
@@ -415,8 +415,8 @@ public class Raster implements Renderer, Runnable
       {
         RasterContext context = (RasterContext) threadRasterContext.get();
         ObjectInfo obj = sortedObjects[index];
-        context.camera.setObjectTransform(obj.coords.fromLocal());
-        renderObject(obj, orig, viewdir, obj.coords.toLocal(), context, thisThread);
+        context.camera.setObjectTransform(obj.getCoords().fromLocal());
+        renderObject(obj, orig, viewdir, obj.getCoords().toLocal(), context, thisThread);
         if (thisThread != renderThread)
           return;
         if (System.currentTimeMillis()-updateTime > 5000)
@@ -448,8 +448,8 @@ public class Raster implements Renderer, Runnable
       {
         this.object = object;
         depth = theCamera.getObjectToView().times(object.getBounds().getCenter()).z;
-        if (object.object.getTexture() != null)
-          isTransparent = (object.object.getTexture().hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
+        if (object.getObject().getTexture() != null)
+          isTransparent = (object.getObject().getTexture().hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
       }
 
       public int compareTo(Object o)
@@ -477,7 +477,7 @@ public class Raster implements Renderer, Runnable
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo obj = theScene.getObject(i);
-      theCamera.setObjectTransform(obj.coords.fromLocal());
+      theCamera.setObjectTransform(obj.getCoords().fromLocal());
       objects.add(new SortRecord(obj));
     }
     Collections.sort(objects);
@@ -822,9 +822,9 @@ public class Raster implements Renderer, Runnable
 
     if (mainThread != renderThread)
       return;
-    if (!obj.visible)
+    if (!obj.isVisible())
       return;
-    theObject = obj.object;
+    theObject = obj.getObject();
     if (context.camera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
       return;
     while (theObject instanceof ObjectWrapper)
@@ -836,7 +836,7 @@ public class Raster implements Renderer, Runnable
         while (objects.hasMoreElements())
           {
             ObjectInfo elem = (ObjectInfo) objects.nextElement();
-            CoordinateSystem coords = elem.coords.duplicate();
+            CoordinateSystem coords = elem.getCoords().duplicate();
             coords.transformCoordinates(fromLocal);
             context.camera.setObjectTransform(coords.fromLocal());
             renderObject(elem, orig, viewdir, coords.toLocal(), context, mainThread);
@@ -862,9 +862,9 @@ public class Raster implements Renderer, Runnable
     viewdir = toLocal.timesDirection(viewdir);
     for (i = light.length-1; i >= 0; i--)
     {
-      lightPosition[i] = toLocal.times(light[i].coords.getOrigin());
-      if (!(light[i].object instanceof PointLight))
-        lightDirection[i] = toLocal.timesDirection(light[i].coords.getZDirection());
+      lightPosition[i] = toLocal.times(light[i].getCoords().getOrigin());
+      if (!(light[i].getObject() instanceof PointLight))
+        lightDirection[i] = toLocal.timesDirection(light[i].getCoords().getZDirection());
     }
     boolean bumpMap = theObject.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     boolean cullBackfaces = (hideBackfaces && theObject.isClosed() && !theObject.getTexture().hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
@@ -926,7 +926,7 @@ public class Raster implements Renderer, Runnable
 
     for (int i = light.length-1; i >= 0; i--)
       {
-        Light lt = (Light) light[i].object;
+        Light lt = (Light) light[i].getObject();
         Vec3 lightPos = lightPosition[i];
         double distToLight = 0.0, fatt = 0.0, lightDot = 0.0;
         if (lt instanceof PointLight)

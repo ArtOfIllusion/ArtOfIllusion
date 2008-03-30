@@ -303,7 +303,7 @@ public class SceneCamera extends Object3D
     BButton filtersButton = Translate.button("filters", new Object() {
       void processEvent()
       {
-        new CameraFilterDialog(parent, SceneCamera.this, info.coords);
+        new CameraFilterDialog(parent, SceneCamera.this, info.getCoords());
       }
     }, "processEvent");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),
@@ -321,17 +321,17 @@ public class SceneCamera extends Object3D
     
     Scene sc = parent.getScene();
     for (int i = 0; i < sc.getNumObjects(); i++)
-      if (sc.getObject(i).object == this)
+      if (sc.getObject(i).getObject() == this)
       {
         // This ObjectInfo corresponds to this SceneCamera.  Check each of its tracks.
         
         ObjectInfo obj = sc.getObject(i);
-        for (int j = 0; j < obj.tracks.length; j++)
-          if (obj.tracks[j] instanceof PoseTrack)
+        for (int j = 0; j < obj.getTracks().length; j++)
+          if (obj.getTracks()[j] instanceof PoseTrack)
           {
             // This is a Pose track, so update its subtracks.
             
-            PoseTrack pose = (PoseTrack) obj.tracks[j];
+            PoseTrack pose = (PoseTrack) obj.getTracks()[j];
             Track old[] = pose.getSubtracks();
             Track newtracks[] = new Track [filter.length];
             for (int k = 0; k < filter.length; k++)

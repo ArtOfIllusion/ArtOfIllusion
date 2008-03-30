@@ -87,24 +87,24 @@ public class RotateObjectTool extends EditingTool
     for (i = 0; i < objectCoords.length; i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i), parent = info;
-        objectCoords[i] = info.coords.duplicate();
+        objectCoords[i] = info.getCoords().duplicate();
         if (rotateAround == SELECTION_CENTER)
           {
             rotationCenter[i] = center;
             if (info.selected)
               {
-                center.add(info.coords.getOrigin());
+                center.add(info.getCoords().getOrigin());
                 numSelected++;
               }
           }
         else
-          rotationCenter[i] = info.coords.getOrigin();
+          rotationCenter[i] = info.getCoords().getOrigin();
         if (rotateAround == PARENT_CENTER)
-          while (parent.parent != null)
+          while (parent.getParent() != null)
             {
-              parent = parent.parent;
+              parent = parent.getParent();
               if (parent.selected)
-                rotationCenter[i] = parent.coords.getOrigin();
+                rotationCenter[i] = parent.getCoords().getOrigin();
             }
       }
     if (numSelected > 0)
@@ -154,7 +154,7 @@ public class RotateObjectTool extends EditingTool
         for (i = 0; i < toMove.size(); i++)
           {
             ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-            c = info.coords;
+            c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
         dragged = true;
@@ -177,7 +177,7 @@ public class RotateObjectTool extends EditingTool
         for (i = 0; i < toMove.size(); i++)
           {
             ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-            c = info.coords;
+            c = info.getCoords();
             origin = rotationCenter[i];
             rotMatrix = Mat4.translation(origin.x, origin.y, origin.z).times(Mat4.axisRotation(rotAxis, angle)).times(Mat4.translation(-origin.x, -origin.y, -origin.z));
             c.copyCoords(objectCoords[i]);
@@ -250,18 +250,18 @@ public class RotateObjectTool extends EditingTool
             rotationCenter[i] = center;
             if (info.selected)
               {
-                center.add(info.coords.getOrigin());
+                center.add(info.getCoords().getOrigin());
                 numSelected++;
               }
           }
         else
-          rotationCenter[i] = info.coords.getOrigin();
+          rotationCenter[i] = info.getCoords().getOrigin();
         if (rotateAround == PARENT_CENTER)
-          while (parent.parent != null)
+          while (parent.getParent() != null)
             {
-              parent = parent.parent;
+              parent = parent.getParent();
               if (parent.selected)
-                rotationCenter[i] = parent.coords.getOrigin();
+                rotationCenter[i] = parent.getCoords().getOrigin();
             }
       }
     if (numSelected > 0)
@@ -276,7 +276,7 @@ public class RotateObjectTool extends EditingTool
     for (int i = 0; i < toMove.size(); i++)
       {
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-        c = info.coords;
+        c = info.getCoords();
         origin = rotationCenter[i];
         rotMatrix = Mat4.translation(origin.x, origin.y, origin.z).times(Mat4.axisRotation(rotAxis, angle)).times(Mat4.translation(-origin.x, -origin.y, -origin.z));
         undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});

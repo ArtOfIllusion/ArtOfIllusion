@@ -47,7 +47,7 @@ public class ActorEditorWindow extends BDialog
 
   public ActorEditorWindow(EditingWindow parent, ObjectInfo info, Actor obj, ActorKeyframe key, Runnable cb)
   {
-    super(parent.getFrame(), (key == null ? info.name : Translate.text("editKeyframeFor", info.name)), false);
+    super(parent.getFrame(), (key == null ? info.getName() : Translate.text("editKeyframeFor", info.getName())), false);
     objInfo = info;
     oldObject = obj;
     theObject = (Actor) obj.duplicate();
@@ -58,7 +58,7 @@ public class ActorEditorWindow extends BDialog
     currentPose = (ActorKeyframe) theObject.getPoseKeyframe();
     onClose = cb;
     processor = new ActionProcessor();
-    canModifyGestures = (info.object == obj);
+    canModifyGestures = (info.getObject() == obj);
     for (int i = currentPose.id.length-1; i >= 0; i--)
     {
       int which = theObject.findPoseIndex(currentPose.id[i]);
@@ -278,7 +278,7 @@ public class ActorEditorWindow extends BDialog
     editObj.applyPoseKeyframe(theObject.gesture[which]);
     EditCallback cb = new EditCallback(editObj, theObject.gestureID[which]);
     ObjectInfo info = objInfo.duplicate(editObj);
-    info.name = theObject.gestureName[which];
+    info.setName(theObject.gestureName[which]);
     editObj.editGesture(theWindow, info, cb, objInfo);
     setCursor(Cursor.getDefaultCursor());
   }

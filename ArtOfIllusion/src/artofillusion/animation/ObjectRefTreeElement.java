@@ -10,7 +10,6 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.util.*;
@@ -39,8 +38,8 @@ public class ObjectRefTreeElement extends TreeElement
 	    for (int i = 0; i < j.length; i++)
 	      children.addElement(new ObjectRefTreeElement(new ObjectRef(info, j[i]), this, tree, exclude));
 	  }
-	for (int i = 0; i < info.children.length; i++)
-	  children.addElement(new ObjectRefTreeElement(new ObjectRef(info.children[i]), this, tree, exclude));
+	for (int i = 0; i < info.getChildren().length; i++)
+	  children.addElement(new ObjectRefTreeElement(new ObjectRef(info.getChildren()[i]), this, tree, exclude));
       }
   }
   
@@ -51,7 +50,7 @@ public class ObjectRefTreeElement extends TreeElement
     Joint j = ref.getJoint();
     if (j != null)
       return j.name;
-    return ref.getObject().name;
+    return ref.getObject().getName();
   }
   
   /* Determine whether this element can be added as a child of another one  If el is null,

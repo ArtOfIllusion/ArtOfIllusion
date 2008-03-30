@@ -115,8 +115,8 @@ public class UndoRecord
             {
               ObjectInfo info = (ObjectInfo) d[0];
               Object3D obj = (Object3D) d[1];
-              redoRecord.addCommandAtBeginning(SET_OBJECT, new Object [] {info, info.object});
-              info.object = obj;
+              redoRecord.addCommandAtBeginning(SET_OBJECT, new Object [] {info, info.getObject()});
+              info.setObject(obj);
               break;
             }
           case ADD_OBJECT:
@@ -142,7 +142,7 @@ public class UndoRecord
             {
               LayoutWindow win = (LayoutWindow) theWindow;
               int which = ((Integer) d[0]).intValue();
-              String oldName = (win.getScene().getObject(which)).name;
+              String oldName = (win.getScene().getObject(which)).getName();
               redoRecord.addCommandAtBeginning(RENAME_OBJECT, new Object [] {d[0], oldName});
               win.setObjectName(which, (String) d[1]);
               break;
@@ -161,8 +161,8 @@ public class UndoRecord
               ObjectInfo group = (ObjectInfo) d[0];
               ObjectInfo child = (ObjectInfo) d[1];
               int pos;
-              for (pos = 0; pos < group.children.length && group.children[pos] != child; pos++);
-              if (pos == group.children.length)
+              for (pos = 0; pos < group.getChildren().length && group.getChildren()[pos] != child; pos++);
+              if (pos == group.getChildren().length)
                 break;
               redoRecord.addCommandAtBeginning(ADD_TO_GROUP, new Object [] {group, child, new Integer(pos)});
               group.removeChild(child);
@@ -171,13 +171,13 @@ public class UndoRecord
           case SET_GROUP_CONTENTS:
             {
               ObjectInfo group = (ObjectInfo) d[0];
-              ObjectInfo oldobj[] = group.children;
+              ObjectInfo oldobj[] = group.getChildren();
               ObjectInfo newobj[] = (ObjectInfo []) d[1];
               redoRecord.addCommandAtBeginning(SET_GROUP_CONTENTS, new Object [] {group, oldobj});
               for (int j = 0; j < oldobj.length; j++)
-                oldobj[j].parent = null;
+                oldobj[j].setParent(null);
               for (int j = 0; j < newobj.length; j++)
-                newobj[j].parent = group;
+                newobj[j].setParent(group);
               group.children = newobj;
               break;
             }
@@ -185,14 +185,14 @@ public class UndoRecord
             {
               ObjectInfo info = (ObjectInfo) d[0];
               int which = ((Integer) d[1]).intValue();
-              redoRecord.addCommandAtBeginning(SET_TRACK, new Object [] {info, d[1], info.tracks[which]});
-              info.tracks[which] = (Track) d[2];
+              redoRecord.addCommandAtBeginning(SET_TRACK, new Object [] {info, d[1], info.getTracks()[which]});
+              info.getTracks()[which] = (Track) d[2];
               break;
             }
           case SET_TRACK_LIST:
             {
               ObjectInfo info = (ObjectInfo) d[0];
-              redoRecord.addCommandAtBeginning(SET_TRACK_LIST, new Object [] {info, info.tracks});
+              redoRecord.addCommandAtBeginning(SET_TRACK_LIST, new Object [] {info, info.getTracks()});
               info.tracks = (Track []) d[1];
               break;
             }

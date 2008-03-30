@@ -92,7 +92,7 @@ public class TaperMeshTool extends MeshEditingTool
 
   protected void handlePressed(HandlePressedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     clickPoint = ev.getMouseEvent().getPoint();
     whichHandle = ev.getHandle();
     taperAll = ev.getMouseEvent().isShiftDown();
@@ -105,7 +105,7 @@ public class TaperMeshTool extends MeshEditingTool
   
   protected void handleDragged(HandleDraggedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     if (undo == null)
       undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
     Vec3 v[] = findTaperedPositions(baseVertPos, ev.getMouseEvent().getPoint(), ev.getSelectionBounds(), (MeshViewer) ev.getView());
@@ -116,7 +116,7 @@ public class TaperMeshTool extends MeshEditingTool
 
   protected void handleReleased(HandleReleasedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     if (undo != null)
       theWindow.setUndoRecord(undo);
     Vec3 v[] = findTaperedPositions(baseVertPos, ev.getMouseEvent().getPoint(), ev.getSelectionBounds(), (MeshViewer) ev.getView());

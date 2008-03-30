@@ -37,7 +37,7 @@ public class JointEditorDialog extends BDialog
   {
     super(win, "Edit Bone", true);
     window = win;
-    theMesh = (Mesh) window.getObject().object;
+    theMesh = (Mesh) window.getObject().getObject();
     oldMesh = ((Object3D) theMesh).duplicate();
     skeleton = theMesh.getSkeleton();
     joint = skeleton.getJoint(jointID);

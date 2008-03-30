@@ -14,7 +14,6 @@ import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
 
@@ -49,7 +48,7 @@ public class ShatterTrack extends Track
     if (time <= startTime)
       return;
     if (worldCoords)
-      info.addDistortion(new ShatterDistortion(time-startTime, size, speed, randomness, gravity, spin, disappear, gravityAxis, info.coords.toLocal()));
+      info.addDistortion(new ShatterDistortion(time-startTime, size, speed, randomness, gravity, spin, disappear, gravityAxis, info.getCoords().toLocal()));
     else
       info.addDistortion(new ShatterDistortion(time-startTime, size, speed, randomness, gravity, spin, disappear, gravityAxis, null));
   }

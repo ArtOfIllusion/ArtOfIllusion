@@ -36,7 +36,7 @@ public class ObjectRef
   public ObjectRef(ObjectInfo info)
   {
     object = info;
-    objectID = info.id;
+    objectID = info.getId();
     jointID = -1;
   }
   
@@ -45,7 +45,7 @@ public class ObjectRef
   public ObjectRef(ObjectInfo info, Joint j)
   {
     object = info;
-    objectID = info.id;
+    objectID = info.getId();
     jointID = j.id;
   }
 
@@ -79,7 +79,7 @@ public class ObjectRef
 	for (int i = theScene.getNumObjects()-1; i >= 0; i--)
 	  {
 	    ObjectInfo info = theScene.getObject(i);
-	    if (info.id != objectID)
+	    if (info.getId() != objectID)
 	      continue;
 	    object = info;
 	    break;
@@ -97,7 +97,7 @@ public class ObjectRef
     ObjectInfo info = getObject();
     if (info == null)
       return null;
-    Skeleton s = info.object.getSkeleton();
+    Skeleton s = info.getObject().getSkeleton();
     if (s != null)
       return s.getJoint(jointID);
     return null;
@@ -111,8 +111,8 @@ public class ObjectRef
     if (info == null)
       return null;
     if (jointID == -1)
-      return info.coords;
-    Skeleton s = info.object.getSkeleton();
+      return info.getCoords();
+    Skeleton s = info.getObject().getSkeleton();
     if (s != null)
     {
       Skeleton ds = info.getDistortedObject(ModellingApp.getPreferences().getInteractiveSurfaceError()).getSkeleton();
@@ -120,12 +120,12 @@ public class ObjectRef
         s = ds;
     }
     if (s == null)
-      return info.coords;
+      return info.getCoords();
     Joint j = s.getJoint(jointID);
     if (j == null)
-      return info.coords;
+      return info.getCoords();
     CoordinateSystem coords = j.coords.duplicate();
-    coords.transformCoordinates(info.coords.fromLocal());
+    coords.transformCoordinates(info.getCoords().fromLocal());
     return coords;
   }
 
@@ -177,7 +177,7 @@ public class ObjectRef
       return "(no object selected)";
     Joint j = getJoint();
     if (j == null)
-      return info.name;
-    return info.name+" ("+j.name+")";
+      return info.getName();
+    return info.getName() +" ("+j.name+")";
   }
 }

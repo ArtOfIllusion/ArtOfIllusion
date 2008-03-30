@@ -81,9 +81,9 @@ public abstract class ObjectViewer extends ViewerCanvas
         dy = bounds.maxy-bounds.miny;
         dz = bounds.maxz-bounds.minz;
         size = 0.5*Math.sqrt(dx*dx+dy*dy+dz*dz);
-        origin = info.coords.fromLocal().times(bounds.getCenter());
+        origin = info.getCoords().fromLocal().times(bounds.getCenter());
         if (!useWorldCoords)
-          origin = thisObjectInScene.coords.toLocal().times(origin);
+          origin = thisObjectInScene.getCoords().toLocal().times(origin);
         depth = toView.times(origin).z;
         if (depth-size < min)
           min = depth-size;
@@ -111,11 +111,11 @@ public abstract class ObjectViewer extends ViewerCanvas
         ObjectInfo obj = theScene.getObject(i);
         if (obj == thisObjectInScene)
           continue;
-        Mat4 objectTransform = obj.coords.fromLocal();
+        Mat4 objectTransform = obj.getCoords().fromLocal();
         if (!useWorldCoords && thisObjectInScene != null)
-          objectTransform = thisObjectInScene.coords.toLocal().times(objectTransform);
+          objectTransform = thisObjectInScene.getCoords().toLocal().times(objectTransform);
         theCamera.setObjectTransform(objectTransform);
-        obj.object.renderObject(obj, this, viewdir);
+        obj.getObject().renderObject(obj, this, viewdir);
       }
     }
 
@@ -139,9 +139,9 @@ public abstract class ObjectViewer extends ViewerCanvas
   public CoordinateSystem getDisplayCoordinates()
   {
     if (useWorldCoords && thisObjectInScene != null)
-      return thisObjectInScene.coords;
+      return thisObjectInScene.getCoords();
     else
-      return controller.getObject().coords;
+      return controller.getObject().getCoords();
   }
   
   /** Get whether freehand selection mode is currently in use. */
@@ -358,7 +358,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       return;
     sc.addObject(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), theCamera.getCameraCoordinates(), "", null);
     ObjectInfo obj = getController().getObject();
-    sc.addObject(obj.duplicate(obj.object.duplicate()), null);
+    sc.addObject(obj.duplicate(obj.getObject().duplicate()), null);
     adjustCamera(true);
     rend.configurePreview();
     ObjectInfo cameraInfo = new ObjectInfo(new SceneCamera(), theCamera.getCameraCoordinates(), "");

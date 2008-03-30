@@ -216,7 +216,7 @@ public class TextureMappingDialog extends BDialog
       return;
     TextureParameter param[] = mesh.getParameters();
     ParameterValue val[] = mesh.getParameterValues();
-    Object3D previewObj = preview.getObject().object;
+    Object3D previewObj = preview.getObject().getObject();
     for (int i = 0; i < param.length; i++)
       previewObj.setParameterValue(param[i], val[i]);
     preview.render();

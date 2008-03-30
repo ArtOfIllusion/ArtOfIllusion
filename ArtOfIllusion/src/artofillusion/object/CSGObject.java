@@ -41,10 +41,10 @@ public class CSGObject extends Object3D
   {
     obj1 = o1.duplicate();
     obj2 = o2.duplicate();
-    obj1.object = obj1.object.duplicate();
-    obj2.object = obj2.object.duplicate();
+    obj1.setObject(obj1.getObject().duplicate());
+    obj2.setObject(obj2.getObject().duplicate());
     operation = op;
-    obj1.visible = obj2.visible = true;
+    obj1.setVisible(obj2.visible = true);
   }
   
   /** Create a new object which is an exact duplicate of this one. */
@@ -65,8 +65,8 @@ public class CSGObject extends Object3D
 
     obj1 = csg.obj1.duplicate();
     obj2 = csg.obj2.duplicate();
-    obj1.object = obj1.object.duplicate();
-    obj2.object = obj2.object.duplicate();
+    obj1.setObject(obj1.object.duplicate());
+    obj2.setObject(obj2.object.duplicate());
     operation = csg.operation;
     cachedMesh = csg.cachedMesh;
     cachedWire = csg.cachedWire;
@@ -117,12 +117,12 @@ public class CSGObject extends Object3D
   
   public Vec3 centerObjects()
   {
-    BoundingBox b1 = obj1.getBounds().transformAndOutset(obj1.coords.fromLocal());
-    BoundingBox b2 = obj2.getBounds().transformAndOutset(obj2.coords.fromLocal());
+    BoundingBox b1 = obj1.getBounds().transformAndOutset(obj1.getCoords().fromLocal());
+    BoundingBox b2 = obj2.getBounds().transformAndOutset(obj2.getCoords().fromLocal());
     BoundingBox b = b1.merge(b2);
     Vec3 center = b.getCenter();
-    obj1.coords.setOrigin(obj1.coords.getOrigin().minus(center));
-    obj2.coords.setOrigin(obj2.coords.getOrigin().minus(center));
+    obj1.getCoords().setOrigin(obj1.getCoords().getOrigin().minus(center));
+    obj2.getCoords().setOrigin(obj2.getCoords().getOrigin().minus(center));
     bounds = null;
     cachedMesh = null;
     cachedWire = null;
@@ -194,12 +194,12 @@ public class CSGObject extends Object3D
     // Adjust the size and position of each component object.
     
     objSize = obj1.getBounds().getSize();
-    obj1.object.setSize(objSize.x*xscale, objSize.y*yscale, objSize.z*zscale);
+    obj1.getObject().setSize(objSize.x*xscale, objSize.y*yscale, objSize.z*zscale);
     objSize = obj2.getBounds().getSize();
-    obj2.object.setSize(objSize.x*xscale, objSize.y*yscale, objSize.z*zscale);
+    obj2.getObject().setSize(objSize.x*xscale, objSize.y*yscale, objSize.z*zscale);
     Mat4 m = Mat4.scale(xscale, yscale, zscale);
-    obj1.coords.transformOrigin(m);
-    obj2.coords.transformOrigin(m);
+    obj1.getCoords().transformOrigin(m);
+    obj2.getCoords().transformOrigin(m);
     cachedMesh = null;
     cachedWire = null;
     findBounds();
@@ -209,7 +209,7 @@ public class CSGObject extends Object3D
   
   public int canConvertToTriangleMesh()
   {
-    if (obj1.object.canConvertToTriangleMesh() == EXACTLY && obj2.object.canConvertToTriangleMesh() == EXACTLY)
+    if (obj1.getObject().canConvertToTriangleMesh() == EXACTLY && obj2.getObject().canConvertToTriangleMesh() == EXACTLY)
       return EXACTLY;
     return APPROXIMATELY;
   }
@@ -218,7 +218,7 @@ public class CSGObject extends Object3D
   
   public boolean isClosed()
   {
-    return (obj1.object.isClosed() && obj2.object.isClosed());
+    return (obj1.getObject().isClosed() && obj2.getObject().isClosed());
   }
   
   /** Create a triangle mesh representing this object. */
@@ -227,9 +227,9 @@ public class CSGObject extends Object3D
   {
     TriangleMesh mesh1, mesh2;
     
-    mesh1 = obj1.object.convertToTriangleMesh(tol);
-    mesh2 = obj2.object.convertToTriangleMesh(tol);
-    CSGModeller modeller = new CSGModeller(mesh1, mesh2, obj1.coords, obj2.coords);
+    mesh1 = obj1.getObject().convertToTriangleMesh(tol);
+    mesh2 = obj2.getObject().convertToTriangleMesh(tol);
+    CSGModeller modeller = new CSGModeller(mesh1, mesh2, obj1.getCoords(), obj2.getCoords());
     TriangleMesh trimesh = modeller.getMesh(operation, getTexture());
     trimesh.copyTextureAndMaterial(this);
     return trimesh;
@@ -244,7 +244,7 @@ public class CSGObject extends Object3D
   
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    new CSGEditorWindow(parent, info.name, this, cb);
+    new CSGEditorWindow(parent, info.getName(), this, cb);
   }
     
   /** When setting the texture or material, also set it for each of the component objects. */
@@ -254,8 +254,8 @@ public class CSGObject extends Object3D
     super.setTexture(tex, mapping);
     if (obj1 == null)
       return;
-    obj1.object.setTexture(tex, mapping);
-    obj2.object.setTexture(tex, mapping);
+    obj1.getObject().setTexture(tex, mapping);
+    obj2.getObject().setTexture(tex, mapping);
   }
 
   public void setMaterial(Material mat, MaterialMapping mapping)
@@ -263,8 +263,8 @@ public class CSGObject extends Object3D
     super.setMaterial(mat, mapping);
     if (obj1 == null)
       return;
-    obj1.object.setMaterial(mat, mapping);
-    obj2.object.setMaterial(mat, mapping);
+    obj1.getObject().setMaterial(mat, mapping);
+    obj2.getObject().setMaterial(mat, mapping);
   }
 
   /** Get a RenderingMesh for this object. */
@@ -318,14 +318,14 @@ public class CSGObject extends Object3D
     super.writeToFile(out, theScene);
     out.writeShort(0);
     out.writeInt(operation);
-    obj1.coords.writeToFile(out);
-    out.writeUTF(obj1.name);
-    out.writeUTF(obj1.object.getClass().getName());
-    obj1.object.writeToFile(out, theScene);
-    obj2.coords.writeToFile(out);
-    out.writeUTF(obj2.name);
-    out.writeUTF(obj2.object.getClass().getName());
-    obj2.object.writeToFile(out, theScene);
+    obj1.getCoords().writeToFile(out);
+    out.writeUTF(obj1.getName());
+    out.writeUTF(obj1.getObject().getClass().getName());
+    obj1.getObject().writeToFile(out, theScene);
+    obj2.getCoords().writeToFile(out);
+    out.writeUTF(obj2.getName());
+    out.writeUTF(obj2.getObject().getClass().getName());
+    obj2.getObject().writeToFile(out, theScene);
   }
   
   public CSGObject(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
@@ -341,11 +341,11 @@ public class CSGObject extends Object3D
         obj1 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
         Class cls = ModellingApp.getClass(in.readUTF());
         Constructor con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
-        obj1.object = (Object3D) con.newInstance(new Object [] {in, theScene});
+        obj1.setObject((Object3D) con.newInstance(new Object [] {in, theScene}));
         obj2 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
         cls = ModellingApp.getClass(in.readUTF());
         con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
-        obj2.object = (Object3D) con.newInstance(new Object [] {in, theScene});
+        obj2.setObject((Object3D) con.newInstance(new Object [] {in, theScene}));
       }
     catch (InvocationTargetException ex)
       {
@@ -357,12 +357,12 @@ public class CSGObject extends Object3D
         ex.printStackTrace();
         throw new IOException();
       }
-    obj1.object.setTexture(getTexture(), getTextureMapping());
-    obj2.object.setTexture(getTexture(), getTextureMapping());
+    obj1.getObject().setTexture(getTexture(), getTextureMapping());
+    obj2.getObject().setTexture(getTexture(), getTextureMapping());
     if (getMaterial() != null)
       {
-        obj1.object.setMaterial(getMaterial(), getMaterialMapping());
-        obj2.object.setMaterial(getMaterial(), getMaterialMapping());
+        obj1.getObject().setMaterial(getMaterial(), getMaterialMapping());
+        obj2.getObject().setMaterial(getMaterial(), getMaterialMapping());
       }
   }
   
@@ -370,8 +370,8 @@ public class CSGObject extends Object3D
   
   public Keyframe getPoseKeyframe()
   {
-    return new CSGKeyframe(obj1.object.getPoseKeyframe(), obj2.object.getPoseKeyframe(),
-      obj1.coords.duplicate(), obj2.coords.duplicate());
+    return new CSGKeyframe(obj1.getObject().getPoseKeyframe(), obj2.getObject().getPoseKeyframe(),
+      obj1.getCoords().duplicate(), obj2.getCoords().duplicate());
   }
   
   /** Modify this object based on a pose keyframe. */
@@ -380,11 +380,11 @@ public class CSGObject extends Object3D
   {
     CSGKeyframe key = (CSGKeyframe) k;
     if (key.key1 != null)
-      obj1.object.applyPoseKeyframe(key.key1);
+      obj1.getObject().applyPoseKeyframe(key.key1);
     if (key.key2 != null)
-      obj2.object.applyPoseKeyframe(key.key2);
-    obj1.coords.copyCoords(key.coords1);
-    obj2.coords.copyCoords(key.coords2);
+      obj2.getObject().applyPoseKeyframe(key.key2);
+    obj1.getCoords().copyCoords(key.coords1);
+    obj2.getCoords().copyCoords(key.coords2);
     cachedMesh = null;
     cachedWire = null;
   }
@@ -406,7 +406,7 @@ public class CSGObject extends Object3D
         original.key2 = edited.key2;
       }
     };
-    new CSGEditorWindow(parent, info.name, copy, onClose);
+    new CSGEditorWindow(parent, info.getName(), copy, onClose);
   }
   
   /** Inner class representing a pose for a CSGObject. */
@@ -435,7 +435,7 @@ public class CSGObject extends Object3D
   
     public Keyframe duplicate(Object owner)
     {
-      CSGObject csg = (CSGObject) ((ObjectInfo) owner).object;
+      CSGObject csg = (CSGObject) ((ObjectInfo) owner).getObject();
       return new CSGKeyframe(key1.duplicate(csg.obj1), key2.duplicate(csg.obj2), coords1.duplicate(), coords2.duplicate());
     }
   

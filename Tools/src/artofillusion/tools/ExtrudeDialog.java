@@ -52,14 +52,14 @@ public class ExtrudeDialog extends BDialog
     for (int i = 0; i < selection.length; i++)
     {
       ObjectInfo obj = scene.getObject(selection[i]);
-      if (obj.object instanceof Curve)
+      if (obj.getObject() instanceof Curve)
       {
         objects.addElement(obj);
         paths.addElement(obj);
       }
-      else if ((obj.object instanceof TriangleMesh || 
-          obj.object.canConvertToTriangleMesh() != Object3D.CANT_CONVERT) && 
-          !obj.object.isClosed())
+      else if ((obj.getObject() instanceof TriangleMesh ||
+          obj.getObject().canConvertToTriangleMesh() != Object3D.CANT_CONVERT) &&
+          !obj.getObject().isClosed())
         objects.addElement(obj);
     }
     if (objects.size() == 1)
@@ -73,7 +73,7 @@ public class ExtrudeDialog extends BDialog
     content.add(new BLabel("Object to Extrude:"), 0, 0, 2, 1);
     content.add(objChoice = new BComboBox(), 0, 1, 2, 1);
     for (int i = 0; i < objects.size(); i++)
-      objChoice.add(((ObjectInfo) objects.elementAt(i)).name);
+      objChoice.add(((ObjectInfo) objects.elementAt(i)).getName());
     objChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
     content.add(new BLabel("Extrude Direction:"), 0, 2, 2, 1);
     pathGroup = new RadioButtonGroup();
@@ -92,7 +92,7 @@ public class ExtrudeDialog extends BDialog
     distField.addEventLink(ValueChangedEvent.class, this, "makeObject");
     content.add(pathChoice = new BComboBox(), 1, 6);
     for (int i = 0; i < paths.size(); i++)
-      pathChoice.add(((ObjectInfo) paths.elementAt(i)).name);
+      pathChoice.add(((ObjectInfo) paths.elementAt(i)).getName());
     pathChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
     RowContainer vectorRow = new RowContainer();
     content.add(vectorRow, 1, 7);
@@ -155,7 +155,7 @@ public class ExtrudeDialog extends BDialog
     pathChoice.setEnabled(pathBox.getState());
     segField.setEnabled(!pathBox.getState());
     orientBox.setEnabled(pathBox.getState());
-    Object3D profile = ((ObjectInfo) objects.elementAt(objChoice.getSelectedIndex())).object;
+    Object3D profile = ((ObjectInfo) objects.elementAt(objChoice.getSelectedIndex())).getObject();
     tolField.setEnabled(!(profile instanceof Curve || profile instanceof TriangleMesh));
     if (pathBox.getState())
       okButton.setEnabled(objects.elementAt(objChoice.getSelectedIndex()) != paths.elementAt(pathChoice.getSelectedIndex()));
@@ -167,12 +167,12 @@ public class ExtrudeDialog extends BDialog
   {
     ObjectInfo profile = (ObjectInfo) objects.elementAt(objChoice.getSelectedIndex());
     CoordinateSystem coords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
-    if (profile.object instanceof Mesh)
+    if (profile.getObject() instanceof Mesh)
     {
-      Vec3 offset = profile.coords.fromLocal().times(((Mesh) profile.object).getVertices()[0].r).minus(coords.fromLocal().times(((Mesh) preview.getObject().object).getVertices()[0].r));
+      Vec3 offset = profile.getCoords().fromLocal().times(((Mesh) profile.getObject()).getVertices()[0].r).minus(coords.fromLocal().times(((Mesh) preview.getObject().getObject()).getVertices()[0].r));
       coords.setOrigin(coords.getOrigin().plus(offset));
     }
-    window.addObject(preview.getObject().object, coords, "Extruded Object "+(counter++), null);
+    window.addObject(preview.getObject().getObject(), coords, "Extruded Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
     window.updateImage();
@@ -190,8 +190,8 @@ public class ExtrudeDialog extends BDialog
     if (pathBox.getState())
       {
         ObjectInfo info = (ObjectInfo) paths.elementAt(pathChoice.getSelectedIndex());
-        path = (Curve) info.object;
-        pathCoords = info.coords;
+        path = (Curve) info.getObject();
+        pathCoords = info.getCoords();
       }
     else
       {
@@ -216,14 +216,14 @@ public class ExtrudeDialog extends BDialog
         pathCoords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
       }
     Object3D obj;
-    if (profile.object == path)
+    if (profile.getObject() == path)
       obj = null;
-    else if (profile.object instanceof TriangleMesh)
-      obj = extrudeMesh((TriangleMesh) profile.object, path, profile.coords, pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
-    else if (profile.object instanceof Curve)
-      obj = extrudeCurve((Curve) profile.object, path, profile.coords, pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
+    else if (profile.getObject() instanceof TriangleMesh)
+      obj = extrudeMesh((TriangleMesh) profile.getObject(), path, profile.getCoords(), pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
+    else if (profile.getObject() instanceof Curve)
+      obj = extrudeCurve((Curve) profile.getObject(), path, profile.getCoords(), pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
     else
-      obj = extrudeMesh(profile.object.convertToTriangleMesh(tolField.getValue()), path, profile.coords, pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
+      obj = extrudeMesh(profile.getObject().convertToTriangleMesh(tolField.getValue()), path, profile.getCoords(), pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
     Texture tex = window.getScene().getDefaultTexture();
     obj.setTexture(tex, tex.getDefaultMapping(obj));
     preview.setObject(obj);

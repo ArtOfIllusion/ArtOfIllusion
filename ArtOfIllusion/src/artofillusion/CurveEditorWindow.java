@@ -67,7 +67,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
       view.setScene(parent.getScene(), obj);
     }
     createEditMenu();
-    createMeshMenu((Curve) obj.object);
+    createMeshMenu((Curve) obj.getObject());
     createViewMenu();
     recursivelyAddListeners(this);
     UIUtilities.applyDefaultFont(content);
@@ -76,7 +76,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     d2 = new Dimension((d1.width*3)/4, (d1.height*3)/4);
     setBounds(new Rectangle((d1.width-d2.width)/2, (d1.height-d2.height)/2, d2.width, d2.height));
     tools.requestFocus();
-    selected = new boolean [((Curve) obj.object).getVertices().length];
+    selected = new boolean [((Curve) obj.getObject()).getVertices().length];
     findSelectionDistance();
     updateMenus();
   }
@@ -150,7 +150,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   public void setObject(Object3D obj)
   {
-    objInfo.object = obj;
+    objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
   
@@ -203,7 +203,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   void findSelectionDistance()
   {
-    Curve theCurve = (Curve) getObject().object;
+    Curve theCurve = (Curve) getObject().getObject();
     int i, j, dist[] = new int [theCurve.getVertices().length];
     
     maxDistance = getTensionDistance();
@@ -258,7 +258,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   protected void doOk()
   {
-    Curve theMesh = (Curve) objInfo.object;
+    Curve theMesh = (Curve) objInfo.getObject();
     oldMesh.copyObject(theMesh);
     oldMesh = null;
     dispose();
@@ -330,7 +330,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     if (!topology)
       return;
     int i, j, num = 0;
-    Curve theCurve = (Curve) objInfo.object;
+    Curve theCurve = (Curve) objInfo.getObject();
     boolean newsel[];
     MeshVertex vt[] = theCurve.getVertices();
     float s[] = theCurve.getSmoothness(), news[];
@@ -370,7 +370,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   public void subdivideCommand()
   {
-    Curve theCurve = (Curve) objInfo.object;
+    Curve theCurve = (Curve) objInfo.getObject();
     MeshVertex vt[] = theCurve.getVertices();
     float s[] = theCurve.getSmoothness(), news[];
     boolean newsel[], split[];
@@ -467,7 +467,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   public void setSmoothnessCommand()
   {
-    final Curve theCurve = (Curve) objInfo.object;
+    final Curve theCurve = (Curve) objInfo.getObject();
     Curve oldCurve = (Curve) theCurve.duplicate();
     final MeshVertex vt[] = theCurve.getVertices();
     final float s[] = theCurve.getSmoothness();
@@ -508,7 +508,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   void setSmoothingMethod(int method)
   {
-    Curve theCurve = (Curve) objInfo.object;
+    Curve theCurve = (Curve) objInfo.getObject();
 
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theCurve, theCurve.duplicate()}));
     for (int i = 0; i < smoothItem.length; i++)
@@ -527,7 +527,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   public void toggleClosedCommand()
   {
-    Curve theCurve = (Curve) objInfo.object;
+    Curve theCurve = (Curve) objInfo.getObject();
 
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theCurve, theCurve.duplicate()}));
     if (theCurve.isClosed())
@@ -551,7 +551,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];
-    Curve theCurve = (Curve) objInfo.object;
+    Curve theCurve = (Curve) objInfo.getObject();
     int maxDistance = getTensionDistance();
     double tension = getMeshTension(), scale[] = new double [maxDistance+1];
 

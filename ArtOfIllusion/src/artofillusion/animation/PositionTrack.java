@@ -67,7 +67,7 @@ public class PositionTrack extends Track
 
     if (pos == null)
       return;
-    Vec3 v = info.coords.getOrigin();
+    Vec3 v = info.getCoords().getOrigin();
     if (mode == ABSOLUTE)
       {
         double w = 1.0-weight;
@@ -80,8 +80,8 @@ public class PositionTrack extends Track
       }
     if (mode == ABSOLUTE && relCoords == PARENT)
       {
-        if (info.parent != null)
-          pos = info.parent.coords.fromLocal().times(pos);
+        if (info.getParent() != null)
+          pos = info.getParent().getCoords().fromLocal().times(pos);
       }
     else if (mode == ABSOLUTE && relCoords == OBJECT)
       {
@@ -91,8 +91,8 @@ public class PositionTrack extends Track
       }
     else if (mode == RELATIVE && relCoords == PARENT)
       {
-        if (info.parent != null)
-          pos = info.parent.coords.fromLocal().timesDirection(pos);
+        if (info.getParent() != null)
+          pos = info.getParent().getCoords().fromLocal().timesDirection(pos);
       }
     else if (mode == RELATIVE && relCoords == OBJECT)
       {
@@ -101,19 +101,19 @@ public class PositionTrack extends Track
           pos = coords.fromLocal().timesDirection(pos);
       }
     else if (mode == RELATIVE && relCoords == LOCAL)
-      pos = info.coords.fromLocal().timesDirection(pos);
+      pos = info.getCoords().fromLocal().timesDirection(pos);
     if (joint > -1 && mode == ABSOLUTE)
       {
         Joint j = info.getSkeleton().getJoint(joint);
         if (j != null)
           {
-            if (info.pose != null && !info.pose.equals(info.object.getPoseKeyframe()))
+            if (info.getPose() != null && !info.getPose().equals(info.getObject().getPoseKeyframe()))
               {
-                info.object.applyPoseKeyframe(info.pose);
+                info.getObject().applyPoseKeyframe(info.getPose());
                 j = info.getSkeleton().getJoint(joint);
               }
             pos = pos.minus(new ObjectRef(info, j).getCoords().getOrigin());
-            pos.add(info.coords.getOrigin());
+            pos.add(info.getCoords().getOrigin());
           }
       }
     if (enablex)
@@ -122,7 +122,7 @@ public class PositionTrack extends Track
       v.y += pos.y*weight;
     if (enablez)
       v.z += pos.z*weight;
-    info.coords.setOrigin(v);
+    info.getCoords().setOrigin(v);
   }
   
   /** Create a duplicate of this track. */
@@ -193,7 +193,7 @@ public class PositionTrack extends Track
   
   public Keyframe setKeyframe(double time, Scene sc)
   {
-    Vec3 pos = info.coords.getOrigin();
+    Vec3 pos = info.getCoords().getOrigin();
 
     if (joint > -1 && mode == ABSOLUTE)
       {
@@ -203,8 +203,8 @@ public class PositionTrack extends Track
       }
     if (relCoords == PARENT)
       {
-        if (info.parent != null)
-          pos = info.parent.coords.toLocal().times(pos);
+        if (info.getParent() != null)
+          pos = info.getParent().getCoords().toLocal().times(pos);
       }
     else if (relCoords == OBJECT)
       {
@@ -226,7 +226,7 @@ public class PositionTrack extends Track
     if (tc.getTimes().length == 0)
       return setKeyframe(time, sc);
     VectorKeyframe pos = (VectorKeyframe) tc.evaluate(time, smoothingMethod);
-    Vec3 current = info.coords.getOrigin();
+    Vec3 current = info.getCoords().getOrigin();
 
     if (joint > -1 && mode == ABSOLUTE)
       {
@@ -236,8 +236,8 @@ public class PositionTrack extends Track
       }
     if (relCoords == PARENT)
       {
-        if (info.parent != null)
-          current = info.parent.coords.toLocal().times(current);
+        if (info.getParent() != null)
+          current = info.getParent().getCoords().toLocal().times(current);
       }
     else if (relCoords == OBJECT)
       {
@@ -408,7 +408,7 @@ public class PositionTrack extends Track
   
   public double [] getDefaultGraphValues()
   {
-    Vec3 pos = info.coords.getOrigin();
+    Vec3 pos = info.getCoords().getOrigin();
     return new double [] {pos.x, pos.y, pos.z};
   }
   
@@ -438,8 +438,8 @@ public class PositionTrack extends Track
       if (relInfo != null)
         return new ObjectInfo [] {relInfo};
     }
-    else if (relCoords == PARENT && info.parent != null)
-      return new ObjectInfo [] {info.parent};
+    else if (relCoords == PARENT && info.getParent() != null)
+      return new ObjectInfo [] {info.getParent()};
     return new ObjectInfo [0];
   }
   

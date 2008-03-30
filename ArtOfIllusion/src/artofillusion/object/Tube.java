@@ -750,13 +750,13 @@ public class Tube extends Curve
   
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    TubeEditorWindow ed = new TubeEditorWindow(parent, "Tube object '"+info.name+"'", info, cb, true);
+    TubeEditorWindow ed = new TubeEditorWindow(parent, "Tube object '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
-    TubeEditorWindow ed = new TubeEditorWindow(parent, "Gesture '"+info.name+"'", info, cb, false);
+    TubeEditorWindow ed = new TubeEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
     ViewerCanvas views[] = ed.getAllViews();
     for (int i = 0; i < views.length; i++)
       ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
@@ -945,7 +945,7 @@ public class Tube extends Curve
       if (owner instanceof Tube)
         k.tube = (Tube) owner;
       else
-        k.tube = (Tube) ((ObjectInfo) owner).object;
+        k.tube = (Tube) ((ObjectInfo) owner).getObject();
       k.vertPos = new Vec3 [vertPos.length];
       k.vertSmoothness = new float [vertSmoothness.length];
       k.vertThickness = new double [vertThickness.length];

@@ -62,7 +62,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   public void apply(double time)
   {
     PointInfo point = new PointInfo();
-    Vec3 v = info.coords.getOrigin(), jointDelta = null;
+    Vec3 v = info.getCoords().getOrigin(), jointDelta = null;
     OutputModule output[] = proc.getOutputModules();
 
     point.x = v.x;
@@ -73,12 +73,12 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
         Joint j = info.getSkeleton().getJoint(joint);
         if (j != null)
           {
-            if (info.pose != null && !info.pose.equals(info.object.getPoseKeyframe()))
+            if (info.getPose() != null && !info.getPose().equals(info.getObject().getPoseKeyframe()))
               {
-                info.object.applyPoseKeyframe(info.pose);
+                info.getObject().applyPoseKeyframe(info.getPose());
                 j = info.getSkeleton().getJoint(joint);
               }
-            jointDelta = new ObjectRef(info, j).getCoords().getOrigin().minus(info.coords.getOrigin());
+            jointDelta = new ObjectRef(info, j).getCoords().getOrigin().minus(info.getCoords().getOrigin());
             point.x += jointDelta.x;
             point.y += jointDelta.y;
             point.z += jointDelta.z;
@@ -100,8 +100,8 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
       }
     if (mode == ABSOLUTE && relCoords == PARENT)
       {
-        if (info.parent != null)
-          pos = info.parent.coords.fromLocal().times(pos);
+        if (info.getParent() != null)
+          pos = info.getParent().getCoords().fromLocal().times(pos);
       }
     else if (mode == ABSOLUTE && relCoords == OBJECT)
       {
@@ -111,8 +111,8 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
       }
     else if (mode == RELATIVE && relCoords == PARENT)
       {
-        if (info.parent != null)
-          pos = info.parent.coords.fromLocal().timesDirection(pos);
+        if (info.getParent() != null)
+          pos = info.getParent().getCoords().fromLocal().timesDirection(pos);
       }
     else if (mode == RELATIVE && relCoords == OBJECT)
       {
@@ -121,13 +121,13 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
           pos = coords.fromLocal().timesDirection(pos);
       }
     else if (mode == RELATIVE && relCoords == LOCAL)
-      pos = info.coords.fromLocal().timesDirection(pos);
+      pos = info.getCoords().fromLocal().timesDirection(pos);
     if (jointDelta != null)
       pos.subtract(jointDelta);
     v.x += pos.x*weight;
     v.y += pos.y*weight;
     v.z += pos.z*weight;
-    info.coords.setOrigin(v);
+    info.getCoords().setOrigin(v);
   }
   
   /* Create a duplicate of this track. */
@@ -335,8 +335,8 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
       if (relInfo != null)
         return new ObjectInfo [] {relInfo};
     }
-    else if (relCoords == PARENT && info.parent != null)
-      return new ObjectInfo [] {info.parent};
+    else if (relCoords == PARENT && info.getParent() != null)
+      return new ObjectInfo [] {info.getParent()};
     return new ObjectInfo [0];
   }
   

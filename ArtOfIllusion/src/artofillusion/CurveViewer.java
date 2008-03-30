@@ -34,9 +34,9 @@ public class CurveViewer extends MeshViewer
   {
     if (!showMesh)
       return;
-    MeshVertex v[] = ((Mesh) getController().getObject().object).getVertices();
+    MeshVertex v[] = ((Mesh) getController().getObject().getObject()).getVertices();
     boolean selected[] = controller.getSelection();
-    WireframeMesh wireframe = getController().getObject().object.getWireframeMesh();
+    WireframeMesh wireframe = getController().getObject().getObject().getWireframeMesh();
     for (int i = 0; i < wireframe.from.length; i++)
       renderLine(wireframe.vert[wireframe.from[i]], wireframe.vert[wireframe.to[i]], theCamera, lineColor);
     for (int i = 0; i < v.length; i++)
@@ -63,7 +63,7 @@ public class CurveViewer extends MeshViewer
   {
     int i, j, x, y;
     double z, nearest;
-    MeshVertex v[] = ((Curve) getController().getObject().object).getVertices();
+    MeshVertex v[] = ((Curve) getController().getObject().getObject()).getVertices();
     Vec2 pos;
     Point p;
 
@@ -192,7 +192,7 @@ public class CurveViewer extends MeshViewer
   protected void mouseReleased(WidgetMouseEvent e)
   {
     int i, x, y;
-    MeshVertex v[] = ((Curve) getController().getObject().object).getVertices();
+    MeshVertex v[] = ((Curve) getController().getObject().getObject()).getVertices();
     Vec2 pos;
 
     moveToGrid(e);

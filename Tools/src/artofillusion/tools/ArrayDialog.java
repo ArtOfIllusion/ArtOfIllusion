@@ -13,9 +13,7 @@
 package artofillusion.tools;
 
 import artofillusion.*;
-import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.object.TriangleMesh.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -58,7 +56,7 @@ public class ArrayDialog extends BDialog
     for (int i=0; i<window.getScene().getNumObjects();i++)
     {
         ObjectInfo info = window.getScene().getObject(i);
-        if (info.object instanceof Curve)
+        if (info.getObject() instanceof Curve)
                 curvesVector.addElement(info);
     }
  
@@ -125,11 +123,11 @@ public class ArrayDialog extends BDialog
     for (int k=0; k<curvesVector.size(); k++)
     {
         ObjectInfo info = (ObjectInfo)(curvesVector.elementAt(k));
-        curveChoice.add(info.name);
+        curveChoice.add(info.getName());
     }
     
     if (spec.curve != null)
-        curveChoice.setSelectedValue(spec.curve.name);
+        curveChoice.setSelectedValue(spec.curve.getName());
     curveChoice.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(curveCopiesBox = new BRadioButton("Number Of Copies", spec.curveMode == spec.MODE_COPIES, modeGroup), 1, 1);
     curveCopiesBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");

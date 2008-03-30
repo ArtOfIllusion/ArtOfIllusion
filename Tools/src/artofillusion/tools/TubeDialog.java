@@ -39,7 +39,7 @@ public class TubeDialog extends BDialog
     super(window, "Tube", true);
     this.window = window;
     curveInfo = curve;
-    theCurve = (Curve) curve.object;
+    theCurve = (Curve) curve.getObject();
     Scene scene = window.getScene();
     
     // Layout the window.
@@ -68,7 +68,7 @@ public class TubeDialog extends BDialog
   
   private void doOk()
   {
-    window.addObject(theTube, curveInfo.coords.duplicate(), "Tube "+(counter++), null);
+    window.addObject(theTube, curveInfo.getCoords().duplicate(), "Tube "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
     window.updateImage();

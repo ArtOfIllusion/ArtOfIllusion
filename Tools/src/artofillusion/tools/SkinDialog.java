@@ -51,7 +51,7 @@ public class SkinDialog extends BDialog
     for (int i = 0; i < curves.size(); i++)
     {
       curve[i] = (ObjectInfo) curves.elementAt(i);
-      curveList.add(curve[i].name);
+      curveList.add(curve[i].getName());
     }
     curveList.setMultipleSelectionEnabled(false);
     curveList.setSelected(0, true);
@@ -101,7 +101,7 @@ public class SkinDialog extends BDialog
   {
     CoordinateSystem coords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
     coords.setOrigin(coords.getOrigin().plus(centerOffset));
-    window.addObject(preview.getObject().object, coords, "Skinned Object "+(counter++), null);
+    window.addObject(preview.getObject().getObject(), coords, "Skinned Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
     window.updateImage();
@@ -147,13 +147,13 @@ public class SkinDialog extends BDialog
   private void makeObject()
   {
     Vec3 v[][] = new Vec3 [curve.length][], center = new Vec3();
-    float us[] = new float [curve.length], vs[] = new float [((Curve) curve[0].object).getVertices().length];
+    float us[] = new float [curve.length], vs[] = new float [((Curve) curve[0].getObject()).getVertices().length];
     int smoothMethod = Mesh.INTERPOLATING;
     boolean closed = false;
     
     for (int i = 0; i < curve.length; i++)
       {
-        Curve cv = (Curve) curve[i].object;
+        Curve cv = (Curve) curve[i].getObject();
         MeshVertex vert[] = cv.getVertices();
         v[i] = new Vec3 [vert.length];
         float smooth[] = cv.getSmoothness();
@@ -163,7 +163,7 @@ public class SkinDialog extends BDialog
         for (int j = 0; j < vert.length; j++)
           {
             int k = (reverse[i] ? vert.length-j-1 : j);
-            v[i][j] = curve[i].coords.fromLocal().times(vert[k].r);
+            v[i][j] = curve[i].getCoords().fromLocal().times(vert[k].r);
             center.add(v[i][j]);
             if (cv.getSmoothingMethod() != Mesh.NO_SMOOTHING)
               vs[j] += smooth[k];

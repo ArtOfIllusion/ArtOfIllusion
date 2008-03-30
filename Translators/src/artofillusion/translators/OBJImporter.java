@@ -290,7 +290,7 @@ public class OBJImporter
             
             // Find the smoothness values for the edges.
             
-            TriangleMesh.Edge edge[] = ((TriangleMesh) info.object).getEdges();
+            TriangleMesh.Edge edge[] = ((TriangleMesh) info.getObject()).getEdges();
             for (int i = 0; i < edge.length; i++)
               {
                 if (edge[i].f2 == -1)
@@ -335,7 +335,7 @@ public class OBJImporter
                   {
                     // Set the UV coordinates.
                     
-                    UVMapping map = new UVMapping(info.object, tex);
+                    UVMapping map = new UVMapping(info.getObject(), tex);
                     info.setTexture(tex, map);
                     Vec2 uv[] = new Vec2 [numVert];
                     boolean needPerFace = false;
@@ -368,13 +368,13 @@ public class OBJImporter
                             uvf[j][k] = new Vec2(texCoords.x, texCoords.y);
                           }
                       }
-                      map.setFaceTextureCoordinates((TriangleMesh) info.object, uvf);
+                      map.setFaceTextureCoordinates((TriangleMesh) info.getObject(), uvf);
                     }
                     else
-                      map.setTextureCoordinates(info.object, uv);
+                      map.setTextureCoordinates(info.getObject(), uv);
                   }
                 else
-                  info.setTexture(tex, tex.getDefaultMapping(info.object));
+                  info.setTexture(tex, tex.getDefaultMapping(info.getObject()));
               }
             theScene.addObject(info, null);
           }

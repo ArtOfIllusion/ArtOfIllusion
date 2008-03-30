@@ -71,10 +71,10 @@ public class RotationTrack extends Track
     if (rot == null)
       return;
     Mat4 pre = null, post = null;
-    if (relCoords == PARENT && info.parent != null)
+    if (relCoords == PARENT && info.getParent() != null)
       {
-        pre = info.parent.coords.toLocal();
-        post = info.parent.coords.fromLocal();
+        pre = info.getParent().getCoords().toLocal();
+        post = info.getParent().getCoords().fromLocal();
       }
     else if (relCoords == OBJECT)
       {
@@ -87,20 +87,20 @@ public class RotationTrack extends Track
       }
     else if (mode == RELATIVE && relCoords == LOCAL)
       {
-        pre = info.coords.fromLocal();
-        post = info.coords.toLocal();
+        pre = info.getCoords().fromLocal();
+        post = info.getCoords().toLocal();
       }
-    rot.applyToCoordinates(info.coords, weight, pre, post, (mode == RELATIVE), enablex, enabley, enablez);
+    rot.applyToCoordinates(info.getCoords(), weight, pre, post, (mode == RELATIVE), enablex, enabley, enablez);
     Joint j = (joint > -1 ? info.getSkeleton().getJoint(joint) : null);
     if (j != null && mode == ABSOLUTE)
       {
-        if (info.pose != null && !info.pose.equals(info.object.getPoseKeyframe()))
+        if (info.getPose() != null && !info.getPose().equals(info.getObject().getPoseKeyframe()))
           {
-            info.object.applyPoseKeyframe(info.pose);
+            info.getObject().applyPoseKeyframe(info.getPose());
             j = info.getSkeleton().getJoint(joint);
           }
-        Mat4 m = info.coords.fromLocal().times(j.coords.toLocal().times(info.coords.toLocal()));
-        info.coords.transformAxes(m);
+        Mat4 m = info.getCoords().fromLocal().times(j.coords.toLocal().times(info.getCoords().toLocal()));
+        info.getCoords().transformAxes(m);
       }
   }
   
@@ -185,10 +185,10 @@ public class RotationTrack extends Track
           c = new ObjectRef(info, j).getCoords().duplicate();
       }
     if (c == null)
-      c = info.coords.duplicate();
-    if (relCoords == PARENT && info.parent != null)
+      c = info.getCoords().duplicate();
+    if (relCoords == PARENT && info.getParent() != null)
       {
-        c.transformAxes(info.parent.coords.toLocal());
+        c.transformAxes(info.getParent().getCoords().toLocal());
         r = new RotationKeyframe(c);
       }
     else if (relCoords == OBJECT)
@@ -218,12 +218,12 @@ public class RotationTrack extends Track
     RotationKeyframe rot = (RotationKeyframe) tc.evaluate(time, smoothingMethod);
     RotationKeyframe current = null;
     Joint j = (joint > -1 && mode == ABSOLUTE ? info.getSkeleton().getJoint(joint) : null);
-    CoordinateSystem c = (j == null ? info.coords : new ObjectRef(info, j).getCoords());
+    CoordinateSystem c = (j == null ? info.getCoords() : new ObjectRef(info, j).getCoords());
 
-    if (relCoords == PARENT && info.parent != null)
+    if (relCoords == PARENT && info.getParent() != null)
       {
         c = c.duplicate();
-        c.transformAxes(info.parent.coords.toLocal());
+        c.transformAxes(info.getParent().getCoords().toLocal());
       }
     else if (relCoords == OBJECT)
       {
@@ -427,7 +427,7 @@ public class RotationTrack extends Track
   
   public double [] getDefaultGraphValues()
   {
-    return info.coords.getRotationAngles();
+    return info.getCoords().getRotationAngles();
   }
   
   /** Get the allowed range for graphable values.  This returns a 2D array, where elements
@@ -456,8 +456,8 @@ public class RotationTrack extends Track
       if (relInfo != null)
         return new ObjectInfo [] {relInfo};
     }
-    else if (relCoords == PARENT && info.parent != null)
-      return new ObjectInfo [] {info.parent};
+    else if (relCoords == PARENT && info.getParent() != null)
+      return new ObjectInfo [] {info.getParent()};
     return new ObjectInfo [0];
   }
   

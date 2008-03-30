@@ -56,7 +56,7 @@ public class RenderSetupDialog
     for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
     {
       obj = theScene.getObject(i);
-      if (obj.object instanceof SceneCamera)
+      if (obj.getObject() instanceof SceneCamera)
         count++;
     }
     if (count == 0)
@@ -70,7 +70,7 @@ public class RenderSetupDialog
     for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
     {
       obj = theScene.getObject(i);
-      if (obj.object instanceof SceneCamera)
+      if (obj.getObject() instanceof SceneCamera)
         cameras[count++] = obj;
     }
     showDialog();
@@ -109,7 +109,7 @@ public class RenderSetupDialog
     rendChoice.addEventLink(ValueChangedEvent.class, this, "rendererChanged");
     top.add(camChoice = new BComboBox(), 3, 1);
     for (int i = 0; i < cameras.length; i++)
-      camChoice.add(cameras[i].name);
+      camChoice.add(cameras[i].getName());
     camChoice.setSelectedIndex(currentCamera);
     top.add(fpsField = new ValueField(fps, ValueField.POSITIVE+ValueField.INTEGER), 3, 3);
     top.add(subimagesField = new ValueField(subimages, ValueField.POSITIVE+ValueField.INTEGER), 3, 4);
@@ -139,8 +139,8 @@ public class RenderSetupDialog
     if (currentRenderer.recordConfiguration())
     {
       Camera cam = new Camera();
-      SceneCamera sc = (SceneCamera) cameras[currentCamera].object;
-      cam.setCameraCoordinates(cameras[currentCamera].coords.duplicate());
+      SceneCamera sc = (SceneCamera) cameras[currentCamera].getObject();
+      cam.setCameraCoordinates(cameras[currentCamera].getCoords().duplicate());
       cam.setSize(width, height);
       cam.setDistToScreen((height/200.0)/Math.tan(sc.getFieldOfView()*Math.PI/360.0));
       if (movie)
@@ -165,7 +165,7 @@ public class RenderSetupDialog
     
     Vector cameras = new Vector();
     for (int i = 0; i < theScene.getNumObjects(); i++)
-      if (theScene.getObject(i).object instanceof SceneCamera)
+      if (theScene.getObject(i).getObject() instanceof SceneCamera)
         cameras.addElement(theScene.getObject(i));
     if (cameras.size() == 0)
     {
@@ -183,8 +183,8 @@ public class RenderSetupDialog
     currentRenderer.recordConfiguration();
     Camera cam = new Camera();
     ObjectInfo cameraInfo = (ObjectInfo) cameras.elementAt(currentCamera);
-    SceneCamera sc = (SceneCamera) cameraInfo.object;
-    cam.setCameraCoordinates(cameraInfo.coords.duplicate());
+    SceneCamera sc = (SceneCamera) cameraInfo.getObject();
+    cam.setCameraCoordinates(cameraInfo.getCoords().duplicate());
     cam.setSize(width, height);
     cam.setDistToScreen((height/200.0)/Math.tan(sc.getFieldOfView()*Math.PI/360.0));
     new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo);

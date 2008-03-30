@@ -35,8 +35,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     oldObject = obj;
     theObject = (CSGObject) obj.duplicate();
     this.onClose = onClose;
-    theScene.addObject(obj.getObject1().object.duplicate(), obj.getObject1().coords.duplicate(), obj.getObject1().name, null);
-    theScene.addObject(obj.getObject2().object.duplicate(), obj.getObject2().coords.duplicate(), obj.getObject2().name, null);
+    theScene.addObject(obj.getObject1().getObject().duplicate(), obj.getObject1().getCoords().duplicate(), obj.getObject1().getName(), null);
+    theScene.addObject(obj.getObject2().getObject().duplicate(), obj.getObject2().getCoords().duplicate(), obj.getObject2().getName(), null);
     FormContainer content = new FormContainer(new double [] {0, 1}, new double [] {1, 0, 0});
     setContent(content);
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
@@ -219,7 +219,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
 
     if (sel.length != 1)
       return;
-    final Object3D obj = theScene.getObject(sel[0]).object;
+    final Object3D obj = theScene.getObject(sel[0]).getObject();
     if (obj.isEditable())
     {
       final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
@@ -249,8 +249,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     setUndoRecord(undo);
     for (i = 0; i < sel.length; i++)
     {
-      obj[i] = theScene.getObject(sel[i]).object;
-      coords[i] = theScene.getObject(sel[i]).coords;
+      obj[i] = theScene.getObject(sel[i]).getObject();
+      coords[i] = theScene.getObject(sel[i]).getCoords();
       undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i], obj[i].duplicate()});
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords[i], coords[i].duplicate()});
     }
@@ -259,7 +259,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       orig = coords[0].getOrigin();
       angles = coords[0].getRotationAngles();
       size = theScene.getObject(sel[0]).getBounds().getSize();
-      TransformDialog dlg = new TransformDialog(this, Translate.text("objectLayoutTitle", theScene.getObject(sel[0]).name), 
+      TransformDialog dlg = new TransformDialog(this, Translate.text("objectLayoutTitle", theScene.getObject(sel[0]).getName()),
           new double [] {orig.x, orig.y, orig.z, angles[0], angles[1], angles[2], 
           size.x, size.y, size.z}, false, false);
       values = dlg.getValues();
@@ -333,7 +333,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     if (sel.length == 0)
       return;
     if (sel.length == 1)
-      dlg = new TransformDialog(this, Translate.text("transformObjectTitle", theScene.getObject(sel[0]).name), 
+      dlg = new TransformDialog(this, Translate.text("transformObjectTitle", theScene.getObject(sel[0]).getName()),
 		new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
     else
       dlg = new TransformDialog(this, Translate.text("transformObjectTitleMultiple"), 
@@ -343,8 +343,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     setUndoRecord(undo);
     for (i = 0; i < sel.length; i++)
     {
-      obj = theScene.getObject(sel[i]).object;
-      coords = theScene.getObject(sel[i]).coords;
+      obj = theScene.getObject(sel[i]).getObject();
+      coords = theScene.getObject(sel[i]).getCoords();
       undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, coords.duplicate()});
       orig = coords.getOrigin();
@@ -428,8 +428,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     alignTo = new Vec3();
     for (i = 0; i < sel.length; i++)
     {
-      obj = theScene.getObject(sel[i]).object;
-      coords = theScene.getObject(sel[i]).coords;
+      obj = theScene.getObject(sel[i]).getObject();
+      coords = theScene.getObject(sel[i]).getCoords();
       bounds = obj.getBounds();
       bounds = bounds.transformAndOutset(coords.fromLocal());
       center = bounds.getCenter();
@@ -471,8 +471,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     
     for (i = 0; i < sel.length; i++)
     {
-      obj = theScene.getObject(sel[i]).object;
-      coords = theScene.getObject(sel[i]).coords;
+      obj = theScene.getObject(sel[i]).getObject();
+      coords = theScene.getObject(sel[i]).getCoords();
       bounds = obj.getBounds();
       bounds = bounds.transformAndOutset(coords.fromLocal());
       center = bounds.getCenter();
@@ -516,7 +516,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
-      BoundingBox b = info.getBounds().transformAndOutset(info.coords.fromLocal());
+      BoundingBox b = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
       if (bounds == null)
         bounds = b;
       else
@@ -531,8 +531,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.coords, info.coords.duplicate()});
-      info.coords.setOrigin(info.coords.getOrigin().minus(center));
+      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.getCoords(), info.getCoords().duplicate()});
+      info.getCoords().setOrigin(info.getCoords().getOrigin().minus(center));
     }
     updateImage();
   }  
@@ -546,7 +546,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     if (sel.length != 1)
       return;
     info = theScene.getObject(sel[0]);
-    obj = info.object;
+    obj = info.getObject();
     if (obj.canConvertToTriangleMesh() == Object3D.CANT_CONVERT)
       return;
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
@@ -568,7 +568,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     }
     mesh.setTexture(obj.getTexture(), obj.getTextureMapping());
     mesh.setMaterial(obj.getMaterial(), obj.getMaterialMapping());
-    theScene.getObject(sel[0]).object = mesh;
+    theScene.getObject(sel[0]).setObject(mesh);
     updateImage();
     updateMenus();
   }

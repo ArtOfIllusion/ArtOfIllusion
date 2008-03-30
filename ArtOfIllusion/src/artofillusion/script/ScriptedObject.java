@@ -345,7 +345,7 @@ public class ScriptedObject extends ObjectCollection
   
     public Keyframe duplicate(Object owner)
     {
-      ScriptedObjectKeyframe key = new ScriptedObjectKeyframe((ScriptedObject) ((ObjectInfo) owner).object, new String [0], new double [0]);
+      ScriptedObjectKeyframe key = new ScriptedObjectKeyframe((ScriptedObject) ((ObjectInfo) owner).getObject(), new String [0], new double [0]);
       key.valueTable = (Hashtable) valueTable.clone();
       return key;
     }
@@ -458,7 +458,7 @@ public class ScriptedObject extends ObjectCollection
       short version = in.readShort();
       if (version != 0)
         throw new InvalidObjectException("");
-      script = (ScriptedObject) ((ObjectInfo) parent).object;
+      script = (ScriptedObject) ((ObjectInfo) parent).getObject();
       double values[] = new double [script.paramName.length];
       for (int i = 0; i < values.length; i++)
         values[i] = in.readDouble();

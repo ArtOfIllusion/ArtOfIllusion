@@ -17,7 +17,6 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
-import javax.swing.*;
 
 /** This is a Track which places constraints on the position or orientation of an object. */
 
@@ -66,14 +65,14 @@ public class ConstraintTrack extends Track
   {
     double weight = theWeight.getWeight(time);
 
-    Vec3 v = info.coords.getOrigin();
+    Vec3 v = info.getCoords().getOrigin();
     v.x = findCoordinate(v.x, pos.x, xType, weight);
     v.y = findCoordinate(v.y, pos.y, yType, weight);
     v.z = findCoordinate(v.z, pos.z, zType, weight);
     if (orientType != NONE)
       {
-        Vec3 zdir = info.coords.getZDirection();
-        Vec3 ydir = info.coords.getUpDirection();
+        Vec3 zdir = info.getCoords().getZDirection();
+        Vec3 ydir = info.getCoords().getUpDirection();
         Vec3 xdir = ydir.cross(zdir);
         Vec3 oldy = new Vec3(ydir);
         Vec3 oldz = new Vec3(zdir);
@@ -89,9 +88,9 @@ public class ConstraintTrack extends Track
           ydir.set(weight*ydir.x+w1*oldy.x, weight*ydir.y+w1*oldy.y, weight*ydir.z+w1*oldy.z);
           zdir.set(weight*zdir.x+w1*oldz.x, weight*zdir.y+w1*oldz.y, weight*zdir.z+w1*oldz.z);
         }
-        info.coords.setOrientation(zdir, ydir);
+        info.getCoords().setOrientation(zdir, ydir);
       }
-    info.coords.setOrigin(v);
+    info.getCoords().setOrigin(v);
   }
   
   /** Find the new value for a particular coordinate, based on the current value and the
@@ -119,7 +118,7 @@ public class ConstraintTrack extends Track
         CoordinateSystem target = faceToward.getCoords();
         if (target == null)
           return;
-        v = target.getOrigin().minus(info.coords.getOrigin());
+        v = target.getOrigin().minus(info.getCoords().getOrigin());
       }
     else
       v = new Vec3(orient);

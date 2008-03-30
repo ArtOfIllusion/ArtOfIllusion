@@ -66,7 +66,7 @@ public class CreateVertexTool extends MeshEditingTool
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     TriMeshViewer tmv = (TriMeshViewer) view;
-    TriangleMesh mesh = (TriangleMesh) controller.getObject().object;
+    TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
     MeshVertex vert[] = mesh.getVertices();
     int mode = controller.getSelectionMode();
     Vec3 uvw = new Vec3();
@@ -141,7 +141,7 @@ public class CreateVertexTool extends MeshEditingTool
     if (target == -1)
       return;
     TriMeshViewer tmv = (TriMeshViewer) view;
-    TriangleMesh mesh = (TriangleMesh) controller.getObject().object;
+    TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
     Point dragPoint = e.getPoint();
     Vec3 v[], drag;
     int dx, dy;
@@ -160,7 +160,7 @@ public class CreateVertexTool extends MeshEditingTool
     if (target == -1)
       return;
     TriMeshViewer tmv = (TriMeshViewer) view;
-    Object3D meshobj = controller.getObject().object;
+    Object3D meshobj = controller.getObject().getObject();
     TriangleMesh mesh = (TriangleMesh) meshobj;
     Point dragPoint = e.getPoint();
     int dx, dy;

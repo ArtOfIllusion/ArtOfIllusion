@@ -154,7 +154,7 @@ public class RotateMeshTool extends MeshEditingTool
 
   protected void handlePressed(HandlePressedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     clickPoint =  ev.getMouseEvent().getPoint();
     HandlePosition handle = ev.getHandle();
     if (!handle.isEast() && !handle.isWest())
@@ -186,7 +186,7 @@ public class RotateMeshTool extends MeshEditingTool
   
   protected void handleDragged(HandleDraggedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
     if (undo == null)
       undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
@@ -200,7 +200,7 @@ public class RotateMeshTool extends MeshEditingTool
 
   protected void handleReleased(HandleReleasedEvent ev)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
 
     double angle = DRAG_SCALE*((dragPoint.x-clickPoint.x)*hdirection + (dragPoint.y-clickPoint.y)*vdirection);

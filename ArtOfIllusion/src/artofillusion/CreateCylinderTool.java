@@ -120,9 +120,9 @@ public class CreateCylinderTool extends EditingTool
 
     // Update the size and position, and redraw the display.
     
-    ((Cylinder) objInfo.object).setSize(xsize, ysize, zsize);
-    objInfo.coords.setOrigin(orig);
-    objInfo.coords.setOrientation(zdir, ydir);
+    ((Cylinder) objInfo.getObject()).setSize(xsize, ysize, zsize);
+    objInfo.getCoords().setOrigin(orig);
+    objInfo.getCoords().setOrientation(zdir, ydir);
     objInfo.clearCachedMeshes();
     theWindow.updateImage();
   }

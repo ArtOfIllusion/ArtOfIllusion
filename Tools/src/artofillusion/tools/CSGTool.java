@@ -47,11 +47,11 @@ public class CSGTool implements ModellingTool
     for (int i = 0; i < selection.length; i++)
       {
 	ObjectInfo obj = scene.getObject(selection[i]);
-	if (obj.object.canSetTexture())
-	  if (obj.object instanceof TriangleMesh || obj.object.canConvertToTriangleMesh() != Object3D.CANT_CONVERT)
+	if (obj.getObject().canSetTexture())
+	  if (obj.getObject() instanceof TriangleMesh || obj.getObject().canConvertToTriangleMesh() != Object3D.CANT_CONVERT)
 	    {
 	      inputObj.addElement(obj);
-	      if (obj.object.isClosed())
+	      if (obj.getObject().isClosed())
 		closedCount++;
 	    }
       }

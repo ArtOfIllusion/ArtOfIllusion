@@ -61,7 +61,7 @@ public class SkeletonShapeTrack extends Track
     double weight = theWeight.getWeight(time);
     Actor actor = null;
     if (useGestures)
-      actor = Actor.getActor(info.object);
+      actor = Actor.getActor(info.getObject());
     if (weight > 0.0)
       info.addDistortion(new SkeletonShapeDistortion(key.getSkeleton().duplicate(), weight, actor));
   }
@@ -76,7 +76,7 @@ public class SkeletonShapeTrack extends Track
     t.quantized = quantized;
     t.smoothingMethod = smoothingMethod;
     t.useGestures = useGestures;
-    t.tc = tc.duplicate(((ObjectInfo) obj).object);
+    t.tc = tc.duplicate(((ObjectInfo) obj).getObject());
     t.theWeight = (WeightTrack) theWeight.duplicate(t);
     return t;
   }
@@ -91,7 +91,7 @@ public class SkeletonShapeTrack extends Track
     quantized = t.quantized;
     smoothingMethod = t.smoothingMethod;
     useGestures = t.useGestures;
-    tc = t.tc.duplicate(info.object);
+    tc = t.tc.duplicate(info.getObject());
     theWeight = (WeightTrack) t.theWeight.duplicate(this);
   }
   
@@ -122,7 +122,7 @@ public class SkeletonShapeTrack extends Track
   {
     Keyframe k = tc.evaluate(time, smoothingMethod);
     if (k == null)
-      k = new SkeletonShapeKeyframe(info.object, info.object.getSkeleton().duplicate());
+      k = new SkeletonShapeKeyframe(info.getObject(), info.getObject().getSkeleton().duplicate());
     else
       k = k.duplicate();
     tc.addTimepoint(k, time, new Smoothness());
@@ -271,7 +271,7 @@ public class SkeletonShapeTrack extends Track
     for (int i = 0; i < keys; i++)
     {
       t[i] = in.readDouble();
-      v[i] = new SkeletonShapeKeyframe(in, info.object);
+      v[i] = new SkeletonShapeKeyframe(in, info.getObject());
       s[i] = new Smoothness(in);
     }
     tc = new Timecourse(v, t, s);
@@ -308,7 +308,7 @@ public class SkeletonShapeTrack extends Track
     });
     smoothChoice.setSelectedIndex(smoothingMethod);
     BCheckBox gesturesBox = new BCheckBox(Translate.text("useGesturesToShapeMesh"), useGestures);
-    gesturesBox.setEnabled(Actor.getActor(info.object) != null);
+    gesturesBox.setEnabled(Actor.getActor(info.getObject()) != null);
     ComponentsDialog dlg = new ComponentsDialog(win, Translate.text("skeletonShapeTrackTitle"), new Widget []
         {nameField, smoothChoice, gesturesBox}, new String []
         {Translate.text("trackName"), Translate.text("SmoothingMethod"), null});

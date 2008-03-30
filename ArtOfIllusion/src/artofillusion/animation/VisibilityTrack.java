@@ -38,7 +38,7 @@ public class VisibilityTrack extends Track
 
     if (v == null)
       return;
-    info.visible = v.val;
+    info.setVisible(v.val);
   }
   
   /* Create a duplicate of this track. */
@@ -91,7 +91,7 @@ public class VisibilityTrack extends Track
   
   public Keyframe setKeyframe(double time, Scene sc)
   {
-    Keyframe k = new BooleanKeyframe(info.visible);
+    Keyframe k = new BooleanKeyframe(info.isVisible());
     tc.addTimepoint(k, time, new Smoothness());
     return k;
   }
@@ -105,7 +105,7 @@ public class VisibilityTrack extends Track
     if (tc.getTimes().length == 0)
       return setKeyframe(time, sc);
     BooleanKeyframe v = (BooleanKeyframe) tc.evaluate(time, tc.LINEAR);
-    if (v.val == info.visible)
+    if (v.val == info.isVisible())
       return null;
     return setKeyframe(time, sc);
   }

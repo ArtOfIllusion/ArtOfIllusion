@@ -314,7 +314,7 @@ public class ApplicationPreferences
               {
                 ObjectInfo info = sc.getObject(j);
                 Vec3 size = info.getBounds().getSize();
-                info.object.setSize(size.x, size.y, size.z);
+                info.getObject().setSize(size.x, size.y, size.z);
                 info.clearCachedMeshes();
               }
             windows[i].updateImage();

@@ -78,7 +78,7 @@ public class ObjectRefSelector extends RowContainer
     for (int i = 0; i < sc.getNumObjects(); i++)
     {
       ObjectInfo info = sc.getObject(i);
-      if (info.parent == null)
+      if (info.getParent() == null)
         tree.addElement(new ObjectRefTreeElement(new ObjectRef(info), null, tree, exclude));
     }
     tree.setUpdateEnabled(true);

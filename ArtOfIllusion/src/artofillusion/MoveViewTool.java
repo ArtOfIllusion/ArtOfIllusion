@@ -127,8 +127,8 @@ public class MoveViewTool extends EditingTool
             // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
             // the camera.
             
-            UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.coords, oldCoords});
-            moveChildren(bound, bound.coords.fromLocal().times(oldCoords.toLocal()), undo);
+            UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
+            moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
             theWindow.setUndoRecord(undo);
           }
         theWindow.updateImage();
@@ -139,13 +139,13 @@ public class MoveViewTool extends EditingTool
   
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
   {
-    for (int i = 0; i < parent.children.length; i++)
+    for (int i = 0; i < parent.getChildren().length; i++)
       {
-        CoordinateSystem coords = parent.children[i].coords;
+        CoordinateSystem coords = parent.getChildren()[i].getCoords();
         CoordinateSystem oldCoords = coords.duplicate();
         coords.transformCoordinates(transform);
         undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
-        moveChildren(parent.children[i], transform, undo);
+        moveChildren(parent.getChildren()[i], transform, undo);
       }
   }
 }

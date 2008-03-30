@@ -605,13 +605,13 @@ public class Curve extends Object3D implements Mesh
   
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    CurveEditorWindow ed = new CurveEditorWindow(parent, "Curve object '"+info.name+"'", info, cb, true);
+    CurveEditorWindow ed = new CurveEditorWindow(parent, "Curve object '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
-    CurveEditorWindow ed = new CurveEditorWindow(parent, "Gesture '"+info.name+"'", info, cb, false);
+    CurveEditorWindow ed = new CurveEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
     ViewerCanvas views[] = ed.getAllViews();
     for (int i = 0; i < views.length; i++)
       ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
@@ -805,7 +805,7 @@ public class Curve extends Object3D implements Mesh
       if (owner instanceof Curve)
         k.curve = (Curve) owner;
       else
-        k.curve = (Curve) ((ObjectInfo) owner).object;
+        k.curve = (Curve) ((ObjectInfo) owner).getObject();
       k.vertPos = new Vec3 [vertPos.length];
       k.vertSmoothness = new float [vertSmoothness.length];
       for (int i = 0; i < vertPos.length; i++)

@@ -58,7 +58,7 @@ public class AnimationPreviewer implements Runnable
     for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
     {
       obj = theScene.getObject(i);
-      if (obj.object instanceof SceneCamera)
+      if (obj.getObject() instanceof SceneCamera)
         count++;
     }
     if (count == 0)
@@ -72,7 +72,7 @@ public class AnimationPreviewer implements Runnable
     for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
     {
       obj = theScene.getObject(i);
-      if (obj.object instanceof SceneCamera)
+      if (obj.getObject() instanceof SceneCamera)
         cameras[count++] = obj;
     }
 
@@ -80,7 +80,7 @@ public class AnimationPreviewer implements Runnable
 
     camChoice = new BComboBox();
     for (i = 0; i < cameras.length; i++)
-      camChoice.add(cameras[i].name);
+      camChoice.add(cameras[i].getName());
     camChoice.setSelectedIndex(currentCamera);
     modeChoice = new BComboBox(new Object [] {
        Translate.text("menu.wireframeDisplay"), 
@@ -165,8 +165,8 @@ public class AnimationPreviewer implements Runnable
       {
         final double time = startTime+i/(double) fps;
         theScene.setTime(time);
-        SceneCamera sc = (SceneCamera) sceneCamera.object;
-        cam.setCameraCoordinates(sceneCamera.coords.duplicate());
+        SceneCamera sc = (SceneCamera) sceneCamera.getObject();
+        cam.setCameraCoordinates(sceneCamera.getCoords().duplicate());
         cam.setDistToScreen((height/200.0)/Math.tan(sc.getFieldOfView()*Math.PI/360.0));
         final int frame = i;
         try

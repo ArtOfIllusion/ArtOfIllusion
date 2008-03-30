@@ -51,7 +51,7 @@ public abstract class MeshViewer extends ObjectViewer
   
   public boolean [] getLockedJoints()
   {
-    Skeleton s = ((Mesh) getController().getObject().object).getSkeleton();
+    Skeleton s = ((Mesh) getController().getObject().getObject()).getSkeleton();
     if (s == null)
       return new boolean [0];
     boolean b[] = new boolean [s.getNumJoints()];

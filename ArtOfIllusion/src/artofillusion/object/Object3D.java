@@ -361,7 +361,7 @@ public abstract class Object3D
 
   public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
   {
-    if (!obj.visible)
+    if (!obj.isVisible())
       return;
     Camera theCamera = canvas.getCamera();
     if (theCamera.visibility(obj.getBounds()) == Camera.NOT_VISIBLE)
@@ -387,12 +387,12 @@ public abstract class Object3D
         if (canvas.getScene() != null)
           time = canvas.getScene().getTime();
         if (renderMode == ViewerCanvas.RENDER_FLAT)
-          shader = new FlatVertexShader(mesh, obj.object, time, obj.coords.toLocal().timesDirection(viewDir));
+          shader = new FlatVertexShader(mesh, obj.getObject(), time, obj.getCoords().toLocal().timesDirection(viewDir));
         else if (renderMode == ViewerCanvas.RENDER_SMOOTH)
-          shader = new SmoothVertexShader(mesh, obj.object, time, obj.coords.toLocal().timesDirection(viewDir));
+          shader = new SmoothVertexShader(mesh, obj.getObject(), time, obj.getCoords().toLocal().timesDirection(viewDir));
         else
-          shader = new TexturedVertexShader(mesh, obj.object, time, obj.coords.toLocal().timesDirection(viewDir)).optimize();
-        canvas.renderMesh(mesh, shader, theCamera, obj.object.isClosed(), null);
+          shader = new TexturedVertexShader(mesh, obj.getObject(), time, obj.getCoords().toLocal().timesDirection(viewDir)).optimize();
+        canvas.renderMesh(mesh, shader, theCamera, obj.getObject().isClosed(), null);
       }
     }
     else

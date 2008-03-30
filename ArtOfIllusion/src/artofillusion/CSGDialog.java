@@ -46,19 +46,19 @@ public class CSGDialog extends BDialog
     opRow.add(opChoice = new BComboBox());
     int i = 0;
     operation = new int [4];
-    if (obj.getObject1().object.isClosed() && obj.getObject2().object.isClosed())
+    if (obj.getObject1().getObject().isClosed() && obj.getObject2().getObject().isClosed())
     {
       opChoice.add(Translate.text("Union"));
       operation[i++] = CSGObject.UNION;
     }
     opChoice.add(Translate.text("Intersection"));
     operation[i++] = CSGObject.INTERSECTION;
-    if (obj.getObject2().object.isClosed())
+    if (obj.getObject2().getObject().isClosed())
     {
       opChoice.add(Translate.text("firstSecond"));
       operation[i++] = CSGObject.DIFFERENCE12;
     }
-    if (obj.getObject1().object.isClosed())
+    if (obj.getObject1().getObject().isClosed())
     {
       opChoice.add(Translate.text("secondFirst"));
       operation[i++] = CSGObject.DIFFERENCE21;
@@ -101,9 +101,9 @@ public class CSGDialog extends BDialog
       double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
       TriangleMesh mesh1, mesh2;
   
-      mesh1 = theObject.getObject1().object.convertToTriangleMesh(tol);
-      mesh2 = theObject.getObject2().object.convertToTriangleMesh(tol);
-      modeller = new CSGModeller(mesh1, mesh2, theObject.getObject1().coords, theObject.getObject2().coords);
+      mesh1 = theObject.getObject1().getObject().convertToTriangleMesh(tol);
+      mesh2 = theObject.getObject2().getObject().convertToTriangleMesh(tol);
+      modeller = new CSGModeller(mesh1, mesh2, theObject.getObject1().getCoords(), theObject.getObject2().getCoords());
     }
     TriangleMesh trimesh = modeller.getMesh(operation[opChoice.getSelectedIndex()], texture);
     trimesh.setTexture(texture, texture.getDefaultMapping(trimesh));

@@ -32,7 +32,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   
   public ScriptedObjectEditorWindow(EditingWindow parent, ObjectInfo obj, Runnable onClose)
   {
-    super("Script '"+obj.name+"'");
+    super("Script '"+ obj.getName() +"'");
     window = parent;
     info = obj;
     this.onClose = onClose;
@@ -41,7 +41,7 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptDir = new File(ModellingApp.OBJECT_SCRIPT_DIRECTORY);
     BorderContainer content = new BorderContainer();
     setContent(content);
-    scriptText = new ScriptEditor(((ScriptedObject) info.object).getScript());
+    scriptText = new ScriptEditor(((ScriptedObject) info.getObject()).getScript());
     content.add(BOutline.createBevelBorder(scriptText.createContainer(), false), BorderContainer.CENTER);
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
@@ -128,7 +128,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   
   private void commitChanges()
   {
-    ScriptedObject so = (ScriptedObject) info.object;
+    ScriptedObject so = (ScriptedObject) info.getObject();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     so.setScript(scriptText.getText());
     so.sceneChanged(info, window.getScene());
@@ -154,7 +154,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     public ParametersDialog()
     {
       super(ScriptedObjectEditorWindow.this, Translate.text("objectParameters"), true);
-      script = (ScriptedObject) info.object;
+      script = (ScriptedObject) info.getObject();
       FormContainer content = new FormContainer(new double [] {0.0, 1.0}, new double [] {1.0, 0.0, 0.0, 0.0});
       content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
       setContent(content);

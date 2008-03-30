@@ -43,7 +43,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   public TriMeshEditorWindow(EditingWindow parent, String title, ObjectInfo obj, Runnable onClose, boolean allowTopology)
   {
     super(parent, title, obj);
-    mesh = (TriangleMesh) objInfo.object;
+    mesh = (TriangleMesh) objInfo.getObject();
     hideVert = new boolean [mesh.getVertices().length];
     this.onClose = onClose;
     topology = allowTopology;
@@ -97,9 +97,9 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     modes.addTool(new GenericTool(this, "edge", Translate.text("edgeSelectionModeTool.tipText")));
     modes.addTool(new GenericTool(this, "face", Translate.text("faceSelectionModeTool.tipText")));
     setSelectionMode(modes.getSelection());
-    createEditMenu((TriangleMesh) obj.object);
-    createMeshMenu((TriangleMesh) obj.object);
-    createSkeletonMenu((TriangleMesh) obj.object);
+    createEditMenu((TriangleMesh) obj.getObject());
+    createMeshMenu((TriangleMesh) obj.getObject());
+    createSkeletonMenu((TriangleMesh) obj.getObject());
     createViewMenu();
     recursivelyAddListeners(this);
     UIUtilities.applyDefaultFont(content);
@@ -239,7 +239,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   public void setObject(Object3D obj)
   {
-    objInfo.object = obj;
+    objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
   
@@ -270,7 +270,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     if (hideFace != null)
     {
       boolean oldHideFace[] = hideFace;
-      FaceParameterValue val = (FaceParameterValue) getObject().object.getParameterValue(faceIndexParam);
+      FaceParameterValue val = (FaceParameterValue) getObject().getObject().getParameterValue(faceIndexParam);
       double param[] = val.getValue();
       hideFace = new boolean [obj.getFaces().length];
       for (int i = 0; i < param.length; i++)
@@ -326,7 +326,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   public void updateMenus()
   {
     super.updateMenus();
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     MeshViewer view = (MeshViewer) theView[currentView];
     boolean any = false;
     int i;
@@ -376,7 +376,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       meshMenuItem[1].setText(Translate.text("menu.simplifyMesh"));
     }
     editMenuItem[5].setEnabled(theMesh.getSmoothingMethod() == TriangleMesh.APPROXIMATING || theMesh.getSmoothingMethod() == TriangleMesh.INTERPOLATING);
-    selectMenuItem[0].setEnabled(!objInfo.object.isClosed());
+    selectMenuItem[0].setEnabled(!objInfo.getObject().isClosed());
     selectMenuItem[1].setEnabled(any);
     selectMenuItem[2].setEnabled(any && selectMode == EDGE_MODE);
     selectMenuItem[3].setEnabled(any && selectMode == EDGE_MODE);
@@ -415,12 +415,12 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       for (int i = 0; i < hideVert.length; i++)
         hideVert[i] = false;
     }
-    FaceParameterValue val = (FaceParameterValue) objInfo.object.getParameterValue(faceIndexParam);
+    FaceParameterValue val = (FaceParameterValue) objInfo.getObject().getParameterValue(faceIndexParam);
     double param[] = val.getValue();
     for (int i = 0; i < param.length; i++)
       param[i] = i;
     val.setValue(param);
-    objInfo.object.setParameterValue(faceIndexParam, val);
+    objInfo.getObject().setParameterValue(faceIndexParam, val);
     objInfo.clearCachedMeshes();
     findQuads();
     updateImage();
@@ -435,7 +435,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       return;
     faceIndexParam = new TextureParameter(this, "Face Index", 0.0, Double.MAX_VALUE, 0.0);
     jointWeightParam = new TextureParameter(this, "Joint Weight", 0.0, 1.0, 0.0);
-    TriangleMesh mesh = (TriangleMesh) getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getObject().getObject();
     TextureParameter params[] = mesh.getParameters();
     TextureParameter newparams[] = new TextureParameter [params.length+2];
     ParameterValue values[] = mesh.getParameterValues();
@@ -468,7 +468,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       return;
     faceIndexParam = null;
     jointWeightParam = null;
-    TriangleMesh mesh = (TriangleMesh) getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getObject().getObject();
     TextureParameter params[] = mesh.getParameters();
     TextureParameter newparams[] = new TextureParameter [params.length-2];
     ParameterValue values[] = mesh.getParameterValues();
@@ -503,9 +503,9 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       else
         jointWeight[i] = 0.0;
     }
-    VertexParameterValue value = (VertexParameterValue) getObject().object.getParameterValue(jointWeightParam);
+    VertexParameterValue value = (VertexParameterValue) getObject().getObject().getParameterValue(jointWeightParam);
     value.setValue(jointWeight);
-    getObject().object.setParameterValues(getObject().object.getParameterValues());
+    getObject().getObject().setParameterValues(getObject().getObject().getParameterValues());
     lastSelectedJoint = selJointId;
     objInfo.clearCachedMeshes();    
   }
@@ -704,7 +704,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   protected void doOk()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     if (((TriangleMesh) oldMesh).getMaterial() != null)
     {
       if (!theMesh.isClosed())
@@ -772,7 +772,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   private void findQuads()
   {
-    TriangleMesh mesh = (TriangleMesh) getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getObject().getObject();
     Vertex v[] = (Vertex []) mesh.getVertices();
     Edge e[] = mesh.getEdges();
     Face f[] = mesh.getFaces();
@@ -901,7 +901,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   public void setSelectionMode(int mode)
   {
-    TriangleMesh mesh = (TriangleMesh) getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getObject().getObject();
     Vertex v[] = (Vertex []) mesh.getVertices();
     Edge e[] = mesh.getEdges();
     Face f[] = mesh.getFaces();
@@ -1002,7 +1002,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   void findSelectionDistance()
   {
     int i, j;
-    TriangleMesh mesh = (TriangleMesh) getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getObject().getObject();
     int dist[] = new int [mesh.getVertices().length];
     Edge e[] = mesh.getEdges();
     Face f[] = mesh.getFaces();
@@ -1125,7 +1125,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   public void hideSelectionCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     boolean hide[] = new boolean [theMesh.getFaces().length];
     if (selectMode == FACE_MODE)
       System.arraycopy(selected, 0, hide, 0, selected.length);
@@ -1164,7 +1164,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   public void selectObjectBoundaryCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     TriangleMesh.Edge edge[] = theMesh.getEdges();
     boolean newSel[] = new boolean [edge.length];
     
@@ -1228,7 +1228,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void extendSelectionCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     int dist[] = getSelectionDistance();
     boolean selectedVert[] = new boolean [dist.length];
     TriangleMesh.Edge edge[] = theMesh.getEdges();
@@ -1260,7 +1260,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   {
     if (!topology)
       return;
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     Vertex vert[] = (Vertex []) theMesh.getVertices();
     Edge edge[] = theMesh.getEdges();
     Face face[] = theMesh.getFaces();
@@ -1431,7 +1431,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   public void subdivideCommand()
   {
     int i, j;
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object, newmesh;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject(), newmesh;
     boolean newselection[];
     Edge edges[];
     Face faces[];
@@ -1485,7 +1485,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   public void simplifyCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     boolean selection[] = selected;
     ValueField errorField = new ValueField(0.01, ValueField.NONNEGATIVE);
     int i;
@@ -1538,7 +1538,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
     if (dlg.showOptionDialog(this, options, options[0]) == 1)
       return;
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
     theMesh.copyObject(TriangleMesh.optimizeMesh(theMesh));
     setMesh(theMesh);
@@ -1550,7 +1550,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void bevelCommand()
   {
-    final TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    final TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     final ValueField heightField = new ValueField(0.0, ValueField.NONE), widthField = new ValueField(0.0, ValueField.NONE);
     final ObjectPreviewCanvas preview = new ObjectPreviewCanvas(new ObjectInfo(theMesh, new CoordinateSystem(), ""));
     final int bevelMode[];
@@ -1623,7 +1623,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   {
     if (edges.length < 3)
       return false;
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     Edge ed[] = theMesh.getEdges();
     Edge first = ed[edges[0]];
     Edge last = ed[edges[edges.length-1]];
@@ -1637,7 +1637,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     if (getSelectionMode() != EDGE_MODE)
       return new int [0][0];
     if (boundary == null)
-      boundary = ((TriangleMesh) getObject().object).findBoundaryEdges();
+      boundary = ((TriangleMesh) getObject().getObject()).findBoundaryEdges();
     Vector<int[]> all = new Vector<int[]>();
     for (int i = 0; i < boundary.length; i++)
     {
@@ -1675,7 +1675,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   public void closeBoundaryCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     Vertex vt[] = (Vertex []) theMesh.getVertices();
     Edge ed[] = theMesh.getEdges();
     Face fc[] = theMesh.getFaces();
@@ -1839,7 +1839,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     if (boundaryList.length != 2)
       return;
     final int boundaryVert[][] = new int [2][];
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     Vertex vt[] = (Vertex []) theMesh.getVertices();
     Edge ed[] = theMesh.getEdges();
     boolean closed = isBoundaryClosed(boundaryList[0]);
@@ -1956,8 +1956,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     PanelDialog dlg = new PanelDialog(this, Translate.text("joinBoundardiesTitle"), content);
     if (!dlg.clickedOk())
       return;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {preview.getObject().object, theMesh}));
-    setMesh((Mesh) preview.getObject().object);
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {preview.getObject().getObject(), theMesh}));
+    setMesh((Mesh) preview.getObject().getObject());
     updateImage();
   }
 
@@ -1968,7 +1968,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     int maxsteps = (boundary[0].length > boundary[1].length ? boundary[0].length : boundary[1].length);
     double step0 = boundary[0].length/((double) maxsteps);
     double step1 = (reverse ? -1.0 : 1.0)*boundary[1].length/((double) maxsteps);
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     Vertex vt[] = (Vertex []) theMesh.getVertices();
     Edge ed[] = theMesh.getEdges();
     Face fc[] = theMesh.getFaces();
@@ -2132,7 +2132,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void extractCurveCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     Vertex vt[] = (Vertex []) theMesh.getVertices();
     Edge ed[] = theMesh.getEdges();
     Vector<Edge> edges = new Vector<Edge>();
@@ -2210,7 +2210,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       parent = parent.getParent();
     if (parent != null)
     {
-      ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.coords.duplicate(),
+      ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(),
           "Extracted Curve", null);
       ((LayoutWindow) parent).updateImage();
     }
@@ -2218,7 +2218,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void setSmoothnessCommand()
   {
-    final TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    final TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     TriangleMesh oldMesh = (TriangleMesh) theMesh.duplicate();
     final Vertex vt[] = (Vertex []) theMesh.getVertices();
     final Edge ed[] = theMesh.getEdges();
@@ -2275,7 +2275,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void reverseNormalsCommand()
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
     theMesh.reverseNormals();
     objectChanged();
@@ -2284,7 +2284,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   void setSmoothingMethod(int method)
   {
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
 
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
     for (int i = 0; i < smoothItem.length; i++)
@@ -2302,7 +2302,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];
-    TriangleMesh theMesh = (TriangleMesh) objInfo.object;
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     TriangleMesh.Edge edge[] = theMesh.getEdges();
     int maxDistance = getTensionDistance();
     double tension = getMeshTension(), scale[] = new double [maxDistance+1];

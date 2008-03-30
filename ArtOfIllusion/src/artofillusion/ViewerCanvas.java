@@ -533,8 +533,8 @@ public abstract class ViewerCanvas extends CustomWidget
     if (boundCamera != null)
     {
       Rectangle bounds = getBounds();
-      boundCamera.coords.copyCoords(theCamera.getCameraCoordinates());
-      theCamera.setDistToScreen((bounds.height/200.0)/Math.tan(((SceneCamera) boundCamera.object).getFieldOfView()*Math.PI/360.0));
+      boundCamera.getCoords().copyCoords(theCamera.getCameraCoordinates());
+      theCamera.setDistToScreen((bounds.height/200.0)/Math.tan(((SceneCamera) boundCamera.getObject()).getFieldOfView()*Math.PI/360.0));
     }
     else
       theCamera.setDistToScreen(ModellingApp.DIST_TO_SCREEN);
@@ -795,7 +795,7 @@ public abstract class ViewerCanvas extends CustomWidget
     if (boundCamera == null)
       return;
     CoordinateSystem coords = theCamera.getCameraCoordinates();
-    coords.copyCoords(boundCamera.coords);
+    coords.copyCoords(boundCamera.getCoords());
     theCamera.setCameraCoordinates(coords);
   }
   

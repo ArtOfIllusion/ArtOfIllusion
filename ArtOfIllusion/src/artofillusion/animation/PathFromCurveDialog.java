@@ -19,7 +19,6 @@ import buoy.widget.*;
 import java.awt.*;
 import java.text.*;
 import java.util.Vector;
-import javax.swing.*;
 
 /** PathFromCurveDialog is a dialog box for describing how to set an animation path from
     a Curve object. */
@@ -53,15 +52,15 @@ public class PathFromCurveDialog extends BDialog
     for (int i = 0; i < sel.length; i++)
     {
       ObjectInfo info = (ObjectInfo) sel[i];
-      if (info.object instanceof Curve)
+      if (info.getObject() instanceof Curve)
       {
         curves.addElement(info);
-        curveList.add(info.name);
+        curveList.add(info.getName());
       }
       else
       {
         objects.addElement(info);
-        objList.add(info.name);
+        objList.add(info.getName());
       }
     }
     objList.setMultipleSelectionEnabled(false);
@@ -156,10 +155,10 @@ public class PathFromCurveDialog extends BDialog
     if (curveList.getSelectedIndex() > -1)
     {
       ObjectInfo info = (ObjectInfo) curves.elementAt(curveList.getSelectedIndex());
-      Curve cv = (Curve) info.object;
+      Curve cv = (Curve) info.getObject();
       MeshVertex vert[] = cv.getVertices();
       Vec3 v[] = new Vec3 [vert.length];
-      Mat4 trans = info.coords.fromLocal();
+      Mat4 trans = info.getCoords().fromLocal();
       for (int i = 0; i < v.length; i++)
         v[i] = trans.times(vert[i].r);
       subdiv = new Curve(v, cv.getSmoothness(), cv.getSmoothingMethod(), cv.isClosed()).subdivideCurve(4).getVertexPositions();
@@ -257,12 +256,12 @@ public class PathFromCurveDialog extends BDialog
   private void addTracks()
   {
     ObjectInfo info = (ObjectInfo) curves.elementAt(curveList.getSelectedIndex());
-    Mat4 trans = info.coords.fromLocal();
-    Curve cv = (Curve) info.object;
+    Mat4 trans = info.getCoords().fromLocal();
+    Curve cv = (Curve) info.getObject();
     MeshVertex vert[] = cv.getVertices();
     int n = (cv.isClosed() ? vert.length+1 : vert.length);
     double dist[] = new double [n], time[] = new double [n];
-    String curveName = info.name;
+    String curveName = info.getName();
     
     // Find the distance along the curve of each keyframe.
     
@@ -296,7 +295,7 @@ public class PathFromCurveDialog extends BDialog
     // Create the position track.
     
     info = (ObjectInfo) objects.elementAt(objList.getSelectedIndex());
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.SET_TRACK_LIST, new Object [] {info, info.tracks}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()}));
     float smoothness[] = cv.getSmoothness();
     PositionTrack tr = new PositionTrack(info);
     tr.setName(curveName+" Position");

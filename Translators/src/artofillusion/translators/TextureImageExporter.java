@@ -62,7 +62,7 @@ public class TextureImageExporter
 
   public void addObject(ObjectInfo obj)
   {
-    Texture tex = obj.object.getTexture();
+    Texture tex = obj.getObject().getTexture();
     if (tex == null)
       return;
     TextureImageInfo info = (TextureImageInfo) textureTable.get(tex);
@@ -70,7 +70,7 @@ public class TextureImageExporter
       {
         // We haven't encountered this texture before, so create a new TextureImageInfo for it.
 
-        info = new TextureImageInfo(tex, obj.object.getAverageParameterValues());
+        info = new TextureImageInfo(tex, obj.getObject().getAverageParameterValues());
         textureTable.put(tex, info);
         if (tex instanceof ImageMapTexture)
           {
@@ -103,8 +103,8 @@ public class TextureImageExporter
       }
     else if (tex instanceof ProceduralTexture2D)
       {
-        Mesh mesh = (obj.object instanceof Mesh ? (Mesh) obj.object : obj.object.convertToTriangleMesh(0.1));
-        Mapping2D map = (Mapping2D) obj.object.getTextureMapping();
+        Mesh mesh = (obj.getObject() instanceof Mesh ? (Mesh) obj.getObject() : obj.getObject().convertToTriangleMesh(0.1));
+        Mapping2D map = (Mapping2D) obj.getObject().getTextureMapping();
         if (map instanceof UVMapping && mesh instanceof FacetedMesh && ((UVMapping) map).isPerFaceVertex((FacetedMesh) mesh))
         {
           Vec2 coords[][] = ((UVMapping) map).findFaceTextureCoordinates((FacetedMesh) mesh);

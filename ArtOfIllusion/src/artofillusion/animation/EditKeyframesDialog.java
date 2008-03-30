@@ -13,7 +13,6 @@ package artofillusion.animation;
 import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.event.*;
 import buoy.widget.*;
 import java.text.*;
 import java.util.*;
@@ -111,8 +110,8 @@ public class EditKeyframesDialog
         for (int i = 0; i < theScene.getNumObjects(); i++)
           {
             ObjectInfo info = theScene.getObject(i);
-            for (int j = 0; j < info.tracks.length; j++)
-              addToVector(info.tracks[j], tracks);
+            for (int j = 0; j < info.getTracks().length; j++)
+              addToVector(info.getTracks()[j], tracks);
           }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
@@ -125,8 +124,8 @@ public class EditKeyframesDialog
         for (int i = 0; i < sel.length; i++)
           {
             ObjectInfo info = theScene.getObject(sel[i]);
-            for (int j = 0; j < info.tracks.length; j++)
-              addToVector(info.tracks[j], tracks);
+            for (int j = 0; j < info.getTracks().length; j++)
+              addToVector(info.getTracks()[j], tracks);
           }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)

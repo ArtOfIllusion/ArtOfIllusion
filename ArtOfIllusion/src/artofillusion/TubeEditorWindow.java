@@ -61,7 +61,7 @@ public class TubeEditorWindow extends CurveEditorWindow
       view.setScene(parent.getScene(), obj);
     }
     createEditMenu();
-    createMeshMenu((Tube) obj.object);
+    createMeshMenu((Tube) obj.getObject());
     createViewMenu();
     recursivelyAddListeners(this);
     UIUtilities.applyDefaultFont(content);
@@ -70,7 +70,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     d2 = new Dimension((d1.width*3)/4, (d1.height*3)/4);
     setBounds(new Rectangle((d1.width-d2.width)/2, (d1.height-d2.height)/2, d2.width, d2.height));
     tools.requestFocus();
-    selected = new boolean [((Tube) obj.object).getVertices().length];
+    selected = new boolean [((Tube) obj.getObject()).getVertices().length];
     findSelectionDistance();
     updateMenus();
   }
@@ -146,7 +146,7 @@ public class TubeEditorWindow extends CurveEditorWindow
         for (int j = 0; j < endsItem.length; j++)
           endsItem[j].setState(false);
         endsItem[i].setState(true);
-        ((Tube) objInfo.object).setEndsStyle(i);
+        ((Tube) objInfo.getObject()).setEndsStyle(i);
         objectChanged();
         updateImage();
       }
@@ -154,7 +154,7 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   protected void doOk()
   {
-    Tube theMesh = (Tube) objInfo.object;
+    Tube theMesh = (Tube) objInfo.getObject();
     if (((Tube) oldMesh).getMaterial() != null)
     {
       if (!theMesh.isClosed())
@@ -188,7 +188,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     if (!topology)
       return;
     int i, j, num = 0;
-    Tube theTube = (Tube) objInfo.object;
+    Tube theTube = (Tube) objInfo.getObject();
     boolean newsel[];
     MeshVertex vt[] = theTube.getVertices(), newv[];
     double t[] = theTube.getThickness(), newt[];
@@ -234,7 +234,7 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   public void subdivideCommand()
   {
-    Tube theTube = (Tube) objInfo.object;
+    Tube theTube = (Tube) objInfo.getObject();
     MeshVertex vt[] = theTube.getVertices(), newpos[];
     float s[] = theTube.getSmoothness(), news[];
     double t[] = theTube.getThickness(), newt[];
@@ -385,7 +385,7 @@ public class TubeEditorWindow extends CurveEditorWindow
   
   public void setThicknessCommand()
   {
-    Tube theTube = (Tube) objInfo.object;
+    Tube theTube = (Tube) objInfo.getObject();
     double thickness[] = theTube.getThickness(), initial = -1;
     int selectDist[] = getSelectionDistance();
 

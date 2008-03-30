@@ -52,7 +52,7 @@ public class TwistTrack extends Track
     if (weight == 0.0)
       return;
     if (worldCoords)
-      info.addDistortion(new TwistDistortion(axis, angle.val*weight, forward, info.coords.fromLocal(), info.coords.toLocal()));
+      info.addDistortion(new TwistDistortion(axis, angle.val*weight, forward, info.getCoords().fromLocal(), info.getCoords().toLocal()));
     else
       info.addDistortion(new TwistDistortion(axis, angle.val*weight, forward, null, null));
   }

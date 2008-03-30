@@ -103,7 +103,7 @@ public class SkeletonTool extends EditingTool
       return;
     MeshViewer mv = (MeshViewer) view;
     int selected = mv.getSelectedJoint();
-    mesh = (oldMesh == null ? (Mesh) mv.getController().getObject().object : oldMesh);
+    mesh = (oldMesh == null ? (Mesh) mv.getController().getObject().getObject() : oldMesh);
     Skeleton s = mesh.getSkeleton();
     Joint j = s.getJoint(selected);
     if (j == null)
@@ -170,7 +170,7 @@ public class SkeletonTool extends EditingTool
   {
     MeshViewer mv = (MeshViewer) view;
     ViewerCanvas allViews[] = ((MeshEditorWindow) theWindow).getAllViews();
-    mesh = (Mesh) mv.getController().getObject().object;
+    mesh = (Mesh) mv.getController().getObject().getObject();
     Skeleton s = mesh.getSkeleton();
     Joint selectedJoint = s.getJoint(mv.getSelectedJoint());
     Camera cam = mv.getCamera();
@@ -292,7 +292,7 @@ public class SkeletonTool extends EditingTool
     final MeshViewer mv = (MeshViewer) view;
     final CoordinateSystem objCoords = mv.getDisplayCoordinates();
     final Camera cam = mv.getCamera();
-    final Mesh mesh = (Mesh) mv.getController().getObject().object;
+    final Mesh mesh = (Mesh) mv.getController().getObject().getObject();
     final Skeleton s = mesh.getSkeleton();
     final Joint selectedJoint = s.getJoint(mv.getSelectedJoint());
 

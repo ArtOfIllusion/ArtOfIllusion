@@ -211,23 +211,23 @@ public class VRMLExporter
 
   private static void writeObject(ObjectInfo info, ObjectInfo parent, PrintWriter out, double tol, boolean smooth, int indent, Scene theScene, TextureImageExporter textureExporter)
   {
-    if (info.parent != null && info.parent != parent)
+    if (info.getParent() != null && info.getParent() != parent)
       return; // someone else's child - skip
 
-    CoordinateSystem coords = info.coords;
-    Object3D obj = info.object;
+    CoordinateSystem coords = info.getCoords();
+    Object3D obj = info.getObject();
     Vec3 orig = coords.getOrigin(), size = info.getBounds().getSize(), axis = new Vec3(0.0, 0.0, 0.0);
     double rot[] = new double [4], ratio = 0.0;
     double pos[] = new double [3], scale[] = new double [3];
-    String name = translate(info.name, 0, 1, matchId, replace) +
-        translate(info.name, 1, -1, matchId, replace);
+    String name = translate(info.getName(), 0, 1, matchId, replace) +
+        translate(info.getName(), 1, -1, matchId, replace);
     if (name.length() > 0 && illegalFirst.indexOf(name.charAt(0)) > 0)
       name = '_'+name;
 
     if (obj instanceof SceneCamera)
       {
         coords = coords.duplicate();
-        coords.setOrientation(info.coords.getZDirection().times(-1.0), info.coords.getUpDirection().times(1.0));
+        coords.setOrientation(info.getCoords().getZDirection().times(-1.0), info.getCoords().getUpDirection().times(1.0));
       }
     rot[3] = coords.getAxisAngleRotation(axis);
 
@@ -316,12 +316,12 @@ public class VRMLExporter
         write("position "+pos[0]+" "+pos[1]+" "+pos[2], out, indent+1);
         write("orientation "+rot[0]+" "+rot[1]+" "+rot[2]+" "+rot[3], out, indent+1);
         write("fieldOfView "+((SceneCamera) obj).getFieldOfView()*Math.PI/180.0, out, indent+1);
-        write("description "+"\""+info.name+"\"", out, indent+1);
+        write("description "+"\""+ info.getName() +"\"", out, indent+1);
         write("}", out, indent);
         return;
       }
 
-    if (info.children != null && info.children.length > 0) {
+    if (info.getChildren() != null && info.getChildren().length > 0) {
         // a group node
         write("DEF " + name + " Group {", out, indent++);
         write("children [", out, indent++);
@@ -417,21 +417,21 @@ public class VRMLExporter
       {
         // All other objects are represented as IndexedFaceSets.
 
-        TriangleMesh mesh = info.object.convertToTriangleMesh(tol);
+        TriangleMesh mesh = info.getObject().convertToTriangleMesh(tol);
         if (mesh != null)
           writeMesh(mesh, info, out, indent+2, theScene, textureExporter, true);
       }
 
-    if (info.children != null && info.children.length > 0)
+    if (info.getChildren() != null && info.getChildren().length > 0)
       {
         write("]", out, indent+1);
         write("}", out, indent);
 
         indent -= 2;
 
-        int max = info.children.length;
+        int max = info.getChildren().length;
         for (int i = 0; i < max; i++)
-            writeObject(info.children[i], info, out, tol, smooth, indent+2, theScene, textureExporter);
+            writeObject(info.getChildren()[i], info, out, tol, smooth, indent+2, theScene, textureExporter);
       }
 
     write("]", out, indent+1);
@@ -444,15 +444,15 @@ public class VRMLExporter
   {
     MeshVertex vert[] = mesh.getVertices();
     double pos[] = new double [3];
-    String name = translate(info.name, 0, 1, matchId, replace) +
-        translate(info.name, 1, -1, matchId, replace);
+    String name = translate(info.getName(), 0, 1, matchId, replace) +
+        translate(info.getName(), 1, -1, matchId, replace);
     if (name.length() > 0 && illegalFirst.indexOf(name.charAt(0)) > 0)
       name = '_'+name;
 
     write("Shape {", out, indent);
     writeTexture(info, out, indent+1, theScene, textureExporter);
     write("geometry DEF " + name + " IndexedFaceSet {", out, indent+1);
-    if (info.object.isClosed())
+    if (info.getObject().isClosed())
       write("solid TRUE", out, indent+2);
     else
       write("solid FALSE", out, indent+2);
@@ -586,7 +586,7 @@ public class VRMLExporter
 
   private static void writeTexture(ObjectInfo info, PrintWriter out, int indent, Scene theScene, TextureImageExporter textureExporter)
   {
-    Texture tex = info.object.getTexture();
+    Texture tex = info.getObject().getTexture();
     TextureSpec spec;
 
     if (tex == null)
@@ -594,7 +594,7 @@ public class VRMLExporter
     TextureImageInfo ti = (textureExporter == null ? null : textureExporter.getTextureInfo(tex));
     boolean hasMap = (ti != null && ti.diffuseFilename != null);
     spec = new TextureSpec();
-    tex.getAverageSpec(spec, theScene.getTime(), info.object.getAverageParameterValues());
+    tex.getAverageSpec(spec, theScene.getTime(), info.getObject().getAverageParameterValues());
     write("appearance Appearance {", out, indent);
     write("material Material {", out, indent+1);
     if (hasMap)

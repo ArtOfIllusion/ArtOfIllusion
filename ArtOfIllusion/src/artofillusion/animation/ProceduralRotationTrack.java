@@ -68,15 +68,15 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
 
     if (j != null && mode == ABSOLUTE)
       {
-        if (info.pose != null && !info.pose.equals(info.object.getPoseKeyframe()))
+        if (info.getPose() != null && !info.getPose().equals(info.getObject().getPoseKeyframe()))
           {
-            info.object.applyPoseKeyframe(info.pose);
+            info.getObject().applyPoseKeyframe(info.getPose());
             j = info.getSkeleton().getJoint(joint);
           }
         angles = new ObjectRef(info, j).getCoords().getRotationAngles();
       }
     else
-      angles = info.coords.getRotationAngles();
+      angles = info.getCoords().getRotationAngles();
     point.x = angles[0];
     point.y = angles[1];
     point.z = angles[2];
@@ -88,10 +88,10 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     RotationKeyframe rot = new RotationKeyframe(output[0].getAverageValue(0, 0.0), output[1].getAverageValue(0, 0.0), output[2].getAverageValue(0, 0.0));
     double weight = theWeight.getWeight(time);
     Mat4 pre = null, post = null;
-    if (relCoords == PARENT && info.parent != null)
+    if (relCoords == PARENT && info.getParent() != null)
       {
-        pre = info.parent.coords.toLocal();
-        post = info.parent.coords.fromLocal();
+        pre = info.getParent().getCoords().toLocal();
+        post = info.getParent().getCoords().fromLocal();
       }
     else if (relCoords == OBJECT)
       {
@@ -104,14 +104,14 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
       }
     else if (mode == RELATIVE && relCoords == LOCAL)
       {
-        pre = info.coords.fromLocal();
-        post = info.coords.toLocal();
+        pre = info.getCoords().fromLocal();
+        post = info.getCoords().toLocal();
       }
-    rot.applyToCoordinates(info.coords, weight, pre, post, (mode == RELATIVE), true, true, true);
+    rot.applyToCoordinates(info.getCoords(), weight, pre, post, (mode == RELATIVE), true, true, true);
     if (j != null && mode == ABSOLUTE)
       {
-        Mat4 m = info.coords.fromLocal().times(j.coords.toLocal().times(info.coords.toLocal()));
-        info.coords.transformAxes(m);
+        Mat4 m = info.getCoords().fromLocal().times(j.coords.toLocal().times(info.getCoords().toLocal()));
+        info.getCoords().transformAxes(m);
       }
   }
   
@@ -320,8 +320,8 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
       if (relInfo != null)
         return new ObjectInfo [] {relInfo};
     }
-    else if (relCoords == PARENT && info.parent != null)
-      return new ObjectInfo [] {info.parent};
+    else if (relCoords == PARENT && info.getParent() != null)
+      return new ObjectInfo [] {info.getParent()};
     return new ObjectInfo [0];
   }
   

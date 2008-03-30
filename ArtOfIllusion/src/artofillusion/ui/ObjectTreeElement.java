@@ -33,15 +33,15 @@ public class ObjectTreeElement extends TreeElement
     this.tree = tree;
     children = new Vector();
     if (addChildren)
-      for (int i = 0; i < info.children.length; i++)
-        children.addElement(new ObjectTreeElement(info.children[i], this, tree, true));
+      for (int i = 0; i < info.getChildren().length; i++)
+        children.addElement(new ObjectTreeElement(info.getChildren()[i], this, tree, true));
   }
   
   /* Get the label to display for this element. */
   
   public String getLabel()
   {
-    return info.name;
+    return info.getName();
   }
   
   /* Determine whether this element can be added as a child of another one  If el is null,
@@ -58,7 +58,7 @@ public class ObjectTreeElement extends TreeElement
       {
         if (i == info)
           return false;
-        i = i.parent;
+        i = i.getParent();
       }
     return true;
   }
@@ -136,16 +136,16 @@ public class ObjectTreeElement extends TreeElement
   
   public boolean isGray()
   {
-    return !info.visible;
+    return !info.isVisible();
   }
   
   /* Add all of the Tracks for this object as children. */
   
   public void addTracks()
   {
-    for (int i = 0; i < info.tracks.length; i++)
+    for (int i = 0; i < info.getTracks().length; i++)
       {
-        TreeElement el = new TrackTreeElement(info.tracks[i], this, tree);
+        TreeElement el = new TrackTreeElement(info.getTracks()[i], this, tree);
         children.insertElementAt(el, i);
       }
   }

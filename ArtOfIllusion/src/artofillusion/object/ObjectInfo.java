@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,9 +19,9 @@ import artofillusion.texture.*;
 
 /** ObjectInfo represents information about an object within a Scene: its position, 
     orientation, name, visibility, etc.  The internal properties (i.e. geometry) of
-    the object are defined by the "object" field.
-    
-    There may be several ObjectInfos in a scene whose "object" fields all reference
+    the object are defined by the "object" property.
+    <p>
+    There may be several ObjectInfos in a scene which all reference
     the same Object3D.  In that case, they are live duplicates of each other. */
 
 public class ObjectInfo
@@ -44,12 +44,12 @@ public class ObjectInfo
 
   public ObjectInfo(Object3D obj, CoordinateSystem c, String name)
   {
-    object = obj;
-    coords = c;
-    this.name = name;
-    visible = true;
+    setObject(obj);
+    setCoords(c);
+    this.setName(name);
+    setVisible(true);
     children = new ObjectInfo [0];
-    id = -1;
+    setId(-1);
   }
   
   /** Create a new ObjectInfo which is identical to this one.  It will still reference the
@@ -57,22 +57,22 @@ public class ObjectInfo
   
   public ObjectInfo duplicate()
   {
-    return duplicate(object);
+    return duplicate(getObject());
   }
   
   /** Create a new ObjectInfo which is identical to this one, but references a new Object3D. */
   
   public ObjectInfo duplicate(Object3D obj)
   {
-    ObjectInfo info = new ObjectInfo(obj, coords.duplicate(), name);
+    ObjectInfo info = new ObjectInfo(obj, getCoords().duplicate(), getName());
     
-    info.visible = visible;
-    info.id = id;
-    if (tracks != null)
+    info.setVisible(isVisible());
+    info.setId(id);
+    if (getTracks() != null)
       {
-        info.tracks = new Track [tracks.length];
-        for (int i = 0; i < tracks.length; i++)
-          info.tracks[i] = tracks[i].duplicate(info);
+        info.tracks = new Track [getTracks().length];
+        for (int i = 0; i < getTracks().length; i++)
+          info.getTracks()[i] = getTracks()[i].duplicate(info);
       }
     if (distortion != null)
       info.distortion = distortion.duplicate();
@@ -86,12 +86,12 @@ public class ObjectInfo
   {
     ObjectInfo newobj[] = new ObjectInfo [info.length];
     for (int i = 0; i < newobj.length; i++)
-      newobj[i] = info[i].duplicate(info[i].object.duplicate());
+      newobj[i] = info[i].duplicate(info[i].getObject().duplicate());
     for (int i = 0; i < info.length; i++)
-      for (int k = info[i].children.length-1; k >= 0; k--)
+      for (int k = info[i].getChildren().length-1; k >= 0; k--)
 	{
 	  int j;
-	  for (j = 0; j < info.length && info[j] != info[i].children[k]; j++);
+	  for (j = 0; j < info.length && info[j] != info[i].getChildren()[k]; j++);
 	  if (j < info.length)
 	    newobj[i].addChild(newobj[j], 0);
 	}
@@ -103,21 +103,21 @@ public class ObjectInfo
   
   public void copyInfo(ObjectInfo info)
   {
-    object = info.object;
-    coords.copyCoords(info.coords);
-    name = info.name.toString();
-    visible = info.visible;
-    id = info.id;
+    setObject(info.getObject());
+    getCoords().copyCoords(info.getCoords());
+    setName(info.name.toString());
+    setVisible(info.visible);
+    setId(info.id);
     cachedMesh = info.cachedMesh;
     cachedWire = info.cachedWire;
     cachedBounds = info.cachedBounds;
-    if (info.tracks == null)
+    if (info.getTracks() == null)
       tracks = null;
     else
       {
-        tracks = new Track [info.tracks.length];
-        for (int i = 0; i < tracks.length; i++)
-          tracks[i] = info.tracks[i].duplicate(this);
+        tracks = new Track [info.getTracks().length];
+        for (int i = 0; i < getTracks().length; i++)
+          getTracks()[i] = info.getTracks()[i].duplicate(this);
       }
     if (info.distortion != null)
       distortion = info.distortion.duplicate();
@@ -129,24 +129,24 @@ public class ObjectInfo
   
   public void addChild(ObjectInfo info, int position)
   {
-    ObjectInfo newChildren[] = new ObjectInfo [children.length+1];
+    ObjectInfo newChildren[] = new ObjectInfo [getChildren().length+1];
     int i;
     
     for (i = 0; i < position; i++)
-      newChildren[i] = children[i];
+      newChildren[i] = getChildren()[i];
     newChildren[position] = info;
-    for (; i < children.length; i++)
-      newChildren[i+1] = children[i];
+    for (; i < getChildren().length; i++)
+      newChildren[i+1] = getChildren()[i];
     children = newChildren;
-    info.parent = this;
+    info.setParent(this);
   }
   
   /** Remove a child from this object. */
   
   public void removeChild(ObjectInfo info)
   {
-    for (int i = 0; i < children.length; i++)
-      if (children[i] == info)
+    for (int i = 0; i < getChildren().length; i++)
+      if (getChildren()[i] == info)
         {
           removeChild(i);
           return;
@@ -157,14 +157,14 @@ public class ObjectInfo
   
   public void removeChild(int which)
   {
-    ObjectInfo newChildren[] = new ObjectInfo [children.length-1];
+    ObjectInfo newChildren[] = new ObjectInfo [getChildren().length-1];
     int i;
     
-    children[which].parent = null;
+    getChildren()[which].setParent(null);
     for (i = 0; i < which; i++)
-      newChildren[i] = children[i];
-    for (i++; i < children.length; i++)
-      newChildren[i-1] = children[i];
+      newChildren[i] = getChildren()[i];
+    for (i++; i < getChildren().length; i++)
+      newChildren[i-1] = getChildren()[i];
     children = newChildren;
   }
 
@@ -172,19 +172,19 @@ public class ObjectInfo
   
   public void addTrack(Track tr, int position)
   {
-    if (tracks == null)
+    if (getTracks() == null)
       {
         tracks = new Track [] {tr};
         return;
       }
-    Track newTracks[] = new Track [tracks.length+1];
+    Track newTracks[] = new Track [getTracks().length+1];
     int i;
     
     for (i = 0; i < position; i++)
-      newTracks[i] = tracks[i];
+      newTracks[i] = getTracks()[i];
     newTracks[position] = tr;
-    for (; i < tracks.length; i++)
-      newTracks[i+1] = tracks[i];
+    for (; i < getTracks().length; i++)
+      newTracks[i+1] = getTracks()[i];
     tracks = newTracks;
   }
   
@@ -192,8 +192,8 @@ public class ObjectInfo
   
   public void removeTrack(Track tr)
   {
-    for (int i = 0; i < tracks.length; i++)
-      if (tracks[i] == tr)
+    for (int i = 0; i < getTracks().length; i++)
+      if (getTracks()[i] == tr)
         {
           removeTrack(i);
           return;
@@ -204,13 +204,13 @@ public class ObjectInfo
 
   public void removeTrack(int which)
   {
-    Track newTracks[] = new Track [tracks.length-1];
+    Track newTracks[] = new Track [getTracks().length-1];
     int i;
     
     for (i = 0; i < which; i++)
-      newTracks[i] = tracks[i];
-    for (i++; i < tracks.length; i++)
-      newTracks[i-1] = tracks[i];
+      newTracks[i] = getTracks()[i];
+    for (i++; i < getTracks().length; i++)
+      newTracks[i-1] = getTracks()[i];
     tracks = newTracks;
   }
   
@@ -218,22 +218,22 @@ public class ObjectInfo
   
   public void setTexture(Texture tex, TextureMapping map)
   {
-    object.setTexture(tex, map);
+    getObject().setTexture(tex, map);
     clearCachedMeshes();
     
     // Update any texture tracks.
     
-    if (tracks != null)
-      for (int i = 0; i < tracks.length; i++)
-        if (tracks[i] instanceof TextureTrack)
-          ((TextureTrack) tracks[i]).parametersChanged();
+    if (getTracks() != null)
+      for (int i = 0; i < getTracks().length; i++)
+        if (getTracks()[i] instanceof TextureTrack)
+          ((TextureTrack) getTracks()[i]).parametersChanged();
   }
   
   /** Set the material and material mapping for this object. */
   
   public void setMaterial(Material mat, MaterialMapping map)
   {
-    object.setMaterial(mat, map);
+    getObject().setMaterial(mat, map);
   }
   
   /** Remove any Distortions from the object. */
@@ -276,11 +276,11 @@ public class ObjectInfo
   public Object3D getDistortedObject(double tol)
   {
     if (distortion == null)
-      return object;
-    Object3D obj = object;
+      return getObject();
+    Object3D obj = getObject();
     while (obj instanceof ObjectWrapper)
       obj = ((ObjectWrapper) obj).getWrappedObject();
-    if (!(obj instanceof Mesh) && object.canConvertToTriangleMesh() != Object3D.CANT_CONVERT)
+    if (!(obj instanceof Mesh) && getObject().canConvertToTriangleMesh() != Object3D.CANT_CONVERT)
       obj = obj.convertToTriangleMesh(tol);
     if (obj instanceof Mesh)
       obj = (Object3D) distortion.transform((Mesh) obj);
@@ -301,8 +301,8 @@ public class ObjectInfo
     checkDistortionChanged();
     if (cachedMesh == null)
       {
-        if (pose != null && !pose.equals(object.getPoseKeyframe()))
-          object.applyPoseKeyframe(pose);
+        if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
+          getObject().applyPoseKeyframe(getPose());
         double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedMesh = obj.getRenderingMesh(tol, true, this);
@@ -320,8 +320,8 @@ public class ObjectInfo
     checkDistortionChanged();
     if (cachedWire == null)
       {
-        if (pose != null && !pose.equals(object.getPoseKeyframe()))
-          object.applyPoseKeyframe(pose);
+        if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
+          getObject().applyPoseKeyframe(getPose());
         double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedWire = obj.getWireframeMesh();
@@ -339,12 +339,12 @@ public class ObjectInfo
     checkDistortionChanged();
     if (cachedBounds == null)
       {
-        if (pose != null && !pose.equals(object.getPoseKeyframe()))
-          object.applyPoseKeyframe(pose);
+        if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
+          getObject().applyPoseKeyframe(getPose());
         double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedBounds = obj.getBounds();
-        Object3D realObject = object;
+        Object3D realObject = getObject();
         while (realObject instanceof ObjectWrapper)
           realObject = ((ObjectWrapper) realObject).getWrappedObject();
         if (!(realObject instanceof ObjectCollection))
@@ -371,6 +371,118 @@ public class ObjectInfo
   
   public Skeleton getSkeleton()
   {
-    return object.getSkeleton();
+    return getObject().getSkeleton();
+  }
+
+  /** Get the Object3D defining the geometry for this ObjectInfo. */
+
+  public Object3D getObject()
+  {
+    return object;
+  }
+
+  /** Set the Object3D defining the geometry for this ObjectInfo. */
+
+  public void setObject(Object3D object)
+  {
+    this.object = object;
+  }
+
+  /** Get the CoordinateSystem for this object. */
+
+  public CoordinateSystem getCoords()
+  {
+    return coords;
+  }
+
+  /** Set the CoordinateSystem for this object. */
+
+  public void setCoords(CoordinateSystem coords)
+  {
+    this.coords = coords;
+  }
+
+  /** Get the name of this object. */
+
+  public String getName()
+  {
+    return name;
+  }
+
+  /** Set the name of this object. */
+
+  public void setName(String name)
+  {
+    this.name = name;
+  }
+
+  /** Get whether this object is visible. */
+
+  public boolean isVisible()
+  {
+    return visible;
+  }
+
+  /** Set whether this object is visible. */
+
+  public void setVisible(boolean visible)
+  {
+    this.visible = visible;
+  }
+
+  /** Get this object's parent, or null if it is a top level object. */
+
+  public ObjectInfo getParent()
+  {
+    return parent;
+  }
+
+  /** Set this object's parent. */
+
+  public void setParent(ObjectInfo parent)
+  {
+    this.parent = parent;
+  }
+
+  /** Get the current pose for this object (may be null). */
+
+  public Keyframe getPose()
+  {
+    return pose;
+  }
+
+  /** Set the current pose for this object (may be null). */
+
+  public void setPose(Keyframe pose)
+  {
+    this.pose = pose;
+  }
+
+  /** Get this object's ID. */
+
+  public int getId()
+  {
+    return id;
+  }
+
+  /** Set this object's ID. */
+
+  public void setId(int id)
+  {
+    this.id = id;
+  }
+
+  /** Get the list of children for this object. */
+
+  public ObjectInfo[] getChildren()
+  {
+    return children;
+  }
+
+  /** Get the list of Tracks for this object. */
+
+  public Track[] getTracks()
+  {
+    return tracks;
   }
 }

@@ -41,7 +41,7 @@ import javax.swing.*;
 public class ModellingApp
 {
   public static final String MAJOR_VERSION = "2.6";
-  public static final String VERSION = MAJOR_VERSION+"ea1";
+  public static final String VERSION = MAJOR_VERSION+"ea2";
   public static final double DIST_TO_SCREEN = 20.0;
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
@@ -756,10 +756,10 @@ public class ModellingApp
     ArrayList<Texture> textures = new ArrayList<Texture>();
     for (int i = 0; i < obj.length; i++)
       {
-        Texture tex = obj[i].object.getTexture();
+        Texture tex = obj[i].getObject().getTexture();
         if (tex instanceof LayeredTexture)
           {
-            LayeredMapping map = (LayeredMapping) obj[i].object.getTextureMapping();
+            LayeredMapping map = (LayeredMapping) obj[i].getObject().getTextureMapping();
             Texture layer[] = map.getLayers();
             for (int j = 0; j < layer.length; j++)
               {
@@ -767,7 +767,7 @@ public class ModellingApp
                 dup.setID(layer[j].getID());
                 textures.add(dup);
                 map.setLayer(j, dup);
-                map.setLayerMapping(j, map.getLayerMapping(j).duplicate(obj[i].object, dup));
+                map.setLayerMapping(j, map.getLayerMapping(j).duplicate(obj[i].getObject(), dup));
               }
           }
         else if (tex != null)
@@ -775,7 +775,7 @@ public class ModellingApp
             Texture dup = tex.duplicate();
             dup.setID(tex.getID());
             textures.add(dup);
-            obj[i].object.setTexture(dup, obj[i].object.getTextureMapping().duplicate(obj[i].object, dup));
+            obj[i].getObject().setTexture(dup, obj[i].getObject().getTextureMapping().duplicate(obj[i].getObject(), dup));
           }
       }
 
@@ -784,13 +784,13 @@ public class ModellingApp
     ArrayList<Material> materials = new ArrayList<Material>();
     for (int i = 0; i < obj.length; i++)
       {
-        Material mat = obj[i].object.getMaterial();
+        Material mat = obj[i].getObject().getMaterial();
         if (mat != null)
           {
             Material dup = mat.duplicate();
             dup.setID(mat.getID());
             materials.add(dup);
-            obj[i].object.setMaterial(dup, obj[i].object.getMaterialMapping().duplicate(obj[i].object, dup));
+            obj[i].getObject().setMaterial(dup, obj[i].getObject().getMaterialMapping().duplicate(obj[i].getObject(), dup));
           }
       }
     
@@ -855,12 +855,12 @@ public class ModellingApp
           newtex = scene.getTexture(j);
         for (j = 0; j < clipboardObject.length; j++)
           {
-            Texture current = clipboardObject[j].object.getTexture();
+            Texture current = clipboardObject[j].getObject().getTexture();
             if (current == clipboardTexture[i])
-              clipboardObject[j].setTexture(newtex, clipboardObject[j].object.getTextureMapping().duplicate(clipboardObject[j].object, newtex));
+              clipboardObject[j].setTexture(newtex, clipboardObject[j].getObject().getTextureMapping().duplicate(clipboardObject[j].getObject(), newtex));
             else if (current instanceof LayeredTexture)
               {
-                LayeredMapping map = (LayeredMapping) clipboardObject[j].object.getTextureMapping();
+                LayeredMapping map = (LayeredMapping) clipboardObject[j].getObject().getTextureMapping();
                 map = (LayeredMapping) map.duplicate();
                 clipboardObject[j].setTexture(new LayeredTexture(map), map);
                 Texture layer[] = map.getLayers();
@@ -868,7 +868,7 @@ public class ModellingApp
                   if (layer[k] == clipboardTexture[i])
                     {
                       map.setLayer(k, newtex);
-                      map.setLayerMapping(k, map.getLayerMapping(k).duplicate(clipboardObject[j].object, newtex));
+                      map.setLayerMapping(k, map.getLayerMapping(k).duplicate(clipboardObject[j].getObject(), newtex));
                     }
               }
           }
@@ -891,9 +891,9 @@ public class ModellingApp
           newmat = scene.getMaterial(j);
         for (j = 0; j < clipboardObject.length; j++)
           {
-            Material current = clipboardObject[j].object.getMaterial();
+            Material current = clipboardObject[j].getObject().getMaterial();
             if (current == clipboardMaterial[i])
-              clipboardObject[j].setMaterial(newmat, clipboardObject[j].object.getMaterialMapping().duplicate(clipboardObject[j].object, newmat));
+              clipboardObject[j].setMaterial(newmat, clipboardObject[j].getObject().getMaterialMapping().duplicate(clipboardObject[j].getObject(), newmat));
           }
       }
     

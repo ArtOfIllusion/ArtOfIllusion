@@ -35,13 +35,13 @@ public class TriMeshViewer extends MeshViewer
   public TriMeshViewer(MeshEditController window, RowContainer p)
   {
     super(window, p);
-    TriangleMesh mesh = (TriangleMesh) window.getObject().object;
+    TriangleMesh mesh = (TriangleMesh) window.getObject().getObject();
     visible = new boolean [mesh.getVertices().length];
   }
 
   protected void drawObject()
   {
-    TriangleMesh mesh = (TriangleMesh) getController().getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
     RenderingMesh previewMesh = getController().getObject().getPreviewMesh();
     boolean project = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).getProjectOntoSurface() : false);
@@ -108,7 +108,7 @@ public class TriMeshViewer extends MeshViewer
       TextureParameter faceIndexParameter = ((TriMeshEditorWindow) controller).getFaceIndexParameter();
       double param[] = null;
       for (int i = 0; i < mesh.param.length; i++)
-        if (objInfo.object.getParameters()[i] == faceIndexParameter)
+        if (objInfo.getObject().getParameters()[i] == faceIndexParameter)
           param = ((FaceParameterValue) mesh.param[i]).getValue();
       faceIndex = new int [param.length];
       for (int i = 0; i < faceIndex.length; i++)
@@ -140,7 +140,7 @@ public class TriMeshViewer extends MeshViewer
       else if (surfaceColoringParameter != null)
       {
         shader = null;
-        TextureParameter params[] = objInfo.object.getParameters();
+        TextureParameter params[] = objInfo.getObject().getParameters();
         for (int i = 0; i < params.length; i++)
           if (params[i].equals(surfaceColoringParameter))
           {
@@ -151,10 +151,10 @@ public class TriMeshViewer extends MeshViewer
       else if (renderMode == RENDER_SMOOTH)
         shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
       else
-        shader = new TexturedVertexShader(mesh, objInfo.object, 0.0, viewDir).optimize();
+        shader = new TexturedVertexShader(mesh, objInfo.getObject(), 0.0, viewDir).optimize();
       if (faceIndex != null && controller.getSelectionMode() == MeshEditController.FACE_MODE)
         shader = new SelectionVertexShader(new RGBColor(1.0, 0.4, 1.0), shader, faceIndex, controller.getSelection());
-      renderMesh(mesh, shader, theCamera, objInfo.object.isClosed(), hide);
+      renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), hide);
     }
   }
   
@@ -164,7 +164,7 @@ public class TriMeshViewer extends MeshViewer
   {
     if (!showMesh)
       return;
-    MeshVertex v[] = ((Mesh) getController().getObject().object).getVertices();
+    MeshVertex v[] = ((Mesh) getController().getObject().getObject()).getVertices();
 
     // First, draw any unselected portions of the object.
 
@@ -186,7 +186,7 @@ public class TriMeshViewer extends MeshViewer
   {
     if (!showMesh)
       return;
-    Edge e[] = ((TriangleMesh) getController().getObject().object).getEdges();
+    Edge e[] = ((TriangleMesh) getController().getObject().getObject()).getEdges();
 
     // Determine which edges are selected.
 
@@ -255,7 +255,7 @@ public class TriMeshViewer extends MeshViewer
 
   protected void mousePressed(WidgetMouseEvent e)
   {
-    TriangleMesh mesh = (TriangleMesh) getController().getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
     Edge ed[] = mesh.getEdges();
     Face f[] = mesh.getFaces();
     int i, j, k;
@@ -384,7 +384,7 @@ public class TriMeshViewer extends MeshViewer
 
   protected void mouseReleased(WidgetMouseEvent e)
   {
-    TriangleMesh mesh = (TriangleMesh) getController().getObject().object;
+    TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
     Edge ed[] = mesh.getEdges();
     Face fc[] = mesh.getFaces();
 
@@ -503,7 +503,7 @@ public class TriMeshViewer extends MeshViewer
     boolean priorityToSelected = (getRenderMode() == RENDER_WIREFRAME || getRenderMode() == RENDER_TRANSPARENT);
     if (controller.getSelectionMode() == MeshEditController.POINT_MODE)
     {
-      TriangleMesh mesh = (TriangleMesh) getController().getObject().object;
+      TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
       Vertex vt[] = (Vertex []) mesh.getVertices();
       for (int i = 0; i < vt.length; i++)
       {
@@ -526,7 +526,7 @@ public class TriMeshViewer extends MeshViewer
     }
     else if (controller.getSelectionMode() == MeshEditController.EDGE_MODE)
     {
-      TriangleMesh mesh = (TriangleMesh) getController().getObject().object;
+      TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
       Vertex vt[];
       Edge ed[], origEd[] = mesh.getEdges();
       int projectedEdge[] = null;
@@ -624,10 +624,10 @@ public class TriMeshViewer extends MeshViewer
       if (controller instanceof TriMeshEditorWindow)
         mesh = ((TriMeshEditorWindow) controller).getSubdividedMesh();
       if (mesh == null)
-        mesh = (TriangleMesh) getController().getObject().object;
+        mesh = (TriangleMesh) getController().getObject().getObject();
       Vertex vt[] = (Vertex []) mesh.getVertices();
       Face fc[] = mesh.getFaces();
-      Face origFc[] = ((TriangleMesh) getController().getObject().object).getFaces();
+      Face origFc[] = ((TriangleMesh) getController().getObject().getObject()).getFaces();
       double param[] = null;
       boolean hideFace[] = null;
       if (controller instanceof TriMeshEditorWindow)

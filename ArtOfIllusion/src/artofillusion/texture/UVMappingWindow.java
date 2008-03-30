@@ -206,7 +206,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   public void setMesh(Mesh mesh)
   {
-    objInfo.object = (Object3D) mesh;
+    objInfo.setObject((Object3D) mesh);
     objInfo.clearCachedMeshes();
   }
 
@@ -457,12 +457,12 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
           texCoord[i][j] = coord[index++];
       }
       map.setFaceTextureCoordinates((Object3D) editObj, texCoord);
-      map.setFaceTextureCoordinates(preview.getObject().object, texCoord);
+      map.setFaceTextureCoordinates(preview.getObject().getObject(), texCoord);
     }
     else
     {
       map.setTextureCoordinates((Object3D) editObj, coords);
-      map.setTextureCoordinates(preview.getObject().object, coords);
+      map.setTextureCoordinates(preview.getObject().getObject(), coords);
     }
     preview.render();
   }

@@ -255,15 +255,15 @@ public class POVExporter
     static void writeTexture(Scene theScene, ObjectInfo obj, PrintWriter out,int indent)
     {
 	// ObjectInfo obj=theScene.getObject(index);
-	Texture tex = obj.object.getTexture();
+	Texture tex = obj.getObject().getTexture();
 	if (tex == null) return;
 	TextureSpec spec;
 	
 	spec = new TextureSpec();
-	tex.getAverageSpec(spec, theScene.getTime(), obj.object.getAverageParameterValues());
+	tex.getAverageSpec(spec, theScene.getTime(), obj.getObject().getAverageParameterValues());
 	
 	String texName=cleanName(tex.getName());
-	if (tex.getID()==1) texName=cleanName(obj.name);
+	if (tex.getID()==1) texName=cleanName(obj.getName());
 	if (DEBUG) {
 	    System.err.println("Texture "+tex.getName()+":\t"+tex.getID());
 	}
@@ -294,11 +294,11 @@ public class POVExporter
     static void writeObjects(Scene theScene, ObjectInfo obj, PrintWriter out,boolean smooth,double tolerance) {
     // Camera setting
     // (not very good because of extra loop count - but for readability purposes of POV file better)
-	if (!obj.visible) return;
-	if (obj.object instanceof SceneCamera) {
+	if (!obj.isVisible()) return;
+	if (obj.getObject() instanceof SceneCamera) {
 	    write("// Camera settings",out,0);
 	    ObjectInfo info = (ObjectInfo)obj;
-	    CoordinateSystem coords = info.coords.duplicate();
+	    CoordinateSystem coords = info.getCoords().duplicate();
 	    // nötig ???? obwohl KoSys linkshändig????
 	    //coords.setOrientation(coords.getZDirection().times(-1.0), coords.getUpDirection().times(1.0));
 	    Vec3 orig=coords.getOrigin();
@@ -309,7 +309,7 @@ public class POVExporter
 	    String direction="direction <"+zdir.x+","+zdir.y+","+zdir.z+">";
 	    String up="up <"+updir.x+","+updir.y+","+updir.z+">";
 	    String right="right <"+rightdir.x+","+rightdir.y+","+rightdir.z+">";
-	    String angle="angle "+(((SceneCamera)obj.object).getFieldOfView()*1.33);
+	    String angle="angle "+(((SceneCamera) obj.getObject()).getFieldOfView()*1.33);
 	    write("camera {",out,0);
 	    write("perspective",out,1);
 	    write(location,out,1);
@@ -332,18 +332,18 @@ public class POVExporter
 	// Directional Light
 	// in POVRAY it is a very far away point light
 	// i.e. 10000 units should be in most cases far enough
-	else if (obj.object instanceof DirectionalLight) {
+	else if (obj.getObject() instanceof DirectionalLight) {
 	    write("// Directional light (simulated as far away point light distance="+DIRECTIONAL_LIGHT_DISTANCE+"units)",out,0);
-	    DirectionalLight light=(DirectionalLight)obj.object;
+	    DirectionalLight light=(DirectionalLight) obj.getObject();
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    Vec3 zdir=coords.getZDirection();
 	    float intensity=light.getIntensity();
 	    RGBColor color=light.getColor().duplicate();
 	    color.scale(intensity);
 	    zdir.normalize(); // to get a defined distance
 	    zdir.scale(-DIRECTIONAL_LIGHT_DISTANCE);
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    write("light_source {",out,0);
 	    write(getVec3String(zdir),out,1);
 	    write("color <"+color.getRed()+","+color.getGreen()+","+color.getBlue()+">",out,1);
@@ -358,13 +358,13 @@ public class POVExporter
 		System.err.println("// Color:\t"+color.toString());
 	    }
 	}
-	else if (obj.object instanceof PointLight) {
+	else if (obj.getObject() instanceof PointLight) {
 	    write("// Point light",out,0);
 	    write("// decay is different than in Art Of Illusion",out,0);
 	    write("// the point light source has actually no \"radius\"",out,0);
-	    PointLight light=(PointLight)obj.object;
+	    PointLight light=(PointLight) obj.getObject();
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    Vec3 orig=coords.getOrigin();
 	    float intensity=light.getIntensity();
 	    RGBColor color=light.getColor().duplicate();
@@ -375,7 +375,7 @@ public class POVExporter
 	    if (dr!=0.0) fadeDistance=0.5/(new Float(dr).doubleValue());
 	    double fadePower=2.0; 
 	    if (fadeDistance>=5.0) fadePower=1.0;  // only linear instead of squared
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    write("light_source {",out,0);
 	    write(getVec3String(orig),out,1);
 	    write("color <"+color.getRed()+","+color.getGreen()+","+color.getBlue()+">",out,1);
@@ -392,12 +392,12 @@ public class POVExporter
 		System.err.println("// FadePower:\t"+fadePower);
 	    }
 	}
-	else if (obj.object instanceof SpotLight) {
+	else if (obj.getObject() instanceof SpotLight) {
 	    write("// Spot light",out,0);
 	    write("// the spot light source has actually no \"radius\"",out,0);
-	    SpotLight light=(SpotLight)obj.object;
+	    SpotLight light=(SpotLight) obj.getObject();
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    Vec3 zdir=coords.getZDirection();
 	    Vec3 orig=coords.getOrigin();
 	    // get the point to which a spotlight points at (orig + zdir)
@@ -416,7 +416,7 @@ public class POVExporter
 	    if (dr!=0.0) fadeDistance=0.5/(new Float(dr).doubleValue());
 	    double fadePower=2.0;  
 	    if (fadeDistance>=5.0) fadePower=1.0;  // only linear instead of squared
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    write("light_source {",out,0);
 	    write(getVec3String(orig),out,1);
 	    write("color <"+color.getRed()+","+color.getGreen()+","+color.getBlue()+">",out,1);
@@ -445,15 +445,15 @@ public class POVExporter
 	    }
 	}
 	// Cube setting
-	else if (obj.object instanceof Cube) {
+	else if (obj.getObject() instanceof Cube) {
 	    write("// Cube settings",out,0);
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    Vec3 size = info.getBounds().getSize(), orig=coords.getOrigin();
-	    String texName=cleanName(info.object.getTexture().getName());
-	    if (info.object.getTexture().getID()==1) texName=cleanName(info.name);
+	    String texName=cleanName(info.getObject().getTexture().getName());
+	    if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
 	    size.scale(0.5);
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    write("box {",out,0);
 	    write(getVec3String(new Vec3(-1,-1,-1))+", "+getVec3String(new Vec3(1,1,1)),out,1);
 	    write("scale "+getVec3String(size),out,1);
@@ -473,16 +473,16 @@ public class POVExporter
 	}
 	//  sphere and ellipse setting
 	// (only for testing purposes in an extra loop)
-	else if (obj.object instanceof Sphere) {
+	else if (obj.getObject() instanceof Sphere) {
 	    write("// Sphere settings",out,0);
-	    Sphere sphere=(Sphere)obj.object;
+	    Sphere sphere=(Sphere) obj.getObject();
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    //coords.setOrientation(coords.getZDirection().times(-1.0), coords.getUpDirection().times(1.0));
 	    Vec3 size = sphere.getRadii(), orig=coords.getOrigin();
-	    String texName=cleanName(info.object.getTexture().getName());
-	    if (info.object.getTexture().getID()==1) texName=cleanName(info.name);
-	    write("// "+info.name,out,0);
+	    String texName=cleanName(info.getObject().getTexture().getName());
+	    if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
+	    write("// "+ info.getName(),out,0);
 	    write("sphere {",out,0);
 	    write("<0,0,0>, 1",out,1);  // standard sphere
 	    write("scale "+getVec3String(size),out,1);
@@ -505,18 +505,18 @@ public class POVExporter
 	// cylinder setting
 	// will be transkripted to a cone object
 	// (only for testing purposes in an extra loop)
-	else if (obj.object instanceof Cylinder) {
+	else if (obj.getObject() instanceof Cylinder) {
 	    write("// Cylinder settings",out,0);
-	    Cylinder cyl=(Cylinder)obj.object;
+	    Cylinder cyl=(Cylinder) obj.getObject();
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    Vec3 orig=coords.getOrigin();
 	    double ratio=cyl.getRatio();
 	    Vec3 size=cyl.getBounds().getSize();
-	    String texName=cleanName(info.object.getTexture().getName());
-	    if (info.object.getTexture().getID()==1) texName=cleanName(info.name);
+	    String texName=cleanName(info.getObject().getTexture().getName());
+	    if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
 	    size.scale(0.5); 
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    write("cone {",out,0);
 	    write("<0,-1,0>, 1, <0,1,0>, "+ratio,out,1);  // standard sphere
 	    write("scale "+getVec3String(size),out,1);
@@ -538,19 +538,19 @@ public class POVExporter
 	}
 	// Mesh for not smoothed triangle meshes
 	// (only for testing purposes in an extra loop)
-	else if ((obj.object instanceof TriangleMesh) && (!smooth)) {
+	else if ((obj.getObject() instanceof TriangleMesh) && (!smooth)) {
 	    write("// Triangle Mesh (mesh2) not smoothed",out,0);
-	    TriangleMesh trimesh=(TriangleMesh)obj.object;
+	    TriangleMesh trimesh=(TriangleMesh) obj.getObject();
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
-	    CoordinateSystem coords = info.coords;
+	    CoordinateSystem coords = info.getCoords();
 	    Vec3 orig=coords.getOrigin();
-	    String texName=cleanName(info.object.getTexture().getName());
-	    if (info.object.getTexture().getID()==1) texName=cleanName(info.name);
+	    String texName=cleanName(info.getObject().getTexture().getName());
+	    if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
 	    
 	    MeshVertex vert[] = trimesh.getVertices();
 	    TriangleMesh.Face face[] = (trimesh.getFaces());  
 	    
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    write("mesh2 {",out,0);
 	    write("vertex_vectors {",out,1);
 	    write(vert.length+",",out,2);
@@ -583,14 +583,14 @@ public class POVExporter
 	    write("",out,0);
 	    if (DEBUG) {
 		System.err.println("Mesh");
-		System.err.println("Name:\t"+info.name);
+		System.err.println("Name:\t"+ info.getName());
 		System.err.println("Mittelpunkt:\t"+orig.toString());
 		System.err.println();
 	    }
 	}
 	// if it is a grouping object
-	else if ((obj.object) instanceof ObjectCollection)    {
-	    Enumeration objects = ((ObjectCollection)obj.object).getObjects(obj, false, theScene);
+	else if ((obj.getObject()) instanceof ObjectCollection)    {
+	    Enumeration objects = ((ObjectCollection) obj.getObject()).getObjects(obj, false, theScene);
 	    while (objects.hasMoreElements())
 		writeObjects(theScene,(ObjectInfo)objects.nextElement(),out,smooth,tolerance);
 	}
@@ -599,15 +599,15 @@ public class POVExporter
 	    write("// smoothed object",out,0);
 	    ObjectInfo info=(ObjectInfo)obj.duplicate();
 	    RenderingMesh mesh = info.getRenderingMesh(tolerance);
-	    write("// "+info.name,out,0);
+	    write("// "+ info.getName(),out,0);
 	    if (mesh != null) {  // only if you can render the mesh
 		Vec3 vert[] = mesh.vert, norm[] = mesh.norm;
 		RenderingTriangle face[] = mesh.triangle;
 		
-		CoordinateSystem coords = info.coords;
+		CoordinateSystem coords = info.getCoords();
 		Vec3 orig=coords.getOrigin();
-		String texName=cleanName(info.object.getTexture().getName());
-		if (info.object.getTexture().getID()==1) texName=cleanName(info.name);
+		String texName=cleanName(info.getObject().getTexture().getName());
+		if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
 		
 		write("mesh2 {",out,0);
 		write("vertex_vectors {",out,1);
@@ -666,7 +666,7 @@ public class POVExporter
 		write("",out,0);
 		if (DEBUG) {
 		    System.err.println("Mesh");
-		    System.err.println("Name:\t"+info.name);
+		    System.err.println("Name:\t"+ info.getName());
 		    System.err.println("Mittelpunkt:\t"+orig.toString());
 		    System.err.println();
 		}

@@ -263,7 +263,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
-        if (info.parent == null)
+        if (info.getParent() == null)
           itemTree.addElement(new ObjectTreeElement(info, itemTree));
       }
     itemTree.setUpdateEnabled(true);
@@ -301,7 +301,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
-        if (info.parent == null)
+        if (info.getParent() == null)
           itemTree.addElement(new ObjectTreeElement(info, itemTree));
       }
     for (int i = 0; i < theScene.getNumObjects(); i++)
@@ -684,16 +684,16 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < sel.length; i++)
       {
         info = (ObjectInfo) sel[i];
-        obj = info.object;
+        obj = info.getObject();
         if (obj.canConvertToTriangleMesh() == Object3D.CANT_CONVERT)
           canConvert = false;
         if (!obj.canSetTexture())
           canSetTexture = false;
         if (!obj.canSetMaterial())
           canSetMaterial = false;
-        if (info.children.length > 0)
+        if (info.getChildren().length > 0)
           hasChildren = true;
-        if (info.visible)
+        if (info.isVisible())
           canHide = true;
         else
           canShow = true;
@@ -705,7 +705,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     else
       {
-        obj = ((ObjectInfo) sel[0]).object;
+        obj = ((ObjectInfo) sel[0]).getObject();
         popupMenuItem[0].setEnabled(sel.length == 1 && obj.isEditable()); // Edit Object
         popupMenuItem[1].setEnabled(true); // Object Layout
         popupMenuItem[2].setEnabled(canSetTexture); // Set Texture
@@ -842,7 +842,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < numSelObjects; i++)
     {
       info = (ObjectInfo) sel[i];
-      obj = info.object;
+      obj = info.getObject();
       if (obj instanceof Curve)
         curve = true;
       else
@@ -853,9 +853,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         canSetTexture = false;
       if (!obj.canSetMaterial())
         canSetMaterial = false;
-      if (info.children.length > 0)
+      if (info.getChildren().length > 0)
         hasChildren = true;
-      if (info.parent != null)
+      if (info.getParent() != null)
         hasParent = true;
     }
     for (i = 0; i < numSelTracks; i++)
@@ -883,7 +883,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     else
     {
-      obj = ((ObjectInfo) sel[0]).object;
+      obj = ((ObjectInfo) sel[0]).getObject();
       objectMenuItem[0].setEnabled(numSelObjects == 1 && obj.isEditable()); // Edit Object
       objectMenuItem[1].setEnabled(true); // Object Layout
       objectMenuItem[2].setEnabled(true); // Transform Object
@@ -892,7 +892,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       objectMenuItem[5].setEnabled(canSetMaterial); // Set Material
       objectMenuItem[6].setEnabled(sel.length == 1); // Rename Object
       objectMenuItem[7].setEnabled(canConvert && sel.length == 1); // Convert to Triangle Mesh
-      objectMenuItem[8].setEnabled(sel.length == 1 && ((ObjectInfo) sel[0]).object.canConvertToActor()); // Convert to Actor
+      objectMenuItem[8].setEnabled(sel.length == 1 && ((ObjectInfo) sel[0]).getObject().canConvertToActor()); // Convert to Actor
       objectMenuItem[9].setEnabled(true); // Hide Selection
       objectMenuItem[10].setEnabled(true); // Show Selection
     }
@@ -1001,14 +1001,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void removeObject(int which, UndoRecord undo)
   {
     ObjectInfo info = theScene.getObject(which);
-    ObjectInfo parent = info.parent;
+    ObjectInfo parent = info.getParent();
     int childIndex = -1;
     if (parent != null)
-      for (int i = 0; i < parent.children.length; i++)
-        if (parent.children[i] == info)
+      for (int i = 0; i < parent.getChildren().length; i++)
+        if (parent.getChildren()[i] == info)
           childIndex = i;
     itemTree.removeObject(info);
-    if (childIndex > -1 && info.parent == null)
+    if (childIndex > -1 && info.getParent() == null)
       undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {parent, info, new Integer(childIndex)});
     theScene.removeObject(which, undo);
     for (int i = 0; i < theView.length ; i++)
@@ -1020,7 +1020,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void setObjectName(int which, String name)
   {
-    theScene.getObject(which).name = name;
+    theScene.getObject(which).setName(name);
     itemTree.repaint();
     for (int i = 0; i < theView.length ; i++)
       theView[i].rebuildCameraList();
@@ -1593,7 +1593,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       for (i = 0; i < theScene.getNumObjects(); i++)
         {
           ObjectInfo info = theScene.getObject(i);
-          if (info.parent != null && theScene.indexOf(info.parent) == -1)
+          if (info.getParent() != null && theScene.indexOf(info.getParent()) == -1)
             {
               removeObject(i, undo);
               i--;
@@ -1647,7 +1647,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         info = (ObjectInfo) sel[i];
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
-        info.object = info.object.duplicate();
+        info.setObject(info.object.duplicate());
       }
     setUndoRecord(undo);
   }
@@ -1659,7 +1659,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     if (sel.length != 1)
       return;
-    obj = theScene.getObject(sel[0]).object;
+    obj = theScene.getObject(sel[0]).getObject();
     if (obj.isEditable())
       {
         final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
@@ -1689,15 +1689,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
       {
         obj[i] = theScene.getObject(sel[i]);
-        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].object, obj[i].object.duplicate()});
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {obj[i].coords, obj[i].coords.duplicate()});
+        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].getObject(), obj[i].getObject().duplicate()});
+        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {obj[i].getCoords(), obj[i].getCoords().duplicate()});
       }
     if (sel.length == 1)
     {
-      orig = obj[0].coords.getOrigin();
-      angles = obj[0].coords.getRotationAngles();
-      size = obj[0].object.getBounds().getSize();
-      dlg = new TransformDialog(this, Translate.text("objectLayoutTitle", theScene.getObject(sel[0]).name),
+      orig = obj[0].getCoords().getOrigin();
+      angles = obj[0].getCoords().getRotationAngles();
+      size = obj[0].getObject().getBounds().getSize();
+      dlg = new TransformDialog(this, Translate.text("objectLayoutTitle", theScene.getObject(sel[0]).getName()),
           new double [] {orig.x, orig.y, orig.z, angles[0], angles[1], angles[2],
           size.x, size.y, size.z}, false, false);
       if (!dlg.clickedOk())
@@ -1721,11 +1721,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         size.y = values[7];
       if (!Double.isNaN(values[8]))
         size.z = values[8];
-      obj[0].coords.setOrigin(orig);
-      obj[0].coords.setOrientation(angles[0], angles[1], angles[2]);
-      obj[0].object.setSize(size.x, size.y, size.z);
-      theScene.objectModified(obj[0].object);
-      obj[0].object.sceneChanged(obj[0], theScene);
+      obj[0].getCoords().setOrigin(orig);
+      obj[0].getCoords().setOrientation(angles[0], angles[1], angles[2]);
+      obj[0].getObject().setSize(size.x, size.y, size.z);
+      theScene.objectModified(obj[0].getObject());
+      obj[0].getObject().sceneChanged(obj[0], theScene);
       theScene.applyTracksAfterModification(Collections.singleton(obj[0]));
     }
     else
@@ -1736,9 +1736,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       values = dlg.getValues();
       for (i = 0; i < sel.length; i++)
       {
-        orig = obj[i].coords.getOrigin();
-        angles = obj[i].coords.getRotationAngles();
-        size = obj[i].object.getBounds().getSize();
+        orig = obj[i].getCoords().getOrigin();
+        angles = obj[i].getCoords().getRotationAngles();
+        size = obj[i].getObject().getBounds().getSize();
         if (!Double.isNaN(values[0]))
           orig.x = values[0];
         if (!Double.isNaN(values[1]))
@@ -1757,9 +1757,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           size.y = values[7];
         if (!Double.isNaN(values[8]))
           size.z = values[8];
-        obj[i].coords.setOrigin(orig);
-        obj[i].coords.setOrientation(angles[0], angles[1], angles[2]);
-        obj[i].object.setSize(size.x, size.y, size.z);
+        obj[i].getCoords().setOrigin(orig);
+        obj[i].getCoords().setOrientation(angles[0], angles[1], angles[2]);
+        obj[i].getObject().setSize(size.x, size.y, size.z);
       }
       ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
       for (int index : sel)
@@ -1784,7 +1784,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (sel.length == 0)
       return;
     if (sel.length == 1)
-      dlg = new TransformDialog(this, Translate.text("transformObjectTitle", theScene.getObject(sel[0]).name),
+      dlg = new TransformDialog(this, Translate.text("transformObjectTitle", theScene.getObject(sel[0]).getName()),
                 new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
     else
       dlg = new TransformDialog(this, Translate.text("transformObjectTitleMultiple"),
@@ -1800,9 +1800,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       info = theScene.getObject(sel[i]);
       if (bounds == null)
-        bounds = info.getBounds().transformAndOutset(info.coords.fromLocal());
+        bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
       else
-        bounds = bounds.merge(info.getBounds().transformAndOutset(info.coords.fromLocal()));
+        bounds = bounds.merge(info.getBounds().transformAndOutset(info.getCoords().fromLocal()));
     }
     center = bounds.getCenter();
     if (dlg.applyToChildren())
@@ -1822,8 +1822,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);
-      obj = info.object;
-      coords = info.coords;
+      obj = info.getObject();
+      coords = info.getCoords();
       if (!scaledObjects.contains(obj))
         undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, coords.duplicate()});
@@ -1868,7 +1868,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);
-      theScene.objectModified(info.object);
+      theScene.objectModified(info.getObject());
     }
     ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
     for (int index : sel)
@@ -1931,7 +1931,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);
-      coords = info.coords;
+      coords = info.getCoords();
       bounds = info.getBounds();
       bounds = bounds.transformAndOutset(coords.fromLocal());
       center = bounds.getCenter();
@@ -1974,7 +1974,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);
-      coords = info.coords;
+      coords = info.getCoords();
       bounds = info.getBounds();
       bounds = bounds.transformAndOutset(coords.fromLocal());
       center = bounds.getCenter();
@@ -2020,17 +2020,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     ObjectInfo obj[];
 
     for (i = 0; i < sel.length; i++)
-      if (theScene.getObject(sel[i]).object.canSetTexture())
+      if (theScene.getObject(sel[i]).getObject().canSetTexture())
         count++;
     if (count == 0)
       return;
     obj = new ObjectInfo [count];
     for (i = 0; i < sel.length; i++)
-      if (theScene.getObject(sel[i]).object.canSetTexture())
+      if (theScene.getObject(sel[i]).getObject().canSetTexture())
         obj[i] = theScene.getObject(sel[i]);
     new ObjectTextureDialog(this, obj);
     for (i = 0; i < sel.length; i++)
-      theScene.objectModified(theScene.getObject(sel[i]).object);
+      theScene.objectModified(theScene.getObject(sel[i]).getObject());
     modified = true;
     updateImage();
   }
@@ -2043,7 +2043,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
       {
         info = theScene.getObject(sel[i]);
-        if (info.object.canSetMaterial())
+        if (info.getObject().canSetMaterial())
           count++;
       }
     if (count == 0)
@@ -2052,7 +2052,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (i = 0; i < sel.length; i++)
       {
         info = theScene.getObject(sel[i]);
-        if (info.object.canSetMaterial())
+        if (info.getObject().canSetMaterial())
           obj[i] = info;
       }
     new ObjectMaterialDialog(this, obj);
@@ -2069,10 +2069,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       return;
     info = theScene.getObject(sel[0]);
     BStandardDialog dlg = new BStandardDialog("", Translate.text("renameObjectTitle"), BStandardDialog.PLAIN);
-    String val = dlg.showInputDialog(this, null, info.name);
+    String val = dlg.showInputDialog(this, null, info.getName());
     if (val == null)
       return;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {new Integer(sel[0]), info.name}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {new Integer(sel[0]), info.getName()}));
     setObjectName(sel[0], val);
   }
 
@@ -2085,28 +2085,28 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (sel.length != 1)
       return;
     info = theScene.getObject(sel[0]);
-    obj = info.object;
+    obj = info.getObject();
     if (obj.canConvertToTriangleMesh() == Object3D.CANT_CONVERT)
       return;
 
     // If the object has a Pose track, all Pose keyframes will need to be deleted.
 
     boolean confirmed = false, hasPose = false;
-    for (int i = 0; i < info.tracks.length; i++)
-      if (info.tracks[i] instanceof PoseTrack)
+    for (int i = 0; i < info.getTracks().length; i++)
+      if (info.getTracks()[i] instanceof PoseTrack)
       {
         hasPose = true;
-        if (!confirmed && !info.tracks[i].isNullTrack())
+        if (!confirmed && !info.getTracks()[i].isNullTrack())
         {
-          BStandardDialog dlg = new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.name), BStandardDialog.QUESTION);
+          BStandardDialog dlg = new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.getName()), BStandardDialog.QUESTION);
           String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
           if (dlg.showOptionDialog(this, options, options[0]) == 1)
             return;
           confirmed = true;
         }
-        if (info.tracks[i].getTimecourse() != null)
-          info.tracks[i].getTimecourse().removeAllTimepoints();
-        info.pose = null;
+        if (info.getTracks()[i].getTimecourse() != null)
+          info.getTracks()[i].getTimecourse().removeAllTimepoints();
+        info.setPose(null);
       }
     if (confirmed)
       theScore.repaintAll();
@@ -2115,7 +2115,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       if (!confirmed)
       {
-        BStandardDialog dlg = new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.name), BStandardDialog.QUESTION);
+        BStandardDialog dlg = new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.getName()), BStandardDialog.QUESTION);
         String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
         if (dlg.showOptionDialog(this, options, options[0]) == 1)
           return;
@@ -2158,11 +2158,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (sel.length != 1)
       return;
     info = theScene.getObject(sel[0]);
-    obj = info.object;
+    obj = info.getObject();
     Object3D posable = obj.getPosableObject();
     if (posable == null)
       return;
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.name)), BStandardDialog.QUESTION);
+    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.getName())), BStandardDialog.QUESTION);
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
     if (dlg.showOptionDialog(this, options, options[0]) == 1)
       return;
@@ -2186,7 +2186,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         info = theScene.getObject(sel[i]);
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
-        info.visible = visible;
+        info.setVisible(visible);
       }
     }
     else
@@ -2194,7 +2194,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         info = theScene.getObject(i);
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
-        info.visible = visible;
+        info.setVisible(visible);
       }
     setUndoRecord(undo);
     updateImage();
@@ -2388,18 +2388,18 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < sel.length; i++)
     {
       ObjectInfo info = theScene.getObject(sel[i]);
-      if (info.parent == null)
+      if (info.getParent() == null)
         continue;
-      Skeleton s = info.parent.getSkeleton();
-      ObjectRef relObj = new ObjectRef(info.parent);
+      Skeleton s = info.getParent().getSkeleton();
+      ObjectRef relObj = new ObjectRef(info.getParent());
       if (s != null)
       {
         double nearest = Double.MAX_VALUE;
         Joint jt[] = s.getJoints();
-        Vec3 pos = info.coords.getOrigin();
+        Vec3 pos = info.getCoords().getOrigin();
         for (int j = 0; j < jt.length; j++)
         {
-          ObjectRef r = new ObjectRef(info.parent, jt[j]);
+          ObjectRef r = new ObjectRef(info.getParent(), jt[j]);
           double dist = r.getCoords().getOrigin().distance2(pos);
           if (dist < nearest)
           {
@@ -2501,7 +2501,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       for (int i = 0; i < sel.length; i++)
       {
         ObjectInfo info = theScene.getObject(sel[i]);
-        BoundingBox bounds = info.getBounds().transformAndOutset(info.coords.fromLocal());
+        BoundingBox bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
         if (bb == null)
           bb = bounds;
         else
@@ -2511,7 +2511,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
-        BoundingBox bounds = info.getBounds().transformAndOutset(info.coords.fromLocal());
+        BoundingBox bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
         if (bb == null)
           bb = bounds;
         else

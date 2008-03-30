@@ -43,7 +43,7 @@ public class ExternalObjectEditingWindow extends BDialog
   
   public ExternalObjectEditingWindow(EditingWindow parent, ExternalObject obj, ObjectInfo info, Runnable onClose)
   {
-    super(parent.getFrame(), info.name, true);
+    super(parent.getFrame(), info.getName(), true);
     parentWindow = parent;
     theObject = obj;
     this.info = info;
@@ -139,12 +139,12 @@ public class ExternalObjectEditingWindow extends BDialog
     for (int i = 0; i < scene.getNumObjects(); i++)
     {
       ObjectInfo info = scene.getObject(i);
-      if (info.parent == null)
+      if (info.getParent() == null)
         itemTree.addElement(new ObjectTreeElement(info, itemTree));
     }
     itemTree.setUpdateEnabled(true);
     ObjectInfo oldSelection = scene.getObjectById(objectId);
-    if (oldSelection == null || !oldSelection.name.equals(objectName))
+    if (oldSelection == null || !oldSelection.getName().equals(objectName))
       oldSelection = scene.getObject(objectName);
     if (oldSelection != null)
     {
@@ -164,8 +164,8 @@ public class ExternalObjectEditingWindow extends BDialog
     {
       okButton.setEnabled(true);
       ObjectInfo selected = (ObjectInfo) sel[0];
-      objectName = selected.name;
-      objectId = selected.id;
+      objectName = selected.getName();
+      objectId = selected.getId();
     }
   }
 

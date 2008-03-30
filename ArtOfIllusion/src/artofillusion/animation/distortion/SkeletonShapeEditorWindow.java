@@ -36,7 +36,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
 
   public SkeletonShapeEditorWindow(EditingWindow parent, String title, SkeletonShapeTrack track, int keyIndex, Runnable onClose)
   {
-    super(parent, title, new ObjectInfo((Object3D) getEditMesh(((ObjectInfo) track.getParent()).object), new CoordinateSystem(), ""));
+    super(parent, title, new ObjectInfo((Object3D) getEditMesh(((ObjectInfo) track.getParent()).getObject()), new CoordinateSystem(), ""));
     this.track = track;
     this.keyIndex = keyIndex;
     this.onClose = onClose;
@@ -85,7 +85,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     setBounds(new Rectangle((d1.width-d2.width)/2, (d1.height-d2.height)/2, d2.width, d2.height));
     tools.requestFocus();
     updateMenus();
-    objInfo.object.getSkeleton().copy(keyframe.getSkeleton());
+    objInfo.getObject().getSkeleton().copy(keyframe.getSkeleton());
     adjustMeshForSkeleton();
   }
   
@@ -117,7 +117,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     skeletonMenu.add(skeletonMenuItem[0] = Translate.menuItem("editBone", this, "editJointCommand"));
     skeletonMenu.add(Translate.menuItem("resetToDefaultPose", this, "resetCommand"));
     skeletonMenu.add(item = Translate.menuItem("createPoseFromGestures", this, "createFromGesturesCommand"));
-    Object3D obj = ((ObjectInfo) track.getParent()).object;
+    Object3D obj = ((ObjectInfo) track.getParent()).getObject();
     item.setEnabled(Actor.getActor(obj) != null);
   }
 
@@ -143,7 +143,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   public void setObject(Object3D obj)
   {
-    objInfo.object = obj;
+    objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
   
@@ -214,9 +214,9 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   private void adjustMeshForSkeleton()
   {
-    Object3D obj = ((ObjectInfo) track.getParent()).object;
+    Object3D obj = ((ObjectInfo) track.getParent()).getObject();
     Actor actor = Actor.getActor(obj);
-    Mesh mesh = (Mesh) getObject().object;
+    Mesh mesh = (Mesh) getObject().getObject();
     if (track.getUseGestures() && actor != null)
       actor.shapeMeshFromGestures((Object3D) mesh);
     else
@@ -227,14 +227,14 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   protected void resetCommand()
   {
-    Object3D obj = ((ObjectInfo) track.getParent()).object;
+    Object3D obj = ((ObjectInfo) track.getParent()).getObject();
     Actor actor = Actor.getActor(obj);
     Skeleton defaultSkeleton;
     if (actor != null)
       defaultSkeleton = actor.getGesture(0).getSkeleton();
     else
       defaultSkeleton = obj.getSkeleton();
-    Object3D editObj = getObject().object;
+    Object3D editObj = getObject().getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {editObj, editObj.duplicate()}));
     editObj.getSkeleton().copy(defaultSkeleton);
     adjustMeshForSkeleton();
@@ -247,13 +247,13 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   protected void createFromGesturesCommand()
   {
     ObjectInfo info = (ObjectInfo) track.getParent();
-    final Actor actor = Actor.getActor(info.object);
+    final Actor actor = Actor.getActor(info.getObject());
     final Actor.ActorKeyframe key = new Actor.ActorKeyframe();
     new ActorEditorWindow(this, info, actor, key, new Runnable() {
       public void run()
       {
         Skeleton newSkeleton = ((Gesture) key.createObjectKeyframe(actor)).getSkeleton();
-        Object3D editObj = getObject().object;
+        Object3D editObj = getObject().getObject();
         setUndoRecord(new UndoRecord(SkeletonShapeEditorWindow.this, false, UndoRecord.COPY_OBJECT, new Object [] {editObj, editObj.duplicate()}));
         editObj.getSkeleton().copy(newSkeleton);
         adjustMeshForSkeleton();

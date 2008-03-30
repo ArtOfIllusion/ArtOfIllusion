@@ -36,13 +36,13 @@ public class SplineMeshViewer extends MeshViewer
   public SplineMeshViewer(MeshEditController window, RowContainer p)
   {
     super(window, p);
-    SplineMesh mesh = (SplineMesh) window.getObject().object;
+    SplineMesh mesh = (SplineMesh) window.getObject().getObject();
     visible = new boolean [mesh.getVertices().length];
   }
 
   protected void drawObject()
   {
-    SplineMesh mesh = (SplineMesh) getController().getObject().object;
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
 
     // Calculate the screen coordinates of every vertex.
@@ -118,7 +118,7 @@ public class SplineMeshViewer extends MeshViewer
       else if (surfaceColoringParameter != null)
       {
         shader = null;
-        TextureParameter params[] = objInfo.object.getParameters();
+        TextureParameter params[] = objInfo.getObject().getParameters();
         for (int i = 0; i < params.length; i++)
           if (params[i].equals(surfaceColoringParameter))
           {
@@ -129,8 +129,8 @@ public class SplineMeshViewer extends MeshViewer
       else if (renderMode == RENDER_SMOOTH)
         shader = new SmoothVertexShader(mesh, surfaceRGB, viewDir);
       else
-        shader = new TexturedVertexShader(mesh, objInfo.object, 0.0, viewDir).optimize();
-      renderMesh(mesh, shader, theCamera, objInfo.object.isClosed(), null);
+        shader = new TexturedVertexShader(mesh, objInfo.getObject(), 0.0, viewDir).optimize();
+      renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), null);
     }
   }
   
@@ -140,7 +140,7 @@ public class SplineMeshViewer extends MeshViewer
   {
     if (!showMesh)
       return;
-    SplineMesh mesh = (SplineMesh) getController().getObject().object;
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
 
     // First, draw any unselected portions of the object.
@@ -166,7 +166,7 @@ public class SplineMeshViewer extends MeshViewer
 
     // First, draw any unselected portions of the object.
 
-    SplineMesh mesh = (SplineMesh) getController().getObject().object;
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
     int i, j, usize = mesh.getUSize(), vsize = mesh.getVSize();
     boolean uclosed = mesh.isUClosed(), vclosed = mesh.isVClosed();
@@ -235,7 +235,7 @@ public class SplineMeshViewer extends MeshViewer
 
   protected void mousePressed(WidgetMouseEvent e)
   {
-    SplineMesh mesh = (SplineMesh) getController().getObject().object;
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     int usize = mesh.getUSize(), vsize = mesh.getVSize();
     int i, j, k, dist, closest;
     Point pos = e.getPoint();
@@ -363,7 +363,7 @@ public class SplineMeshViewer extends MeshViewer
 
   protected void mouseReleased(WidgetMouseEvent e)
   {
-    SplineMesh mesh = (SplineMesh) getController().getObject().object;
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     int usize = mesh.getUSize(), vsize = mesh.getVSize();
     int i, j;
 
@@ -439,7 +439,7 @@ public class SplineMeshViewer extends MeshViewer
   
   int findClickTarget(Point pos)
   {
-    SplineMesh mesh = (SplineMesh) getController().getObject().object;
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     MeshVertex vt[] = mesh.getVertices();
     double z, closestz = Double.MAX_VALUE;
     boolean sel = false;

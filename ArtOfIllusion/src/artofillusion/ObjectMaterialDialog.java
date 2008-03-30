@@ -41,7 +41,7 @@ public class ObjectMaterialDialog extends BDialog implements ListChangeListener
     window = parent;
     scene = parent.getScene();
     obj = objects;
-    firstObj = obj[0].object;
+    firstObj = obj[0].getObject();
     oldMaterial = firstObj.getMaterial();
     if (oldMaterial == null)
       oldMapping = null;
@@ -54,7 +54,7 @@ public class ObjectMaterialDialog extends BDialog implements ListChangeListener
     setContent(content);
     String title;
     if (obj.length == 1)
-      title = Translate.text("chooseMaterialForSingle", obj[0].name);
+      title = Translate.text("chooseMaterialForSingle", obj[0].getName());
     else
       title = Translate.text("chooseMaterialForMultiple");
     content.add(new BLabel(title), 0, 0, 3, 1);
@@ -129,13 +129,13 @@ public class ObjectMaterialDialog extends BDialog implements ListChangeListener
   {
     UndoRecord undo = new UndoRecord(window, false);
     for (int i = 0; i < obj.length; i++)
-      undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].object, obj[i].object.duplicate()});
+      undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i].getObject(), obj[i].getObject().duplicate()});
     if (firstObj.getMaterial() == null)
       for (int i = 1; i < obj.length; i++)
-        obj[i].object.setMaterial(null, null);
+        obj[i].getObject().setMaterial(null, null);
     else
       for (int i = 1; i < obj.length; i++)
-        obj[i].object.setMaterial(firstObj.getMaterial(), firstObj.getMaterialMapping().duplicate());
+        obj[i].getObject().setMaterial(firstObj.getMaterial(), firstObj.getMaterialMapping().duplicate());
     window.setUndoRecord(undo);
     dispose();
   }

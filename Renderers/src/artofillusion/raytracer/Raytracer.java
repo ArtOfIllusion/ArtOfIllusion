@@ -692,7 +692,7 @@ public class Raytracer implements Renderer, Runnable
         if (renderThread != mainThread)
           return;
         ObjectInfo info = theScene.getObject(index);
-        if (info.visible)
+        if (info.isVisible())
           addObject(obj, lt, info, theCamera, mainThread, factories);
       }
       public void cleanup()
@@ -749,9 +749,9 @@ public class Raytracer implements Renderer, Runnable
 
     // Handle it in the default way.
 
-    Object3D theObject = info.object;
-    Mat4 toLocal = info.coords.toLocal();
-    Mat4 fromLocal = info.coords.fromLocal();
+    Object3D theObject = info.getObject();
+    Mat4 toLocal = info.getCoords().toLocal();
+    Mat4 fromLocal = info.getCoords().fromLocal();
     if (theObject instanceof Light)
     {
       lt.add(info);
@@ -765,10 +765,10 @@ public class Raytracer implements Renderer, Runnable
       while (enm.hasMoreElements())
       {
         ObjectInfo elem = (ObjectInfo) enm.nextElement();
-        if (!elem.visible)
+        if (!elem.isVisible())
           continue;
         ObjectInfo copy = elem.duplicate();
-        copy.coords.transformCoordinates(fromLocal);
+        copy.getCoords().transformCoordinates(fromLocal);
         addObject(obj, lt, copy, camera, mainThread, factories);
       }
       return;
@@ -805,28 +805,28 @@ public class Raytracer implements Renderer, Runnable
         Vec3 rad = ((Sphere) theObject).getRadii();
         if (rad.x == rad.y && rad.x == rad.z)
         {
-          obj.add(new RTSphere((Sphere) theObject, fromLocal, toLocal, info.object.getAverageParameterValues()));
+          obj.add(new RTSphere((Sphere) theObject, fromLocal, toLocal, info.getObject().getAverageParameterValues()));
           return;
         }
         else
         {
-          obj.add(new RTEllipsoid((Sphere) theObject, fromLocal, toLocal, info.object.getAverageParameterValues()));
+          obj.add(new RTEllipsoid((Sphere) theObject, fromLocal, toLocal, info.getObject().getAverageParameterValues()));
           return;
         }
       }
       else if (theObject instanceof Cylinder)
       {
-        obj.add(new RTCylinder((Cylinder) theObject, fromLocal, toLocal, info.object.getAverageParameterValues()));
+        obj.add(new RTCylinder((Cylinder) theObject, fromLocal, toLocal, info.getObject().getAverageParameterValues()));
         return;
       }
       else if (theObject instanceof Cube)
       {
-        obj.add(new RTCube((Cube) theObject, fromLocal, toLocal, info.object.getAverageParameterValues()));
+        obj.add(new RTCube((Cube) theObject, fromLocal, toLocal, info.getObject().getAverageParameterValues()));
         return;
       }
       else if (theObject instanceof ImplicitObject && ((ImplicitObject) theObject).getPreferDirectRendering())
       {
-        obj.add(new RTImplicitObject((ImplicitObject) theObject, fromLocal, toLocal, info.object.getAverageParameterValues(), tol));
+        obj.add(new RTImplicitObject((ImplicitObject) theObject, fromLocal, toLocal, info.getObject().getAverageParameterValues(), tol));
         return;
       }
     }
@@ -949,10 +949,10 @@ public class Raytracer implements Renderer, Runnable
     lightNode = new OctreeNode [light.length];
     for (i = 0; i < light.length; i++)
       {
-        if (light[i].object instanceof DirectionalLight)
+        if (light[i].getObject() instanceof DirectionalLight)
           lightNode[i] = null;
         else
-          lightNode[i] = rootNode.findNode(light[i].coords.getOrigin());
+          lightNode[i] = rootNode.findNode(light[i].getCoords().getOrigin());
       }
   }
   
@@ -1045,12 +1045,12 @@ public class Raytracer implements Renderer, Runnable
 
       // Process it in the default way.
 
-      if (light[i].object instanceof DirectionalLight)
-        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].object, light[i].coords, map));
-      else if (light[i].object instanceof PointLight)
-        sources.add(new PointPhotonSource((PointLight) light[i].object, light[i].coords, map));
-      else if (light[i].object instanceof SpotLight)
-        sources.add(new SpotlightPhotonSource((SpotLight) light[i].object, light[i].coords, map));
+      if (light[i].getObject() instanceof DirectionalLight)
+        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].getObject(), light[i].getCoords(), map));
+      else if (light[i].getObject() instanceof PointLight)
+        sources.add(new PointPhotonSource((PointLight) light[i].getObject(), light[i].getCoords(), map));
+      else if (light[i].getObject() instanceof SpotLight)
+        sources.add(new SpotlightPhotonSource((SpotLight) light[i].getObject(), light[i].getCoords(), map));
     }
     ArrayList<PhotonSource> objectSources = new ArrayList<PhotonSource>();
     for (int i = 0; i < sceneObject.length; i++)
@@ -2036,8 +2036,8 @@ public class Raytracer implements Renderer, Runnable
     hilight = (spec.hilight.getRed() != 0.0 || spec.hilight.getGreen() != 0.0 || spec.hilight.getBlue() != 0.0);
     for (i = light.length-1; i >= 0; i--)
       {
-        lt = (Light) light[i].object;
-        lightPos = light[i].coords.getOrigin();
+        lt = (Light) light[i].getObject();
+        lightPos = light[i].getCoords().getOrigin();
         if (lt instanceof PointLight)
           {
             dir.set(lightPos);
@@ -2055,13 +2055,13 @@ public class Raytracer implements Renderer, Runnable
             dir.subtract(pos);
             distToLight = dir.length();
             dir.normalize();
-            fatt = -dir.dot(light[i].coords.getZDirection());
+            fatt = -dir.dot(light[i].getCoords().getZDirection());
             if (fatt < ((SpotLight) lt).getAngleCosine())
               continue;
           }
         else if (lt instanceof DirectionalLight)
           {
-            dir.set(light[i].coords.getZDirection());
+            dir.set(light[i].getCoords().getZDirection());
             dir.scale(-1.0);
             distToLight = Double.MAX_VALUE;
           }
@@ -2597,8 +2597,8 @@ public class Raytracer implements Renderer, Runnable
     dir = r.getDirection();
     for (i = light.length-1; i >= 0; i--)
       {
-        lt = (Light) light[i].object;
-        lightPos = light[i].coords.getOrigin();
+        lt = (Light) light[i].getObject();
+        lightPos = light[i].getCoords().getOrigin();
         if (lt instanceof PointLight)
           {
             dir.set(lightPos);
@@ -2612,13 +2612,13 @@ public class Raytracer implements Renderer, Runnable
             dir.subtract(pos);
             distToLight = dir.length();
             dir.normalize();
-            fatt = -dir.dot(light[i].coords.getZDirection());
+            fatt = -dir.dot(light[i].getCoords().getZDirection());
             if (fatt < ((SpotLight) lt).getAngleCosine())
               continue;
           }
         else if (lt instanceof DirectionalLight)
           {
-            dir.set(light[i].coords.getZDirection());
+            dir.set(light[i].getCoords().getZDirection());
             dir.scale(-1.0);
             distToLight = Double.MAX_VALUE;
           }

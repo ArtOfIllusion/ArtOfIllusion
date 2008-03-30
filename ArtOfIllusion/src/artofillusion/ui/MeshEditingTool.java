@@ -36,7 +36,7 @@ public abstract class MeshEditingTool extends EditingTool
 
   protected BoundingBox findSelectionBounds(Camera cam)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     MeshVertex vert[] = mesh.getVertices();
     int selected[] = controller.getSelectionDistance();
     double minx, miny, minz, maxx, maxy, maxz;

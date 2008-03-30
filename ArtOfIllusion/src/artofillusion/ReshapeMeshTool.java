@@ -53,7 +53,7 @@ public class ReshapeMeshTool extends MeshEditingTool
 
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
     
     clickPoint = e.getPoint();
@@ -64,7 +64,7 @@ public class ReshapeMeshTool extends MeshEditingTool
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     MeshViewer mv = (MeshViewer) view;
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = e.getPoint();
     Vec3 v[], drag;
     int dx, dy;
@@ -94,7 +94,7 @@ public class ReshapeMeshTool extends MeshEditingTool
 
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = e.getPoint();
     int dx, dy;
     Vec3 v[];
@@ -124,7 +124,7 @@ public class ReshapeMeshTool extends MeshEditingTool
 
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
-    Mesh mesh = (Mesh) controller.getObject().object;
+    Mesh mesh = (Mesh) controller.getObject().getObject();
     Vec3 vert[] = mesh.getVertexPositions();
     int i, selectDist[] = controller.getSelectionDistance();
     int key = e.getKeyCode();

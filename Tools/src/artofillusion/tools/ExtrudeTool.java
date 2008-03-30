@@ -41,7 +41,7 @@ public class ExtrudeTool implements ModellingTool
     
     for (int i = 0; i < selection.length; i++)
       {
-	Object3D obj = scene.getObject(selection[i]).object;
+	Object3D obj = scene.getObject(selection[i]).getObject();
 	if (obj instanceof Curve || ((obj instanceof TriangleMesh || 
 	    obj.canConvertToTriangleMesh() != Object3D.CANT_CONVERT) && !obj.isClosed()))
 	  {

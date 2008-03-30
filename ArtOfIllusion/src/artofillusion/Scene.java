@@ -23,6 +23,7 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.zip.*;
+import java.beans.*;
 
 /** The Scene class describes a collection of objects, arranged relative to each other to
     form a scene, as well as the available textures and materials, environment options, etc. */
@@ -35,6 +36,7 @@ public class Scene
   private Vector<ImageMap> images;
   private Vector<Integer> selection;
   private Vector<ListChangeListener> textureListeners, materialListeners;
+  private HashMap<String, Object> metadataMap;
   private HashMap<ObjectInfo, Integer> objectIndexMap;
   private RGBColor ambientColor, environColor, fogColor;
   private Texture environTexture;
@@ -62,6 +64,7 @@ public class Scene
     textures = new Vector<Texture>();
     images = new Vector<ImageMap>();
     selection = new Vector<Integer>();
+    metadataMap = new HashMap<String, Object>();
     textureListeners = new Vector<ListChangeListener>();
     materialListeners = new Vector<ListChangeListener>();
     defTex.setName("Default Texture");
@@ -639,6 +642,43 @@ public class Scene
   {
     textureListeners.removeElement(ls);
   }
+
+  /**
+   * Get a piece of metadata stored in this scene.
+   *
+   * @param name   the name of the piece of metadata to get
+   * @return the value associated with that name, or null if there is none
+   */
+
+  public Object getMetadata(String name)
+  {
+    return metadataMap.get(name);
+  }
+
+  /**
+   * Store a piece of metadata in this scene.  This may be an arbitrary object which
+   * you want to store as part of the scene.  When the scene is saved to disk, metadata
+   * objects are stored using the java.beans.XMLEncoder class.  This means that if the
+   * object is not a bean, you must register a PersistenceDelegate for it before calling
+   * this method.  Otherwise, it will fail to be saved.
+   *
+   * @param name   the name of the piece of metadata to set
+   * @param value  the value to store
+   */
+
+  public void setMetadata(String name, Object value)
+  {
+    metadataMap.put(name, value);
+  }
+
+  /**
+   * Get the names of all metadata objects stored in this scene.
+   */
+
+  public Set<String> getAllMetadataNames()
+  {
+    return metadataMap.keySet();
+  }
   
   /** Show the dialog for editing textures. */
   
@@ -1049,13 +1089,13 @@ public class Scene
   
   private void initFromStream(DataInputStream in, boolean fullScene) throws IOException, InvalidObjectException
   {
-    int i, j, count;
+    int count;
     short version = in.readShort();
     Hashtable<Integer, Object3D> table;
     Class cls;
     Constructor con;
 
-    if (version < 0 || version > 3)
+    if (version < 0 || version > 4)
       throw new InvalidObjectException("");
     loadingErrors = new StringBuffer();
     ambientColor = new RGBColor(in);
@@ -1073,7 +1113,7 @@ public class Scene
     
     count = in.readInt();
     images = new Vector<ImageMap>(count);
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
       {
         if (version == 0)
           {
@@ -1099,7 +1139,7 @@ public class Scene
     
     count = in.readInt();
     materials = new Vector<Material>(count);
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
       {
         try
           {
@@ -1139,7 +1179,7 @@ public class Scene
     
     count = in.readInt();
     textures = new Vector<Texture>(count);
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
       {
         try
           {
@@ -1180,18 +1220,18 @@ public class Scene
     count = in.readInt();
     objects = new Vector<ObjectInfo>(count);
     table = new Hashtable<Integer, Object3D>(count);
-    for (i = 0; i < count; i++)
+    for (int i = 0; i < count; i++)
       objects.addElement(readObjectFromFile(in, table, version));
     objectIndexMap = null;
     selection = new Vector<Integer>();
     
     // Read the list of children for each object.
     
-    for (i = 0; i < objects.size(); i++)
+    for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo info = objects.elementAt(i);
         int num = in.readInt();
-        for (j = 0; j < num; j++)
+        for (int j = 0; j < num; j++)
           {
             ObjectInfo child = objects.elementAt(in.readInt());
             info.addChild(child, j);
@@ -1240,9 +1280,33 @@ public class Scene
         environColor = new RGBColor(0.0f, 0.0f, 0.0f);
         environParamValue = new ParameterValue [environMapping.getParameters().length];
         if (version > 2)
-          for (i = 0; i < environParamValue.length; i++)
+          for (int i = 0; i < environParamValue.length; i++)
             environParamValue[i] = Object3D.readParameterValue(in);
       }
+
+    // Read the metadata.
+
+    metadataMap = new HashMap<String, Object>();
+    if (version > 3)
+    {
+      count = in.readInt();
+      for (int i = 0; i < count; i++)
+      {
+        try
+        {
+          String name = in.readUTF();
+          byte data[] = new byte[in.readInt()];
+          in.readFully(data);
+          XMLDecoder decoder = new XMLDecoder(new ByteArrayInputStream(data));
+          metadataMap.put(name, decoder.readObject());
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+          // Nothing more we can do about it.
+        }
+      }
+    }
     textureListeners = new Vector<ListChangeListener>();
     materialListeners = new Vector<ListChangeListener>();
     setTime(0.0);
@@ -1366,7 +1430,7 @@ public class Scene
     int i, j, index = 0;
     Hashtable<Object3D, Integer> table = new Hashtable<Object3D, Integer>(objects.size());
     
-    out.writeShort(3);
+    out.writeShort(4);
     ambientColor.writeToFile(out);
     fogColor.writeToFile(out);
     out.writeBoolean(fog);
@@ -1451,6 +1515,20 @@ public class Scene
           environParamValue[i].writeToStream(out);
         }
       }
+
+    // Save metadata.
+
+    out.writeInt(metadataMap.size());
+    for (Map.Entry<String, Object> entry : metadataMap.entrySet())
+    {
+      ByteArrayOutputStream value = new ByteArrayOutputStream();
+      XMLEncoder encoder = new XMLEncoder(value);
+      encoder.writeObject(entry.getValue());
+      encoder.close();
+      out.writeUTF(entry.getKey());
+      out.writeInt(value.size());
+      out.write(value.toByteArray());
+    }
   }
   
   /** Write the information about a single object to a file. */

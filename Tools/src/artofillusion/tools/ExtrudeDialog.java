@@ -42,7 +42,7 @@ public class ExtrudeDialog extends BDialog
     super(window, "Extrude", true);
     this.window = window;
     Scene scene = window.getScene();
-    int selection[] = scene.getSelection();
+    int selection[] = window.getSelectedIndices();
     
     // Identify the objects that can be extruded, and the paths along which they can be
     // extruded.
@@ -68,7 +68,7 @@ public class ExtrudeDialog extends BDialog
     // Layout the window.
     
     FormContainer content = new FormContainer(4, 10);
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
     content.add(new BLabel("Object to Extrude:"), 0, 0, 2, 1);
     content.add(objChoice = new BComboBox(), 0, 1, 2, 1);

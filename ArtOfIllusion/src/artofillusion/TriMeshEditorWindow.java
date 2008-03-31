@@ -69,7 +69,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     tools.addTool(new TaperMeshTool(this, this));
     tools.addTool(new ThickenMeshTool(this, this));
     tools.addTool(compoundTool = new MoveScaleRotateMeshTool(this, this));
-    if (ModellingApp.getPreferences().getUseCompoundMeshTool())
+    if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
       defaultTool = compoundTool;
     if (allowTopology)
     {
@@ -563,7 +563,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
     // We need an actual TriangleMesh, not just a RenderingMesh.
 
-    divMesh = mesh.convertToTriangleMesh(ModellingApp.getPreferences().getInteractiveSurfaceError());
+    divMesh = mesh.convertToTriangleMesh(ArtOfIllusion.getPreferences().getInteractiveSurfaceError());
     Edge divEdge[] = divMesh.getEdges();
     double param[] = ((FaceParameterValue) divMesh.getParameterValue(getFaceIndexParameter())).getValue();
     projectedEdge = new int [divEdge.length];

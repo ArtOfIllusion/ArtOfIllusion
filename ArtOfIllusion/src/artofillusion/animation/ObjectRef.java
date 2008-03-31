@@ -115,7 +115,7 @@ public class ObjectRef
     Skeleton s = info.getObject().getSkeleton();
     if (s != null)
     {
-      Skeleton ds = info.getDistortedObject(ModellingApp.getPreferences().getInteractiveSurfaceError()).getSkeleton();
+      Skeleton ds = info.getDistortedObject(ArtOfIllusion.getPreferences().getInteractiveSurfaceError()).getSkeleton();
       if (ds != null)
         s = ds;
     }

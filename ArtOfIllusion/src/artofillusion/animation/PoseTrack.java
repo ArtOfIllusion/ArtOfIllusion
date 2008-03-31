@@ -322,7 +322,7 @@ public class PoseTrack extends Track
       {
         try
           {
-            Class cl = ModellingApp.getClass(in.readUTF());
+            Class cl = ArtOfIllusion.getClass(in.readUTF());
             Constructor con = cl.getConstructor(new Class [] {DataInputStream.class, Object.class});
             for (int i = 0; i < keys; i++)
               {

@@ -57,7 +57,7 @@ public class TreeList extends CustomWidget
     allowMultiple = true;
     Font font = getFont();
     if (font == null)
-      font = ModellingApp.defaultFont;
+      font = UIUtilities.getDefaultFont();
     if (font != null)
     {
       FontMetrics fm = getComponent().getFontMetrics(font);

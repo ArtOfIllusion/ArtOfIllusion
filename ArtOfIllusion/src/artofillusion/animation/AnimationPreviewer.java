@@ -120,7 +120,7 @@ public class AnimationPreviewer implements Runnable
     format = NumberFormat.getNumberInstance();
     format.setMaximumFractionDigits(3);
     ColumnContainer content = new ColumnContainer();
-    display.setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    display.setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(2, 0, 2, 0), null));
     content.add(timeLabel = new BLabel());
     content.add(frameLabel = new BLabel());

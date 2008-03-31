@@ -38,7 +38,7 @@ public class SceneViewer extends ViewerCanvas
 
   public SceneViewer(Scene s, RowContainer p, EditingWindow fr, boolean forceSoftwareRendering)
   {
-    super(ModellingApp.getPreferences().getUseOpenGL() && isOpenGLAvailable() && !forceSoftwareRendering);
+    super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable() && !forceSoftwareRendering);
     theScene = s;
     parentFrame = fr;
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
@@ -46,7 +46,7 @@ public class SceneViewer extends ViewerCanvas
     cameras = new Vector();
     buildChoices(p);
     rebuildCameraList();
-    setRenderMode(ModellingApp.getPreferences().getDefaultDisplayMode());
+    setRenderMode(ArtOfIllusion.getPreferences().getDefaultDisplayMode());
   }
 
   /** Get the EditingWindow in which this canvas is displayed. */

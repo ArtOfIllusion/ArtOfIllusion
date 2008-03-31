@@ -107,7 +107,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     viewMenu.add(axesItem = Translate.menuItem(view.getShowAxes() ? "hideCoordinateAxes" : "showCoordinateAxes", this, "showAxesCommand"));
     viewMenu.add(templateItem = Translate.menuItem("showTemplate", this, "showTemplateCommand"));
     viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
-    if (ModellingApp.getPreferences().getObjectPreviewRenderer() != null)
+    if (ArtOfIllusion.getPreferences().getObjectPreviewRenderer() != null)
     {
       viewMenu.addSeparator();
       viewMenu.add(Translate.menuItem("renderPreview", this, "renderPreviewCommand"));

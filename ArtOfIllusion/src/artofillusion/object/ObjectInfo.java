@@ -303,7 +303,7 @@ public class ObjectInfo
       {
         if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
           getObject().applyPoseKeyframe(getPose());
-        double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
+        double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedMesh = obj.getRenderingMesh(tol, true, this);
         if (cachedBounds == null)
@@ -322,7 +322,7 @@ public class ObjectInfo
       {
         if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
           getObject().applyPoseKeyframe(getPose());
-        double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
+        double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedWire = obj.getWireframeMesh();
         if (cachedBounds == null)
@@ -341,7 +341,7 @@ public class ObjectInfo
       {
         if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
           getObject().applyPoseKeyframe(getPose());
-        double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
+        double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cachedBounds = obj.getBounds();
         Object3D realObject = getObject();

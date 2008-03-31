@@ -18,7 +18,8 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.lang.reflect.*;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 
 /** This class implements the dialog box which is used to choose texture mappings for objects. 
     It presents a list of all mappings which can be used with the current object and material,
@@ -58,17 +59,17 @@ public class TextureMappingDialog extends BDialog
     // Make a list of all texture mappings which can be used for this object and texture.
     
     mappings = new Vector();
-    Class allMappings[] = ModellingApp.getTextureMappings();
-    for (int i = 0; i < allMappings.length; i++)
+    List<TextureMapping> allMappings = PluginRegistry.getPlugins(TextureMapping.class);
+    for (int i = 0; i < allMappings.size(); i++)
     {
       try
       {
-        Method mtd = allMappings[i].getMethod("legalMapping", new Class [] {Object3D.class, Texture.class});
+        Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Texture.class);
         Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) 
             : editObj.getTexture();
-        Boolean result = (Boolean) mtd.invoke(null, new Object [] {editObj, tex});
+        Boolean result = (Boolean) mtd.invoke(null, editObj, tex);
         if (result.booleanValue())
-          mappings.addElement(allMappings[i]);
+          mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)
       {
@@ -78,7 +79,7 @@ public class TextureMappingDialog extends BDialog
     // Add the various components to the dialog.
     
     content = new FormContainer(new double [] {1}, new double [] {1, 0, 0, 0});
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     Object3D previewObj = editObj;
     while (previewObj instanceof ObjectWrapper)
       previewObj = ((ObjectWrapper) previewObj).getWrappedObject();

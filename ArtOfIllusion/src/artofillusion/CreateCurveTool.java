@@ -133,7 +133,7 @@ public class CreateCurveTool extends EditingTool
 
     if (e.getClickCount() != 2)
       {
-        clickPoint.addElement(cam.convertScreenToWorld(dragPoint, ModellingApp.DIST_TO_SCREEN));
+        clickPoint.addElement(cam.convertScreenToWorld(dragPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN));
         smoothness.addElement(new Float(e.isShiftDown() ? 0.0f : 1.0f));
       }
     if (clickPoint.size() > 1)

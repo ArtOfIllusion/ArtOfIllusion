@@ -51,7 +51,7 @@ public class ExternalObjectEditingWindow extends BDialog
     objectName = obj.getExternalObjectName();
     objectId = obj.getExternalObjectId();
     FormContainer content = new FormContainer(new double [] {0, 1, 0, 0}, new double [] {0, 1, 0, 0});
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
     LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 2, 2, 2), null);
     content.add(Translate.label("externalObject.sceneFile"), 0, 0, labelLayout);

@@ -61,7 +61,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     tools.addTool(new TaperMeshTool(this, this));
     tools.addTool(new ThickenMeshTool(this, this));
     tools.addTool(compoundTool = new MoveScaleRotateMeshTool(this, this));
-    if (ModellingApp.getPreferences().getUseCompoundMeshTool())
+    if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
       defaultTool = compoundTool;
     tools.addTool(new SkeletonTool(this, true));
     tools.addTool(metaTool = new MoveViewTool(this));

@@ -73,7 +73,7 @@ public class PathFromCurveDialog extends BDialog
     // Layout the dialog.
 
     FormContainer content = new FormContainer(4, 5);
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(2, 2, 2, 2), null));
     content.add(Translate.label("setPathOf"), 0, 0);
     content.add(UIUtilities.createScrollingList(objList), 1, 0);

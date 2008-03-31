@@ -55,7 +55,7 @@ public class ColorChooser extends BDialog
   {
     super(parent, title, true);
     BorderContainer content = new BorderContainer();
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     oldColor = c;
     newColor = c.duplicate();
 

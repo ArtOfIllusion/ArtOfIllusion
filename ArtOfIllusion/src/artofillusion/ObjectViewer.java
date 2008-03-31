@@ -34,7 +34,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   
   public ObjectViewer(MeshEditController controller, RowContainer p)
   {
-    super(ModellingApp.getPreferences().getUseOpenGL() && isOpenGLAvailable());
+    super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
     this.controller = controller;
     buildChoices(p);
   }
@@ -352,7 +352,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   public void previewObject()
   {
     Scene sc = new Scene();
-    Renderer rend = ModellingApp.getPreferences().getObjectPreviewRenderer();
+    Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
 
     if (rend == null)
       return;

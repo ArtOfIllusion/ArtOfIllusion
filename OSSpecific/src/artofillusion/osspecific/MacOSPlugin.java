@@ -35,9 +35,9 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       if (!os.startsWith("mac os x"))
         return;
       isMacOSX = true;
-      ModellingApp.addWindow(new MacMenuBarWindow());
-      ModellingApp.defaultFont = new Font("Application", Font.PLAIN, 11);
-      ModellingApp.standardDialogInsets = 3;
+      ArtOfIllusion.addWindow(new MacMenuBarWindow());
+      UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
+      UIUtilities.setStandardDialogInsets(3);
       try
       {
         // Use reflection to set up the application menu.
@@ -120,7 +120,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     }
     else if ("handleQuit".equals(method.getName()))
     {
-      ModellingApp.quit();
+      ArtOfIllusion.quit();
       handled = false;
     }
     else if ("handleOpenFile".equals(method.getName()))
@@ -129,7 +129,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       {
         Method getFilename = args[0].getClass().getMethod("getFilename", new Class [0]);
         String path = (String) getFilename.invoke(args[0], new Object [0]);
-        ModellingApp.newWindow(new Scene(new File(path), true));
+        ArtOfIllusion.newWindow(new Scene(new File(path), true));
       }
       catch (Exception ex)
       {
@@ -241,11 +241,11 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     {
       String command = ev.getActionCommand();
       if (command.equals("new"))
-        ModellingApp.newWindow();
+        ArtOfIllusion.newWindow();
       else if (command.equals("open"))
-        ModellingApp.openScene(this);
+        ArtOfIllusion.openScene(this);
       else if (command.equals("quit"))
-        ModellingApp.quit();
+        ArtOfIllusion.quit();
     }
   }
 }

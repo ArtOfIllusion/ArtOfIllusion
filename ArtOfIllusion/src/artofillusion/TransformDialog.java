@@ -87,7 +87,7 @@ public class TransformDialog extends BDialog
   void layoutDialog(boolean transformLabels, boolean extraOptions)
   {
     BorderContainer content = new BorderContainer();
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     FormContainer center = new FormContainer(4, extraOptions ? 6 : 4);
     content.add(center, BorderContainer.CENTER);
     LayoutInfo eastLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);

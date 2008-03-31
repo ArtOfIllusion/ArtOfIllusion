@@ -106,8 +106,8 @@ public class ApplicationPreferences
 
   private void initDefaultPreferences()
   {
-    Renderer renderers[] = ModellingApp.getRenderers();
-    if (renderers.length > 0)
+    List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
+    if (renderers.size() > 0)
       objectPreviewRenderer = texturePreviewRenderer = defaultRenderer = getNamedRenderer("Raytracer");
     defaultDisplayMode = ViewerCanvas.RENDER_SMOOTH;
     interactiveTol = 0.05;
@@ -215,14 +215,13 @@ public class ApplicationPreferences
 
   private Renderer getNamedRenderer(String name)
   {
-    Renderer renderers[] = ModellingApp.getRenderers();
-
-    if (renderers.length == 0)
+    List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
+    if (renderers.size() == 0)
       return null;
-    for (int i = 0; i < renderers.length; i++)
-      if (renderers[i].getName().equals(name))
-        return renderers[i];
-    return renderers[renderers.length-1];
+    for (int i = 0; i < renderers.size(); i++)
+      if (renderers.get(i).getName().equals(name))
+        return renderers.get(i);
+    return renderers.get(renderers.size()-1);
   }
 
   /** Get the default renderer. */
@@ -304,7 +303,7 @@ public class ApplicationPreferences
       {
         // Clear the cached meshes for objects in all windows.
 
-        EditingWindow windows[] = ModellingApp.getWindows();
+        EditingWindow windows[] = ArtOfIllusion.getWindows();
         for (int i = 0; i < windows.length; i++)
           {
             Scene sc = windows[i].getScene();

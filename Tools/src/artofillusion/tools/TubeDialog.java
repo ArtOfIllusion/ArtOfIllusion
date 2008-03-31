@@ -45,7 +45,7 @@ public class TubeDialog extends BDialog
     // Layout the window.
     
     FormContainer content = new FormContainer(4, 10);
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
     content.add(new BLabel("Tube Width"), 0, 0);
     content.add(new BLabel("Cap Ends"), 0, 1);

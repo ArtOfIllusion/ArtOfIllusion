@@ -83,7 +83,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     // Add the title and combo box at the top.
     
     content = new BorderContainer();
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     FormContainer northPanel = new FormContainer(1, 2);
     String title;
     if (obj.length == 1)

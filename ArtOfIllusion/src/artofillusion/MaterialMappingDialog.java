@@ -17,7 +17,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.Insets;
 import java.lang.reflect.*;
-import java.util.Vector;
+import java.util.*;
 
 /** This class implements the dialog box which is used to choose material mappings for objects. 
     It presents a list of all mappings which can be used with the current object and material,
@@ -47,16 +47,16 @@ public class MaterialMappingDialog extends BDialog
     // Make a list of all material mappings which can be used for this object and material.
     
     mappings = new Vector();
-    Class allMappings[] = ModellingApp.getMaterialMappings();
-    for (int i = 0; i < allMappings.length; i++)
+    List<MaterialMapping> allMappings = PluginRegistry.getPlugins(MaterialMapping.class);
+    for (int i = 0; i < allMappings.size(); i++)
     {
       try
       {
-        Method mtd = allMappings[i].getMethod("legalMapping", new Class [] {Object3D.class, Material.class});
+        Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Material.class);
         Material mat = obj.getMaterial();
-        Boolean result = (Boolean) mtd.invoke(null, new Object [] {obj, mat});
+        Boolean result = (Boolean) mtd.invoke(null, obj, mat);
         if (result.booleanValue())
-          mappings.addElement(allMappings[i]);
+          mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)
       {
@@ -66,7 +66,7 @@ public class MaterialMappingDialog extends BDialog
     // Add the various components to the dialog.
     
     FormContainer content = new FormContainer(new double [] {1}, new double [] {1, 0, 0, 0});
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.add(preview = new MaterialPreviewer(obj.getTexture(), obj.getMaterial(), obj.duplicate(), 160, 160), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(0, 50, 0, 50), null));
     preview.setMaterial(obj.getMaterial(), obj.getMaterialMapping());
     RowContainer choiceRow = new RowContainer();

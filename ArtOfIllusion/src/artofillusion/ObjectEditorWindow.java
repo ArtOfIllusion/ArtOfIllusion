@@ -19,6 +19,7 @@ import buoy.widget.*;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.prefs.*;
 
 /** The ObjectEditorWindow class represents a window for editing an object.  This is an
@@ -62,8 +63,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   protected void initialize()
   {
     undoStack = new UndoStack();
-    if (ModellingApp.APP_ICON != null)
-      setIcon(ModellingApp.APP_ICON);
+    if (ArtOfIllusion.APP_ICON != null)
+      setIcon(ArtOfIllusion.APP_ICON);
     preferences = Preferences.userNodeForPackage(getClass()).node("ObjectEditorWindow");
     loadPreferences();
     addEventLink(WindowClosingEvent.class, new Object() {
@@ -404,9 +405,9 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;
-      Plugin plugins[] = ModellingApp.getPlugins();
-      for (int i = 0; i < plugins.length; i++)
-        plugins[i].processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
+      List<Plugin> plugins = PluginRegistry.getPlugins(Plugin.class);
+      for (int i = 0; i < plugins.size(); i++)
+        plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
     }
     super.setVisible(visible);
   }
@@ -418,8 +419,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public void dispose()
   {
     super.dispose();
-    Plugin plugins[] = ModellingApp.getPlugins();
-    for (int i = 0; i < plugins.length; i++)
-      plugins[i].processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
+    List<Plugin> plugins = PluginRegistry.getPlugins(Plugin.class);
+    for (int i = 0; i < plugins.size(); i++)
+      plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
   }
 }

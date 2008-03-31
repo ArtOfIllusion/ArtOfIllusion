@@ -42,7 +42,7 @@ public class PluginRegistry
 
   static void scanPlugins()
   {
-    File dir = new File(ModellingApp.PLUGIN_DIRECTORY);
+    File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
     if (!dir.exists())
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);

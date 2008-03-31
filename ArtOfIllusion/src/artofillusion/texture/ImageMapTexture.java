@@ -353,7 +353,7 @@ public class ImageMapTexture extends Texture2D
       parent = fr;
       newTexture = (ImageMapTexture) duplicate();
       BorderContainer content = new BorderContainer();
-      setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+      setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
 
       // Add the buttons at the bottom.
 

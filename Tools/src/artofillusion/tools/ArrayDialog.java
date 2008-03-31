@@ -64,7 +64,7 @@ public class ArrayDialog extends BDialog
     methodGroup = new RadioButtonGroup();
     modeGroup = new RadioButtonGroup();
     ColumnContainer content = new ColumnContainer();
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 15, 0), null));
     content.add(new BLabel("Create Array of Selected Objects:"), new LayoutInfo());
     content.add(createLinearPanel());

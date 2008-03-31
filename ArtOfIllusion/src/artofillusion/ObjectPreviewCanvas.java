@@ -38,7 +38,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
 
   public ObjectPreviewCanvas(ObjectInfo obj, RowContainer p)
   {
-    super(ModellingApp.getPreferences().getUseOpenGL() && isOpenGLAvailable());
+    super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
     if (obj != null)
     {
       objInfo = obj.duplicate();

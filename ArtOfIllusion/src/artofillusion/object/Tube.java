@@ -520,7 +520,7 @@ public class Tube extends Curve
   {
     if (cachedWire != null)
       return cachedWire;
-    return (cachedWire = convertToTriangleMesh(ModellingApp.getPreferences().getInteractiveSurfaceError()).getWireframeMesh());
+    return (cachedWire = convertToTriangleMesh(ArtOfIllusion.getPreferences().getInteractiveSurfaceError()).getWireframeMesh());
   }
   
   /** Get a triangle mesh which approximates the surface of this object at

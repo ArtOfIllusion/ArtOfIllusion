@@ -73,7 +73,7 @@ public class ScriptOutputWindow extends OutputStream
     BorderContainer content = new BorderContainer();
     window.setContent(content);
     text = new BTextArea(10, 60);
-    text.setFont(ModellingApp.defaultFont);
+    text.setFont(UIUtilities.getDefaultFont());
     BScrollPane sp = new BScrollPane(text, BScrollPane.SCROLLBAR_ALWAYS, BScrollPane.SCROLLBAR_ALWAYS);
     content.add(sp, BorderContainer.CENTER);
     content.add(Translate.button("close", this, "closeWindow"), BorderContainer.SOUTH, new LayoutInfo());

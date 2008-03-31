@@ -88,12 +88,12 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public ViewerCanvas()
   {
-    this(ModellingApp.getPreferences().getUseOpenGL() && openGLAvailable);
+    this(ArtOfIllusion.getPreferences().getUseOpenGL() && openGLAvailable);
   }
 
   public ViewerCanvas(boolean useOpenGL)
   {
-    CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, ModellingApp.DIST_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
+    CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     viewChangedEvent = new ViewChangedEvent(this);
     controlMap = new HashMap<ViewerControl,Widget>();
     theCamera = new Camera();
@@ -495,7 +495,7 @@ public abstract class ViewerCanvas extends CustomWidget
       theCamera.setScreenParams(0, 100.0, bounds.width, bounds.height);
     else
       theCamera.setScreenParamsParallel(100.0, bounds.width, bounds.height);  
-    double startDist = ModellingApp.DIST_TO_SCREEN+Math.max(Math.max(bb.maxx-bb.minx, bb.maxy-bb.miny), bb.maxz-bb.minz);
+    double startDist = Camera.DEFAULT_DISTANCE_TO_SCREEN+Math.max(Math.max(bb.maxx-bb.minx, bb.maxy-bb.miny), bb.maxz-bb.minz);
     CoordinateSystem coords = theCamera.getCameraCoordinates();
     Vec3 boxCenter = bb.getCenter();
     coords.setOrigin(boxCenter.minus(coords.getZDirection().times(startDist)));
@@ -537,7 +537,7 @@ public abstract class ViewerCanvas extends CustomWidget
       theCamera.setDistToScreen((bounds.height/200.0)/Math.tan(((SceneCamera) boundCamera.getObject()).getFieldOfView()*Math.PI/360.0));
     }
     else
-      theCamera.setDistToScreen(ModellingApp.DIST_TO_SCREEN);
+      theCamera.setDistToScreen(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
   
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -769,7 +769,7 @@ public abstract class ViewerCanvas extends CustomWidget
     if (which > 5 && which != VIEW_OTHER)
       return;
     CoordinateSystem coords = theCamera.getCameraCoordinates();
-    double dist = (perspective ? coords.getOrigin().length() : ModellingApp.DIST_TO_SCREEN);
+    double dist = (perspective ? coords.getOrigin().length() : Camera.DEFAULT_DISTANCE_TO_SCREEN);
         
     if (which == 0)             // Front
       coords = new CoordinateSystem(new Vec3(0.0, 0.0, dist), new Vec3(0.0, 0.0, -1.0), Vec3.vy());

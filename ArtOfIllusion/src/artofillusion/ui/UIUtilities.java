@@ -22,7 +22,9 @@ import javax.swing.*;
 
 public class UIUtilities
 {
-  
+  private static Font defaultFont;
+  private static int standardDialogInsets = 0;
+
   /** Given a Window, center it in the screen. */
   
   public static void centerWindow(WindowWidget win)
@@ -55,14 +57,41 @@ public class UIUtilities
     dlg.setBounds(new Rectangle(x, y, r2.width, r2.height));
   }
 
-  
+  /** Get the default font for the program (may be null). */
+
+  public static Font getDefaultFont()
+  {
+    return defaultFont;
+  }
+
+  /** Set the default font for the program (may be null). */
+
+  public static void setDefaultFont(Font font)
+  {
+    defaultFont = font;
+  }
+
+  /** Get the insets which should be used on all dialogs. */
+
+  public static int getStandardDialogInsets()
+  {
+    return standardDialogInsets;
+  }
+
+  /** Set the insets which should be used on all dialogs. */
+
+  public static void setStandardDialogInsets(int pixels)
+  {
+    standardDialogInsets = pixels;
+  }
+
   /** Set up a Widget and all of its children to have the default font for the program. */
   
   public static void applyDefaultFont(Widget w)
   {
-    if (ModellingApp.defaultFont == null)
+    if (UIUtilities.getDefaultFont() == null)
       return;
-    w.setFont(ModellingApp.defaultFont);
+    w.setFont(UIUtilities.getDefaultFont());
     if (w instanceof WidgetContainer && !(w instanceof BMenuBar))
     {
       Iterator children = ((WidgetContainer) w).getChildren().iterator();

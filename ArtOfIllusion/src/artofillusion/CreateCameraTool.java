@@ -56,7 +56,7 @@ public class CreateCameraTool extends EditingTool
     Camera cam = view.getCamera();
     Vec3 orig, ydir, zdir;
     
-    orig = cam.convertScreenToWorld(e.getPoint(), ModellingApp.DIST_TO_SCREEN);
+    orig = cam.convertScreenToWorld(e.getPoint(), Camera.DEFAULT_DISTANCE_TO_SCREEN);
     ydir = new Vec3(0.0, 1.0, 0.0);
     zdir = new Vec3(0.0, 0.0, 1.0);
     ObjectInfo info = new ObjectInfo(new SceneCamera(), new CoordinateSystem(orig, zdir, ydir), "Camera "+(counter++));

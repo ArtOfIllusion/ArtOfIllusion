@@ -713,9 +713,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
         for (i = 0; i < split.length; i++)
           split[i] = true;
         if (smoothingMethod == INTERPOLATING)
-          mesh = subdivideButterfly(mesh, split, ModellingApp.getPreferences().getInteractiveSurfaceError());
+          mesh = subdivideButterfly(mesh, split, ArtOfIllusion.getPreferences().getInteractiveSurfaceError());
         else
-          mesh = subdivideLoop(mesh, split, ModellingApp.getPreferences().getInteractiveSurfaceError());
+          mesh = subdivideLoop(mesh, split, ArtOfIllusion.getPreferences().getInteractiveSurfaceError());
         v = mesh.vertex;
         e = mesh.edge;
       }

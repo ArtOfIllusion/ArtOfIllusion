@@ -39,7 +39,7 @@ public class RecentFiles
       item.addEventLink(CommandEvent.class, new Object() {
         void processEvent(CommandEvent ev)
         {
-          ModellingApp.openScene(file, UIUtilities.findFrame(ev.getWidget()));
+          ArtOfIllusion.openScene(file, UIUtilities.findFrame(ev.getWidget()));
         }
       });
     }
@@ -70,7 +70,7 @@ public class RecentFiles
     
     // Rebuild the menus in all open windows.
     
-    EditingWindow win[] = ModellingApp.getWindows();
+    EditingWindow win[] = ArtOfIllusion.getWindows();
     for (int i = 0; i < win.length; i++)
       if (win[i] instanceof LayoutWindow)
         createMenu(((LayoutWindow) win[i]).recentFilesMenu);

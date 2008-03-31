@@ -29,8 +29,8 @@ public class TitleWindow extends BWindow
     int imageNumber = new Random(System.currentTimeMillis()).nextInt(8);
     ImageIcon image = new ImageIcon(getClass().getResource("/artofillusion/titleImages/titleImage"+imageNumber+".jpg"));
     String text = "<html><div align=\"center\">"+
-        "Art of Illusion v"+ModellingApp.getVersion()+
-        "<br>Copyright 1999-2007 by Peter Eastman and others"+
+        "Art of Illusion v"+ArtOfIllusion.getVersion()+
+        "<br>Copyright 1999-2008 by Peter Eastman and others"+
         "<br>(See the README file for details.)"+
         "<br>This program may be freely distributed under"+
         "<br>the terms of the accompanying license.</div></html>";

@@ -47,7 +47,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     tools.addTool(new SkewMeshTool(this, this));
     tools.addTool(new TaperMeshTool(this, this));
     tools.addTool(compoundTool = new MoveScaleRotateMeshTool(this, this));
-    if (ModellingApp.getPreferences().getUseCompoundMeshTool())
+    if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
       defaultTool = compoundTool;
     tools.addTool(metaTool = new MoveViewTool(this));
     tools.addTool(altTool = new RotateViewTool(this));

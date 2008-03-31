@@ -16,7 +16,8 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 
 /** This class implements the dialog box in which the user can select a renderer, and 
     specify options on how a scene should be rendered. */
@@ -24,7 +25,7 @@ import java.util.Vector;
 public class RenderSetupDialog
 {
   private BFrame parent;
-  private Renderer renderers[];
+  private List<Renderer> renderers;
   private ObjectInfo cameras[];
   private Scene theScene;
   private BComboBox rendChoice, camChoice;
@@ -44,9 +45,9 @@ public class RenderSetupDialog
   {
     this.parent = parent;
     this.theScene = theScene;
-    renderers = ModellingApp.getRenderers();
+    renderers = PluginRegistry.getPlugins(Renderer.class);
     if (currentRenderer == null)
-      currentRenderer = ModellingApp.getPreferences().getDefaultRenderer();
+      currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
     
     // Find all the cameras in the scene.
     
@@ -103,8 +104,8 @@ public class RenderSetupDialog
     top.add(new BLabel(Translate.text("FramesPerSec")+":"), 2, 3, labelLayout);
     top.add(new BLabel(Translate.text("ImagesPerFrame")+":"), 2, 4, labelLayout);
     top.add(rendChoice = new BComboBox(), 3, 0);
-    for (int i = 0; i < renderers.length; i++)
-      rendChoice.add(renderers[i].getName());
+    for (int i = 0; i < renderers.size(); i++)
+      rendChoice.add(renderers.get(i).getName());
     rendChoice.setSelectedValue(currentRenderer.getName());
     rendChoice.addEventLink(ValueChangedEvent.class, this, "rendererChanged");
     top.add(camChoice = new BComboBox(), 3, 1);
@@ -178,7 +179,7 @@ public class RenderSetupDialog
     // Render the image.
     
     if (currentRenderer == null)
-      currentRenderer = ModellingApp.getPreferences().getDefaultRenderer();
+      currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
     currentRenderer.getConfigPanel();
     currentRenderer.recordConfiguration();
     Camera cam = new Camera();
@@ -193,7 +194,7 @@ public class RenderSetupDialog
   private void rendererChanged()
   {
     content.remove(BorderContainer.CENTER);
-    currentRenderer = renderers[rendChoice.getSelectedIndex()];
+    currentRenderer = renderers.get(rendChoice.getSelectedIndex());
     content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo());    
     UIUtilities.findWindow(content).pack();
   }

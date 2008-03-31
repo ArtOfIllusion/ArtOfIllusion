@@ -170,7 +170,7 @@ class ModuleLoader {
         Class moduleClass; 
  
         try { 
-            moduleClass = ModellingApp.getClass (name); 
+            moduleClass = ArtOfIllusion.getClass (name);
         } catch (ClassNotFoundException e) { 
             debug.print ("Couldn't get class for " +  
                                 name + ": " + e); 
@@ -182,7 +182,7 @@ class ModuleLoader {
     } 
     public static boolean moduleExists (String name) { 
         try { 
-            Class moduleClass = ModellingApp.getClass (name); 
+            Class moduleClass = ArtOfIllusion.getClass (name);
             return true; 
         } catch (ClassNotFoundException e) { 
             return false; 

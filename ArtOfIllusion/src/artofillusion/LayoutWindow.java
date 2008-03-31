@@ -28,6 +28,7 @@ import java.io.*;
 import java.text.*;
 import java.util.prefs.*;
 import java.util.*;
+import java.util.List;
 
 import buoyx.docking.*;
 
@@ -63,7 +64,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private boolean modified, sceneChangePending;
   private KeyEventPostProcessor keyEventHandler;
   private SceneChangedEvent sceneChangedEvent;
-  private ModellingTool modellingTools[];
+  private List<ModellingTool> modellingTools;
 
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
@@ -226,15 +227,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     addEventLink(WindowClosingEvent.class, new Object() {
       void processEvent()
       {
-        ModellingApp.closeWindow(LayoutWindow.this);
+        ArtOfIllusion.closeWindow(LayoutWindow.this);
       }
     });
     itemTree.setPopupMenuManager(this);
     UIUtilities.applyDefaultFont(getContent());
     UIUtilities.applyDefaultBackground(centerContainer);
     itemTreeScroller.setBackground(Color.white);
-    if (ModellingApp.APP_ICON != null)
-      setIcon(ModellingApp.APP_ICON);
+    if (ArtOfIllusion.APP_ICON != null)
+      setIcon(ArtOfIllusion.APP_ICON);
     Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
     Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(getComponent().getGraphicsConfiguration());
     setBounds(new Rectangle(screenInsets.left, screenInsets.top, screenDim.width-screenInsets.left-screenInsets.right, screenDim.height-screenInsets.top-screenInsets.bottom));
@@ -406,7 +407,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     BMenuItem item;
     BMenu importMenu, exportMenu;
-    Translator trans[] = ModellingApp.getTranslators();
+    List<Translator> trans = PluginRegistry.getPlugins(Translator.class);
 
     fileMenu = Translate.menu("file");
     menubar.add(fileMenu);
@@ -419,17 +420,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     RecentFiles.createMenu(recentFilesMenu);
     fileMenu.add(Translate.menuItem("close", this, "actionPerformed"));
     fileMenu.addSeparator();
-    for (int i = 0; i < trans.length; i++)
+    for (int i = 0; i < trans.size(); i++)
       {
-        if (trans[i].canImport())
+        if (trans.get(i).canImport())
           {
-            importMenu.add(item = new BMenuItem(trans[i].getName()));
+            importMenu.add(item = new BMenuItem(trans.get(i).getName()));
             item.setActionCommand("import");
             item.addEventLink(CommandEvent.class, this, "actionPerformed");
           }
-        if (trans[i].canExport())
+        if (trans.get(i).canExport())
           {
-            exportMenu.add(item = new BMenuItem(trans[i].getName()));
+            exportMenu.add(item = new BMenuItem(trans.get(i).getName()));
             item.setActionCommand("export");
             item.addEventLink(CommandEvent.class, this, "actionPerformed");
           }
@@ -501,19 +502,19 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   private void createToolsMenu()
   {
-    modellingTools = ModellingApp.getModellingTools();
-    Arrays.sort(modellingTools, new Comparator() {
-      public int compare(Object o1, Object o2)
+    modellingTools = PluginRegistry.getPlugins(ModellingTool.class);
+    Collections.sort(modellingTools, new Comparator<ModellingTool>() {
+      public int compare(ModellingTool o1, ModellingTool o2)
       {
-        return (((ModellingTool) o1).getName().compareTo(((ModellingTool) o2).getName()));
+        return (o1.getName().compareTo(o2.getName()));
       }
     });
     toolsMenu = Translate.menu("tools");
     menubar.add(toolsMenu);
-    toolsMenuItem = new BMenuItem [modellingTools.length];
-    for (int i = 0; i < modellingTools.length; i++)
+    toolsMenuItem = new BMenuItem [modellingTools.size()];
+    for (int i = 0; i < modellingTools.size(); i++)
       {
-        BMenuItem item = new BMenuItem(modellingTools[i].getName());
+        BMenuItem item = new BMenuItem(modellingTools.get(i).getName());
         toolsMenu.add(item);
         item.setActionCommand("modellingTool");
         item.addEventLink(CommandEvent.class, this, "modellingToolCommand");
@@ -532,7 +533,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void rebuildScriptsMenu()
   {
     scriptMenu.removeAll();
-    addScriptsToMenu(scriptMenu, new File(ModellingApp.TOOL_SCRIPT_DIRECTORY));
+    addScriptsToMenu(scriptMenu, new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY));
   }
 
   private void addScriptsToMenu(BMenu menu, File dir)
@@ -871,7 +872,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenuItem[1].setEnabled(undoStack.canRedo()); // Redo
     editMenuItem[2].setEnabled(numSelObjects > 0); // Cut
     editMenuItem[3].setEnabled(numSelObjects > 0); // Copy
-    editMenuItem[4].setEnabled(ModellingApp.getClipboardSize() > 0); // Paste
+    editMenuItem[4].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     editMenuItem[5].setEnabled(numSelObjects > 0); // Clear
     editMenuItem[6].setEnabled(hasChildren); // Select Children
     editMenuItem[7].setEnabled(numSelObjects > 0); // Make Live Duplicates
@@ -1123,7 +1124,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     for (int i = 0; i < sel.length; i++)
       which[i] = theScene.indexOf((ObjectInfo) sel[i]);
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {theScene.getSelection()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
     setSelection(which);
     updateImage();
   }
@@ -1251,13 +1252,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (menu == fileMenu)
       {
         if (command.equals("new"))
-          ModellingApp.newWindow();
+          ArtOfIllusion.newWindow();
         else if (command.equals("open"))
-          ModellingApp.openScene(this);
+          ArtOfIllusion.openScene(this);
         else if (command.equals("close"))
-          ModellingApp.closeWindow(this);
+          ArtOfIllusion.closeWindow(this);
         else if (command.equals("quit"))
-          ModellingApp.quit();
+          ArtOfIllusion.quit();
       }
     else if (command.equals("import"))
      importCommand(((BMenuItem) e.getWidget()).getText());
@@ -1267,8 +1268,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         if (command.equals("selectChildren"))
           {
-            setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {theScene.getSelection()}));
-            setSelection(theScene.getSelectionWithChildren());
+            setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
+            setSelection(getSelectionWithChildren());
             updateImage();
           }
         else if (command.equals("preferences"))
@@ -1416,8 +1417,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         if (command.equals("selectChildren"))
           {
-            setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {theScene.getSelection()}));
-            setSelection(theScene.getSelectionWithChildren());
+            setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
+            setSelection(getSelectionWithChildren());
             updateImage();
           }
         else if (command.equals("hideSelection"))
@@ -1430,26 +1431,22 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   void importCommand(String format)
   {
-    Translator trans[] = ModellingApp.getTranslators();
-    int i;
-
-    for (i = 0; i < trans.length; i++)
-      if (trans[i].canImport() && format.equals(trans[i].getName()))
+    List<Translator> trans = PluginRegistry.getPlugins(Translator.class);
+    for (int i = 0; i < trans.size(); i++)
+      if (trans.get(i).canImport() && format.equals(trans.get(i).getName()))
         {
-          trans[i].importFile(this);
+          trans.get(i).importFile(this);
           return;
         }
   }
 
   void exportCommand(String format)
   {
-    Translator trans[] = ModellingApp.getTranslators();
-    int i;
-
-    for (i = 0; i < trans.length; i++)
-      if (trans[i].canExport() && format.equals(trans[i].getName()))
+    List<Translator> trans = PluginRegistry.getPlugins(Translator.class);
+    for (int i = 0; i < trans.size(); i++)
+      if (trans.get(i).canExport() && format.equals(trans.get(i).getName()))
         {
-          trans[i].exportFile(this, theScene);
+          trans.get(i).exportFile(this, theScene);
           return;
         }
   }
@@ -1464,7 +1461,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (obj.getTexture() == null)
       obj.setTexture(getScene().getDefaultTexture(), getScene().getDefaultTexture().getDefaultMapping(obj));
     UndoRecord undo = new UndoRecord(this, false);
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     addObject(info, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
     setUndoRecord(undo);
@@ -1477,7 +1474,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Widget item = ev.getWidget();
     for (int i = 0; i < toolsMenuItem.length; i++)
       if (toolsMenuItem[i] == item)
-        modellingTools[i].commandSelected(this);
+        modellingTools.get(i).commandSelected(this);
   }
 
   public void saveCommand()
@@ -1485,7 +1482,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (theScene.getName() == null)
       saveAsCommand();
     else
-      modified = !ModellingApp.saveScene(theScene, this);
+      modified = !ArtOfIllusion.saveScene(theScene, this);
   }
 
   public void saveAsCommand()
@@ -1497,8 +1494,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       fc.setSelectedFile(new File(theScene.getName()));
     if (theScene.getDirectory() != null)
       fc.setDirectory(new File(theScene.getDirectory()));
-    else if (ModellingApp.currentDirectory != null)
-      fc.setDirectory(new File(ModellingApp.currentDirectory));
+    else if (ArtOfIllusion.getCurrentDirectory() != null)
+      fc.setDirectory(new File(ArtOfIllusion.getCurrentDirectory()));
     if (!fc.showDialog(this))
       return;
     String name = fc.getSelectedFile().getName();
@@ -1515,7 +1512,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.setName(name);
     theScene.setDirectory(fc.getDirectory().getAbsolutePath());
     setTitle(name);
-    modified = !ModellingApp.saveScene(theScene, this);
+    modified = !ArtOfIllusion.saveScene(theScene, this);
   }
 
   public void undoCommand()
@@ -1542,23 +1539,23 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void copyCommand()
   {
-    int sel[] = theScene.getSelectionWithChildren();
+    int sel[] = getSelectionWithChildren();
     if (sel.length == 0)
       return;
     ObjectInfo copy[] = new ObjectInfo [sel.length];
     for (int i = 0; i < sel.length; i++)
       copy[i] = theScene.getObject(sel[i]);
     copy = ObjectInfo.duplicateAll(copy);
-    ModellingApp.copyToClipboard(copy, theScene);
+    ArtOfIllusion.copyToClipboard(copy, theScene);
     updateMenus();
   }
 
   public void pasteCommand()
   {
-    int which[] = new int [ModellingApp.getClipboardSize()], num = theScene.getNumObjects();
+    int which[] = new int [ArtOfIllusion.getClipboardSize()], num = theScene.getNumObjects();
     for (int i = 0; i < which.length; i++)
       which[i] = num+i;
-    ModellingApp.pasteClipboard(this);
+    ArtOfIllusion.pasteClipboard(this);
     setSelection(which);
     rebuildItemList();
     updateImage();
@@ -1567,13 +1564,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void clearCommand()
   {
     Object sel[] = itemTree.getSelectedObjects();
-    int selIndex[] = theScene.getSelection();
+    int selIndex[] = getSelectedIndices();
     boolean any;
     int i;
 
     if (sel.length == 0)
       return;
-    theScene.clearSelection();
+    clearSelection();
     UndoRecord undo = new UndoRecord(this, false);
 
     // First remove any selected objects.
@@ -1613,7 +1610,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     for (i = 0; i < which.length; i++)
       which[i] = i;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {theScene.getSelection()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
     setSelection(which);
     updateImage();
   }
@@ -1624,7 +1621,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     int i, which[] = new int [sel.length], num = theScene.getNumObjects();
 
     UndoRecord undo = new UndoRecord(this, false);
-    int selected[] = theScene.getSelection();
+    int selected[] = getSelectedIndices();
     for (i = 0; i < sel.length; i++)
       {
         addObject(((ObjectInfo) sel[i]).duplicate(), undo);
@@ -1654,7 +1651,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void editObjectCommand()
   {
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     final Object3D obj;
 
     if (sel.length != 1)
@@ -1677,7 +1674,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void objectLayoutCommand()
   {
-    int i, sel[] = theScene.getSelection();
+    int i, sel[] = getSelectedIndices();
     TransformDialog dlg;
     ObjectInfo obj[] = new ObjectInfo [sel.length];
     Vec3 orig, size;
@@ -1772,7 +1769,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void transformObjectCommand()
   {
-    int i, sel[] = theScene.getSelection();
+    int i, sel[] = getSelectedIndices();
     TransformDialog dlg;
     ObjectInfo info;
     Object3D obj;
@@ -1806,7 +1803,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     center = bounds.getCenter();
     if (dlg.applyToChildren())
-      sel = theScene.getSelectionWithChildren();
+      sel = getSelectionWithChildren();
 
     // Determine the rotation matrix.
 
@@ -1880,7 +1877,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void alignObjectsCommand()
   {
-    int i, sel[] = theScene.getSelection();
+    int i, sel[] = getSelectedIndices();
     ComponentsDialog dlg;
     ObjectInfo info;
     CoordinateSystem coords;
@@ -2016,7 +2013,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void setTextureCommand()
   {
-    int sel[] = theScene.getSelection(), i, count = 0;
+    int sel[] = getSelectedIndices(), i, count = 0;
     ObjectInfo obj[];
 
     for (i = 0; i < sel.length; i++)
@@ -2037,7 +2034,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void setMaterialCommand()
   {
-    int sel[] = theScene.getSelection(), i, count = 0;
+    int sel[] = getSelectedIndices(), i, count = 0;
     ObjectInfo obj[], info;
 
     for (i = 0; i < sel.length; i++)
@@ -2062,7 +2059,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void renameObjectCommand()
   {
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     ObjectInfo info;
 
     if (sel.length != 1)
@@ -2078,7 +2075,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void convertToTriangleCommand()
   {
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     Object3D obj, mesh;
     ObjectInfo info;
 
@@ -2151,7 +2148,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void convertToActorCommand()
   {
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     Object3D obj;
     ObjectInfo info;
 
@@ -2181,7 +2178,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     UndoRecord undo = new UndoRecord(this, false);
     if (selectionOnly)
     {
-      sel = theScene.getSelection();
+      sel = getSelectedIndices();
       for (i = 0; i < sel.length; i++)
       {
         info = theScene.getObject(sel[i]);
@@ -2307,7 +2304,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);
     UndoRecord undo = new UndoRecord(this, false);
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     addObject(info, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
     setSelection(theScene.getNumObjects()-1);
@@ -2322,7 +2319,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     BTextField nameField = new BTextField(Translate.text("Script"));
     BComboBox scriptChoice = new BComboBox();
     scriptChoice.add(Translate.text("newScript"));
-    String files[] = new File(ModellingApp.OBJECT_SCRIPT_DIRECTORY).list();
+    String files[] = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY).list();
     if (files != null)
       for (int i = 0; i < files.length; i++)
         if (files[i].endsWith(".bsh") && files[i].length() > 4)
@@ -2340,8 +2337,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       try
       {
         String scriptName = scriptChoice.getSelectedValue()+".bsh";
-        File f = new File(ModellingApp.OBJECT_SCRIPT_DIRECTORY, scriptName);
-        scriptText = ModellingApp.loadFile(f);
+        File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptName);
+        scriptText = ArtOfIllusion.loadFile(f);
       }
       catch (IOException ex)
       {
@@ -2352,7 +2349,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     ScriptedObject obj = new ScriptedObject("");
     ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(), nameField.getText());
     UndoRecord undo = new UndoRecord(this, false);
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
     addObject(info, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
     setSelection(theScene.getNumObjects()-1);
@@ -2382,7 +2379,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
     if (dlg.showOptionDialog(this, options, options[0]) == 1)
       return;
-    int sel[] = theScene.getSelection();
+    int sel[] = getSelectedIndices();
 
     UndoRecord undo = new UndoRecord(this, false);
     for (int i = 0; i < sel.length; i++)
@@ -2494,7 +2491,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void frameWithCameraCommand(boolean selectionOnly)
   {
-    int sel[] = theScene.getSelectionWithChildren();
+    int sel[] = getSelectionWithChildren();
     BoundingBox bb = null;
 
     if (selectionOnly)
@@ -2663,7 +2660,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     String scriptText = null;
     try
     {
-      scriptText = ModellingApp.loadFile(f);
+      scriptText = ArtOfIllusion.loadFile(f);
     }
     catch (IOException ex)
     {

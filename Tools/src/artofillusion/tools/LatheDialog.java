@@ -45,7 +45,7 @@ public class LatheDialog extends BDialog
     // Layout the window.
     
     FormContainer content = new FormContainer(3, 10);
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
     content.add(new BLabel("Select Lathe Axis:"), 0, 0, 2, 1);
     axisGroup = new RadioButtonGroup();

@@ -52,14 +52,14 @@ public class PreferencesWindow
           done = false;
       }
     }
-    ApplicationPreferences prefs = ModellingApp.getPreferences();
+    ApplicationPreferences prefs = ArtOfIllusion.getPreferences();
     Locale languages[] = Translate.getAvailableLocales();
-    Renderer renderers[] = ModellingApp.getRenderers();
-    if (renderers.length > 0)
+    List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
+    if (renderers.size() > 0)
     {
-      prefs.setDefaultRenderer(renderers[defaultRendChoice.getSelectedIndex()]);
-      prefs.setObjectPreviewRenderer(renderers[objectRendChoice.getSelectedIndex()]);
-      prefs.setTexturePreviewRenderer(renderers[texRendChoice.getSelectedIndex()]);
+      prefs.setDefaultRenderer(renderers.get(defaultRendChoice.getSelectedIndex()));
+      prefs.setObjectPreviewRenderer(renderers.get(objectRendChoice.getSelectedIndex()));
+      prefs.setTexturePreviewRenderer(renderers.get(texRendChoice.getSelectedIndex()));
     }
     prefs.setDefaultDisplayMode(displayChoice.getSelectedIndex());
     prefs.setInteractiveSurfaceError(interactiveTolField.getValue());
@@ -84,11 +84,11 @@ public class PreferencesWindow
 
   private BComboBox getRendererChoice(Renderer selected)
   {
-    Renderer renderers[] = ModellingApp.getRenderers();
+    List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     BComboBox c = new BComboBox();
 
-    for (int i = 0; i < renderers.length; i++)
-      c.add(renderers[i].getName());
+    for (int i = 0; i < renderers.size(); i++)
+      c.add(renderers.get(i).getName());
     if (selected != null)
       c.setSelectedValue(selected.getName());
     return c;
@@ -100,7 +100,7 @@ public class PreferencesWindow
   {
     // Create the Widgets.
 
-    ApplicationPreferences prefs = ModellingApp.getPreferences();
+    ApplicationPreferences prefs = ArtOfIllusion.getPreferences();
     defaultRendChoice = getRendererChoice(prefs.getDefaultRenderer());
     objectRendChoice = getRendererChoice(prefs.getObjectPreviewRenderer());
     texRendChoice = getRendererChoice(prefs.getTexturePreviewRenderer());

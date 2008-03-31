@@ -456,7 +456,7 @@ public abstract class Object3D
       {
         try
           {
-            Class mapClass = ModellingApp.getClass(in.readUTF());
+            Class mapClass = ArtOfIllusion.getClass(in.readUTF());
             Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Material.class});
             theMaterial = theScene.getMaterial(i);
             setMaterial(theMaterial, (MaterialMapping) con.newInstance(new Object [] {in, this, theMaterial}));
@@ -471,7 +471,7 @@ public abstract class Object3D
       {
         try
           {
-            Class mapClass = ModellingApp.getClass(in.readUTF());
+            Class mapClass = ArtOfIllusion.getClass(in.readUTF());
             Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Texture.class});
             theTexture = theScene.getTexture(i);
             setTexture(theTexture, (TextureMapping) con.newInstance(new Object [] {in, this, theTexture}));
@@ -504,7 +504,7 @@ public abstract class Object3D
   {
     try
     {
-      Class valueClass = ModellingApp.getClass(in.readUTF());
+      Class valueClass = ArtOfIllusion.getClass(in.readUTF());
       Constructor con = valueClass.getConstructor(new Class [] {DataInputStream.class});
       return ((ParameterValue) con.newInstance(new Object [] {in}));
     }

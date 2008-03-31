@@ -19,6 +19,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /** This is dialog in which the user can edit the list of filters attached to a camera. */
 
@@ -40,7 +41,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   private Map savedConfiguration;
   private Thread filterThread;
 
-  private static Renderer previewRenderer = ModellingApp.getPreferences().getTexturePreviewRenderer();
+  private static Renderer previewRenderer = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
   private static HashMap rendererConfiguration = new HashMap();
 
   private static final int PREVIEW_WIDTH = 200;
@@ -93,9 +94,11 @@ public class CameraFilterDialog extends BDialog implements RenderListener
 
     // Fill in the Lists.
 
-    filterClasses = ModellingApp.getImageFilters();
+    List<ImageFilter> filters = PluginRegistry.getPlugins(ImageFilter.class);
+    filterClasses = new Class[filters.size()];
     for (int i = 0; i < filterClasses.length; i++)
     {
+      filterClasses[i] = filters.get(i).getClass();
       try
       {
         allFiltersList.add(((ImageFilter) filterClasses[i].newInstance()).getName());
@@ -301,11 +304,11 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   {
     final BorderContainer content = new BorderContainer();
     final BComboBox rendererChoice = new BComboBox();
-    final Renderer renderers[] = ModellingApp.getRenderers();
-    for (int i = 0; i < renderers.length; i++)
+    final List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
+    for (int i = 0; i < renderers.size(); i++)
     {
-      rendererChoice.add(renderers[i].getName());
-      if (previewRenderer == renderers[i])
+      rendererChoice.add(renderers.get(i).getName());
+      if (previewRenderer == renderers.get(i))
         rendererChoice.setSelectedIndex(i);
     }
     RowContainer rc = new RowContainer();
@@ -316,7 +319,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     rendererChoice.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
-        Renderer newRenderer = renderers[rendererChoice.getSelectedIndex()];
+        Renderer newRenderer = renderers.get(rendererChoice.getSelectedIndex());
         Map recordedConfig = (Map) rendererConfiguration.get(newRenderer);
         if (recordedConfig == null)
         {
@@ -333,7 +336,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     if (!dlg.clickedOk())
       return;
     configureRenderer(savedConfiguration, previewRenderer);
-    previewRenderer = renderers[rendererChoice.getSelectedIndex()];
+    previewRenderer = renderers.get(rendererChoice.getSelectedIndex());
     savedConfiguration = previewRenderer.getConfiguration();
     previewRenderer.recordConfiguration();
     rendererConfiguration.put(previewRenderer, previewRenderer.getConfiguration());

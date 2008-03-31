@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 /** This is the editor for editing procedures.  It subclasses CustomWidget, but you should never
     add it to any Container.  Instead, it will automatically create a BFrame and add itself
@@ -238,16 +239,16 @@ public class ProcedureEditor extends CustomWidget
     subMenu.add(Translate.menuItem("bricksModule", this, "actionPerformed"));
     subMenu.add(Translate.menuItem("imageModule", this, "actionPerformed"));
 
-    Class plugin[] = ModellingApp.getModules();
-    if (plugin.length > 0)
+    List<Module> plugins = PluginRegistry.getPlugins(Module.class);
+    if (plugins.size() > 0)
     {
       insertMenu.add(subMenu = Translate.menu("plugins"));
-      for (int i = 0; i < plugin.length; i++)
+      for (int i = 0; i < plugins.size(); i++)
       {
         try
         {
-          BMenuItem mi = new BMenuItem(((Module) plugin[i].newInstance()).getName());
-          mi.setActionCommand(plugin[i].getName());
+          BMenuItem mi = new BMenuItem((plugins.get(i).getClass().newInstance()).getName());
+          mi.setActionCommand(plugins.get(i).getClass().getName());
           mi.addEventLink(CommandEvent.class, this, "actionPerformed");
           subMenu.add(mi);
         }
@@ -607,7 +608,7 @@ public class ProcedureEditor extends CustomWidget
     {
       try
       {
-        Class cl = ModellingApp.getClass(command);
+        Class cl = ArtOfIllusion.getClass(command);
         Module mod = (Module) cl.newInstance();
         mod.setPosition(p.x, p.y);
         addModule(mod);

@@ -318,7 +318,7 @@ public class SpectrumModule extends Module
     {
       super(parent, "Function", true);
       FormContainer content = new FormContainer(1, 5);
-      setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+      setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
       content.add(Translate.label("functionModuleInstructions"), 0, 0);
       content.add(canvas = new CustomWidget(), 0, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
       canvas.setPreferredSize(new Dimension (200, 30+rows*HANDLE_SIZE));

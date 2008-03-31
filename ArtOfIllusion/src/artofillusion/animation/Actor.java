@@ -401,11 +401,11 @@ public class Actor extends ObjectWrapper
       throw new InvalidObjectException("");
     try
       {
-        Class cls = ModellingApp.getClass(in.readUTF());
+        Class cls = ArtOfIllusion.getClass(in.readUTF());
         Constructor con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
         theObject = (Object3D) con.newInstance(new Object [] {in, theScene});
         nextPoseID = in.readInt();
-        cls = ModellingApp.getClass(in.readUTF());
+        cls = ArtOfIllusion.getClass(in.readUTF());
         con = cls.getConstructor(new Class [] {DataInputStream.class, Object.class});
         int num = in.readInt();
         gesture = new Gesture [num];

@@ -121,7 +121,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     viewMenu.add(axesItem = Translate.menuItem(view.getShowAxes() ? "hideCoordinateAxes" : "showCoordinateAxes", this, "showAxesCommand"));
     viewMenu.add(templateItem = Translate.menuItem("showTemplate", this, "showTemplateCommand"));
     viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
-    if (ModellingApp.getPreferences().getObjectPreviewRenderer() != null)
+    if (ArtOfIllusion.getPreferences().getObjectPreviewRenderer() != null)
     {
       viewMenu.addSeparator();
       viewMenu.add(Translate.menuItem("renderPreview", this, "renderPreviewCommand"));
@@ -577,7 +577,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
   {
     Scene sc = new Scene();
     Camera theCamera = getView().getCamera();
-    Renderer rend = ModellingApp.getPreferences().getObjectPreviewRenderer();
+    Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
 
     if (rend == null)
       return;

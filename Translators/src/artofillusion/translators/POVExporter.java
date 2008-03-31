@@ -62,8 +62,8 @@ public class POVExporter
         BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("exportToPOV"));
 	String suffix=".pov", suffix2=".inc";
 	fc.setSelectedFile(new File(exportFileName+suffix));
-	if (ModellingApp.currentDirectory != null)
-	    fc.setDirectory(new File(ModellingApp.currentDirectory));
+	if (ArtOfIllusion.getCurrentDirectory() != null)
+	    fc.setDirectory(new File(ArtOfIllusion.getCurrentDirectory()));
 	// Get the result
 	if (!fc.showDialog(parent))
 	    return;
@@ -71,7 +71,7 @@ public class POVExporter
 	int endpos=fc.getSelectedFile().getName().indexOf(FIX_SEPARATOR);
 	if (endpos==-1) endpos=fc.getSelectedFile().getName().length();
 	exportFileName=fc.getSelectedFile().getName().substring(0,endpos);
-	ModellingApp.currentDirectory = fc.getDirectory().getAbsolutePath();
+	ArtOfIllusion.setCurrentDirectory(fc.getDirectory().getAbsolutePath());
 	
 	// Check whether file/s exist/s
 	File f=null;
@@ -135,13 +135,13 @@ public class POVExporter
 	// Write the header information.
 	
 	write("// POV V3.5", out, 0);
-	write("// Produced by Art of Illusion (Peter Eastman) "+ModellingApp.VERSION, out, 0);
+	write("// Produced by Art of Illusion (Peter Eastman) "+ArtOfIllusion.getVersion(), out, 0);
 	write("//   and POVExporter plugin (Norbert Krieg) version 1.11", out, 0);
 	write("//   creation date: "+new Date().toString(),out,0);
 	write("",out,0);
 	if (bIncludeFile) {
 	    write("// POV V3.5 (include file)",out2,0);
-	    write("// Produced by Art of Illusion (Peter Eastman) "+ModellingApp.VERSION, out2, 0);
+	    write("// Produced by Art of Illusion (Peter Eastman) "+ArtOfIllusion.getVersion(), out2, 0);
 	    write("//   and POVExporter plugin (Norbert Krieg) version 1.11", out2, 0);
 	    write("//   creation date: "+new Date().toString(),out2,0);
 	    write("",out2,0);

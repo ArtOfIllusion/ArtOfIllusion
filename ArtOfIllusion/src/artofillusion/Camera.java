@@ -42,10 +42,12 @@ public class Camera implements Cloneable
   private Vec3 lastPoint;
   private CoordinateSystem cameraCoords;
 
+  public static final double DEFAULT_DISTANCE_TO_SCREEN = 20.0;
+
   public Camera()
   {
     objectToWorld = objectToView = worldToView = viewToWorld = Mat4.identity();
-    setDistToScreen(ModellingApp.DIST_TO_SCREEN);
+    setDistToScreen(DEFAULT_DISTANCE_TO_SCREEN);
     setScreenParams(0.0, 100.0, 100, 100);
   }
   

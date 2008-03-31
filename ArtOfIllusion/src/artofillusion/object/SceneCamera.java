@@ -33,8 +33,8 @@ public class SceneCamera extends Object3D
   private static final int SEGMENTS = 8;
   private static final Property PROPERTIES[] = new Property [] {
     new Property(Translate.text("fieldOfView"), 0.0, 180.0, 30.0),
-      new Property(Translate.text("depthOfField"), Double.MIN_VALUE, Double.MAX_VALUE, ModellingApp.DIST_TO_SCREEN/2.0),
-      new Property(Translate.text("focalDist"), Double.MIN_VALUE, Double.MAX_VALUE, ModellingApp.DIST_TO_SCREEN)
+      new Property(Translate.text("depthOfField"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN/2.0),
+      new Property(Translate.text("focalDist"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN)
   };
 
   static
@@ -126,8 +126,8 @@ public class SceneCamera extends Object3D
   public SceneCamera()
   {
     fov = 30.0;
-    depthOfField = ModellingApp.DIST_TO_SCREEN/2.0;
-    focalDist = ModellingApp.DIST_TO_SCREEN;
+    depthOfField = Camera.DEFAULT_DISTANCE_TO_SCREEN/2.0;
+    focalDist = Camera.DEFAULT_DISTANCE_TO_SCREEN;
     filter = new ImageFilter [0];
   }
   
@@ -375,7 +375,7 @@ public class SceneCamera extends Object3D
       {
         for (int i = 0; i < filter.length; i++)
         {
-          Class cls = ModellingApp.getClass(in.readUTF());
+          Class cls = ArtOfIllusion.getClass(in.readUTF());
           filter[i] = (ImageFilter) cls.newInstance();
           filter[i].initFromStream(in, theScene);
         }

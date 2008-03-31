@@ -152,7 +152,7 @@ public class TriMeshSimplifier implements Runnable
   {
     dial = new BDialog(fr, true);
     BorderContainer content = new BorderContainer();
-    dial.setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    dial.setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.add(Translate.label("numTrianglesInMesh"), BorderContainer.NORTH);
     GridContainer grid = new GridContainer(2, 2);
     grid.add(new BLabel(Translate.text("Original")+":"), 0, 0);

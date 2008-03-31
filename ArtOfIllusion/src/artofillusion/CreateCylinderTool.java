@@ -99,9 +99,9 @@ public class CreateCylinderTool extends EditingTool
           dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
       }
     }
-    v1 = cam.convertScreenToWorld(clickPoint, ModellingApp.DIST_TO_SCREEN);
-    v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), ModellingApp.DIST_TO_SCREEN);
-    v3 = cam.convertScreenToWorld(dragPoint, ModellingApp.DIST_TO_SCREEN);
+    v1 = cam.convertScreenToWorld(clickPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN);
+    v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), Camera.DEFAULT_DISTANCE_TO_SCREEN);
+    v3 = cam.convertScreenToWorld(dragPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN);
     orig = v1.plus(v3).times(0.5);
     if (dragPoint.x < clickPoint.x)
       xdir = v1.minus(v2);

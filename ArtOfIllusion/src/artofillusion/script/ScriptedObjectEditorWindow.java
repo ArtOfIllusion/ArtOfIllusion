@@ -38,7 +38,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     this.onClose = onClose;
     scriptName = "Untitled.bsh";
     if (scriptDir == null)
-      scriptDir = new File(ModellingApp.OBJECT_SCRIPT_DIRECTORY);
+      scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
     BorderContainer content = new BorderContainer();
     setContent(content);
     scriptText = new ScriptEditor(((ScriptedObject) info.getObject()).getScript());

@@ -285,7 +285,7 @@ public class CSGObject extends Object3D
   public WireframeMesh getWireframeMesh()
   {
     if (cachedWire == null)
-      cacheMeshes(ModellingApp.getPreferences().getInteractiveSurfaceError(), null);
+      cacheMeshes(ArtOfIllusion.getPreferences().getInteractiveSurfaceError(), null);
     return cachedWire;
   }
 
@@ -339,11 +339,11 @@ public class CSGObject extends Object3D
     try
       {
         obj1 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
-        Class cls = ModellingApp.getClass(in.readUTF());
+        Class cls = ArtOfIllusion.getClass(in.readUTF());
         Constructor con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
         obj1.setObject((Object3D) con.newInstance(new Object [] {in, theScene}));
         obj2 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
-        cls = ModellingApp.getClass(in.readUTF());
+        cls = ArtOfIllusion.getClass(in.readUTF());
         con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
         obj2.setObject((Object3D) con.newInstance(new Object [] {in, theScene}));
       }
@@ -639,10 +639,10 @@ public class CSGObject extends Object3D
       coords2 = new CoordinateSystem(in);
       try
       {
-        Class cl = ModellingApp.getClass(in.readUTF());
+        Class cl = ArtOfIllusion.getClass(in.readUTF());
         Constructor con = cl.getConstructor(new Class [] {DataInputStream.class, Object.class});
         key1 = (Keyframe) con.newInstance(new Object [] {in, parent});
-        cl = ModellingApp.getClass(in.readUTF());
+        cl = ArtOfIllusion.getClass(in.readUTF());
         con = cl.getConstructor(new Class [] {DataInputStream.class, Object.class});
         key2 = (Keyframe) con.newInstance(new Object [] {in, parent});
       }

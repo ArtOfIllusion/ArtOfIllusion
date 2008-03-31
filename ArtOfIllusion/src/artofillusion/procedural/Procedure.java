@@ -245,7 +245,7 @@ public class Procedure
           {
             String classname = in.readUTF();
             Point p = new Point(in.readInt(), in.readInt());
-            Class cls = ModellingApp.getClass(classname);
+            Class cls = ArtOfIllusion.getClass(classname);
             Constructor con = cls.getConstructor(new Class [] {Point.class});
             module[i] = (Module) con.newInstance(new Object [] {p});
             module[i].readFromStream(in, theScene);

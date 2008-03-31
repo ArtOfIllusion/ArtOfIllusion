@@ -16,7 +16,8 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 import java.util.zip.*;
 
 /** MaterialsDialog is a dialog box for editing the list of Materials used in a scene. */
@@ -34,7 +35,7 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
     parent = fr;
     theScene = sc;
     BorderContainer content = new BorderContainer();
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     ColumnContainer buttons = new ColumnContainer();
     buttons.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
     content.add(buttons, BorderContainer.WEST);
@@ -169,13 +170,13 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
   {
     BTextField nameField = new BTextField();
     BComboBox typeChoice = new BComboBox();
-    Class types[] = ModellingApp.getMaterialTypes();
+    List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
     java.lang.reflect.Method mtd;
-    for (int j = 0; j < types.length; j++)
+    for (int j = 0; j < materialTypes.size(); j++)
     {
       try
       {
-        mtd = types[j].getMethod("getTypeName", null);
+        mtd = materialTypes.get(j).getClass().getMethod("getTypeName", null);
         typeChoice.add((String) mtd.invoke(null, null));
       }
       catch (Exception ex)
@@ -202,7 +203,7 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
         frame = frame.getParent();
       try
       {
-        Material mat = (Material) types[typeChoice.getSelectedIndex()].newInstance();
+        Material mat = materialTypes.get(typeChoice.getSelectedIndex()).getClass().newInstance();
         mat.setName(nameField.getText());
         theScene.addMaterial(mat);
         mat.edit((BFrame) frame, theScene);

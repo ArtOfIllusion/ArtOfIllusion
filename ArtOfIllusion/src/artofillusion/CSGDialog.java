@@ -98,7 +98,7 @@ public class CSGDialog extends BDialog
   {
     if (modeller == null)
     {
-      double tol = ModellingApp.getPreferences().getInteractiveSurfaceError();
+      double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
       TriangleMesh mesh1, mesh2;
   
       mesh1 = theObject.getObject1().getObject().convertToTriangleMesh(tol);

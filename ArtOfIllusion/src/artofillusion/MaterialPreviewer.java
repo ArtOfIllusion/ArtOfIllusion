@@ -136,7 +136,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
         if ((ev.getChangeFlags()&HierarchyEvent.DISPLAYABILITY_CHANGED) != 0)
           if (!getComponent().isDisplayable())
           {
-            Renderer rend = ModellingApp.getPreferences().getTexturePreviewRenderer();
+            Renderer rend = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
             if (rend != null)
               rend.cancelRendering(theScene);
           }
@@ -179,7 +179,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
 
   public synchronized void render()
   {
-    Renderer rend = ModellingApp.getPreferences().getTexturePreviewRenderer();
+    Renderer rend = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
     if (rend == null)
       return;
     rend.cancelRendering(theScene);
@@ -198,7 +198,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   
   public synchronized void cancelRendering()
   {
-    Renderer rend = ModellingApp.getPreferences().getTexturePreviewRenderer();
+    Renderer rend = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
     if (rend != null)
       rend.cancelRendering(theScene);
   }
@@ -324,7 +324,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   {
     Graphics g = getComponent().getGraphics();
     clickPoint = e.getPoint();
-    Renderer rend = ModellingApp.getPreferences().getTexturePreviewRenderer();
+    Renderer rend = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
     if (rend != null)
       rend.cancelRendering(theScene);
     dragTransform = Mat4.identity();

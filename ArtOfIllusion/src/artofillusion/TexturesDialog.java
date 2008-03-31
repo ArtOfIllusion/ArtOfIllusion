@@ -16,7 +16,8 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 import java.util.zip.*;
 
 /** TexturesDialog is a dialog box for editing the list of Textures used in a scene. */
@@ -34,7 +35,7 @@ public class TexturesDialog extends BDialog implements ListChangeListener
     parent = fr;
     theScene = sc;
     BorderContainer content = new BorderContainer();
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     ColumnContainer buttons = new ColumnContainer();
     buttons.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
     content.add(buttons, BorderContainer.WEST);
@@ -169,13 +170,13 @@ public class TexturesDialog extends BDialog implements ListChangeListener
   {
     BTextField nameField = new BTextField();
     BComboBox typeChoice = new BComboBox();
-    Class types[] = ModellingApp.getTextureTypes();
+    List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
     java.lang.reflect.Method mtd;
-    for (int j = 0; j < types.length; j++)
+    for (int j = 0; j < textureTypes.size(); j++)
     {
       try
       {
-        mtd = types[j].getMethod("getTypeName", null);
+        mtd = textureTypes.get(j).getClass().getMethod("getTypeName", null);
         typeChoice.add((String) mtd.invoke(null, null));
       }
       catch (Exception ex)
@@ -202,7 +203,7 @@ public class TexturesDialog extends BDialog implements ListChangeListener
         frame = frame.getParent();
       try
       {
-        Texture tex = (Texture) types[typeChoice.getSelectedIndex()].newInstance();
+        Texture tex = textureTypes.get(typeChoice.getSelectedIndex()).getClass().newInstance();
         tex.setName(nameField.getText());
         theScene.addTexture(tex);
         tex.edit((BFrame) frame, theScene);

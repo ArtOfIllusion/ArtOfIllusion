@@ -28,12 +28,12 @@ public class OBJImporter
   public static void importFile(BFrame parent)
   {
     BFileChooser bfc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("importOBJ"));
-    if (ModellingApp.currentDirectory != null)
-      bfc.setDirectory(new File(ModellingApp.currentDirectory));
+    if (ArtOfIllusion.getCurrentDirectory() != null)
+      bfc.setDirectory(new File(ArtOfIllusion.getCurrentDirectory()));
     if (!bfc.showDialog(parent))
       return;
     File f = bfc.getSelectedFile();
-    ModellingApp.currentDirectory = bfc.getDirectory().getAbsolutePath();
+    ArtOfIllusion.setCurrentDirectory(bfc.getDirectory().getAbsolutePath());
     String objName = f.getName();
     if (objName.lastIndexOf('.') > 0)
       objName = objName.substring(0, objName.lastIndexOf('.'));
@@ -41,7 +41,7 @@ public class OBJImporter
     // Create a scene to add objects to.
     
     Scene theScene = new Scene();
-    CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, ModellingApp.DIST_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
+    CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     ObjectInfo info = new ObjectInfo(new SceneCamera(), coords, "Camera 1");
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);
@@ -391,7 +391,7 @@ public class OBJImporter
         new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
         return;
       }
-    ModellingApp.newWindow(theScene);
+    ArtOfIllusion.newWindow(theScene);
     return;
   }
   

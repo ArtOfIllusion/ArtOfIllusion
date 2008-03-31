@@ -321,7 +321,7 @@ public class ConstraintTrack extends Track
       // Layout the dialog.
       
       FormContainer content = new FormContainer(3, 7);
-      setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+      setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
       content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
       content.add(Translate.label("trackName"), 0, 0);
       content.add(nameField = new BTextField(ConstraintTrack.this.getName()), 1, 0, 2, 1);

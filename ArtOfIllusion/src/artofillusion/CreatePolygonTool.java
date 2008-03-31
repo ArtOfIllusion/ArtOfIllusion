@@ -129,8 +129,8 @@ public class CreatePolygonTool extends EditingTool
         for (int i = 0; i < points.length; i++)
           s[i] = 1.0f;
       }
-    orig = cam.convertScreenToWorld(new Point((int) centerx, (int) centery), ModellingApp.DIST_TO_SCREEN, false);
-    temp = cam.convertScreenToWorld(new Point(1+(int) centerx, (int) centery), ModellingApp.DIST_TO_SCREEN, false);
+    orig = cam.convertScreenToWorld(new Point((int) centerx, (int) centery), Camera.DEFAULT_DISTANCE_TO_SCREEN, false);
+    temp = cam.convertScreenToWorld(new Point(1+(int) centerx, (int) centery), Camera.DEFAULT_DISTANCE_TO_SCREEN, false);
     scale = temp.minus(orig).length();
     for (int i = 0; i < points.length; i++)
       vertex[i] = new Vec3(scale*(points[i].x-centerx), -scale*(points[i].y-centery), 0.0);

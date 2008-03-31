@@ -45,7 +45,7 @@ public class SkinDialog extends BDialog
     // Layout the window.
     
     FormContainer content = new FormContainer(3, 2);
-    setContent(BOutline.createEmptyBorder(content, ModellingApp.standardDialogInsets));
+    setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     content.add(UIUtilities.createScrollingList(curveList = new BList()), 0, 0);
     for (int i = 0; i < curves.size(); i++)

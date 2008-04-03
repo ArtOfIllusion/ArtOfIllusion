@@ -86,7 +86,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     // Find the selected objects.
 
     Scene scene = window.getScene();
-    int sel[] = scene.getSelection();
+    int sel[] = window.getSelectedIndices();
     objects = new ObjectInfo [sel.length];
     for (int i = 0; i < sel.length; i++)
       objects[i] = scene.getObject(sel[i]);
@@ -157,7 +157,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     }
     if (canSetTexture)
     {
-      Vector names = new Vector();
+      Vector<String> names = new Vector<String>();
       int selected = -1;
       for (int i = 0; i < scene.getNumTextures(); i++)
       {
@@ -194,7 +194,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     }
     if (canSetMaterial)
     {
-      Vector names = new Vector();
+      Vector<String> names = new Vector<String>();
       int selected = -1;
       for (int i = 0; i < scene.getNumMaterials(); i++)
       {
@@ -370,7 +370,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       else if (propSelector[i] instanceof ValueField)
         ((ValueField) propSelector[i]).setValue(values[i] == null ? Double.NaN : ((Integer) values[i]).intValue());
       else if (propSelector[i] instanceof BCheckBox)
-        ((BCheckBox) propSelector[i]).setState(((Boolean) values[i]).booleanValue());
+        ((BCheckBox) propSelector[i]).setState(values[i] == null ? false : ((Boolean) values[i]).booleanValue());
       else if (propSelector[i] instanceof BTextField)
         ((BTextField) propSelector[i]).setText((String) values[i]);
       else if (propSelector[i] instanceof ColorSelector)

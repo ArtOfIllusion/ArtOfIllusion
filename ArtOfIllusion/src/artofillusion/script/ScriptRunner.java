@@ -40,6 +40,7 @@ public class ScriptRunner
             interp.eval("import artofillusion.material.*");
             interp.eval("import artofillusion.math.*");
             interp.eval("import artofillusion.object.*");
+            interp.eval("import artofillusion.script.*");
             interp.eval("import artofillusion.texture.*");
             interp.eval("import artofillusion.ui.*");
             interp.eval("import buoy.event.*");
@@ -80,7 +81,7 @@ public class ScriptRunner
   
   public static ToolScript parseToolScript(String script) throws Exception
   {
-    String prefix = "return new artofillusion.script.ToolScript() {void execute(LayoutWindow window) {\n";
+    String prefix = "return new ToolScript() {void execute(LayoutWindow window) {\n";
     String suffix = "\n;}}";
     return (ToolScript) getInterpreter().eval(prefix+script+suffix);
   }
@@ -89,7 +90,7 @@ public class ScriptRunner
   
   public static ObjectScript parseObjectScript(String script) throws Exception
   {
-    String prefix = "return new artofillusion.script.ObjectScript() {void execute(artofillusion.script.ScriptedObjectController script) {\n";
+    String prefix = "return new ObjectScript() {void execute(ScriptedObjectController script) {\n";
     String suffix = "\n;}}";
     return (ObjectScript) getInterpreter().eval(prefix+script+suffix);
   }

@@ -72,9 +72,9 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     recursivelyAddListeners(this);
     UIUtilities.applyDefaultFont(content);
     UIUtilities.applyDefaultBackground(content);
-    Dimension d1 = Toolkit.getDefaultToolkit().getScreenSize(), d2;
-    d2 = new Dimension((d1.width*3)/4, (d1.height*3)/4);
-    setBounds(new Rectangle((d1.width-d2.width)/2, (d1.height-d2.height)/2, d2.width, d2.height));
+    Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+    Dimension windowDim = new Dimension((screenBounds.width*3)/4, (screenBounds.height*3)/4);
+    setBounds(new Rectangle((screenBounds.width-windowDim.width)/2, (screenBounds.height-windowDim.height)/2, windowDim.width, windowDim.height));
     tools.requestFocus();
     selected = new boolean [((Curve) obj.getObject()).getVertices().length];
     findSelectionDistance();

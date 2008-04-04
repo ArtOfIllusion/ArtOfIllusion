@@ -100,7 +100,7 @@ public class MaterialMappingDialog extends BDialog
     // Show the dialog.
 
     pack();
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
     setVisible(true);
   }
   

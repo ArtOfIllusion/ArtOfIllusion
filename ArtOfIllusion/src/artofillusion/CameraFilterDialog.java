@@ -143,7 +143,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     // Display the window.
 
     pack();
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent.getFrame());
     setVisible(true);
   }
 

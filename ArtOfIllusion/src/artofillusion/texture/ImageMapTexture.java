@@ -423,7 +423,7 @@ public class ImageMapTexture extends Texture2D
       renderProcessor = new ActionProcessor();
       pack();
       setResizable(false);
-      UIUtilities.centerWindow(this);
+      UIUtilities.centerDialog(this, fr);
       setVisible(true);
     }
 

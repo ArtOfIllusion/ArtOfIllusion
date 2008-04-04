@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2007 by Peter Eastman
+/* Copyright (C) 2004-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,7 +10,6 @@
 
 package artofillusion.ui;
 
-import artofillusion.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
@@ -29,17 +28,14 @@ public class UIUtilities
   
   public static void centerWindow(WindowWidget win)
   {
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(win.getComponent().getGraphicsConfiguration());
-    screenSize.width -= screenInsets.left+screenInsets.right;
-    screenSize.height -= screenInsets.top+screenInsets.bottom;
+    Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
     Rectangle winBounds = win.getBounds();
-    int x = (screenSize.width-winBounds.width)/2;
-    int y = (screenSize.height-winBounds.height)/2;
-    if (x < screenInsets.left)
-      x = screenInsets.left;
-    if (y < screenInsets.top)
-      y = screenInsets.top;
+    int x = (screenBounds.width-winBounds.width)/2;
+    int y = (screenBounds.height-winBounds.height)/2;
+    if (x < screenBounds.x)
+      x = screenBounds.x;
+    if (y < screenBounds.y)
+      y = screenBounds.y;
     win.setBounds(new Rectangle(x, y, winBounds.width, winBounds.height));
   }
 
@@ -49,7 +45,7 @@ public class UIUtilities
   {
     Rectangle r1 = parent.getBounds(), r2 = dlg.getBounds();
     int x = r1.x+(r1.width-r2.width)/2;
-    int y = r1.y+20;
+    int y = r1.y+(r1.height-r2.height)/2;
     if (x < 0)
       x = 0;
     if (y < 0)
@@ -182,7 +178,7 @@ public class UIUtilities
     if (lines < 2)
       return new String [] {s};
     int lineLength = s.length()/lines;
-    Vector line = new Vector();
+    Vector<String> line = new Vector<String>();
     int index = 0;
     while (index+lineLength < s.length())
     {

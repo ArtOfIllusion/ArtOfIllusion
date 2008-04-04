@@ -55,7 +55,7 @@ public class ImagesDialog extends BDialog
     addEventLink(WindowClosingEvent.class, this, "dispose");
     ic.imagesChanged();
     ic.scrollToSelection();
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, fr);
     setVisible(true);
   }
 

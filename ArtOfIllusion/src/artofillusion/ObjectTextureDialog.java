@@ -186,7 +186,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     pack();
     setResizable(false);
     addEventLink(WindowClosingEvent.class, this, "dispose");
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
     updateComponents();
     scene.addTextureListener(this);
     setVisible(true);
@@ -504,7 +504,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       updateComponents();
       layoutSimple();
       pack();
-      UIUtilities.centerWindow(this);
+      UIUtilities.centerDialog(this, window);
       resetParameters();
     }
     else
@@ -515,7 +515,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       updateComponents();
       layoutLayered();
       pack();
-      UIUtilities.centerWindow(this);
+      UIUtilities.centerDialog(this, window);
       resetParameters();
       return;
     }

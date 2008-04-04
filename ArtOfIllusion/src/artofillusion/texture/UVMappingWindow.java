@@ -191,7 +191,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     row.add(Translate.button("ok", this, "doOk"));
     row.add(Translate.button("cancel", this, "dispose"));
     pack();
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
     setVisible(true);
   }
 

@@ -382,7 +382,7 @@ public class ConstraintTrack extends Track
       buttons.add(Translate.button("cancel", this, "dispose"));
       content.add(buttons, 0, 6, 3, 1, new LayoutInfo());
       pack();
-      UIUtilities.centerWindow(this);
+      UIUtilities.centerDialog(this, win);
       updateComponents();
       setVisible(true);
     }

@@ -57,7 +57,7 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
     addEventLink(WindowClosingEvent.class, this, "dispose");
     hilightButtons();
     pack();
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
   }
 
   public void dispose()

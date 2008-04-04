@@ -274,7 +274,7 @@ public class SpotLight extends Light
     angleSlider.addEventLink(ValueChangedEvent.class, listener);
     falloffSlider.addEventLink(ValueChangedEvent.class, listener);
     dlg.pack();
-    UIUtilities.centerWindow(dlg);
+    UIUtilities.centerDialog(dlg, parentFrame);
     dlg.setVisible(true);
   }
 
@@ -430,7 +430,7 @@ public class SpotLight extends Light
     angleSlider.addEventLink(ValueChangedEvent.class, listener);
     falloffSlider.addEventLink(ValueChangedEvent.class, listener);
     dlg.pack();
-    UIUtilities.centerWindow(dlg);
+    UIUtilities.centerDialog(dlg, parentFrame);
     dlg.setVisible(true);
   }
 

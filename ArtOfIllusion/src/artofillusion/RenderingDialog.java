@@ -107,7 +107,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     BScrollPane sp = new BScrollPane(canvas);
     content.add(sp, 0, 2, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     pack();
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
   }
   
   private void doCancel()

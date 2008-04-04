@@ -43,7 +43,7 @@ public class TransformDialog extends BDialog
     layoutDialog(transformLabels, extraOptions);
     pack();
     setResizable(false);
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
     fields[0].requestFocus();
     setVisible(true);
   }

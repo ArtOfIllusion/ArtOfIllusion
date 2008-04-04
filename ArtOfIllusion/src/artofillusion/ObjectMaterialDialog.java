@@ -86,7 +86,7 @@ public class ObjectMaterialDialog extends BDialog implements ListChangeListener
     pack();
     setResizable(false);
     addEventLink(WindowClosingEvent.class, this, "dispose");
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent.getFrame());
     scene.addMaterialListener(this);
     setVisible(true);
   }

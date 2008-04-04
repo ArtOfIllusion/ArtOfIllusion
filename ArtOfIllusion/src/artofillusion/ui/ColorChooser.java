@@ -116,7 +116,7 @@ public class ColorChooser extends BDialog
     modeChanged();
     pack();
     setResizable(false);
-    UIUtilities.centerWindow(this);
+    UIUtilities.centerDialog(this, parent);
     setVisible(true);
   }
 

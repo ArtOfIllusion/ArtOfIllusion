@@ -236,9 +236,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     itemTreeScroller.setBackground(Color.white);
     if (ArtOfIllusion.APP_ICON != null)
       setIcon(ArtOfIllusion.APP_ICON);
-    Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-    Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(getComponent().getGraphicsConfiguration());
-    setBounds(new Rectangle(screenInsets.left, screenInsets.top, screenDim.width-screenInsets.left-screenInsets.right, screenDim.height-screenInsets.top-screenInsets.bottom));
+    Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+    setBounds(screenBounds);
     tools.requestFocus();
   }
 

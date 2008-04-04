@@ -112,8 +112,8 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     else if ("handlePreferences".equals(method.getName()))
     {
       BFrame f = new BFrame();
-      Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
-      f.setBounds(new Rectangle(0, 0, d.width, d.height));
+      Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+      f.setBounds(screenBounds);
       UIUtilities.centerWindow(f);
       new PreferencesWindow(f);
       f.dispose();

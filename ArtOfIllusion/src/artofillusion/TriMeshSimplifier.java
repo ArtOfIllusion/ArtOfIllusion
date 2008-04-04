@@ -169,7 +169,7 @@ public class TriMeshSimplifier implements Runnable
     }, "processEvent"), BorderContainer.SOUTH, new LayoutInfo());
     dial.pack();
     dial.setResizable(false);
-    UIUtilities.centerWindow(dial);
+    UIUtilities.centerDialog(dial, fr);
   }
 
   /* Build the new TriangleMesh. */

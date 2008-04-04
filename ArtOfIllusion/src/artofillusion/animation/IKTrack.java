@@ -330,7 +330,7 @@ public class IKTrack extends Track
       buttons.add(Translate.button("ok", this, "doOk"));
       buttons.add(Translate.button("cancel", this, "dispose"));
       pack();
-      UIUtilities.centerWindow(this);
+      UIUtilities.centerDialog(this, win);
       editButton.setEnabled(false);
       deleteButton.setEnabled(false);
       setVisible(true);

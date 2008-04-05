@@ -1293,9 +1293,8 @@ public class Scene
     {
       count = in.readInt();
       SearchlistClassLoader loader = new SearchlistClassLoader(getClass().getClassLoader());
-      List<ClassLoader> plugins = PluginRegistry.getPluginClassLoaders();
-      for (int i = 0; i < plugins.size(); i++)
-        loader.add(plugins.get(i));
+      for (ClassLoader cl : PluginRegistry.getPluginClassLoaders())
+        loader.add(cl);
       for (int i = 0; i < count; i++)
       {
         try
@@ -1525,16 +1524,30 @@ public class Scene
     // Save metadata.
 
     out.writeInt(metadataMap.size());
+    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    SearchlistClassLoader loader = new SearchlistClassLoader(getClass().getClassLoader());
+    for (ClassLoader cl : PluginRegistry.getPluginClassLoaders())
+      loader.add(cl);
+    Thread.currentThread().setContextClassLoader(loader); // So that plugin classes can be saved correctly.
+    ExceptionListener exceptionListener = new ExceptionListener()
+      {
+        public void exceptionThrown(Exception e)
+        {
+          e.printStackTrace();
+        }
+      };
     for (Map.Entry<String, Object> entry : metadataMap.entrySet())
     {
       ByteArrayOutputStream value = new ByteArrayOutputStream();
       XMLEncoder encoder = new XMLEncoder(value);
+      encoder.setExceptionListener(exceptionListener);
       encoder.writeObject(entry.getValue());
       encoder.close();
       out.writeUTF(entry.getKey());
       out.writeInt(value.size());
       out.write(value.toByteArray());
     }
+    Thread.currentThread().setContextClassLoader(contextClassLoader);
   }
   
   /** Write the information about a single object to a file. */

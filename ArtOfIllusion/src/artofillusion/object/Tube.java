@@ -814,7 +814,7 @@ public class Tube extends Curve
   public Object getPropertyValue(int index)
   {
     if (index == 1)
-      return PROPERTIES[0].getAllowedValues()[endsStyle];
+      return PROPERTIES[index].getAllowedValues()[endsStyle];
     return super.getPropertyValue(index);
   }
 

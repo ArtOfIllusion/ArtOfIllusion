@@ -340,12 +340,12 @@ public class CSGObject extends Object3D
       {
         obj1 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
         Class cls = ArtOfIllusion.getClass(in.readUTF());
-        Constructor con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
-        obj1.setObject((Object3D) con.newInstance(new Object [] {in, theScene}));
+        Constructor con = cls.getConstructor(DataInputStream.class, Scene.class);
+        obj1.setObject((Object3D) con.newInstance(in, theScene));
         obj2 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
         cls = ArtOfIllusion.getClass(in.readUTF());
-        con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
-        obj2.setObject((Object3D) con.newInstance(new Object [] {in, theScene}));
+        con = cls.getConstructor(DataInputStream.class, Scene.class);
+        obj2.setObject((Object3D) con.newInstance(in, theScene));
       }
     catch (InvocationTargetException ex)
       {
@@ -635,16 +635,17 @@ public class CSGObject extends Object3D
       short version = in.readShort();
       if (version != 0)
         throw new InvalidObjectException("");
+      CSGObject obj = (CSGObject) ((ObjectInfo) parent).object;
       coords1 = new CoordinateSystem(in);
       coords2 = new CoordinateSystem(in);
       try
       {
         Class cl = ArtOfIllusion.getClass(in.readUTF());
-        Constructor con = cl.getConstructor(new Class [] {DataInputStream.class, Object.class});
-        key1 = (Keyframe) con.newInstance(new Object [] {in, parent});
+        Constructor con = cl.getConstructor(DataInputStream.class, Object.class);
+        key1 = (Keyframe) con.newInstance(in, obj.getObject1().getObject());
         cl = ArtOfIllusion.getClass(in.readUTF());
-        con = cl.getConstructor(new Class [] {DataInputStream.class, Object.class});
-        key2 = (Keyframe) con.newInstance(new Object [] {in, parent});
+        con = cl.getConstructor(DataInputStream.class, Object.class);
+        key2 = (Keyframe) con.newInstance(in, obj.getObject2().getObject());
       }
       catch (Exception ex)
       {

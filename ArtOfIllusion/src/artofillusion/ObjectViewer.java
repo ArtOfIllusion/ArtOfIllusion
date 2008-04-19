@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   protected MeshEditController controller;
   protected boolean showScene, useWorldCoords, freehandSelection, draggingBox, squareBox, sentClick;
   protected Point clickPoint, dragPoint;
-  protected Vector selectBoundsPoints;
+  protected Vector<Point> selectBoundsPoints;
   protected Shape selectBounds;
   protected ObjectInfo thisObjectInScene;
   protected Scene theScene;
@@ -109,7 +109,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo obj = theScene.getObject(i);
-        if (obj == thisObjectInScene)
+        if (!obj.isVisible() || obj == thisObjectInScene)
           continue;
         Mat4 objectTransform = obj.getCoords().fromLocal();
         if (!useWorldCoords && thisObjectInScene != null)
@@ -211,7 +211,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     squareBox = square;
     dragPoint = null;
     if (freehandSelection)
-      selectBoundsPoints = new Vector();
+      selectBoundsPoints = new Vector<Point>();
   }
   
   /** Finish dragging a selection region. */

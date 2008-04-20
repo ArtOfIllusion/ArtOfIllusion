@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -121,16 +121,11 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
-      BoundingBox bounds = info.getBounds();
-      double dx = bounds.maxx-bounds.minx;
-      double dy = bounds.maxy-bounds.miny;
-      double dz = bounds.maxz-bounds.minz;
-      double size = 0.5*Math.sqrt(dx*dx+dy*dy+dz*dz);
-      double depth = toView.times(info.getCoords().getOrigin()).z;
-      if (depth-size < min)
-        min = depth-size;
-      if (depth+size > max)
-        max = depth+size;
+      BoundingBox bounds = info.getBounds().transformAndOutset(toView);
+      if (bounds.minz < min)
+        min = bounds.minz;
+      if (bounds.maxz > max)
+        max = bounds.maxz;
     }
     return new double [] {min, max};
   }

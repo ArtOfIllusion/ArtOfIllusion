@@ -55,6 +55,7 @@ public class TreeList extends CustomWidget
     selected = new Vector();
     origSelected = new boolean [0];
     allowMultiple = true;
+    lastClickRow = -1;
     Font font = getFont();
     if (font == null)
       font = UIUtilities.getDefaultFont();
@@ -460,7 +461,11 @@ public class TreeList extends CustomWidget
       return;
     }
     if (ev.isShiftDown() || ev.isControlDown() || ev.isMetaDown())
+    {
       moving = false;
+      if (lastClickRow == -1)
+        lastClickRow = row;
+    }
     else
     {
       moving = true;
@@ -473,9 +478,9 @@ public class TreeList extends CustomWidget
       setSelected(el, !el.isSelected());
       selectionChanged = true;
     }
-    else if (allowMultiple && ev.isShiftDown())
+    else if (allowMultiple && ev.isShiftDown() && lastClickRow > -1)
     {
-      int min = Math.max(Math.min(lastClickRow, row), 0);
+      int min = Math.min(lastClickRow, row);
       int max = Math.min(Math.max(lastClickRow, row), showing.size()-1);
       updateDisabled = true;
       for (i = 0; i < showing.size(); i++)

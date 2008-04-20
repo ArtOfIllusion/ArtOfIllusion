@@ -24,7 +24,8 @@ import java.util.Vector;
 public class CreateCurveTool extends EditingTool
 {
   static int counter = 1;
-  private Vector clickPoint, smoothness;
+  private Vector<Vec3> clickPoint;
+  private Vector<Float> smoothness;
   private int smoothing;
   private Curve theCurve;
   private CoordinateSystem coords;
@@ -102,8 +103,8 @@ public class CreateCurveTool extends EditingTool
   {
     if (clickPoint == null)
     {
-      clickPoint = new Vector();
-      smoothness = new Vector();
+      clickPoint = new Vector<Vec3>();
+      smoothness = new Vector<Float>();
       view.repaint();
     }
     else
@@ -156,7 +157,17 @@ public class CreateCurveTool extends EditingTool
         ydir = cam.getViewToWorld().timesDirection(Vec3.vy());
         zdir = cam.getViewToWorld().timesDirection(new Vec3(0.0, 0.0, -1.0));
         coords = new CoordinateSystem(orig, zdir, ydir);
-            
+        if (view.getSnapToGrid())
+        {
+          double spacing = view.getGridSpacing()/view.getSnapToSubdivisions();
+          Vec3 offset = coords.toLocal().times(vertex[0]);
+          offset.x = Math.IEEEremainder(offset.x, spacing);
+          offset.y = Math.IEEEremainder(offset.y, spacing);
+          offset.z = Math.IEEEremainder(offset.z, spacing);
+          coords.fromLocal().transformDirection(offset);
+          coords.setOrigin(orig.plus(offset));
+        }
+
         // Transform all of the vertices into the object's coordinate system.
             
         for (int i = 0; i < vertex.length; i++)
@@ -198,7 +209,7 @@ public class CreateCurveTool extends EditingTool
         info.addTrack(new PositionTrack(info), 0);
         info.addTrack(new RotationTrack(info), 1);
         UndoRecord undo = new UndoRecord(theWindow, false);
-        int sel[] = theWindow.getScene().getSelection();
+        int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
         ((LayoutWindow) theWindow).addObject(info, undo);
         undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
         theWindow.setUndoRecord(undo);

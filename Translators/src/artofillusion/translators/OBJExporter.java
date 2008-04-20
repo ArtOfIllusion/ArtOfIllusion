@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2006 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -118,7 +118,7 @@ public class OBJExporter
     // Write the objects in the scene.
 
     int numVert = 0, numNorm = 0, numTexVert = 0;
-    Hashtable groupNames = new Hashtable();
+    Hashtable<String, String> groupNames = new Hashtable<String, String>();
     NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
     nf.setMaximumFractionDigits(5);
     nf.setGroupingUsed(false);
@@ -128,6 +128,8 @@ public class OBJExporter
         
         ObjectInfo info = theScene.getObject(i);
         if (!wholeScene && !info.selected)
+          continue;
+        if (info.getObject().getTexture() == null)
           continue;
         FacetedMesh mesh;
         if (!smooth && info.getObject() instanceof FacetedMesh)
@@ -300,7 +302,7 @@ public class OBJExporter
     
     out.println("#Produced by Art of Illusion "+ArtOfIllusion.getVersion()+", "+(new Date()).toString());
     Enumeration textures = textureExporter.getTextures();
-    Hashtable names = new Hashtable();
+    Hashtable<String, TextureImageInfo> names = new Hashtable<String, TextureImageInfo>();
     TextureSpec spec = new TextureSpec();
     NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
     nf.setMaximumFractionDigits(5);

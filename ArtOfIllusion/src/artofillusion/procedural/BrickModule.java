@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -115,7 +115,7 @@ public class BrickModule extends Module
     double z = (linkFrom[2] == null) ? point.z : linkFrom[2].getAverageValue(linkFromIndex[2], blur);    
     double d = ((FastMath.floor(y)&1) == 0 ? 0.5*offset : -0.5*offset);
     x += d;
-    z += d;
+    z += d+0.5;
     double x1 = x-FastMath.round(x), y1 = y-FastMath.round(y), z1 = z-FastMath.round(z);
     double xf = Math.abs(x1), yf = Math.abs(y1), zf = Math.abs(z1);
     double halfgap = 0.5*gap;

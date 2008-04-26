@@ -1,6 +1,4 @@
-/* This is a distortion which shatters an object. */
-
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +12,11 @@ package artofillusion.animation.distortion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.texture.*;
+
 import java.util.Random;
+
+/** This is a distortion which shatters an object. */
 
 public class ShatterDistortion implements Distortion
 {
@@ -181,6 +183,24 @@ public class ShatterDistortion implements Distortion
         v3.add(disp);
       }
     mesh.setShape(newvert, newface);
+
+    // Fix any texture parameters.
+
+    ParameterValue param[] = mesh.getParameterValues();
+    for (int i = 0; i < size; i++)
+    {
+      if (param[i] instanceof ConstantParameterValue || param[i] instanceof FaceParameterValue)
+        continue;
+      double value[][] = new double[face.length][3];
+      for (int j = 0; j < face.length; j++)
+      {
+        value[j][0] = param[i].getValue(j, face[j].v1, face[j].v2, face[j].v3, 1.0, 0.0, 0.0);
+        value[j][1] = param[i].getValue(j, face[j].v1, face[j].v2, face[j].v3, 0.0, 1.0, 0.0);
+        value[j][2] = param[i].getValue(j, face[j].v1, face[j].v2, face[j].v3, 0.0, 0.0, 1.0);
+      }
+      param[i] = new FaceVertexParameterValue(value);
+    }
+    mesh.setParameterValues(param);
     return mesh;
   }
 }

@@ -715,7 +715,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       paramIndex = new int [num];
       for (i = 0, k = 0; k < param.length; k++)
         if (paramValue[k] instanceof VertexParameterValue)
-          if (!isExtraParameter(param[i]))
+          if (!isExtraParameter(param[k]))
             paramIndex[i++] = k;
     }
     if (paramIndex == null || paramIndex.length == 0)

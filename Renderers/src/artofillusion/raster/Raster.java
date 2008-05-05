@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2007 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -48,6 +48,7 @@ public class Raster implements Renderer, Runnable
   private TextureMapping envMapping;
   private ThreadLocal threadRasterContext, threadCompositingContext;
   private RowLock lock[];
+  private double envParamValue[];
   private double time, smoothing = 1.0, smoothScale, depthOfField, focalDist, surfaceError = 0.02, fogDist;
   private boolean fog, transparentBackground = false, adaptive = true, hideBackfaces = true, generateHDR = false, positionNeeded, depthNeeded, needCopyToUI = true;
 
@@ -271,9 +272,9 @@ public class Raster implements Renderer, Runnable
   }
 
 
-  public Map getConfiguration()
+  public Map<String, Object> getConfiguration()
   {
-    HashMap map = new HashMap();
+    HashMap<String, Object> map = new HashMap<String, Object>();
     map.put("textureSmoothing", new Double(smoothing));
     map.put("reduceAccuracyForDistant", new Boolean(adaptive));
     map.put("hideBackfaces", new Boolean(hideBackfaces));
@@ -352,7 +353,7 @@ public class Raster implements Renderer, Runnable
 
   void findLights()
   {
-    Vector lt = new Vector();
+    Vector<ObjectInfo> lt = new Vector<ObjectInfo>();
     int i;
 
     positionNeeded = false;
@@ -392,6 +393,10 @@ public class Raster implements Renderer, Runnable
     fogColor = theScene.getFogColor();
     fog = theScene.getFogState();
     fogDist = theScene.getFogDistance();
+    ParameterValue envParam[] = theScene.getEnvironmentParameterValues();
+    envParamValue = new double [envParam.length];
+    for (int i = 0; i < envParamValue.length; i++)
+      envParamValue[i] = envParam[i].getAverageValue();
 
     // Determine information about the viewpoint.
 
@@ -473,7 +478,7 @@ public class Raster implements Renderer, Runnable
         return -1;
       }
     }
-    ArrayList objects = new ArrayList();
+    ArrayList<SortRecord> objects = new ArrayList<SortRecord>();
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo obj = theScene.getObject(i);
@@ -536,7 +541,7 @@ public class Raster implements Renderer, Runnable
         RGBColor multColor = context.multColor;
         RGBColor subpixelColor = context.subpixelColor;
         RGBColor subpixelMult = context.subpixelMult;
-        ArrayList materialStack = context.materialStack;
+        ArrayList<ObjectMaterialInfo> materialStack = context.materialStack;
         TextureSpec surfSpec = context.surfSpec;
         int i2 = i1*samplesPerPixel;
         for (int j1 = 0, j2 = 0; j1 < imageWidth; j1++, j2 += samplesPerPixel)
@@ -597,7 +602,7 @@ public class Raster implements Renderer, Runnable
                     dir.z = center.z + h*hvec.z + v*vvec.z;
                     dir.subtract(orig);
                     dir.normalize();
-                    envMapping.getTextureSpec(dir, surfSpec, 1.0, smoothScale, time, null);
+                    envMapping.getTextureSpec(dir, surfSpec, 1.0, smoothScale, time, envParamValue);
                     if (envMode == Scene.ENVIRON_DIFFUSE)
                       addColor.copy(surfSpec.diffuse);
                     else
@@ -906,7 +911,7 @@ public class Raster implements Renderer, Runnable
             reflectDir.scale(-2.0*viewDot);
             reflectDir.add(viewdir);
             context.camera.getViewToWorld().transformDirection(reflectDir);
-            envMapping.getTextureSpec(reflectDir, context.surfSpec2, 1.0, smoothScale, time, null);
+            envMapping.getTextureSpec(reflectDir, context.surfSpec2, 1.0, smoothScale, time, envParamValue);
             if (envMode == Scene.ENVIRON_DIFFUSE)
               specular.copy(context.surfSpec2.diffuse);
             else

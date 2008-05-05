@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,7 @@ public class CompositingContext
   public Camera camera;
   public RGBColor addColor, multColor, subpixelMult;
   public RGBColor subpixelColor, totalColor, totalTransparency;
-  public ArrayList materialStack;
+  public ArrayList<ObjectMaterialInfo> materialStack;
 
   public CompositingContext(Camera camera)
   {
@@ -46,7 +46,7 @@ public class CompositingContext
     subpixelColor = new RGBColor();
     totalColor = new RGBColor();
     totalTransparency = new RGBColor();
-    materialStack = new ArrayList();
+    materialStack = new ArrayList<ObjectMaterialInfo>();
   }
 
   /**

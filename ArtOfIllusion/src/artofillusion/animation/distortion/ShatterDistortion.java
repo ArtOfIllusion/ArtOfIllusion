@@ -187,7 +187,7 @@ public class ShatterDistortion implements Distortion
     // Fix any texture parameters.
 
     ParameterValue param[] = mesh.getParameterValues();
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < param.length; i++)
     {
       if (param[i] instanceof ConstantParameterValue || param[i] instanceof FaceParameterValue)
         continue;

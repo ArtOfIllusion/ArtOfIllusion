@@ -121,7 +121,7 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
-      BoundingBox bounds = info.getBounds().transformAndOutset(toView);
+      BoundingBox bounds = info.getBounds().transformAndOutset(toView.times(info.coords.fromLocal()));
       if (bounds.minz < min)
         min = bounds.minz;
       if (bounds.maxz > max)
@@ -136,7 +136,6 @@ public class SceneViewer extends ViewerCanvas
     Vec3 viewdir;
     int i;
 
-    adjustCamera(isPerspective());
     super.updateImage();
     
     // Draw the objects.

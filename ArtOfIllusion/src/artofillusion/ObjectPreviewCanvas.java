@@ -101,7 +101,6 @@ public class ObjectPreviewCanvas extends ViewerCanvas
 
   public synchronized void updateImage()
   {
-    adjustCamera(isPerspective());
     super.updateImage();
     if (objInfo == null)
       return;

@@ -96,7 +96,6 @@ public abstract class ObjectViewer extends ViewerCanvas
 
   public synchronized void updateImage()
   {
-    adjustCamera(isPerspective());
     super.updateImage();
     if (controller.getObject() == null)
       return;

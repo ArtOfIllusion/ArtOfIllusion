@@ -1,4 +1,4 @@
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +17,7 @@ import artofillusion.ui.*;
 import bsh.*;
 import java.io.*;
 import java.util.*;
+import java.awt.*;
 
 /** This class represents an Object3D whose properties are defined by a script. */
 
@@ -61,9 +62,13 @@ public class ScriptedObject extends ObjectCollection
           {
             parsedScript = ScriptRunner.parseObjectScript(script);
           }
-        catch (Exception ex)
+        catch (final Exception ex)
           {
-            ScriptRunner.displayError(ex, 1);
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
+                ScriptRunner.displayError(ex, 1);
+              }
+            });
             parsedScript = new ObjectScript() {
               public void execute(ScriptedObjectController script)
               {
@@ -324,12 +329,12 @@ public class ScriptedObject extends ObjectCollection
   public static class ScriptedObjectKeyframe implements Keyframe
   {
     ScriptedObject script;
-    public Hashtable valueTable;
+    public Hashtable<String, Double> valueTable;
     
     public ScriptedObjectKeyframe(ScriptedObject object, String names[], double values[])
     {
       script = object;
-      valueTable = new Hashtable();
+      valueTable = new Hashtable<String, Double>();
       for (int i = 0; i < names.length; i++)
         valueTable.put(names[i], new Double(values[i]));
     }
@@ -346,7 +351,7 @@ public class ScriptedObject extends ObjectCollection
     public Keyframe duplicate(Object owner)
     {
       ScriptedObjectKeyframe key = new ScriptedObjectKeyframe((ScriptedObject) ((ObjectInfo) owner).getObject(), new String [0], new double [0]);
-      key.valueTable = (Hashtable) valueTable.clone();
+      key.valueTable = (Hashtable<String, Double>) valueTable.clone();
       return key;
     }
   
@@ -462,7 +467,7 @@ public class ScriptedObject extends ObjectCollection
       double values[] = new double [script.paramName.length];
       for (int i = 0; i < values.length; i++)
         values[i] = in.readDouble();
-      valueTable = new Hashtable();
+      valueTable = new Hashtable<String, Double>();
       for (int i = 0; i < values.length; i++)
         valueTable.put(script.paramName[i], new Double(values[i]));
     }

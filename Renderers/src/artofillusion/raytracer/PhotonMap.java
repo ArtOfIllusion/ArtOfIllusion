@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ import java.util.*;
 public class PhotonMap
 {
   private Raytracer rt;
-  private ArrayList photonList;
+  private ArrayList<Photon> photonList;
   private Photon photon[], workspace[];
   private int numWanted, filter, numEstimate;
   private BoundingBox bounds;
@@ -116,7 +116,7 @@ public class PhotonMap
     
     // Generate photons.
     
-    photonList = new ArrayList((int) (1.1*numWanted));
+    photonList = new ArrayList<Photon>((int) (1.1*numWanted));
     int iteration = 0;
     ThreadManager threads = new ThreadManager();
     try
@@ -155,7 +155,7 @@ public class PhotonMap
     // Create the balanced kd-tree.
     
     int numPhotons = photonList.size();
-    workspace = (Photon []) photonList.toArray(new Photon [numPhotons]);
+    workspace = photonList.toArray(new Photon [numPhotons]);
     photonList = null;
     photon = new Photon [numPhotons];
     buildTree(0, numPhotons-1, 0);
@@ -316,7 +316,7 @@ public class PhotonMap
     if (treeDepth == rt.maxRayDepth-1)
       return;
     boolean spawnSpecular = false, spawnTransmitted = false, spawnDiffuse = false;
-    if (includeCaustics)
+    if (includeCaustics || includeVolume)
     {
       if (spec.specular.getRed()+spec.specular.getGreen()+spec.specular.getBlue() > rt.minRayIntensity)
         spawnSpecular = true;

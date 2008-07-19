@@ -1,6 +1,4 @@
-/* This is a Module which returns the maximum of two numbers. */
-
-/* Copyright (C) 2000 by Peter Eastman
+/* Copyright (C) 2000-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,12 +13,14 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
+/** This is a Module which returns the maximum of two numbers. */
+
 public class MaxModule extends Module
 {
-  double lastBlur;
+  double lastBlur, value, error;
   int which;
-  boolean whichOk;
-  
+  boolean valueOk;
+
   public MaxModule(Point position)
   {
     super("Max", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Value 1", "(0)"}),
@@ -33,43 +33,61 @@ public class MaxModule extends Module
 
   public void init(PointInfo p)
   {
-    whichOk = false;
+    valueOk = false;
   }
 
   /* Compare the two inputs. */
   
   public double getAverageValue(int which, double blur)
   {
-    if (whichOk && blur == lastBlur)
-      return ((linkFrom[which] == null) ? 0.0 : linkFrom[which].getAverageValue(linkFromIndex[which], blur));
-    whichOk = true;
-    lastBlur = blur;
-    
+    if (valueOk && blur == lastBlur)
+      return value;
+    valueOk = true;
     double value1 = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getAverageValue(linkFromIndex[0], blur);
     double value2 = (linkFrom[1] == null) ? 0.0 : linkFrom[1].getAverageValue(linkFromIndex[1], blur);
-    if (value1 > value2)
-      {
-	which = 0;
-	return value1;
-      }
-    which = 1;
-    return value2;
+    double error1 = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getValueError(linkFromIndex[0], blur);
+    double error2 = (linkFrom[1] == null) ? 0.0 : linkFrom[1].getValueError(linkFromIndex[1], blur);
+    double min1 = value1-error1;
+    double max1 = value1+error1;
+    double min2 = value2-error2;
+    double max2 = value2+error2;
+    if (max1 < min2)
+    {
+      value = value2;
+      error = error2;
+      which = 1;
+    }
+    else if (max2 < min1)
+    {
+      value = value1;
+      error = error1;
+      which = 0;
+    }
+    else
+    {
+      double min = (min1 < min2 ? min2 : min1);
+      double max = (max1 < max2 ? max2 : max1);
+      value = 0.5*(min+max);
+      error = 0.5*(max-min);
+      which = (value1 < value2 ? 0 : 1);
+    }
+    return value;
   }
 
   /* Determine which input to use, and get its error. */
-  
+
   public double getValueError(int which, double blur)
   {
-    if (!whichOk || blur != lastBlur)
+    if (!valueOk || blur != lastBlur)
       getAverageValue(which, blur);
-    return ((linkFrom[which] == null) ? 0.0 : linkFrom[which].getValueError(linkFromIndex[which], blur));
+    return error;
   }
 
   /* Determine which input to use, and get its gradient. */
 
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
-    if (!whichOk || blur != lastBlur)
+    if (!valueOk || blur != lastBlur)
       getAverageValue(which, blur);
     if (linkFrom[which] == null)
       grad.set(0.0, 0.0, 0.0);

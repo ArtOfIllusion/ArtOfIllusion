@@ -33,7 +33,7 @@ public class Raytracer implements Renderer, Runnable
   ObjectInfo light[];
   OctreeNode rootNode, cameraNode, lightNode[];
   ColumnContainer configPanel;
-  BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, filterBox;
+  BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, filterBox, reducedMemoryBox;
   BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice;
   ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField, filterIterationsField;
   ValueField extraGIField, extraGIEnvField;
@@ -55,7 +55,7 @@ public class Raytracer implements Renderer, Runnable
   int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100, noiseFilterIterations = 5;
   float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[];
   Object objectImage[];
-  boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, noiseFilter = false;
+  boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, noiseFilter = false, reducedMemory = false;
   boolean needCopyToUI = true;
   PhotonMap globalMap, causticsMap, volumeMap;
   BoundingBox materialBounds;
@@ -273,6 +273,7 @@ public class Raytracer implements Renderer, Runnable
       filterBox = new BCheckBox(Translate.text("applyNoiseFilter"), noiseFilter);
       filterIterationsField = new ValueField(noiseFilterIterations, ValueField.NONNEGATIVE+ValueField.INTEGER);
       filterIterationsField.setEnabled(false);
+      reducedMemoryBox = new BCheckBox(Translate.text("useLessMemory"), reducedMemory);
 
       // Set up listeners for components.
 
@@ -328,7 +329,7 @@ public class Raytracer implements Renderer, Runnable
   {
     // Layout the window.
     
-    FormContainer content = new FormContainer(2, 11);
+    FormContainer content = new FormContainer(2, 12);
     content.setColumnWeight(0, 0.0);
     LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, null, null);
@@ -348,10 +349,11 @@ public class Raytracer implements Renderer, Runnable
     row.add(new BLabel(Translate.text("environment")+":"));
     row.add(extraGIEnvField);
     content.add(adaptiveBox, 0, 7, 2, 1, rightLayout);
-    content.add(rouletteBox, 0, 8, 2, 1, rightLayout);
-    content.add(filterBox, 0, 9, 2, 1, rightLayout);
-    content.add(Translate.label("noiseFilterIterations"), 0, 10, leftLayout);
-    content.add(filterIterationsField, 1, 10, rightLayout);
+    content.add(reducedMemoryBox, 0, 8, 2, 1, rightLayout);
+    content.add(rouletteBox, 0, 9, 2, 1, rightLayout);
+    content.add(filterBox, 0, 10, 2, 1, rightLayout);
+    content.add(Translate.label("noiseFilterIterations"), 0, 11, leftLayout);
+    content.add(filterIterationsField, 1, 11, rightLayout);
 
     // Record the current settings.
 
@@ -386,6 +388,7 @@ public class Raytracer implements Renderer, Runnable
       rouletteBox.setState(roulette);
       filterBox.setState(noiseFilter);
       filterIterationsField.setValue(noiseFilterIterations);
+      reducedMemoryBox.setState(reducedMemory);
     }
   }
 
@@ -502,6 +505,7 @@ public class Raytracer implements Renderer, Runnable
     maxRaysChoice.setSelectedValue(Integer.toString(maxRays));
     filterBox.setState(noiseFilter);
     filterIterationsField.setValue(noiseFilterIterations);
+    reducedMemoryBox.setState(reducedMemory);
     giModeChoice.setSelectedIndex(giMode);
     diffuseRaysChoice.setSelectedValue(Integer.toString(diffuseRays));
     globalPhotonsField.setValue(globalPhotons);
@@ -554,6 +558,7 @@ public class Raytracer implements Renderer, Runnable
     volumeNeighborPhotons = (int) volumeNeighborPhotonsField.getValue();
     noiseFilter = filterBox.getState();
     noiseFilterIterations = (int) filterIterationsField.getValue();
+    reducedMemory = reducedMemoryBox.getState();
     return true;
   }
   
@@ -570,6 +575,7 @@ public class Raytracer implements Renderer, Runnable
     map.put("russianRouletteSampling", Boolean.valueOf(roulette));
     map.put("noiseFilter", Boolean.valueOf(noiseFilter));
     map.put("noiseFilterIterations", new Integer(noiseFilterIterations));
+    map.put("useLessMemory", Boolean.valueOf(reducedMemory));
     map.put("maxSurfaceError", new Double(surfaceError));
     map.put("antialiasing", new Integer(antialiasLevel));
     map.put("depthOfField", Boolean.valueOf(depth));
@@ -615,6 +621,8 @@ public class Raytracer implements Renderer, Runnable
       noiseFilter = ((Boolean) value).booleanValue();
     else if ("noiseFilterIterations".equals(property))
       noiseFilterIterations = ((Integer) value).intValue();
+    else if ("useLessMemory".equals(property))
+      reducedMemory = ((Boolean) value).booleanValue();
     else if ("maxSurfaceError".equals(property))
       surfaceError = ((Number) value).doubleValue();
     else if ("antialiasing".equals(property))
@@ -669,6 +677,7 @@ public class Raytracer implements Renderer, Runnable
     extraGISmoothing = 10.0;
     extraGIEnvSmoothing = 100.0;
     adaptive = true;
+    reducedMemory = false;
     roulette = false;
     surfaceError = 0.02;
     giMode = GI_NONE;
@@ -874,7 +883,12 @@ public class Raytracer implements Renderer, Runnable
         RTDisplacedTriangle dispTri = new RTDisplacedTriangle(mesh, i, fromLocal, toLocal, localTol, time);
         RTObject dt = dispTri;
         if (!dispTri.isReallyDisplaced())
-          dt = new RTTriangle(mesh, i, fromLocal, toLocal);
+        {
+          if (reducedMemory)
+            dt = new RTTriangleLowMemory(mesh, i, fromLocal, toLocal);
+          else
+            dt = new RTTriangle(mesh, i, fromLocal, toLocal);
+        }
         obj.add(dt);
         if (adaptive && dt instanceof RTDisplacedTriangle)
         {
@@ -900,7 +914,10 @@ public class Raytracer implements Renderer, Runnable
           continue;
         if (vert[tri.v2].distance(vert[tri.v3]) < TOL)
           continue;
-        obj.add(new RTTriangle(mesh, i, fromLocal, toLocal));
+        if (reducedMemory)
+          obj.add(new RTTriangleLowMemory(mesh, i, fromLocal, toLocal));
+        else
+          obj.add(new RTTriangle(mesh, i, fromLocal, toLocal));
       }
   }
   
@@ -1073,7 +1090,9 @@ public class Raytracer implements Renderer, Runnable
         continue;
       PhotonSource src;
       if (sceneObject[i] instanceof RTTriangle)
-        src = new TrianglePhotonSource((RTTriangle) sceneObject[i], map);
+        src = new TrianglePhotonSource(((RTTriangle) sceneObject[i]).tri, map);
+      else if (sceneObject[i] instanceof RTTriangleLowMemory)
+        src = new TrianglePhotonSource(((RTTriangleLowMemory) sceneObject[i]).tri, map);
       else if (sceneObject[i] instanceof RTDisplacedTriangle)
         src = new DisplacedTrianglePhotonSource((RTDisplacedTriangle) sceneObject[i], map);
       else if (sceneObject[i] instanceof RTEllipsoid)

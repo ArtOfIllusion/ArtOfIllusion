@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,12 +13,13 @@ package artofillusion.raytracer;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.util.*;
+import artofillusion.*;
 
 /** This is a PhotonSource corresponding to an RTTriangle. */
 
 public class TrianglePhotonSource implements PhotonSource
 {
-  private RTTriangle tri;
+  private RenderingTriangle tri;
   private RGBColor color;
   private float lightIntensity;
 
@@ -27,15 +28,15 @@ public class TrianglePhotonSource implements PhotonSource
       @param map    the photon map for which this will generate photons
   */
   
-  public TrianglePhotonSource(RTTriangle tri, PhotonMap map)
+  public TrianglePhotonSource(RenderingTriangle tri, PhotonMap map)
   {
     this.tri = tri;
     
     // Find the size of the triangle.
     
-    Vec3 vert1 = tri.tri.theMesh.vert[tri.tri.v1];
-    Vec3 vert2 = tri.tri.theMesh.vert[tri.tri.v2];
-    Vec3 vert3 = tri.tri.theMesh.vert[tri.tri.v3];
+    Vec3 vert1 = tri.theMesh.vert[tri.v1];
+    Vec3 vert2 = tri.theMesh.vert[tri.v2];
+    Vec3 vert3 = tri.theMesh.vert[tri.v3];
     Vec3 e1 = vert2.minus(vert1);
     Vec3 e2 = vert3.minus(vert1);
     double area = 0.5*e1.cross(e2).length();
@@ -47,9 +48,9 @@ public class TrianglePhotonSource implements PhotonSource
     TextureSpec spec = map.getContext().surfSpec[0];
     double third = 1.0/3.0;
     color = new RGBColor();
-    tri.tri.getTextureSpec(spec, 1.0, third, third, third, avgSize, map.getRaytracer().time);
+    tri.getTextureSpec(spec, 1.0, third, third, third, avgSize, map.getRaytracer().time);
     color.copy(spec.emissive);
-    tri.tri.getTextureSpec(spec, -1.0, third, third, third, avgSize, map.getRaytracer().time);
+    tri.getTextureSpec(spec, -1.0, third, third, third, avgSize, map.getRaytracer().time);
     color.add(spec.emissive);
     lightIntensity = 0.5f*(color.getRed()+color.getGreen()+color.getBlue())*(float) area;
   }
@@ -74,12 +75,12 @@ public class TrianglePhotonSource implements PhotonSource
     Raytracer rt = map.getRaytracer();
     TextureSpec spec = map.getContext().surfSpec[0];
     Ray r = new Ray(map.getContext());
-    Vec3 vert1 = tri.tri.theMesh.vert[tri.tri.v1];
-    Vec3 vert2 = tri.tri.theMesh.vert[tri.tri.v2];
-    Vec3 vert3 = tri.tri.theMesh.vert[tri.tri.v3];
+    Vec3 vert1 = tri.theMesh.vert[tri.v1];
+    Vec3 vert2 = tri.theMesh.vert[tri.v2];
+    Vec3 vert3 = tri.theMesh.vert[tri.v3];
     Vec3 orig = r.getOrigin();
     Vec3 dir = r.getDirection();
-    Vec3 trueNorm = new Vec3();
+    Vec3 trueNorm = tri.theMesh.faceNorm[tri.index];
     double emittedIntensity = 0.0;
 
     // Send out the photons.
@@ -91,7 +92,6 @@ public class TrianglePhotonSource implements PhotonSource
         dir.set(0.0, 0.0, 0.0);
         map.randomizePoint(dir, 1.0);
         dir.normalize();
-        trueNorm.set(tri.trueNorm);
         double dot = trueNorm.dot(dir), absdot = (dot > 0.0 ? dot : -dot);
         if (absdot < map.random.nextDouble())
           continue;
@@ -108,7 +108,7 @@ public class TrianglePhotonSource implements PhotonSource
         
         // Evaluate the texture at the ray origin.
         
-        tri.tri.getTextureSpec(spec, dot, u, v, w, rt.smoothScale, rt.time);
+        tri.getTextureSpec(spec, dot, u, v, w, rt.smoothScale, rt.time);
         color.copy(spec.emissive);
         float sum = color.getRed()+color.getGreen()+color.getBlue();
         emittedIntensity += sum;

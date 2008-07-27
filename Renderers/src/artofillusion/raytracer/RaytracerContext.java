@@ -72,7 +72,10 @@ public class RaytracerContext
     for (int i = 0; i < matChange.length; i++)
       matChange[i] = new MaterialIntersection();
     random = new FastRandom(0);
-    rtTriPool = new ResourcePool(RTTriangle.TriangleIntersection.class);
+    if (rt.reducedMemory)
+      rtTriPool = new ResourcePool(RTTriangleLowMemory.TriangleIntersection.class);
+    else
+      rtTriPool = new ResourcePool(RTTriangle.TriangleIntersection.class);
     rtDispTriPool = new ResourcePool(RTDisplacedTriangle.DisplacedTriangleIntersection.class);
     rtImplicitPool = new ResourcePool(RTImplicitObject.ImplicitIntersection.class);
     lastRayID = new int [rt.sceneObject.length];

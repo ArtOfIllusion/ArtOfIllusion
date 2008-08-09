@@ -34,6 +34,7 @@ public class ObjectInfo
   public Track tracks[];
   public Keyframe pose;
   public int id;
+  private boolean locked;
   private Distortion distortion, prevDistortion;
   private RenderingMesh cachedMesh;
   private WireframeMesh cachedWire;
@@ -67,6 +68,7 @@ public class ObjectInfo
     ObjectInfo info = new ObjectInfo(obj, getCoords().duplicate(), getName());
     
     info.setVisible(isVisible());
+    info.setLocked(isLocked());
     info.setId(id);
     if (getTracks() != null)
       {
@@ -107,6 +109,7 @@ public class ObjectInfo
     getCoords().copyCoords(info.getCoords());
     setName(info.name.toString());
     setVisible(info.visible);
+    setLocked(info.locked);
     setId(info.id);
     cachedMesh = info.cachedMesh;
     cachedWire = info.cachedWire;
@@ -428,6 +431,20 @@ public class ObjectInfo
   public void setVisible(boolean visible)
   {
     this.visible = visible;
+  }
+
+  /** Get whether this object is locked. */
+
+  public boolean isLocked()
+  {
+    return locked;
+  }
+
+  /** Set whether this object is locked. */
+
+  public void setLocked(boolean locked)
+  {
+    this.locked = locked;
   }
 
   /** Get this object's parent, or null if it is a top level object. */

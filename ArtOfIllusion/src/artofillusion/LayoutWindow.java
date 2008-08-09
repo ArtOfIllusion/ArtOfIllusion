@@ -471,7 +471,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     objectMenu = Translate.menu("object");
     menubar.add(objectMenu);
-    objectMenuItem = new BMenuItem [11];
+    objectMenuItem = new BMenuItem [13];
     objectMenu.add(objectMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand"));
     objectMenu.add(objectMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand"));
     objectMenu.add(objectMenuItem[2] = Translate.menuItem("transformObject", this, "transformObjectCommand"));
@@ -485,6 +485,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     objectMenu.add(objectMenuItem[9] = Translate.menuItem("hideSelection", this, "actionPerformed"));
     objectMenu.add(objectMenuItem[10] = Translate.menuItem("showSelection", this, "actionPerformed"));
     objectMenu.add(Translate.menuItem("showAll", this, "actionPerformed"));
+    objectMenu.addSeparator();
+    objectMenu.add(objectMenuItem[11] = Translate.menuItem("lockSelection", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[12] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
+    objectMenu.add(Translate.menuItem("unlockAll", this, "actionPerformed"));
     objectMenu.addSeparator();
     objectMenu.add(createMenu = Translate.menu("createPrimitive"));
     createMenu.add(Translate.menuItem("cube", this, "createObjectCommand"));
@@ -653,7 +657,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createPopupMenu()
   {
     popupMenu = new BPopupMenu();
-    popupMenuItem = new BMenuItem [12];
+    popupMenuItem = new BMenuItem [14];
     popupMenu.add(popupMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand", null));
     popupMenu.add(popupMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand", null));
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTexture", this, "setTextureCommand", null));
@@ -665,9 +669,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.add(popupMenuItem[7] = Translate.menuItem("hideSelection", this, "actionPerformed", null));
     popupMenu.add(popupMenuItem[8] = Translate.menuItem("showSelection", this, "actionPerformed", null));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[9] = Translate.menuItem("cut", this, "cutCommand", null));
-    popupMenu.add(popupMenuItem[10] = Translate.menuItem("copy", this, "copyCommand", null));
-    popupMenu.add(popupMenuItem[11] = Translate.menuItem("clear", this, "clearCommand", null));
+    popupMenu.add(popupMenuItem[9] = Translate.menuItem("lockSelection", this, "actionPerformed"));
+    popupMenu.add(popupMenuItem[10] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
+    popupMenu.addSeparator();
+    popupMenu.add(popupMenuItem[11] = Translate.menuItem("cut", this, "cutCommand", null));
+    popupMenu.add(popupMenuItem[12] = Translate.menuItem("copy", this, "copyCommand", null));
+    popupMenu.add(popupMenuItem[13] = Translate.menuItem("clear", this, "clearCommand", null));
   }
 
   /** Display the popup menu. */
@@ -675,12 +682,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void showPopupMenu(Widget w, int x, int y)
   {
     Object sel[] = itemTree.getSelectedObjects();
-    boolean canConvert, canSetMaterial, canSetTexture, canHide, canShow, hasChildren;
+    boolean canConvert, canSetMaterial, canSetTexture, canHide, canShow, canLock, canUnlock, hasChildren;
     ObjectInfo info;
     Object3D obj;
 
     canConvert = canSetMaterial = canSetTexture = (sel.length > 0);
-    canHide = canShow = hasChildren = false;
+    canHide = canShow = canLock = canUnlock = hasChildren = false;
     for (int i = 0; i < sel.length; i++)
       {
         info = (ObjectInfo) sel[i];
@@ -697,6 +704,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           canHide = true;
         else
           canShow = true;
+        if (info.isLocked())
+          canUnlock = true;
+        else
+          canLock = true;
       }
     if (sel.length == 0)
       {
@@ -715,9 +726,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[6].setEnabled(sel.length == 1 && hasChildren); // Select Children
         popupMenuItem[7].setEnabled(canHide); // Hide Selection
         popupMenuItem[8].setEnabled(canShow); // Show Selection
-        popupMenuItem[9].setEnabled(sel.length > 0); // Cut
-        popupMenuItem[10].setEnabled(sel.length > 0); // Copy
-        popupMenuItem[11].setEnabled(sel.length > 0); // Clear
+        popupMenuItem[9].setEnabled(canLock); // Lock Selection
+        popupMenuItem[10].setEnabled(canUnlock); // Unlock Selection
+        popupMenuItem[11].setEnabled(sel.length > 0); // Cut
+        popupMenuItem[12].setEnabled(sel.length > 0); // Copy
+        popupMenuItem[13].setEnabled(sel.length > 0); // Clear
       }
     popupMenu.show(w, x, y);
   }
@@ -895,6 +908,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       objectMenuItem[8].setEnabled(sel.length == 1 && ((ObjectInfo) sel[0]).getObject().canConvertToActor()); // Convert to Actor
       objectMenuItem[9].setEnabled(true); // Hide Selection
       objectMenuItem[10].setEnabled(true); // Show Selection
+      objectMenuItem[11].setEnabled(true); // Lock Selection
+      objectMenuItem[12].setEnabled(true); // Unlock Selection
     }
     animationMenuItem[0].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
     animationMenuItem[1].setEnabled(numSelKeyframes == 1); // Edit Keyframe
@@ -1282,6 +1297,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           setObjectVisibility(true, true);
         else if (command.equals("showAll"))
           setObjectVisibility(true, false);
+        else if (command.equals("lockSelection"))
+          setObjectsLocked(true, true);
+        else if (command.equals("unlockSelection"))
+          setObjectsLocked(false, true);
+        else if (command.equals("unlockAll"))
+          setObjectsLocked(false, false);
       }
     else if (menu == toolsMenu)
       {
@@ -1424,6 +1445,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           setObjectVisibility(false, true);
         else if (command.equals("showSelection"))
           setObjectVisibility(true, true);
+        else if (command.equals("lockSelection"))
+          setObjectsLocked(true, true);
+        else if (command.equals("unlockSelection"))
+          setObjectsLocked(false, true);
       }
     clearWaitCursor();
   }
@@ -2169,26 +2194,23 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateMenus();
   }
 
-  void setObjectVisibility(boolean visible, boolean selectionOnly)
+  private void setObjectVisibility(boolean visible, boolean selectionOnly)
   {
-    int i, sel[];
-    ObjectInfo info;
-
     UndoRecord undo = new UndoRecord(this, false);
     if (selectionOnly)
     {
-      sel = getSelectedIndices();
-      for (i = 0; i < sel.length; i++)
+      int sel[] = getSelectedIndices();
+      for (int i = 0; i < sel.length; i++)
       {
-        info = theScene.getObject(sel[i]);
+        ObjectInfo info = theScene.getObject(sel[i]);
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
         info.setVisible(visible);
       }
     }
     else
-      for (i = 0; i < theScene.getNumObjects(); i++)
+      for (int i = 0; i < theScene.getNumObjects(); i++)
       {
-        info = theScene.getObject(i);
+        ObjectInfo info = theScene.getObject(i);
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
         info.setVisible(visible);
       }
@@ -2196,6 +2218,32 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
     itemTree.repaint();
   }
+
+  private void setObjectsLocked(boolean locked, boolean selectionOnly)
+  {
+    UndoRecord undo = new UndoRecord(this, false);
+    if (selectionOnly)
+    {
+      int sel[] = getSelectedIndices();
+      for (int i = 0; i < sel.length; i++)
+      {
+        ObjectInfo info = theScene.getObject(sel[i]);
+        undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
+        info.setLocked(locked);
+      }
+    }
+    else
+      for (int i = 0; i < theScene.getNumObjects(); i++)
+      {
+        ObjectInfo info = theScene.getObject(i);
+        undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
+        info.setLocked(locked);
+      }
+    setUndoRecord(undo);
+    updateImage();
+    itemTree.repaint();
+  }
+
 
   void createObjectCommand(CommandEvent ev)
   {

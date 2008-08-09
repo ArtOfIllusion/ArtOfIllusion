@@ -161,6 +161,8 @@ public class SceneViewer extends ViewerCanvas
       for (i = 0; i < theScene.getNumObjects(); i++)
       {
         obj = theScene.getObject(i);
+        if (obj.isLocked())
+          continue;
         if (obj.selected)
         {
           hsize = Scene.HANDLE_SIZE;
@@ -251,7 +253,7 @@ public class SceneViewer extends ViewerCanvas
       info = theScene.getObject(sel[i]);
       theCamera.setObjectTransform(info.getCoords().fromLocal());
       bounds = theCamera.findScreenBounds(info.getBounds());
-      if (bounds != null && pointInRectangle(p, bounds))
+      if (!info.isLocked() && bounds != null && pointInRectangle(p, bounds))
       {
         clickedObject = info;
         break;
@@ -333,7 +335,7 @@ public class SceneViewer extends ViewerCanvas
     for (i = 0; i < theScene.getNumObjects(); i++)
     {
       info = theScene.getObject(i);
-      if (info.isVisible())
+      if (info.isVisible() && !info.isLocked())
       {
         theCamera.setObjectTransform(info.getCoords().fromLocal());
         bounds = theCamera.findScreenBounds(info.getBounds());
@@ -476,7 +478,7 @@ public class SceneViewer extends ViewerCanvas
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         info = theScene.getObject(i);
-        if (info.isVisible())
+        if (info.isVisible() && !info.isLocked())
         {
           theCamera.setObjectTransform(info.getCoords().fromLocal());
           b = theCamera.findScreenBounds(info.getBounds());

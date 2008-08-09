@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2002 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.ui;
 import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.object.*;
+import javax.swing.*;
 import java.util.*;
 
 /** This class represents an object in the tree of objects in a scene. */
@@ -20,7 +21,8 @@ import java.util.*;
 public class ObjectTreeElement extends TreeElement
 {
   protected ObjectInfo info;
-  
+  private static Icon lockIcon = ThemeManager.getIcon("lock");
+
   public ObjectTreeElement(ObjectInfo info, TreeList tree)
   {
     this(info, null, tree, true);
@@ -31,7 +33,7 @@ public class ObjectTreeElement extends TreeElement
     this.info = info;
     this.parent = parent;
     this.tree = tree;
-    children = new Vector();
+    children = new Vector<TreeElement>();
     if (addChildren)
       for (int i = 0; i < info.getChildren().length; i++)
         children.addElement(new ObjectTreeElement(info.getChildren()[i], this, tree, true));
@@ -43,7 +45,12 @@ public class ObjectTreeElement extends TreeElement
   {
     return info.getName();
   }
-  
+
+  public Icon getIcon()
+  {
+    return (info.isLocked() ? lockIcon : null);
+  }
+
   /* Determine whether this element can be added as a child of another one  If el is null,
      return whether this element can be added at the root level of the tree. */
   

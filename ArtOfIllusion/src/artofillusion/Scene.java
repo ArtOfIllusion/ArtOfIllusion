@@ -898,6 +898,13 @@ public class Scene
     return null;
   }
 
+  /** Get all objects in the Scene in the form of a List. */
+
+  public List<ObjectInfo> getAllObjects()
+  {
+    return Collections.unmodifiableList(objects);
+  }
+
   /** Get the index of the specified object. */
   
   public int indexOf(ObjectInfo info)

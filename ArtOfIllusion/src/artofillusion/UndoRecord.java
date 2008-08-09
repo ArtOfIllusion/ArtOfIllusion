@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,8 @@ import java.util.Vector;
 
 public class UndoRecord
 {
-  Vector command, data;
+  Vector<Integer> command;
+  Vector<Object[]> data;
   boolean redo;
   EditingWindow theWindow;
   
@@ -47,8 +48,8 @@ public class UndoRecord
   {
     theWindow = win;
     redo = isRedo;
-    command = new Vector();
-    data = new Vector();
+    command = new Vector<Integer>();
+    data = new Vector<Object[]>();
   }
   
   public UndoRecord(EditingWindow win, boolean isRedo, int theCommand, Object commandData[])
@@ -64,13 +65,13 @@ public class UndoRecord
   
   public void addCommand(int theCommand, Object commandData[])
   {
-    command.addElement(new Integer(theCommand));
+    command.addElement(theCommand);
     data.addElement(commandData);
   }
   
   public void addCommandAtBeginning(int theCommand, Object commandData[])
   {
-    command.insertElementAt(new Integer(theCommand), 0);
+    command.insertElementAt(theCommand, 0);
     data.insertElementAt(commandData, 0);
   }
   

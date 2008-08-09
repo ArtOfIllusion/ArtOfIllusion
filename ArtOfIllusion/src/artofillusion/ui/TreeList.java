@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,8 @@ package artofillusion.ui;
 import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
+
+import javax.swing.*;
 import java.awt.*;
 import java.util.*;
 
@@ -23,7 +25,8 @@ import java.util.*;
 public class TreeList extends CustomWidget
 {
   private EditingWindow window;
-  private Vector elements, showing, indent, selected;
+  private Vector<TreeElement> elements, showing, selected;
+  private Vector<Integer> indent;
   private int yoffset, rowHeight, dragStart, lastDrag, lastClickRow, lastIndent, maxRowWidth;
   private boolean updateDisabled, moving, origSelected[], insertAbove, okToInsert, allowMultiple;
   private PopupMenuManager popupManager;
@@ -49,10 +52,10 @@ public class TreeList extends CustomWidget
   public TreeList(EditingWindow win)
   {
     window = win;
-    elements = new Vector();
-    showing = new Vector();
-    indent = new Vector();
-    selected = new Vector();
+    elements = new Vector<TreeElement>();
+    showing = new Vector<TreeElement>();
+    indent = new Vector<Integer>();
+    selected = new Vector<TreeElement>();
     origSelected = new boolean [0];
     allowMultiple = true;
     lastClickRow = -1;
@@ -192,7 +195,7 @@ public class TreeList extends CustomWidget
   
   public TreeElement [] getElements()
   {
-    Vector v = new Vector();
+    Vector<TreeElement> v = new Vector<TreeElement>();
     TreeElement el;
 
     for (int i = 0; i < elements.size(); i++)
@@ -207,7 +210,7 @@ public class TreeList extends CustomWidget
     return allEl;
   }
   
-  private void addChildrenToVector(TreeElement el, Vector v)
+  private void addChildrenToVector(TreeElement el, Vector<TreeElement> v)
   {
     for (int i = 0; i < el.getNumChildren(); i++)
     {
@@ -335,7 +338,7 @@ public class TreeList extends CustomWidget
     {
       TreeElement el = (TreeElement) elements.elementAt(i);
       showing.addElement(el);
-      indent.addElement(new Integer(0));
+      indent.addElement(0);
       if (el.isSelected())
         selected.addElement(el);
       addChildrenToState(el, 1, el.isExpanded());
@@ -407,6 +410,12 @@ public class TreeList extends CustomWidget
       // Draw the label.
       
       x += INDENT_WIDTH;
+      Icon icon = el.getIcon();
+      if (icon != null)
+      {
+        icon.paintIcon(getComponent(), g, x, y);
+        x += icon.getIconWidth();
+      }
       if (el.isSelected())
       {
         g.setColor(el.isGray() ? Color.gray : Color.black);
@@ -702,7 +711,6 @@ public class TreeList extends CustomWidget
       if (lastDrag != dragStart)
         dispatchEvent(new SelectionChangedEvent(this));
     }
-    Point pos = ev.getPoint();
     showPopupIfNeeded(ev);
   }
   

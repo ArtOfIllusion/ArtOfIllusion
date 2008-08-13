@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ import javax.swing.*;
 
 public class MacOSPlugin implements Plugin, InvocationHandler
 {
-  private boolean isMacOSX, usingAppMenu;
+  private boolean usingAppMenu;
 
   public void processMessage(int message, Object args[])
   {
@@ -34,7 +34,6 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       String os = ((String) System.getProperties().get("os.name")).toLowerCase();
       if (!os.startsWith("mac os x"))
         return;
-      isMacOSX = true;
       ArtOfIllusion.addWindow(new MacMenuBarWindow());
       UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
       UIUtilities.setStandardDialogInsets(3);
@@ -43,12 +42,12 @@ public class MacOSPlugin implements Plugin, InvocationHandler
         // Use reflection to set up the application menu.
         
         Class appClass = Class.forName("com.apple.eawt.Application");
-        Object app = appClass.getMethod("getApplication", new Class [0]).invoke(null, new Object [0]);
-        appClass.getMethod("setEnabledAboutMenu", new Class [] {Boolean.TYPE}).invoke(app, new Object [] {Boolean.TRUE});
-        appClass.getMethod("setEnabledPreferencesMenu", new Class [] {Boolean.TYPE}).invoke(app, new Object [] {Boolean.TRUE});
+        Object app = appClass.getMethod("getApplication").invoke(null);
+        appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
+        appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
         Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
         Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class [] {listenerClass}, this);
-        appClass.getMethod("addApplicationListener", new Class [] {listenerClass}).invoke(app, new Object [] {proxy});
+        appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
       }
       catch (Exception ex)
       {
@@ -61,15 +60,41 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     }
     else if (message == SCENE_WINDOW_CREATED)
     {
+      final LayoutWindow win = (LayoutWindow) args[0];
+      win.addEventLink(SceneChangedEvent.class, new Object() {
+        void processEvent()
+        {
+          updateWindowProperties(win);
+        }
+      });
+      updateWindowProperties(win);
       if (!usingAppMenu)
         return;
       
       // Remove the Quit and Preferences menu items, since we are using the ones in the application
       // menu instead.
       
-      LayoutWindow win = (LayoutWindow) args[0];
       removeMenuItem(win, Translate.text("menu.file"), Translate.text("menu.quit"));
       removeMenuItem(win, Translate.text("menu.edit"), Translate.text("menu.preferences"));
+    }
+    else if (message == SCENE_SAVED)
+    {
+      LayoutWindow win = (LayoutWindow) args[1];
+      updateWindowProperties(win);
+      win.getComponent().getRootPane().putClientProperty("Window.documentModified", false);      
+    }
+  }
+
+  /** Update the Mac OS X specific client properties. */
+
+  private void updateWindowProperties(LayoutWindow win)
+  {
+    win.getComponent().getRootPane().putClientProperty("Window.documentModified", win.isModified());
+    Scene scene = win.getScene();
+    if (scene.getName() != null)
+    {
+      File file = new File(scene.getDirectory(), scene.getName());
+      win.getComponent().getRootPane().putClientProperty("Window.documentFile", file);
     }
   }
   

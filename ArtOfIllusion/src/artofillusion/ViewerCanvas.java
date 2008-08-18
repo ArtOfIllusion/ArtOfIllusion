@@ -534,7 +534,10 @@ public abstract class ViewerCanvas extends CustomWidget
     {
       Rectangle bounds = getBounds();
       boundCamera.getCoords().copyCoords(theCamera.getCameraCoordinates());
-      theCamera.setDistToScreen((bounds.height/200.0)/Math.tan(((SceneCamera) boundCamera.getObject()).getFieldOfView()*Math.PI/360.0));
+      if (boundCamera.getObject() instanceof SceneCamera)
+        theCamera.setDistToScreen((bounds.height/200.0)/Math.tan(((SceneCamera) boundCamera.getObject()).getFieldOfView()*Math.PI/360.0));
+      else
+        theCamera.setDistToScreen(Camera.DEFAULT_DISTANCE_TO_SCREEN);
     }
     else
       theCamera.setDistToScreen(Camera.DEFAULT_DISTANCE_TO_SCREEN);

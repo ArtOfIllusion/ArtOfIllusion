@@ -25,7 +25,7 @@ public class SceneViewer extends ViewerCanvas
 {
   Scene theScene;
   EditingWindow parentFrame;
-  Vector cameras;
+  Vector<ObjectInfo> cameras;
   boolean draggingBox, draggingSelectionBox, squareBox, sentClick, dragging;
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
@@ -43,7 +43,7 @@ public class SceneViewer extends ViewerCanvas
     parentFrame = fr;
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     draggingBox = draggingSelectionBox = false;
-    cameras = new Vector();
+    cameras = new Vector<ObjectInfo>();
     buildChoices(p);
     rebuildCameraList();
     setRenderMode(ArtOfIllusion.getPreferences().getDefaultDisplayMode());
@@ -74,6 +74,12 @@ public class SceneViewer extends ViewerCanvas
     {
       ObjectInfo obj = theScene.getObject(i);
       if (obj.getObject() instanceof SceneCamera)
+        cameras.addElement(obj);
+    }
+    for (int i = 0; i < theScene.getNumObjects(); i++)
+    {
+      ObjectInfo obj = theScene.getObject(i);
+      if (obj.getObject() instanceof DirectionalLight || obj.getObject() instanceof SpotLight)
         cameras.addElement(obj);
     }
     for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )

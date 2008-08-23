@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,7 +10,6 @@
 
 package artofillusion.image;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.awt.*;
 import java.awt.image.*;
@@ -192,24 +191,21 @@ public class MIPMappedImage extends ImageMap
 
   private void countComponents(int data[])
   {
-    int i, j, k;
-
-    for (i = 0; i < data.length; i++)
+    components = 1;
+    for (int i = 0; i < data.length; i++)
       {
-        j = data[i];
+        int j = data[i];
         if ((j & 0xFF000000) != 0xFF000000)
           {
             components = 4;
             return;
           }
-        k = j & 0xFF;
+        int k = j & 0xFF;
         if ((((j>>8)&0xFF) != k) || (((j>>16)&0xFF) != k))
           {
             components = 3;
-            return;
           }
       }
-    components = 1;
   }
 
   /** This method calculates the average value for each component over the entire image. */

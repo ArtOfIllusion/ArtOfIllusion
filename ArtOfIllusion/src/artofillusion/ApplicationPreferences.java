@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,17 +27,13 @@ public class ApplicationPreferences
   private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
 
+  /**
+   * Create a new ApplicationPreferences object, loading the preferences from a
+   * file in the default location.
+   */
+
   public ApplicationPreferences()
   {
-    loadPreferences();
-  }
-
-  /** Load the preferences from disk. */
-
-  public void loadPreferences()
-  {
-    properties = new Properties();
-    initDefaultPreferences();
     File f = new File(getPreferencesDirectory(), "aoiprefs");
     if (!f.exists())
     {
@@ -55,13 +51,39 @@ public class ApplicationPreferences
     try
       {
         InputStream in = new BufferedInputStream(new FileInputStream(f));
-        properties.load(in);
+        loadPreferences(in);
         in.close();
       }
     catch (IOException ex)
       {
         ex.printStackTrace();
       }
+  }
+
+  /**
+   * Create a new ApplicationPreferences object, loading the preferences from an InputStream.
+   */
+
+  public ApplicationPreferences(InputStream in)
+  {
+    try
+    {
+      loadPreferences(in);
+      in.close();
+    }
+    catch (IOException ex)
+    {
+      ex.printStackTrace();
+    }
+  }
+
+  /** Load the preferences from an InputStream. */
+
+  private void loadPreferences(InputStream in) throws IOException
+  {
+    properties = new Properties();
+    initDefaultPreferences();
+    properties.load(in);
     parsePreferences();
   }
 

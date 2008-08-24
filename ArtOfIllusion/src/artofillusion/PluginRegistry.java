@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2008 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -40,7 +40,7 @@ public class PluginRegistry
    * contained in them.
    */
 
-  static void scanPlugins()
+  public static void scanPlugins()
   {
     File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
     if (!dir.exists())
@@ -68,8 +68,39 @@ public class PluginRegistry
         ex.printStackTrace(System.err);
       }
     }
+    processPlugins(jars);
+  }
 
-    // Now build a classloader for each one, registering plugins, categories, and resources.
+  /**
+   * Process a set of ClassLoaders corresponding to jar files, read in their indices,
+   * and record all plugins contained in them.
+   */
+
+  public static void scanPlugins(List<ClassLoader> loaders)
+  {
+    HashSet<JarInfo> jars = new HashSet<JarInfo>();
+    for (ClassLoader loader : loaders)
+    {
+      try
+      {
+        jars.add(new JarInfo(loader));
+      }
+      catch (IOException ex)
+      {
+        // Not a zip file.
+      }
+      catch (Exception ex)
+      {
+        System.err.println("*** Exception loading plugin classloader");
+        ex.printStackTrace(System.err);
+      }
+    }
+    processPlugins(jars);
+  }
+
+  private static void processPlugins(HashSet<JarInfo> jars)
+  {
+    // Build a classloader for each jar, registering plugins, categories, and resources.
     // This needs to be done in the proper order to account for dependencies between plugins.
 
     HashMap<String, JarInfo> nameMap = new HashMap<String, JarInfo>();
@@ -97,8 +128,13 @@ public class PluginRegistry
       if (!processedAny)
       {
         System.err.println("*** The following plugins were not loaded because their imports could not be resolved:");
-        for (Iterator jarIterator = jars.iterator(); jarIterator.hasNext(); )
-          System.out.println(((JarInfo) jarIterator.next()).file.getName());
+        for (JarInfo info : jars)
+        {
+          if (info.file == null)
+            System.err.println("(plugin loaded from ClassLoader)");
+          else
+            System.err.println(info.file.getName());
+        }
         System.err.println();
         break;
       }
@@ -117,10 +153,17 @@ public class PluginRegistry
     try
     {
       if (jar.imports.size() == 0)
-        jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});
+      {
+        if (jar.loader == null)
+          jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});
+      }
       else
       {
-        SearchlistClassLoader loader = new SearchlistClassLoader(new URL [] {jar.file.toURI().toURL()});;
+        SearchlistClassLoader loader;
+        if (jar.loader == null)
+          loader = new SearchlistClassLoader(new URL [] {jar.file.toURI().toURL()});
+        else
+          loader = new SearchlistClassLoader(jar.loader);
         jar.loader = loader;
         for (String importName : jar.imports)
           loader.add(nameMap.get(importName).loader);
@@ -220,7 +263,7 @@ public class PluginRegistry
     if (plugins == null)
       return new ArrayList<T>();
     ArrayList<T> list = new ArrayList<T>(plugins.size());
-    for(Object plugin : plugins)
+    for (Object plugin : plugins)
       list.add((T) plugin);
     return list;
   }
@@ -411,92 +454,14 @@ public class PluginRegistry
         if (ze != null)
         {
           InputStream in = new BufferedInputStream(zf.getInputStream(ze));
-          DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-          try
-          {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(in);
-            Element extensions = doc.getDocumentElement();
-            if (!"extension".equals(extensions.getNodeName()))
-              throw new Exception("The root element must be <extension>");
-            Node nameNode = extensions.getAttributes().getNamedItem("name");
-            if (nameNode != null)
-              name = nameNode.getNodeValue();
-            NodeList categoryList = doc.getElementsByTagName("category");
-            for (int i = 0; i < categoryList.getLength(); i++)
-            {
-              Node category = categoryList.item(i);
-              categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
-            }
-            NodeList pluginList = doc.getElementsByTagName("plugin");
-            for (int i = 0; i < pluginList.getLength(); i++)
-            {
-              Node plugin = pluginList.item(i);
-
-              // Check for <export> tags inside the <plugin> tag.
-
-              String className = plugin.getAttributes().getNamedItem("class").getNodeValue();
-              plugins.add(className);
-              NodeList children = plugin.getChildNodes();
-              for (int k = 0; k < children.getLength(); k++)
-              {
-                Node childNode = children.item(k);
-                if ("export".equals(childNode.getNodeName()))
-                {
-                  ExportInfo export = new ExportInfo();
-                  export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
-                  export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
-                  export.className = className;
-                  exports.add(export);
-                }
-              }
-            }
-            NodeList importList = doc.getElementsByTagName("import");
-            for (int i = 0; i < importList.getLength(); i++)
-            {
-              Node importNode = importList.item(i);
-              imports.add(importNode.getAttributes().getNamedItem("name").getNodeValue());
-            }
-            NodeList resourceList = doc.getElementsByTagName("resource");
-            for (int i = 0; i < resourceList.getLength(); i++)
-            {
-              Node resourceNode = resourceList.item(i);
-              ResourceInfo resource = new ResourceInfo();
-              resource.type = resourceNode.getAttributes().getNamedItem("type").getNodeValue();
-              resource.id = resourceNode.getAttributes().getNamedItem("id").getNodeValue();
-              resource.name = resourceNode.getAttributes().getNamedItem("name").getNodeValue();
-              Node localeNode = resourceNode.getAttributes().getNamedItem("locale");
-              if (localeNode != null)
-              {
-                String[] parts = localeNode.getNodeValue().split("_");
-                if (parts.length == 1)
-                  resource.locale = new Locale(parts[0]);
-                else if (parts.length == 2)
-                  resource.locale = new Locale(parts[0], parts[1]);
-                else if (parts.length == 3)
-                  resource.locale = new Locale(parts[0], parts[1], parts[2]);
-              }
-              resources.add(resource);
-            }
-          }
-          catch (Exception ex)
-          {
-            System.err.println("*** Exception while parsing extensions.xml for plugin "+file.getName()+":");
-            ex.printStackTrace();
-            throw new IOException();
-          }
+          loadExtensionsFile(in);
           return;
         }
         ze = zf.getEntry("plugins");
         if (ze != null)
         {
           BufferedReader in = new BufferedReader(new InputStreamReader(zf.getInputStream(ze)));
-          String className = in.readLine();
-          while (className != null)
-          {
-            plugins.add(className.trim());
-            className = in.readLine();
-          }
+          loadPluginsFile(in);
           return;
         }
         throw new IOException(); // No index found
@@ -504,6 +469,119 @@ public class PluginRegistry
       finally
       {
         zf.close();
+      }
+    }
+
+    JarInfo(ClassLoader loader) throws IOException
+    {
+      this.loader = loader;
+      imports = new ArrayList<String>();
+      plugins = new ArrayList<String>();
+      categories = new ArrayList<String>();
+      resources = new ArrayList<ResourceInfo>();
+      exports = new ArrayList<ExportInfo>();
+      InputStream in = loader.getResourceAsStream("extensions.xml");
+      if (in != null)
+      {
+        loadExtensionsFile(new BufferedInputStream(in));
+        in.close();
+        return;
+      }
+      in = loader.getResourceAsStream("plugins");
+      if (in != null)
+      {
+        loadPluginsFile(new BufferedReader(new InputStreamReader(in)));
+        in.close();
+        return;
+      }
+      throw new IOException(); // No index found
+    }
+
+    private void loadExtensionsFile(InputStream in) throws IOException
+    {
+      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      try
+      {
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(in);
+        Element extensions = doc.getDocumentElement();
+        if (!"extension".equals(extensions.getNodeName()))
+          throw new Exception("The root element must be <extension>");
+        Node nameNode = extensions.getAttributes().getNamedItem("name");
+        if (nameNode != null)
+          name = nameNode.getNodeValue();
+        NodeList categoryList = doc.getElementsByTagName("category");
+        for (int i = 0; i < categoryList.getLength(); i++)
+        {
+          Node category = categoryList.item(i);
+          categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
+        }
+        NodeList pluginList = doc.getElementsByTagName("plugin");
+        for (int i = 0; i < pluginList.getLength(); i++)
+        {
+          Node plugin = pluginList.item(i);
+
+          // Check for <export> tags inside the <plugin> tag.
+
+          String className = plugin.getAttributes().getNamedItem("class").getNodeValue();
+          plugins.add(className);
+          NodeList children = plugin.getChildNodes();
+          for (int k = 0; k < children.getLength(); k++)
+          {
+            Node childNode = children.item(k);
+            if ("export".equals(childNode.getNodeName()))
+            {
+              ExportInfo export = new ExportInfo();
+              export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
+              export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
+              export.className = className;
+              exports.add(export);
+            }
+          }
+        }
+        NodeList importList = doc.getElementsByTagName("import");
+        for (int i = 0; i < importList.getLength(); i++)
+        {
+          Node importNode = importList.item(i);
+          imports.add(importNode.getAttributes().getNamedItem("name").getNodeValue());
+        }
+        NodeList resourceList = doc.getElementsByTagName("resource");
+        for (int i = 0; i < resourceList.getLength(); i++)
+        {
+          Node resourceNode = resourceList.item(i);
+          ResourceInfo resource = new ResourceInfo();
+          resource.type = resourceNode.getAttributes().getNamedItem("type").getNodeValue();
+          resource.id = resourceNode.getAttributes().getNamedItem("id").getNodeValue();
+          resource.name = resourceNode.getAttributes().getNamedItem("name").getNodeValue();
+          Node localeNode = resourceNode.getAttributes().getNamedItem("locale");
+          if (localeNode != null)
+          {
+            String[] parts = localeNode.getNodeValue().split("_");
+            if (parts.length == 1)
+              resource.locale = new Locale(parts[0]);
+            else if (parts.length == 2)
+              resource.locale = new Locale(parts[0], parts[1]);
+            else if (parts.length == 3)
+              resource.locale = new Locale(parts[0], parts[1], parts[2]);
+          }
+          resources.add(resource);
+        }
+      }
+      catch (Exception ex)
+      {
+        System.err.println("*** Exception while parsing extensions.xml for plugin "+file.getName()+":");
+        ex.printStackTrace();
+        throw new IOException();
+      }
+    }
+
+    private void loadPluginsFile(BufferedReader in) throws IOException
+    {
+      String className = in.readLine();
+      while (className != null)
+      {
+        plugins.add(className.trim());
+        className = in.readLine();
       }
     }
   }

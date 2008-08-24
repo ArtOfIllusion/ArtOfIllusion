@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -98,6 +98,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
             displayItem[3].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
             currentView = i;
             updateImage();
+            updateMenus();
           }
       }
     };
@@ -1839,7 +1840,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (!Double.isNaN(values[5]))
       m = m.times(Mat4.zrotation(values[5]*Math.PI/180.0));
     UndoRecord undo = new UndoRecord(this, false);
-    HashSet scaledObjects = new HashSet();
+    HashSet<Object3D> scaledObjects = new HashSet<Object3D>();
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);

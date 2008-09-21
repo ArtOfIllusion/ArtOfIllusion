@@ -36,7 +36,7 @@ public class DirectionalPhotonSource implements PhotonSource
     maxy = bounds.maxy;
     center = coords.fromLocal().times(new Vec3(0.5*(minx+maxx), 0.5*(miny+maxy), bounds.minz-1.0));
     color = new RGBColor();
-    light.getLight(color, 0.0f);
+    light.getLight(color, new Vec3());
     lightIntensity = color.getRed()+color.getGreen()+color.getBlue();
     if (lightIntensity == 0.0f)
       return;

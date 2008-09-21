@@ -933,7 +933,7 @@ public class Raster implements Renderer, Runnable
       {
         Light lt = (Light) light[i].getObject();
         Vec3 lightPos = lightPosition[i];
-        double distToLight = 0.0, fatt = 0.0, lightDot = 0.0;
+        double distToLight = 0.0, lightDot = 0.0;
         if (lt instanceof PointLight)
           {
             lightDir.set(pos);
@@ -947,19 +947,10 @@ public class Raster implements Renderer, Runnable
             lightDir.subtract(lightPos);
             distToLight = lightDir.length();
             lightDir.scale(1.0/distToLight);
-            fatt = lightDir.dot(lightDirection[i]);
-            if (fatt < ((SpotLight) lt).getAngleCosine())
-              continue;
           }
         else if (lt instanceof DirectionalLight)
           lightDir.set(lightDirection[i]);
-        lt.getLight(outputColor, (float) distToLight);
-        if (lt instanceof SpotLight)
-        {
-          double exponent = ((SpotLight) lt).getExponent();
-          if (exponent > 0.0)
-            outputColor.scale(Math.pow(fatt, exponent));
-        }
+        lt.getLight(outputColor, light[i].getCoords().toLocal().times(pos));
         if (lt.getType() == Light.TYPE_AMBIENT)
           {
             if (diffuse != null)

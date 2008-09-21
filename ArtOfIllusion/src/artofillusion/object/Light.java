@@ -97,16 +97,10 @@ public abstract class Light extends Object3D
   }
 
   /**
-   * Get the attenuated light at a given distance from the light source.
+   * Get the attenuated light at a given position relative to the light source.
    */
 
-  public void getLight(RGBColor light, float distance)
-  {
-    double d = distance*decayRate;
-    
-    light.copy(color);
-    light.scale(intensity/(1.0f+d+d*d));
-  }
+  public abstract void getLight(RGBColor light, Vec3 position);
   
   /**
    * Get the decay rate of the light.

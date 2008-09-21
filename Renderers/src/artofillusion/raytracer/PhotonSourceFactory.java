@@ -10,8 +10,6 @@
 
 package artofillusion.raytracer;
 
-import artofillusion.object.*;
-
 import java.util.*;
 
 /**
@@ -48,5 +46,5 @@ public interface PhotonSourceFactory
    * @return true if the light has been successfully processed, false otherwise.  Returning true
    * will prevent any further PhotonSources from being generated for the light.
    */
-  boolean processLight(ObjectInfo light, PhotonMap map, Collection<PhotonSource> sources);
+  boolean processLight(RTLight light, PhotonMap map, Collection<PhotonSource> sources);
 }

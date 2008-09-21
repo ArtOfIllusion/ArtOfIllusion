@@ -43,7 +43,7 @@ public class PointPhotonSource implements PhotonSource
       }
     color = new RGBColor();
     double radius = Math.sqrt(maxDist2)*0.5;
-    light.getLight(color, (float) radius);
+    light.getLight(color, new Vec3(radius, 0.0, 0.0));
     lightIntensity = color.getRed()+color.getGreen()+color.getBlue();
     if (lightIntensity == 0.0f)
       return;

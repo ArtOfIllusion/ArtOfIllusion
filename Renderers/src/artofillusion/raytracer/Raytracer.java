@@ -30,7 +30,7 @@ import java.util.List;
 public class Raytracer implements Renderer, Runnable
 {
   RTObject sceneObject[];
-  ObjectInfo light[];
+  RTLight light[];
   OctreeNode rootNode, cameraNode, lightNode[];
   ColumnContainer configPanel;
   BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, filterBox, reducedMemoryBox;
@@ -690,7 +690,7 @@ public class Raytracer implements Renderer, Runnable
   private void buildScene(final Scene theScene, final Camera theCamera)
   {
     final List<RTObject> obj = Collections.synchronizedList(new ArrayList<RTObject>());
-    final List<ObjectInfo> lt = Collections.synchronizedList(new ArrayList<ObjectInfo>());
+    final List<RTLight> lt = Collections.synchronizedList(new ArrayList<RTLight>());
     final Thread mainThread = Thread.currentThread();
     final List<RTObjectFactory> factories = PluginRegistry.getPlugins(RTObjectFactory.class);
 
@@ -723,9 +723,9 @@ public class Raytracer implements Renderer, Runnable
           materialBounds.extend(sceneObject[i].getBounds());
       }
     }
-    light = new ObjectInfo [lt.size()];
+    light = new RTLight [lt.size()];
     for (int i = 0; i < light.length; i++)
-      light[i] = (ObjectInfo) lt.get(i);
+      light[i] = lt.get(i);
     ambColor = theScene.getAmbientColor();
     envColor = theScene.getEnvironmentColor();
     envMapping = theScene.getEnvironmentMapping();
@@ -741,7 +741,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Add a single object to the scene. */
   
-  private void addObject(List<RTObject> obj, List<ObjectInfo> lt, ObjectInfo info, Camera camera,
+  private void addObject(List<RTObject> obj, List<RTLight> lt, ObjectInfo info, Camera camera,
                 Thread mainThread, List<RTObjectFactory> factories)
   {
     boolean displaced = false;
@@ -761,9 +761,19 @@ public class Raytracer implements Renderer, Runnable
     Object3D theObject = info.getObject();
     Mat4 toLocal = info.getCoords().toLocal();
     Mat4 fromLocal = info.getCoords().fromLocal();
-    if (theObject instanceof Light)
+    if (theObject instanceof PointLight)
     {
-      lt.add(info);
+      lt.add(new RTSphericalLight((PointLight) theObject, info.getCoords(), penumbra));
+      return;
+    }
+    if (theObject instanceof SpotLight)
+    {
+      lt.add(new RTSphericalLight((SpotLight) theObject, info.getCoords(), penumbra));
+      return;
+    }
+    if (theObject instanceof DirectionalLight)
+    {
+      lt.add(new RTDirectionalLight((DirectionalLight) theObject, info.getCoords()));
       return;
     }
     while (theObject instanceof ObjectWrapper)
@@ -966,7 +976,7 @@ public class Raytracer implements Renderer, Runnable
     lightNode = new OctreeNode [light.length];
     for (i = 0; i < light.length; i++)
       {
-        if (light[i].getObject() instanceof DirectionalLight)
+        if (light[i].getLight() instanceof DirectionalLight)
           lightNode[i] = null;
         else
           lightNode[i] = rootNode.findNode(light[i].getCoords().getOrigin());
@@ -1062,12 +1072,12 @@ public class Raytracer implements Renderer, Runnable
 
       // Process it in the default way.
 
-      if (light[i].getObject() instanceof DirectionalLight)
-        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].getObject(), light[i].getCoords(), map));
-      else if (light[i].getObject() instanceof PointLight)
-        sources.add(new PointPhotonSource((PointLight) light[i].getObject(), light[i].getCoords(), map));
-      else if (light[i].getObject() instanceof SpotLight)
-        sources.add(new SpotlightPhotonSource((SpotLight) light[i].getObject(), light[i].getCoords(), map));
+      if (light[i].getLight() instanceof DirectionalLight)
+        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].getLight(), light[i].getCoords(), map));
+      else if (light[i].getLight() instanceof PointLight)
+        sources.add(new PointPhotonSource((PointLight) light[i].getLight(), light[i].getCoords(), map));
+      else if (light[i].getLight() instanceof SpotLight)
+        sources.add(new SpotlightPhotonSource((SpotLight) light[i].getLight(), light[i].getCoords(), map));
     }
     ArrayList<PhotonSource> objectSources = new ArrayList<PhotonSource>();
     for (int i = 0; i < sceneObject.length; i++)
@@ -2010,9 +2020,9 @@ public class Raytracer implements Renderer, Runnable
     int i;
     RGBColor lightColor = rt.color[treeDepth+1], finalColor = rt.color[treeDepth];
     TextureSpec spec = rt.surfSpec[treeDepth];
-    Vec3 lightPos, dir;
+    Vec3 dir;
     Ray r = rt.ray[treeDepth+1];
-    double sign, distToLight = 0.0, fatt = 0.0, dot;
+    double sign, distToLight = 0.0, dot;
     boolean hilight;
     Light lt;
 
@@ -2049,41 +2059,13 @@ public class Raytracer implements Renderer, Runnable
 
     // Now loop over the list of lights.
 
-    r.getOrigin().set(pos);
     dir = r.getDirection();
     sign = front ? 1.0 : -1.0;
     hilight = (spec.hilight.getRed() != 0.0 || spec.hilight.getGreen() != 0.0 || spec.hilight.getBlue() != 0.0);
     for (i = light.length-1; i >= 0; i--)
       {
-        lt = (Light) light[i].getObject();
-        lightPos = light[i].getCoords().getOrigin();
-        if (lt instanceof PointLight)
-          {
-            dir.set(lightPos);
-            if (penumbra)
-              randomizePoint(dir, rt.random, ((PointLight) lt).getRadius(), rayNumber+treeDepth+1);
-            dir.subtract(pos);
-            distToLight = dir.length();
-            dir.normalize();
-          }
-        else if (lt instanceof SpotLight)
-          {
-            dir.set(lightPos);
-            if (penumbra)
-              randomizePoint(dir, rt.random, ((SpotLight) lt).getRadius(), rayNumber+treeDepth+1);
-            dir.subtract(pos);
-            distToLight = dir.length();
-            dir.normalize();
-            fatt = -dir.dot(light[i].getCoords().getZDirection());
-            if (fatt < ((SpotLight) lt).getAngleCosine())
-              continue;
-          }
-        else if (lt instanceof DirectionalLight)
-          {
-            dir.set(light[i].getCoords().getZDirection());
-            dir.scale(-1.0);
-            distToLight = Double.MAX_VALUE;
-          }
+        lt = light[i].getLight();
+        distToLight = light[i].findRayToLight(pos, r, rayNumber+treeDepth+1);
         r.newID();
 
         // Now scan through the list of objects, and see if the light is blocked.
@@ -2094,13 +2076,7 @@ public class Raytracer implements Renderer, Runnable
           dot = sign*dir.dot(normal);
         if (dot > 0.0)
           {
-            lt.getLight(lightColor, (float) distToLight);
-            if (lt instanceof SpotLight)
-            {
-              double exponent = ((SpotLight) lt).getExponent();
-              if (exponent > 0.0)
-                lightColor.scale(Math.pow(fatt, exponent));
-            }
+            lt.getLight(lightColor, light[i].getCoords().toLocal().times(pos));
             if (lightColor.getRed()*(spec.diffuse.getRed()*dot+spec.hilight.getRed()) < minRayIntensity &&
                 lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen()) < minRayIntensity &&
                 lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue()) < minRayIntensity)
@@ -2607,7 +2583,7 @@ public class Raytracer implements Renderer, Runnable
     int i;
     RGBColor filter = rt.rayIntensity[treeDepth], lightColor = rt.color[treeDepth];
     Ray r = rt.ray[treeDepth];
-    Vec3 lightPos, dir, pos = r.origin, viewDir = rt.ray[treeDepth-1].direction;
+    Vec3 dir, pos = r.origin, viewDir = rt.ray[treeDepth-1].direction;
     double distToLight = 0.0, fatt = 0.0, dot;
     double ec2 = eccentricity*eccentricity;
     Light lt;
@@ -2616,43 +2592,14 @@ public class Raytracer implements Renderer, Runnable
     dir = r.getDirection();
     for (i = light.length-1; i >= 0; i--)
       {
-        lt = (Light) light[i].getObject();
-        lightPos = light[i].getCoords().getOrigin();
-        if (lt instanceof PointLight)
-          {
-            dir.set(lightPos);
-            dir.subtract(pos);
-            distToLight = dir.length();
-            dir.normalize();
-          }
-        else if (lt instanceof SpotLight)
-          {
-            dir.set(lightPos);
-            dir.subtract(pos);
-            distToLight = dir.length();
-            dir.normalize();
-            fatt = -dir.dot(light[i].getCoords().getZDirection());
-            if (fatt < ((SpotLight) lt).getAngleCosine())
-              continue;
-          }
-        else if (lt instanceof DirectionalLight)
-          {
-            dir.set(light[i].getCoords().getZDirection());
-            dir.scale(-1.0);
-            distToLight = Double.MAX_VALUE;
-          }
+        lt = light[i].getLight();
+        distToLight = light[i].findRayToLight(pos, r, -1);
         r.newID();
 
         // Now scan through the list of objects, and see if the light is blocked.
 
-        lt.getLight(lightColor, (float) distToLight);
+        lt.getLight(lightColor, light[i].getCoords().toLocal().times(pos));
         lightColor.multiply(filter);
-        if (lt instanceof SpotLight)
-        {
-          double exponent = ((SpotLight) lt).getExponent();
-          if (exponent > 0.0)
-            lightColor.scale(Math.pow(fatt, exponent));
-        }
         if (eccentricity != 0.0 && lt.getType() != Light.TYPE_AMBIENT)
           {
             dot = dir.dot(viewDir);
@@ -2672,7 +2619,7 @@ public class Raytracer implements Renderer, Runnable
      over the volume of a sphere whose radius is given by size.  number is used for 
      distributing the displacements evenly. */
 
-  private void randomizePoint(Vec3 pos, Random random, double size, int number)
+  public void randomizePoint(Vec3 pos, Random random, double size, int number)
   {
     double x, y, z;
     int d;
@@ -2712,7 +2659,7 @@ public class Raytracer implements Renderer, Runnable
      surface normal, roughness determines how much the ray direction is altered, and number
      is used for distributing rays evenly. */
 
-  private void randomizeDirection(Vec3 dir, Vec3 norm, Random random, double roughness, int number)
+  public void randomizeDirection(Vec3 dir, Vec3 norm, Random random, double roughness, int number)
   {
     double x, y, z, scale, dot1, dot2;
     int d;

@@ -106,7 +106,18 @@ public class PointLight extends Light
   {
     radius = r;
   }
-  
+
+  /**
+   * Get the attenuated light at a given position relative to the light source.
+   */
+
+  public void getLight(RGBColor light, Vec3 position)
+  {
+    double d = position.length()*decayRate;
+    light.copy(color);
+    light.scale(intensity/(1.0f+d+d*d));
+  }
+
   public Object3D duplicate()
   {
     return new PointLight(color, intensity, radius, type, decayRate);

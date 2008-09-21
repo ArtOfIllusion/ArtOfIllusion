@@ -125,6 +125,27 @@ public class SpotLight extends Light
     return exponent;
   }
   
+  /**
+   * Get the attenuated light at a given position relative to the light source.
+   */
+
+  public void getLight(RGBColor light, Vec3 position)
+  {
+    double distance = position.length();
+    double fatt = position.z/distance;
+    if (fatt < cosangle)
+      light.setRGB(0.0f, 0.0f, 0.0f);
+    else
+    {
+      double d = distance*decayRate;
+      light.copy(color);
+      double scale = intensity/(1.0f+d+d*d);
+      if (exponent > 0.0)
+        scale *= Math.pow(fatt, exponent);
+      light.scale(scale);
+    }
+  }
+
   public Object3D duplicate()
   {
     return new SpotLight(color, intensity, angle, falloff, radius, type, decayRate);

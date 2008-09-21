@@ -34,10 +34,9 @@ public interface RTObjectFactory
    * @param scene      the Scene which is being rendered
    * @param camera     the Camera from which the scene is being rendered
    * @param rtobjects  RTObjects representing the object should be added to this Collection
-   * @param lights     ObjectInfos (whose objects <i>must</i> be Lights) representing the object
-   *                   should be added to this collection
+   * @param lights     RTLights representing the object should be added to this collection
    * @return true if the object has been successfully processed, false otherwise.  Returning true
    * will prevent any further RTObjects or Lights from being generated for the object.
    */
-  boolean processObject(ObjectInfo obj, Scene scene, Camera camera, Collection<RTObject> rtobjects, Collection<ObjectInfo> lights);
+  boolean processObject(ObjectInfo obj, Scene scene, Camera camera, Collection<RTObject> rtobjects, Collection<RTLight> lights);
 }

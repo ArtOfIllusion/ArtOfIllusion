@@ -47,7 +47,7 @@ public class SpotlightPhotonSource implements PhotonSource
       }
     color = new RGBColor();
     double radius = Math.sqrt(maxDist2)*0.5;
-    light.getLight(color, (float) radius);
+    light.getLight(color, new Vec3(0.0, 0.0, radius));
     lightIntensity = color.getRed()+color.getGreen()+color.getBlue();
     if (lightIntensity == 0.0f)
       return;

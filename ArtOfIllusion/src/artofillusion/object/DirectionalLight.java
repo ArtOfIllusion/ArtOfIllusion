@@ -93,10 +93,12 @@ public class DirectionalLight extends Light
   {
   }
 
-  // Directional lights are not attenuated with distance, since the light source is far
-  // outside the scene.
+  /**
+   * Directional lights are not attenuated with distance, since the light source is far
+   * outside the scene.
+   */
 
-  public void getLight(RGBColor light, float distance)
+  public void getLight(RGBColor light, Vec3 position)
   {
     light.copy(color);
     light.scale(intensity);

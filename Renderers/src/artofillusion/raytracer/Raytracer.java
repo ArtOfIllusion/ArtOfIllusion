@@ -773,7 +773,7 @@ public class Raytracer implements Renderer, Runnable
     }
     if (theObject instanceof DirectionalLight)
     {
-      lt.add(new RTDirectionalLight((DirectionalLight) theObject, info.getCoords()));
+      lt.add(new RTDirectionalLight((DirectionalLight) theObject, info.getCoords(), penumbra));
       return;
     }
     while (theObject instanceof ObjectWrapper)

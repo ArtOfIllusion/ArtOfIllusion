@@ -19,16 +19,25 @@ import artofillusion.object.*;
 
 public class RTDirectionalLight extends RTLight
 {
-  public RTDirectionalLight(DirectionalLight light, CoordinateSystem coords)
+  private final double radius;
+
+  public RTDirectionalLight(DirectionalLight light, CoordinateSystem coords, boolean softShadows)
   {
     super(light, coords);
+    radius = (softShadows ? Math.tan(light.getRadius()*Math.PI/180.0) : 0.0);
   }
 
   public double findRayToLight(Vec3 origin, Ray ray, int rayNumber)
   {
     ray.getOrigin().set(origin);
-    ray.getDirection().set(getCoords().getZDirection());
-    ray.getDirection().scale(-1.0);
+    Vec3 dir = ray.getDirection();
+    dir.set(getCoords().getZDirection());
+    dir.scale(-1.0);
+    if (rayNumber != -1)
+    {
+      ray.rt.rt.randomizePoint(dir, ray.rt.random, radius, rayNumber);
+      dir.normalize();
+    }
     return Double.MAX_VALUE;
   }
 }

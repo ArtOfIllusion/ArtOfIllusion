@@ -441,24 +441,24 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
     int index[] = new int [newparams.length];
     for (int i = 0; i < newparams.length; i++)
       {
-	index[i] = -1;
-	for (int j = 0; j < parameter.length; j++)
-	  if (parameter[j].equals(newparams[i]))
-	    index[i] = j;
+        index[i] = -1;
+        for (int j = 0; j < parameter.length; j++)
+          if (parameter[j].equals(newparams[i]))
+            index[i] = j;
       }
     parameter = newparams;
     Keyframe key[] = tc.getValues();
     for (int i = 0; i < key.length; i++)
       {
-	double newval[] = new double [parameter.length];
-	for (int j = 0; j < newval.length; j++)
-	  {
-	    if (index[j] > -1)
-	      newval[j] = ((ArrayKeyframe) key[i]).val[index[j]];
-	    else
+        double newval[] = new double [parameter.length];
+        for (int j = 0; j < newval.length; j++)
+          {
+            if (index[j] > -1)
+              newval[j] = ((ArrayKeyframe) key[i]).val[index[j]];
+            else
               newval[j] = parameter[j].defaultVal;
-	  }
-	((ArrayKeyframe) key[i]).val = newval;
+          }
+        ((ArrayKeyframe) key[i]).val = newval;
       }
     procVersion++;
     ((LayoutWindow) win).getScore().finishEditingTrack(this);

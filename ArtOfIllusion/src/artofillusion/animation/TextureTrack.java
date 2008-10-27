@@ -344,8 +344,8 @@ public class TextureTrack extends Track
     int index[] = new int [param.length];
     for (int i = 0; i < param.length; i++)
       for (int j = 0; j < texParam.length; j++)
-	if (param[i].equals(texParam[j]))
-	  index[i] = j;
+        if (param[i].equals(texParam[j]))
+          index[i] = j;
     for (int i = 0; i < index.length; i++)
       out.writeShort(index[i]);
     out.writeInt(t.length);
@@ -495,13 +495,13 @@ public class TextureTrack extends Track
     }
     else
       for (int i = 0; i < texParam.length; i++)
-	if (paramValue[i] instanceof ConstantParameterValue)
-	  elements.addElement(new GenericTreeElement(texParam[i].name, texParam[i], null, tree, null));
+        if (paramValue[i] instanceof ConstantParameterValue)
+          elements.addElement(new GenericTreeElement(texParam[i].name, texParam[i], null, tree, null));
     if (elements.size() == 0)
       {
-	TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
-	el.setSelectable(false);
-	elements.addElement(el);
+        TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
+        el.setSelectable(false);
+        elements.addElement(el);
       }
     TreeElement texElem = new GenericTreeElement(Translate.text("Texture"), null, null, tree,  elements);
     texElem.setSelectable(false);

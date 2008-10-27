@@ -276,7 +276,7 @@ public class DirectionalLight extends Light
     final DirectionalLightKeyframe key = (DirectionalLightKeyframe) k;
     final Widget patch = key.color.getSample(50, 30);
     ValueField intensityField = new ValueField(key.intensity, ValueField.NONE);
-    ValueSelector radiusField = new ValueSelector(radius, 0.0, 45.0, 0.1);
+    ValueSelector radiusField = new ValueSelector(key.radius, 0.0, 45.0, 0.1);
     RGBColor oldColor = key.color.duplicate();
     final BFrame parentFrame = parent.getFrame();
     

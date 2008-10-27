@@ -499,6 +499,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     createMenu.add(Translate.menuItem("pointLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("directionalLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("spotLight", this, "createObjectCommand"));
+    createMenu.add(Translate.menuItem("proceduralDirectionalLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("camera", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("referenceImage", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("null", this, "createObjectCommand"));
@@ -2285,6 +2286,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     else if ("spotLight".equals(type))
     {
       obj = new SpotLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f, 20.0, 0.0, 0.1);
+      name = "Light "+(CreateLightTool.counter++);
+    }
+    else if ("proceduralDirectionalLight".equals(type))
+    {
+      obj = new ProceduralDirectionalLight(1.0f);
       name = "Light "+(CreateLightTool.counter++);
     }
     else if ("camera".equals(type))

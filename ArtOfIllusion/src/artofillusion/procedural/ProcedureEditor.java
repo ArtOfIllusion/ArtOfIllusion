@@ -486,6 +486,7 @@ public class ProcedureEditor extends CustomWidget
     if (command.equals("properties"))
     {
       owner.editProperties(this);
+      updatePreview();
       return;
     }
     saveState(false);

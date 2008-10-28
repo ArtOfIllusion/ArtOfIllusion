@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2002,2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   Point lastPos, dragPos;
   boolean draggingBox;
   int yoffset;
-  Vector markers;
+  Vector<Marker> markers;
   UndoRecord undo;
   
   private static final Polygon handle;
@@ -50,7 +50,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     theScore = sc;
     this.subdivisions = subdivisions;
     this.scale = scale;
-    markers = new Vector();
+    markers = new Vector<Marker>();
     setPreferredSize(new Dimension(200, 100));
     addEventLink(MousePressedEvent.class, this, "mousePressed");
     addEventLink(MouseReleasedEvent.class, this, "mouseReleased");
@@ -144,10 +144,19 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     
     for (i = 0; i < markers.size(); i++)
     {
-      Marker m = (Marker) markers.elementAt(i);
+      Marker m = markers.elementAt(i);
       g.setColor(m.color);
       x = (int) Math.round(scale*(m.position-start));
       g.drawLine(x, 0, x, dim.height);
+    }
+
+    // If a drag is in progress, draw a box.
+
+    if (dragPos != null)
+    {
+      g.setColor(Color.BLACK);
+      g.drawRect(Math.min(lastPos.x, dragPos.x), Math.min(lastPos.y, dragPos.y),
+        Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
     }
   }
   
@@ -222,16 +231,8 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       {
         // Drag a box for selecting keyframes.
         
-        Graphics g = getComponent().getGraphics();
-        g.setXORMode(Color.white);
-        g.setColor(Color.black);
-        if (dragPos != null)
-          g.drawRect(Math.min(lastPos.x, dragPos.x), Math.min(lastPos.y, dragPos.y), 
-            Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
         dragPos = pos;
-        g.drawRect(Math.min(lastPos.x, dragPos.x), Math.min(lastPos.y, dragPos.y), 
-          Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
-        g.dispose();
+        repaint();
         return;
       }
 
@@ -316,6 +317,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       float rowHeight = (float) theList.getRowHeight();
       int y1 = lastPos.y-yoffset, y2 = dragPos.y-yoffset;
       int row1, row2, x1 = Math.min(lastPos.x, dragPos.x), x2 = Math.max(lastPos.x, dragPos.x);
+      dragPos = null;
       if (y1 < y2)
       {
         row1 = Math.round(y1/rowHeight);
@@ -331,7 +333,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
         row1 = 0;
       if (row2 > obj.length)
         row2 = obj.length;
-      Vector v = new Vector();
+      Vector<SelectionInfo> v = new Vector<SelectionInfo>();
       for (int row = row1; row < row2; row++)
       {
         if (!(obj[row] instanceof Track))
@@ -352,7 +354,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       }
       SelectionInfo sel[] = new SelectionInfo [v.size()];
       for (int i = 0; i < sel.length; i++)
-        sel[i] = (SelectionInfo) v.elementAt(i);
+        sel[i] = v.elementAt(i);
       theScore.addSelectedKeyframes(sel);
       theScore.repaintGraphs();
     }

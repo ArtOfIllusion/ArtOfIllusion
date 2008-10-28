@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2006 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
   private Point lastPos, dragPos;
   private Rectangle lastBounds;
   private boolean draggingBox, lineAtBottom;
-  private Vector markers;
+  private Vector<Marker> markers;
   private TrackInfo tracks[];
   private UndoRecord undo;
   
@@ -67,7 +67,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     addEventLink(RepaintEvent.class, this, "paint");
     tracks = new TrackInfo [0];
-    markers = new Vector();
+    markers = new Vector<Marker>();
   }
   
   /**
@@ -329,16 +329,8 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
       {
         // Drag a box for selecting keyframes.
         
-        Graphics g = getComponent().getGraphics();
-        g.setXORMode(Color.white);
-        g.setColor(Color.black);
-        if (dragPos != null)
-          g.drawRect(Math.min(lastPos.x, dragPos.x), Math.min(lastPos.y, dragPos.y), 
-            Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
         dragPos = pos;
-        g.drawRect(Math.min(lastPos.x, dragPos.x), Math.min(lastPos.y, dragPos.y), 
-          Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
-        g.dispose();
+        repaint();
         return;
       }
 
@@ -460,7 +452,8 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
     
     int x1 = Math.min(lastPos.x, dragPos.x), x2 = Math.max(lastPos.x, dragPos.x);
     int y1 = Math.min(lastPos.y, dragPos.y), y2 = Math.max(lastPos.y, dragPos.y);
-    Vector v = new Vector();
+    dragPos = null;
+    Vector<SelectionInfo> v = new Vector<SelectionInfo>();
     Rectangle dim = getBounds();
     for (int i = 0; i < tracks.length; i++)
       for (int j = 0; j < tracks[i].keyValue.length; j++)
@@ -490,7 +483,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
       }
     SelectionInfo sel[] = new SelectionInfo [v.size()];
     for (int i = 0; i < sel.length; i++)
-      sel[i] = (SelectionInfo) v.elementAt(i);
+      sel[i] = v.elementAt(i);
     theScore.addSelectedKeyframes(sel);
     selectionChanged();
     theScore.repaintGraphs();
@@ -580,7 +573,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
     
     for (int i = 0; i < markers.size(); i++)
     {
-      Marker m = (Marker) markers.elementAt(i);
+      Marker m = markers.elementAt(i);
       g.setColor(m.color);
       x = (int) Math.round(hscale*(m.position-hstart));
       g.drawLine(x, 0, x, dim.height);
@@ -589,6 +582,15 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
     {
       g.setColor(Color.black);
       g.drawLine(0, dim.height-1, dim.width, dim.height-1);
+    }
+
+    // If a drag is in progress, draw a box.
+
+    if (dragPos != null && tracks.length > 0)
+    {
+      g.setColor(Color.BLACK);
+      g.drawRect(Math.min(lastPos.x, dragPos.x), Math.min(lastPos.y, dragPos.y), 
+        Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
     }
   }
 

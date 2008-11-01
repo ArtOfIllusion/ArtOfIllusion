@@ -358,17 +358,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     // Make a table of all DockableWidgets.
 
-    HashMap widgets = new HashMap();
+    HashMap<String, DockableWidget> widgets = new HashMap<String, DockableWidget>();
     for (int i = 0; i < dock.length; i++)
     {
-      Iterator children = dock[i].getChildren().iterator();
-      while (children.hasNext())
+      for (Widget next : dock[i].getChildren())
       {
-        Object next = children.next();
         if (next instanceof DockableWidget)
         {
           DockableWidget w = (DockableWidget) next;
-          widgets.put(w.getContent().getClass().getName()+'\t'+w.getLabel(), next);
+          widgets.put(w.getContent().getClass().getName()+'\t'+w.getLabel(), w);
         }
       }
     }
@@ -392,7 +390,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
       else
       {
-        DockableWidget w = (DockableWidget) widgets.get(lines[i]);
+        DockableWidget w = widgets.get(lines[i]);
         if (w != null)
         {
           dock[container].addDockableWidget(w, tab, index++);
@@ -496,10 +494,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     createMenu.add(Translate.menuItem("sphere", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("cylinder", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("cone", this, "createObjectCommand"));
+    createMenu.addSeparator();
     createMenu.add(Translate.menuItem("pointLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("directionalLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("spotLight", this, "createObjectCommand"));
+    createMenu.add(Translate.menuItem("proceduralPointLight", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("proceduralDirectionalLight", this, "createObjectCommand"));
+    createMenu.addSeparator();
     createMenu.add(Translate.menuItem("camera", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("referenceImage", this, "createObjectCommand"));
     createMenu.add(Translate.menuItem("null", this, "createObjectCommand"));
@@ -2288,9 +2289,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       obj = new SpotLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f, 20.0, 0.0, 0.1);
       name = "Light "+(CreateLightTool.counter++);
     }
+    else if ("proceduralPointLight".equals(type))
+    {
+      obj = new ProceduralPointLight(0.1);
+      name = "Light "+(CreateLightTool.counter++);
+    }
     else if ("proceduralDirectionalLight".equals(type))
     {
-      obj = new ProceduralDirectionalLight(1.0f);
+      obj = new ProceduralDirectionalLight(1.0);
       name = "Light "+(CreateLightTool.counter++);
     }
     else if ("camera".equals(type))

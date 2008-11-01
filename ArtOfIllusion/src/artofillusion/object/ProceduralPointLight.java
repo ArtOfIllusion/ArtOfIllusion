@@ -22,9 +22,9 @@ import java.io.*;
 import java.awt.*;
 import java.util.*;
 
-/** This is a DirectionalLight whose emitted light is calculated by a Procedure. */
+/** This is a PointLight whose emitted light is calculated by a Procedure. */
 
-public class ProceduralDirectionalLight extends DirectionalLight
+public class ProceduralPointLight extends PointLight
 {
   private Procedure procedure;
   private ThreadLocal renderingProc;
@@ -37,7 +37,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
   };
 
-  public ProceduralDirectionalLight(double theRadius)
+  public ProceduralPointLight(double theRadius)
   {
     super(new RGBColor(), 1.0f, theRadius);
     procedure = createProcedure();
@@ -105,14 +105,14 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   public Object3D duplicate()
   {
-    ProceduralDirectionalLight light = new ProceduralDirectionalLight(getRadius());
+    ProceduralPointLight light = new ProceduralPointLight(getRadius());
     light.copyObject(this);
     return light;
   }
 
   public void copyObject(Object3D obj)
   {
-    ProceduralDirectionalLight lt = (ProceduralDirectionalLight) obj;
+    ProceduralPointLight lt = (ProceduralPointLight) obj;
     setRadius(lt.getRadius());
     procedure.copy(lt.procedure);
   }
@@ -143,7 +143,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
      constructor which reads the necessary data from an input stream.  The other writes
      the object's representation to an output stream. */
 
-  public ProceduralDirectionalLight(DataInputStream in, Scene theScene) throws IOException
+  public ProceduralPointLight(DataInputStream in, Scene theScene) throws IOException
   {
     super(in, theScene);
     short version = in.readShort();
@@ -269,7 +269,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     }
     fields[fields.length-1] = new ValueSelector(key.radius, 0.0, 45.0, 0.1);;
     names[names.length-1] = Translate.text("Radius");
-    ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editDirectionalLightTitle"), fields, names);
+    ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editPointLightTitle"), fields, names);
     if (!dlg.clickedOk())
       return;
     for (int i = 0; i < parameters.length; i++)
@@ -277,15 +277,15 @@ public class ProceduralDirectionalLight extends DirectionalLight
     key.radius = fields[fields.length-1].getValue();
   }
 
-  /** Inner class representing a pose for a directional light. */
+  /** Inner class representing a pose for a point light. */
 
   public static class ProceduralLightKeyframe implements Keyframe
   {
-    private final ProceduralDirectionalLight light;
+    private final ProceduralPointLight light;
     public HashMap<TextureParameter, Double> paramValues;
     public double radius;
 
-    public ProceduralLightKeyframe(ProceduralDirectionalLight light)
+    public ProceduralLightKeyframe(ProceduralPointLight light)
     {
       this.light = light;
       paramValues = new HashMap<TextureParameter, Double>();
@@ -305,7 +305,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     public Keyframe duplicate(Object owner)
     {
-      ProceduralLightKeyframe key = new ProceduralLightKeyframe((ProceduralDirectionalLight) ((ObjectInfo) owner).getObject());
+      ProceduralLightKeyframe key = new ProceduralLightKeyframe((ProceduralPointLight) ((ObjectInfo) owner).getObject());
       key.paramValues.clear();
       for (Map.Entry<TextureParameter, Double> entry : paramValues.entrySet())
         key.paramValues.put(entry.getKey(), entry.getValue());
@@ -419,7 +419,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     public ProceduralLightKeyframe(DataInputStream in, Object parent) throws IOException
     {
-      this((ProceduralDirectionalLight) ((ObjectInfo) parent).getObject());
+      this((ProceduralPointLight) ((ObjectInfo) parent).getObject());
       radius = in.readDouble();
       for (TextureParameter param : light.parameters)
         paramValues.put(param, in.readDouble());
@@ -439,7 +439,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     public String getWindowTitle()
     {
-      return Translate.text("editProceduralDirectionalLightTitle");
+      return Translate.text("editProceduralPointLightTitle");
     }
 
     public Object getPreview(ProcedureEditor editor)
@@ -452,7 +452,10 @@ public class ProceduralDirectionalLight extends DirectionalLight
       {
         ObjectInfo info = scene.getObject(i);
         if (info.getObject() instanceof DirectionalLight)
-          info.setObject(ProceduralDirectionalLight.this);
+        {
+          info.setObject(ProceduralPointLight.this);
+          info.getCoords().setOrigin(new Vec3(1.0, 0.8, 2.0));
+        }
       }
       content.add(preview, BorderContainer.CENTER);
       RowContainer row = new RowContainer();

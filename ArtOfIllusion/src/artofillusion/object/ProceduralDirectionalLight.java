@@ -33,7 +33,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
   private double parameterValues[];
 
   private static final Property PROPERTIES[] = new Property [] {
-    new Property(Translate.text("Radius"), 0.0, 45.0, 1.0),
+    new Property(Translate.text("AngularRadius"), 0.0, 45.0, 1.0),
     new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
   };
 
@@ -245,7 +245,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       defaults[i] = param.defaultVal;
       ranges[i] = new double[] {param.minVal, param.maxVal};
     }
-    names[parameters.length] = Translate.text("Radius");
+    names[parameters.length] = Translate.text("AngularRadius");
     defaults[parameters.length] = getRadius();
     ranges[parameters.length] = new double[] {0.0, 45.0};
     track.setGraphableValues(names, defaults, ranges);
@@ -268,7 +268,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       names[i] = param.name;
     }
     fields[fields.length-1] = new ValueSelector(key.radius, 0.0, 45.0, 0.1);;
-    names[names.length-1] = Translate.text("Radius");
+    names[names.length-1] = Translate.text("AngularRadius");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editDirectionalLightTitle"), fields, names);
     if (!dlg.clickedOk())
       return;
@@ -529,7 +529,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       final BFrame parentFrame = editor.getParentFrame();
 
       ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("Properties"),
-          new Widget [] {radiusField, typeChoice}, new String [] {Translate.text("Radius"), Translate.text("lightType")});
+          new Widget [] {radiusField, typeChoice}, new String [] {Translate.text("AngularRadius"), Translate.text("lightType")});
       if (!dlg.clickedOk())
         return;
       setParameters(getColor(), getIntensity(), typeChoice.getSelectedIndex(), getDecayRate());

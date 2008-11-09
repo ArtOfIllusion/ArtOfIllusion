@@ -31,7 +31,7 @@ public class DirectionalLight extends Light
   private static final Property PROPERTIES[] = new Property [] {
     new Property(Translate.text("lightColor"), new RGBColor(1.0, 1.0, 1.0)),
     new Property(Translate.text("Intensity"), -Double.MAX_VALUE, Double.MAX_VALUE, 1.0),
-    new Property(Translate.text("Radius"), 0.0, 45.0, 1.0),
+    new Property(Translate.text("AngularRadius"), 0.0, 45.0, 1.0),
     new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
   };
 
@@ -193,7 +193,7 @@ public class DirectionalLight extends Light
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"), 
-        new Widget [] {patch, intensityField, radiusField, typeChoice}, new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("lightType")});
+        new Widget [] {patch, intensityField, radiusField, typeChoice}, new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius"), Translate.text("lightType")});
     if (!dlg.clickedOk())
     {
       color.copy(oldColor);
@@ -264,7 +264,7 @@ public class DirectionalLight extends Light
   
   public void configurePoseTrack(PoseTrack track)
   {
-    track.setGraphableValues(new String [] {"Intensity", "Radius"},
+    track.setGraphableValues(new String [] {"Intensity", "AngularRadius"},
         new double [] {intensity, radius},
         new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}, {0.0, 45.0}});
   }
@@ -289,7 +289,7 @@ public class DirectionalLight extends Light
     });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"), 
         new Widget [] {patch, intensityField, radiusField},
-        new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius")});
+        new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius")});
     if (!dlg.clickedOk())
     {
       key.color.copy(oldColor);

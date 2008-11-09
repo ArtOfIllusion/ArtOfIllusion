@@ -73,13 +73,7 @@ public abstract class EditingTool
 
   protected void initButton(String name)
   {
-    int colon = name.indexOf(':');
-    String selectedName;
-    if (colon > -1)
-      selectedName = name.substring(0, colon+1)+"selected/"+name.substring(colon+1);
-    else
-      selectedName = "selected/"+name;
-    button = ThemeManager.getToolButton(this, name, selectedName);
+    button = ThemeManager.getToolButton(this, name);
   }
 
   /** Get the tool tip text to display for this tool (or null if it does not have a tool tip). */

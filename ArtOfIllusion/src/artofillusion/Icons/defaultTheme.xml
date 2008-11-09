@@ -46,5 +46,17 @@
   	<dockabletitlecolor R="0" G="0" B="0"/>
   	<textcolor R="0" G="0" B="0"/>
   </colorset>
-  <button class="artofillusion.ui.DefaultToolButton"/>
+  <button class="artofillusion.ui.DefaultToolButton">
+    <style owner="artofillusion.ui.EditingTool" notFound="toolNotFound"
+	   size="32,32"
+	   normal.icon="ButtonBackground; {icon}"
+	   selected.icon="selected/ButtonBackground; {icon} @(x+1,y+1)" />
+
+<!--
+    <style owner="artofillusion.view.ViewerControl" notFound="controlNotFound"
+	   size="16,16"
+	   normal.icon="{owner}.getBackground(); {icon} + #(r=0.35,g=0.35,b=0.35)"
+	   selected.icon="{owner}.getBackground(); {icon} @(z+1)" />
+-->
+  </button>
 </theme>

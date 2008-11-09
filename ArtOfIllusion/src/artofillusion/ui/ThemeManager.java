@@ -12,12 +12,14 @@
 package artofillusion.ui;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 import javax.swing.ImageIcon;
@@ -141,8 +143,10 @@ public class ThemeManager {
       private final ColorSet[] colorSets;
       public final boolean classicToolBarButtons;
       public final PluginRegistry.PluginResource resource;
-      public final String pathRoot;
+      public final ClassLoader loader;
+        //public final String pathRoot;
       public final boolean selectable;
+      protected ButtonStyle buttonStyles;
 
       private ThemeInfo(PluginRegistry.PluginResource resource) throws IOException, SAXException, ParserConfigurationException
       {
@@ -154,12 +158,24 @@ public class ThemeManager {
         Node rootNode = document.getDocumentElement();
         NodeList themeNodeList = rootNode.getChildNodes();
         this.resource = resource;
+        URL url = resource.getURL();
+
+        String path = url.getPath();
+        int cut = path.lastIndexOf('/');
+        if (cut > 0) path = path.substring(0, cut+1);
+        else path = "/";
+        url = new URL(url.getProtocol(), url.getHost(), path);
+        loader = new URLClassLoader(new URL[] { url });
+
+        /*
         String root = resource.getName();
         if (root.lastIndexOf('/') > -1)
           root = root.substring(0, root.lastIndexOf('/')+1);
         else
           root = "";
         pathRoot = root;
+        */
+
         String s;
         Node node = getNodeFromNodeList(themeNodeList, "name");
         name = (node != null ? node.getFirstChild().getNodeValue() : "");
@@ -182,8 +198,22 @@ public class ThemeManager {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            // parse the button styles for this theme
+            ButtonStyle bstyle = null;
+            NodeList list = node.getChildNodes();
+            Node kid = null;
+            for (int i = 0; i < list.getLength(); i++) {
+                kid = list.item(i);
+                if (kid.getNodeName().equals("style")) {
+                    if (bstyle == null) bstyle = new ButtonStyle(kid);
+                    else bstyle.add(kid);
+                }
+            }
+
             buttonClass = cls;
             buttonProperties = properties;
+            buttonStyles = bstyle;
             s = getAttribute(node, "useintoolbars");
             classicToolBarButtons = (s != null ? !Boolean.valueOf(s).booleanValue() : false);
         }
@@ -225,11 +255,123 @@ public class ThemeManager {
       }
     }
 
+    /**
+     *  nested ButtonStyle class.
+     *
+     *  Forms a chain of ButtonStyle objects for a particular Theme.
+     *
+     *  ButtonStyle objects store all the attributes of the defining XML as
+     *  elements of a Map. These values can be accessed by calling
+     *  {@link #getAttribute(String)}.
+     */
+    public static class ButtonStyle
+    {
+        protected Class ownerType;
+        protected int width = -1;
+        protected int height = -1;
+
+        protected HashMap<String, String> attributes = new HashMap<String, String>();
+        protected HashMap<String, Object> namespace;
+
+        protected ButtonStyle next;
+
+        /**
+         *  create a new ButtonStyle by parsing the XML represented by node.
+         *
+         *  @param node the XML defining the style.
+         */
+        public ButtonStyle(Node node)
+        {
+            String name, value;
+
+            // stash all attributes in the attributes map
+            NamedNodeMap kids = node.getAttributes();
+            for (int i = 0; i < kids.getLength(); i++) {
+                node = kids.item(i);
+                name = node.getNodeName();
+                value = node.getNodeValue();
+                attributes.put(name, value);
+
+                if (name.equalsIgnoreCase("owner")) {
+                    try {
+                        ownerType = ArtOfIllusion.getClass(value);
+                    } catch (Exception e) {
+                        String msg = e.getMessage();
+                        System.out.println("Unable to identify ButtonStyle.owner: " + (msg != null ? msg : e.toString()));
+                    }
+                }
+
+                if (name.equalsIgnoreCase("size")) {
+                    int cut = value.indexOf(',');
+                    if (cut >= 0) {
+                        width = Integer.parseInt(value.substring(0, cut).trim());
+                        height = Integer.parseInt(value.substring(cut+1).trim());
+                    }
+                    else {
+                        width = height = Integer.parseInt(value.trim());
+                    }
+                }
+            }
+
+            if (ownerType == null) ownerType = EditingTool.class;
+        }
+
+        /**
+         *  add a new ButtonNode to this ButtonNode.
+         */
+        protected void add(Node node)
+        {
+            if (next == null) next = new ButtonStyle(node);
+            else next.add(node);
+        }
+
+        /**
+         *  get the ButtonStyle assocaited with <i>owner</i>
+         */
+        public ButtonStyle getStyle(Object owner)
+        {
+            if (ownerType != null && ownerType.isInstance(owner)) return this;
+            return (next != null ? next.getStyle(owner) : null);
+        }
+
+        /**
+         *  get the named attribute value.
+         */
+        public String getAttribute(String name)
+        { return (String) attributes.get(name); }
+    }
+
     private static ThemeInfo selectedTheme, defaultTheme;
     private static ColorSet selectedColorSet;
     private static ThemeInfo[] themeList;
     private static Map<String,ThemeInfo> themeIdMap;
     private static DocumentBuilderFactory documentBuilderFactory; //XML parsing
+
+    /** icon to use if no other icon can be found  */
+    private static final ImageIcon notFoundIcon;
+
+    // initialise the ...NotFoundIcon objects
+    static {
+        URL url = null;
+        ImageIcon icon = null;
+        try {
+            url = Class.forName("artofillusion.ArtOfIllusion").getResource("artofillusion/Icons/iconNotFound.png");
+            icon = new ImageIcon(url);
+        } catch (Exception e) {
+            BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_BYTE_INDEXED);
+            Graphics2D graphics = (Graphics2D) image.getGraphics();
+            graphics.setColor(new Color(128,128,128));
+            graphics.fillRect(0, 0, 16, 16);
+            graphics.setColor(new Color(200, 100, 100));
+            graphics.fillOval(3, 3, 10, 10);
+            graphics.setColor(Color.WHITE);
+            graphics.fillRect(7, 4, 2, 4);
+            graphics.fillOval(7, 10, 2, 2);
+            icon = new ImageIcon(image);
+        }
+
+        notFoundIcon = icon;
+    }
 
     /**
      * Get the currently selected theme.
@@ -326,26 +468,32 @@ public class ThemeManager {
         ViewerCanvas.highValueColor = new RGBColor(viewerHighValue.getRed()/255.0, viewerHighValue.getGreen()/255.0, viewerHighValue.getBlue()/255.0);
     }
 
-    private static void applyButtonProperties() {
-        if (selectedTheme.buttonProperties != null) {
-            Class buttonClass = selectedTheme.buttonClass;
-            try {
-                Method m = buttonClass.getMethod("setProperties", Object.class);
-                m.invoke(buttonClass, selectedTheme.buttonProperties);
-            } catch (SecurityException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
+    /**
+     *  apply the button properties for the selected Theme
+     */
+    private static void applyButtonProperties()
+    {
+        Class buttonClass = selectedTheme.buttonClass;
+        try {
+            Method m = buttonClass.getMethod("setProperties", Object.class);
+            m.invoke(buttonClass, selectedTheme.buttonProperties);
+        } catch (NoSuchMethodException e) {
+            // missing method is quite normal - silently ignore
+        } catch (Throwable t) {
+            System.out.println("Error applying Button proterties: " + t);
         }
     }
 
-  private static URL getIconURL(String name)
+    /**
+     * search for the named icon in the selected and default themes, retiurning
+     * the URL of the first found icon.
+     *
+     * @param name the name of the icon (without path or suffix)
+     *
+     * @return the URL of the first found icon, or <i>null</i> if no icon
+     *                were found.
+     */
+    private static URL getIconURL(String name)
     {
       ThemeInfo source = selectedTheme;
       ThemeInfo defaultSource = defaultTheme;
@@ -356,43 +504,149 @@ public class ThemeManager {
         name = name.substring(colon+1);
       }
       URL url = null;
-      url = source.resource.getClassLoader().getResource(source.pathRoot+name+".png");
+      url = source.loader.getResource(name+".png");
       if (url == null)
-        url = source.resource.getClassLoader().getResource(source.pathRoot+name+".gif");
+        url = source.loader.getResource(name+".gif");
       if (url == null && defaultSource != null)
-        url = defaultSource.resource.getClassLoader().getResource(defaultSource.pathRoot+name+".png");
+        url = defaultSource.loader.getResource(name+".png");
       if (url == null && defaultSource != null)
-        url = defaultSource.resource.getClassLoader().getResource(defaultSource.pathRoot+name+".gif");
+        url = defaultSource.loader.getResource(name+".gif");
+
       return url;
+    }
+
+    /**
+     *  return the URL for the "notFound" icon for the selected Theme and the
+     *  style associated with the specified owner.
+     *
+     *  @param owner the owner of the button icon that could not be found.
+     *
+     *  @return the URL of the matching notFound icon, or <i>null</i> if no
+     *                matching icon were found.
+     */
+    public static URL getNotFoundURL(Object owner)
+    {
+        String notFound = null;
+        ButtonStyle bstyle = getButtonStyle(owner);
+
+        if (bstyle != null) notFound = bstyle.getAttribute("notFound");
+        if (notFound == null) notFound = "iconNotFound";
+
+        return getIconURL(notFound);
+    }
+
+    /**
+     *  return the notFound icon most appropriate to the slected Theme and the
+     *  specified owner.
+     *
+     *  @param owner the owner of the button icon which could not be found.
+     *
+     *  @return an ImageIcon of the notFound icon. The method never returns
+     *                <i>null</i>.
+     */    
+    public static ImageIcon getNotFoundIcon(Object owner)
+    {
+        URL url = getNotFoundURL(owner);
+        if (url != null) return new ImageIcon(url);
+        else return notFoundIcon;
+    }
+
+    /**
+     *  compatibility method.
+     *
+     *  @deprecated this method allows pre 2.7 plugins to continue to function.
+     *                Such code should be ported to the new API as soon as possible.
+     */
+    public static ToolButton getToolButton(Object owner, String iconName, String selectedIconName)
+    {
+        System.out.println("**Deprecated method called: ThemeManager.getToolButton(Object, String, String)");
+
+        Exception e = new Exception();
+        StackTraceElement[] trace = e.getStackTrace();
+
+        if (trace.length > 1) {
+            StackTraceElement frame = trace[1];
+            String name = frame.getClassName();
+            int cut = name.lastIndexOf('.');
+
+            System.out.print("\tcalled from ");
+            if (frame.getFileName() != null) {
+                System.out.print(frame.getFileName());
+                System.out.print(':');
+                System.out.print(String.valueOf(frame.getLineNumber()));
+            }
+            else {
+                System.out.print(cut > 0 ? name.substring(cut+1) : name);
+                System.out.print('.');
+                System.out.print(frame.getMethodName());
+                System.out.print("() (unknown source)");
+            }
+
+            System.out.println();
+        }
+
+        return getToolButton(owner, iconName);
     }
 
     /**
      * Creates a ToolButton according to the current theme
      * @param owner The button owner
      * @param iconName The name of the icon to display on the button, without extension
-     * @param selectedIconName The name of the icon to display when the button is selected, without extension
-     * @return
+     * @return the ToolButton generated according to the selected Theme.
      */
-    public static ToolButton getToolButton(Object owner, String iconName, String selectedIconName) {
+    public static ToolButton getToolButton(Object owner, String iconName)
+    {
         Class buttonClass = selectedTheme.buttonClass;
-        Constructor contructor;
-        try {
-            contructor = buttonClass.getConstructor(Object.class, String.class, String.class);
-            return (ToolButton) contructor.newInstance(owner, iconName, selectedIconName);
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        Constructor ctor;
+        URL url = getIconURL(iconName);
+        ImageIcon selected = null;
+
+        if (url != null) {
+
+            /*
+             * look for the selected icon from the *same classloader*
+             * Simply calling getIconURL() would allow the selectedIcon to
+             * be loaded from a different theme, with strange results.
+             */
+
+            // generate a URL on the same path (classlaoder) as icon
+            String path = url.getFile();
+            int cut = path.lastIndexOf('/');
+            if (cut > 0)
+                path = path.substring(0, cut) + "/selected" + path.substring(cut);
+            try {
+                selected = new ImageIcon(new URL(url.getProtocol(), url.getHost(), path));
+            } catch (Throwable t) {
+                selected = null;
+            }
         }
-        return null;
+
+        // warning: ImageIcon is happy to return a non-null Image with size<=0
+        if (selected != null && selected.getIconWidth() > 0) {
+            try {
+                ctor = buttonClass.getConstructor(Object.class, ImageIcon.class, ImageIcon.class);
+                return (ToolButton) ctor.newInstance(owner, new ImageIcon(url), selected);
+            } catch (Throwable t) {
+                System.out.println("Could not find a usable Ctor for ToolButton: "
+                                   + buttonClass.getName() + ": " + iconName + "\n\t" + t);
+            }
+        }
+
+        if (url == null) url = getNotFoundURL(owner);
+
+        // if we found a single icon of some form, then use that
+        if (url != null) {
+            try {
+                ctor = buttonClass.getConstructor(Object.class, ImageIcon.class);
+                return (ToolButton) ctor.newInstance(owner, new ImageIcon(url));
+            } catch (Throwable t) {
+                System.out.println("Could not find a usable Ctor for ToolButton: "
+                                   + buttonClass.getName() + ": " + iconName + "\n\t" + t);
+            }
+        }
+
+        // if all else fails, use the notFoundIcon.
+        return new DefaultToolButton(owner, notFoundIcon);
     }
 
     /**
@@ -402,6 +656,9 @@ public class ThemeManager {
      * This method will first look for a .gif file, then for a.png one.
      *
      * @param iconName The file name of the icon, without extension.
+     *
+     * @return the ImageIcon matching the name. If no such icon were found,
+     *                then <i>null</i> is returned.
      */
     public static ImageIcon getIcon(String iconName)
     {
@@ -528,6 +785,14 @@ public class ThemeManager {
      */
     public static int getButtonMargin() {
         return selectedTheme.buttonMargin;
+    }
+
+    /**
+     *  returns the ButtonStyle for the current Theme and the specified owner.
+     */
+    public static ButtonStyle getButtonStyle(Object owner)
+    {
+        return (selectedTheme.buttonStyles != null ? selectedTheme.buttonStyles.getStyle(owner) : null);
     }
 
     /**

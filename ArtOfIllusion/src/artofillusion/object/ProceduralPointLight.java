@@ -52,7 +52,8 @@ public class ProceduralPointLight extends PointLight
   private Procedure createProcedure()
   {
     return new Procedure(new OutputModule [] {
-      new OutputModule("Light", "White", 0.0, new RGBColor(1.0, 1.0, 1.0), IOPort.COLOR)});
+        new OutputModule("Color", "White", 0.0, new RGBColor(1.0, 1.0, 1.0), IOPort.COLOR),
+        new OutputModule("Intensity", "1/r\u00B2", 1.0, null, IOPort.NUMBER)});
   }
 
   /**
@@ -136,7 +137,14 @@ public class ProceduralPointLight extends PointLight
     point.param = parameterValues;
     Procedure pr = (Procedure) renderingProc.get();
     pr.initForPoint(point);
-    pr.getOutputModules()[0].getColor(0, light, 0.0);
+    OutputModule output[] = pr.getOutputModules();
+    output[0].getColor(0, light, 0.0);
+    double intensity;
+    if (output[1].inputConnected(0))
+      intensity = output[1].getAverageValue(0, 0.0);
+    else
+      intensity = 1.0/position.length2();
+    light.scale(intensity);
   }
 
   /* The following two methods are used for reading and writing files.  The first is a

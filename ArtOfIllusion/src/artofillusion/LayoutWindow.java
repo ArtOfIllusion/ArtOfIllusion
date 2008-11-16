@@ -206,10 +206,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     setMenuBar(menubar);
     createFileMenu();
     createEditMenu();
-    createObjectMenu();
-    createToolsMenu();
-    createAnimationMenu();
     createSceneMenu();
+    createObjectMenu();
+    createAnimationMenu();
+    createToolsMenu();
     createPopupMenu();
     toggleViewsCommand();
     keyEventHandler = new KeyEventPostProcessor()
@@ -571,25 +571,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenu = Translate.menu("animation");
     menubar.add(animationMenu);
     animationMenuItem = new BMenuItem [13];
-    animationMenu.add(animationMenuItem[0] = Translate.menuItem("showScore", this, "actionPerformed"));
-    animationMenu.add(Translate.menuItem("previewAnimation", this, "actionPerformed"));
-    animationMenu.addSeparator();
-    animationMenu.add(Translate.menuItem("forwardFrame", this, "actionPerformed"));
-    animationMenu.add(Translate.menuItem("backFrame", this, "actionPerformed"));
-    animationMenu.add(Translate.menuItem("jumpToTime", this, "jumpToTimeCommand"));
-    animationMenu.addSeparator();
-    animationMenu.add(animationMenuItem[1] = Translate.menuItem("editKeyframe", theScore, "editSelectedKeyframe"));
-    animationMenu.add(animationMenuItem[2] = Translate.menuItem("deleteSelectedKeyframes", theScore, "deleteSelectedKeyframes"));
-    animationMenu.add(editKeyframeMenu = Translate.menu("bulkEditKeyframes"));
-    editKeyframeMenu.add(Translate.menuItem("moveKeyframes", this, "actionPerformed"));
-    editKeyframeMenu.add(Translate.menuItem("copyKeyframes", this, "actionPerformed"));
-    editKeyframeMenu.add(Translate.menuItem("rescaleKeyframes", this, "actionPerformed"));
-    editKeyframeMenu.add(Translate.menuItem("loopKeyframes", this, "actionPerformed"));
-    editKeyframeMenu.add(Translate.menuItem("deleteKeyframes", this, "actionPerformed"));
-    animationMenu.add(animationMenuItem[3] = Translate.menuItem("keyframe", theScore, "keyframeSelectedTracks"));
-    animationMenu.add(animationMenuItem[4] = Translate.menuItem("keyframeModified", theScore, "keyframeModifiedTracks"));
-    animationMenu.addSeparator();
-    animationMenu.add(animationMenuItem[5] = Translate.menuItem("editTrack", theScore, "editSelectedTrack"));
     animationMenu.add(addTrackMenu = Translate.menu("addTrack"));
     addTrackMenu.add(positionTrackMenu = Translate.menu("positionTrack"));
     positionTrackMenu.add(Translate.menuItem("xyzOneTrack", this, "actionPerformed"));
@@ -613,13 +594,32 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     addTrackMenu.add(Translate.menuItem("constraintTrack", this, "actionPerformed"));
     addTrackMenu.add(Translate.menuItem("visibilityTrack", this, "actionPerformed"));
     addTrackMenu.add(Translate.menuItem("textureTrack", this, "actionPerformed"));
-    animationMenu.add(animationMenuItem[6] = Translate.menuItem("duplicateTracks", theScore, "duplicateSelectedTracks"));
-    animationMenu.add(animationMenuItem[7] = Translate.menuItem("deleteTracks", theScore, "deleteSelectedTracks"));
-    animationMenu.add(animationMenuItem[8] = Translate.menuItem("selectAllTracks", theScore, "selectAllTracks"));
-    animationMenu.add(animationMenuItem[9] = Translate.menuItem("enableTracks", this, "actionPerformed"));
-    animationMenu.add(animationMenuItem[10] = Translate.menuItem("disableTracks", this, "actionPerformed"));
-    animationMenu.add(animationMenuItem[11] = Translate.menuItem("pathFromCurve", this, "actionPerformed"));
-    animationMenu.add(animationMenuItem[12] = Translate.menuItem("bindToParent", this, "bindToParentCommand"));
+    animationMenu.add(animationMenuItem[0] = Translate.menuItem("editTrack", theScore, "editSelectedTrack"));
+    animationMenu.add(animationMenuItem[1] = Translate.menuItem("duplicateTracks", theScore, "duplicateSelectedTracks"));
+    animationMenu.add(animationMenuItem[2] = Translate.menuItem("deleteTracks", theScore, "deleteSelectedTracks"));
+    animationMenu.add(animationMenuItem[3] = Translate.menuItem("selectAllTracks", theScore, "selectAllTracks"));
+    animationMenu.add(animationMenuItem[4] = Translate.menuItem("enableTracks", this, "actionPerformed"));
+    animationMenu.add(animationMenuItem[5] = Translate.menuItem("disableTracks", this, "actionPerformed"));
+    animationMenu.addSeparator();
+    animationMenu.add(animationMenuItem[6] = Translate.menuItem("keyframe", theScore, "keyframeSelectedTracks"));
+    animationMenu.add(animationMenuItem[7] = Translate.menuItem("keyframeModified", theScore, "keyframeModifiedTracks"));
+    animationMenu.add(animationMenuItem[8] = Translate.menuItem("editKeyframe", theScore, "editSelectedKeyframe"));
+    animationMenu.add(animationMenuItem[9] = Translate.menuItem("deleteSelectedKeyframes", theScore, "deleteSelectedKeyframes"));
+    animationMenu.add(editKeyframeMenu = Translate.menu("bulkEditKeyframes"));
+    editKeyframeMenu.add(Translate.menuItem("moveKeyframes", this, "actionPerformed"));
+    editKeyframeMenu.add(Translate.menuItem("copyKeyframes", this, "actionPerformed"));
+    editKeyframeMenu.add(Translate.menuItem("rescaleKeyframes", this, "actionPerformed"));
+    editKeyframeMenu.add(Translate.menuItem("loopKeyframes", this, "actionPerformed"));
+    editKeyframeMenu.add(Translate.menuItem("deleteKeyframes", this, "actionPerformed"));
+    animationMenu.add(animationMenuItem[10] = Translate.menuItem("pathFromCurve", this, "actionPerformed"));
+    animationMenu.add(animationMenuItem[11] = Translate.menuItem("bindToParent", this, "bindToParentCommand"));
+    animationMenu.addSeparator();
+    animationMenu.add(animationMenuItem[12] = Translate.menuItem("showScore", this, "actionPerformed"));
+    animationMenu.add(Translate.menuItem("previewAnimation", this, "actionPerformed"));
+    animationMenu.addSeparator();
+    animationMenu.add(Translate.menuItem("forwardFrame", this, "actionPerformed"));
+    animationMenu.add(Translate.menuItem("backFrame", this, "actionPerformed"));
+    animationMenu.add(Translate.menuItem("jumpToTime", this, "jumpToTimeCommand"));
   }
 
   private void createSceneMenu()
@@ -736,6 +736,55 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[13].setEnabled(sel.length > 0); // Clear
       }
     popupMenu.show(w, x, y);
+  }
+
+  /** Get the File menu. */
+
+  public BMenu getFileMenu()
+  {
+    return fileMenu;
+  }
+
+  /** Get the Edit menu. */
+
+  public BMenu getEditMenu()
+  {
+    return editMenu;
+  }
+
+  /** Get the Scene menu. */
+
+  public BMenu getSceneMenu()
+  {
+    return sceneMenu;
+  }
+
+  /** Get the Object menu. */
+
+  public BMenu getObjectMenu()
+  {
+    return objectMenu;
+  }
+
+  /** Get the Animation menu. */
+
+  public BMenu getAnimationMenu()
+  {
+    return animationMenu;
+  }
+
+  /** Get the Tools menu. */
+
+  public BMenu getToolsMenu()
+  {
+    return toolsMenu;
+  }
+
+  /** Get the popup menu. */
+
+  public BPopupMenu getPopupMenu()
+  {
+    return popupMenu;
   }
 
   /** Get the DockingContainer which holds DockableWidgets on one side of the window. */
@@ -914,19 +963,19 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       objectMenuItem[11].setEnabled(true); // Lock Selection
       objectMenuItem[12].setEnabled(true); // Unlock Selection
     }
-    animationMenuItem[0].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
-    animationMenuItem[1].setEnabled(numSelKeyframes == 1); // Edit Keyframe
-    animationMenuItem[2].setEnabled(numSelKeyframes > 0); // Delete Selected Keyframes
-    animationMenuItem[3].setEnabled(numSelTracks > 0); // Keyframe Selected Tracks
-    animationMenuItem[4].setEnabled(numSelObjects > 0); // Keyframe Modified Tracks
-    animationMenuItem[5].setEnabled(numSelTracks == 1); // Edit Track
-    animationMenuItem[6].setEnabled(numSelTracks > 0); // Duplicate Tracks
-    animationMenuItem[7].setEnabled(numSelTracks > 0); // Delete Tracks
-    animationMenuItem[8].setEnabled(numSelObjects > 0); // Select All Tracks
-    animationMenuItem[9].setEnabled(enable); // Enable Tracks
-    animationMenuItem[10].setEnabled(disable); // Disable Tracks
-    animationMenuItem[11].setEnabled(curve && noncurve); // Set Path From Curve
-    animationMenuItem[12].setEnabled(hasParent); // Bind to Parent Skeleton
+    animationMenuItem[0].setEnabled(numSelTracks == 1); // Edit Track
+    animationMenuItem[1].setEnabled(numSelTracks > 0); // Duplicate Tracks
+    animationMenuItem[2].setEnabled(numSelTracks > 0); // Delete Tracks
+    animationMenuItem[3].setEnabled(numSelObjects > 0); // Select All Tracks
+    animationMenuItem[4].setEnabled(enable); // Enable Tracks
+    animationMenuItem[5].setEnabled(disable); // Disable Tracks
+    animationMenuItem[6].setEnabled(numSelTracks > 0); // Keyframe Selected Tracks
+    animationMenuItem[7].setEnabled(numSelObjects > 0); // Keyframe Modified Tracks
+    animationMenuItem[8].setEnabled(numSelKeyframes == 1); // Edit Keyframe
+    animationMenuItem[9].setEnabled(numSelKeyframes > 0); // Delete Selected Keyframes
+    animationMenuItem[10].setEnabled(curve && noncurve); // Set Path From Curve
+    animationMenuItem[11].setEnabled(hasParent); // Bind to Parent Skeleton
+    animationMenuItem[12].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
     addTrackMenu.setEnabled(numSelObjects > 0);
     distortionMenu.setEnabled(sel.length > 0);
     sceneMenuItem[1].setText(Translate.text(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0 ? "menu.showObjectList" : "menu.hideObjectList"));

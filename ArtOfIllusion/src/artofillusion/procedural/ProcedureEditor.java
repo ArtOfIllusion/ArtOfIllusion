@@ -68,7 +68,7 @@ public class ProcedureEditor extends CustomWidget
     BorderContainer content = new BorderContainer();
     parent.setContent(content);
     content.add(scroll = new BScrollPane(this), BorderContainer.CENTER);
-    scroll.setPreferredViewSize(new Dimension(500, 550));
+    scroll.setPreferredViewSize(new Dimension(600, 600));
     new AutoScroller(scroll, 5, 5);
     size = new Dimension(1000, 1000);
     setBackground(Color.white);
@@ -94,15 +94,16 @@ public class ProcedureEditor extends CustomWidget
 
     // Create the buttons at the top of the window.
     
-    FormContainer top = new FormContainer(new double [] {0.0, 1.0, 0.0, 0.0}, new double [] {1.0});
+    FormContainer top = new FormContainer(new double [] {0.0, 0.0, 1.0, 0.0, 0.0}, new double [] {1.0});
     top.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(0, 0, 0, 5), null));
+    top.add(Translate.button("properties", this, "actionPerformed"), 0, 0);
     if (owner.canEditName())
     {
-      top.add(new BLabel(Translate.text("Name")+':'), 0, 0);
-      top.add(nameField = new BTextField(owner.getName()), 1, 0);
+      top.add(new BLabel(Translate.text("Name")+':'), 1, 0);
+      top.add(nameField = new BTextField(owner.getName()), 2, 0);
     }
-    top.add(Translate.button("ok", this, "actionPerformed"), 2, 0);
-    top.add(Translate.button("cancel", this, "actionPerformed"), 3, 0);
+    top.add(Translate.button("ok", this, "actionPerformed"), 3, 0);
+    top.add(Translate.button("cancel", this, "actionPerformed"), 4, 0);
     content.add(top, BorderContainer.NORTH);
     
     // Let each output module calculate its preferred width, then set all of them to be

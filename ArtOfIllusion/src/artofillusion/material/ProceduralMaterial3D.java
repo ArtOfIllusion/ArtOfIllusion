@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2007 by Peter Eastman
+/* Copyright (C) 2000-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -274,13 +274,20 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     RowContainer row = new RowContainer();
     content.add(row, BorderContainer.SOUTH, new LayoutInfo());
     row.add(Translate.label("Time", ":"));
-    final ValueField value = new ValueField(0.0, ValueField.NONE);
+    final ValueSelector value = new ValueSelector(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 0.01);
+    final ActionProcessor processor = new ActionProcessor();
     row.add(value);
     value.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
-        preview.getScene().setTime(value.getValue());
-        preview.render();
+        processor.addEvent(new Runnable()
+        {
+          public void run()
+          {
+            preview.getScene().setTime(value.getValue());
+            preview.render();
+          }
+        });
       }
     });
     dlg.setContent(content);

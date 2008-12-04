@@ -461,13 +461,20 @@ public class ProceduralDirectionalLight extends DirectionalLight
       RowContainer row = new RowContainer();
       content.add(row, BorderContainer.SOUTH, new LayoutInfo());
       row.add(Translate.label("Time", ":"));
-      final ValueField value = new ValueField(0.0, ValueField.NONE);
+      final ValueSelector value = new ValueSelector(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 0.01);
+      final ActionProcessor processor = new ActionProcessor();
       row.add(value);
       value.addEventLink(ValueChangedEvent.class, new Object() {
         void processEvent()
         {
-          preview.getScene().setTime(value.getValue());
-          preview.render();
+          processor.addEvent(new Runnable()
+          {
+            public void run()
+            {
+              preview.getScene().setTime(value.getValue());
+              preview.render();
+            }
+          });
         }
       });
       dlg.setContent(content);

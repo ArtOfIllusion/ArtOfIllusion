@@ -934,8 +934,12 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       parent = parent.getParent();
     if (parent != null)
     {
-      ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(), "Extracted Curve", null);
-      ((LayoutWindow) parent).updateImage();
+      String name = new BStandardDialog("", Translate.text("extractedCurveName"), BStandardDialog.QUESTION).showInputDialog(this, null, "Extracted Curve");
+      if (name != null)
+      {
+        ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(), name, null);
+        ((LayoutWindow) parent).updateImage();
+      }
     }
   }
 

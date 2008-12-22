@@ -157,7 +157,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     
     BMenu meshMenu = Translate.menu("mesh");
     menubar.add(meshMenu);
-    meshMenuItem = new BMenuItem [11];
+    meshMenuItem = new BMenuItem [12];
     meshMenuItem[0] = Translate.menuItem("subdivideEdges", this, "subdivideCommand");
     if (topology)
       meshMenu.add(meshMenuItem[0]);
@@ -181,9 +181,10 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     meshMenuItem[8] = Translate.menuItem("joinBoundaries", this, "joinBoundariesCommand");
     if (topology)
       meshMenu.add(meshMenuItem[8]);
-    meshMenu.add(meshMenuItem[9] = Translate.menuItem("extractCurve", this, "extractCurveCommand"));
+    meshMenu.add(meshMenuItem[9] = Translate.menuItem("extractFaces", this, "extractFacesCommand"));
+    meshMenu.add(meshMenuItem[10] = Translate.menuItem("extractCurve", this, "extractCurveCommand"));
     meshMenu.addSeparator();
-    meshMenu.add(meshMenuItem[10] = Translate.menuItem("smoothness", this, "setSmoothnessCommand"));
+    meshMenu.add(meshMenuItem[11] = Translate.menuItem("smoothness", this, "setSmoothnessCommand"));
     meshMenu.add(smoothMenu = Translate.menu("smoothingMethod"));
     smoothItem = new BCheckBoxMenuItem [4];
     smoothMenu.add(smoothItem[0] = Translate.checkboxMenuItem("none", this, "smoothingChanged", obj.getSmoothingMethod() == TriangleMesh.NO_SMOOTHING));
@@ -338,7 +339,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       editMenuItem[0].setEnabled(true);
       editMenuItem[1].setEnabled(true);
       editMenuItem[6].setEnabled(true);
-      for (i = 0; i < 11; i++)
+      for (i = 0; i < 12; i++)
         meshMenuItem[i].setEnabled(true);
       if (selectMode == EDGE_MODE)
       {
@@ -347,14 +348,15 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         meshMenuItem[6].setEnabled(false);
         meshMenuItem[7].setEnabled(boundaryList.length > 0);
         meshMenuItem[8].setEnabled(boundaryList.length == 2);
+        meshMenuItem[9].setEnabled(false);
       }
       else if (selectMode == FACE_MODE)
       {
         meshMenuItem[0].setText(Translate.text("menu.subdivideFaces"));
         meshMenuItem[7].setEnabled(false);
         meshMenuItem[8].setEnabled(false);
-        meshMenuItem[9].setEnabled(false);
         meshMenuItem[10].setEnabled(false);
+        meshMenuItem[11].setEnabled(false);
       }
       else
       {
@@ -362,6 +364,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         meshMenuItem[7].setEnabled(false);
         meshMenuItem[8].setEnabled(false);
         meshMenuItem[9].setEnabled(false);
+        meshMenuItem[10].setEnabled(false);
       }
       meshMenuItem[1].setText(Translate.text("menu.simplify"));
     }
@@ -371,7 +374,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       editMenuItem[1].setEnabled(false);
       editMenuItem[6].setEnabled(false);
       meshMenuItem[0].setEnabled(false);
-      for (i = 2; i < 11; i++)
+      for (i = 2; i < 12; i++)
         meshMenuItem[i].setEnabled(false);
       meshMenuItem[1].setText(Translate.text("menu.simplifyMesh"));
     }
@@ -2130,6 +2133,133 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     return newmesh;
   }
 
+  public void extractFacesCommand()
+  {
+    TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
+    Vertex vt[] = (Vertex []) theMesh.getVertices();
+    Face fc[] = theMesh.getFaces();
+    Vector<Integer> faces = new Vector<Integer>();
+    TreeSet<Integer> vertices = new TreeSet<Integer>();
+
+    if (selectMode != FACE_MODE)
+      return;
+    
+    // Find the selected faces and make a new mesh out of them.
+    
+    for (int i = 0; i < selected.length; i++)
+      if (selected[i])
+        faces.addElement(i);
+    if (faces.size() == 0)
+      return;
+    for (Integer face : faces)
+    {
+      vertices.add(fc[face].v1);
+      vertices.add(fc[face].v2);
+      vertices.add(fc[face].v3);
+    }
+    int vertIndex[] = new int[vt.length];
+    Arrays.fill(vertIndex, -1);
+    Vec3 v[] = new Vec3[vertices.size()];
+    int count = 0;
+    for (Integer vertex : vertices)
+    {
+      v[count] = new Vec3(vt[vertex].r);
+      vertIndex[vertex] = count++;
+    }
+    int f[][] = new int[faces.size()][];
+    count = 0;
+    for (Integer face : faces)
+      f[count++] = new int[] {vertIndex[fc[face].v1], vertIndex[fc[face].v2], vertIndex[fc[face].v3]};
+    TriangleMesh mesh = new TriangleMesh(v, f);
+    mesh.copyTextureAndMaterial(theMesh);
+    mesh.setSmoothingMethod(theMesh.getSmoothingMethod());
+
+    // Verify that it is a valid mesh.
+
+    int vertexEdgeCount[] = new int[vertices.size()];
+    for (int i = 0; i < mesh.getEdges().length; i++)
+    {
+      Edge edge = mesh.getEdges()[i];
+      if (edge.f2 == -1)
+      {
+        vertexEdgeCount[edge.v1]++;
+        vertexEdgeCount[edge.v2]++;
+      }
+    }
+    for (int i = 0; i < vertexEdgeCount.length; i++)
+    {
+      if (vertexEdgeCount[i] != 0 && vertexEdgeCount[i] != 2)
+      {
+        new BStandardDialog("", Translate.text("illegalExtract"), BStandardDialog.ERROR).showMessageDialog(this);
+        return;
+      }
+    }
+
+    // Copy over smoothness values.
+
+    for (Integer vertex : vertices)
+        ((TriangleMesh.Vertex) mesh.getVertices()[vertIndex[vertex]]).smoothness = vt[vertex].smoothness;
+    for (int i = 0; i < faces.size(); i++)
+    {
+      Face face = fc[faces.get(i)];
+      Face newFace = mesh.getFaces()[i];
+      mesh.getEdges()[newFace.e1].smoothness = theMesh.getEdges()[face.e1].smoothness;
+      mesh.getEdges()[newFace.e2].smoothness = theMesh.getEdges()[face.e2].smoothness;
+      mesh.getEdges()[newFace.e3].smoothness = theMesh.getEdges()[face.e3].smoothness;
+    }
+
+    // Copy over parameter values.
+
+    ParameterValue oldValues[] = theMesh.getParameterValues();
+    ParameterValue newValues[] = mesh.getParameterValues();
+    for (int i = 0; i < oldValues.length; i++)
+    {
+      if (oldValues[i] instanceof FaceParameterValue)
+      {
+        FaceParameterValue old = (FaceParameterValue) oldValues[i];
+        double val[] = new double[faces.size()];
+        for (int j = 0; j < val.length; j++)
+          val[j] = old.getValue()[faces.get(j)];
+        newValues[i] = new FaceParameterValue(val);
+      }
+      else if (oldValues[i] instanceof VertexParameterValue)
+      {
+        VertexParameterValue old = (VertexParameterValue) oldValues[i];
+        double val[] = new double[vertices.size()];
+        for (int j = 0; j < vertIndex.length; j++)
+          if (vertIndex[j] != -1)
+            val[vertIndex[j]] = old.getValue()[j ];
+        newValues[i] = new VertexParameterValue(val);
+      }
+      else if (oldValues[i] instanceof FaceVertexParameterValue)
+      {
+        FaceVertexParameterValue old = (FaceVertexParameterValue) oldValues[i];
+        double val[][] = new double[faces.size()][];
+        for (int j = 0; j < val.length; j++)
+        {
+          int faceIndex = faces.get(j);
+          val[j] = new double[] {old.getValue(faceIndex, 0), old.getValue(faceIndex, 1), old.getValue(faceIndex, 2)};
+        }
+        newValues[i] = new FaceVertexParameterValue(val);
+      }
+    }
+
+    // Add it to the scene.
+
+    Widget parent = (Widget) parentWindow;
+    while (parent != null && !(parent instanceof LayoutWindow))
+      parent = parent.getParent();
+    if (parent != null)
+    {
+      String name = new BStandardDialog("", Translate.text("extractedMeshName"), BStandardDialog.QUESTION).showInputDialog(this, null, "Extracted Mesh");
+      if (name != null)
+      {
+        ((LayoutWindow) parent).addObject(mesh, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(), name, null);
+        ((LayoutWindow) parent).updateImage();
+      }
+    }
+  }
+
   public void extractCurveCommand()
   {
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
@@ -2140,9 +2270,9 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
     if (selectMode != EDGE_MODE)
       return;
-    
+
     // Find the select edges, and try to chain them together.
-    
+
     for (i = 0; i < selected.length; i++)
       if (selected[i])
         edges.addElement(ed[i]);
@@ -2177,9 +2307,9 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       }
       edges.removeElementAt(i);
     }
-    
+
     // Now find the sequence of vertices.
-    
+
     boolean closed = (ordered.size() > 2 && (last.v1 == first.v1 || last.v2 == first.v1 || last.v1 == first.v2 || last.v2 == first.v2));
     Vec3 v[] = new Vec3 [closed ? ordered.size() : ordered.size()+1];
     float smoothness[] = new float [v.length];
@@ -2210,9 +2340,12 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       parent = parent.getParent();
     if (parent != null)
     {
-      ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(),
-          "Extracted Curve", null);
-      ((LayoutWindow) parent).updateImage();
+      String name = new BStandardDialog("", Translate.text("extractedCurveName"), BStandardDialog.QUESTION).showInputDialog(this, null, "Extracted Curve");
+      if (name != null)
+      {
+        ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(), name, null);
+        ((LayoutWindow) parent).updateImage();
+      }
     }
   }
 

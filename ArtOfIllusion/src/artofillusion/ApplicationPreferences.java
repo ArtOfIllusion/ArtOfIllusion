@@ -24,7 +24,7 @@ public class ApplicationPreferences
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol;
-  private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool;
+  private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
 
   /**
@@ -137,6 +137,7 @@ public class ApplicationPreferences
     useOpenGL = true;
     keepBackupFiles = false;
     useCompoundMeshTool = false;
+    reverseZooming = false;
   }
 
   /** Parse the properties loaded from the preferences file. */
@@ -152,6 +153,7 @@ public class ApplicationPreferences
     useOpenGL = parseBooleanProperty("useOpenGL", useOpenGL);
     keepBackupFiles = parseBooleanProperty("keepBackupFiles", keepBackupFiles);
     useCompoundMeshTool = parseBooleanProperty("useCompoundMeshTool", useCompoundMeshTool);
+    reverseZooming = parseBooleanProperty("reverseZooming", reverseZooming);
     Translate.setLocale(parseLocaleProperty("language"));
     if (properties.getProperty("theme") == null)
     {
@@ -416,5 +418,20 @@ public class ApplicationPreferences
   {
     useCompoundMeshTool = use;
     properties.put("useCompoundMeshTool", Boolean.toString(use));
+  }
+
+  /** Get whether to reverse the direction of scroll wheel zooming. */
+
+  public final boolean getReverseZooming()
+  {
+    return reverseZooming;
+  }
+
+  /** Set whether to reverse the direction of scroll wheel zooming. */
+
+  public final void setReverseZooming(boolean reverse)
+  {
+    reverseZooming = reverse;
+    properties.put("reverseZooming", Boolean.toString(reverse));
   }
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -79,14 +79,16 @@ public class RotateViewTool extends EditingTool
     
     if (!useSelectionCenter || theWindow == null || theWindow.getScene() == null)
       {
-        rotationCenter = new Vec3();
+        CoordinateSystem coords = cam.getCameraCoordinates();
+        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(cam.getDistToScreen()));
         return;
       }
     Scene scene = theWindow.getScene();
     int selection[] = scene.getSelection();
     if (selection.length == 0)
       {
-        rotationCenter = new Vec3();
+        CoordinateSystem coords = cam.getCameraCoordinates();
+        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(cam.getDistToScreen()));
         return;
       }
     BoundingBox bounds = null;

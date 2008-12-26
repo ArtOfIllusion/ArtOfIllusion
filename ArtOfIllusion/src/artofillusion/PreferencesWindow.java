@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,8 +25,8 @@ public class PreferencesWindow
 {
   private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, displayChoice, localeChoice, themeChoice, colorChoice, toolChoice;
   private ValueField interactiveTolField, undoField;
-  private BCheckBox glBox, backupBox;
-  private List themes;
+  private BCheckBox glBox, backupBox, reverseZoomBox;
+  private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
 
   public PreferencesWindow(BFrame parent)
@@ -73,6 +73,7 @@ public class PreferencesWindow
     prefs.setLocale(languages[localeChoice.getSelectedIndex()]);
     prefs.setUseOpenGL(glBox.getState());
     prefs.setKeepBackupFiles(backupBox.getState());
+    prefs.setReverseZooming(reverseZoomBox.getState());
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
     ThemeManager.setSelectedTheme((ThemeManager.ThemeInfo) themes.get(themeChoice.getSelectedIndex()));
     ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[colorChoice.getSelectedIndex()]);
@@ -106,9 +107,10 @@ public class PreferencesWindow
     texRendChoice = getRendererChoice(prefs.getTexturePreviewRenderer());
     interactiveTolField = new ValueField(prefs.getInteractiveSurfaceError(), ValueField.POSITIVE);
     undoField = new ValueField(prefs.getUndoLevels(), ValueField.POSITIVE+ValueField.INTEGER);
-    glBox  = new BCheckBox(Translate.text("useOpenGL"), prefs.getUseOpenGL());
+    glBox = new BCheckBox(Translate.text("useOpenGL"), prefs.getUseOpenGL());
     glBox.setEnabled(ViewerCanvas.isOpenGLAvailable());
-    backupBox  = new BCheckBox(Translate.text("keepBackupFiles"), prefs.getKeepBackupFiles());
+    backupBox = new BCheckBox(Translate.text("keepBackupFiles"), prefs.getKeepBackupFiles());
+    reverseZoomBox  = new BCheckBox(Translate.text("reverseScrollWheelZooming"), prefs.getReverseZooming());
     displayChoice = new BComboBox(new String [] {
       Translate.text("menu.wireframeDisplay"),
       Translate.text("menu.shadedDisplay"),
@@ -117,18 +119,18 @@ public class PreferencesWindow
     });
     displayChoice.setSelectedIndex(prefs.getDefaultDisplayMode());
     List allThemes = ThemeManager.getThemes();
-    themes = new ArrayList();
+    themes = new ArrayList<ThemeManager.ThemeInfo>();
     for (int i = 0; i < allThemes.size(); i++)
     {
       ThemeManager.ThemeInfo theme = (ThemeManager.ThemeInfo) allThemes.get(i);
       if (theme.selectable)
         themes.add(theme);
     }
-    Collections.sort(themes, new Comparator()
+    Collections.sort(themes, new Comparator<ThemeManager.ThemeInfo>()
     {
-      public int compare(Object o1, Object o2)
+      public int compare(ThemeManager.ThemeInfo o1, ThemeManager.ThemeInfo o2)
       {
-        return ((ThemeManager.ThemeInfo) o1).getName().compareTo(((ThemeManager.ThemeInfo) o2).getName());
+        return o1.getName().compareTo(o2.getName());
       }
     });
     String themeNames[] = new String[themes.size()];
@@ -165,7 +167,7 @@ public class PreferencesWindow
 
     // Layout the panel.
 
-    FormContainer panel = new FormContainer(2, 12);
+    FormContainer panel = new FormContainer(2, 13);
     panel.setColumnWeight(1, 1.0);
     LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null);
     LayoutInfo widgetLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null);
@@ -179,7 +181,7 @@ public class PreferencesWindow
     panel.add(Translate.label("defaultMeshEditingTool"), 0, 6, labelLayout);
     panel.add(Translate.label("interactiveSurfError"), 0, 7, labelLayout);
     panel.add(Translate.label("maxUndoLevels"), 0, 8, labelLayout);
-    panel.add(Translate.label("language"), 0, 11, labelLayout);
+    panel.add(Translate.label("language"), 0, 12, labelLayout);
     panel.add(defaultRendChoice, 1, 0, widgetLayout);
     panel.add(objectRendChoice, 1, 1, widgetLayout);
     panel.add(texRendChoice, 1, 2, widgetLayout);
@@ -189,9 +191,10 @@ public class PreferencesWindow
     panel.add(toolChoice, 1, 6, widgetLayout);
     panel.add(interactiveTolField, 1, 7, widgetLayout);
     panel.add(undoField, 1, 8, widgetLayout);
-    panel.add(glBox, 0, 9, 2, 1, centerLayout);
-    panel.add(backupBox, 0, 10, 2, 1, centerLayout);
-    panel.add(localeChoice, 1, 11, widgetLayout);
+    panel.add(reverseZoomBox, 0, 9, 2, 1, centerLayout);
+    panel.add(glBox, 0, 10, 2, 1, centerLayout);
+    panel.add(backupBox, 0, 11, 2, 1, centerLayout);
+    panel.add(localeChoice, 1, 12, widgetLayout);
     return panel;
   }
 

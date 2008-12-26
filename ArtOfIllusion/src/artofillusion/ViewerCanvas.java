@@ -183,19 +183,21 @@ public abstract class ViewerCanvas extends CustomWidget
   protected void processMouseScrolled(MouseScrolledEvent ev)
   {
     int amount = ev.getWheelRotation();
-    if (ev.isAltDown())
+    if (!ev.isAltDown())
       amount *= 10;
+    if (ArtOfIllusion.getPreferences().getReverseZooming())
+      amount *= -1;
     if (isPerspective())
     {
       CoordinateSystem coords = theCamera.getCameraCoordinates();
-      Vec3 delta = coords.getZDirection().times(0.1*amount);
+      Vec3 delta = coords.getZDirection().times(-0.1*amount);
       coords.setOrigin(coords.getOrigin().plus(delta));
       theCamera.setCameraCoordinates(coords);
       repaint();
     }
     else
     {
-      setScale(getScale()*Math.pow(0.99, -amount));
+      setScale(getScale()*Math.pow(0.99, amount));
     }
   }
   
@@ -773,20 +775,39 @@ public abstract class ViewerCanvas extends CustomWidget
     if (which > 5 && which != VIEW_OTHER)
       return;
     CoordinateSystem coords = theCamera.getCameraCoordinates();
-    double dist = (perspective ? coords.getOrigin().length() : Camera.DEFAULT_DISTANCE_TO_SCREEN);
-        
+    double dist = theCamera.getDistToScreen();
+    Vec3 center = coords.getOrigin().plus(coords.getZDirection().times(dist));
+
     if (which == 0)             // Front
-      coords = new CoordinateSystem(new Vec3(0.0, 0.0, dist), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
+    {
+      center.z += dist;
+      coords = new CoordinateSystem(center, new Vec3(0.0, 0.0, -1.0), Vec3.vy());
+    }
     else if (which == 1)        // Back
-      coords = new CoordinateSystem(new Vec3(0.0, 0.0, -dist), Vec3.vz(), Vec3.vy());
+    {
+      center.z -= dist;
+      coords = new CoordinateSystem(center, Vec3.vz(), Vec3.vy());
+    }
     else if (which == 2)        // Left
-      coords = new CoordinateSystem(new Vec3(-dist, 0.0, 0.0), Vec3.vx(), Vec3.vy());
+    {
+      center.x -= dist;
+      coords = new CoordinateSystem(center, Vec3.vx(), Vec3.vy());
+    }
     else if (which == 3)        // Right
-      coords = new CoordinateSystem(new Vec3(dist, 0.0, 0.0), new Vec3(-1.0, 0.0, 0.0), Vec3.vy());
+    {
+      center.x += dist;
+      coords = new CoordinateSystem(center, new Vec3(-1.0, 0.0, 0.0), Vec3.vy());
+    }
     else if (which == 4)        // Top
-      coords = new CoordinateSystem(new Vec3(0.0, dist, 0.0), new Vec3(0.0, -1.0, 0.0), new Vec3(0.0, 0.0, -1.0));
+    {
+      center.y += dist;
+      coords = new CoordinateSystem(center, new Vec3(0.0, -1.0, 0.0), new Vec3(0.0, 0.0, -1.0));
+    }
     else if (which == 5)        // Bottom
-      coords = new CoordinateSystem(new Vec3(0.0, -dist, 0.0), Vec3.vy(), Vec3.vz());
+    {
+      center.y -= dist;
+      coords = new CoordinateSystem(center, Vec3.vy(), Vec3.vz());
+    }
     theCamera.setCameraCoordinates(coords);
     dispatchEvent(viewChangedEvent);
     repaint();

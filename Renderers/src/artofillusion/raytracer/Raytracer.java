@@ -29,37 +29,37 @@ import java.util.List;
 
 public class Raytracer implements Renderer, Runnable
 {
-  RTObject sceneObject[];
-  RTLight light[];
-  OctreeNode rootNode, cameraNode, lightNode[];
-  ColumnContainer configPanel;
-  BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, filterBox, reducedMemoryBox;
-  BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice;
-  ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField, filterIterationsField;
-  ValueField extraGIField, extraGIEnvField;
-  ValueField globalPhotonsField, globalNeighborPhotonsField, causticsPhotonsField, causticsNeighborPhotonsField, volumePhotonsField, volumeNeighborPhotonsField;
-  int pixel[], width, height, rtWidth, rtHeight, maxRayDepth = 8, minRays = 4, maxRays = 16, diffuseRays, antialiasLevel;
-  MemoryImageSource imageSource;
-  Scene theScene;
-  Camera theCamera;
-  RenderListener listener;
-  Image img;
-  volatile Thread renderThread;
-  RGBColor ambColor, envColor, fogColor;
-  double envParamValue[];
-  TextureMapping envMapping;
-  int envMode;
-  Vec3 hvec, vvec, center, viewpoint, cameraDir;
-  double time, dofScale, depthOfField, focalDist, fogDist, surfaceError = 0.02, stepSize = 1.0;
-  double smoothing = 1.0, smoothScale, extraGISmoothing = 10.0, extraGIEnvSmoothing = 100.0;
-  int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100, noiseFilterIterations = 5;
-  float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[];
-  Object objectImage[];
-  boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, noiseFilter = false, reducedMemory = false;
-  boolean needCopyToUI = true;
-  PhotonMap globalMap, causticsMap, volumeMap;
-  BoundingBox materialBounds;
-  ThreadLocal threadContext;
+  protected RTObject sceneObject[];
+  protected RTLight light[];
+  protected OctreeNode rootNode, cameraNode, lightNode[];
+  protected ColumnContainer configPanel;
+  protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, filterBox, reducedMemoryBox;
+  protected BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice;
+  protected ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField, filterIterationsField;
+  protected ValueField extraGIField, extraGIEnvField;
+  protected ValueField globalPhotonsField, globalNeighborPhotonsField, causticsPhotonsField, causticsNeighborPhotonsField, volumePhotonsField, volumeNeighborPhotonsField;
+  protected int pixel[], width, height, rtWidth, rtHeight, maxRayDepth = 8, minRays = 4, maxRays = 16, diffuseRays, antialiasLevel;
+  protected MemoryImageSource imageSource;
+  protected Scene theScene;
+  protected Camera theCamera;
+  protected RenderListener listener;
+  protected Image img;
+  protected volatile Thread renderThread;
+  protected RGBColor ambColor, envColor, fogColor;
+  protected double envParamValue[];
+  protected TextureMapping envMapping;
+  protected int envMode;
+  protected Vec3 hvec, vvec, center, viewpoint, cameraDir;
+  protected double time, dofScale, depthOfField, focalDist, fogDist, surfaceError = 0.02, stepSize = 1.0;
+  protected double smoothing = 1.0, smoothScale, extraGISmoothing = 10.0, extraGIEnvSmoothing = 100.0;
+  protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100, noiseFilterIterations = 5;
+  protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[];
+  protected Object objectImage[];
+  protected boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, noiseFilter = false, reducedMemory = false;
+  protected boolean needCopyToUI = true;
+  protected PhotonMap globalMap, causticsMap, volumeMap;
+  protected BoundingBox materialBounds;
+  protected ThreadLocal threadContext;
 
   public static final double TOL = 1e-12;
   
@@ -325,7 +325,7 @@ public class Raytracer implements Renderer, Runnable
     return configPanel;
   }
   
-  private void showAdvancedOptionsWindow(WidgetEvent ev)
+  protected void showAdvancedOptionsWindow(WidgetEvent ev)
   {
     // Layout the window.
     
@@ -392,7 +392,7 @@ public class Raytracer implements Renderer, Runnable
     }
   }
 
-  private void showIlluminationWindow(WidgetEvent ev)
+  protected void showIlluminationWindow(WidgetEvent ev)
   {
     // Layout the window.
     
@@ -461,7 +461,7 @@ public class Raytracer implements Renderer, Runnable
     }
   }
 
-  private void showOutputOptionsWindow(WidgetEvent ev)
+  protected void showOutputOptionsWindow(WidgetEvent ev)
   {
     // Record the current settings.
 
@@ -483,7 +483,7 @@ public class Raytracer implements Renderer, Runnable
 
   /** Copy the current configuration to the user interface. */
 
-  private void copyConfigurationToUI()
+  protected void copyConfigurationToUI()
   {
     needCopyToUI = false;
     if (configPanel == null)
@@ -687,7 +687,7 @@ public class Raytracer implements Renderer, Runnable
 
   /** Construct the list of RTObjects and lights in the scene. */
 
-  private void buildScene(final Scene theScene, final Camera theCamera)
+  protected void buildScene(final Scene theScene, final Camera theCamera)
   {
     final List<RTObject> obj = Collections.synchronizedList(new ArrayList<RTObject>());
     final List<RTLight> lt = Collections.synchronizedList(new ArrayList<RTLight>());
@@ -741,7 +741,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Add a single object to the scene. */
   
-  private void addObject(List<RTObject> obj, List<RTLight> lt, ObjectInfo info, Camera camera,
+  protected void addObject(List<RTObject> obj, List<RTLight> lt, ObjectInfo info, Camera camera,
                 Thread mainThread, List<RTObjectFactory> factories)
   {
     boolean displaced = false;
@@ -933,7 +933,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Build the octree. */
   
-  void buildTree()
+  protected void buildTree()
   {
     BoundingBox objBounds[] = new BoundingBox [sceneObject.length];
     double minx, maxx, miny, maxy, minz, maxz;
@@ -985,7 +985,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Build the photon maps. */
   
-  private void buildPhotonMap()
+  protected void buildPhotonMap()
   {
     if (giMode != GI_PHOTON && giMode != GI_HYBRID && !caustics && scatterMode != SCATTER_PHOTONS && scatterMode != SCATTER_BOTH)
       return;
@@ -1052,7 +1052,7 @@ public class Raytracer implements Renderer, Runnable
 
   /** Find all the photon sources in the scene, and generate the photons in a PhotonMap. */
   
-  private void generatePhotons(PhotonMap map)
+  protected void generatePhotons(PhotonMap map)
   {
     List<PhotonSourceFactory> factories = PluginRegistry.getPlugins(PhotonSourceFactory.class);
     ArrayList<PhotonSource> sources = new ArrayList<PhotonSource>();
@@ -1365,7 +1365,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Record a row of pixels into the image. */
   
-  private void recordRow(PixelInfo pix[][], PixelInfo tempPixel, int row)
+  protected void recordRow(PixelInfo pix[][], PixelInfo tempPixel, int row)
   {
     for (int i = 0; i < width; i++)
       {
@@ -1422,7 +1422,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Record a single pixel into the image. */
 
-  private void recordPixel(int x, int y, PixelInfo pix)
+  protected void recordPixel(int x, int y, PixelInfo pix)
   {
     int index = x+y*width;
     pixel[index] = pix.calcARGB();
@@ -1442,7 +1442,7 @@ public class Raytracer implements Renderer, Runnable
   
   /** Apply the noise reduction filter to the image. */
   
-  private void applyNoiseFilter()
+  protected void applyNoiseFilter()
   {
     if (!noiseFilter)
       	return;
@@ -1468,7 +1468,7 @@ public class Raytracer implements Renderer, Runnable
   /** This routine is called when rendering is finished.  It sets variables to null and
      runs a garbage collection. */
 
-  private void finish()
+  protected void finish()
   {
     sceneObject = null;
     light = null;
@@ -1514,7 +1514,7 @@ public class Raytracer implements Renderer, Runnable
       distribution ray tracing.  The light color is returned in color[0], and the
       transparency in transparency[0]. */
   
-  private double spawnEyeRay(RaytracerContext rt, int i, int j, int number, int outOf)
+  protected double spawnEyeRay(RaytracerContext rt, int i, int j, int number, int outOf)
   {
     Ray ray = rt.ray[0];
     Vec3 orig = ray.getOrigin(), dir = ray.getDirection();
@@ -1594,7 +1594,7 @@ public class Raytracer implements Renderer, Runnable
       @return the object with a material which the point is inside, or null if it is not inside any material.
    */
 
-  RTObject getMaterialAtPoint(RaytracerContext rt, Vec3 pos, OctreeNode node)
+  protected RTObject getMaterialAtPoint(RaytracerContext rt, Vec3 pos, OctreeNode node)
   {
     // Many points can be excluded immediately.
 
@@ -1686,7 +1686,7 @@ public class Raytracer implements Renderer, Runnable
       @return the distance to the first object hit by the ray
   */
 
-  private double spawnRay(RaytracerContext rt, int treeDepth, OctreeNode node, RTObject first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, int rayNumber, double totalDist, boolean transmitted, boolean diffuse)
+  protected double spawnRay(RaytracerContext rt, int treeDepth, OctreeNode node, RTObject first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, int rayNumber, double totalDist, boolean transmitted, boolean diffuse)
   {
     RTObject second = null;
     double dist, dot, truedot, n, beta = 0.0, d;
@@ -2015,7 +2015,7 @@ public class Raytracer implements Renderer, Runnable
       @param diffuse            true if this ray has been diffusely reflected since leaving the eye
   */
 
-  void getDirectLight(RaytracerContext rt, Vec3 pos, Vec3 normal, boolean front, Vec3 viewDir, int treeDepth, OctreeNode node, int rayNumber, double totalDist, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, boolean diffuse)
+  protected void getDirectLight(RaytracerContext rt, Vec3 pos, Vec3 normal, boolean front, Vec3 viewDir, int treeDepth, OctreeNode node, int rayNumber, double totalDist, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, boolean diffuse)
   {
     int i;
     RGBColor lightColor = rt.color[treeDepth+1], finalColor = rt.color[treeDepth];
@@ -2112,7 +2112,7 @@ public class Raytracer implements Renderer, Runnable
      the ray intersects.  If an intersection is found, the octree node containing the
      intersection point is returned.  Otherwise, the return value is null. */
   
-  OctreeNode traceRay(Ray r, OctreeNode node)
+  protected OctreeNode traceRay(Ray r, OctreeNode node)
   {
     RTObject first = null, second = null, obj[];
     double dist, firstDist = Double.MAX_VALUE, secondDist = Double.MAX_VALUE;
@@ -2180,7 +2180,7 @@ public class Raytracer implements Renderer, Runnable
      @param currentMatTrans    the transform to local coordinates for the current material
      @param prevMatTrans       the transform to local coordinates for the previous material */
 
-  boolean traceLightRay(Ray r, Light lt, int treeDepth, OctreeNode node, OctreeNode endNode, double distToLight, double totalDist, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans)
+  protected boolean traceLightRay(Ray r, Light lt, int treeDepth, OctreeNode node, OctreeNode endNode, double distToLight, double totalDist, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans)
   {
     RGBColor lightColor = r.rt.color[treeDepth], transColor = r.rt.surfSpec[treeDepth].transparent;
     Vec3 intersectionPoint = r.rt.pos[maxRayDepth], trueNorm = r.rt.trueNormal[maxRayDepth];
@@ -2306,7 +2306,7 @@ public class Raytracer implements Renderer, Runnable
       @param totalDist         the distance traveled from the viewpoint
    */
 
-  void propagateRay(Ray r, OctreeNode node, double dist, MaterialMapping material, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, RGBColor emitted, RGBColor filter, int treeDepth, double totalDist)
+  protected void propagateRay(Ray r, OctreeNode node, double dist, MaterialMapping material, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, RGBColor emitted, RGBColor filter, int treeDepth, double totalDist)
   {
     boolean scattering = material.isScattering();
     MaterialSpec matSpec = r.rt.matSpec;
@@ -2472,7 +2472,7 @@ public class Raytracer implements Renderer, Runnable
       @param toLocal    the transformation from world coordinates to the material's local coordinates.
       @param totalDist  the distance traveled from the viewpoint */
 
-  void propagateLightRay(Ray r, OctreeNode node, double startDist, double endDist, MaterialMapping material, RGBColor filter, Mat4 toLocal, double totalDist)
+  protected void propagateLightRay(Ray r, OctreeNode node, double startDist, double endDist, MaterialMapping material, RGBColor filter, Mat4 toLocal, double totalDist)
   {
     float rf = filter.getRed(), gf = filter.getGreen(), bf = filter.getBlue();
     MaterialSpec matSpec = r.rt.matSpec;
@@ -2578,7 +2578,7 @@ public class Raytracer implements Renderer, Runnable
       @param prevMatTrans      the transform to local coordinates for the previous material
    */
 
-  void getScatteredLight(RaytracerContext rt, int treeDepth, OctreeNode node, double eccentricity, double totalDist, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans)
+  protected void getScatteredLight(RaytracerContext rt, int treeDepth, OctreeNode node, double eccentricity, double totalDist, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans)
   {
     int i;
     RGBColor filter = rt.rayIntensity[treeDepth], lightColor = rt.color[treeDepth];
@@ -2717,7 +2717,7 @@ public class Raytracer implements Renderer, Runnable
       short, and is in close to the correct order to begin with, this will generally
       be very fast. */
   
-  private void sortMaterialList(MaterialIntersection matChange[], int count)
+  protected void sortMaterialList(MaterialIntersection matChange[], int count)
   {
     for (int i = 1; i < count; i++)
       for (int j = i; j > 0 && matChange[j].dist < matChange[j-1].dist; j--)

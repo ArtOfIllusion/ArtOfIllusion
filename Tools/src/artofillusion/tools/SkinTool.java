@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -37,39 +37,39 @@ public class SkinTool implements ModellingTool
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
-    int selection[] = scene.getSelection();
-    Vector curves = new Vector();
+    int selection[] = window.getSelectedIndices();
+    Vector<ObjectInfo> curves = new Vector<ObjectInfo>();
     
     for (int i = 0; i < selection.length; i++)
       {
-	ObjectInfo obj = scene.getObject(selection[i]);
-	if (obj.getObject() instanceof Curve)
-	  curves.addElement(obj);
+        ObjectInfo obj = scene.getObject(selection[i]);
+        if (obj.getObject() instanceof Curve)
+          curves.addElement(obj);
       }
     if (curves.size() < 2)
       {
         new BStandardDialog("", UIUtilities.breakString("You must select two or more curves to create a skin across."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
-	return;
+        return;
       }
-    Curve c = (Curve) ((ObjectInfo) curves.elementAt(0)).getObject();
+    Curve c = (Curve) curves.elementAt(0).getObject();
     for (int i = 1; i < curves.size(); i++)
       {
-	Curve c2 = (Curve) ((ObjectInfo) curves.elementAt(i)).getObject();
-	if (c2.getVertices().length != c.getVertices().length)
-	  {
+        Curve c2 = (Curve) curves.elementAt(i).getObject();
+        if (c2.getVertices().length != c.getVertices().length)
+          {
             new BStandardDialog("", UIUtilities.breakString("All the curves must have the same number of points."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
-	    return;
-	  }
-	if (c2.isClosed() != c.isClosed())
-	  {
+            return;
+          }
+        if (c2.isClosed() != c.isClosed())
+          {
             new BStandardDialog("", UIUtilities.breakString("You cannot create a skin between a closed curve and an open one."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
-	    return;
-	  }
-	if (c2.getSmoothingMethod() != c.getSmoothingMethod() && c.getSmoothingMethod() != Mesh.NO_SMOOTHING && c2.getSmoothingMethod() != Mesh.NO_SMOOTHING)
-	  {
+            return;
+          }
+        if (c2.getSmoothingMethod() != c.getSmoothingMethod() && c.getSmoothingMethod() != Mesh.NO_SMOOTHING && c2.getSmoothingMethod() != Mesh.NO_SMOOTHING)
+          {
             new BStandardDialog("", UIUtilities.breakString("You cannot create a skin between an interpolating curve and an approximating one."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
-	    return;
-	  }
+            return;
+          }
       }
     new SkinDialog(window, curves);
   }

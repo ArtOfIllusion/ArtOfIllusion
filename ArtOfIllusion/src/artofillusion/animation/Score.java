@@ -692,7 +692,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   public void keyframeModifiedTracks()
   {
     Scene theScene = window.getScene();
-    int sel[] = theScene.getSelection();
+    int sel[] = window.getSelectedIndices();
     double time = theScene.getTime();
     UndoRecord undo = new UndoRecord(window, false);
     Vector newkeys = new Vector();
@@ -818,7 +818,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   public void selectAllTracks()
   {
     Scene theScene = window.getScene();
-    int sel[] = theScene.getSelection();
+    int sel[] = window.getSelectedIndices();
     
     theList.setUpdateEnabled(false);
     for (int i = 0; i < sel.length; i++)

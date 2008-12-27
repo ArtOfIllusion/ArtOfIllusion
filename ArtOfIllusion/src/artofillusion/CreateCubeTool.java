@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@ public class CreateCubeTool extends EditingTool
   private Point clickPoint;
   private ObjectInfo objInfo;
   
-  public CreateCubeTool(EditingWindow fr)
+  public CreateCubeTool(LayoutWindow fr)
   {
     super(fr);
     initButton("cube");
@@ -66,7 +66,7 @@ public class CreateCubeTool extends EditingTool
       objInfo.addTrack(new PositionTrack(objInfo), 0);
       objInfo.addTrack(new RotationTrack(objInfo), 1);
       UndoRecord undo = new UndoRecord(theWindow, false);
-      int sel[] = theScene.getSelection();
+      int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
       ((LayoutWindow) theWindow).addObject(objInfo, undo);
       undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
       theWindow.setUndoRecord(undo);

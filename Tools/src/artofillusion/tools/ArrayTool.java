@@ -39,7 +39,7 @@ public class ArrayTool implements ModellingTool
      message, or bring up the array tool window. */
   public void commandSelected(LayoutWindow window)
   {
-        if (window.getScene().getSelection().length < 1)
+        if (window.getSelectedIndices().length < 1)
             new BStandardDialog("", "You must select one or more objects to create an array from.", BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
         else
             new ArrayDialog(window);

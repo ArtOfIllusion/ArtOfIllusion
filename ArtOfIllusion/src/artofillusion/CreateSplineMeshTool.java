@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -32,7 +32,7 @@ public class CreateSplineMeshTool extends EditingTool
   int usize = 5, vsize = 5, shape = FLAT, smoothing = Mesh.APPROXIMATING;
   double thickness = 0.5;
 
-  public CreateSplineMeshTool(EditingWindow fr)
+  public CreateSplineMeshTool(LayoutWindow fr)
   {
     super(fr);
     initButton("splineMesh");
@@ -138,7 +138,7 @@ public class CreateSplineMeshTool extends EditingTool
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);
     UndoRecord undo = new UndoRecord(theWindow, false);
-    int sel[] = theScene.getSelection();
+    int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
     ((LayoutWindow) theWindow).addObject(info, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
     theWindow.setUndoRecord(undo);

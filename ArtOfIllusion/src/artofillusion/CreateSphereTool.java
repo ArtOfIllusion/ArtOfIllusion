@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,7 @@ public class CreateSphereTool extends EditingTool
   private Point clickPoint;
   private ObjectInfo objInfo;
   
-  public CreateSphereTool(EditingWindow fr)
+  public CreateSphereTool(LayoutWindow fr)
   {
     super(fr);
     initButton("sphere");
@@ -65,7 +65,7 @@ public class CreateSphereTool extends EditingTool
       objInfo.addTrack(new PositionTrack(objInfo), 0);
       objInfo.addTrack(new RotationTrack(objInfo), 1);
       UndoRecord undo = new UndoRecord(theWindow, false);
-      int sel[] = theScene.getSelection();
+      int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
       ((LayoutWindow) theWindow).addObject(objInfo, undo);
       undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
       theWindow.setUndoRecord(undo);

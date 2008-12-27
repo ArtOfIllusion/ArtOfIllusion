@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ public class CreatePolygonTool extends EditingTool
   private double centerx, centery;
   private double sine[], cosine[], minsine, maxsine, mincosine, maxcosine;
 
-  public CreatePolygonTool(EditingWindow fr)
+  public CreatePolygonTool(LayoutWindow fr)
   {
     super(fr);
     initButton("polygon");
@@ -107,7 +107,6 @@ public class CreatePolygonTool extends EditingTool
 
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    Scene theScene = ((LayoutWindow) theWindow).getScene();
     Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     Vec3 vertex[], orig, ydir, zdir, temp;
@@ -157,7 +156,7 @@ public class CreatePolygonTool extends EditingTool
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);
     UndoRecord undo = new UndoRecord(theWindow, false);
-    int sel[] = theScene.getSelection();
+    int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
     ((LayoutWindow) theWindow).addObject(info, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
     theWindow.setUndoRecord(undo);

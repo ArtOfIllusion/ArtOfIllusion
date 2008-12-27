@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,7 +36,7 @@ public class TubeTool implements ModellingTool
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
-    int selection[] = scene.getSelection();
+    int selection[] = window.getSelectedIndices();
     
     if (selection.length == 1)
       {

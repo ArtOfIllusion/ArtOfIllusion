@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2007 by Peter Eastman
+/* Copyright (C) 2001-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -37,17 +37,17 @@ public class ExtrudeTool implements ModellingTool
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
-    int selection[] = scene.getSelection();
+    int selection[] = window.getSelectedIndices();
     
     for (int i = 0; i < selection.length; i++)
       {
-	Object3D obj = scene.getObject(selection[i]).getObject();
-	if (obj instanceof Curve || ((obj instanceof TriangleMesh || 
-	    obj.canConvertToTriangleMesh() != Object3D.CANT_CONVERT) && !obj.isClosed()))
-	  {
-	    new ExtrudeDialog(window);
-	    return;
-	  }
+        Object3D obj = scene.getObject(selection[i]).getObject();
+        if (obj instanceof Curve || ((obj instanceof TriangleMesh ||
+            obj.canConvertToTriangleMesh() != Object3D.CANT_CONVERT) && !obj.isClosed()))
+          {
+            new ExtrudeDialog(window);
+            return;
+          }
       }
     new BStandardDialog("", UIUtilities.breakString("You must select a curve or open surface to extrude and, optionally, a curve along which to extrude it."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }

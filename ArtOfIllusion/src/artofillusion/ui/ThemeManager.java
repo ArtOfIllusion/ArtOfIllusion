@@ -271,8 +271,6 @@ public class ThemeManager {
         protected int height = -1;
 
         protected HashMap<String, String> attributes = new HashMap<String, String>();
-        protected HashMap<String, Object> namespace;
-
         protected ButtonStyle next;
 
         /**

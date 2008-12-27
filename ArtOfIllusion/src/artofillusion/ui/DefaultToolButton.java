@@ -167,24 +167,20 @@ public class DefaultToolButton extends ToolButton
       // we're still here, so apply the style...
 
       // initialise the namespace
-      if (style.namespace == null) style.namespace = new HashMap<String, Object>(style.attributes);
-      else {
-          style.namespace.clear();
-          style.namespace.putAll(style.attributes);
-      }
+      HashMap<String, Object> namespace = new HashMap<String, Object>(style.attributes);
 
       if (image != null) {
           Image img = image.getImage();
-          style.namespace.put("{icon}", img);
-          style.namespace.put('{' + type + ".icon}", img);
+          namespace.put("{icon}", img);
+          namespace.put('{' + type + ".icon}", img);
       }
 
-      style.namespace.put("{owner}", owner);
+      namespace.put("{owner}", owner);
 
       // get the classloader from the selected theme
       ClassLoader loader = ThemeManager.getSelectedTheme().loader;
 
       // return the result of applying the style
-      return IconGenerator.apply(macro, null, style.namespace, loader, width, height);
+      return IconGenerator.apply(macro, null, namespace, loader, style.width, style.height);
   }
 }

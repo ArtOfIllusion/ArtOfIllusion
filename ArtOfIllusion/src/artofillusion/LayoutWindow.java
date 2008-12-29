@@ -87,19 +87,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Object listen = new Object() {
       void processEvent(MousePressedEvent ev)
       {
-        for (int i = 0; i < theView.length; i++)
-          if (currentView != i && ev.getWidget() == theView[i])
-          {
-            theView[currentView].setDrawFocus(false);
-            theView[i].setDrawFocus(true);
-            displayItem[0].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
-            displayItem[1].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_FLAT);
-            displayItem[2].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
-            displayItem[3].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
-            currentView = i;
-            updateImage();
-            updateMenus();
-          }
+        setCurrentView((ViewerCanvas) ev.getWidget());
       }
     };
     Object keyListener = new Object() {
@@ -1129,6 +1117,30 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public ViewerCanvas[] getAllViews()
   {
     return (ViewerCanvas[]) theView.clone();
+  }
+
+  /**
+   * Set which ViewerCanvas has focus.
+   *
+   * @param view  the ViewerCanvas which should become the currently focused view.  If this
+   * is not one of the views belonging to this window, this method does nothing.
+   */
+
+  public void setCurrentView(ViewerCanvas view)
+  {
+    for (int i = 0; i < theView.length; i++)
+      if (currentView != i && view == theView[i])
+      {
+        theView[currentView].setDrawFocus(false);
+        theView[i].setDrawFocus(true);
+        displayItem[0].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
+        displayItem[1].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_FLAT);
+        displayItem[2].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
+        displayItem[3].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
+        currentView = i;
+        updateImage();
+        updateMenus();
+      }
   }
 
   /** Get the Score for this window. */

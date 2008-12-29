@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -91,15 +91,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     Object listen = new Object() {
       void processEvent(MousePressedEvent ev)
       {
-        for (int i = 0; i < theView.length; i++)
-          if (currentView != i && ev.getWidget() == theView[i])
-          {
-            theView[currentView].setDrawFocus(false);
-            theView[i].setDrawFocus(true);
-            currentView = i;
-            updateMenus();
-            updateImage();
-          }
+        setCurrentView((ViewerCanvas) ev.getWidget());
       }
     };
     for (int i = 0; i < theView.length; i++)
@@ -259,6 +251,26 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public ViewerCanvas getView()
   {
     return theView[currentView];
+  }
+
+  /**
+   * Set which ViewerCanvas has focus.
+   *
+   * @param view  the ViewerCanvas which should become the currently focused view.  If this
+   * is not one of the views belonging to this window, this method does nothing.
+   */
+
+  public void setCurrentView(ViewerCanvas view)
+  {
+    for (int i = 0; i < theView.length; i++)
+      if (currentView != i && view == theView[i])
+      {
+        theView[currentView].setDrawFocus(false);
+        theView[i].setDrawFocus(true);
+        currentView = i;
+        updateMenus();
+        updateImage();
+      }
   }
 
   /** Get the ToolPalette for this window. */

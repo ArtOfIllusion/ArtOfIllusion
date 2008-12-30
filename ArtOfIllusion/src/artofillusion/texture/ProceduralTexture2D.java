@@ -202,6 +202,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     
     tex.proc.copy(proc);
     tex.setName(getName());
+    tex.antialiasing = antialiasing;
     return tex;
   }
   

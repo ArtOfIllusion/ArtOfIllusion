@@ -224,6 +224,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
     
     tex.proc.copy(proc);
     tex.setName(getName());
+    tex.antialiasing = antialiasing;
     return tex;
   }
   

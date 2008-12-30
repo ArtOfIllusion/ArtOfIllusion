@@ -406,6 +406,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     RecentFiles.createMenu(recentFilesMenu);
     fileMenu.add(Translate.menuItem("close", this, "actionPerformed"));
     fileMenu.addSeparator();
+    Collections.sort(trans, new Comparator<Translator>() {
+      public int compare(Translator o1, Translator o2)
+      {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
     for (int i = 0; i < trans.size(); i++)
       {
         if (trans.get(i).canImport())

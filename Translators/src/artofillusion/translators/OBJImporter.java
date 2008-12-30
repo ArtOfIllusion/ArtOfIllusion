@@ -1,4 +1,4 @@
-/* Copyright (C) 2002,2004 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -53,9 +53,14 @@ public class OBJImporter
 
     // Open the file and read the contents.
     
-    Hashtable groupTable = new Hashtable(), textureTable = new Hashtable();
-    Vector vertex = new Vector(), normal = new Vector(), texture = new Vector(), face[] = new Vector [] {new Vector()};
-    groupTable.put("default", face[0]);
+    Hashtable<String, Vector<FaceInfo>> groupTable = new Hashtable<String, Vector<FaceInfo>>();
+    Hashtable<String, TextureInfo> textureTable = new Hashtable<String, TextureInfo>();
+    Vector<Vec3> vertex = new Vector<Vec3>();
+    Vector<Vec3> normal = new Vector<Vec3>();
+    Vector<Vec3> texture = new Vector<Vec3>();
+    Vector<Vector<FaceInfo>> face = new Vector<Vector<FaceInfo>>();
+    face.add(new Vector<FaceInfo>());
+    groupTable.put("default", face.get(0));
     int lineno = 0, smoothingGroup = -1;
     String currentTexture = null;
     VertexInfo vertIndex[] = new VertexInfo [3];
@@ -148,20 +153,20 @@ public class OBJImporter
                   vertIndex = new VertexInfo [fields.length-1];
                 for (int i = 0; i < vertIndex.length; i++)
                   vertIndex[i] = parseVertexSpec(fields[i+1], vertex, texture, normal, lineno);
-                for (int i = 0; i < face.length; i++)
+                for (int i = 0; i < face.size(); i++)
                   {
                     if (fields.length == 4)
                       {
                         // Add a triangular face.
                         
-                        face[i].addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
+                        face.get(i).addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
                       }
                     else if (fields.length == 5)
                       {
                         // Add a 4 sided face.
                         
-                        face[i].addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
-                        face[i].addElement(new FaceInfo(vertIndex[2], vertIndex[3], vertIndex[0], smoothingGroup, currentTexture));
+                        face.get(i).addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
+                        face.get(i).addElement(new FaceInfo(vertIndex[2], vertIndex[3], vertIndex[0], smoothingGroup, currentTexture));
                       }
                     else if (fields.length > 5)
                       {
@@ -171,9 +176,9 @@ public class OBJImporter
                         for (step = 1; 2*step < vertIndex.length; step *= 2)
                           {
                             for (start = 0; start+2*step < vertIndex.length; start += 2*step)
-                              face[i].addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[start+2*step], smoothingGroup, currentTexture));
+                              face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[start+2*step], smoothingGroup, currentTexture));
                             if (start+step < vertIndex.length)
-                              face[i].addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[0], smoothingGroup, currentTexture));
+                              face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[0], smoothingGroup, currentTexture));
                           }
                       }
                   }
@@ -201,14 +206,14 @@ public class OBJImporter
               {
                 // Set the current group or groups.
                 
-                face = new Vector [fields.length-1];
-                for (int i = 0; i < face.length; i++)
+                face.setSize(fields.length-1);
+                for (int i = 0; i < face.size(); i++)
                   {
-                    face[i] = (Vector) groupTable.get(fields[i+1]);
-                    if (face[i] == null)
+                    face.set(i, groupTable.get(fields[i+1]));
+                    if (face.get(i) == null)
                       {
-                        face[i] = new Vector();
-                        groupTable.put(fields[i+1], face[i]);
+                        face.set(i, new Vector<FaceInfo>());
+                        groupTable.put(fields[i+1], face.get(i));
                       }
                   }
               }
@@ -242,17 +247,17 @@ public class OBJImporter
         double maxSize = Math.max(Math.max(max[0]-min[0], max[1]-min[1]), max[2]-min[2]);
         double scale = Math.pow(10.0, -Math.floor(Math.log(maxSize)/Math.log(10.0)));
         for (int i = 0; i < vertex.size(); i++)
-          ((Vec3) vertex.elementAt(i)).scale(scale);
+          vertex.elementAt(i).scale(scale);
         
         // Create a triangle mesh for each group.
         
-        Enumeration keys = groupTable.keys();
-        Hashtable realizedTextures = new Hashtable();
-        Hashtable imageMaps = new Hashtable();
+        Enumeration<String> keys = groupTable.keys();
+        Hashtable<String, Texture> realizedTextures = new Hashtable<String, Texture>();
+        Hashtable<String, ImageMap> imageMaps = new Hashtable<String, ImageMap>();
         while (keys.hasMoreElements())
           {
-            String group = (String) keys.nextElement();
-            Vector groupFaces = (Vector) groupTable.get(group);
+            String group = keys.nextElement();
+            Vector<FaceInfo> groupFaces = groupTable.get(group);
             if (groupFaces.size() == 0)
               continue;
             
@@ -264,7 +269,7 @@ public class OBJImporter
             int fc[][] = new int [groupFaces.size()][], numVert = 0;
             for (int i = 0; i < fc.length; i++)
               {
-                FaceInfo fi = (FaceInfo) groupFaces.elementAt(i);
+                FaceInfo fi = groupFaces.elementAt(i);
                 for (int j = 0; j < 3; j++)
                   if (realIndex[fi.getVertex(j).vert] == -1)
                     realIndex[fi.getVertex(j).vert] = numVert++;
@@ -277,7 +282,7 @@ public class OBJImporter
             for (int i = 0; i < realIndex.length; i++)
               if (realIndex[i] > -1)
                 {
-                  vert[realIndex[i]] = (Vec3) vertex.elementAt(i);
+                  vert[realIndex[i]] = vertex.elementAt(i);
                   center.add(vert[realIndex[i]]);
                 }
             center.scale(1.0/vert.length);
@@ -313,69 +318,113 @@ public class OBJImporter
                       {
                         int n1 = f1.getVertex(j).norm;
                         int n2 = f2.getVertex(k).norm;
-                        if (n1 != n2 && ((Vec3) normal.elementAt(n1)).distance((Vec3) normal.elementAt(n2)) > 1e-10)
+                        if (n1 != n2 && normal.elementAt(n1).distance(normal.elementAt(n2)) > 1e-10)
                           edge[i].smoothness = 0.0f;
                         break;
                       }
               }
             
-            // Set the texture.  For the moment, assume a single texture per group.  In the future, this could possibly
-            // be improved to deal correctly with per-face textures.
-            
-            String texName = ((FaceInfo) groupFaces.elementAt(0)).texture;
-            if (texName != null && textureTable.get(texName) != null)
+            // Set the texture.  Begin by finding all textures used by the group.
+
+            HashSet<String> texNames = new HashSet<String>();
+            for (FaceInfo faceInfo : groupFaces)
+              if (faceInfo.texture != null)
+                texNames.add(faceInfo.texture);
+
+            // If multiple textures are needed, create a layered texture.
+
+            LayeredMapping layered = null;
+            if (texNames.size() > 1)
+            {
+              LayeredTexture tex = new LayeredTexture(info.getObject());
+              layered = (LayeredMapping) tex.getDefaultMapping(info.getObject());
+              info.setTexture(tex, layered);
+            }
+
+            // Now create all the textures.
+
+            for (String texName : texNames)
+            {
+              Texture tex = realizedTextures.get(texName);
+              if (tex == null)
               {
-                Texture tex = (Texture) realizedTextures.get(texName);
-                if (tex == null)
-                  {
-                    tex = createTexture((TextureInfo) textureTable.get(texName), theScene, bfc.getDirectory(), imageMaps, parent);
-                    realizedTextures.put(texName, tex);
-                  }
-                if (tex instanceof Texture2D)
-                  {
-                    // Set the UV coordinates.
-                    
-                    UVMapping map = new UVMapping(info.getObject(), tex);
-                    info.setTexture(tex, map);
-                    Vec2 uv[] = new Vec2 [numVert];
-                    boolean needPerFace = false;
-                    for (int j = 0; j < groupFaces.size() && !needPerFace; j++)
-                      {
-                        FaceInfo fi = (FaceInfo) groupFaces.elementAt(j);
-                        for (int k = 0; k < 3; k++)
-                          {
-                            VertexInfo vi = fi.getVertex(k);
-                            Vec3 texCoords = (Vec3) (vi.tex < texture.size() ? texture.elementAt(vi.tex) : vertex.elementAt(vi.vert));
-                            Vec2 tc = new Vec2(texCoords.x, texCoords.y);
-                            if (uv[realIndex[vi.vert]] != null && !uv[realIndex[vi.vert]].equals(tc))
-                              needPerFace = true;
-                            uv[realIndex[vi.vert]] = tc;
-                          }
-                      }
-                    if (needPerFace)
-                    {
-                      // Different faces have different texture coordinates for the same vertex,
-                      // so we need to use per-face-vertex coordinates.
-                      
-                      Vec2 uvf[][] = new Vec2 [groupFaces.size()][3];
-                      for (int j = 0; j < groupFaces.size(); j++)
-                      {
-                        FaceInfo fi = (FaceInfo) groupFaces.elementAt(j);
-                        for (int k = 0; k < 3; k++)
-                          {
-                            VertexInfo vi = fi.getVertex(k);
-                            Vec3 texCoords = (Vec3) (vi.tex < texture.size() ? texture.elementAt(vi.tex) : vertex.elementAt(vi.vert));
-                            uvf[j][k] = new Vec2(texCoords.x, texCoords.y);
-                          }
-                      }
-                      map.setFaceTextureCoordinates((TriangleMesh) info.getObject(), uvf);
-                    }
-                    else
-                      map.setTextureCoordinates(info.getObject(), uv);
-                  }
-                else
-                  info.setTexture(tex, tex.getDefaultMapping(info.getObject()));
+                tex = createTexture(textureTable.get(texName), texName, theScene, bfc.getDirectory(), imageMaps);
+                realizedTextures.put(texName, tex);
               }
+              if (tex instanceof Texture2D)
+              {
+                // Set the UV coordinates.
+
+                UVMapping map = new UVMapping(info.getObject(), tex);
+                if (layered == null)
+                  info.setTexture(tex, map);
+                else
+                {
+                  layered.addLayer(tex);
+                  layered.setLayerMapping(0, map);
+                  info.setTexture(layered.getTexture(), layered);
+                }
+                Vec2 uv[] = new Vec2 [numVert];
+                boolean needPerFace = false;
+                for (int j = 0; j < groupFaces.size() && !needPerFace; j++)
+                  {
+                    FaceInfo fi = (FaceInfo) groupFaces.elementAt(j);
+                    for (int k = 0; k < 3; k++)
+                      {
+                        VertexInfo vi = fi.getVertex(k);
+                        Vec3 texCoords = (vi.tex < texture.size() ? texture.elementAt(vi.tex) : vertex.elementAt(vi.vert));
+                        Vec2 tc = new Vec2(texCoords.x, texCoords.y);
+                        if (uv[realIndex[vi.vert]] != null && !uv[realIndex[vi.vert]].equals(tc))
+                          needPerFace = true;
+                        uv[realIndex[vi.vert]] = tc;
+                      }
+                  }
+                if (needPerFace)
+                {
+                  // Different faces have different texture coordinates for the same vertex,
+                  // so we need to use per-face-vertex coordinates.
+
+                  Vec2 uvf[][] = new Vec2 [groupFaces.size()][3];
+                  for (int j = 0; j < groupFaces.size(); j++)
+                  {
+                    FaceInfo fi = (FaceInfo) groupFaces.elementAt(j);
+                    for (int k = 0; k < 3; k++)
+                      {
+                        VertexInfo vi = fi.getVertex(k);
+                        Vec3 texCoords = (vi.tex < texture.size() ? texture.elementAt(vi.tex) : vertex.elementAt(vi.vert));
+                        uvf[j][k] = new Vec2(texCoords.x, texCoords.y);
+                      }
+                  }
+                  map.setFaceTextureCoordinates((TriangleMesh) info.getObject(), uvf);
+                }
+                else
+                  map.setTextureCoordinates(info.getObject(), uv);
+              }
+              else
+              {
+                if (layered == null)
+                  info.setTexture(tex, tex.getDefaultMapping(info.getObject()));
+                else
+                {
+                  layered.addLayer(tex);
+                  layered.setLayerMapping(0, tex.getDefaultMapping(info.getObject()));
+                  info.setTexture(layered.getTexture(), layered);
+                }
+              }
+
+              // If we are using a layered texture, set a parameter defining what layer to use
+              // for each face.
+
+              if (layered != null)
+              {
+                double paramValue[] = new double[groupFaces.size()];
+                for (int i = 0; i < paramValue.length; i++)
+                  paramValue[i] = (texName.equals(groupFaces.get(i).texture) ? 1.0 : 0.0);
+                TextureParameter parameter = layered.getLayerParameters(0)[0];
+                System.out.println(parameter.name);
+                info.getObject().setParameterValue(parameter, new FaceParameterValue(paramValue));
+              }
+            }
             theScene.addObject(info, null);
           }
       }
@@ -400,7 +449,7 @@ public class OBJImporter
   private static String [] breakLine(String line)
   {
     StringTokenizer st = new StringTokenizer(line);
-    Vector v = new Vector();
+    Vector<String> v = new Vector<String>();
     
     while (st.hasMoreTokens())
       v.addElement(st.nextToken());
@@ -461,7 +510,7 @@ public class OBJImporter
   
   /** Parse the contents of a .mtl file and add TextureInfo object to a hashtable. */
   
-  private static void parseTextures(String file, File baseDir, Hashtable textures) throws Exception
+  private static void parseTextures(String file, File baseDir, Hashtable<String, TextureInfo> textures) throws Exception
   {
     File f = new File(baseDir, file);
     if (!f.isFile())
@@ -491,7 +540,6 @@ public class OBJImporter
                 if (fields.length == 1 || textures.get(fields[1]) != null)
                   continue;
                 currentTexture = new TextureInfo();
-                currentTexture.name = fields[1];
                 textures.put(fields[1], currentTexture);
               }
             if (currentTexture == null || fields.length < 2)
@@ -528,13 +576,24 @@ public class OBJImporter
   
   /** Create a texture from a TextureInfo and add it to the scene. */
   
-  private static Texture createTexture(TextureInfo info, Scene scene, File baseDir, Hashtable imageMaps, BFrame parent) throws Exception
+  private static Texture createTexture(TextureInfo info, String name, Scene scene, File baseDir, Hashtable<String, ImageMap> imageMaps) throws Exception
   {
+    if (info == null)
+    {
+      // This texture was not defined in an MTL file.  Create an empty image mapped texture
+      // so that texture coordinates will be preserved and the user can specify the images
+      // later.
+
+      ImageMapTexture tex = new ImageMapTexture();
+      tex.setName(name);
+      scene.addTexture(tex);
+      return tex;
+    }
     info.resolveColors();
-    ImageMap diffuseMap = loadMap(info.diffuseMap, scene, baseDir, imageMaps, parent);
-    ImageMap specularMap = loadMap(info.specularMap, scene, baseDir, imageMaps, parent);
-    ImageMap transparentMap = loadMap(info.transparentMap, scene, baseDir, imageMaps, parent);
-    ImageMap bumpMap = loadMap(info.bumpMap, scene, baseDir, imageMaps, parent);
+    ImageMap diffuseMap = loadMap(info.diffuseMap, scene, baseDir, imageMaps);
+    ImageMap specularMap = loadMap(info.specularMap, scene, baseDir, imageMaps);
+    ImageMap transparentMap = loadMap(info.transparentMap, scene, baseDir, imageMaps);
+    ImageMap bumpMap = loadMap(info.bumpMap, scene, baseDir, imageMaps);
     RGBColor transparentColor =  new RGBColor(info.transparency, info.transparency, info.transparency);
     if (diffuseMap == null && specularMap == null && transparentMap == null && bumpMap == null)
       {
@@ -547,7 +606,7 @@ public class OBJImporter
         tex.shininess = (float) info.specularity;
         tex.specularity = 0.0f;
         tex.roughness = info.roughness;
-        tex.setName(info.name);
+        tex.setName(name);
         scene.addTexture(tex);
         return tex;
       }
@@ -566,7 +625,7 @@ public class OBJImporter
         tex.roughness = new ImageOrValue((float) info.roughness);
         tex.tileX = tex.tileY = true;
         tex.mirrorX = tex.mirrorY = false;
-        tex.setName(info.name);
+        tex.setName(name);
         scene.addTexture(tex);
         return tex;
       }
@@ -574,7 +633,7 @@ public class OBJImporter
   
   /** Return the image map corresponding to the specified filename, and add it to the scene. */
   
-  private static ImageMap loadMap(String name, Scene scene, File baseDir, Hashtable imageMaps, BFrame parent) throws Exception
+  private static ImageMap loadMap(String name, Scene scene, File baseDir, Hashtable<String, ImageMap> imageMaps) throws Exception
   {
     if (name == null)
       return null;
@@ -649,7 +708,6 @@ public class OBJImporter
   
   private static class TextureInfo
   {
-    public String name;
     public RGBColor ambient, diffuse, specular;
     public double shininess, transparency, specularity, roughness;
     public String ambientMap, diffuseMap, specularMap, transparentMap, bumpMap;

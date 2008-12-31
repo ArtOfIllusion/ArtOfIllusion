@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -626,18 +626,29 @@ public class ObjectPropertiesPanel extends ColumnContainer
 
     public void setColor(RGBColor color)
     {
-      this.color = color.duplicate();
-      setBackground(color.getColor());
+      if (color == null)
+      {
+        this.color = null;
+        setBackground(Color.GRAY);
+      }
+      else
+      {
+        this.color = color.duplicate();
+        setBackground(color.getColor());
+      }
     }
 
     private void processEvent()
     {
-      RGBColor oldColor = color.duplicate();
-      new ColorChooser(window, title, color);
-      if (!color.equals(oldColor))
+      if (color != null)
       {
-        setBackground(color.getColor());
-        dispatchEvent(new ValueChangedEvent(this));
+        RGBColor oldColor = color.duplicate();
+        new ColorChooser(window, title, color);
+        if (!color.equals(oldColor))
+        {
+          setBackground(color.getColor());
+          dispatchEvent(new ValueChangedEvent(this));
+        }
       }
     }
   }

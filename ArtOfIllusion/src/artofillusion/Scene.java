@@ -612,6 +612,13 @@ public class Scene
         ObjectInfo obj = objects.elementAt(i);
         if (obj.getObject().getTexture() == tex)
           obj.setTexture(tex, obj.getObject().getTextureMapping());
+        else if (obj.getObject().getTexture() instanceof LayeredTexture)
+          for (Texture layer : ((LayeredMapping) obj.getObject().getTextureMapping()).getLayers())
+            if (layer == tex)
+            {
+              obj.setTexture(tex, obj.getObject().getTextureMapping());
+              break;
+            }
       }
     for (int i = 0; i < textureListeners.size(); i++)
       textureListeners.elementAt(i).itemChanged(which, tex);

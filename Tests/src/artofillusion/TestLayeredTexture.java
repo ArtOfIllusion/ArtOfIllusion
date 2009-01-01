@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2007 by Peter Eastman
+/* Copyright (C) 2006-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -113,5 +113,19 @@ public class TestLayeredTexture extends TestCase
       obj.setParameterValue(param[i], new ConstantParameterValue(i));
     for (int i = 0; i < param.length; i++)
       assertEquals(i, obj.getParameterValue(param[i]).getAverageValue(), 0.0);
+
+    // Test the getLayerBlendingParameter() and getParameterForLayer() methods.
+
+    for (int layer = 0; layer < 3; layer++)
+    {
+      assertEquals(map.getLayerBlendingParameter(layer), map.getLayerParameters(layer)[0]);
+      for (int parameter = 0; parameter < 2; parameter++)
+      {
+        TextureParameter oldParameter = map.getLayerMapping(layer).getParameters()[parameter];
+        TextureParameter newParameter = map.getLayerParameters(layer)[parameter+1];
+        assertFalse(newParameter.equals(oldParameter));
+        assertTrue(newParameter.equals(map.getParameterForLayer(oldParameter, layer)));
+      }
+    }
   }
 }

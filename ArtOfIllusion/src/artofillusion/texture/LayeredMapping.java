@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -131,7 +131,7 @@ public class LayeredMapping extends TextureMapping
         paramStartIndex[i] = param.size();
         for (j = 0; j < p.length; j++)
         {
-          param.addElement(p[j].duplicate(texture[i]));
+          param.addElement(p[j].duplicate());
           param.lastElement().setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
         }
         if (p.length > maxParams)
@@ -154,6 +154,38 @@ public class LayeredMapping extends TextureMapping
     for (int i = 1; i < param.length; i++)
       param[i] = p[i+paramStartIndex[which]-1];
     return param;
+  }
+
+  /** Get the parameter which specifies the blending fraction for a layer. */
+
+  public TextureParameter getLayerBlendingParameter(int layer)
+  {
+    return getParameters()[fractParamIndex[layer]];
+  }
+
+  /**
+   * Get the parameter corresponding to a parameter of one of the layer textures or mappings.
+   * <p>
+   * A LayeredMapping creates a new TextureParameter corresponding to each parameter of its
+   * component Textures and TextureMappings.  This is necessary because a single Texture
+   * might be used for multiple layers, so there must be multiple parameters corresponding to
+   * each parameter of that Texture.
+   *
+   * @param parameter a parameter defined by a layer's Texture or TextureMapping
+   * @param layer     the layer for which to get the parameter
+   * @return the parameter of this LayeredMapping corresponding to the specified parameter,
+   * or null if the specified parameter does not belong to the Texture or TextureMapping of
+   * the specified layer
+   */
+
+  public TextureParameter getParameterForLayer(TextureParameter parameter, int layer)
+  {
+    TextureParameter originalParams[] = mapping[layer].getParameters();
+    TextureParameter newParams[] = getLayerParameters(layer);
+    for (int i = 0; i < originalParams.length; i++)
+      if (parameter.equals(originalParams[i]))
+        return newParams[i+1];
+    return null;
   }
 
   /** Add a layer to the texture. */

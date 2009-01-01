@@ -86,7 +86,7 @@ public class OBJImporter
             String fields[] = breakLine(s);
             if (fields.length == 0)
               continue;
-            if ("v".equals(fields[0]) && fields.length == 4)
+            if ("v".equals(fields[0]) && (fields.length == 4 || fields.length == 5))
               {
                 // Read in a vertex.
                 
@@ -379,6 +379,13 @@ public class OBJImporter
                         uv[realIndex[vi.vert]] = tc;
                       }
                   }
+                TextureParameter uparam = map.getUParameter();
+                TextureParameter vparam = map.getVParameter();
+                if (layered != null)
+                {
+                  uparam = layered.getParameterForLayer(uparam, 0);
+                  vparam = layered.getParameterForLayer(vparam, 0);
+                }
                 if (needPerFace)
                 {
                   // Different faces have different texture coordinates for the same vertex,
@@ -395,10 +402,12 @@ public class OBJImporter
                         uvf[j][k] = new Vec2(texCoords.x, texCoords.y);
                       }
                   }
-                  map.setFaceTextureCoordinates((TriangleMesh) info.getObject(), uvf);
+                  map.setFaceTextureCoordinates((TriangleMesh) info.getObject(), uvf, uparam, vparam);
                 }
                 else
-                  map.setTextureCoordinates(info.getObject(), uv);
+                {
+                  map.setTextureCoordinates(info.getObject(), uv, uparam, vparam);
+                }
               }
               else
               {
@@ -420,8 +429,7 @@ public class OBJImporter
                 double paramValue[] = new double[groupFaces.size()];
                 for (int i = 0; i < paramValue.length; i++)
                   paramValue[i] = (texName.equals(groupFaces.get(i).texture) ? 1.0 : 0.0);
-                TextureParameter parameter = layered.getLayerParameters(0)[0];
-                System.out.println(parameter.name);
+                TextureParameter parameter = layered.getLayerBlendingParameter(0);
                 info.getObject().setParameterValue(parameter, new FaceParameterValue(paramValue));
               }
             }
@@ -618,6 +626,13 @@ public class OBJImporter
         tex.diffuseColor = (diffuseMap == null ? new ImageOrColor(info.diffuse) : new ImageOrColor(info.diffuse, diffuseMap));
         tex.specularColor = (specularMap == null ? new ImageOrColor(info.specular) : new ImageOrColor(info.specular, specularMap));
         tex.transparentColor = (transparentMap == null ? new ImageOrColor(transparentColor) : new ImageOrColor(transparentColor, transparentMap));
+        if (transparentMap == null && info.transparency == 0.0 && diffuseMap != null && diffuseMap.getComponentCount() == 4)
+        {
+          // Use the diffuse map's alpha channel channel for transparency.
+
+          tex.transparentColor = new ImageOrColor(new RGBColor(1.0, 1.0, 1.0));
+          tex.transparency = new ImageOrValue(1.0f, diffuseMap, 3);
+        }
         if (bumpMap != null)
           tex.bump = new ImageOrValue(1.0f, bumpMap, 0);
         tex.shininess = new ImageOrValue((float) info.specularity);
@@ -718,7 +733,12 @@ public class OBJImporter
     public void resolveColors()
     {
       if (diffuse == null)
-        diffuse = new RGBColor(0.0, 0.0, 0.0);
+      {
+        if (diffuseMap == null)
+          diffuse = new RGBColor(0.0, 0.0, 0.0);
+        else
+          diffuse = new RGBColor(1.0, 1.0, 1.0);
+      }
       if (ambient == null)
         ambient = new RGBColor(0.0, 0.0, 0.0);
       if (specular == null)

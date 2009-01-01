@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007 by Peter Eastman
+/* Copyright (C) 2002-2008 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,6 +34,28 @@ public class UVMapping extends Mapping2D
   public static String getName()
   {
     return "UV";
+  }
+
+  /**
+   * Get the TextureParameter which stores the U texture coordinate.
+   */
+
+  public TextureParameter getUParameter()
+  {
+    if (uparam == null)
+      getParameters();
+    return uparam;
+  }
+
+  /**
+   * Get the TextureParameter which stores the V texture coordinate.
+   */
+
+  public TextureParameter getVParameter()
+  {
+    if (vparam == null)
+      getParameters();
+    return vparam;
   }
 
   public static boolean legalMapping(Object3D obj, Texture tex)
@@ -172,10 +194,27 @@ public class UVMapping extends Mapping2D
     return uv;
   }
 
-  /** Given an object to which this mapping has been applied and the desired texture coordinates
-      at each vertex, set the texture parameters accordingly. */
+  /**
+   * Given an object to which this mapping has been applied and the desired texture coordinates
+   * at each vertex, set the texture parameters accordingly.
+   */
   
   public void setTextureCoordinates(Object3D obj, Vec2 uv[])
+  {
+    setTextureCoordinates(obj, uv, uparam, vparam);
+  }
+
+  /**
+   * Given an object to which this mapping has been applied and the desired texture coordinates
+   * at each vertex, set the texture parameters accordingly.
+   * <p>
+   * In most cases, you can call {@link #setTextureCoordinates(artofillusion.object.Object3D, artofillusion.math.Vec2[])}
+   * instead, since the mapping already knows what parameters correspond to the U and V
+   * coordinates.  This version is necessary when this mapping is part of a {@link LayeredMapping},
+   * since the LayeredMapping will have created new parameters that must be used in place of the original ones.
+   */
+
+  public void setTextureCoordinates(Object3D obj, Vec2 uv[], TextureParameter uParameter, TextureParameter vParameter)
   {
     double uval[] = new double [uv.length], vval[] = new double [uv.length];
     for (int i = 0; i < uv.length; i++)
@@ -183,15 +222,33 @@ public class UVMapping extends Mapping2D
       uval[i] = uv[i].x;
       vval[i] = uv[i].y;
     }
-    obj.setParameterValue(uparam, new VertexParameterValue(uval));
-    obj.setParameterValue(vparam, new VertexParameterValue(vval));
+    obj.setParameterValue(uParameter, new VertexParameterValue(uval));
+    obj.setParameterValue(vParameter, new VertexParameterValue(vval));
   }
 
-  /** Given a triangle mesh to which this mapping has been applied and the desired texture coordinates
-      at each vertex, set the texture parameters accordingly.  uv is an array of size [# faces][# vertices/face]
-      containing the face-vertex texture coordinates. */
+  /**
+   * Given a triangle mesh to which this mapping has been applied and the desired texture coordinates
+   * at each vertex, set the texture parameters accordingly.  uv is an array of size [# faces][# vertices/face]
+   * containing the face-vertex texture coordinates.
+   */
   
   public void setFaceTextureCoordinates(Object3D obj, Vec2 uv[][])
+  {
+    setFaceTextureCoordinates(obj, uv, uparam, vparam);
+  }
+
+  /**
+   * Given a triangle mesh to which this mapping has been applied and the desired texture coordinates
+   * at each vertex, set the texture parameters accordingly.  uv is an array of size [# faces][# vertices/face]
+   * containing the face-vertex texture coordinates.
+   * <p>
+   * In most cases, you can call {@link #setFaceTextureCoordinates(artofillusion.object.Object3D, artofillusion.math.Vec2[][])}
+   * instead, since the mapping already knows what parameters correspond to the U and V
+   * coordinates.  This version is necessary when this mapping is part of a {@link LayeredMapping},
+   * since the LayeredMapping will have created new parameters that must be used in place of the original ones.
+   */
+
+  public void setFaceTextureCoordinates(Object3D obj, Vec2 uv[][], TextureParameter uParameter, TextureParameter vParameter)
   {
     while (obj instanceof ObjectWrapper)
       obj = ((ObjectWrapper) obj).getWrappedObject();
@@ -211,7 +268,7 @@ public class UVMapping extends Mapping2D
     obj.setParameterValue(uparam, new FaceVertexParameterValue(uval));
     obj.setParameterValue(vparam, new FaceVertexParameterValue(vval));
   }
-  
+
   /** Given a faceted mesh to which this mapping has been applied, determined whether the mapping
       is per-face-vertex. */
   

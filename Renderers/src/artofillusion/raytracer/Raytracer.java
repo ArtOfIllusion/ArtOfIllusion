@@ -1704,7 +1704,22 @@ public class Raytracer implements Renderer, Runnable
     rt.transparency[treeDepth] = 0.0;
     SurfaceIntersection intersection = SurfaceIntersection.NO_INTERSECTION;
     if (first != null)
+    {
       intersection = r.findIntersection(first);
+      if (intersection == SurfaceIntersection.NO_INTERSECTION)
+      {
+        // If the intersection is very close to the ray origin, findIntersection() may have
+        // ignored it.  Move back a tiny bit.
+
+        Ray r2 = rt.ray[treeDepth+1];
+        r2.origin.set(r.origin);
+        r2.direction.set(r.direction);
+        r2.origin.x -= TOL*r.direction.x;
+        r2.origin.y -= TOL*r.direction.y;
+        r2.origin.z -= TOL*r.direction.z;
+        intersection = r2.findIntersection(first);
+      }
+    }
     if (intersection != SurfaceIntersection.NO_INTERSECTION)
     {
       intersection.intersectionPoint(0, intersectionPoint);

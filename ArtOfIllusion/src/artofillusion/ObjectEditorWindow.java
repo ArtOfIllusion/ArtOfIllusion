@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,7 +39,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   protected BMenuBar menubar;
   protected UndoStack undoStack;
   protected Preferences preferences;
-  private boolean hasNotifiedPlugins;
+  private boolean hasNotifiedPlugins, sceneChangePending;
+  private SceneChangedEvent sceneChangedEvent;
 
   protected static boolean lastShowAxes, lastShowGrid, lastSnapToGrid;
   protected static int lastNumViews = 4, lastGridSubdivisions = 10;
@@ -49,6 +50,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   {
     super(title);
     parentWindow = parent;
+    sceneChangedEvent = new SceneChangedEvent(this);
     objInfo = obj.duplicate(obj.getObject().duplicate());
     objInfo.getCoords().setOrigin(new Vec3());
     objInfo.getCoords().setOrientation(Vec3.vz(), Vec3.vy());
@@ -229,11 +231,30 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public void setUndoRecord(UndoRecord command)
   {
     undoStack.addRecord(command);
+    setModified();
     updateMenus();
   }
 
   public void setModified()
   {
+    dispatchSceneChangedEvent();
+  }
+
+  /** Cause a SceneChangedEvent to be dispatched to this window's listeners. */
+
+  private void dispatchSceneChangedEvent()
+  {
+    if (sceneChangePending)
+      return; // There's already a Runnable on the event queue waiting to dispatch a SceneChangedEvent.
+    sceneChangePending = true;
+    EventQueue.invokeLater(new Runnable()
+    {
+      public void run()
+      {
+        sceneChangePending = false;
+        dispatchEvent(sceneChangedEvent);
+      }
+    });
   }
 
   protected void keyPressed(KeyPressedEvent e)

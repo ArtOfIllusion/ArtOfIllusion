@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,17 +10,19 @@
 
 package artofillusion;
 
+import artofillusion.ui.*;
+
 /**
- * A SceneChangedEvent is dispatched by a LayoutWindow to indicate that some element of the
+ * A SceneChangedEvent is dispatched by an EditingWindow to indicate that some element of the
  * scene has changed.  This includes all aspects of the scene, including the list of objects,
  * properties of individual objects, textures, the list of currently selected objects, etc.
  */
 
 public class SceneChangedEvent
 {
-  private LayoutWindow window;
+  private EditingWindow window;
 
-  public SceneChangedEvent(LayoutWindow window)
+  public SceneChangedEvent(EditingWindow window)
   {
     this.window = window;
   }
@@ -29,7 +31,7 @@ public class SceneChangedEvent
    * Get the LayoutWindow containing the scene which was changed.
    */
 
-  public LayoutWindow getWindow()
+  public EditingWindow getWindow()
   {
     return window;
   }

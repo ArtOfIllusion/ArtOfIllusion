@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -542,8 +542,6 @@ public class Raytracer implements Renderer, Runnable
     penumbra = shadowBox.getState();
     minRays = Integer.parseInt((String) minRaysChoice.getSelectedValue());
     maxRays = Integer.parseInt((String) maxRaysChoice.getSelectedValue());
-    if (antialiasLevel == 0)
-      minRays = maxRays = 1;
     transparentBackground = transparentBox.getState();
     generateHDR = hdrBox.getState();
     giMode = giModeChoice.getSelectedIndex();
@@ -1141,6 +1139,10 @@ public class Raytracer implements Renderer, Runnable
     listener.statusChanged(Translate.text("Rendering"));
     for (int i = 0; i < pixel.length; i++)
       pixel[i] = 0;
+    int maxRaysInUse = maxRays;
+    int minRaysInUse = minRays;
+    if (antialiasLevel == 0)
+      minRaysInUse = maxRaysInUse = 1;
 
     // First construct vectors to define the view.
 
@@ -1160,7 +1162,7 @@ public class Raytracer implements Renderer, Runnable
 
     // If we are only using one ray/pixel, everything is simple.
 
-    if (maxRays == 1)
+    if (maxRaysInUse == 1)
     {
       rtWidth = width;
       rtHeight = height;
@@ -1221,7 +1223,7 @@ public class Raytracer implements Renderer, Runnable
     for (int i = 0; i < pix.length; i++)
       for (int j = 0; j < pix[i].length; j++)
         pix[i][j] = new PixelInfo();
-    int minPerSubpixel = minRays/4, maxPerSubpixel = maxRays/4;
+    int minPerSubpixel = minRaysInUse/4, maxPerSubpixel = maxRaysInUse/4;
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];
     ThreadManager threads = new ThreadManager(rtWidth, new ThreadManager.Task() {

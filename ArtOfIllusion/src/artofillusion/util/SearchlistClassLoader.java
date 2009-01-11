@@ -3,7 +3,7 @@ package artofillusion.util;
 /*
  * SearchlistClassLoader: class loader which loads classes using a searchlist
  *
- * Copyright (C) 2007 Nik Trevallyn-Jones, Sydney Austraila.
+ * Copyright (C) 2007-2009 Nik Trevallyn-Jones, Sydney Austraila.
  *
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
@@ -23,7 +23,11 @@ package artofillusion.util;
  */
 
 /*
- * History.
+ * History:
+ *   V1.2	NTJ, Jan 2009.
+ *		- Fixed NullPointerException when searchlist was empty.
+ *		- Added support for findLibrary()
+ *
  *   V1.1	NTJ, Aug 2007.
  *		- Reworked the searchlist storage, and moved searchlist
  *		  traversal into a new method: getLoader(int, byte).
@@ -39,6 +43,7 @@ package artofillusion.util;
  *		- Initial coding, based on a RemoteClassLoader used in AOS.
  */
 
+import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.net.URL;
@@ -232,6 +237,8 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr;
 	URL[] url;
 	int j;
+	ArrayList path = new ArrayList(8);
+
 	for (int i = 0; (ldr = getLoader(i++, searchMode)) != null; i++) {
 	    if (ldr.loader instanceof SearchlistClassLoader)
 		url = ((SearchlistClassLoader) ldr.loader).getSearchPath();
@@ -242,11 +249,11 @@ public class SearchlistClassLoader extends ClassLoader
 
 	    if (url != null) {
 		for (j = 0; j < url.length; j++)
-		    list.add(url[j]);
+		    path.add(url[j]);
 	    }
 	}
 
-	return (list.size() > 0 ? (URL[]) list.toArray(EMPTY_URL) : EMPTY_URL);
+	return (path.size() > 0 ? (URL[]) path.toArray(EMPTY_URL) : EMPTY_URL);
     }
 
     /**
@@ -447,6 +454,61 @@ public class SearchlistClassLoader extends ClassLoader
     }
 
     /**
+     *  return the pathname to the specified native library.
+     *
+     *  If the library is not found on the searchpath, then <i>null</i>
+     *  is returned, indicating to the Java machine that it should search
+     *  java.library.path.
+     *
+     *  @param libname - the String name of the library to find
+     *  @return the full path to the found library file, or <i>null</i>.
+     */
+    public String findLibrary(String libname)
+    {
+	String fileName = System.mapLibraryName(libname);
+	System.out.println("findLibrary: looking in " + this + " for " +
+			   libname + " as " + fileName);
+
+	int i, j;
+	URL[] url;
+	File dir, file;
+	Loader ldr;
+	for (i = 0; (ldr = getLoader(i++, searchMode)) != null; i++) {
+	    if (ldr.loader instanceof SearchlistClassLoader)
+		url = ((SearchlistClassLoader) ldr.loader).getSearchPath();
+	    else if (ldr.loader instanceof URLClassLoader)
+		url = ((URLClassLoader) ldr.loader).getURLs();
+	    else
+		url = null;
+
+	    if (url != null) {
+		for (j = 0; j < url.length; j++) {
+		    if (!url[j].getProtocol().equalsIgnoreCase("file"))
+			continue;
+		    
+		    try {
+			dir = new File(url[j].toURI()).getParentFile();
+			file = new File(dir, fileName);
+
+			if (file.exists()) {
+			    System.out.println("found: " +
+					       file.getAbsolutePath());
+
+			    return file.getAbsolutePath();
+			}
+		    } catch (Exception e) {
+			System.out.println("Ignoring url: " + url[j] + ": "
+					   + e);
+		    }
+		}
+	    }
+	}
+
+	// nothing found, use java.library.path
+	return null;
+    }
+
+    /**
      *  return the correct classloader for the specified position in the
      *  search.
      *
@@ -463,7 +525,7 @@ public class SearchlistClassLoader extends ClassLoader
 	    else index--;
 	}
 
-	if (index < 0 || index >= list.size()) return null;
+	if (index < 0 || list == null || index >= list.size()) return null;
 
 	Loader result;
 

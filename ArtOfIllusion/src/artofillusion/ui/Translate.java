@@ -123,14 +123,17 @@ public class Translate
   
   public static BMenu menu(String name)
   {
+    String title = name;
     try
     {
-      return new BMenu(getValue(name, "menu.", null));
+      title = getValue(name, "menu.", null);
     }
     catch (MissingResourceException ex)
     {
-      return new BMenu(name);
     }
+    BMenu menu = new BMenu(title);
+    menu.setName(name);
+    return menu;
   }
   
   /** Get a BMenuItem whose text is given by the property "menu.(name)".

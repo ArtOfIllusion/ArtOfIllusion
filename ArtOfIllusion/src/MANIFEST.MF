@@ -1,1 +1,1 @@
-Manifest-Version: 1.0Main-Class: artofillusion.ArtOfIllusionClass-Path: jogl.jar gluegen-rt.jar jmf.jar
+Manifest-Version: 1.0Main-Class: artofillusion.ArtOfIllusionClass-Path: lib/jogl.jar lib/gluegen-rt.jar jmf.jar

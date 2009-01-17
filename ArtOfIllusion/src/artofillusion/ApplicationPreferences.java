@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -43,6 +43,7 @@ public class ApplicationPreferences
       if (f2.exists())
         f2.renameTo(f);
     }
+    initDefaultPreferences();
     if (!f.exists())
       {
         Translate.setLocale(Locale.getDefault());
@@ -66,6 +67,7 @@ public class ApplicationPreferences
 
   public ApplicationPreferences(InputStream in)
   {
+    initDefaultPreferences();
     try
     {
       loadPreferences(in);
@@ -82,7 +84,6 @@ public class ApplicationPreferences
   private void loadPreferences(InputStream in) throws IOException
   {
     properties = new Properties();
-    initDefaultPreferences();
     properties.load(in);
     parsePreferences();
   }

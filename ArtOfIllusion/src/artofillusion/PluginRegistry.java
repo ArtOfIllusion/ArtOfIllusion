@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2008 by Peter Eastman
+/* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -152,7 +152,7 @@ public class PluginRegistry
   {
     try
     {
-      if (jar.imports.size() == 0)
+      if (jar.imports.size() == 0 && jar.searchpath.size() == 0)
       {
         if (jar.loader == null)
           jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});
@@ -167,6 +167,19 @@ public class PluginRegistry
         jar.loader = loader;
         for (String importName : jar.imports)
           loader.add(nameMap.get(importName).loader);
+
+        // NTJ - add URL of searchpath to class loader
+        for (String uri : jar.searchpath) {
+
+          URL url = new URL(uri);
+          // resolve any registry-based authority
+          if (url.getAuthority() != null && url.getAuthority().startsWith("$")) {
+            uri = (String) ArtOfIllusion.class.getField(url.getAuthority().substring(1)).get(null);
+            url = new File(uri, url.getPath()).toURI().toURL();
+          }
+
+          loader.add(url);
+        }
       }
       pluginLoaders.add(jar.loader);
       HashMap<String, Object> classNameMap = new HashMap<String, Object>();
@@ -434,7 +447,7 @@ public class PluginRegistry
   {
     File file;
     String name, version;
-    ArrayList<String> imports, plugins, categories;
+    ArrayList<String> imports, plugins, categories, searchpath;
     ArrayList<ResourceInfo> resources;
     ArrayList<ExportInfo> exports;
     ClassLoader loader;
@@ -445,6 +458,7 @@ public class PluginRegistry
       imports = new ArrayList<String>();
       plugins = new ArrayList<String>();
       categories = new ArrayList<String>();
+      searchpath = new ArrayList<String>();
       resources = new ArrayList<ResourceInfo>();
       exports = new ArrayList<ExportInfo>();
       ZipFile zf = new ZipFile(file);
@@ -539,11 +553,15 @@ public class PluginRegistry
             }
           }
         }
+        // NTJ import may name a plugin or point to a file
         NodeList importList = doc.getElementsByTagName("import");
         for (int i = 0; i < importList.getLength(); i++)
         {
-          Node importNode = importList.item(i);
-          imports.add(importNode.getAttributes().getNamedItem("name").getNodeValue());
+          NamedNodeMap importMap = importList.item(i).getAttributes();
+          if (importMap.getNamedItem("name") != null)
+            imports.add(importMap.getNamedItem("name").getNodeValue());
+          else if (importMap.getNamedItem("url") != null)
+            searchpath.add(importMap.getNamedItem("url").getNodeValue());
         }
         NodeList resourceList = doc.getElementsByTagName("resource");
         for (int i = 0; i < resourceList.getLength(); i++)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2006 by Peter Eastman
+/* Copyright (C) 2002-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -278,11 +278,11 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     {
       FacetedMesh mesh = (FacetedMesh) editObj;
       Vec2 faceCoord[][] = map.findFaceTextureCoordinates(mesh);
-      ArrayList coordList = new ArrayList();
+      ArrayList<Vec2> coordList = new ArrayList<Vec2>();
       for (int i = 0; i < faceCoord.length; i++)
         for (int j = 0; j < faceCoord[i].length; j++)
           coordList.add(faceCoord[i][j]);
-      coord = (Vec2 []) coordList.toArray(new Vec2[coordList.size()]);
+      coord = coordList.toArray(new Vec2[coordList.size()]);
     }
     else
       coord = map.findTextureCoordinates(editObj);
@@ -364,11 +364,11 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     {
       // Convert from per-vertex to per-face-vertex mapping.
 
-      ArrayList coordList = new ArrayList();
+      ArrayList<Vec2> coordList = new ArrayList<Vec2>();
       for (int i = 0; i < mesh.getFaceCount(); i++)
         for (int j = 0; j < mesh.getFaceVertexCount(i); j++)
           coordList.add(new Vec2(coord[mesh.getFaceVertexIndex(i, j)]));
-      setTextureCoords((Vec2[]) coordList.toArray(new Vec2[coordList.size()]));
+      setTextureCoords(coordList.toArray(new Vec2[coordList.size()]));
       selected = new boolean [mesh.getFaceCount()];
     }
     else
@@ -464,7 +464,8 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       map.setTextureCoordinates((Object3D) editObj, coords);
       map.setTextureCoordinates(preview.getObject().getObject(), coords);
     }
-    preview.render();
+    if (!mapView.isDragInProgress())
+      preview.render();
   }
 
   public ToolPalette getToolPalette()

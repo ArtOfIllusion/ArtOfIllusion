@@ -70,7 +70,6 @@ public class MoveUVViewTool extends EditingTool
 
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
-    Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     UVMappingViewer uvview = (UVMappingViewer) view;
     int dx, dy;
@@ -94,10 +93,10 @@ public class MoveUVViewTool extends EditingTool
     {
       if (e.isShiftDown())
       {
-	if (Math.abs(dx) > Math.abs(dy))
-	  dy = 0;
-	else
-	  dx = 0;
+        if (Math.abs(dx) > Math.abs(dy))
+          dy = 0;
+        else
+          dx = 0;
       }
       double du = (minu - maxu)*dx/vwidth;
       double dv = (maxv - minv)*dy/vheight;

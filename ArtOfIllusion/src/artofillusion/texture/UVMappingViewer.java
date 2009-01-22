@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2006 by Peter Eastman
+/* Copyright (C) 2002-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,6 @@ import java.awt.event.*;
 
 public class UVMappingViewer extends MeshViewer
 {
-  private Image theImage;
   private Texture2D tex;
   private UVMappingWindow window;
   private UVMesh uvmesh;
@@ -87,7 +86,7 @@ public class UVMappingViewer extends MeshViewer
     this.maxv = maxv;
     this.component = component;
     this.sampling = sampling;
-    Rectangle dim = getBounds();
+    adjustCamera();
     createImage();
     calcScreenPositions();
     repaint();
@@ -99,8 +98,8 @@ public class UVMappingViewer extends MeshViewer
   private void adjustCamera()
   {
     Rectangle dim = getBounds();
-    double uscale = dim.width/(maxu-minu);
-    double vscale = dim.height/(maxv-minv);
+    double uscale = 0.01*dim.width/(maxu-minu);
+    double vscale = 0.01*dim.height/(maxv-minv);
     theCamera.setScreenParamsParallel(1.0, dim.width, dim.height);
     Mat4 worldToView = Mat4.scale(-uscale, vscale, 1.0).times(Mat4.translation(-minu-0.5*dim.width/uscale, -maxv+0.5*dim.height/vscale, 0.0));
     Mat4 viewToWorld = Mat4.translation(minu+0.5*dim.width/uscale, maxv-0.5*dim.height/vscale, 0.0).times(Mat4.scale(-1.0/uscale, 1.0/vscale, 1.0));
@@ -117,7 +116,7 @@ public class UVMappingViewer extends MeshViewer
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     double uoffset = 0.5*sampling*(maxu-minu)/dim.width;
     double voffset = 0.5*sampling*(maxv-minv)/dim.height;
-    theImage = ((Texture2D) tex.duplicate()).createComponentImage(minu+uoffset, maxu+uoffset, minv-voffset, maxv-voffset,
+    Image theImage = ((Texture2D) tex.duplicate()).createComponentImage(minu+uoffset, maxu+uoffset, minv-voffset, maxv-voffset,
         dim.width/sampling, dim.height/sampling, component, time, param);
     if (sampling > 1)
       theImage = theImage.getScaledInstance(dim.width, dim.height, Image.SCALE_SMOOTH);
@@ -259,6 +258,15 @@ public class UVMappingViewer extends MeshViewer
     return maxv;
   }
 
+  /**
+   * Get whether a mouse drag is currently in progress.
+   */
+
+  public boolean isDragInProgress()
+  {
+    return dragging;
+  }
+
   /** This is called whenever the mesh has changed. */
   
   public void objectChanged()
@@ -378,9 +386,11 @@ public class UVMappingViewer extends MeshViewer
 
     // Send the event to the current tool, if appropriate.
 
+    boolean wasDragging = dragging;
+    dragging = false;
     if (sentClick)
     {
-      if (!dragging)
+      if (!wasDragging)
       {
         Point p = e.getPoint();
         e.translatePoint(clickPoint.x-p.x, clickPoint.y-p.y);
@@ -396,6 +406,23 @@ public class UVMappingViewer extends MeshViewer
     window.selectionDistance = null;
     currentTool.getWindow().updateMenus();
     repaint();
+  }
+
+  protected void processMouseScrolled(MouseScrolledEvent ev)
+  {
+    int amount = ev.getWheelRotation();
+    if (!ev.isAltDown())
+      amount *= 10;
+    if (ArtOfIllusion.getPreferences().getReverseZooming())
+      amount *= -1;
+    double factor = Math.pow(1.01, -amount);
+    double midu = (minu+maxu)/2;
+    double midv = (minv+maxv)/2;
+    double newminu = ((minu - midu)/factor) + midu;
+    double newmaxu = ((maxu - midu)/factor) + midu;
+    double newminv = ((minv - midv)/factor) + midv;
+    double newmaxv = ((maxv - midv)/factor) + midv;
+    setParameters(newminu, newmaxu, newminv, newmaxv);
   }
 
   /** Determine which point was clicked on. */

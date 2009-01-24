@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2006 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,8 @@ import java.util.*;
 
 public class CSGModeller
 {
-  private Vector vert1, vert2, face1, face2;
+  private Vector<VertexInfo> vert1, vert2;
+  private Vector<FaceInfo> face1, face2;
 
   static final int VERTEX = 0;
   static final int FACE = 1;
@@ -47,10 +48,10 @@ public class CSGModeller
     
     // Create the lists of vertices, edges, and faces for each mesh.
     
-    vert1 = new Vector();
-    vert2 = new Vector();
-    face1 = new Vector();
-    face2 = new Vector();
+    vert1 = new Vector<VertexInfo>();
+    vert2 = new Vector<VertexInfo>();
+    face1 = new Vector<FaceInfo>();
+    face2 = new Vector<FaceInfo>();
     TriangleMesh.Vertex vert[] = (TriangleMesh.Vertex []) obj1.getVertices();
     Mat4 trans = coords1.fromLocal();
     for (i = 0; i < vert.length; i++)
@@ -98,7 +99,9 @@ public class CSGModeller
   
   public TriangleMesh getMesh(int op, Texture texture)
   {
-    Vector allVert = new Vector(), faceIndex = new Vector(), faceSmoothness = new Vector();
+    Vector<VertexInfo> allVert = new Vector<VertexInfo>();
+    Vector<int[]> faceIndex = new Vector<int[]>();
+    Vector<float[]> faceSmoothness = new Vector<float[]>();
     int index1[] = new int [vert1.size()], index2[] = new int [vert2.size()];
     int firstBoundary = -1, faces1;
 
@@ -313,9 +316,9 @@ public class CSGModeller
     return mesh;
   }
   
-  /* Split the faces in one mesh so that they do not intersect the faces of the other mesh. */
+  /** Split the faces in one mesh so that they do not intersect the faces of the other mesh. */
   
-  private void splitFaces(Vector v1, Vector f1, BoundingBox bounds1, Vector v2, Vector f2, BoundingBox bounds2)
+  private void splitFaces(Vector<VertexInfo> v1, Vector<FaceInfo> f1, BoundingBox bounds1, Vector v2, Vector f2, BoundingBox bounds2)
   {
     if (!intersect(bounds1, bounds2))
       return;
@@ -544,9 +547,9 @@ p1 :for (int i = 0; i < f1.size(); i++)
       }
   }
   
-  /* Split one face of one of the component objects. */
+  /** Split one face of one of the component objects. */
   
-  private void splitOneFace(Vector vert, Vector face, int which, int intersectVert[], double distA[], 
+  private void splitOneFace(Vector<VertexInfo> vert, Vector<FaceInfo> face, int which, int intersectVert[], double distA[], 
       double distB[], int typeA[], int spanTypeA, Vec3 line, Vec3 root)
   {
     FaceInfo f = (FaceInfo) face.elementAt(which);
@@ -974,12 +977,12 @@ p1 :for (int i = 0; i < f1.size(); i++)
         double dot3 = Math.abs((d.x*dx + d.y*dy + d.z*dz)/d.length());
         Vec3 onLinePos;
         int onLine;
-        if (dot1 > dot2 && dot1 > dot3)
+        if (dot1 >= dot2 && dot1 >= dot3)
           {
             onLine = 1;
             onLinePos = v1.r;
           }
-        else if (dot2 > dot3 && dot2 > dot1)
+        else if (dot2 >= dot3 && dot2 >= dot1)
           {
             onLine = 2;
             onLinePos = v2.r;
@@ -991,7 +994,7 @@ p1 :for (int i = 0; i < f1.size(); i++)
           }
         
         // Now find which of the intersection endpoints is nearest to that vertex.
-        
+
         int newindex = vert.size();
         if (onLinePos.distance(startPos) > onLinePos.distance(endPos))
           {
@@ -1032,7 +1035,7 @@ p1 :for (int i = 0; i < f1.size(); i++)
     return;
   }
   
-  /* Determine which vertices of one object are inside or outside the other object. */
+  /** Determine which vertices of one object are inside or outside the other object. */
   
   private void findInsideVertices(Vector v1, Vector f1, Vector v2, Vector f2)
   {
@@ -1087,7 +1090,7 @@ p1 :for (int i = 0; i < f1.size(); i++)
       }
   }
   
-  /* Determine whether a particular face is inside or outside the other object. */
+  /** Determine whether a particular face is inside or outside the other object. */
   
   private int classifyFace(FaceInfo f, Vector v1, Vector v2, Vector f2)
   {
@@ -1148,7 +1151,7 @@ p1 :for (int i = 0; i < f1.size(); i++)
     return OUTSIDE;
   }
   
-  /* Determine whether two bounding boxes intersect, to within the minimum tolerance. */
+  /** Determine whether two bounding boxes intersect, to within the minimum tolerance. */
   
   private boolean intersect(BoundingBox b1, BoundingBox b2)
   {
@@ -1157,8 +1160,8 @@ p1 :for (int i = 0; i < f1.size(); i++)
     return true;
   }
 
-  /* Determine whether a ray intersects the bounding box.  Return the distance along the
-     ray at which it enters the box, or Double.MAX_VALUE if it does not intersect. */
+  /** Determine whether a ray intersects the bounding box.  Return the distance along the
+      ray at which it enters the box, or Double.MAX_VALUE if it does not intersect. */
   
   private double rayBoxIntersectionDist(Vec3 origin, Vec3 direction, BoundingBox bb)
   {
@@ -1244,10 +1247,10 @@ p1 :for (int i = 0; i < f1.size(); i++)
     return mint;
   }
 
-  /* Determine whether a ray intersects a triangle.  Return the distance along the
-     ray at which it enters the triangle, or Double.MAX_VALUE if it does not intersect.
-     If the ray lies in the plane of the triangle, or passes through an edge of it,
-     return -Double.MAX_VALUE. */
+  /** Determine whether a ray intersects a triangle.  Return the distance along the
+      ray at which it enters the triangle, or Double.MAX_VALUE if it does not intersect.
+      If the ray lies in the plane of the triangle, or passes through an edge of it,
+      return -Double.MAX_VALUE. */
   
   private double rayFaceIntersectionDist(Vec3 orig, Vec3 dir, FaceInfo f, Vec3 v1, Vec3 v2, Vec3 v3)
   {

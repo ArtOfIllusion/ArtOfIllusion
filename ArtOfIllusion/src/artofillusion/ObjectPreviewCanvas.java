@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -95,7 +95,8 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     double dy = bounds.maxy-bounds.miny;
     double dz = bounds.maxz-bounds.minz;
     double size = 0.5*Math.sqrt(dx*dx+dy*dy+dz*dz);
-    double depth = toView.times(new Vec3()).z;
+    Vec3 origin = objInfo.getCoords().fromLocal().times(bounds.getCenter());
+    double depth = toView.times(origin).z;
     return new double [] {depth-size, depth+size};
   }
 

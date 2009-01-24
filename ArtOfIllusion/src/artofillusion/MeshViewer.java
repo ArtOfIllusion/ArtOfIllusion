@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.object.*;
 import artofillusion.ui.MeshEditController;
+import artofillusion.math.*;
 import buoy.widget.*;
 import java.util.*;
 
@@ -158,5 +159,30 @@ public abstract class MeshViewer extends ObjectViewer
   public void setSurfaceTextureParameter(TextureParameter param)
   {
     surfaceColoringParameter = param;
+  }
+
+
+  /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
+      but should err on the side of returning bounds that are slightly too large.
+      @return the two element array {minDepth, maxDepth}
+   */
+
+  public double[] estimateDepthRange()
+  {
+    // Get the depth range for the object and the rest of the scene.
+
+    double range[] = super.estimateDepthRange();
+
+    // Now add in the control mesh.
+
+    Mat4 toView = theCamera.getWorldToView();
+    Mat4 fromLocal = getDisplayCoordinates().fromLocal();
+    for (MeshVertex vertex : ((Mesh) getController().getObject().getObject()).getVertices())
+    {
+      double depth = toView.times(fromLocal.times(vertex.r)).z;
+      range[0] = Math.min(range[0], depth);
+      range[1] = Math.max(range[1], depth);
+    }
+    return range;
   }
 }

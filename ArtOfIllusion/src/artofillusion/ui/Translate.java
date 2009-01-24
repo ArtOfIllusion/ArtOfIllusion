@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -48,7 +48,7 @@ import artofillusion.*;
 public class Translate
 {
   private static Locale locale = Locale.getDefault();
-  private static Map bundles = new HashMap();
+  private static Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
   
   /** Set the locale to be used for generating text. */
   
@@ -70,15 +70,20 @@ public class Translate
   public static Locale [] getAvailableLocales()
   {
     return new Locale [] {
-      new Locale("da", "DA"),
+      new Locale("af", "ZA"),
+      Locale.SIMPLIFIED_CHINESE,
+      new Locale("da", "DK"),
+      new Locale("nl", "NL"),
       Locale.US,
+      new Locale("fi", "FI"),
       Locale.FRENCH,
       Locale.GERMAN,
       Locale.ITALIAN,
       Locale.JAPANESE,
       new Locale("pt", "BR"),
       new Locale("es", "ES"),
-      new Locale("sv", "SE")
+      new Locale("sv", "SE"),
+      new Locale("vi", "VN")
     };
   }
 
@@ -107,7 +112,7 @@ public class Translate
       key = prefix+key;
     else if (suffix != null)
       key = key+suffix;
-    ResourceBundle resources = (ResourceBundle) bundles.get(bundle);
+    ResourceBundle resources = bundles.get(bundle);
     if (resources == null)
     {
       PluginRegistry.PluginResource plugin = PluginRegistry.getResource("TranslateBundle", bundle);
@@ -317,7 +322,7 @@ public class Translate
     catch (MissingResourceException ex)
     {
     }
-    return MessageFormat.format(pattern, new Object [] {arg1});
+    return MessageFormat.format(pattern, arg1);
   }
 
   /** Get the text given by the property "name".  If the property is not
@@ -335,7 +340,7 @@ public class Translate
     catch (MissingResourceException ex)
     {
     }
-    return MessageFormat.format(pattern, new Object [] {arg1, arg2});
+    return MessageFormat.format(pattern, arg1, arg2);
   }
 
   /** Get the text given by the property "name".  If the property is not

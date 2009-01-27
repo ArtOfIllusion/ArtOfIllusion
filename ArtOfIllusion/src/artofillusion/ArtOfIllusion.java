@@ -207,6 +207,7 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
+        tx.printStackTrace();
         String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -288,6 +289,7 @@ public class ArtOfIllusion
           }
           catch (Throwable tx)
           {
+            tx.printStackTrace();
             String name = plugins.get(i).getClass().getName();
             name = name.substring(name.lastIndexOf('.')+1);
             new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -335,6 +337,7 @@ public class ArtOfIllusion
             }
             catch (Throwable tx)
             {
+              tx.printStackTrace();
               String name = plugins.get(i).getClass().getName();
               name = name.substring(name.lastIndexOf('.')+1);
               new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -373,6 +376,7 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
+        tx.printStackTrace();
         String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -486,6 +490,7 @@ public class ArtOfIllusion
         }
         catch (Throwable tx)
         {
+          tx.printStackTrace();
           String name = plugins.get(i).getClass().getName();
           name = name.substring(name.lastIndexOf('.')+1);
           new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);

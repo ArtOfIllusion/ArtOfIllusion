@@ -1873,7 +1873,7 @@ public class Raytracer implements Renderer, Runnable
             oldMaterial = prevMaterial;
             oldMatTrans = prevMatTrans;
           }
-        else if (dot < 0.0)
+        else if (truedot < 0.0)
           {
             // Entering an object.
 

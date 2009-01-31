@@ -98,8 +98,8 @@ public class UVMappingViewer extends MeshViewer
   private void adjustCamera()
   {
     Rectangle dim = getBounds();
-    double uscale = 0.01*dim.width/(maxu-minu);
-    double vscale = 0.01*dim.height/(maxv-minv);
+    double uscale = dim.width/(maxu-minu);
+    double vscale = dim.height/(maxv-minv);
     theCamera.setScreenParamsParallel(1.0, dim.width, dim.height);
     Mat4 worldToView = Mat4.scale(-uscale, vscale, 1.0).times(Mat4.translation(-minu-0.5*dim.width/uscale, -maxv+0.5*dim.height/vscale, 0.0));
     Mat4 viewToWorld = Mat4.translation(minu+0.5*dim.width/uscale, maxv-0.5*dim.height/vscale, 0.0).times(Mat4.scale(-1.0/uscale, 1.0/vscale, 1.0));
@@ -153,6 +153,7 @@ public class UVMappingViewer extends MeshViewer
 
   public synchronized void updateImage()
   {
+    adjustCamera();
     for (int i = 0; i < screenVert.length; i++)
     {
       int x = screenVert[i].x;

@@ -28,6 +28,7 @@ public class CSGModeller
 {
   private Vector<VertexInfo> vert1, vert2;
   private Vector<FaceInfo> face1, face2;
+  private int mainAxis;
 
   static final int VERTEX = 0;
   static final int FACE = 1;
@@ -44,8 +45,26 @@ public class CSGModeller
   
   public CSGModeller(TriangleMesh obj1, TriangleMesh obj2, CoordinateSystem coords1, CoordinateSystem coords2)
   {
-    int i;
-    
+    // Find the axis which best divides the two objects from each other.
+
+    BoundingBox bounds1 = obj1.getBounds().transformAndOutset(coords1.fromLocal());
+    BoundingBox bounds2 = obj2.getBounds().transformAndOutset(coords2.fromLocal());
+    double xoverlap = Math.max(0, Math.min(bounds1.maxx-bounds2.minx, bounds2.maxx-bounds1.minx));
+    double yoverlap = Math.max(0, Math.min(bounds1.maxy-bounds2.miny, bounds2.maxy-bounds1.miny));
+    double zoverlap = Math.max(0, Math.min(bounds1.maxz-bounds2.minz, bounds2.maxz-bounds1.minz));
+    double xwidth = Math.max(bounds1.maxx-bounds2.minx, bounds2.maxx-bounds1.minx);
+    double ywidth = Math.max(bounds1.maxy-bounds2.miny, bounds2.maxy-bounds1.miny);
+    double zwidth = Math.max(bounds1.maxz-bounds2.minz, bounds2.maxz-bounds1.minz);
+    double xratio = (xwidth == 0.0 ? 1.0 : xoverlap/xwidth);
+    double yratio = (ywidth == 0.0 ? 1.0 : yoverlap/ywidth);
+    double zratio = (zwidth == 0.0 ? 1.0 : zoverlap/zwidth);
+    if (xratio <= yratio && xratio <= zratio)
+      mainAxis = 0;
+    else if (yratio <= xratio && yratio <= zratio)
+      mainAxis = 1;
+    else
+      mainAxis = 2;
+
     // Create the lists of vertices, edges, and faces for each mesh.
     
     vert1 = new Vector<VertexInfo>();
@@ -54,30 +73,28 @@ public class CSGModeller
     face2 = new Vector<FaceInfo>();
     TriangleMesh.Vertex vert[] = (TriangleMesh.Vertex []) obj1.getVertices();
     Mat4 trans = coords1.fromLocal();
-    for (i = 0; i < vert.length; i++)
+    for (int i = 0; i < vert.length; i++)
       vert1.addElement(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
-    BoundingBox bounds1 = obj1.getBounds().transformAndOutset(trans);
     vert = (TriangleMesh.Vertex []) obj2.getVertices();
     trans = coords2.fromLocal();
-    for (i = 0; i < vert.length; i++)
+    for (int i = 0; i < vert.length; i++)
       vert2.addElement(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
-    BoundingBox bounds2 = obj2.getBounds().transformAndOutset(trans);
     TriangleMesh.Edge edge[] = (TriangleMesh.Edge []) obj1.getEdges();
     TriangleMesh.Face face[] = (TriangleMesh.Face []) obj1.getFaces();
     if (obj1.getSmoothingMethod() == Mesh.NO_SMOOTHING)
-      for (i = 0; i < face.length; i++)
+      for (int i = 0; i < face.length; i++)
         face1.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1, 0.0f, 0.0f, 0.0f));
     else
-      for (i = 0; i < face.length; i++)
+      for (int i = 0; i < face.length; i++)
         face1.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1,
             edge[face[i].e1].smoothness, edge[face[i].e2].smoothness, edge[face[i].e3].smoothness));
     edge = (TriangleMesh.Edge []) obj2.getEdges();
     face = (TriangleMesh.Face []) obj2.getFaces();
     if (obj2.getSmoothingMethod() == Mesh.NO_SMOOTHING)
-      for (i = 0; i < face.length; i++)
+      for (int i = 0; i < face.length; i++)
         face2.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2, 0.0f, 0.0f, 0.0f));
     else
-      for (i = 0; i < face.length; i++)
+      for (int i = 0; i < face.length; i++)
         face2.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2,
             edge[face[i].e1].smoothness, edge[face[i].e2].smoothness, edge[face[i].e3].smoothness));
     
@@ -318,7 +335,7 @@ public class CSGModeller
   
   /** Split the faces in one mesh so that they do not intersect the faces of the other mesh. */
   
-  private void splitFaces(Vector<VertexInfo> v1, Vector<FaceInfo> f1, BoundingBox bounds1, Vector v2, Vector f2, BoundingBox bounds2)
+  private void splitFaces(Vector<VertexInfo> v1, Vector<FaceInfo> f1, BoundingBox bounds1, Vector<VertexInfo> v2, final Vector<FaceInfo> f2, BoundingBox bounds2)
   {
     if (!intersect(bounds1, bounds2))
       return;
@@ -330,25 +347,61 @@ public class CSGModeller
     double m[][] = new double [3][3], b[] = new double [3];
     Vec3 root = new Vec3();
 
+    // Sort the faces in the second mesh along the main axis.
+
+    Integer faceIndex[] = new Integer[f2.size()];
+    for (int i = 0; i < faceIndex.length; i++)
+      faceIndex[i] = i;
+    Arrays.sort(faceIndex, new Comparator<Integer>() {
+      public int compare(Integer index1, Integer index2)
+      {
+        double min1 = f2.get(index1).min;
+        double min2 = f2.get(index2).min;
+        if (min1 < min2)
+          return -1;
+        if (min2 < min1)
+          return 1;
+        return 0;
+      }
+    });
+
 p1 :for (int i = 0; i < f1.size(); i++)
       {
-        FaceInfo fa = (FaceInfo) f1.elementAt(i);
+        FaceInfo fa = f1.elementAt(i);
         if (!intersect(fa.bounds, bounds2))
           continue;
-        VertexInfo va1 = (VertexInfo) v1.elementAt(fa.v1);
-        VertexInfo va2 = (VertexInfo) v1.elementAt(fa.v2);
-        VertexInfo va3 = (VertexInfo) v1.elementAt(fa.v3);
-        for (int j = 0; j < f2.size(); j++)
+        VertexInfo va1 = v1.elementAt(fa.v1);
+        VertexInfo va2 = v1.elementAt(fa.v2);
+        VertexInfo va3 = v1.elementAt(fa.v3);
+
+        // Do a binary search to find the first face we need to intersect against.
+
+        int start = 0;
+        int end = f2.size();
+        while (end > start+1)
+        {
+          int mid = (start+end)/2;
+          if (f2.get(faceIndex[mid]).max >= fa.min)
+            end = mid;
+          else
+            start = mid;
+        }
+
+        // Look for intersecting faces.
+
+        for (int j = start; j < f2.size(); j++)
           {
-            FaceInfo fb = (FaceInfo) f2.elementAt(j);
+            FaceInfo fb = f2.elementAt(faceIndex[j]);
+            if (fb.min > fa.max)
+              break;
             if (!intersect(fa.bounds, fb.bounds))
               continue;
             
             // Determine whether two faces actually intersect.
             
-            VertexInfo vb1 = (VertexInfo) v2.elementAt(fb.v1);
-            VertexInfo vb2 = (VertexInfo) v2.elementAt(fb.v2);
-            VertexInfo vb3 = (VertexInfo) v2.elementAt(fb.v3);
+            VertexInfo vb1 = v2.elementAt(fb.v1);
+            VertexInfo vb2 = v2.elementAt(fb.v2);
+            VertexInfo vb3 = v2.elementAt(fb.v3);
             double dista1, dista2, dista3, distb1, distb2, distb3;
             dista1 = va1.r.dot(fb.norm)-fb.distRoot;
             dista2 = va2.r.dot(fb.norm)-fb.distRoot;
@@ -1168,81 +1221,81 @@ p1 :for (int i = 0; i < f1.size(); i++)
     double t1, t2, mint = -Double.MAX_VALUE, maxt = Double.MAX_VALUE;
     if (direction.x == 0.0)
       {
-	if (origin.x < bb.minx || origin.x > bb.maxx)
-	  return Double.MAX_VALUE;
+        if (origin.x < bb.minx || origin.x > bb.maxx)
+          return Double.MAX_VALUE;
       }
     else
       {
-	t1 = (bb.minx-origin.x)/direction.x;
-	t2 = (bb.maxx-origin.x)/direction.x;
-	if (t1 < t2)
-	  {
-	    if (t1 > mint)
-	      mint = t1;
-	    if (t2 < maxt)
-	      maxt = t2;
-	  }
-	else
-	  {
-	    if (t2 > mint)
-	      mint = t2;
-	    if (t1 < maxt)
-	      maxt = t1;
-	  }
-	if (mint > maxt || maxt < 0.0)
-	  return Double.MAX_VALUE;
+        t1 = (bb.minx-origin.x)/direction.x;
+        t2 = (bb.maxx-origin.x)/direction.x;
+        if (t1 < t2)
+          {
+            if (t1 > mint)
+              mint = t1;
+            if (t2 < maxt)
+              maxt = t2;
+          }
+        else
+          {
+            if (t2 > mint)
+              mint = t2;
+            if (t1 < maxt)
+              maxt = t1;
+          }
+        if (mint > maxt || maxt < 0.0)
+          return Double.MAX_VALUE;
       }
     if (direction.y == 0.0)
       {
-	if (origin.y < bb.miny || origin.y > bb.maxy)
-	  return Double.MAX_VALUE;
+        if (origin.y < bb.miny || origin.y > bb.maxy)
+          return Double.MAX_VALUE;
       }
     else
       {
-	t1 = (bb.miny-origin.y)/direction.y;
-	t2 = (bb.maxy-origin.y)/direction.y;
-	if (t1 < t2)
-	  {
-	    if (t1 > mint)
-	      mint = t1;
-	    if (t2 < maxt)
-	      maxt = t2;
-	  }
-	else
-	  {
-	    if (t2 > mint)
-	      mint = t2;
-	    if (t1 < maxt)
-	      maxt = t1;
-	  }
-	if (mint > maxt || maxt < 0.0)
-	  return Double.MAX_VALUE;
+        t1 = (bb.miny-origin.y)/direction.y;
+        t2 = (bb.maxy-origin.y)/direction.y;
+        if (t1 < t2)
+          {
+            if (t1 > mint)
+              mint = t1;
+            if (t2 < maxt)
+              maxt = t2;
+          }
+        else
+          {
+            if (t2 > mint)
+              mint = t2;
+            if (t1 < maxt)
+              maxt = t1;
+          }
+        if (mint > maxt || maxt < 0.0)
+          return Double.MAX_VALUE;
       }
     if (direction.z == 0.0)
       {
-	if (origin.z < bb.minz || origin.z > bb.maxz)
-	  return Double.MAX_VALUE;
+        if (origin.z < bb.minz || origin.z > bb.maxz)
+          return Double.MAX_VALUE;
       }
     else
       {
-	t1 = (bb.minz-origin.z)/direction.z;
-	t2 = (bb.maxz-origin.z)/direction.z;
-	if (t1 < t2)
-	  {
-	    if (t1 > mint)
-	      mint = t1;
-	    if (t2 < maxt)
-	      maxt = t2;
-	  }
-	else
-	  {
-	    if (t2 > mint)
-	      mint = t2;
-	    if (t1 < maxt)
-	      maxt = t1;
-	  }
-	if (mint > maxt || maxt < 0.0)
-	  return Double.MAX_VALUE;
+        t1 = (bb.minz-origin.z)/direction.z;
+        t2 = (bb.maxz-origin.z)/direction.z;
+        if (t1 < t2)
+          {
+            if (t1 > mint)
+              mint = t1;
+            if (t2 < maxt)
+              maxt = t2;
+          }
+        else
+          {
+            if (t2 > mint)
+              mint = t2;
+            if (t1 < maxt)
+              maxt = t1;
+          }
+        if (mint > maxt || maxt < 0.0)
+          return Double.MAX_VALUE;
       }
     return mint;
   }
@@ -1275,24 +1328,24 @@ p1 :for (int i = 0; i < f1.size(); i++)
     double vx, vy;
     if (f.norm.x > 0.5 || f.norm.x < -0.5)
       {
-	edge2d1 = new Vec2(v1.y-v2.y, v1.z-v2.z);
-	edge2d2 = new Vec2(v1.y-v3.y, v1.z-v3.z);
-	vx = ri.y - v1.y;
-	vy = ri.z - v1.z;
+        edge2d1 = new Vec2(v1.y-v2.y, v1.z-v2.z);
+        edge2d2 = new Vec2(v1.y-v3.y, v1.z-v3.z);
+        vx = ri.y - v1.y;
+        vy = ri.z - v1.z;
       }
     else if (f.norm.y > 0.5 || f.norm.y < -0.5)
       {
-	edge2d1 = new Vec2(v1.x-v2.x, v1.z-v2.z);
-	edge2d2 = new Vec2(v1.x-v3.x, v1.z-v3.z);
-	vx = ri.x - v1.x;
-	vy = ri.z - v1.z;
+        edge2d1 = new Vec2(v1.x-v2.x, v1.z-v2.z);
+        edge2d2 = new Vec2(v1.x-v3.x, v1.z-v3.z);
+        vx = ri.x - v1.x;
+        vy = ri.z - v1.z;
       }
     else
       {
-	edge2d1 = new Vec2(v1.x-v2.x, v1.y-v2.y);
-	edge2d2 = new Vec2(v1.x-v3.x, v1.y-v3.y);
-	vx = ri.x - v1.x;
-	vy = ri.y - v1.y;
+        edge2d1 = new Vec2(v1.x-v2.x, v1.y-v2.y);
+        edge2d2 = new Vec2(v1.x-v3.x, v1.y-v3.y);
+        vx = ri.x - v1.x;
+        vy = ri.y - v1.y;
       }
     double denom = 1.0/edge2d1.cross(edge2d2);
     double u, v, w;
@@ -1352,24 +1405,24 @@ p1 :for (int i = 0; i < f1.size(); i++)
     double vx, vy;
     if (f.norm.x > 0.5 || f.norm.x < -0.5)
       {
-	edge2d1 = new Vec2(v1.r.y-v2.r.y, v1.r.z-v2.r.z);
-	edge2d2 = new Vec2(v1.r.y-v3.r.y, v1.r.z-v3.r.z);
-	vx = pos.y - v1.r.y;
-	vy = pos.z - v1.r.z;
+        edge2d1 = new Vec2(v1.r.y-v2.r.y, v1.r.z-v2.r.z);
+        edge2d2 = new Vec2(v1.r.y-v3.r.y, v1.r.z-v3.r.z);
+        vx = pos.y - v1.r.y;
+        vy = pos.z - v1.r.z;
       }
     else if (f.norm.y > 0.5 || f.norm.y < -0.5)
       {
-	edge2d1 = new Vec2(v1.r.x-v2.r.x, v1.r.z-v2.r.z);
-	edge2d2 = new Vec2(v1.r.x-v3.r.x, v1.r.z-v3.r.z);
-	vx = pos.x - v1.r.x;
-	vy = pos.z - v1.r.z;
+        edge2d1 = new Vec2(v1.r.x-v2.r.x, v1.r.z-v2.r.z);
+        edge2d2 = new Vec2(v1.r.x-v3.r.x, v1.r.z-v3.r.z);
+        vx = pos.x - v1.r.x;
+        vy = pos.z - v1.r.z;
       }
     else
       {
-	edge2d1 = new Vec2(v1.r.x-v2.r.x, v1.r.y-v2.r.y);
-	edge2d2 = new Vec2(v1.r.x-v3.r.x, v1.r.y-v3.r.y);
-	vx = pos.x - v1.r.x;
-	vy = pos.y - v1.r.y;
+        edge2d1 = new Vec2(v1.r.x-v2.r.x, v1.r.y-v2.r.y);
+        edge2d2 = new Vec2(v1.r.x-v3.r.x, v1.r.y-v3.r.y);
+        vx = pos.x - v1.r.x;
+        vy = pos.y - v1.r.y;
       }
     double denom = 1.0/edge2d1.cross(edge2d2);
     double u, v, w;
@@ -1383,8 +1436,8 @@ p1 :for (int i = 0; i < f1.size(); i++)
   }
   
   /* Inner classes for keeping track of information about vertices and faces. */
-  
-  class VertexInfo
+
+  private static class VertexInfo
   {
     Vec3 r;
     float smoothness;
@@ -1408,14 +1461,14 @@ p1 :for (int i = 0; i < f1.size(); i++)
     }
   }
 
-  class FaceInfo
+  private class FaceInfo
   {
     int v1, v2, v3;
     int type;
     BoundingBox bounds;
     Vec3 norm;
     float smoothness1, smoothness2, smoothness3;
-    double distRoot;
+    double distRoot, min, max;
     
     public FaceInfo(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3)
     {
@@ -1442,6 +1495,21 @@ p1 :for (int i = 0; i < f1.size(); i++)
       if (length > 0.0)
         norm.scale(1.0/length);
       distRoot = vert1.dot(norm);
+      if (mainAxis == 0)
+      {
+        min = minx;
+        max = maxx;
+      }
+      else if (mainAxis == 1)
+      {
+        min = miny;
+        max = maxy;
+      }
+      else
+      {
+        min = minz;
+        max = maxz;
+      }
     }
   }
 }

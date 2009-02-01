@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2007 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -294,11 +294,6 @@ public class CSGObject extends Object3D
   private void cacheMeshes(double tol, ObjectInfo info)
   {
     TriangleMesh mesh = convertToTriangleMesh(tol);
-    if (info == null)
-      {
-        cachedWire = mesh.getWireframeMesh();
-        return;
-      }
     cachedMesh = mesh.getRenderingMesh(tol, true, info);
     TriangleMesh.Edge edge[] = mesh.getEdges();
     int to[] = new int [edge.length], from[] = new int [edge.length];

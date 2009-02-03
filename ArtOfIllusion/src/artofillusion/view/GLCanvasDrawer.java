@@ -352,7 +352,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       Rectangle r = box.get(i);
       float y1 = bounds.height-r.y;
       float d = -depth.get(i).floatValue();
-      float scale = (float) (view.isPerspective() ? d/minDepth : 1.0);
+      float scale = (float) (view.isPerspective() ? -d/minDepth : 1.0);
       vertBuffer.put((float) r.x*scale);
       vertBuffer.put((float) y1*scale);
       vertBuffer.put(d);

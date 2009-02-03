@@ -80,7 +80,8 @@ public class RotateViewTool extends EditingTool
     if (!useSelectionCenter || theWindow == null || theWindow.getScene() == null)
       {
         CoordinateSystem coords = cam.getCameraCoordinates();
-        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(cam.getDistToScreen()));
+        double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
+        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
         return;
       }
     Scene scene = theWindow.getScene();
@@ -88,7 +89,8 @@ public class RotateViewTool extends EditingTool
     if (selection.length == 0)
       {
         CoordinateSystem coords = cam.getCameraCoordinates();
-        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(cam.getDistToScreen()));
+        double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
+        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
         return;
       }
     BoundingBox bounds = null;

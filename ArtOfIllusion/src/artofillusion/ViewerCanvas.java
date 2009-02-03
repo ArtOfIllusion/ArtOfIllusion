@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -862,11 +862,27 @@ public abstract class ViewerCanvas extends CustomWidget
     drawer.drawBox(x, y, width, height, color);
   }
 
+  /** Draw a set of filled boxes in the rendered image. */
+
+  public void drawBoxes(java.util.List<Rectangle> box, Color color)
+  {
+    if (box.size() > 0)
+      drawer.drawBoxes(box, color);
+  }
+
   /** Render a filled box at a specified depth in the rendered image. */
   
   public void renderBox(int x, int y, int width, int height, double depth, Color color)
   {
     drawer.renderBox(x, y, width, height, depth, color);
+  }
+
+  /** Render a set of filled boxes at specified depths in the rendered image. */
+
+  public void renderBoxes(java.util.List<Rectangle> box, java.util.List<Double>depth, Color color)
+  {
+    if (box.size() > 0)
+      drawer.renderBoxes(box, depth, color);
   }
 
   /** Draw a line into the rendered image. */

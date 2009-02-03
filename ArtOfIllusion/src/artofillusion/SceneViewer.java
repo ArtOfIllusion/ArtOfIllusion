@@ -138,18 +138,14 @@ public class SceneViewer extends ViewerCanvas
 
   public void updateImage()
   {
-    ObjectInfo obj;
-    Vec3 viewdir;
-    int i;
-
     super.updateImage();
     
     // Draw the objects.
     
-    viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-    for (i = 0; i < theScene.getNumObjects(); i++)
+    Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+    for (int i = 0; i < theScene.getNumObjects(); i++)
     {
-      obj = theScene.getObject(i);
+      ObjectInfo obj = theScene.getObject(i);
       if (obj == boundCamera || !obj.isVisible())
         continue;
       theCamera.setObjectTransform(obj.getCoords().fromLocal());
@@ -160,41 +156,43 @@ public class SceneViewer extends ViewerCanvas
 
     if (currentTool.hilightSelection())
     {
-      Rectangle bounds;
-      int hsize;
-      Color col;
-      
-      for (i = 0; i < theScene.getNumObjects(); i++)
+      ArrayList<Rectangle> selectedBoxes = new ArrayList<Rectangle>();
+      ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<Rectangle>();
+      for (int i = 0; i < theScene.getNumObjects(); i++)
       {
-        obj = theScene.getObject(i);
+        int hsize;
+        ArrayList<Rectangle> boxes;
+        ObjectInfo obj = theScene.getObject(i);
         if (obj.isLocked())
           continue;
         if (obj.selected)
         {
           hsize = Scene.HANDLE_SIZE;
-          col = handleColor;
+          boxes = selectedBoxes;
         }
         else if (obj.parentSelected)
         {
           hsize = Scene.HANDLE_SIZE/2;
-          col = highlightColor;
+          boxes = parentSelectedBoxes;
         }
         else
           continue;
         theCamera.setObjectTransform(obj.getCoords().fromLocal());
-        bounds = theCamera.findScreenBounds(obj.getBounds());
+        Rectangle bounds = theCamera.findScreenBounds(obj.getBounds());
         if (bounds != null)
         {
-          drawBox(bounds.x, bounds.y, hsize, hsize, col);
-          drawBox(bounds.x+bounds.width-hsize+1, bounds.y, hsize, hsize, col);
-          drawBox(bounds.x, bounds.y+bounds.height-hsize+1, hsize, hsize, col);
-          drawBox(bounds.x+bounds.width-hsize+1, bounds.y+bounds.height-hsize+1, hsize, hsize, col);
-          drawBox(bounds.x+(bounds.width-hsize)/2, bounds.y, hsize, hsize, col);
-          drawBox(bounds.x, bounds.y+(bounds.height-hsize)/2, hsize, hsize, col);
-          drawBox(bounds.x+(bounds.width-hsize)/2, bounds.y+bounds.height-hsize+1, hsize, hsize, col);
-          drawBox(bounds.x+bounds.width-hsize+1, bounds.y+(bounds.height-hsize)/2, hsize, hsize, col);
+          boxes.add(new Rectangle(bounds.x, bounds.y, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x+bounds.width-hsize+1, bounds.y, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x, bounds.y+bounds.height-hsize+1, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x+bounds.width-hsize+1, bounds.y+bounds.height-hsize+1, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x+(bounds.width-hsize)/2, bounds.y, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x, bounds.y+(bounds.height-hsize)/2, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x+(bounds.width-hsize)/2, bounds.y+bounds.height-hsize+1, hsize, hsize));
+          boxes.add(new Rectangle(bounds.x+bounds.width-hsize+1, bounds.y+(bounds.height-hsize)/2, hsize, hsize));
         }
       }
+      drawBoxes(selectedBoxes, handleColor);
+      drawBoxes(parentSelectedBoxes, highlightColor);
     }
     
     // Finish up.

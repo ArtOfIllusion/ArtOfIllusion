@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +18,7 @@ import artofillusion.view.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.util.*;
 
 /** The SplineMeshViewer class is a component which displays a SplineMesh object and 
     allow the user to edit it. */
@@ -145,16 +146,28 @@ public class SplineMeshViewer extends MeshViewer
 
     // First, draw any unselected portions of the object.
 
+    ArrayList<Rectangle> boxes = new ArrayList<Rectangle>();
+    ArrayList<Double> depths = new ArrayList<Double>();
     boolean selected[] = controller.getSelection();
     for (int i = 0; i < v.length; i++)
       if (!selected[i] && visible[i])
-        renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, unselectedColor);
+      {
+        boxes.add(new Rectangle(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE));
+        depths.add(screenZ[i]-0.02);
+      }
+    renderBoxes(boxes, depths, unselectedColor);
 
     // Now draw the selected portions.
 
+    boxes.clear();
+    depths.clear();
     for (int i = 0; i < v.length; i++)
       if (selected[i] && visible[i])
-        renderBox(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, screenZ[i]-0.02, selectedColor);
+      {
+        boxes.add(new Rectangle(screenVert[i].x-HANDLE_SIZE/2, screenVert[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE));
+        depths.add(screenZ[i]-0.02);
+      }
+    renderBoxes(boxes, depths, selectedColor);
   }
   
   /** Draw the edges of the control mesh. */

@@ -1,4 +1,4 @@
-/* Copyright (C) 2005 by Peter Eastman
+/* Copyright (C) 2005-2009 by Peter Eastman
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -10,10 +10,7 @@ PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.view;
 
-import java.awt.Color;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Shape;
+import java.awt.*;
 
 import artofillusion.Camera;
 import artofillusion.RenderingMesh;
@@ -54,9 +51,17 @@ public interface CanvasDrawer
   
   public void drawBox(int x, int y, int width, int height, Color color);
 
+  /** Draw a set of filled boxes in the rendered image. */
+
+  public void drawBoxes(java.util.List<Rectangle> box, Color color);
+
   /** Render a filled box at a specified depth in the rendered image. */
   
   public void renderBox(int x, int y, int width, int height, double depth, Color color);
+
+  /** Render a set of filled boxes at specified depths in the rendered image. */
+
+  public void renderBoxes(java.util.List<Rectangle> box, java.util.List<Double>depth, Color color);
 
   /** Draw a line into the rendered image. */
   

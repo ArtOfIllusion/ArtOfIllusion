@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,8 +33,8 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   protected Rectangle bounds;
 
   private static Vec2 reuseVec2[];
-  private static WeakHashMap imageMap = new WeakHashMap();
-  private static WeakHashMap imageMeshMap = new WeakHashMap();
+  private static WeakHashMap<Image, SoftReference<ImageRecord>> imageMap = new WeakHashMap<Image, SoftReference<ImageRecord>>();
+  private static WeakHashMap<Image, SoftReference<RenderingMesh>> imageMeshMap = new WeakHashMap<Image, SoftReference<RenderingMesh>>();
 
   private static final int MODE_COPY = 0;
   private static final int MODE_ADD = 1;
@@ -203,6 +203,17 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
         pixel[index+j] = col;
   }
 
+  /** Draw a set of filled boxes in the rendered image. */
+
+  public void drawBoxes(java.util.List<Rectangle> box, Color color)
+  {
+    for (int i = 0; i < box.size(); i++)
+    {
+      Rectangle r = box.get(i);
+      drawBox(r.x, r.y, r.width, r.height, color);
+    }
+  }
+
   /** Render a filled box at a specified depth in the rendered image. */
 
   public void renderBox(int x, int y, int width, int height, double depth, Color color)
@@ -225,6 +236,17 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
             pixel[index+j] = col;
             zbuffer[index+j] = z;
           }
+  }
+
+  /** Render a set of filled boxes at specified depths in the rendered image. */
+
+  public void renderBoxes(java.util.List<Rectangle> box, java.util.List<Double>depth, Color color)
+  {
+    for (int i = 0; i < box.size(); i++)
+    {
+      Rectangle r = box.get(i);
+      renderBox(r.x, r.y, r.width, r.height, depth.get(i), color);
+    }
   }
 
   /** Draw a line into the rendered image. */
@@ -1657,7 +1679,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
           tri[index+1] = new UniformTriangle(i+j*width, i+1+(j+1)*width, i+(j+1)*width, 0, 0, 0);
         }
       mesh = new RenderingMesh(vert, norm, tri, null, null);
-      imageMeshMap.put(image, new SoftReference(mesh));
+      imageMeshMap.put(image, new SoftReference<RenderingMesh>(mesh));
     }
     else
     {
@@ -1706,7 +1728,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       try
       {
         record = new ImageRecord(image);
-        imageMap.put(image, new SoftReference(record));
+        imageMap.put(image, new SoftReference<ImageRecord>(record));
       }
       catch (InterruptedException ex)
       {

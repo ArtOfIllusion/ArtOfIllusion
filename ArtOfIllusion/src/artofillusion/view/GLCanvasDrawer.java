@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2007 by Peter Eastman
+/* Copyright (C) 2005-2009 by Peter Eastman
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -39,13 +39,13 @@ public class GLCanvasDrawer implements CanvasDrawer
   private FloatBuffer vertBuffer, normBuffer;
   private Shape draggedShape;
   private GLImage template;
-  private WeakHashMap textureMap = new WeakHashMap();
+  private WeakHashMap<Image, GLTexture> textureMap = new WeakHashMap<Image, GLTexture>();
   private ReferenceQueue textureCleanupQueue = new ReferenceQueue();
-  private HashSet textureReferences = new HashSet();
+  private HashSet<TextureReference> textureReferences = new HashSet<TextureReference>();
 
   private static final float COLOR_SCALE = 1.0f/255.0f;
-  private static HashMap textImageMap = new HashMap();
-  private static WeakHashMap imageMap = new WeakHashMap();
+  private static HashMap<String, SoftReference<GLImage>> textImageMap = new HashMap<String, SoftReference<GLImage>>();
+  private static WeakHashMap<Image, SoftReference<GLImage>> imageMap = new WeakHashMap<Image, SoftReference<GLImage>>();
   private static Color lastTextColor;
   private static int imageRenderMode = -1;
   private static boolean useTextureRectangle;
@@ -289,6 +289,37 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glEnd();
   }
 
+  /** Draw a set of filled boxes in the rendered image. */
+
+  public void drawBoxes(java.util.List<Rectangle> box, Color color)
+  {
+    prepareView2D();
+    prepareDepthTest(false);
+    prepareSolidColor(color);
+    prepareBuffers(box.size()*12);
+    vertBuffer.clear();
+    float d = (float) -(minDepth+0.001);
+    for (int i = 0; i < box.size(); i++)
+    {
+      Rectangle r = box.get(i);
+      float y1 = bounds.height-r.y;
+      float scale = (float) (view.isPerspective() ? -d/minDepth : 1.0);
+      vertBuffer.put((float) r.x*scale);
+      vertBuffer.put((float) y1*scale);
+      vertBuffer.put(d);
+      vertBuffer.put((float) r.x*scale);
+      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put(d);
+      vertBuffer.put((float) (r.x+r.width)*scale);
+      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put(d);
+      vertBuffer.put((float) (r.x+r.width)*scale);
+      vertBuffer.put((float) y1*scale);
+      vertBuffer.put(d);
+    }
+    gl.glDrawArrays(GL.GL_QUADS, 0, box.size()*4);
+  }
+
   /** Render a filled box at a specified depth in the rendered image. */
   
   public void renderBox(int x, int y, int width, int height, double depth, Color color)
@@ -305,6 +336,37 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glVertex3f((x+width)*scale, (y1-height)*scale, d);
     gl.glVertex3f((x+width)*scale, y1*scale, d);
     gl.glEnd();
+  }
+
+  /** Render a set of filled boxes at specified depths in the rendered image. */
+
+  public void renderBoxes(java.util.List<Rectangle> box, java.util.List<Double>depth, Color color)
+  {
+    prepareView2D();
+    prepareDepthTest(true);
+    prepareSolidColor(color);
+    prepareBuffers(box.size()*12);
+    vertBuffer.clear();
+    for (int i = 0; i < box.size(); i++)
+    {
+      Rectangle r = box.get(i);
+      float y1 = bounds.height-r.y;
+      float d = -depth.get(i).floatValue();
+      float scale = (float) (view.isPerspective() ? d/minDepth : 1.0);
+      vertBuffer.put((float) r.x*scale);
+      vertBuffer.put((float) y1*scale);
+      vertBuffer.put(d);
+      vertBuffer.put((float) r.x*scale);
+      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put(d);
+      vertBuffer.put((float) (r.x+r.width)*scale);
+      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put(d);
+      vertBuffer.put((float) (r.x+r.width)*scale);
+      vertBuffer.put((float) y1*scale);
+      vertBuffer.put(d);
+    }
+    gl.glDrawArrays(GL.GL_QUADS, 0, box.size()*4);
   }
 
   /** Draw a line into the rendered image. */
@@ -594,8 +656,8 @@ public class GLCanvasDrawer implements CanvasDrawer
     FontMetrics fm = view.getComponent().getFontMetrics(font);
     int ascent = fm.getMaxAscent();
     int descent = fm.getMaxDescent();
-    SoftReference ref = (SoftReference) textImageMap.get(text);
-    GLImage image = (ref == null ? null : (GLImage) ref.get());
+    SoftReference<GLImage> ref = textImageMap.get(text);
+    GLImage image = (ref == null ? null : ref.get());
     if (image == null)
     {
       // Create an image of the text.
@@ -619,7 +681,7 @@ public class GLCanvasDrawer implements CanvasDrawer
         ex.printStackTrace();
         return;
       }
-      textImageMap.put(text, new SoftReference(image));
+      textImageMap.put(text, new SoftReference<GLImage>(image));
     }
     drawImage(image, x, y-ascent);
   }
@@ -688,9 +750,9 @@ public class GLCanvasDrawer implements CanvasDrawer
   private GLImage getCachedImage(Image image, boolean texture) throws InterruptedException
   {
     GLImage record = null;
-    SoftReference ref = (SoftReference) imageMap.get(image);
+    SoftReference<GLImage> ref = imageMap.get(image);
     if (ref != null)
-      record = (GLImage) ref.get();
+      record = ref.get();
     if (record == null)
     {
       Image sourceImage = image;
@@ -714,7 +776,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       // Grab the pixels from the image and cache them.
 
       record = new GLImage(sourceImage);
-      imageMap.put(image, new SoftReference(record));
+      imageMap.put(image, new SoftReference<GLImage>(record));
     }
     return record;
   }
@@ -723,7 +785,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   private GLTexture getCachedTexture(Image image) throws InterruptedException
   {
-    GLTexture record = (GLTexture) textureMap.get(image);
+    GLTexture record = textureMap.get(image);
     if (record == null)
     {
       // Create a texture from the image and cache it.
@@ -951,7 +1013,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** This inner class is used for cleaning up textures once they are no longer needed. */
 
-  private class TextureReference extends PhantomReference
+  private class TextureReference extends PhantomReference<GLTexture>
   {
     private int textureId;
 

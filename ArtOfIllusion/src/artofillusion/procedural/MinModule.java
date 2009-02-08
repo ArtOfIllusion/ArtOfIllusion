@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2008 by Peter Eastman
+/* Copyright (C) 2000-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -63,13 +63,19 @@ public class MinModule extends Module
       error = error2;
       which = 1;
     }
+    else if (value1 < value2)
+    {
+      value = value1;
+      double minmax = (max1 < max2 ? max1 : max2);
+      error = Math.abs(minmax-value);
+      which = 0;
+    }
     else
     {
-      double min = (min1 < min2 ? min1 : min2);
-      double max = (max1 < max2 ? max1 : max2);
-      value = 0.5*(min+max);
-      error = 0.5*(max-min);
-      which = (value1 < value2 ? 0 : 1);
+      value = value2;
+      double minmax = (max1 < max2 ? max1 : max2);
+      error = Math.abs(minmax-value);
+      which = 1;
     }
     return value;
   }

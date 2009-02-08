@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -317,6 +317,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
         obj[i].setSize(size.x, size.y, size.z);
       }
     }
+    theScene.objectModified(obj[0]);
     updateImage();
   }
 

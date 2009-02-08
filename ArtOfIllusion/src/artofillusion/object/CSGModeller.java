@@ -503,6 +503,8 @@ p1 :for (int i = 0; i < f1.size(); i++)
             int signb1 = (distb1 > TOL ? 1 : (distb1 < -TOL ? -1 : 0));
             int signb2 = (distb2 > TOL ? 1 : (distb2 < -TOL ? -1 : 0));
             int signb3 = (distb3 > TOL ? 1 : (distb3 < -TOL ? -1 : 0));
+            if (signb1 == 0 && signb2 == 0 && signb3 == 0)
+              continue;
             index = 0;
             if (signb1 == 0)
               {
@@ -1379,18 +1381,19 @@ p1 :for (int i = 0; i < f1.size(); i++)
     for (int i = 0; i < vertFace[which].length; i++)
       {
         FaceInfo f = (FaceInfo) f1.elementAt(vertFace[which][i]);
-        if (f.type != UNKNOWN)
-          continue;
-        f.type = value;
-        VertexInfo vi1 = (VertexInfo) v1.elementAt(f.v1);
-        VertexInfo vi2 = (VertexInfo) v1.elementAt(f.v2);
-        VertexInfo vi3 = (VertexInfo) v1.elementAt(f.v3);
-        if (vi1.type == UNKNOWN)
-          markVertex(f.v1, value, v1, f1, vertFace, stackDepth+1);
-        if (vi2.type == UNKNOWN)
-          markVertex(f.v2, value, v1, f1, vertFace, stackDepth+1);
-        if (vi3.type == UNKNOWN)
-          markVertex(f.v3, value, v1, f1, vertFace, stackDepth+1);
+        if (f.type == UNKNOWN || f.type == value)
+        {
+          f.type = value;
+          VertexInfo vi1 = (VertexInfo) v1.elementAt(f.v1);
+          VertexInfo vi2 = (VertexInfo) v1.elementAt(f.v2);
+          VertexInfo vi3 = (VertexInfo) v1.elementAt(f.v3);
+          if (vi1.type == UNKNOWN)
+            markVertex(f.v1, value, v1, f1, vertFace, stackDepth+1);
+          if (vi2.type == UNKNOWN)
+            markVertex(f.v2, value, v1, f1, vertFace, stackDepth+1);
+          if (vi3.type == UNKNOWN)
+            markVertex(f.v3, value, v1, f1, vertFace, stackDepth+1);
+        }
       }
   }
   

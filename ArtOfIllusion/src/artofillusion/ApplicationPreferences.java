@@ -46,6 +46,7 @@ public class ApplicationPreferences
     initDefaultPreferences();
     if (!f.exists())
       {
+        properties = new Properties();
         Translate.setLocale(Locale.getDefault());
         return;
       }

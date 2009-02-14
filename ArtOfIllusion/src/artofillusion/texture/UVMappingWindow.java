@@ -41,6 +41,8 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
   boolean selected[];
   int selectionDistance[];
 
+  private static int resolution;
+
   public UVMappingWindow(BDialog parent, Object3D obj, UVMapping map)
   {
     super(parent, Translate.text("uvCoordsTitle"), true);
@@ -103,7 +105,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     setContent(content);
     BorderContainer mapViewPanel = new BorderContainer();
-    mapViewPanel.add(mapView = new UVMappingViewer((Texture2D) tex, this, minu, maxu, minv, maxv, 0, 4, 0.0, paramVal), BorderContainer.CENTER);
+    mapViewPanel.add(mapView = new UVMappingViewer((Texture2D) tex, this, minu, maxu, minv, maxv, 0, 1 << (2-resolution), 0.0, paramVal), BorderContainer.CENTER);
     mapView.setPreferredSize(new Dimension(200, 200));
     tools = new ToolPalette(6, 1);
     EditingTool defaultTool, metaTool;
@@ -155,7 +157,10 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     {
       faceBox.setState(map.isPerFaceVertex((FacetedMesh) editObj));
       if (faceBox.getState())
+      {
         selectMode = FACE_MODE;
+        selected = new boolean [((FacetedMesh) editObj).getFaceCount()];
+      }
       content.add(faceBox, 0, 4);
     }
     faceBox.addEventLink(ValueChangedEvent.class, this, "faceModeChanged");
@@ -166,6 +171,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       Translate.text("Medium"),
       Translate.text("High")
     }));
+    resChoice.setSelectedIndex(resolution);
     resChoice.addEventLink(ValueChangedEvent.class, this, "rebuildImage");
     content.add(Translate.label("displayedCoordRange"), 1, 2);
     content.add(row = new RowContainer(), 1, 3);
@@ -327,7 +333,8 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   private void rebuildImage()
   {
-    int res = 1 << (2-resChoice.getSelectedIndex());
+    resolution = resChoice.getSelectedIndex();
+    int res = 1 << (2-resolution);
 
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     mapView.setParameters(minuField.getValue(), maxuField.getValue(), minvField.getValue(),

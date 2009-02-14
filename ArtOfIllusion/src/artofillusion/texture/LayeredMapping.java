@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2008 by Peter Eastman
+/* Copyright (C) 2000-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -132,7 +132,8 @@ public class LayeredMapping extends TextureMapping
         for (j = 0; j < p.length; j++)
         {
           param.addElement(p[j].duplicate());
-          param.lastElement().setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
+          if (p[j].identifier != -1)
+            param.lastElement().setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
         }
         if (p.length > maxParams)
           maxParams = p.length;

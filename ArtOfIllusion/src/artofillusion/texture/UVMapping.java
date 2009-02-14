@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -276,7 +276,7 @@ public class UVMapping extends Mapping2D
   {
     TextureParameter param[] = mesh.getParameters();
     for (int i = 0; i < param.length; i++)
-      if (param[i] == uparam || param[i] == vparam)
+      if (param[i].equals(uparam) || param[i].equals(vparam))
         return (mesh.getParameterValues()[i] instanceof FaceVertexParameterValue);
     return false;
   }
@@ -320,8 +320,6 @@ public class UVMapping extends Mapping2D
         vparam = new TextureParameter(this, "V", -Double.MAX_VALUE, Double.MAX_VALUE, 0.0);
         uparam.type = TextureParameter.X_COORDINATE;
         vparam.type = TextureParameter.Y_COORDINATE;
-        uparam.assignNewID();
-        vparam.assignNewID();
       }
     p[numTextureParams] = uparam;
     p[numTextureParams+1] = vparam;

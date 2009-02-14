@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2002,2004 by Peter Eastman
+/* Copyright (C) 2000-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -75,7 +75,7 @@ public class TextureParameter
       sameOwner = true;
     if (!sameOwner)
       return false;
-    if (identifier == -1 && param.identifier == -1)
+    if (identifier == -1 || param.identifier == -1)
       return (param.name.equals(name));
     return (identifier == param.identifier);
   }

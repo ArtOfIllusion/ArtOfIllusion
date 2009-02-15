@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,7 +10,6 @@
 
 package artofillusion.image;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.awt.*;
 import java.awt.image.*;
@@ -27,16 +26,11 @@ public class HDRImage extends ImageMap
   private float average[];
   private double xscale[], yscale[], scale[], scaleMult[];
   private Image preview;
-  private RGBColor tempColor, tempColor2;
-  private Vec2 tempVec;
 
   /** Create an HDRImage from the r, g, b, and e components. */
 
   public HDRImage(byte r[], byte g[], byte b[], byte e[], int xres, int yres)
   {
-    tempColor = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempColor2 = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempVec = new Vec2(0.0, 0.0);
     buildMipMaps(r, g, b, e, xres, yres);
     findAverage();
     createPreview();
@@ -118,6 +112,7 @@ public class HDRImage extends ImageMap
     // Now construct the remaining mipmaps.
     
     RGBColor avg = new RGBColor();
+    RGBColor tempColor = new RGBColor();
     for (i = 2; i < num; i++)
       {
         w = width[i] = width[i-1]/2;
@@ -168,6 +163,7 @@ public class HDRImage extends ImageMap
   {
     byte map[][] = maps[maps.length-1];
     RGBColor avg = new RGBColor();
+    RGBColor tempColor = new RGBColor();
     int len = map[0].length;
     
     for (int i = 0; i < len; i++)
@@ -207,6 +203,7 @@ public class HDRImage extends ImageMap
     float xstep = width[0]/(float) w;
     float ystep = height[0]/(float) h;
     byte map0[][] = maps[0];
+    RGBColor tempColor = new RGBColor();
     for (int i = 0; i < h; i++)
       {
         float pos = (int) (i*ystep)*width[0];
@@ -383,6 +380,7 @@ public class HDRImage extends ImageMap
     
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
+    RGBColor tempColor = new RGBColor();
     getMapColor(tempColor, which, wrapx, wrapy, x, y);
     getMapColor(theColor, which+1, wrapx, wrapy, x, y);
     tempColor.scale(1.0f-frac);
@@ -398,7 +396,7 @@ public class HDRImage extends ImageMap
     int i1, i2, j1, j2;
     int ind1, ind2, ind3, ind4;
     int w = width[which], h = height[which];
-    float frac1, frac2, w1, w2, w3, w4, red, green, blue;
+    float frac1, frac2, w1, w2, w3, w4;
     byte map[][] = maps[which];
     
     // Determine which elements to interpolate between.
@@ -439,15 +437,16 @@ public class HDRImage extends ImageMap
     
     theColor.setERGB(map[0][ind1], map[1][ind1], map[2][ind1], map[3][ind1]);
     theColor.scale(w1);
-    tempColor2.setERGB(map[0][ind2], map[1][ind2], map[2][ind2], map[3][ind2]);
-    tempColor2.scale(w2);
-    theColor.add(tempColor2);
-    tempColor2.setERGB(map[0][ind3], map[1][ind3], map[2][ind3], map[3][ind3]);
-    tempColor2.scale(w3);
-    theColor.add(tempColor2);
-    tempColor2.setERGB(map[0][ind4], map[1][ind4], map[2][ind4], map[3][ind4]);
-    tempColor2.scale(w4);
-    theColor.add(tempColor2);
+    RGBColor tempColor = new RGBColor();
+    tempColor.setERGB(map[0][ind2], map[1][ind2], map[2][ind2], map[3][ind2]);
+    tempColor.scale(w2);
+    theColor.add(tempColor);
+    tempColor.setERGB(map[0][ind3], map[1][ind3], map[2][ind3], map[3][ind3]);
+    tempColor.scale(w3);
+    theColor.add(tempColor);
+    tempColor.setERGB(map[0][ind4], map[1][ind4], map[2][ind4], map[3][ind4]);
+    tempColor.scale(w4);
+    theColor.add(tempColor);
   }
   
   /** Get the gradient of a single component at a particular location in the image.  
@@ -486,6 +485,7 @@ public class HDRImage extends ImageMap
     
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
+    Vec2 tempVec = new Vec2();
     getMapGradient(grad, component, which, wrapx, wrapy, x, y);
     getMapGradient(tempVec, component, which+1, wrapx, wrapy, x, y);
     grad.scale(1.0-frac);
@@ -567,9 +567,6 @@ public class HDRImage extends ImageMap
         map[i] = new byte [w*h];
         in.readFully(map[i]);
       }
-    tempColor = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempColor2 = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempVec = new Vec2(0.0, 0.0);
     buildMipMaps(map[0], map[1], map[2], map[3], w, h);
     findAverage();
     createPreview();

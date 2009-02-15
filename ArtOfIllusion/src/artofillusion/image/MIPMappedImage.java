@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2008 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,8 +27,6 @@ public class MIPMappedImage extends ImageMap
   private float average[];
   private double xscale[], yscale[], scale[], scaleMult[], gradXScale[], gradYScale[];
   private Image preview;
-  private RGBColor tempColor;
-  private Vec2 tempVec;
 
   private static final float SCALE = 1.0f/255.0f;
 
@@ -63,8 +61,6 @@ public class MIPMappedImage extends ImageMap
           preview = im.getScaledInstance(PREVIEW_WIDTH, -1, Image.SCALE_DEFAULT);
       }
     findAverage();
-    tempColor = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempVec = new Vec2(0.0, 0.0);
   }
 
   /** Given an Image object, this method builds the full set of mipmaps for it. */
@@ -380,6 +376,7 @@ public class MIPMappedImage extends ImageMap
 
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
+    RGBColor tempColor = new RGBColor();
     getMapColor(tempColor, which, wrapx, wrapy, x, y);
     getMapColor(theColor, which+1, wrapx, wrapy, x, y);
     tempColor.scale(1.0f-frac);
@@ -484,6 +481,7 @@ public class MIPMappedImage extends ImageMap
 
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
+    Vec2 tempVec = new Vec2();
     getMapGradient(grad, component, which, wrapx, wrapy, x, y);
     getMapGradient(tempVec, component, which+1, wrapx, wrapy, x, y);
     grad.scale(1.0-frac);
@@ -626,8 +624,6 @@ public class MIPMappedImage extends ImageMap
           preview = im.getScaledInstance(PREVIEW_WIDTH, -1, Image.SCALE_DEFAULT);
       }
     findAverage();
-    tempColor = new RGBColor(0.0f, 0.0f, 0.0f);
-    tempVec = new Vec2(0.0, 0.0);
   }
 
   /** Serialize an image to an output stream. */

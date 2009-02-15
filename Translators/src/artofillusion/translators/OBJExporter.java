@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -160,6 +160,38 @@ public class OBJExporter
               normIndex[j][k] = mesh.getFaceVertexIndex(j, k);
           }
         }
+
+        // Determine whether normals are actually required.
+
+        MeshVertex vert[] = mesh.getVertices();
+        boolean needNormals = false;
+        for (int j = 0; j < normIndex.length && !needNormals; j++)
+        {
+          for (int k = 1; k < normIndex[j].length; k++)
+            if (!norm[normIndex[j][k]].equals(norm[normIndex[j][0]]))
+              needNormals = true;
+        }
+        if (!needNormals)
+          out.println("s 0"); // The mesh is faceted, so we can simply disable smoothing
+        else
+        {
+          needNormals = false;
+          Vec3 vertNormal[] = new Vec3[vert.length];
+          for (int j = 0; j < mesh.getFaceCount() && !needNormals; j++)
+          {
+            for (int k = 0; k < mesh.getFaceVertexCount(j); k++)
+            {
+              Vec3 n = norm[normIndex[j][k]];
+              int index = mesh.getFaceVertexIndex(j, k);
+              if (vertNormal[index] == null)
+                vertNormal[index] = n;
+              else if (!n.equals(vertNormal[index]))
+                needNormals = true;
+            }
+          }
+          if (!needNormals)
+            out.println("s 1"); // The mesh is fully smoothed, so we can simply use a smoothing group
+        }
         
         // Select a name for the group.
         
@@ -181,22 +213,22 @@ public class OBJExporter
               out.println("usemtl "+ti.name);
           }
         Mat4 trans = info.getCoords().fromLocal();
-        MeshVertex vert[] = mesh.getVertices();
         for (int j = 0; j < vert.length; j++)
           {
             Vec3 v = trans.times(vert[j].r);
             out.println("v "+nf.format(v.x)+" "+nf.format(v.y)+" "+nf.format(v.z));
           }
-        for (int j = 0; j < norm.length; j++)
-          {
-            if (norm[j] == null)
-              out.println("vn 1 0 0");
-            else
-              {
-                Vec3 v = trans.timesDirection(norm[j]);
-                out.println("vn "+nf.format(v.x)+" "+nf.format(v.y)+" "+nf.format(v.z));
-              }
-          }
+        if (needNormals)
+          for (int j = 0; j < norm.length; j++)
+            {
+              if (norm[j] == null)
+                out.println("vn 1 0 0");
+              else
+                {
+                  Vec3 v = trans.timesDirection(norm[j]);
+                  out.println("vn "+nf.format(v.x)+" "+nf.format(v.y)+" "+nf.format(v.z));
+                }
+            }
         if (ti != null && ((Object3D) mesh).getTextureMapping() instanceof UVMapping && ((UVMapping) ((Object3D) mesh).getTextureMapping()).isPerFaceVertex(mesh))
         {
           // A per-face-vertex texture mapping.
@@ -222,8 +254,11 @@ public class OBJExporter
               out.print(vertIndex+numVert);
               out.print('/');
               out.print(k+1+numTexVert);
-              out.print('/');
-              out.print(normIndex[j][k]+numNorm+1);
+              if (needNormals)
+              {
+                out.print('/');
+                out.print(normIndex[j][k]+numNorm+1);
+              }
             }
             out.println();
             numTexVert += coords[j].length;
@@ -253,8 +288,11 @@ public class OBJExporter
               out.print(vertIndex+numVert);
               out.print('/');
               out.print(vertIndex+numTexVert);
-              out.print('/');
-              out.print(normIndex[j][k]+numNorm+1);
+              if (needNormals)
+              {
+                out.print('/');
+                out.print(normIndex[j][k]+numNorm+1);
+              }
             }
             out.println();
           }
@@ -273,8 +311,11 @@ public class OBJExporter
               if (k > 0)
                 out.print(' ');
               out.print(vertIndex+numVert);
-              out.print("//");
-              out.print(normIndex[j][k]+numNorm+1);
+              if (needNormals)
+              {
+                out.print("//");
+                out.print(normIndex[j][k]+numNorm+1);
+              }
             }
             out.println();
           }

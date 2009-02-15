@@ -12,6 +12,8 @@ package artofillusion.object;
 
 import artofillusion.texture.*;
 import artofillusion.math.*;
+import artofillusion.*;
+
 import java.util.*;
 
 /** This class is used by CSGObject.  It performs the actual work of applying boolean
@@ -175,7 +177,7 @@ public class CSGModeller
 
     for (int i = 0; i < vert2.size(); i++)
       {
-        VertexInfo v = (VertexInfo) vert2.elementAt(i);
+        VertexInfo v = vert2.elementAt(i);
         if (v.type == INSIDE && (op == CSGObject.INTERSECTION || op == CSGObject.DIFFERENCE12))
           {
             index2[i] = allVert.size();
@@ -193,7 +195,7 @@ public class CSGModeller
             index2[i] = -1;
             for (int j = firstBoundary; index2[i] == -1 && j < allVert.size(); j++)
               {
-                VertexInfo v2 = (VertexInfo) allVert.elementAt(j);
+                VertexInfo v2 = allVert.elementAt(j);
                 if (v2.type == BOUNDARY && v2.r.distance(v.r) < TOL)
                   index2[i] = j;
               }
@@ -311,7 +313,7 @@ public class CSGModeller
 
     // Identify any edges with both ends at boundary vertices.  These are
     // candidates for simplifying.
-/*
+
     try
     {
       boolean candidate[] = new boolean [edge.length];
@@ -328,8 +330,9 @@ public class CSGModeller
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
-    }*/
+      // This sometimes happens due to problems (especially degenerate triangles)
+      // in the input objects.  Nothing we can do about it.
+    }
     return mesh;
   }
   
@@ -608,11 +611,11 @@ p1 :for (int i = 0; i < f1.size(); i++)
       double distB[], int typeA[], int spanTypeA, Vec3 line, Vec3 root)
   {
     FaceInfo f = (FaceInfo) face.elementAt(which);
-    VertexInfo v1 = (VertexInfo) vert.elementAt(f.v1);
-    VertexInfo v2 = (VertexInfo) vert.elementAt(f.v2);
-    VertexInfo v3 = (VertexInfo) vert.elementAt(f.v3);
-    VertexInfo startVert = (VertexInfo) vert.elementAt(intersectVert[0]);
-    VertexInfo endVert = (VertexInfo) vert.elementAt(intersectVert[1]);
+    VertexInfo v1 = vert.elementAt(f.v1);
+    VertexInfo v2 = vert.elementAt(f.v2);
+    VertexInfo v3 = vert.elementAt(f.v3);
+    VertexInfo startVert = vert.elementAt(intersectVert[0]);
+    VertexInfo endVert = vert.elementAt(intersectVert[1]);
     int startType, endType;
     double startDist, endDist;
     double startParams[] = null, endParams[] = null;

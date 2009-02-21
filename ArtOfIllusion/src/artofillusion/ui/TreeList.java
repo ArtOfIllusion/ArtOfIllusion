@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2008 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -348,6 +348,10 @@ public class TreeList extends CustomWidget
     invalidateSize();
     if (getComponent().isDisplayable())
       getParent().layoutChildren();
+    if (selected.size() == 0)
+      lastClickRow = -1;
+    else if (selected.size() == 1)
+      lastClickRow = showing.indexOf(selected.get(0));
   }
   
   private void addChildrenToState(TreeElement el, int currentIndent, boolean expanded)
@@ -445,6 +449,7 @@ public class TreeList extends CustomWidget
       // The click was below the last item in the list.
       
       deselectAll();
+      Arrays.fill(origSelected, false);
       buildState();
       dispatchEvent(new SelectionChangedEvent(this));
       return;

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -45,9 +45,16 @@ public class RenderingMesh
     
     // Compute the normals for each face.
 
+    Vec3 edge1 = new Vec3();
+    Vec3 edge2 = new Vec3();
     for (i = 0; i < triangle.length; i++)
       {
-        faceNorm[i] = vert[triangle[i].v2].minus(vert[triangle[i].v1]).cross(vert[triangle[i].v3].minus(vert[triangle[i].v1]));
+        Vec3 v1 = vert[triangle[i].v1];
+        Vec3 v2 = vert[triangle[i].v2];
+        Vec3 v3 = vert[triangle[i].v3];
+        edge1.set(v2.x-v1.x, v2.y-v1.y, v2.z-v1.z);
+        edge2.set(v3.x-v1.x, v3.y-v1.y, v3.z-v1.z);
+        faceNorm[i] = edge1.cross(edge2);
         length = faceNorm[i].length();
         if (length > 1e-12)
           faceNorm[i].scale(1.0/length);

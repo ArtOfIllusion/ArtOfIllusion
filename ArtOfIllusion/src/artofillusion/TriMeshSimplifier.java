@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -819,7 +819,7 @@ public class TriMeshSimplifier implements Runnable
       return tol;
 
     // First calculate the local tesselation error.
-    
+
     for (i = 0; i < v2.faces; i++)
       if (v2.crown[i] != ed.f1 && v2.crown[i] != ed.f2)
         {
@@ -875,6 +875,10 @@ public class TriMeshSimplifier implements Runnable
     temp2.set(v3.x, v3.y, v3.z);
     temp2.subtract(v1);
     normal.set(temp1.y*temp2.z-temp1.z*temp2.y, temp1.z*temp2.x-temp1.x*temp2.z, temp1.x*temp2.y-temp1.y*temp2.x);
-    normal.normalize();
+    double length = normal.length();
+    if (length < 1e-10)
+      normal.set(1.0, 0.0, 0.0);
+    else
+      normal.scale(1.0/length);
   }
 }

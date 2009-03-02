@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -874,6 +874,8 @@ public class TriangleMesh extends Object3D implements FacetedMesh
                     Vec3 edge1 = v[tempFace.v2].r.minus(v[tempFace.v1].r);
                     Vec3 edge2 = v[tempFace.v3].r.minus(v[tempFace.v1].r);
                     Vec3 edge3 = v[tempFace.v3].r.minus(v[tempFace.v2].r);
+                    if (edge1.length2() < 1e-20 || edge2.length2() < 1e-20 || edge3.length2() < 1e-20)
+                      continue;
                     edge1.normalize();
                     edge2.normalize();
                     edge3.normalize();

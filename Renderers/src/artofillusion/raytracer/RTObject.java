@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -53,5 +53,12 @@ public abstract class RTObject
   public Object getObject()
   {
     return this;
+  }
+
+  /** Get the index of this object in the Raytracer's list of RTObjects. */
+
+  public int getIndex()
+  {
+    return index;
   }
 }

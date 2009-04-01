@@ -83,10 +83,10 @@ public class Raytracer implements Renderer, Runnable
      is used for returning the results.  To avoid creating excess objects, only one 
      RayIntersection object is created and used for all rays. */
 
-  static class RayIntersection
+  public static class RayIntersection
   {
-    RTObject first, second;
-    double dist;
+    public RTObject first, second;
+    public double dist;
     
     public RayIntersection()
     {
@@ -96,13 +96,13 @@ public class Raytracer implements Renderer, Runnable
   /** When a shadow ray is traced to determine whether a light is blocked, MaterialIntersection
      objects are used to keep track of where the ray enters or exits materials. */
 
-  static class MaterialIntersection
+  public static class MaterialIntersection
   {
-    MaterialMapping mat;
-    Mat4 toLocal;
-    double dist;
-    boolean entered;
-    OctreeNode node;
+    public MaterialMapping mat;
+    public Mat4 toLocal;
+    public double dist;
+    public boolean entered;
+    public OctreeNode node;
     
     public MaterialIntersection()
     {

@@ -321,7 +321,8 @@ public class OBJExporter
           }
         }
         numVert += vert.length;
-        numNorm += norm.length;
+        if (needNormals)
+          numNorm += norm.length;
       }
   }
   

@@ -658,6 +658,10 @@ public class ArtOfIllusion
           newtex = scene.getTexture(j);
         for (j = 0; j < clipboardObject.length; j++)
           {
+            ParameterValue oldParamValues[] = clipboardObject[j].getObject().getParameterValues();
+            ParameterValue newParamValues[] = new ParameterValue[oldParamValues.length];
+            for (int k = 0; k < newParamValues.length; k++)
+              newParamValues[k] = oldParamValues[k].duplicate();
             Texture current = clipboardObject[j].getObject().getTexture();
             if (current == clipboardTexture[i])
               clipboardObject[j].setTexture(newtex, clipboardObject[j].getObject().getTextureMapping().duplicate(clipboardObject[j].getObject(), newtex));
@@ -674,6 +678,7 @@ public class ArtOfIllusion
                       map.setLayerMapping(k, map.getLayerMapping(k).duplicate(clipboardObject[j].getObject(), newtex));
                     }
               }
+            clipboardObject[j].getObject().setParameterValues(newParamValues);
           }
       }
 

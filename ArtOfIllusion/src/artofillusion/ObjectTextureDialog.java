@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -175,6 +175,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     paramsPanel.add(Translate.label("textureParameters"), 0, 0);
     paramsPanel.add(BOutline.createBevelBorder(paramsScroller = new BScrollPane(), false), 0, 1);
     paramsScroller.setPreferredViewSize(new Dimension(300, 80));
+    paramsScroller.getVerticalScrollBar().setUnitIncrement(10);
     buildParamList();
 
     // Show the dialog.
@@ -266,23 +267,26 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     // Find a list of all parameters, both for the entire texture and for the selected layer.
     
     TextureParameter params[];
-    if (editObj.getObject().getTexture() instanceof LayeredTexture)
+    Object3D obj = editObj.getObject();
+    while (obj instanceof ObjectWrapper)
+      obj = ((ObjectWrapper) obj).getWrappedObject();
+    if (obj.getTexture() instanceof LayeredTexture)
     {
       int index = layerList.getSelectedIndex();
       if (index == -1)
         params = new TextureParameter [0];
       else
-        params = ((LayeredMapping) editObj.getObject().getTextureMapping()).getLayerParameters(index);
+        params = ((LayeredMapping) obj.getTextureMapping()).getLayerParameters(index);
     }
     else
-      params = editObj.getObject().getParameters();
+      params = obj.getParameters();
     paramTypeChoice = new BComboBox [params.length];
     paramValueWidget = new ValueSelector [params.length];
     fieldParamIndex = new int [params.length];
     FormContainer paramsContainer = new FormContainer(3, params.length);
     paramsContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
-    final TextureParameter texParam[] = editObj.getObject().getParameters();
-    final ParameterValue paramValue[] = editObj.getObject().getParameterValues();
+    final TextureParameter texParam[] = obj.getParameters();
+    final ParameterValue paramValue[] = obj.getParameterValues();
     for (int i = 0; i < params.length; i++)
     {
       if (params[i].type != TextureParameter.NORMAL_PARAMETER)
@@ -302,11 +306,11 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       paramsContainer.add(new BLabel(params[i].name), 0, i);
       paramsContainer.add(paramTypeChoice[i] = new BComboBox(), 1, i);
       paramTypeChoice[i].add(PARAM_TYPE_NAME[0]);
-      if (editObj.getObject() instanceof Mesh)
+      if (obj instanceof Mesh)
         paramTypeChoice[i].add(PARAM_TYPE_NAME[1]);
-      if (editObj.getObject() instanceof FacetedMesh)
+      if (obj instanceof FacetedMesh)
         paramTypeChoice[i].add(PARAM_TYPE_NAME[2]);
-      if (editObj.getObject() instanceof FacetedMesh)
+      if (obj instanceof FacetedMesh)
         paramTypeChoice[i].add(PARAM_TYPE_NAME[3]);
       if (whichParam < paramValue.length)
         paramTypeChoice[i].setSelectedValue(PARAM_TYPE_NAME[parameterTypeCode(paramValue[whichParam].getClass())]);

@@ -36,6 +36,7 @@ public class OBJExporter
     final ValueField heightField = new ValueField(200.0, ValueField.INTEGER+ValueField.POSITIVE);
     final ValueSlider qualitySlider = new ValueSlider(0.0, 1.0, 100, 0.5);
     final BCheckBox smoothBox = new BCheckBox(Translate.text("subdivideSmoothMeshes"), true);
+    final BCheckBox normalsBox = new BCheckBox(Translate.text("alwaysWriteNormals"), false);
     final BCheckBox mtlBox = new BCheckBox(Translate.text("writeTexToMTL"), false);
     BComboBox exportChoice = new BComboBox(new String [] {
       Translate.text("exportWholeScene"),
@@ -53,12 +54,12 @@ public class OBJExporter
     ComponentsDialog dlg;
     if (theScene.getSelection().length > 0)
       dlg = new ComponentsDialog(parent, Translate.text("exportToOBJ"), 
-	  new Widget [] {exportChoice, errorField, smoothBox, mtlBox, Translate.label("imageSizeForTextures"), widthField, heightField, qualitySlider},
-	  new String [] {null, Translate.text("maxSurfaceError"), null, null, null, Translate.text("Width"), Translate.text("Height"), Translate.text("imageQuality")});
+	  new Widget [] {exportChoice, errorField, smoothBox, normalsBox, mtlBox, Translate.label("imageSizeForTextures"), widthField, heightField, qualitySlider},
+	  new String [] {null, Translate.text("maxSurfaceError"), null, null, null, null, Translate.text("Width"), Translate.text("Height"), Translate.text("imageQuality")});
     else
       dlg = new ComponentsDialog(parent, Translate.text("exportToOBJ"), 
-	  new Widget [] {errorField, smoothBox, mtlBox, Translate.label("imageSizeForTextures"), widthField, heightField, qualitySlider},
-	  new String [] {Translate.text("maxSurfaceError"), null, null, null, Translate.text("Width"), Translate.text("Height"), Translate.text("imageQuality")});
+	  new Widget [] {errorField, smoothBox, normalsBox, mtlBox, Translate.label("imageSizeForTextures"), widthField, heightField, qualitySlider},
+	  new String [] {Translate.text("maxSurfaceError"), null, null, null, null, Translate.text("Width"), Translate.text("Height"), Translate.text("imageQuality")});
     if (!dlg.clickedOk())
       return;
 
@@ -94,7 +95,7 @@ public class OBJExporter
         textureExporter.saveImages();
       }
       PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-      writeScene(theScene, out, exportChoice.getSelectedIndex() == 0, errorField.getValue(), smoothBox.getState(), textureExporter, mtlFilename);
+      writeScene(theScene, out, exportChoice.getSelectedIndex() == 0, errorField.getValue(), smoothBox.getState(), normalsBox.getState(), textureExporter, mtlFilename);
       out.close();
     }
     catch (Exception ex)
@@ -107,7 +108,7 @@ public class OBJExporter
   /** Write out the scene in OBJ format to the specified PrintWriter.  The other parameters
       correspond to the options in the dialog box displayed by exportFile(). */
 
-  public static void writeScene(Scene theScene, PrintWriter out, boolean wholeScene, double tol, boolean smooth, TextureImageExporter textureExporter, String mtlFilename)
+  public static void writeScene(Scene theScene, PrintWriter out, boolean wholeScene, double tol, boolean smooth, boolean alwaysStoreNormals, TextureImageExporter textureExporter, String mtlFilename)
   {
     // Write the header information.
 
@@ -165,32 +166,37 @@ public class OBJExporter
 
         MeshVertex vert[] = mesh.getVertices();
         boolean needNormals = false;
-        for (int j = 0; j < normIndex.length && !needNormals; j++)
-        {
-          for (int k = 1; k < normIndex[j].length; k++)
-            if (!norm[normIndex[j][k]].equals(norm[normIndex[j][0]]))
-              needNormals = true;
-        }
-        if (!needNormals)
-          out.println("s 0"); // The mesh is faceted, so we can simply disable smoothing
+        if (alwaysStoreNormals)
+          needNormals = true;
         else
         {
-          needNormals = false;
-          Vec3 vertNormal[] = new Vec3[vert.length];
-          for (int j = 0; j < mesh.getFaceCount() && !needNormals; j++)
+          for (int j = 0; j < normIndex.length && !needNormals; j++)
           {
-            for (int k = 0; k < mesh.getFaceVertexCount(j); k++)
-            {
-              Vec3 n = norm[normIndex[j][k]];
-              int index = mesh.getFaceVertexIndex(j, k);
-              if (vertNormal[index] == null)
-                vertNormal[index] = n;
-              else if (!n.equals(vertNormal[index]))
+            for (int k = 1; k < normIndex[j].length; k++)
+              if (!norm[normIndex[j][k]].equals(norm[normIndex[j][0]]))
                 needNormals = true;
-            }
           }
           if (!needNormals)
-            out.println("s 1"); // The mesh is fully smoothed, so we can simply use a smoothing group
+            out.println("s 0"); // The mesh is faceted, so we can simply disable smoothing
+          else
+          {
+            needNormals = false;
+            Vec3 vertNormal[] = new Vec3[vert.length];
+            for (int j = 0; j < mesh.getFaceCount() && !needNormals; j++)
+            {
+              for (int k = 0; k < mesh.getFaceVertexCount(j); k++)
+              {
+                Vec3 n = norm[normIndex[j][k]];
+                int index = mesh.getFaceVertexIndex(j, k);
+                if (vertNormal[index] == null)
+                  vertNormal[index] = n;
+                else if (!n.equals(vertNormal[index]))
+                  needNormals = true;
+              }
+            }
+            if (!needNormals)
+              out.println("s 1"); // The mesh is fully smoothed, so we can simply use a smoothing group
+          }
         }
         
         // Select a name for the group.

@@ -234,7 +234,7 @@ public class ArtOfIllusion
 
   public static String getVersion()
   {
-    return getMajorVersion()+".1";
+    return getMajorVersion()+".2";
   }
 
   /** Get the major part of the version number of Art of Illusion. */

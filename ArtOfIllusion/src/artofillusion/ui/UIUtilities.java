@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2008 by Peter Eastman
+/* Copyright (C) 2004-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,7 +24,7 @@ public class UIUtilities
   private static Font defaultFont;
   private static int standardDialogInsets = 0;
 
-  /** Given a Window, center it in the screen. */
+  /** Given a WindowWidget, center it in the screen. */
   
   public static void centerWindow(WindowWidget win)
   {
@@ -51,6 +51,23 @@ public class UIUtilities
     if (y < 0)
       y = 0;
     dlg.setBounds(new Rectangle(x, y, r2.width, r2.height));
+  }
+
+  /** Ensure that a WindowWidget fits entirely on the screen, making it smaller if necessary. */
+
+  public static void fitWindowToScreen(WindowWidget win)
+  {
+    Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+    Rectangle winBounds = win.getBounds();
+    if (winBounds.x < screenBounds.x)
+      winBounds.x = screenBounds.x;
+    if (winBounds.y < screenBounds.y)
+      winBounds.y = screenBounds.y;
+    if (winBounds.width > screenBounds.width)
+      winBounds.width = screenBounds.width;
+    if (winBounds.height > screenBounds.height)
+      winBounds.height = screenBounds.height;
+    win.setBounds(winBounds);
   }
 
   /** Get the default font for the program (may be null). */

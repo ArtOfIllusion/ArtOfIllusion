@@ -112,6 +112,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     content.add(sp, 0, 2, 3, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     pack();
     UIUtilities.centerDialog(this, parent);
+    UIUtilities.fitWindowToScreen(this);
   }
   
   private void doCancel()

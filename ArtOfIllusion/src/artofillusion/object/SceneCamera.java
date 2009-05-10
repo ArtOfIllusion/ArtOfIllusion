@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,6 +27,7 @@ public class SceneCamera extends Object3D
 {
   private double fov, depthOfField, focalDist;
   private ImageFilter filter[];
+  private int extraComponents;
   
   private static BoundingBox bounds;
   private static WireframeMesh mesh;
@@ -162,13 +163,38 @@ public class SceneCamera extends Object3D
   {
     filter = filters;
   }
-  
-  /** Get a list of all image components required by this camera's filters.  This is a sum of the constants
-      defined in ComplexImage. */
+
+  /**
+   * Get a list of additional image components, beyond those required by the camera's filters,
+   * which should be included in rendered images.  This is a sum of the constants defined in
+   * ComplexImage.
+   */
+
+  public int getExtraRequiredComponents()
+  {
+    return extraComponents;
+  }
+
+  /**
+   * Set a list of additional image components, beyond those required by the camera's filters,
+   * which should be included in rendered images.  This is a sum of the constants defined in
+   * ComplexImage.
+   */
+
+  public void setExtraRequiredComponents(int components)
+  {
+    extraComponents = components;
+  }
+
+  /**
+   * Get a list of all image components that should be included in rendered images.  This includes
+   * all those required by this camera's filters, as well as ones specified by
+   * setExtraRequiredComponents().  This is a sum of the constants defined in ComplexImage.
+   */
   
   public int getComponentsForFilters()
   {
-    int components = 0;
+    int components = extraComponents;
     for (int i = 0; i < filter.length; i++)
       components |= filter[i].getDesiredComponents();
     return components;
@@ -187,7 +213,7 @@ public class SceneCamera extends Object3D
     image.rebuildImage();
   }
 
-  public Object3D duplicate()
+  public SceneCamera duplicate()
   {
     SceneCamera sc = new SceneCamera();
     

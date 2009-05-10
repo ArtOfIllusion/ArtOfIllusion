@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 package artofillusion;
 
 import artofillusion.image.*;
+import artofillusion.image.filter.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -23,20 +24,21 @@ public class RenderingDialog extends BDialog implements RenderListener
 {
   private CustomWidget canvas;
   private Image previewImage;
-  private ComplexImage theImage;
+  private ComplexImage originalImage, filteredImage;
   private Renderer renderer;
   private Scene theScene;
   private ObjectInfo sceneCamera;
+  private SceneCamera cameraForFilters;
   private Camera theCamera;
   private double start, end, originalTime;
   private ImageSaver imgsaver;
   private ImageAverager imgaverager;
-  private BButton closeButton, saveButton;
+  private BButton closeButton, saveButton, filterButton;
   private BLabel label1, label2;
   private BFrame parent;
   private int w, h, fps, subimages, currentFrame, currentSubimage, totalFrames;
   private long startTime;
-  private boolean done;
+  private boolean done, hasModifiedFilters;
 
   /** Render a single frame. */
 
@@ -92,20 +94,22 @@ public class RenderingDialog extends BDialog implements RenderListener
     w = dim.width;
     h = dim.height;
     setFont(parent.getFont());
-    FormContainer content = new FormContainer(new double [] {1, 0}, new double [] {0, 0, 1});
+    FormContainer content = new FormContainer(new double [] {1, 0, 0}, new double [] {0, 0, 1});
     setContent(content);
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
     content.add(label1 = new BLabel(Translate.text("Rendering", "...")), 0, 0);
     content.add(label2 = new BLabel(Translate.text("elapsedTime", "0:00")), 0, 1);
-    content.add(closeButton = Translate.button("cancel", this, "doCancel"), 1, 0);
-    content.add(saveButton = Translate.button("save", this, "doSave"), 1, 1);
+    content.add(closeButton = Translate.button("cancel", this, "doCancel"), 2, 0);
+    content.add(saveButton = Translate.button("save", this, "doSave"), 2, 1);
+    content.add(filterButton = Translate.button("filter", this, "doFilter"), 1, 1);
     closeButton.setFocusable(false);
     saveButton.setVisible(false);
+    filterButton.setVisible(false);
     canvas = new CustomWidget();
     canvas.setPreferredSize(new Dimension(w, h));
     canvas.addEventLink(RepaintEvent.class, this, "paintCanvas");
     BScrollPane sp = new BScrollPane(canvas);
-    content.add(sp, 0, 2, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
+    content.add(sp, 0, 2, 3, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     pack();
     UIUtilities.centerDialog(this, parent);
   }
@@ -120,6 +124,13 @@ public class RenderingDialog extends BDialog implements RenderListener
       imgsaver.lastMovieImage(); // Ken: soft abort; file should be readable.
     }
     dispose();
+    if (hasModifiedFilters)
+    {
+      String values[] = new String[] {Translate.text("button.save"), Translate.text("button.dontSave")};
+      int choice = new BStandardDialog("", Translate.text("saveModifiedFilters", sceneCamera.getName()), BStandardDialog.QUESTION).showOptionDialog(parent, values, values[0]);
+      if (choice == 0)
+        ((SceneCamera) sceneCamera.getObject()).setImageFilters(cameraForFilters.getImageFilters());
+    }
   }
   
   private void doSave()
@@ -127,9 +138,59 @@ public class RenderingDialog extends BDialog implements RenderListener
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     ImageSaver saver = new ImageSaver(parent);
     if (saver.clickedOk())
-      saver.saveImage(theImage);
+      saver.saveImage(filteredImage);
     setCursor(Cursor.getDefaultCursor());
     toFront();
+  }
+
+  private void doFilter()
+  {
+    final CameraFilterDialog.FiltersPanel filtersPanel = new CameraFilterDialog.FiltersPanel(cameraForFilters, new Runnable()
+    {
+      public void run()
+      {
+      }
+    });
+    final BDialog dlg = new BDialog(this, Translate.text("Filters"), true);
+    final ImageFilter originalFilters[] = cameraForFilters.getImageFilters();
+    final boolean hasAppliedFilters[] = new boolean[1];
+    RowContainer buttonPanel = new RowContainer();
+    buttonPanel.add(Translate.button("apply", new Object() {
+      void processEvent()
+      {
+        hasAppliedFilters[0] = true;
+        cameraForFilters.setImageFilters(filtersPanel.getFilters().toArray(new ImageFilter[0]));
+        applyFilters();
+        verifyFilters(dlg);
+      }
+    }, "processEvent"));
+    buttonPanel.add(Translate.button("ok", new Object() {
+      void processEvent()
+      {
+        cameraForFilters.setImageFilters(filtersPanel.getFilters().toArray(new ImageFilter[0]));
+        applyFilters();
+        verifyFilters(dlg);
+        hasModifiedFilters = true;
+        dlg.dispose();
+      }
+    }, "processEvent"));
+    buttonPanel.add(Translate.button("cancel", new Object() {
+      void processEvent()
+      {
+        if (hasAppliedFilters[0])
+        {
+          cameraForFilters.setImageFilters(originalFilters);
+          applyFilters();
+        }
+        dlg.dispose();
+      }
+    }, "processEvent"));
+    BorderContainer content = new BorderContainer();
+    content.add(filtersPanel, BorderContainer.CENTER);
+    content.add(buttonPanel, BorderContainer.SOUTH, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE));
+    dlg.setContent(content);
+    dlg.pack();
+    dlg.setVisible(true);
   }
   
   private void paintCanvas(RepaintEvent ev)
@@ -152,6 +213,44 @@ public class RenderingDialog extends BDialog implements RenderListener
       label2.setText(Translate.text("elapsedTime", min+":"+(sec<10?"0":"")+sec));
     else
       label2.setText(Translate.text("elapsedTime", hour+":"+(min<10?"0":"")+min+":"+(sec<10?"0":"")+sec));
+  }
+
+  /** Make sure all filters can be applied, and show a warning message if now. */
+
+  private void verifyFilters(WindowWidget parent)
+  {
+    ImageFilter[] filters = cameraForFilters.getImageFilters();
+    for (int i = 0; i < filters.length; i++)
+    {
+      int required = filters[i].getDesiredComponents();
+      while (required != 0)
+      {
+        int component = required - (required&(required-1));
+        if (!originalImage.hasFloatData(component))
+        {
+          new BStandardDialog("", UIUtilities.breakString(Translate.text("missingComponentsForFilters")), BStandardDialog.WARNING).showMessageDialog(parent);
+          return;
+        }
+        required -= component;
+      }
+    }
+  }
+
+  /** Apply the filters to the image. */
+
+  private void applyFilters()
+  {
+    filteredImage = null;
+    if (cameraForFilters.getImageFilters().length > 0)
+    {
+      filteredImage = originalImage.duplicate();
+      statusChanged(Translate.text("applyingFilters"));
+      cameraForFilters.applyImageFilters(filteredImage, theScene, sceneCamera.getCoords());
+    }
+    else
+      filteredImage = originalImage;
+    previewImage = filteredImage.getImage();
+    canvas.repaint();
   }
   
   /** Called when more pixels are available for the current image. */
@@ -186,15 +285,9 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   public void imageComplete(ComplexImage image)
   {
-    SceneCamera sc = (SceneCamera) sceneCamera.getObject();
-    if (sc.getImageFilters().length > 0)
-    {
-      statusChanged(Translate.text("applyingFilters"));
-      sc.applyImageFilters(image, theScene, sceneCamera.getCoords());
-    }
-    theImage = image;
-    previewImage = theImage.getImage();
-    canvas.repaint();
+    cameraForFilters = ((SceneCamera) sceneCamera.getObject()).duplicate();
+    originalImage = image;
+    applyFilters();
     try
     {
       EventQueue.invokeAndWait(new Runnable() {
@@ -210,6 +303,8 @@ public class RenderingDialog extends BDialog implements RenderListener
             label1.setText(Translate.text("doneRendering"));
             closeButton.setText(Translate.text("button.close"));
             saveButton.setVisible(imgsaver == null);
+            filterButton.setVisible(imgsaver == null);
+            ((WidgetContainer) getContent()).layoutChildren();
           }
           updateTimeLabel();
         }
@@ -239,7 +334,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     statusChanged(Translate.text("Saving"));
     if (imgaverager != null)
     {
-      imgaverager.addImage(theImage);
+      imgaverager.addImage(filteredImage);
       currentSubimage++;
       if (currentSubimage == subimages)
       {
@@ -253,7 +348,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     }
     else
     {
-      imgsaver.saveImage(theImage);
+      imgsaver.saveImage(filteredImage);
       currentFrame++;
     }
     theScene.setTime(start+(currentFrame*subimages+currentSubimage)/(double) (fps*subimages));

@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,21 +28,17 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   private SceneCamera theCamera;
   private Scene theScene;
   private CoordinateSystem cameraCoords;
-  private Vector filters;
   private ImageFilter oldFilters[];
-  private Class filterClasses[];
-  private BList allFiltersList, cameraFiltersList;
-  private BButton addButton, deleteButton, upButton, downButton;
-  private BScrollPane editorPane;
+  private FiltersPanel filtersPanel;
   private CustomWidget preview;
   private ComplexImage unfilteredImage;
   private Image displayImage;
-  private boolean doneRendering;
+  private boolean doneRendering, doneFiltering;
   private Map savedConfiguration;
   private Thread filterThread;
 
   private static Renderer previewRenderer = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
-  private static HashMap rendererConfiguration = new HashMap();
+  private static HashMap<Renderer, Map<String, Object>> rendererConfiguration = new HashMap<Renderer, Map<String, Object>>();
 
   private static final int PREVIEW_WIDTH = 200;
   private static final int PREVIEW_HEIGHT = 150;
@@ -53,65 +49,27 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     theCamera = camera;
     theScene = parent.getScene();
     this.cameraCoords = cameraCoords;
-    filters = new Vector();
     oldFilters = theCamera.getImageFilters();
     for (int i = 0; i < oldFilters.length; i++)
-    {
-      filters.addElement(oldFilters[i]);
       oldFilters[i] = oldFilters[i].duplicate();
-    }
 
     // Layout the major sections of the window.
 
-    FormContainer content = new FormContainer(2, 3);
+    FormContainer content = new FormContainer(2, 2);
     setContent(content);
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null);
-    FormContainer listsPanel = new FormContainer(3, 1);
+    filtersPanel = new FiltersPanel(theCamera, new Runnable()
+    {
+      public void run()
+      {
+        applyFilters();
+      }
+    });
     BorderContainer previewPanel = new BorderContainer();
     RowContainer okPanel = new RowContainer();
-    editorPane = new BScrollPane();
-    editorPane.setPreferredViewSize(new Dimension(200, 150));
-    content.add(listsPanel, 0, 0, fillLayout);
-    content.add(BOutline.createBevelBorder(editorPane, false), 0, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(2, 2, 2, 2), null));
-    content.add(previewPanel, 1, 0, 1, 2, new LayoutInfo());
-    content.add(okPanel, 0, 2, 2, 1, new LayoutInfo());
-
-    // Layout the Lists and the buttons between them.
-
-    listsPanel.add(UIUtilities.createScrollingList(allFiltersList = new BList()), 0, 0, fillLayout);
-    ColumnContainer buttonsPanel = new ColumnContainer();
-    listsPanel.add(buttonsPanel, 1, 0);
-    listsPanel.add(UIUtilities.createScrollingList(cameraFiltersList = new BList()), 2, 0, fillLayout);
-    buttonsPanel.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
-    buttonsPanel.add(addButton = Translate.button("add", " >>", this, "doAdd"));
-    buttonsPanel.add(deleteButton = Translate.button("delete", this, "doDelete"));
-    buttonsPanel.add(upButton = Translate.button("moveUp", this, "doMoveUp"));
-    buttonsPanel.add(downButton = Translate.button("moveDown", this, "doMoveDown"));
-    allFiltersList.addEventLink(SelectionChangedEvent.class, this, "updateComponents");
-    cameraFiltersList.addEventLink(SelectionChangedEvent.class, this, "updateComponents");
-    allFiltersList.setMultipleSelectionEnabled(false);
-    cameraFiltersList.setMultipleSelectionEnabled(false);
-
-    // Fill in the Lists.
-
-    List<ImageFilter> filters = PluginRegistry.getPlugins(ImageFilter.class);
-    filterClasses = new Class[filters.size()];
-    for (int i = 0; i < filterClasses.length; i++)
-    {
-      filterClasses[i] = filters.get(i).getClass();
-      try
-      {
-        allFiltersList.add(((ImageFilter) filterClasses[i].newInstance()).getName());
-      }
-      catch (Exception ex)
-      {
-        ex.printStackTrace();
-      }
-    }
-    rebuildFilterList();
-    if (cameraFiltersList.getItemCount() > 0)
-      cameraFiltersList.setSelected(0, true);
-    ((BScrollPane) cameraFiltersList.getParent()).setPreferredViewSize(allFiltersList.getPreferredSize());
+    content.add(filtersPanel, 0, 0, fillLayout);
+    content.add(previewPanel, 1, 0, new LayoutInfo());
+    content.add(okPanel, 0, 1, 2, 1, new LayoutInfo());
 
     // Create the preview panel.
 
@@ -125,12 +83,11 @@ public class CameraFilterDialog extends BDialog implements RenderListener
 
     okPanel.add(Translate.button("ok", this, "doOk"));
     okPanel.add(Translate.button("cancel", this, "doCancel"));
-    updateComponents();
 
     // Begin rendering the preview.
 
     savedConfiguration = previewRenderer.getConfiguration();
-    Map recordedConfig = (Map) rendererConfiguration.get(previewRenderer);
+    Map<String, Object> recordedConfig = rendererConfiguration.get(previewRenderer);
     if (recordedConfig == null)
     {
       previewRenderer.configurePreview();
@@ -166,56 +123,17 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   private void renderPreview()
   {
     Camera cam = theCamera.createCamera(PREVIEW_WIDTH, PREVIEW_HEIGHT, cameraCoords);
-    SceneCamera renderCamera = new SceneCamera() {
-      public int getComponentsForFilters()
-      {
-        return -1; // Force the renderer to generate all possible components.
-      }
-    };
-    renderCamera.copyObject(theCamera);
+    SceneCamera renderCamera = theCamera.duplicate();
+    renderCamera.setExtraRequiredComponents(-1); // Force the renderer to generate all possible components.
     doneRendering = false;
     previewRenderer.renderScene(theScene, cam, this, renderCamera);
-  }
-
-  /** Update the states of various components in the window. */
-
-  private void updateComponents()
-  {
-    addButton.setEnabled(allFiltersList.getSelectedIndex() > -1);
-    int selection = cameraFiltersList.getSelectedIndex();
-    deleteButton.setEnabled(selection > -1);
-    upButton.setEnabled(selection > 0);
-    downButton.setEnabled(selection > -1 && selection < filters.size()-1);
-    if (selection > -1)
-    {
-      Runnable callback = new Runnable() {
-        public void run()
-        {
-          applyFilters();
-        }
-      };
-      editorPane.setContent(((ImageFilter) filters.elementAt(cameraFiltersList.getSelectedIndex())).getConfigPanel(callback));
-    }
-    else
-      editorPane.setContent(null);
-    editorPane.layoutChildren();
-  }
-
-  /** Rebuild the list of filters. */
-
-  private void rebuildFilterList()
-  {
-    cameraFiltersList.removeAll();
-    for (int i = 0; i < filters.size(); i++)
-      cameraFiltersList.add(((ImageFilter) filters.elementAt(i)).getName());
   }
 
   /** Save changes and close the window. */
 
   private void doOk()
   {
-    ImageFilter filt[] = new ImageFilter [filters.size()];
-    filters.copyInto(filt);
+    ImageFilter filt[] = filtersPanel.filters.toArray(new ImageFilter [filtersPanel.filters.size()]);
     theCamera.setImageFilters(filt);
     configureRenderer(savedConfiguration, previewRenderer);
     dispose();
@@ -230,72 +148,6 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       filt[i].copy(oldFilters[i]);
     configureRenderer(savedConfiguration, previewRenderer);
     dispose();
-  }
-
-  /** Add a filter to the list. */
-
-  private void doAdd()
-  {
-    int sel = allFiltersList.getSelectedIndex();
-    if (sel == -1)
-      return;
-    try
-    {
-      filters.addElement(filterClasses[sel].newInstance());
-      rebuildFilterList();
-      cameraFiltersList.setSelected(filters.size()-1, true);
-    }
-    catch (Exception ex)
-    {
-      ex.printStackTrace();
-    }
-    updateComponents();
-    applyFilters();
-  }
-
-  /** Delete a filter from the list. */
-
-  private void doDelete()
-  {
-    int sel = cameraFiltersList.getSelectedIndex();
-    if (sel == -1)
-      return;
-    filters.removeElementAt(sel);
-    rebuildFilterList();
-    updateComponents();
-    applyFilters();
-  }
-
-  /** Move the selected filter upward. */
-
-  private void doMoveUp()
-  {
-    int sel = cameraFiltersList.getSelectedIndex();
-    if (sel < 1)
-      return;
-    ImageFilter filt = (ImageFilter) filters.elementAt(sel);
-    filters.removeElementAt(sel);
-    filters.insertElementAt(filt, sel-1);
-    rebuildFilterList();
-    cameraFiltersList.setSelected(sel-1, true);
-    updateComponents();
-    applyFilters();
-  }
-
-  /** Move the selected filter downward. */
-
-  private void doMoveDown()
-  {
-    int sel = cameraFiltersList.getSelectedIndex();
-    if (sel == -1 || sel == filters.size()-1)
-      return;
-    ImageFilter filt = (ImageFilter) filters.elementAt(sel);
-    filters.removeElementAt(sel);
-    filters.insertElementAt(filt, sel+1);
-    rebuildFilterList();
-    cameraFiltersList.setSelected(sel+1, true);
-    updateComponents();
-    applyFilters();
   }
 
   /** Allow the user to configure the renderer used for the preview. */
@@ -320,7 +172,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       void processEvent()
       {
         Renderer newRenderer = renderers.get(rendererChoice.getSelectedIndex());
-        Map recordedConfig = (Map) rendererConfiguration.get(newRenderer);
+        Map<String, Object> recordedConfig = rendererConfiguration.get(newRenderer);
         if (recordedConfig == null)
         {
           newRenderer.configurePreview();
@@ -354,7 +206,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     String message = null;
     if (!doneRendering)
       message = "Rendering Preview...";
-    else if (filterThread != null && filterThread.isAlive())
+    else if (!doneFiltering)
       message = "Applying Filter...";
     if (message != null)
     {
@@ -376,9 +228,9 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       public void run()
       {
         ComplexImage img = unfilteredImage.duplicate();
-        for (int i = 0; i < filters.size(); i++)
-          ((ImageFilter) filters.elementAt(i)).filterImage(img, theScene, theCamera, cameraCoords);
-        if (filters.size() > 0)
+        for (int i = 0; i < filtersPanel.filters.size(); i++)
+          filtersPanel.filters.get(i).filterImage(img, theScene, theCamera, cameraCoords);
+        if (filtersPanel.filters.size() > 0)
           img.rebuildImage();
         if (filterThread == Thread.currentThread())
           displayImage = img.getImage();
@@ -410,13 +262,185 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   {
     unfilteredImage = image;
     displayImage = image.getImage();
+    doneFiltering = false;
     doneRendering = true;
     applyFilters();
+    doneFiltering = true;
   }
 
   /** This method will be called if rendering is canceled. */
 
   public void renderingCanceled()
   {
+  }
+
+  /**
+   * This is the panel containing the list of filters and the parameters for each one.
+   * It is a separate class so it can be reused in the rendering window.
+   */
+
+  public static class FiltersPanel extends FormContainer
+  {
+    private BScrollPane editorPane;
+    private BList allFiltersList, cameraFiltersList;
+    private BButton addButton, deleteButton, upButton, downButton;
+    private Class filterClasses[];
+    private ArrayList<ImageFilter> filters;
+    Runnable filterChangedCallback;
+
+    public FiltersPanel(SceneCamera camera, Runnable filterChangedCallback)
+    {
+      super(1, 2);
+      this.filterChangedCallback = filterChangedCallback;
+      filters = new ArrayList<ImageFilter>();
+      ImageFilter oldFilters[] = camera.getImageFilters();
+      for (int i = 0; i < oldFilters.length; i++)
+        filters.add(oldFilters[i]);
+
+      // Layout the major sections of the window.
+
+      LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null);
+      FormContainer listsPanel = new FormContainer(3, 1);
+      editorPane = new BScrollPane();
+      editorPane.setPreferredViewSize(new Dimension(200, 150));
+      add(listsPanel, 0, 0, fillLayout);
+      add(BOutline.createBevelBorder(editorPane, false), 0, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(2, 2, 2, 2), null));
+
+      // Layout the Lists and the buttons between them.
+
+      listsPanel.add(UIUtilities.createScrollingList(allFiltersList = new BList()), 0, 0, fillLayout);
+      ColumnContainer buttonsPanel = new ColumnContainer();
+      listsPanel.add(buttonsPanel, 1, 0);
+      listsPanel.add(UIUtilities.createScrollingList(cameraFiltersList = new BList()), 2, 0, fillLayout);
+      buttonsPanel.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
+      buttonsPanel.add(addButton = Translate.button("add", " >>", this, "doAdd"));
+      buttonsPanel.add(deleteButton = Translate.button("delete", this, "doDelete"));
+      buttonsPanel.add(upButton = Translate.button("moveUp", this, "doMoveUp"));
+      buttonsPanel.add(downButton = Translate.button("moveDown", this, "doMoveDown"));
+      allFiltersList.addEventLink(SelectionChangedEvent.class, this, "updateComponents");
+      cameraFiltersList.addEventLink(SelectionChangedEvent.class, this, "updateComponents");
+      allFiltersList.setMultipleSelectionEnabled(false);
+      cameraFiltersList.setMultipleSelectionEnabled(false);
+
+      // Fill in the Lists.
+
+      List<ImageFilter> filters = PluginRegistry.getPlugins(ImageFilter.class);
+      filterClasses = new Class[filters.size()];
+      for (int i = 0; i < filterClasses.length; i++)
+      {
+        filterClasses[i] = filters.get(i).getClass();
+        try
+        {
+          allFiltersList.add(((ImageFilter) filterClasses[i].newInstance()).getName());
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
+      rebuildFilterList();
+      if (cameraFiltersList.getItemCount() > 0)
+        cameraFiltersList.setSelected(0, true);
+      ((BScrollPane) cameraFiltersList.getParent()).setPreferredViewSize(allFiltersList.getPreferredSize());
+      updateComponents();
+    }
+
+    /** Get the filters to apply. */
+
+    public ArrayList<ImageFilter> getFilters()
+    {
+      return filters;
+    }
+
+    /** Update the states of various components in the window. */
+
+    private void updateComponents()
+    {
+      addButton.setEnabled(allFiltersList.getSelectedIndex() > -1);
+      int selection = cameraFiltersList.getSelectedIndex();
+      deleteButton.setEnabled(selection > -1);
+      upButton.setEnabled(selection > 0);
+      downButton.setEnabled(selection > -1 && selection < filters.size()-1);
+      if (selection > -1)
+        editorPane.setContent(((ImageFilter) filters.get(cameraFiltersList.getSelectedIndex())).getConfigPanel(filterChangedCallback));
+      else
+        editorPane.setContent(null);
+      editorPane.layoutChildren();
+    }
+
+    /** Rebuild the list of filters. */
+
+    private void rebuildFilterList()
+    {
+      cameraFiltersList.removeAll();
+      for (int i = 0; i < filters.size(); i++)
+        cameraFiltersList.add(((ImageFilter) filters.get(i)).getName());
+    }
+
+    /** Add a filter to the list. */
+
+    private void doAdd()
+    {
+      int sel = allFiltersList.getSelectedIndex();
+      if (sel == -1)
+        return;
+      try
+      {
+        filters.add((ImageFilter) filterClasses[sel].newInstance());
+        rebuildFilterList();
+        cameraFiltersList.setSelected(filters.size()-1, true);
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+      updateComponents();
+      filterChangedCallback.run();
+    }
+
+    /** Delete a filter from the list. */
+
+    private void doDelete()
+    {
+      int sel = cameraFiltersList.getSelectedIndex();
+      if (sel == -1)
+        return;
+      filters.remove(sel);
+      rebuildFilterList();
+      updateComponents();
+      filterChangedCallback.run();
+    }
+
+    /** Move the selected filter upward. */
+
+    private void doMoveUp()
+    {
+      int sel = cameraFiltersList.getSelectedIndex();
+      if (sel < 1)
+        return;
+      ImageFilter filt = filters.get(sel);
+      filters.remove(sel);
+      filters.add(sel-1, filt);
+      rebuildFilterList();
+      cameraFiltersList.setSelected(sel-1, true);
+      updateComponents();
+      filterChangedCallback.run();
+    }
+
+    /** Move the selected filter downward. */
+
+    private void doMoveDown()
+    {
+      int sel = cameraFiltersList.getSelectedIndex();
+      if (sel == -1 || sel == filters.size()-1)
+        return;
+      ImageFilter filt = (ImageFilter) filters.get(sel);
+      filters.remove(sel);
+      filters.add(sel+1, filt);
+      rebuildFilterList();
+      cameraFiltersList.setSelected(sel+1, true);
+      updateComponents();
+      filterChangedCallback.run();
+    }
   }
 }

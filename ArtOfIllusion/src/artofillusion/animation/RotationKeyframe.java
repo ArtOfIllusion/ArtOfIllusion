@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2003 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -252,9 +252,9 @@ public class RotationKeyframe implements Keyframe
       }
     else
       sign = 1.0;
-    if (dot >= 0.99999)
-      return new double [] {q1[0], q1[1], q1[2], q1[3]};
     double angle = Math.acos(dot);
+    if (angle < 1e-10 || Double.isNaN(angle))
+      return new double [] {q1[0], q1[1], q1[2], q1[3]};
     double denom = Math.sin(angle);
     double weight1 = Math.sin((1.0-t)*angle)/denom, weight2 = sign*Math.sin(t*angle)/denom;
     

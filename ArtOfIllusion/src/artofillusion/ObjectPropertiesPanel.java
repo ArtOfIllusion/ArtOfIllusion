@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2008 by Peter Eastman
+/* Copyright (C) 2006-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,7 +34,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
   private BTextField nameField;
   private ValueField xPosField, yPosField, zPosField, xRotField, yRotField, zRotField;
   private BComboBox textureChoice, materialChoice;
-  private Widget propSelector[];
+  private PropertyEditor propEditor[];
   private ObjectInfo objects[];
   private Property properties[];
   private Object3D previousObjects[];
@@ -270,43 +270,18 @@ public class ObjectPropertiesPanel extends ColumnContainer
     // Build widgets for object parameters.
 
     LayoutInfo centerLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(2, 2, 2, 2), null);
-    propSelector = new Widget[properties.length];
-    for (int i = 0; i < propSelector.length; i++)
+    propEditor = new PropertyEditor[properties.length];
+    for (int i = 0; i < propEditor.length; i++)
     {
-      if (properties[i].getType() != Property.BOOLEAN)
-        add(new BLabel(properties[i].getName()));
-      if (properties[i].getType() == Property.DOUBLE)
-        propSelector[i] = new ValueSelector(0.0, properties[i].getMinimum(), properties[i].getMaximum(), 0.005);
-      else if (properties[i].getType() == Property.INTEGER)
-      {
-        propSelector[i] = new ValueField(0.0, ValueField.INTEGER);
-        final Property prop = properties[i];
-        ((ValueField) propSelector[i]).setValueChecker(new ValueChecker() {
-          public boolean isValid(double val)
-          {
-            return (val >= prop.getMinimum() && val <= prop.getMaximum());
-          }
-        });
-      }
-      else if (properties[i].getType() == Property.BOOLEAN)
-        propSelector[i] = new BCheckBox(properties[i].getName(), false);
-      else if (properties[i].getType() == Property.STRING)
-        propSelector[i] = new BTextField(15);
-      else if (properties[i].getType() == Property.COLOR)
-        propSelector[i] = new ColorSelector(properties[i].getName());
-      else if (properties[i].getType() == Property.ENUMERATION)
-        propSelector[i] = new BComboBox(properties[i].getAllowedValues());
-      if (propSelector[i] instanceof BTextField)
-      {
-        propSelector[i].addEventLink(FocusLostEvent.class, this, "stringParameterChanged");
-        propSelector[i].addEventLink(KeyPressedEvent.class, this, "stringParameterChanged");
-      }
+      propEditor[i] = new PropertyEditor(properties[i], null);
+      if (propEditor[i].getLabel() != null)
+        add(new BLabel(propEditor[i].getLabel()));
+      Widget widget = propEditor[i].getWidget();
+      widget.addEventLink(ValueChangedEvent.class, this, "parameterChanged");
+      if (widget instanceof ValueSelector || widget instanceof BCheckBox || widget instanceof ValueField)
+        add(widget, centerLayout);
       else
-        propSelector[i].addEventLink(ValueChangedEvent.class, this, "parameterChanged");
-      if (propSelector[i] instanceof ValueSelector || propSelector[i] instanceof BCheckBox || propSelector[i] instanceof ValueField)
-        add(propSelector[i], centerLayout);
-      else
-        add(propSelector[i], fillLayout);
+        add(widget, fillLayout);
     }
     showParameterValues();
 
@@ -352,9 +327,9 @@ public class ObjectPropertiesPanel extends ColumnContainer
 
   private void showParameterValues()
   {
-    if (propSelector == null)
+    if (propEditor == null)
       return;
-    Object values[] = new Object [propSelector.length];
+    Object values[] = new Object [propEditor.length];
     for (int i = 0; i < values.length; i++)
       values[i] = objects[0].getObject().getPropertyValue(i);
     for (int i = 1; i < objects.length; i++)
@@ -363,20 +338,9 @@ public class ObjectPropertiesPanel extends ColumnContainer
         if (values[j] != null && !values[j].equals(objects[i].getObject().getPropertyValue(j)))
           values[j] = null;
     }
-    for (int i = 0; i < propSelector.length; i++)
+    for (int i = 0; i < propEditor.length; i++)
     {
-      if (propSelector[i] instanceof ValueSelector)
-        ((ValueSelector) propSelector[i]).setValue(values[i] == null ? Double.NaN : ((Double) values[i]).doubleValue());
-      else if (propSelector[i] instanceof ValueField)
-        ((ValueField) propSelector[i]).setValue(values[i] == null ? Double.NaN : ((Integer) values[i]).intValue());
-      else if (propSelector[i] instanceof BCheckBox)
-        ((BCheckBox) propSelector[i]).setState(values[i] == null ? false : ((Boolean) values[i]).booleanValue());
-      else if (propSelector[i] instanceof BTextField)
-        ((BTextField) propSelector[i]).setText((String) values[i]);
-      else if (propSelector[i] instanceof ColorSelector)
-        ((ColorSelector) propSelector[i]).setColor((RGBColor) values[i]);
-      else if (propSelector[i] instanceof BComboBox)
-        ((BComboBox) propSelector[i]).setSelectedValue(values[i]);
+      propEditor[i].setValue(values[i]);
     }
   }
 
@@ -523,17 +487,6 @@ public class ObjectPropertiesPanel extends ColumnContainer
       EventQueue.invokeLater(r); // Ensure that it won't be discarded.
   }
 
-  /**
-   * This is used for events generated by BTextFields for editing String properties.  These
-   * need to be handled differently, since the property value should only change when editing
-   * is complete.
-   */
-
-  private void stringParameterChanged(WidgetEvent ev)
-  {
-    if (ev instanceof FocusLostEvent || (ev instanceof KeyPressedEvent && ((KeyPressedEvent) ev).getKeyCode() == KeyPressedEvent.VK_ENTER))
-      parameterChanged(new ValueChangedEvent(ev.getWidget(), false));
-  }
 
   private void processParameterChange(ValueChangedEvent ev)
   {
@@ -548,22 +501,10 @@ public class ObjectPropertiesPanel extends ColumnContainer
     boolean changed = false;
     for (int i = 0; i < objects.length; i++)
     {
-      for (int j = 0; j < propSelector.length; j++)
-        if (propSelector[j] == ev.getSource())
+      for (int j = 0; j < propEditor.length; j++)
+        if (propEditor[j].getWidget() == ev.getSource())
         {
-          Object value = null;
-          if (propSelector[j] instanceof ValueSelector)
-            value = new Double(((ValueSelector) propSelector[j]).getValue());
-          else if (propSelector[j] instanceof ValueField)
-            value = new Integer((int) ((ValueField) propSelector[j]).getValue());
-          else if (propSelector[j] instanceof BCheckBox)
-            value = Boolean.valueOf(((BCheckBox) propSelector[j]).getState());
-          else if (propSelector[j] instanceof BTextField)
-            value = ((BTextField) propSelector[j]).getText();
-          else if (propSelector[j] instanceof ColorSelector)
-            value = ((ColorSelector) propSelector[j]).getColor();
-          else if (propSelector[j] instanceof BComboBox)
-            value = ((BComboBox) propSelector[j]).getSelectedValue();
+          Object value = propEditor[j].getValue();
           if (!objects[i].getObject().getPropertyValue(j).equals(value))
           {
             objects[i].getObject().setPropertyValue(j, value);
@@ -598,58 +539,5 @@ public class ObjectPropertiesPanel extends ColumnContainer
   public Dimension getMinimumSize()
   {
     return new Dimension();
-  }
-
-  /**
-   * A selector Widget for setting a color.
-   */
-
-  private class ColorSelector extends CustomWidget
-  {
-    private String title;
-    private RGBColor color;
-    ColorSelector(String title)
-    {
-      this.title = title;
-      color = new RGBColor();
-      setPreferredSize(new Dimension(30, 15));
-      setMaximumSize(new Dimension(30, 15));
-      setBackground(color.getColor());
-      ((JComponent) getComponent()).setBorder(BorderFactory.createLoweredBevelBorder());
-      addEventLink(MouseClickedEvent.class, this);
-    }
-
-    public RGBColor getColor()
-    {
-      return color.duplicate();
-    }
-
-    public void setColor(RGBColor color)
-    {
-      if (color == null)
-      {
-        this.color = null;
-        setBackground(Color.GRAY);
-      }
-      else
-      {
-        this.color = color.duplicate();
-        setBackground(color.getColor());
-      }
-    }
-
-    private void processEvent()
-    {
-      if (color != null)
-      {
-        RGBColor oldColor = color.duplicate();
-        new ColorChooser(window, title, color);
-        if (!color.equals(oldColor))
-        {
-          setBackground(color.getColor());
-          dispatchEvent(new ValueChangedEvent(this));
-        }
-      }
-    }
   }
 }

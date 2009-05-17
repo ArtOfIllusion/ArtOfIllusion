@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,12 +26,22 @@ import java.io.*;
 
 public abstract class ImageFilter
 {
+  @Deprecated
   protected double paramValue[];
+  private Object propertyValue[];
   
   /** Every ImageFilter subclass must provide a constructor which takes no arguments. */
   
   public ImageFilter()
   {
+    Property[] properties = getProperties();
+    propertyValue = new Object[properties.length];
+    for (int i = 0; i < properties.length; i++)
+      propertyValue[i] = properties[i].getDefaultValue();
+
+    // This is for backward compatibility with ImageFilters that use the deprecated
+    // TextureParameter interface.
+
     TextureParameter param[] = getParameters();
     paramValue = new double [param.length];
     for (int i = 0; i < param.length; i++)
@@ -92,17 +102,17 @@ public abstract class ImageFilter
       paramValue[i] = f.paramValue[i];
   }
   
-  /** Get a list of parameters which affect the behavior of the filter. */
+  /** This method is deprecated.  Call getProperties() instead. */
   
+  @Deprecated
   public TextureParameter [] getParameters()
   {
-    // Subclasses which have parameters should override this.
-    
     return new TextureParameter [0];
   }
   
-  /** Get the list of parameter values. */
-  
+  /** This method is deprecated.  Call getPropertyValue() instead. */
+
+  @Deprecated
   public double [] getParameterValues()
   {
     double val[] = new double [paramValue.length];
@@ -110,11 +120,61 @@ public abstract class ImageFilter
     return val;
   }
   
-  /** Set the value of a parameter. */
-  
-  public void setParameterValue(int which, double value)
+  /** This method is deprecated.  Call setPropertyValue() instead. */
+
+  @Deprecated
+  public void setParameterValue(int index, double value)
   {
-    paramValue[which] = value;
+    paramValue[index] = value;
+    propertyValue[index] = value;
+  }
+
+  /**
+   * Get a list of Properties which affect the behavior of the filter.
+   */
+
+  public Property[] getProperties()
+  {
+    // The default implementation is for backward compatibility with ImageFilters that
+    // use the deprecated TextureParameter interface.  Subclasses should override it to
+    // return the actual list of Properties for the filter.
+
+    TextureParameter[] parameters = getParameters();
+    Property properties[] = new Property[parameters.length];
+    for (int i = 0; i < parameters.length; i++)
+      properties[i] = new Property(parameters[i].name, parameters[i].minVal, parameters[i].maxVal, parameters[i].defaultVal);
+    return properties;
+  }
+
+  /**
+   * Get the value of a Property.
+   *
+   * @param index    the index of the Property to get
+   */
+
+  public Object getPropertyValue(int index)
+  {
+    if (index < paramValue.length)
+      return paramValue[index];
+    return propertyValue[index];
+  }
+
+  /**
+   * Set the value of a Property.
+   *
+   * @param index    the index of the Property to set
+   * @param value    the value of the Property
+   */
+
+  public void setPropertyValue(int index, Object value)
+  {
+    propertyValue[index] = value;
+
+    // This is for backward compatibility with ImageFilters that use the deprecated
+    // TextureParameter interface.
+
+    if (value instanceof Number && paramValue.length > index)
+      paramValue[index] = ((Number) value).doubleValue();
   }
 
   /** Write a serialized description of this filter to a stream. */
@@ -125,7 +185,8 @@ public abstract class ImageFilter
   
   public abstract void initFromStream(DataInputStream in, Scene theScene) throws IOException;
 
-  /** Get a Widget with which the user can specify options for the filter.
+  /**
+   * Get a Widget with which the user can specify options for the filter.
    *
    * @param changeCallback    a Runnable which should be invoked whenever the filter's configuration
    *                          changes, so the containing window can update its preview
@@ -133,68 +194,43 @@ public abstract class ImageFilter
 
   public Widget getConfigPanel(final Runnable changeCallback)
   {
-    // The default implementation simply allows the parameters to be edited.  Subclasses may override
+    // The default implementation simply allows the Properties to be edited.  Subclasses may override
     // this to provide more complex configuration panels.
     
-    final TextureParameter param[] = getParameters();
-    FormContainer form = new FormContainer(2, param.length);
+    final Property properties[] = getProperties();
+    FormContainer form = new FormContainer(2, properties.length);
     
-    // Create the labels.
+    // Define an inner class to act as a listener on a PropertyEditors.
     
-    LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
-    for (int i = 0; i < param.length; i++)
-      form.add(new BLabel(param[i].name+": "), 0, i, leftLayout);
-    
-    // Define an inner class to act as a listener on a ValueField.
-    
-    class FieldListener
+    class EditorListener
     {
       private int which;
-      private ValueField field;
-      
-      public FieldListener(int which, ValueField field)
+      private PropertyEditor editor;
+
+      public EditorListener(int which, PropertyEditor editor)
       {
         this.which = which;
-        this.field = field;
+        this.editor = editor;
       }
       
       void processEvent()
       {
-        setParameterValue(which, field.getValue());
+        setPropertyValue(which, editor.getValue());
         changeCallback.run();
       }
     }
-    
-    // Define an inner class to act as a listener on a ValueSlider.
-    
-    class SliderListener
-    {
-      private int which;
-      private ValueSlider slider;
-      
-      public SliderListener(int which, ValueSlider slider)
-      {
-        this.which = which;
-        this.slider = slider;
-      }
-      
-      void processEvent()
-      {
-        setParameterValue(which, slider.getValue());
-        changeCallback.run();
-      }
-    }
-    
+
     // Create the editing components.
     
+    LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
-    for (int i = 0; i < param.length; i++)
+    for (int i = 0; i < properties.length; i++)
     {
-      Widget w = param[i].getEditingWidget(paramValue[i]);
-      if (w instanceof ValueField)
-        w.addEventLink(ValueChangedEvent.class, new FieldListener(i, (ValueField) w));
-      else
-        w.addEventLink(ValueChangedEvent.class, new SliderListener(i, (ValueSlider) w));
+      PropertyEditor editor = new PropertyEditor(properties[i], getPropertyValue(i));
+      if (editor.getLabel() != null)
+        form.add(new BLabel(editor.getLabel()+": "), 0, i, leftLayout);
+      Widget w = editor.getWidget();
+      w.addEventLink(ValueChangedEvent.class, new EditorListener(i, editor));
       form.add(w, 1, i, rightLayout);
     }
     UIUtilities.applyBackground(form, null);

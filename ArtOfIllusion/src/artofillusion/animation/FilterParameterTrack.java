@@ -1,4 +1,4 @@
-/* Copyright (C) 2003 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,12 +11,13 @@
 package artofillusion.animation;
 
 import artofillusion.*;
+import artofillusion.math.*;
 import artofillusion.image.filter.*;
-import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
+import java.util.*;
 
 /** This is a Track which allows the parameters of an ImageFilter to be keyframed. */
 
@@ -53,8 +54,15 @@ public class FilterParameterTrack extends Track
 
     if (k == null)
       return;
-    for (int i = 0; i < k.val.length; i++)
-      filter.setParameterValue(i, k.val[i]);
+    int index = 0;
+    Property[] properties = filter.getProperties();
+    for (int i = 0; i < properties.length; i++)
+    {
+      if (properties[i].getType() == Property.DOUBLE)
+        filter.setPropertyValue(i, k.val[index++]);
+      else if (properties[i].getType() == Property.COLOR)
+        filter.setPropertyValue(i, new RGBColor(k.val[index++], k.val[index++], k.val[index++]));
+    }
   }
   
   /** Create a duplicate of this track. */
@@ -108,10 +116,7 @@ public class FilterParameterTrack extends Track
   
   public Keyframe setKeyframe(double time, Scene sc)
   {
-    double val[] = filter.getParameterValues();
-    double key[] = new double [val.length];
-    for (int i = 0; i < val.length; i++)
-      key[i] = val[i];
+    double key[] = getCurrentValues();
     Keyframe k = new ArrayKeyframe(key);
     tc.addTimepoint(k, time, new Smoothness());
     return k;
@@ -126,11 +131,35 @@ public class FilterParameterTrack extends Track
     if (tc.getTimes().length == 0)
       return setKeyframe(time, sc);
     double val1[] = ((ArrayKeyframe) tc.evaluate(time, smoothingMethod)).val;
-    double val2[] = filter.getParameterValues();
+    double val2[] = getCurrentValues();
     for (int i = 0; i < val1.length; i++)
       if (val1[i] != val2[i])
         return setKeyframe(time, sc);
     return null;
+  }
+
+  /** Look up the current values from the filter. */
+
+  private double[] getCurrentValues()
+  {
+    ArrayList<Double> values = new ArrayList<Double>();
+    Property properties[] = filter.getProperties();
+    for (int i = 0; i < properties.length; i++)
+    {
+      if (properties[i].getType() == Property.DOUBLE)
+        values.add((Double) filter.getPropertyValue(i));
+      else if (properties[i].getType() == Property.COLOR)
+      {
+        RGBColor color = (RGBColor) filter.getPropertyValue(i);
+        values.add(Double.valueOf(color.getRed()));
+        values.add(Double.valueOf(color.getGreen()));
+        values.add(Double.valueOf(color.getBlue()));
+      }
+    }
+    double val[] = new double[values.size()];
+    for (int i = 0; i < values.size(); i++)
+      val[i] = values.get(i);
+    return val;
   }
 
   /** Move a keyframe to a new time, and return its new position in the list. */
@@ -200,18 +229,26 @@ public class FilterParameterTrack extends Track
   
   public String [] getValueNames()
   {
-    TextureParameter param[] = filter.getParameters();
-    String name[] = new String [param.length];
-    for (int i = 0; i < param.length; i++)
-      name[i] = param[i].name;
-    return name;
+    ArrayList<String> names = new ArrayList<String>();
+    for (Property property : filter.getProperties())
+    {
+      if (property.getType() == Property.DOUBLE)
+        names.add(property.getName());
+      else if (property.getType() == Property.COLOR)
+      {
+        names.add(property.getName()+" ("+Translate.text("Red")+")");
+        names.add(property.getName()+" ("+Translate.text("Green")+")");
+        names.add(property.getName()+" ("+Translate.text("Blue")+")");
+      }
+    }
+    return names.toArray(new String[names.size()]);
   }
 
   /** Get the default list of graphable values (for a track which has no keyframes). */
   
   public double [] getDefaultGraphValues()
   {
-    return filter.getParameterValues();
+    return getCurrentValues();
   }
   
   /** Get the allowed range for graphable values.  This returns a 2D array, where elements
@@ -220,11 +257,19 @@ public class FilterParameterTrack extends Track
   
   public double[][] getValueRange()
   {
-    TextureParameter param[] = filter.getParameters();
-    double range[][] = new double [param.length][];
-    for (int i = 0; i < param.length; i++)
-      range[i] = new double [] {param[i].minVal, param[i].maxVal};
-    return range;
+    ArrayList<double[]> ranges = new ArrayList<double[]>();
+    for (Property property : filter.getProperties())
+    {
+      if (property.getType() == Property.DOUBLE)
+        ranges.add(new double[] {property.getMinimum(), property.getMaximum()});
+      else if (property.getType() == Property.COLOR)
+      {
+        ranges.add(new double[] {0.0, Double.MAX_VALUE});
+        ranges.add(new double[] {0.0, Double.MAX_VALUE});
+        ranges.add(new double[] {0.0, Double.MAX_VALUE});
+      }
+    }
+    return ranges.toArray(new double[ranges.size()][]);
   }
 
   /** Write a serialized representation of this track to a stream. */
@@ -283,14 +328,23 @@ public class FilterParameterTrack extends Track
     ValueSlider s1Slider = new ValueSlider(0.0, 1.0, 100, s.getLeftSmoothness());
     final ValueSlider s2Slider = new ValueSlider(0.0, 1.0, 100, s.getRightSmoothness());
     final BCheckBox sameBox = new BCheckBox(Translate.text("separateSmoothness"), !s.isForceSame());
-    TextureParameter parameter[] = filter.getParameters();
-    Widget widget[] = new Widget [parameter.length+5];
-    String label[] = new String [parameter.length+5];
+    Property properties[] = filter.getProperties();
+    ArrayList<PropertyEditor> editors = new ArrayList<PropertyEditor>();
 
-    for (int i = 0; i < parameter.length; i++)
+    int index = 0;
+    for (Property property : properties)
     {
-      widget[i] = parameter[i].getEditingWidget(key.val[i]);
-      label[i] = parameter[i].name;
+      if (property.getType() == Property.DOUBLE)
+        editors.add(new PropertyEditor(property, key.val[index++]));
+      else if (property.getType() == Property.COLOR)
+        editors.add(new PropertyEditor(property, new RGBColor(key.val[index++], key.val[index++], key.val[index++])));
+    }
+    Widget widget[] = new Widget [editors.size()+5];
+    String label[] = new String [editors.size()+5];
+    for (int i = 0; i < editors.size(); i++)
+    {
+      widget[i] = editors.get(i).getWidget();
+      label[i] = editors.get(i).getLabel();
     }
     sameBox.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
@@ -299,7 +353,7 @@ public class FilterParameterTrack extends Track
       }
     });
     s2Slider.setEnabled(sameBox.getState());
-    int n = parameter.length;
+    int n = editors.size();
     widget[n] = timeField;
     widget[n+1] = sameBox;
     widget[n+2] = new BLabel(Translate.text("Smoothness")+':');
@@ -312,13 +366,19 @@ public class FilterParameterTrack extends Track
     if (!dlg.clickedOk())
       return;
     win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(filter)}));
-    for (int i = 0; i < parameter.length; i++)
+    index = 0;
+    for (PropertyEditor editor : editors)
+    {
+      if (editor.getProperty().getType() == Property.DOUBLE)
+        key.val[index++] = (Double) editor.getValue();
+      else
       {
-        if (widget[i] instanceof ValueSlider)
-          key.val[i] = ((ValueSlider) widget[i]).getValue();
-        else
-          key.val[i] = ((ValueField) widget[i]).getValue();
+        RGBColor color = (RGBColor) editor.getValue();
+        key.val[index++] = color.getRed();
+        key.val[index++] = color.getGreen();
+        key.val[index++] = color.getBlue();
       }
+    }
     if (sameBox.getState())
       s.setSmoothness(s1Slider.getValue(), s2Slider.getValue());
     else

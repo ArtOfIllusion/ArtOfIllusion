@@ -161,7 +161,7 @@ public class RenderingDialog extends BDialog implements RenderListener
       {
         hasAppliedFilters[0] = true;
         cameraForFilters.setImageFilters(filtersPanel.getFilters().toArray(new ImageFilter[0]));
-        applyFilters();
+        applyFilters(false);
         verifyFilters(dlg);
       }
     }, "processEvent"));
@@ -169,7 +169,7 @@ public class RenderingDialog extends BDialog implements RenderListener
       void processEvent()
       {
         cameraForFilters.setImageFilters(filtersPanel.getFilters().toArray(new ImageFilter[0]));
-        applyFilters();
+        applyFilters(false);
         verifyFilters(dlg);
         hasModifiedFilters = true;
         dlg.dispose();
@@ -181,7 +181,7 @@ public class RenderingDialog extends BDialog implements RenderListener
         if (hasAppliedFilters[0])
         {
           cameraForFilters.setImageFilters(originalFilters);
-          applyFilters();
+          applyFilters(false);
         }
         dlg.dispose();
       }
@@ -239,13 +239,14 @@ public class RenderingDialog extends BDialog implements RenderListener
 
   /** Apply the filters to the image. */
 
-  private void applyFilters()
+  private void applyFilters(boolean updateLabel)
   {
     filteredImage = null;
     if (cameraForFilters.getImageFilters().length > 0)
     {
       filteredImage = originalImage.duplicate();
-      statusChanged(Translate.text("applyingFilters"));
+      if (updateLabel)
+        statusChanged(Translate.text("applyingFilters"));
       cameraForFilters.applyImageFilters(filteredImage, theScene, sceneCamera.getCoords());
     }
     else
@@ -288,7 +289,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   {
     cameraForFilters = ((SceneCamera) sceneCamera.getObject()).duplicate();
     originalImage = image;
-    applyFilters();
+    applyFilters(true);
     try
     {
       EventQueue.invokeAndWait(new Runnable() {

@@ -33,9 +33,9 @@ public class Raytracer implements Renderer, Runnable
   protected RTLight light[];
   protected OctreeNode rootNode, cameraNode, lightNode[];
   protected ColumnContainer configPanel;
-  protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, filterBox, reducedMemoryBox;
+  protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, reducedMemoryBox;
   protected BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice;
-  protected ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField, filterIterationsField;
+  protected ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField;
   protected ValueField extraGIField, extraGIEnvField;
   protected ValueField globalPhotonsField, globalNeighborPhotonsField, causticsPhotonsField, causticsNeighborPhotonsField, volumePhotonsField, volumeNeighborPhotonsField;
   protected int pixel[], width, height, rtWidth, rtHeight, maxRayDepth = 8, minRays = 4, maxRays = 16, diffuseRays, antialiasLevel;
@@ -52,10 +52,9 @@ public class Raytracer implements Renderer, Runnable
   protected Vec3 hvec, vvec, center, viewpoint, cameraDir;
   protected double time, dofScale, depthOfField, focalDist, fogDist, surfaceError = 0.02, stepSize = 1.0;
   protected double smoothing = 1.0, smoothScale, extraGISmoothing = 10.0, extraGIEnvSmoothing = 100.0;
-  protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100, noiseFilterIterations = 5;
-  protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[];
-  protected Object objectImage[];
-  protected boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, noiseFilter = false, reducedMemory = false;
+  protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100;
+  protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[], objectImage[];
+  protected boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, reducedMemory = false;
   protected boolean needCopyToUI = true;
   protected PhotonMap globalMap, causticsMap, volumeMap;
   protected BoundingBox materialBounds;
@@ -151,15 +150,14 @@ public class Raytracer implements Renderer, Runnable
     imageSource.setAnimated(true);
     img = Toolkit.getDefaultToolkit().createImage(imageSource);
     int requiredComponents = (sceneCamera == null ? 0 : sceneCamera.getComponentsForFilters());
-    if (generateHDR || noiseFilter || (requiredComponents&(ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE)) != 0)
+    if (generateHDR || (requiredComponents&(ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE)) != 0)
       floatImage = new float [4][width*height];
     if ((requiredComponents&ComplexImage.DEPTH) != 0)
       depthImage = new float [width*height];
-    if (noiseFilter)
-    {
+    if ((requiredComponents&ComplexImage.NOISE) != 0)
       errorImage = new float [width*height];
-      objectImage = new Object [width*height];
-    }
+    if ((requiredComponents&ComplexImage.OBJECT) != 0)
+      objectImage = new float [width*height];
     renderThread = new Thread(this, "Raytracer main thread");
     renderThread.setPriority(Thread.NORM_PRIORITY);
     renderThread.start();
@@ -270,9 +268,6 @@ public class Raytracer implements Renderer, Runnable
       stepSizeField = new ValueField(stepSize, ValueField.POSITIVE);
       adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive);
       rouletteBox = new BCheckBox(Translate.text("russianRoulette"), roulette);
-      filterBox = new BCheckBox(Translate.text("applyNoiseFilter"), noiseFilter);
-      filterIterationsField = new ValueField(noiseFilterIterations, ValueField.NONNEGATIVE+ValueField.INTEGER);
-      filterIterationsField.setEnabled(false);
       reducedMemoryBox = new BCheckBox(Translate.text("useLessMemory"), reducedMemory);
 
       // Set up listeners for components.
@@ -313,12 +308,6 @@ public class Raytracer implements Renderer, Runnable
       giModeChoice.addEventLink(ValueChangedEvent.class, illumListener);
       causticsBox.addEventLink(ValueChangedEvent.class, illumListener);
       scatterModeChoice.addEventLink(ValueChangedEvent.class, illumListener);
-      filterBox.addEventLink(ValueChangedEvent.class, new Object() {
-        void processEvent()
-        {
-          filterIterationsField.setEnabled(filterBox.getState());
-        }
-      });
     }
     if (needCopyToUI)
       copyConfigurationToUI();
@@ -329,7 +318,7 @@ public class Raytracer implements Renderer, Runnable
   {
     // Layout the window.
     
-    FormContainer content = new FormContainer(2, 12);
+    FormContainer content = new FormContainer(2, 10);
     content.setColumnWeight(0, 0.0);
     LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, null, null);
@@ -351,9 +340,6 @@ public class Raytracer implements Renderer, Runnable
     content.add(adaptiveBox, 0, 7, 2, 1, rightLayout);
     content.add(reducedMemoryBox, 0, 8, 2, 1, rightLayout);
     content.add(rouletteBox, 0, 9, 2, 1, rightLayout);
-    content.add(filterBox, 0, 10, 2, 1, rightLayout);
-    content.add(Translate.label("noiseFilterIterations"), 0, 11, leftLayout);
-    content.add(filterIterationsField, 1, 11, rightLayout);
 
     // Record the current settings.
 
@@ -386,8 +372,6 @@ public class Raytracer implements Renderer, Runnable
       extraGIEnvField.setValue(extraGIEnvSmoothing);
       adaptiveBox.setState(adaptive);
       rouletteBox.setState(roulette);
-      filterBox.setState(noiseFilter);
-      filterIterationsField.setValue(noiseFilterIterations);
       reducedMemoryBox.setState(reducedMemory);
     }
   }
@@ -503,8 +487,6 @@ public class Raytracer implements Renderer, Runnable
     shadowBox.setState(penumbra);
     minRaysChoice.setSelectedValue(Integer.toString(minRays));
     maxRaysChoice.setSelectedValue(Integer.toString(maxRays));
-    filterBox.setState(noiseFilter);
-    filterIterationsField.setValue(noiseFilterIterations);
     reducedMemoryBox.setState(reducedMemory);
     giModeChoice.setSelectedIndex(giMode);
     diffuseRaysChoice.setSelectedValue(Integer.toString(diffuseRays));
@@ -522,7 +504,6 @@ public class Raytracer implements Renderer, Runnable
     // Generate events to force appropriate components to be enabled or disabled.
 
     aliasChoice.dispatchEvent(new ValueChangedEvent(aliasChoice));
-    filterBox.dispatchEvent(new ValueChangedEvent(filterBox));
   }
 
   public boolean recordConfiguration()
@@ -554,8 +535,6 @@ public class Raytracer implements Renderer, Runnable
     scatterMode = scatterModeChoice.getSelectedIndex();
     volumePhotons = (int) volumePhotonsField.getValue();
     volumeNeighborPhotons = (int) volumeNeighborPhotonsField.getValue();
-    noiseFilter = filterBox.getState();
-    noiseFilterIterations = (int) filterIterationsField.getValue();
     reducedMemory = reducedMemoryBox.getState();
     return true;
   }
@@ -571,8 +550,6 @@ public class Raytracer implements Renderer, Runnable
     map.put("extraGIEnvSmoothing", new Double(extraGIEnvSmoothing));
     map.put("reduceAccuracyForDistant", Boolean.valueOf(adaptive));
     map.put("russianRouletteSampling", Boolean.valueOf(roulette));
-    map.put("noiseFilter", Boolean.valueOf(noiseFilter));
-    map.put("noiseFilterIterations", new Integer(noiseFilterIterations));
     map.put("useLessMemory", Boolean.valueOf(reducedMemory));
     map.put("maxSurfaceError", new Double(surfaceError));
     map.put("antialiasing", new Integer(antialiasLevel));
@@ -615,10 +592,6 @@ public class Raytracer implements Renderer, Runnable
       adaptive = ((Boolean) value).booleanValue();
     else if ("russianRouletteSampling".equals(property))
       roulette = ((Boolean) value).booleanValue();
-    else if ("noiseFilter".equals(property))
-      noiseFilter = ((Boolean) value).booleanValue();
-    else if ("noiseFilterIterations".equals(property))
-      noiseFilterIterations = ((Integer) value).intValue();
     else if ("useLessMemory".equals(property))
       reducedMemory = ((Boolean) value).booleanValue();
     else if ("maxSurfaceError".equals(property))
@@ -1200,7 +1173,6 @@ public class Raytracer implements Renderer, Runnable
       }
       imageSource.newPixels();
       threads.finish();
-      applyNoiseFilter();
       finish();
       return;
     }
@@ -1361,7 +1333,6 @@ public class Raytracer implements Renderer, Runnable
     
     imageSource.newPixels();
     threads.finish();
-    applyNoiseFilter();
     finish();
   }
   
@@ -1439,32 +1410,7 @@ public class Raytracer implements Renderer, Runnable
     if (depthImage != null)
       depthImage[index] = pix.depth;
     if (objectImage != null)
-      objectImage[index] = (pix.object == null ? null : pix.object.getObject());
-  }
-  
-  /** Apply the noise reduction filter to the image. */
-  
-  protected void applyNoiseFilter()
-  {
-    if (!noiseFilter)
-      	return;
-    
-    // Apply the filter.
-    
-    imageSource.newPixels();
-    listener.imageUpdated(img);
-    listener.statusChanged("Filtering Noise");
-    NoiseReductionFilter.filter(noiseFilterIterations, width, height, floatImage[0], floatImage[1], floatImage[2], errorImage, objectImage);
-    
-    // Rebuild the image.
-    
-    ComplexImage im = new ComplexImage(img);
-    im.setComponentValues(ComplexImage.RED, floatImage[0]);
-    im.setComponentValues(ComplexImage.GREEN, floatImage[1]);
-    im.setComponentValues(ComplexImage.BLUE, floatImage[2]);
-    im.setComponentValues(ComplexImage.ALPHA, floatImage[3]);
-    im.rebuildImage();
-    img = im.getImage();
+      objectImage[index] = (pix.object == null ? 0.0f : Float.intBitsToFloat(pix.object.getObject().hashCode()));
   }
 
   /** This routine is called when rendering is finished.  It sets variables to null and
@@ -1497,6 +1443,10 @@ public class Raytracer implements Renderer, Runnable
           }
         if (depthImage != null)
           im.setComponentValues(ComplexImage.DEPTH, depthImage);
+        if (objectImage != null)
+          im.setComponentValues(ComplexImage.OBJECT, objectImage);
+        if (errorImage != null)
+          im.setComponentValues(ComplexImage.NOISE, errorImage);
         listener = null;
       }
     img = null;

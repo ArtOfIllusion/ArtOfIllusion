@@ -81,7 +81,7 @@ public abstract class ImageFilter
     return null;
   }
   
-  /** Given another ImageField (of the same class as this one), make this one identical to it. */
+  /** Given another ImageFilter (of the same class as this one), make this one identical to it. */
   
   public void copy(ImageFilter f)
   {

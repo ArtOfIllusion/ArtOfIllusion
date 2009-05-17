@@ -29,7 +29,9 @@ public class ComplexImage
   public static final int RED = 4;
   public static final int ALPHA = 8;
   public static final int DEPTH = 16;
-  
+  public static final int OBJECT = 32;
+  public static final int NOISE = 64;
+
   /** Construct a ComplexImage which wraps an Image object. */
   
   public ComplexImage(Image image)
@@ -37,7 +39,7 @@ public class ComplexImage
     img = image;
     width = image.getWidth(null);
     height = image.getHeight(null);
-    pixelData = new float [5][];
+    pixelData = new float [7][];
   }
 
   /** Set the floating point values of a particular component for each pixel.  The length of the value array

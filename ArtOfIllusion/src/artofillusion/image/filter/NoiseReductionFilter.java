@@ -1,4 +1,4 @@
-/* Copyright (C) 2004 by Peter Eastman
+/* Copyright (C) 2004-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -32,6 +32,7 @@ public class NoiseReductionFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("NoiseReduction");
@@ -44,13 +45,14 @@ public class NoiseReductionFilter extends ImageFilter
       @param cameraPos  the position of the camera in the scene
   */
 
+  @Override
   public void filterImage(final ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     final int width = image.getWidth();
     final int height = image.getHeight();
     float cu[][] = new float [width-1][height];
     float cv[][] = new float [width][height-1];
-    int iterations = (int) paramValue[0];
+    int iterations = (Integer) getPropertyValue(0);
 
     for (int i = 0; i < iterations; i++)
     {
@@ -66,7 +68,7 @@ public class NoiseReductionFilter extends ImageFilter
           float dred = image.getPixelComponent(x1, y1, ComplexImage.RED)-image.getPixelComponent(x2, y2, ComplexImage.RED);
           float dgreen = image.getPixelComponent(x1, y1, ComplexImage.GREEN)-image.getPixelComponent(x2, y2, ComplexImage.GREEN);
           float dblue = image.getPixelComponent(x1, y1, ComplexImage.BLUE)-image.getPixelComponent(x2, y2, ComplexImage.BLUE);
-          float d = (float) ((dred*dred+dgreen*dgreen+dblue*dblue)/err);
+          float d = (dred*dred+dgreen*dgreen+dblue*dblue)/err;
           return (float) (Math.exp(-d*0.2));
         }
       };
@@ -80,32 +82,36 @@ public class NoiseReductionFilter extends ImageFilter
 
   /** Get a list of all the image components required by this filter. */
 
+  @Override
   public int getDesiredComponents()
   {
     return ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE+ComplexImage.NOISE+ComplexImage.OBJECT;
   }
 
-  /** Get a list of parameters which affect the behavior of the filter. */
-
-  public TextureParameter [] getParameters()
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {new TextureParameter(this, getName(), 0.0, Double.MAX_VALUE, 5.0)};
+    return new Property [] {new Property(getName(), 0, Integer.MAX_VALUE, 5)};
   }
 
   /** Write a serialized description of this filter to a stream. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
-    out.writeDouble(paramValue[0]);
+    out.writeInt((Integer) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */
 
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     short version = in.readShort();
-    paramValue[0] = in.readDouble();
+    if (version != 0)
+      throw new IOException("Unknown version "+version);
+    setPropertyValue(0, in.readInt());
   }
 
   /**

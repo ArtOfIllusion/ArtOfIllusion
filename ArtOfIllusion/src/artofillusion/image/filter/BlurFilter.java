@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -41,7 +41,7 @@ public class BlurFilter extends ImageFilter
   
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
-    int radius = (int) (0.5f*paramValue[0]*image.getHeight());
+    int radius = (int) (0.5f*(Double) getPropertyValue(0)*image.getHeight());
     if (radius < 1)
       return;
     float mask[] = createMask(radius);
@@ -117,22 +117,23 @@ public class BlurFilter extends ImageFilter
   
   /** Get a list of parameters which affect the behavior of the filter. */
   
-  public TextureParameter [] getParameters()
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {new TextureParameter(this, Translate.text("Radius"), 0.0, 1.0, 0.05)};
+    return new Property [] {new Property(Translate.text("Radius"), 0.0, 1.0, 0.05)};
   }
 
   /** Write a serialized description of this filter to a stream. */
   
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    out.writeDouble(paramValue[0]);
+    out.writeDouble((Integer) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */
   
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    paramValue[0] = in.readDouble();
+    setPropertyValue(0, in.readDouble());
   }
 }

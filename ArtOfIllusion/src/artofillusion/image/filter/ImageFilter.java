@@ -17,6 +17,8 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
+
+import javax.swing.border.*;
 import java.awt.*;
 import java.io.*;
 
@@ -234,6 +236,8 @@ public abstract class ImageFilter
       form.add(w, 1, i, rightLayout);
     }
     UIUtilities.applyBackground(form, null);
-    return form;
+    BOutline border = new BOutline(form, new EmptyBorder(3, 3, 3, 3));
+    border.setBackground(null);
+    return border;
   }
 }

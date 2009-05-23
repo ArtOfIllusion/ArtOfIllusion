@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,23 +15,21 @@ import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
 import java.io.*;
 
 /** This is an image filter which adds glow to an image. */
 
 public class GlowFilter extends ImageFilter
 {
-  private int shape;
-  public static final int CROSSHAIR = 0;
-  public static final int DIAGONAL = 1;
-  public static final int STAR = 2;
-  public static final int CIRCLE = 3;
+  public static final String CROSSHAIR = Translate.text("Crosshairs");
+  public static final String DIAGONAL = Translate.text("Diagonal");
+  public static final String STAR = Translate.text("Star");
+  public static final String CIRCLE = Translate.text("Circle");
+
+  private static final String SHAPES[] = new String[] {CROSSHAIR, DIAGONAL, STAR, CIRCLE};
 
   public GlowFilter()
   {
-    shape = CROSSHAIR;
   }
 
   /** Get the name of this filter.*/
@@ -50,9 +48,10 @@ public class GlowFilter extends ImageFilter
   
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
-    if (shape == CIRCLE)
+    String shape = (String) getPropertyValue(0);
+    if (shape.equals(CIRCLE))
       {
-        int radius = (int) (paramValue[0]*image.getHeight());
+        int radius = (int) ((Double) getPropertyValue(1)*image.getHeight());
         if (radius < 1)
           return;
         float mask[] = createCircularMask(radius);
@@ -74,10 +73,11 @@ public class GlowFilter extends ImageFilter
   {
     Thread currentThread = Thread.currentThread();
     int width = image.getWidth(), height = image.getHeight();
-    int radius = (int) (paramValue[0]*height);
-    int diagonalRadius = (int) (paramValue[0]*height*Math.sqrt(0.5));
-    float intensity = (float) paramValue[1];
+    int radius = (int) ((Double) getPropertyValue(1)*height);
+    int diagonalRadius = (int) ((Double) getPropertyValue(1)*height*Math.sqrt(0.5));
+    float intensity = ((Number) getPropertyValue(2)).floatValue();
     float glow[] = new float [width*height];
+    String shape = (String) getPropertyValue(0);
     for (int i = 0; i < width; i++)
     {
       if (currentThread.isInterrupted())
@@ -89,14 +89,14 @@ public class GlowFilter extends ImageFilter
         if (value < 1.0f)
           continue;
         float maxIntensity = intensity*(value-1.0f);
-        if (shape == CROSSHAIR || shape == STAR)
+        if (shape.equals(CROSSHAIR) || shape.equals(STAR))
         {
           addGlowArm(glow, i, j, -1, 0, width, height, radius, maxIntensity);
           addGlowArm(glow, i, j, 1, 0, width, height, radius, maxIntensity);
           addGlowArm(glow, i, j, 0, -1, width, height, radius, maxIntensity);
           addGlowArm(glow, i, j, 0, 1, width, height, radius, maxIntensity);
         }
-        if (shape == DIAGONAL || shape == STAR)
+        if (shape.equals(DIAGONAL) || shape.equals(STAR))
         {
           addGlowArm(glow, i, j, -1, -1, width, height, diagonalRadius, maxIntensity);
           addGlowArm(glow, i, j, 1, -1, width, height, diagonalRadius, maxIntensity);
@@ -129,7 +129,7 @@ public class GlowFilter extends ImageFilter
   private float [] createCircularMask(int radius)
   {
     int size = 2*radius+1, radius2 = radius*radius;
-    float intensity = (float) paramValue[1];
+    float intensity = ((Number) getPropertyValue(2)).floatValue();
     float mask[] = new float [size*size];
     for (int i = 0; i < radius; i++)
       for (int j = 0; j < radius; j++)
@@ -183,57 +183,36 @@ public class GlowFilter extends ImageFilter
     }
     image.setComponentValues(component, glow);
   }
-  
-  /** Get a list of parameters which affect the behavior of the filter. */
-  
-  public TextureParameter [] getParameters()
+
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {new TextureParameter(this, Translate.text("Radius"), 0.0, 1.0, 0.05),
-        new TextureParameter(this, Translate.text("Intensity"), 0.0, 1.0, 0.5)};
+    Object shapes[] = new Object[] {CROSSHAIR, DIAGONAL, STAR, CIRCLE};
+    return new Property [] {
+        new Property(Translate.text("Shape"), shapes, CROSSHAIR),
+        new Property(Translate.text("Radius"), 0.0, 1.0, 0.05),
+        new Property(Translate.text("Intensity"), 0.0, 1.0, 0.5)};
   }
 
   /** Write a serialized description of this filter to a stream. */
   
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
+    int shape = 0;
+    for (int i = 0; i < SHAPES.length; i++)
+      if (SHAPES[i].equals(getPropertyValue(0)))
+        shape = i;
     out.writeInt(shape);
-    out.writeDouble(paramValue[0]);
-    out.writeDouble(paramValue[1]);
+    out.writeDouble((Double) getPropertyValue(1));
+    out.writeDouble((Double) getPropertyValue(2));
   }
 
   /** Reconstruct this filter from its serialized representation. */
   
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    shape = in.readInt();
-    paramValue[0] = in.readDouble();
-    paramValue[1] = in.readDouble();
-  }
-
-  /** Get a Widget with which the user can specify options for the filter.
-   * @param changeCallback*/
-
-  public Widget getConfigPanel(final Runnable changeCallback)
-  {
-    FormContainer form = new FormContainer(new double [] {0.0, 1.0}, new double [] {1.0, 1.0});
-    form.add(super.getConfigPanel(changeCallback), 0, 0, 2, 1);
-    form.add(new BLabel(Translate.text("Shape")+": "), 0, 1);
-    final BComboBox shapeChoice = new BComboBox(new String [] {
-      Translate.text("Crosshairs"),
-      Translate.text("Diagonal"),
-      Translate.text("Star"),
-      Translate.text("Circle"),
-    });
-    form.add(shapeChoice, 1, 1, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-    shapeChoice.setSelectedIndex(shape);
-    shapeChoice.addEventLink(ValueChangedEvent.class, new Object() {
-      void processEvent()
-      {
-        shape = shapeChoice.getSelectedIndex();
-        changeCallback.run();
-      }
-    });
-    UIUtilities.applyBackground(form, null);
-    return form;
+    setPropertyValue(0, SHAPES[in.readInt()]);
+    setPropertyValue(1, in.readDouble());
+    setPropertyValue(2, in.readDouble());
   }
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2005 by Peter Eastman
+/* Copyright (C) 2005-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -68,24 +68,23 @@ public class ExposureFilter extends ImageFilter
     image.setComponentValues(ComplexImage.BLUE, blue);
   }
 
-  /** Get a list of parameters which affect the behavior of the filter. */
-
-  public TextureParameter [] getParameters()
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {new TextureParameter(this, getName(), -5.0, 5.0, 0.0)};
+    return new Property [] {new Property(getName(), -5.0, 5.0, 0.0)};
   }
 
   /** Write a serialized description of this filter to a stream. */
 
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    out.writeDouble(paramValue[0]);
+    out.writeDouble((Double) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */
 
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    paramValue[0] = in.readDouble();
+    setPropertyValue(0, in.readDouble());
   }
 }

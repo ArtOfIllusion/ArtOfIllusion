@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2006 by Peter Eastman
+/* Copyright (C) 2004-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,9 +15,6 @@ import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
-import java.awt.*;
 import java.io.*;
 
 /** This is an image filter which blurs an image. */
@@ -60,16 +57,17 @@ public class OutlineFilter extends ImageFilter
   {
     if (!image.hasFloatData(ComplexImage.DEPTH))
       return;
-    double thickness = paramValue[0];
+    double thickness = (Double) getPropertyValue(0);
     if (thickness <= 0.0)
       return;
     float masks[][] = new float [][] {null, createMask(thickness, 0.0, 0.0),
         createMask(thickness, 0.0, -0.5), createMask(thickness, 0.0, 0.5),
         createMask(thickness, -0.5, 0.0), createMask(thickness, 0.5, 0.0)};
     float outline[] = findOutline(image, masks);
-    applyOutline(image, ComplexImage.RED, outline, (float) paramValue[3]);
-    applyOutline(image, ComplexImage.GREEN, outline, (float) paramValue[4]);
-    applyOutline(image, ComplexImage.BLUE, outline, (float) paramValue[5]);
+    RGBColor color = (RGBColor) getPropertyValue(3);
+    applyOutline(image, ComplexImage.RED, outline, color.getRed());
+    applyOutline(image, ComplexImage.GREEN, outline, color.getGreen());
+    applyOutline(image, ComplexImage.BLUE, outline, color.getBlue());
   }
   
   /** Create a map of the outlines. */
@@ -161,8 +159,8 @@ public class OutlineFilter extends ImageFilter
   
   private boolean isOutline(float d1, float d2, float d3)
   {
-    double changeCutoff = paramValue[1];
-    double relCutoff = paramValue[2];
+    double changeCutoff = (Double) getPropertyValue(1);
+    double relCutoff = (Double) getPropertyValue(2);
     if (d1 > 1.0e6f)
       d1 = 1.0e6f;
     if (d2 > 1.0e6f)
@@ -271,18 +269,15 @@ public class OutlineFilter extends ImageFilter
     else
       return (float) ((radius-dist1)/(dist2-dist1));
   }
-  
-  /** Get a list of parameters which affect the behavior of the filter. */
-  
-  public TextureParameter [] getParameters()
+
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {
-        new TextureParameter(this, Translate.text("Thickness"), 0.0, Double.MAX_VALUE, 3.0),
-        new TextureParameter(this, Translate.text("Change Cutoff"), 0.0, Double.MAX_VALUE, 0.01),
-        new TextureParameter(this, Translate.text("Distance Cutoff"), 0.0, Double.MAX_VALUE, 0.01),
-        new TextureParameter(this, Translate.text("Red"), 0.0, Double.MAX_VALUE, 0.0),
-        new TextureParameter(this, Translate.text("Green"), 0.0, Double.MAX_VALUE, 0.0),
-        new TextureParameter(this, Translate.text("Blue"), 0.0, Double.MAX_VALUE, 0.0)
+    return new Property[] {
+        new Property(Translate.text("Thickness"), 0.0, Double.MAX_VALUE, 3.0),
+        new Property(Translate.text("Change Cutoff"), 0.0, Double.MAX_VALUE, 0.01),
+        new Property(Translate.text("Distance Cutoff"), 0.0, Double.MAX_VALUE, 0.01),
+        new Property(Translate.text("Color"), new RGBColor(0.0, 0.0, 0.0))
     };
   }
 
@@ -291,8 +286,13 @@ public class OutlineFilter extends ImageFilter
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
-    for (int i = 0; i < paramValue.length; i++)
-      out.writeDouble(paramValue[i]);
+    out.writeDouble((Double) getPropertyValue(0));
+    out.writeDouble((Double) getPropertyValue(1));
+    out.writeDouble((Double) getPropertyValue(2));
+    RGBColor color = (RGBColor) getPropertyValue(3);
+    out.writeDouble(color.getRed());
+    out.writeDouble(color.getGreen());
+    out.writeDouble(color.getBlue());
   }
 
   /** Reconstruct this filter from its serialized representation. */
@@ -302,71 +302,9 @@ public class OutlineFilter extends ImageFilter
     int version = in.readShort();
     if (version != 0)
       throw new IOException("Unknown version "+version);
-    for (int i = 0; i < paramValue.length; i++)
-      paramValue[i] = in.readDouble();
-  }
-
-  /** Get a Widget with which the user can specify options for the filter.
-   * @param changeCallback*/
-
-  public Widget getConfigPanel(final Runnable changeCallback)
-  {
-    TextureParameter param[] = getParameters();
-    FormContainer form = new FormContainer(2, 4);
-    form.setColumnWeight(0, 0.0);
-    
-    // Create the labels.
-    
-    LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
-    for (int i = 0; i < 3; i++)
-      form.add(new BLabel(param[i].name+": "), 0, i, leftLayout);
-    form.add(new BLabel(Translate.text("Color")+": "), 0, 3, leftLayout);
-    
-    // Define an inner class to act as a listener on a ValueField.
-    
-    class FieldListener
-    {
-      private int which;
-      private ValueField field;
-      
-      public FieldListener(int which, ValueField field)
-      {
-        this.which = which;
-        this.field = field;
-      }
-      
-      void processEvent()
-      {
-        setParameterValue(which, field.getValue());
-        changeCallback.run();
-      }
-    }
-    
-    // Create the editing components.
-    
-    LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
-    for (int i = 0; i < 3; i++)
-    {
-      Widget w = param[i].getEditingWidget(paramValue[i]);
-      w.addEventLink(ValueChangedEvent.class, new FieldListener(i, (ValueField) w));
-      form.add(w, 1, i, rightLayout);
-    }
-    final RGBColor color = new RGBColor(paramValue[3], paramValue[4], paramValue[5]);
-    final Widget sample = color.getSample(40, 30);
-    form.add(sample, 1, 3, rightLayout);
-    sample.addEventLink(MouseClickedEvent.class, new Object() {
-      void processEvent()
-      {
-        new ColorChooser(UIUtilities.findFrame(sample), Translate.text("chooseOutlineColor"), color);
-        paramValue[3] = color.getRed();
-        paramValue[4] = color.getGreen();
-        paramValue[5] = color.getBlue();
-        sample.setBackground(color.getColor());
-        changeCallback.run();
-      }
-    });
-    UIUtilities.applyBackground(form, null);
-    sample.setBackground(color.getColor());
-    return form;
+    setPropertyValue(0, in.readDouble());
+    setPropertyValue(1, in.readDouble());
+    setPropertyValue(2, in.readDouble());
+    setPropertyValue(3, new RGBColor(in.readDouble(), in.readDouble(), in.readDouble()));
   }
 }

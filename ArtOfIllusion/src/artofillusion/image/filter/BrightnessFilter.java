@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -51,7 +51,7 @@ public class BrightnessFilter extends ImageFilter
   private void filterComponent(ComplexImage image, int component)
   {
     int width = image.getWidth(), height = image.getHeight();
-    float brightness = (float) paramValue[0];
+    float brightness = ((Number) getPropertyValue(0)).floatValue();
     float filtered[] = new float [width*height];
     for (int i = 0; i < width; i++)
       for (int j = 0; j < height; j++)
@@ -59,24 +59,23 @@ public class BrightnessFilter extends ImageFilter
     image.setComponentValues(component, filtered);
   }
   
-  /** Get a list of parameters which affect the behavior of the filter. */
-  
-  public TextureParameter [] getParameters()
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {new TextureParameter(this, getName(), 0.0, Double.MAX_VALUE, 1.0)};
+    return new Property [] {new Property(getName(), 0.0, Double.MAX_VALUE, 1.0)};
   }
 
   /** Write a serialized description of this filter to a stream. */
   
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    out.writeDouble(paramValue[0]);
+    out.writeDouble((Double) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */
   
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    paramValue[0] = in.readDouble();
+    setPropertyValue(0, in.readDouble());
   }
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,8 +15,6 @@ import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
 import java.io.*;
 
 /** This is an image filter which multiplies an image by a color. */
@@ -43,9 +41,10 @@ public class TintFilter extends ImageFilter
   
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
-    filterComponent(image, ComplexImage.RED, (float) paramValue[0]);
-    filterComponent(image, ComplexImage.GREEN, (float) paramValue[1]);
-    filterComponent(image, ComplexImage.BLUE, (float) paramValue[2]);
+    RGBColor color = (RGBColor) getPropertyValue(0);
+    filterComponent(image, ComplexImage.RED, color.getRed());
+    filterComponent(image, ComplexImage.GREEN, color.getGreen());
+    filterComponent(image, ComplexImage.BLUE, color.getBlue());
   }
   
   /** Apply the filter to one component of an image. */
@@ -60,56 +59,26 @@ public class TintFilter extends ImageFilter
     image.setComponentValues(component, filtered);
   }
   
-  /** Get a list of parameters which affect the behavior of the filter. */
-  
-  public TextureParameter [] getParameters()
+  @Override
+  public Property[] getProperties()
   {
-    return new TextureParameter [] {
-        new TextureParameter(this, Translate.text("Red"), 0.0, Double.MAX_VALUE, 1.0),
-        new TextureParameter(this, Translate.text("Green"), 0.0, Double.MAX_VALUE, 1.0),
-        new TextureParameter(this, Translate.text("Blue"), 0.0, Double.MAX_VALUE, 1.0),
-    };
+    return new Property[] {new Property(getName(), new RGBColor(1.0, 1.0, 1.0))};
   }
 
   /** Write a serialized description of this filter to a stream. */
   
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    for (int i = 0; i < paramValue.length; i++)
-      out.writeDouble(paramValue[i]);
+    RGBColor color = (RGBColor) getPropertyValue(0);
+    out.writeDouble(color.getRed());
+    out.writeDouble(color.getGreen());
+    out.writeDouble(color.getBlue());
   }
 
   /** Reconstruct this filter from its serialized representation. */
   
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    for (int i = 0; i < paramValue.length; i++)
-      paramValue[i] = in.readDouble();
-  }
-
-  /** Get a Widget with which the user can specify options for the filter.
-   * @param changeCallback*/
-
-  public Widget getConfigPanel(final Runnable changeCallback)
-  {
-    final RGBColor color = new RGBColor(paramValue[0], paramValue[1], paramValue[2]);
-    final Widget sample = color.getSample(40, 30);
-    RowContainer row = new RowContainer();
-    row.add(new BLabel(Translate.text("Color")+": "));
-    row.add(sample);
-    sample.addEventLink(MouseClickedEvent.class, new Object() {
-      void processEvent()
-      {
-        new ColorChooser(UIUtilities.findFrame(sample), Translate.text("chooseTintColor"), color);
-        paramValue[0] = color.getRed();
-        paramValue[1] = color.getGreen();
-        paramValue[2] = color.getBlue();
-        sample.setBackground(color.getColor());
-        changeCallback.run();
-      }
-    });
-    UIUtilities.applyBackground(row, null);
-    sample.setBackground(color.getColor());
-    return row;
+    setPropertyValue(0, new RGBColor(in.readDouble(), in.readDouble(), in.readDouble()));
   }
 }

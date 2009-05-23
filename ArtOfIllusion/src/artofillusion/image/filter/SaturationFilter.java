@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -77,17 +77,23 @@ public class SaturationFilter extends ImageFilter
     return new TextureParameter [] {new TextureParameter(this, getName(), 0.0, Double.MAX_VALUE, 1.0)};
   }
 
+  @Override
+  public Property[] getProperties()
+  {
+    return new Property [] {new Property(getName(), 0.0, Double.MAX_VALUE, 1.0)};
+  }
+
   /** Write a serialized description of this filter to a stream. */
   
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    out.writeDouble(paramValue[0]);
+    out.writeDouble((Double) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */
   
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    paramValue[0] = in.readDouble();
+    setPropertyValue(0, in.readDouble());
   }
 }

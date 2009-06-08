@@ -136,6 +136,28 @@ public class SceneViewer extends ViewerCanvas
     return new double [] {min, max};
   }
 
+  @Override
+  public Vec3 getDefaultRotationCenter()
+  {
+    int selection[] = null;
+    if (parentFrame instanceof LayoutWindow)
+      selection = ((LayoutWindow) parentFrame).getSelectedIndices();
+    if (selection == null || selection.length == 0)
+    {
+      CoordinateSystem coords = theCamera.getCameraCoordinates();
+      double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
+      return coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
+    }
+    BoundingBox bounds = null;
+    for (int i = 0; i < selection.length; i++)
+    {
+      ObjectInfo info = theScene.getObject(selection[i]);
+      BoundingBox objBounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
+      bounds = (i == 0 ? objBounds : bounds.merge(objBounds));
+    }
+    return bounds.getCenter();
+  }
+
   public void updateImage()
   {
     super.updateImage();

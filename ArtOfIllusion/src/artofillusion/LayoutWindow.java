@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -181,7 +181,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].setMetaTool(metaTool);
       theView[i].setAltTool(altTool);
     }
-    ((RotateViewTool) altTool).setUseSelectionCenter(true);
 
     // Fill in the left hand panel.
 

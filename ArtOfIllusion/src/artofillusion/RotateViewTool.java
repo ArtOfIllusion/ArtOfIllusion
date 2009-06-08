@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,7 +24,7 @@ public class RotateViewTool extends EditingTool
 
   private Point clickPoint;
   private Mat4 viewToWorld;
-  private boolean controlDown, useSelectionCenter;
+  private boolean controlDown;
   private CoordinateSystem oldCoords;
   private Vec3 rotationCenter;
   
@@ -47,23 +47,12 @@ public class RotateViewTool extends EditingTool
 
   public boolean hilightSelection()
   {
-/*    if (theWindow instanceof LayoutWindow)
-      return false;
-    else*/
       return true;
   }
 
   public String getToolTipText()
   {
     return Translate.text("rotateViewTool.tipText");
-  }
-  
-  /** Set whether rotation should be performed around the center of the selection, rather than the center
-      of the scene. */
-  
-  public void setUseSelectionCenter(boolean use)
-  {
-    useSelectionCenter = use;
   }
 
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
@@ -76,31 +65,10 @@ public class RotateViewTool extends EditingTool
     viewToWorld = cam.getViewToWorld();
     
     // Find the center point to rotate around.
-    
-    if (!useSelectionCenter || theWindow == null || theWindow.getScene() == null)
-      {
-        CoordinateSystem coords = cam.getCameraCoordinates();
-        double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
-        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
-        return;
-      }
-    Scene scene = theWindow.getScene();
-    int selection[] = scene.getSelection();
-    if (selection.length == 0)
-      {
-        CoordinateSystem coords = cam.getCameraCoordinates();
-        double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
-        rotationCenter = coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
-        return;
-      }
-    BoundingBox bounds = null;
-    for (int i = 0; i < selection.length; i++)
-      {
-        ObjectInfo info = scene.getObject(selection[i]);
-        BoundingBox objBounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
-        bounds = (i == 0 ? objBounds : bounds.merge(objBounds));
-      }
-    rotationCenter = bounds.getCenter();
+
+    rotationCenter = view.getRotationCenter();
+    if (rotationCenter == null)
+      rotationCenter = view.getDefaultRotationCenter();
   }
 
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)

@@ -40,6 +40,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected CanvasDrawer drawer;
   protected Dimension prefSize;
   protected Map<ViewerControl,Widget> controlMap;
+  protected Vec3 rotationCenter;
 
   protected final ViewChangedEvent viewChangedEvent;
   
@@ -394,7 +395,39 @@ public abstract class ViewerCanvas extends CustomWidget
       throw (new InterruptedException());
     setTemplateImage(im);
   }
-  
+
+  /**
+   * Get the location around which the view should be rotated.  This may be null, in which case the value
+   * returned by {@link #getDefaultRotationCenter()} will be used instead.
+   */
+
+  public Vec3 getRotationCenter()
+  {
+    return rotationCenter;
+  }
+
+  /**
+   * Set the location around which the view should be rotated.  This may be null, in which case the value
+   * returned by {@link #getDefaultRotationCenter()} will be used instead.
+   */
+
+  public void setRotationCenter(Vec3 rotationCenter)
+  {
+    this.rotationCenter = rotationCenter;
+  }
+
+  /**
+   * Get the default location around which the view should be rotated.  This value will be used if
+   * {@link #getRotationCenter()} returns null.
+   */
+
+  public Vec3 getDefaultRotationCenter()
+  {
+    CoordinateSystem coords = theCamera.getCameraCoordinates();
+    double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
+    return coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
+  }
+
   /** Set the PopupMenuManager for this canvas. */
 
   public void setPopupMenuManager(PopupMenuManager manager)

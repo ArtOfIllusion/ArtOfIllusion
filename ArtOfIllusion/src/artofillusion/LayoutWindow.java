@@ -540,18 +540,19 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     String files[] = dir.list();
     if (files == null)
       return;
-    for (int i = 0; i < files.length; i++)
+    Arrays.sort(files, Collator.getInstance(Translate.getLocale()));
+    for (String file : files)
     {
-      File f = new File(dir, files[i]);
+      File f = new File(dir, file);
       if (f.isDirectory())
       {
-        BMenu m = new BMenu(files[i]);
+        BMenu m = new BMenu(file);
         menu.add(m);
         addScriptsToMenu(m, f);
       }
-      else if (files[i].endsWith(".bsh") && files[i].length() > 4)
+      else if (file.endsWith(".bsh") && file.length() > 4)
       {
-        BMenuItem item = new BMenuItem(files[i].substring(0, files[i].length()-4));
+        BMenuItem item = new BMenuItem(file.substring(0, file.length()-4));
         item.setActionCommand(f.getAbsolutePath());
         item.addEventLink(CommandEvent.class, this, "executeScriptCommand");
         menu.add(item);

@@ -323,13 +323,18 @@ public class SceneCamera extends Object3D
 
   public void edit(final EditingWindow parent, final ObjectInfo info, Runnable cb)
   {
-    ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
-    ValueField dofField = new ValueField(depthOfField, ValueField.POSITIVE);
-    ValueField fdField = new ValueField(focalDist, ValueField.POSITIVE);
+    final ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
+    final ValueField dofField = new ValueField(depthOfField, ValueField.POSITIVE);
+    final ValueField fdField = new ValueField(focalDist, ValueField.POSITIVE);
     BButton filtersButton = Translate.button("filters", new Object() {
       void processEvent()
       {
-        new CameraFilterDialog(parent, SceneCamera.this, info.getCoords());
+        SceneCamera temp = SceneCamera.this.duplicate();
+        temp.fov = fovSlider.getValue();
+        temp.depthOfField = dofField.getValue();
+        temp.focalDist = fdField.getValue();
+        new CameraFilterDialog(parent, temp, info.getCoords());
+        filter = temp.filter;
       }
     }, "processEvent");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),

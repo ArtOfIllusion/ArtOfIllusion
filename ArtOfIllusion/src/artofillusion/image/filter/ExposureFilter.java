@@ -43,7 +43,7 @@ public class ExposureFilter extends ImageFilter
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     int width = image.getWidth(), height = image.getHeight();
-    double exposure = paramValue[0];
+    double exposure = (Double) getPropertyValue(0);
     double gamma = (exposure < 0.0 ? 1.0/(1.0-exposure) : exposure+1.0);
     float red[] = new float [width*height];
     float green[] = new float [width*height];

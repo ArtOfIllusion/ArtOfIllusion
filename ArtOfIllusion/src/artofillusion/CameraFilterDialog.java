@@ -227,6 +227,8 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     filterThread = new Thread() {
       public void run()
       {
+        if (unfilteredImage == null)
+          return;
         ComplexImage img = unfilteredImage.duplicate();
         for (int i = 0; i < filtersPanel.filters.size(); i++)
           filtersPanel.filters.get(i).filterImage(img, theScene, theCamera, cameraCoords);

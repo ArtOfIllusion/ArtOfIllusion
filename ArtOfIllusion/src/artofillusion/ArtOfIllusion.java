@@ -190,6 +190,7 @@ public class ArtOfIllusion
     PluginRegistry.registerPlugin(new GlowFilter());
     PluginRegistry.registerPlugin(new OutlineFilter());
     PluginRegistry.registerPlugin(new NoiseReductionFilter());
+    PluginRegistry.registerPlugin(new DepthOfFieldFilter());
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();

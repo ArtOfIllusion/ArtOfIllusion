@@ -289,6 +289,8 @@ public class RenderingDialog extends BDialog implements RenderListener
   {
     cameraForFilters = ((SceneCamera) sceneCamera.getObject()).duplicate();
     originalImage = image;
+    previewImage = image.getImage();
+    canvas.repaint();
     applyFilters(true);
     try
     {

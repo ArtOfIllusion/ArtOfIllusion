@@ -189,8 +189,12 @@ public class LayeredMapping extends TextureMapping
     return null;
   }
 
-  /** Add a layer to the texture. */
-  
+  /**
+   * Add a layer to the texture.
+   *
+   * @deprecated Use {@link #addLayer(int, Texture, TextureMapping, int)} instead.
+   */
+
   public void addLayer(Texture tex)
   {
     Texture newtexture[] = new Texture [texture.length+1];
@@ -215,7 +219,43 @@ public class LayeredMapping extends TextureMapping
     blendMode = newblendMode;
     fractParamID = newFractParamID;
   }
-  
+
+  /**
+   * Add a layer to the texture.
+   *
+   * @param index  the position at which the new layer should be added, where layer 0
+   *               is the topmost layer (the one visible over all others)
+   * @param tex    the Texture of the new layer
+   * @param map    the TextureMapping of the new layer
+   * @param mode   the blending mode of the new layer ({@link #BLEND}, {@link #OVERLAY_BLEND_BUMPS},
+   *               or {@link #OVERLAY_ADD_BUMPS})
+   */
+
+  public void addLayer(int index, Texture tex, TextureMapping map, int mode)
+  {
+    Texture newtexture[] = new Texture [texture.length+1];
+    TextureMapping newmapping[] = new TextureMapping [texture.length+1];
+    int newblendMode[] = new int [texture.length+1];
+    int newFractParamID[] = new int [texture.length+1];
+
+    newtexture[index] = tex;
+    newmapping[index] = map;
+    newblendMode[index] = mode;
+    newFractParamID[index] = TextureParameter.getUniqueID();
+    for (int i = 0; i < texture.length; i++)
+      {
+        int j = (i < index ? i : i+1);
+        newtexture[j] = texture[i];
+        newmapping[j] = mapping[i];
+        newblendMode[j] = blendMode[i];
+        newFractParamID[j] = fractParamID[i];
+      }
+    texture = newtexture;
+    mapping = newmapping;
+    blendMode = newblendMode;
+    fractParamID = newFractParamID;
+  }
+
   /** Delete a layer from the texture. */
 
   public void deleteLayer(int which)

@@ -391,7 +391,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   {
     preview.cancelRendering();
     Texture tex = scene.getTexture(texList.getSelectedIndex());
-    layeredMap.addLayer(tex);
+    layeredMap.addLayer(0, tex, tex.getDefaultMapping(editObj.getObject()), LayeredMapping.BLEND);
     layerList.add(0, tex.getName());
     layerList.setSelected(0, true);
     resetParameters();

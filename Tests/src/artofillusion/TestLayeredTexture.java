@@ -29,10 +29,8 @@ public class TestLayeredTexture extends TestCase
     tex.setMapping(map);
     UniformTexture t1 = new UniformTexture();
     UniformTexture t2 = new UniformTexture();
-    map.addLayer(t2);
-    map.addLayer(t1);
-    map.setLayerMode(0, LayeredMapping.BLEND);
-    map.setLayerMode(1, LayeredMapping.BLEND);
+    map.addLayer(0, t2, t2.getDefaultMapping(obj), LayeredMapping.BLEND);
+    map.addLayer(0, t1, t1.getDefaultMapping(obj), LayeredMapping.BLEND);
 
     // Check a few components.
 
@@ -71,9 +69,9 @@ public class TestLayeredTexture extends TestCase
     LayeredTexture tex = new LayeredTexture(obj);
     LayeredMapping map = new LayeredMapping(obj, tex);
     tex.setMapping(map);
-    map.addLayer(tex1);
-    map.addLayer(tex2);
-    map.addLayer(tex2);
+    map.addLayer(0, tex2, tex2.getDefaultMapping(obj), LayeredMapping.BLEND);
+    map.addLayer(1, tex2, tex2.getDefaultMapping(obj), LayeredMapping.BLEND);
+    map.addLayer(2, tex1, tex1.getDefaultMapping(obj), LayeredMapping.BLEND);
     obj.setTexture(tex, map);
 
     // Call getParameters() twice and make sure the results are consistent.

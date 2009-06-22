@@ -360,8 +360,7 @@ public class OBJImporter
                   info.setTexture(tex, map);
                 else
                 {
-                  layered.addLayer(tex);
-                  layered.setLayerMapping(0, map);
+                  layered.addLayer(0, tex, map, LayeredMapping.BLEND);
                   info.setTexture(layered.getTexture(), layered);
                 }
                 Vec2 uv[] = new Vec2 [numVert];
@@ -415,8 +414,7 @@ public class OBJImporter
                   info.setTexture(tex, tex.getDefaultMapping(info.getObject()));
                 else
                 {
-                  layered.addLayer(tex);
-                  layered.setLayerMapping(0, tex.getDefaultMapping(info.getObject()));
+                  layered.addLayer(0, tex, tex.getDefaultMapping(info.getObject()), LayeredMapping.BLEND);
                   info.setTexture(layered.getTexture(), layered);
                 }
               }

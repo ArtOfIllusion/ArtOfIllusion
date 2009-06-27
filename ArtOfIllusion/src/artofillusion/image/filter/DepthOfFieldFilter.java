@@ -55,46 +55,43 @@ public class DepthOfFieldFilter extends ImageFilter
     float red[] = new float [width*height];
     float green[] = new float [width*height];
     float blue[] = new float [width*height];
+    float weight[] = new float [width*height];
     for (int i = 0; i < width; i++)
     {
       if (currentThread.isInterrupted())
         return;
       for (int j = 0; j < height; j++)
       {
-        // Compute the color of this pixel.
+        // Blur this pixel based on its distance.
 
-        int maxRadius = radius[i+j*width];
-        int weight = 0;
-        int mstart = Math.max(0, i-maxRadius);
-        int mend = Math.min(width-1, i+maxRadius);
-        int nstart = Math.max(0, j-maxRadius);
-        int nend = Math.min(height-1, j+maxRadius);
-        int index = i+j*width;
+        int pixelRadius = radius[i+j*width];
+        int radius2 = pixelRadius*pixelRadius;
+        int mstart = Math.max(0, i-pixelRadius);
+        int mend = Math.min(width-1, i+pixelRadius);
+        int nstart = Math.max(0, j-pixelRadius);
+        int nend = Math.min(height-1, j+pixelRadius);
+        float scale = (pixelRadius == 0 ? 1.0f : 1.0f/radius2);
         for (int m = mstart; m < mend; m++)
           for (int n = nstart; n < nend; n++)
           {
-            float r = (float) Math.sqrt((m-i)*(m-i)+(n-j)*(n-j));
-            if (r > maxRadius || r > radius[m+n*width])
+            int dist2 = (m-i)*(m-i)+(n-j)*(n-j);
+            if (dist2 > radius2)
               continue;
-            weight++;
-            red[index] += image.getPixelComponent(m, n, ComplexImage.RED);
-            green[index] += image.getPixelComponent(m, n, ComplexImage.GREEN);
-            blue[index] += image.getPixelComponent(m, n, ComplexImage.BLUE);
+            float w = (pixelRadius-(float) Math.sqrt(dist2))*scale;
+            int index = m+n*width;
+            weight[index] += w;
+            red[index] += w*image.getPixelComponent(i, j, ComplexImage.RED);
+            green[index] += w*image.getPixelComponent(i, j, ComplexImage.GREEN);
+            blue[index] += w*image.getPixelComponent(i, j, ComplexImage.BLUE);
           }
-        if (weight == 0)
-        {
-          red[index] = image.getPixelComponent(i, j, ComplexImage.RED);
-          green[index] = image.getPixelComponent(i, j, ComplexImage.GREEN);
-          blue[index] = image.getPixelComponent(i, j, ComplexImage.BLUE);
-        }
-        else
-        {
-          float invWeight = 1.0f/weight;
-          red[index] *= invWeight;
-          green[index] *= invWeight;
-          blue[index] *= invWeight;
-        }
       }
+    }
+    for (int i = 0; i < red.length; i++)
+    {
+      float invWeight = 1.0f/weight[i];
+      red[i] *= invWeight;
+      green[i] *= invWeight;
+      blue[i] *= invWeight;
     }
     image.setComponentValues(ComplexImage.RED, red);
     image.setComponentValues(ComplexImage.BLUE, blue);
@@ -110,16 +107,16 @@ public class DepthOfFieldFilter extends ImageFilter
     int width = image.getWidth();
     int height = image.getHeight();
     double focalDist = camera.getFocalDistance();
-    double dofScale = 0.25*height/(camera.getDepthOfField()*camera.getFieldOfView());
+    double dofScale = 0.25*height*focalDist/(camera.getDepthOfField()*camera.getFieldOfView());
     int radius[] = new int[width*height];
     for (int i = 0; i < width; i++)
       for (int j = 0; j < height; j++)
       {
         float depth = image.getPixelComponent(i, j, ComplexImage.DEPTH);
         if (depth == Float.MAX_VALUE)
-          radius[i+j*width] = 0;
+          radius[i+j*width] = 1;
         else
-          radius[i+j*width] = (int) Math.round(Math.abs(depth-focalDist)*dofScale);
+          radius[i+j*width] = Math.max(1, (int) Math.round(Math.abs(depth-focalDist)*dofScale/depth));
       }
     return radius;
   }

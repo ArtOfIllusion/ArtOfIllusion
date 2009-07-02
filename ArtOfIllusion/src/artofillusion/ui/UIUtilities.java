@@ -13,6 +13,7 @@ package artofillusion.ui;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import javax.swing.*;
 
 /**
@@ -223,5 +224,31 @@ public class UIUtilities
       while (children.hasNext())
         setEnabled((Widget) children.next(), enabled);
     }
+  }
+
+  /**
+   * Find every Widget which is contained within a specified one, either as a direct child
+   * or through multiple levels of nesting.
+   */
+
+  public static List<Widget> findAllChildren(Widget w)
+  {
+    ArrayList<Widget> list = new ArrayList<Widget>();
+    addChildrenToList(w, list);
+    return list;
+  }
+
+  /**
+   * Recursively add child Widgets to a list.
+   */
+
+  private static void addChildrenToList(Widget w, List<Widget> list)
+  {
+    if (w instanceof WidgetContainer)
+      for (Widget child : ((WidgetContainer) w).getChildren())
+      {
+        list.add(child);
+        addChildrenToList(child, list);
+      }
   }
 }

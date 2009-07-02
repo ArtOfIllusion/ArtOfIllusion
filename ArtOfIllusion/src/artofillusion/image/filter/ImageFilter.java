@@ -102,6 +102,10 @@ public abstract class ImageFilter
     paramValue = new double [f.paramValue.length];
     for (int i = 0; i < paramValue.length; i++)
       paramValue[i] = f.paramValue[i];
+    propertyValue = new Object [f.propertyValue.length];
+    for (int i = 0; i < propertyValue.length; i++)
+      propertyValue[i] = f.propertyValue[i];
+
   }
   
   /** This method is deprecated.  Call getProperties() instead. */

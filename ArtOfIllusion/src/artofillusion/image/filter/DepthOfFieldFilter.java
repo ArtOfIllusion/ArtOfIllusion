@@ -16,6 +16,10 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.io.*;
+import java.util.*;
+
+import buoy.widget.*;
+import buoy.event.*;
 
 /** This is an image filter which blurs parts of an image to simulate a depth of field effect. */
 
@@ -106,8 +110,10 @@ public class DepthOfFieldFilter extends ImageFilter
   {
     int width = image.getWidth();
     int height = image.getHeight();
-    double focalDist = camera.getFocalDistance();
-    double dofScale = 0.25*height*focalDist/(camera.getDepthOfField()*camera.getFieldOfView());
+    boolean useCameraParams = (Boolean) getPropertyValue(0);
+    double dof = (useCameraParams ? camera.getDepthOfField() : (Double) getPropertyValue(1));
+    double focalDist = (useCameraParams ? camera.getFocalDistance() : (Double) getPropertyValue(2));
+    double dofScale = 0.25*height*focalDist/(dof*camera.getFieldOfView());
     int radius[] = new int[width*height];
     for (int i = 0; i < width; i++)
       for (int j = 0; j < height; j++)
@@ -121,15 +127,60 @@ public class DepthOfFieldFilter extends ImageFilter
     return radius;
   }
 
+  @Override
+  public Property[] getProperties()
+  {
+    return new Property[] {
+        new Property(Translate.text("useParamsFromCamera"), true),
+        new Property(Translate.text("depthOfField"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN/2.0),
+        new Property(Translate.text("focalDist"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN)
+    };
+  }
+
+  @Override
+  public Widget getConfigPanel(Runnable changeCallback)
+  {
+    Widget panel = super.getConfigPanel(changeCallback);
+    final List<Widget> children = UIUtilities.findAllChildren(panel);
+    BCheckBox cb = null;
+    for (Widget w : children)
+      if (w instanceof BCheckBox)
+        cb = (BCheckBox) w;
+    final BCheckBox checkbox = cb;
+    Runnable listener = new Runnable() {
+      public void run()
+      {
+
+        boolean enable = !checkbox.getState();
+        for (Widget w : children)
+          if (w != checkbox)
+            w.setEnabled(enable);
+      }
+    };
+    checkbox.addEventLink(ValueChangedEvent.class, listener, "run");
+    listener.run();
+    return panel;
+  }
+
   /** Write a serialized description of this filter to a stream. */
 
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
+    out.writeShort(0);
+    out.writeBoolean((Boolean) getPropertyValue(0));
+    out.writeDouble((Double) getPropertyValue(1));
+    out.writeDouble((Double) getPropertyValue(2));
   }
 
   /** Reconstruct this filter from its serialized representation. */
 
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
+    int version = in.readShort();
+    if (version != 0)
+      throw new IOException("Unknown version "+version);
+    setPropertyValue(0, in.readBoolean());
+    setPropertyValue(1, in.readDouble());
+    setPropertyValue(2, in.readDouble());
   }
 }

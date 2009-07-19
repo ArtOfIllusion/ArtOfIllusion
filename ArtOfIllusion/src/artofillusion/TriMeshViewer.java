@@ -206,7 +206,7 @@ public class TriMeshViewer extends MeshViewer
     int selectMode = controller.getSelectionMode();
     boolean hideEdge[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideEdge : new boolean [e.length]);
     boolean selected[] = controller.getSelection();
-    boolean isSelected[] = new boolean [e.length];
+    boolean isSelected[];
     if (selectMode == MeshEditController.POINT_MODE)
       isSelected = new boolean [e.length];
     else if (selectMode == MeshEditController.EDGE_MODE)
@@ -357,7 +357,7 @@ public class TriMeshViewer extends MeshViewer
 
     // The click was on an unselected object.  Select it and send an event to the current tool.
     
-    boolean oldSelection[] = (boolean []) selected.clone();
+    boolean oldSelection[] = selected.clone();
     if (!e.isShiftDown())
       for (k = 0; k < selected.length; k++)
         selected[k] = false;
@@ -372,7 +372,7 @@ public class TriMeshViewer extends MeshViewer
         if (hideEdge[f[i].e3])
           selected[ed[f[i].e3].f1] = selected[ed[f[i].e3].f2] = true;
       }
-    currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, new Integer(controller.getSelectionMode()), oldSelection}));
+    currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
     controller.setSelection(selected);
     currentTool.getWindow().updateMenus();
     if (!e.isShiftDown() && wantHandleClicks)
@@ -404,7 +404,7 @@ public class TriMeshViewer extends MeshViewer
     moveToGrid(e);
     endDraggingSelection();
     boolean selected[] = controller.getSelection();
-    boolean oldSelection[] = (boolean []) selected.clone();
+    boolean oldSelection[] = selected.clone();
     if (draggingSelectionBox && !e.isShiftDown() && !e.isControlDown())
       for (int i = 0; i < selected.length; i++)
         selected[i] = false;
@@ -494,7 +494,7 @@ public class TriMeshViewer extends MeshViewer
     for (int k = 0; k < selected.length; k++)
       if (selected[k] != oldSelection[k])
       {
-        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, new Integer(controller.getSelectionMode()), oldSelection}));
+        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
         break;
       }
     controller.setSelection(selected);

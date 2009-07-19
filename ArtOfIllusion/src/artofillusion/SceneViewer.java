@@ -94,7 +94,7 @@ public class SceneViewer extends ViewerCanvas
 
   public ObjectInfo[] getCameras()
   {
-    return (ObjectInfo[]) cameras.toArray(new ObjectInfo[cameras.size()]);
+    return cameras.toArray(new ObjectInfo[cameras.size()]);
   }
 
   /** Deal with selecting a SceneCamera from the choice menu. */
@@ -104,7 +104,7 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-      boundCamera = (ObjectInfo) cameras.elementAt(which-6);
+      boundCamera = cameras.elementAt(which-6);
       CoordinateSystem coords = theCamera.getCameraCoordinates();
       coords.copyCoords(boundCamera.getCoords());
       theCamera.setCameraCoordinates(coords);
@@ -246,7 +246,7 @@ public class SceneViewer extends ViewerCanvas
     Point p;
 
     requestFocus();
-    sentClick = true;
+    sentClick = false;
     deselect = -1;
     dragging = true;
     clickPoint = e.getPoint();
@@ -261,15 +261,19 @@ public class SceneViewer extends ViewerCanvas
     else
       activeTool = currentTool;
 
-    // If the current tool wants all clicks, just forward the event and return.
+    // If the current tool wants all clicks, just forward the event.
 
     if ((activeTool.whichClicks() & EditingTool.ALL_CLICKS) != 0)
     {
       moveToGrid(e);
       activeTool.mousePressed(e, this);
-      return;
+      sentClick = true;
     }
-    
+    boolean allowSelectionChange = activeTool.allowSelectionChanges();
+    boolean wantHandleClicks = ((activeTool.whichClicks() & EditingTool.HANDLE_CLICKS) != 0);
+    if (!allowSelectionChange && !wantHandleClicks)
+      return;
+
     // See whether the click was on a currently selected object.
     
     p = e.getPoint();
@@ -290,7 +294,7 @@ public class SceneViewer extends ViewerCanvas
       // The click was on a selected object.  If it was a shift-click, the user may want
       // to deselect it, so set a flag.
       
-      if (e.isShiftDown())
+      if (e.isShiftDown() && allowSelectionChange)
         deselect = sel[i];
       
       // If the current tool wants handle clicks, then check to see whether the click
@@ -318,36 +322,43 @@ public class SceneViewer extends ViewerCanvas
         {
           moveToGrid(e);
           activeTool.mousePressedOnHandle(e, this, sel[i], j);
+          sentClick = true;
           return;
         }
         if (j == 0 && k == 1)
         {
           moveToGrid(e);
           activeTool.mousePressedOnHandle(e, this, sel[i], 3);
+          sentClick = true;
           return;
         }
         if (j == 2 && k == 1)
         {
           moveToGrid(e);
           activeTool.mousePressedOnHandle(e, this, sel[i], 4);
+          sentClick = true;
           return;
         }
         if (k == 2)
         {
           moveToGrid(e);
           activeTool.mousePressedOnHandle(e, this, sel[i], j+5);
+          sentClick = true;
           return;
         }
       }
       moveToGrid(e);
       dragging = false;
       if ((activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0)
+      {
         activeTool.mousePressedOnObject(e, this, sel[i]);
-      else
-        sentClick = false;
+        sentClick = true;
+      }
       return;
     }
-    
+    if (!allowSelectionChange)
+      return;
+
     // The click was not on a selected object.  See whether it was on an unselected object.
     // If so, select it.  If appropriate, send an event to the current tool.
     
@@ -394,18 +405,22 @@ public class SceneViewer extends ViewerCanvas
       parentFrame.updateImage();
       moveToGrid(e);
       if ((activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && !e.isShiftDown())
+      {
+        sentClick = true;
         activeTool.mousePressedOnObject(e, this, j);
-      else
-        sentClick = false;
+      }
       clickedObject = info;
       return;
     }
     
     // The click was not on any object.  Start dragging a selection box.
-    
-    moveToGrid(e);
-    draggingSelectionBox = true;
-    beginDraggingBox(p, false);
+
+    if (allowSelectionChange)
+    {
+      moveToGrid(e);
+      draggingSelectionBox = true;
+      beginDraggingBox(p, false);
+    }
     sentClick = false;
   }
 
@@ -543,7 +558,6 @@ public class SceneViewer extends ViewerCanvas
 
     if (deselect > -1)
     {
-      info = theScene.getObject(deselect);
       if (parentFrame instanceof LayoutWindow)
         ((LayoutWindow) parentFrame).removeFromSelection(deselect);
       else
@@ -557,7 +571,7 @@ public class SceneViewer extends ViewerCanvas
     int newSelection[] = theScene.getSelection();
     boolean changed = (oldSelection.length != newSelection.length);
     for (int i = 0; i < newSelection.length && !changed; i++)
-      changed |= (oldSelection[i] != newSelection[i]);
+      changed = (oldSelection[i] != newSelection[i]);
     if (changed)
      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
   }

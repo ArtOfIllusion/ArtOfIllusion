@@ -53,6 +53,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private RotationHandle[] activeRotationHandleSet;
   private RotationHandle currentRotationHandle;
   private ViewMode viewMode;
+  private boolean rotateAroundSelectionCenter = true;
 
   public final static ViewMode XYZ_MODE = new ViewMode();
   public final static ViewMode UV_MODE = new ViewMode();
@@ -180,12 +181,61 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   }
 
   /**
+   * Get whether rotations should be performed around the select center or around the origin.
+   */
+
+  public boolean getRotateAroundSelectionCenter()
+  {
+    return rotateAroundSelectionCenter;
+  }
+
+  /**
+   * Set whether rotations should be performed around the select center or around the origin.
+   */
+
+  public void setRotateAroundSelectionCenter(boolean rotateAroundSelectionCenter)
+  {
+    this.rotateAroundSelectionCenter = rotateAroundSelectionCenter;
+  }
+
+  /**
    * Set the axis directions to be used in NPQ mode.
    */
 
   public void setNPQAxes(Vec3 nDir, Vec3 pDir, Vec3 qDir)
   {
     npqModeAxes = new Vec3[] {new Vec3(pDir), new Vec3(qDir), new Vec3(nDir)};
+  }
+
+  /**
+   * Get the direction of a particular axis.
+   */
+
+  public Vec3 getAxisDirection(Axis axis, ViewerCanvas view)
+  {
+    if (axis == X)
+      return Vec3.vx();
+    if (axis == Y)
+      return Vec3.vy();
+    if (axis == Z)
+      return Vec3.vz();
+    if (axis == U)
+    {
+      CoordinateSystem coords = view.getCamera().getCameraCoordinates();
+      return coords.getUpDirection().cross(coords.getZDirection());
+    }
+    if (axis == V)
+    {
+      CoordinateSystem coords = view.getCamera().getCameraCoordinates();
+      return coords.getUpDirection();
+    }
+    if (axis == N)
+      return npqModeAxes[0];
+    if (axis == P)
+      return npqModeAxes[1];
+    if (axis == Q)
+      return npqModeAxes[2];
+    throw new IllegalArgumentException("Axis "+axis.getName()+" does not have a fixed direction");
   }
 
   /**
@@ -608,7 +658,6 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Vec2 disp = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
     Vec2 vector = currentRotationHandle.points2d[rotSegment+1].minus(currentRotationHandle.points2d[rotSegment]);
     vector.normalize();
-    Mat4 m = null;
     rotAngle = vector.dot(disp)/70;
     if (isShiftDown)
     {
@@ -616,10 +665,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
         rotAngle = Math.round(rotAngle);
         rotAngle *= (5*Math.PI)/180;
     }
-    m = Mat4.axisRotation(currentRotationHandle.rotAxis, rotAngle);
-    Mat4 mat = Mat4.translation(-center.x, -center.y, -center.z);
-    mat = m.times(mat);
-    mat = Mat4.translation(center.x, center.y, center.z).times(mat);
+    Mat4 mat = Mat4.axisRotation(currentRotationHandle.rotAxis, rotAngle);
+    if (rotateAroundSelectionCenter)
+      mat = Mat4.translation(center.x, center.y, center.z).times(mat.times(Mat4.translation(-center.x, -center.y, -center.z)));
     dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, mat, rotAngle));
   }
 

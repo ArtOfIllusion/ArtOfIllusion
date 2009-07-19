@@ -164,6 +164,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));
     tools.addTool(new ScaleObjectTool(this));
+    tools.addTool(new MoveScaleRotateObjectTool(this));
     tools.addTool(new CreateCubeTool(this));
     tools.addTool(new CreateSphereTool(this));
     tools.addTool(new CreateCylinderTool(this));

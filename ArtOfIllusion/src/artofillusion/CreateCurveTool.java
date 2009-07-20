@@ -15,6 +15,8 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
+import buoy.widget.*;
+
 import java.awt.*;
 import java.awt.geom.*;
 import java.util.Vector;
@@ -32,14 +34,11 @@ public class CreateCurveTool extends EditingTool
 
   public static final int HANDLE_SIZE = 3;
 
-  public CreateCurveTool(EditingWindow fr, int smoothingMethod)
+  public CreateCurveTool(EditingWindow fr)
   {
     super(fr);
-    if (smoothingMethod == Curve.INTERPOLATING)
-      initButton("interpCurve");
-    else
-      initButton("approxCurve");
-    smoothing = smoothingMethod;
+    initButton("interpCurve");
+    smoothing = Mesh.APPROXIMATING;
   }
 
   public void activate()
@@ -61,10 +60,7 @@ public class CreateCurveTool extends EditingTool
 
   public String getToolTipText()
   {
-    if (smoothing == Curve.INTERPOLATING)
-      return Translate.text("createCurveTool.tipText.interpolating");
-    else
-      return Translate.text("createCurveTool.tipText.approximating");
+    return Translate.text("createCurveTool.tipText");
   }
 
   public boolean hilightSelection()
@@ -221,5 +217,26 @@ public class CreateCurveTool extends EditingTool
     coords = null;
     if (addCurve)
       theWindow.updateImage();
+  }
+
+  public void iconDoubleClicked()
+  {
+    BComboBox smoothingChoice = new BComboBox(new String [] {
+      Translate.text("Interpolating"),
+      Translate.text("Approximating")
+    });
+    if (smoothing == Mesh.INTERPOLATING)
+      smoothingChoice.setSelectedIndex(0);
+    else
+      smoothingChoice.setSelectedIndex(1);
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectCurveSmoothing"),
+                new Widget [] {smoothingChoice},
+                new String [] {Translate.text("Smoothing Method")});
+    if (!dlg.clickedOk())
+      return;
+    if (smoothingChoice.getSelectedIndex() == 0)
+      smoothing = Mesh.INTERPOLATING;
+    else
+      smoothing = Mesh.APPROXIMATING;
   }
 }

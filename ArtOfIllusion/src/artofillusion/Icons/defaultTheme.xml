@@ -9,7 +9,7 @@
 
   <colorset name="whiteBackground">
   	<applicationbackground R="228" G="228" B="242"/>
-  	<palettebackground R="160" G="160" B="200"/>
+  	<palettebackground R="228" G="228" B="242"/>
   	<viewerbackground R="255" G="255" B="255" />
   	<viewerline R="0" G="0" B="0"/>
   	<viewerhandle R="255" G="0" B="0"/>
@@ -29,7 +29,7 @@
   <colorset name="grayBackground">
   	<applicationbackground R="228" G="228" B="242"/>
 
-  	<palettebackground R="160" G="160" B="200"/>
+  	<palettebackground R="228" G="228" B="242"/>
   	<viewerbackground R="40" G="40" B="40" />
   	<viewerline R="255" G="255" B="255"/>
   	<viewerhandle R="255" G="0" B="0"/>

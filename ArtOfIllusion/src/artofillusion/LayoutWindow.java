@@ -170,10 +170,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     tools.addTool(new CreateCylinderTool(this));
     tools.addTool(new CreateSplineMeshTool(this));
     tools.addTool(new CreatePolygonTool(this));
+    tools.addTool(new CreateCurveTool(this));
     tools.addTool(new CreateCameraTool(this));
     tools.addTool(new CreateLightTool(this));
-    tools.addTool(new CreateCurveTool(this, Curve.INTERPOLATING));
-    tools.addTool(new CreateCurveTool(this, Curve.APPROXIMATING));
     tools.addTool(metaTool = new MoveViewTool(this));
     tools.addTool(altTool = new RotateViewTool(this));
     tools.selectTool(defaultTool);

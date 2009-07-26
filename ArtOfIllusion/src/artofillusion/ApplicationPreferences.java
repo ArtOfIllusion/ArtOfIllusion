@@ -202,7 +202,7 @@ public class ApplicationPreferences
   {
     try
       {
-        return new Double(properties.getProperty(name)).doubleValue();
+        return Double.valueOf(properties.getProperty(name));
       }
     catch (Exception ex)
       {
@@ -217,7 +217,7 @@ public class ApplicationPreferences
     String prop = properties.getProperty(name);
     if (prop == null)
       return defaultVal;
-    return Boolean.valueOf(prop).booleanValue();
+    return Boolean.valueOf(prop);
   }
 
   /** Parse a property specifying a locale. */
@@ -244,9 +244,9 @@ public class ApplicationPreferences
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     if (renderers.size() == 0)
       return null;
-    for (int i = 0; i < renderers.size(); i++)
-      if (renderers.get(i).getName().equals(name))
-        return renderers.get(i);
+    for (Renderer r : renderers)
+      if (r.getName().equals(name))
+        return r;
     return renderers.get(renderers.size()-1);
   }
 
@@ -330,9 +330,9 @@ public class ApplicationPreferences
         // Clear the cached meshes for objects in all windows.
 
         EditingWindow windows[] = ArtOfIllusion.getWindows();
-        for (int i = 0; i < windows.length; i++)
+        for (EditingWindow w : windows)
           {
-            Scene sc = windows[i].getScene();
+            Scene sc = w.getScene();
             if (sc == null)
               continue;
             for (int j = 0; j < sc.getNumObjects(); j++)
@@ -342,7 +342,7 @@ public class ApplicationPreferences
                 info.getObject().setSize(size.x, size.y, size.z);
                 info.clearCachedMeshes();
               }
-            windows[i].updateImage();
+            w.updateImage();
           }
       }
   }

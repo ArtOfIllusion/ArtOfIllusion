@@ -65,6 +65,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private KeyEventPostProcessor keyEventHandler;
   private SceneChangedEvent sceneChangedEvent;
   private List<ModellingTool> modellingTools;
+  protected Preferences preferences;
 
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
@@ -155,7 +156,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DefaultDockableWidget(itemTreeScroller, Translate.text("Objects")));
     getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DefaultDockableWidget(propertiesScroller, Translate.text("Properties")), 0, 1);
     getDockingContainer(BTabbedPane.BOTTOM).addDockableWidget(new DefaultDockableWidget(theScore, Translate.text("Score")));
-    numViewsShown = 1;
 
     // Build the tool palette.
 
@@ -198,6 +198,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     createAnimationMenu();
     createToolsMenu();
     createPopupMenu();
+    preferences = Preferences.userNodeForPackage(getClass()).node("LayoutWindow");
+    loadPreferences();
+    numViewsShown = (numViewsShown == 1 ? 4 : 1);
     toggleViewsCommand();
     keyEventHandler = new KeyEventPostProcessor()
     {
@@ -227,6 +230,29 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
     setBounds(screenBounds);
     tools.requestFocus();
+  }
+
+  /** Load all the preferences into memory. */
+
+  protected void loadPreferences()
+  {
+    boolean lastShowAxes = preferences.getBoolean("showAxes", false);
+    numViewsShown = preferences.getInt("numViews", 4);
+    byte lastRenderMode[] = preferences.getByteArray("displayMode", new byte[] {ViewerCanvas.RENDER_SMOOTH, ViewerCanvas.RENDER_SMOOTH, ViewerCanvas.RENDER_SMOOTH, ViewerCanvas.RENDER_SMOOTH});
+    for (int i = 0; i < theView.length; i++)
+    {
+      theView[i].setShowAxes(lastShowAxes);
+      theView[i].setRenderMode((int) lastRenderMode[i]);
+    }
+  }
+
+  /** Save user settings that should be persistent between sessions. */
+
+  protected void savePreferences()
+  {
+    preferences.putBoolean("showAxes", theView[currentView].getShowAxes());
+    preferences.putInt("numViews", numViewsShown);
+    preferences.putByteArray("displayMode", new byte[] {(byte) theView[0].getRenderMode(), (byte) theView[1].getRenderMode(), (byte) theView[2].getRenderMode(), (byte) theView[3].getRenderMode()});
   }
 
   private void handleKeyEvent(KeyPressedEvent e)
@@ -1228,6 +1254,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
     for (int i = 0; i < displayItem.length; i++)
       displayItem[i].setState(source == displayItem[i]);
+    savePreferences();
   }
 
   /** Get a list of the indices of all selected objects. */
@@ -1335,6 +1362,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     setWaitCursor();
     if (menu == fileMenu)
       {
+        savePreferences();
         if (command.equals("new"))
           ArtOfIllusion.newWindow();
         else if (command.equals("open"))
@@ -1486,6 +1514,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
             boolean wasShown = theView[currentView].getShowAxes();
             for (int i = 0; i < theView.length; i++)
               theView[i].setShowAxes(!wasShown);
+            savePreferences();
             updateImage();
             updateMenus();
           }
@@ -2573,6 +2602,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       sceneMenuItem[0].setText(Translate.text("menu.oneView"));
     }
     viewsContainer.layoutChildren();
+    savePreferences();
     updateImage();
     viewPanel[currentView].requestFocus();
   }

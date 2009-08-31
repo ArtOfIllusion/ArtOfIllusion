@@ -631,7 +631,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   {
     Vec3 vert[] = mesh.vert;
     Vec2 pos[] = new Vec2 [vert.length];
-    double z[] = new double [vert.length], clip = (cam.isPerspective() ? cam.getClipDistance() : -Double.MAX_VALUE);
+    double z[] = new double [vert.length], clip = cam.getClipDistance();
     double clipz[] = new double [4];
     Mat4 toView = cam.getObjectToView(), toScreen = cam.getObjectToScreen();
     float dot;
@@ -691,7 +691,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   {
     Vec3 vert[] = mesh.vert;
     Vec2 pos[] = new Vec2 [vert.length];
-    double z[] = new double [vert.length], clip = (cam.isPerspective() ? cam.getClipDistance() : -Double.MAX_VALUE);
+    double z[] = new double [vert.length], clip = cam.getClipDistance();
     double clipz[] = new double [4];
     Mat4 toView = cam.getObjectToView(), toScreen = cam.getObjectToScreen();
     RGBColor color1 = new RGBColor(), color2 = new RGBColor(), color3 = new RGBColor();

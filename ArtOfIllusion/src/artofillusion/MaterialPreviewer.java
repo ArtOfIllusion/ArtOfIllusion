@@ -186,8 +186,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     Rectangle bounds = getBounds();
     if (bounds.width == 0 || bounds.height == 0)
       return;
-    theCamera.setSize(bounds.width, bounds.height);
-    theCamera.setDistToScreen((bounds.height/200.0)/Math.tan(0.14));
+    SceneCamera sc = new SceneCamera();
+    sc.setFieldOfView(16.0);
+    theCamera.setScreenTransform(sc.getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
     rend.configurePreview();
     rend.renderScene(theScene, theCamera, this, null);
     renderInProgress = true;

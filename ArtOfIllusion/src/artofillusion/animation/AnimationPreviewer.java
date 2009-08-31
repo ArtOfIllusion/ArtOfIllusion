@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2007 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -167,7 +167,7 @@ public class AnimationPreviewer implements Runnable
         theScene.setTime(time);
         SceneCamera sc = (SceneCamera) sceneCamera.getObject();
         cam.setCameraCoordinates(sceneCamera.getCoords().duplicate());
-        cam.setDistToScreen((height/200.0)/Math.tan(sc.getFieldOfView()*Math.PI/360.0));
+        cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
         final int frame = i;
         try
         {

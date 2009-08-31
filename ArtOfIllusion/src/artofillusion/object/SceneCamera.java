@@ -137,16 +137,31 @@ public class SceneCamera extends Object3D
     return fov;
   }
 
+  public void setFieldOfView(double fieldOfView)
+  {
+    fov = fieldOfView;
+  }
+
   public double getDepthOfField()
   {
     return depthOfField;
+  }
+
+  public void setDepthOfField(double dof)
+  {
+    depthOfField = dof;
   }
 
   public double getFocalDistance()
   {
     return focalDist;
   }
-  
+
+  public void setFocalDistance(double dist)
+  {
+    focalDist = dist;
+  }
+
   /** Get the list of ImageFilters for this camera. */
   
   public ImageFilter [] getImageFilters()
@@ -213,6 +228,48 @@ public class SceneCamera extends Object3D
     image.rebuildImage();
   }
 
+  /**
+   * Get the transform which maps between view coordinates and screen coordinates for this camera.
+   *
+   * @param width    the image width in pixels
+   * @param height   the image height in pixels
+   */
+
+  public Mat4 getScreenTransform(int width, int height)
+  {
+    double scale = 0.5*height/Math.tan(getFieldOfView()*Math.PI/360.0);
+    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(0.0));
+    screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
+    return screenTransform;
+  }
+
+  /**
+   * Compute a ray from the camera location through a point in its field of, represented in the camera's local
+   * coordinate system.
+   *
+   * @param x          the x coordinate of the point in the plane z=1 through which the ray passes
+   * @param y          the y coordinate of the point in the plane z=1 through which the ray passes
+   * @param dof1       this is used for simulating depth of field.  dof1 and dof2 are independent values uniformly distributed
+   *                   between 0 and 1.  Together, they select the point on the camera which should serve as the ray's origin.
+   * @param origin     on exit, this contains the ray origin
+   * @param direction  on exit, this contains the normalized ray direction
+   */
+
+  public void getRayFromCamera(double x, double y, double dof1, double dof2, Vec3 origin, Vec3 direction)
+  {
+    origin.set(0.0, 0.0, 0.0);
+    double scale = focalDist*2.0*Math.tan(getFieldOfView()*Math.PI/360.0);
+    if (dof1 != 0.0)
+    {
+      double angle = dof1*2.0*Math.PI;
+      double dofScale = 0.01*scale*dof2*focalDist/depthOfField;
+      origin.x = dofScale*Math.cos(angle);
+      origin.y = dofScale*Math.sin(angle);
+    }
+    direction.set(-x*scale-origin.x, -y*scale-origin.y, focalDist);
+    direction.normalize();
+  }
+
   public SceneCamera duplicate()
   {
     SceneCamera sc = new SceneCamera();
@@ -270,8 +327,7 @@ public class SceneCamera extends Object3D
   {
     Camera cam = new Camera();
     cam.setCameraCoordinates(coords.duplicate());
-    cam.setSize(width, height);
-    cam.setDistToScreen((height/200.0)/Math.tan(fov*Math.PI/360.0));
+    cam.setScreenTransform(getScreenTransform(width, height), width, height);
     return cam;
   }
   
@@ -437,7 +493,7 @@ public class SceneCamera extends Object3D
 
   public Property[] getProperties()
   {
-    return (Property []) PROPERTIES.clone();
+    return PROPERTIES.clone();
   }
 
   public Object getPropertyValue(int index)
@@ -445,18 +501,18 @@ public class SceneCamera extends Object3D
     switch (index)
     {
       case 0:
-        return new Double(fov);
+        return fov;
       case 1:
-        return new Double(depthOfField);
+        return depthOfField;
       case 2:
-        return new Double(focalDist);
+        return focalDist;
     }
     return null;
   }
 
   public void setPropertyValue(int index, Object value)
   {
-    double val = ((Double) value).doubleValue();
+    double val = (Double) value;
     if (index == 0)
       fov = val;
     else if (index == 1)

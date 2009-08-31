@@ -55,7 +55,7 @@ public class TriMeshViewer extends MeshViewer
     if (visible.length != v.length)
       visible = new boolean [v.length];
     p = new Vec2 [v.length];
-    double clipDist = (theCamera.isPerspective() ? theCamera.getClipDistance() : -Double.MAX_VALUE);
+    double clipDist = theCamera.getClipDistance();
     boolean hideVert[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideVert : new boolean [v.length]);
     for (int i = 0; i < v.length; i++)
       {

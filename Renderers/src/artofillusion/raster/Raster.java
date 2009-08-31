@@ -93,34 +93,29 @@ public class Raster implements Renderer, Runnable
     this.theScene = theScene;
     theCamera = camera.duplicate();
     if (sceneCamera == null)
-      {
-        depthOfField = 0.0;
-        focalDist = theCamera.getDistToScreen();
-        depthNeeded = false;
-      }
-    else
-      {
-        depthOfField = sceneCamera.getDepthOfField();
-        focalDist = sceneCamera.getFocalDistance();
-        depthNeeded = ((sceneCamera.getComponentsForFilters()&ComplexImage.DEPTH) != 0);
-      }
+    {
+      sceneCamera = new SceneCamera();
+      sceneCamera.setDepthOfField(0.0);
+      sceneCamera.setFocalDistance(theCamera.getDistToScreen());
+    }
+    depthOfField = sceneCamera.getDepthOfField();
+    focalDist = sceneCamera.getFocalDistance();
+    depthNeeded = ((sceneCamera.getComponentsForFilters()&ComplexImage.DEPTH) != 0);
     time = theScene.getTime();
     if (imagePixel == null || imageWidth != dim.width || imageHeight != dim.height)
-      {
-        imageWidth = dim.width;
-        imageHeight = dim.height;
-        imagePixel = new int [imageWidth*imageHeight];
-        imageSource = new MemoryImageSource(imageWidth, imageHeight, imagePixel, 0, imageWidth);
-        imageSource.setAnimated(true);
-        img = Toolkit.getDefaultToolkit().createImage(imageSource);
-      }
+    {
+      imageWidth = dim.width;
+      imageHeight = dim.height;
+      imagePixel = new int [imageWidth*imageHeight];
+      imageSource = new MemoryImageSource(imageWidth, imageHeight, imagePixel, 0, imageWidth);
+      imageSource.setAnimated(true);
+      img = Toolkit.getDefaultToolkit().createImage(imageSource);
+    }
     width = imageWidth*samplesPerPixel;
     height = imageHeight*samplesPerPixel;
     fragment = new Fragment [width*height];
     Arrays.fill(fragment, BACKGROUND_FRAGMENT);
-    theCamera.setSize(width, height);
-    theCamera.setDistToScreen(theCamera.getDistToScreen()*samplesPerPixel);
-    theCamera.setClipDistance(theCamera.getClipDistance()/samplesPerPixel);
+    theCamera.setScreenTransform(sceneCamera.getScreenTransform(width, height), width, height);
     lock = new RowLock[height];
     for (int i = 0; i < lock.length; i++)
       lock[i] = new RowLock();

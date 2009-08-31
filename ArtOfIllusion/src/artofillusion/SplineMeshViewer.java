@@ -50,7 +50,7 @@ public class SplineMeshViewer extends MeshViewer
 
     screenVert = new Point [v.length];
     screenZ = new double [v.length];
-    double clipDist = (theCamera.isPerspective() ? theCamera.getClipDistance() : -Double.MAX_VALUE);
+    double clipDist = theCamera.getClipDistance();
     for (int i = 0; i < v.length; i++)
       {
         Vec2 p = theCamera.getObjectToScreen().timesXY(v[i].r);

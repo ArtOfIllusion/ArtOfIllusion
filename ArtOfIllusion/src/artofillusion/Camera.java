@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -47,10 +47,16 @@ public class Camera implements Cloneable
   public Camera()
   {
     objectToWorld = objectToView = worldToView = viewToWorld = Mat4.identity();
-    setDistToScreen(DEFAULT_DISTANCE_TO_SCREEN);
+    distToScreen = DEFAULT_DISTANCE_TO_SCREEN;
     setScreenParams(0.0, 100.0, 100, 100);
   }
-  
+
+  /**
+   * Set the distance from the camera to the screen.
+   *
+   * @deprecated use setScreenParams() instead
+   */
+
   public void setDistToScreen(double dist)
   {
     double oldScale = scale/distToScreen;
@@ -100,38 +106,58 @@ public class Camera implements Cloneable
     c.cameraCoords = cameraCoords.duplicate();
     return c;
   }
+
+  /**
+   * Set the transformation which maps from view coordinates to screen coordinates.
+   *
+   * @param screenTransform the transformation from view coordinates to screen coordinates
+   * @param width           the screen width in pixels
+   * @param height          the screen height in pixels
+   */
+
+  public void setScreenTransform(Mat4 screenTransform, int width, int height)
+  {
+    hres = width;
+    vres = height;
+    viewToScreen = screenTransform;
+    worldToScreen = viewToScreen.times(worldToView);
+    objectToScreen = worldToScreen.times(objectToWorld);
+  }
   
-  /** Set the camera to perspective mode with the specified parameters. */
+  /**
+   * Set the camera to perspective mode with the specified parameters.
+   */
 
   public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
   {
     viewDist = newViewDist;
     scale = newScale*distToScreen;
-    hres = newHres;
-    vres = newVres;
+    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
+    screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
+    setScreenTransform(screenTransform, newHres, newVres);
+    frontClipPlane = newViewDist/20.0;
     perspective = true;
-    viewToScreen = Mat4.perspective(viewDist);
-    viewToScreen = Mat4.scale(-scale, -scale, scale).times(viewToScreen);
-    viewToScreen = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(viewToScreen);
-    worldToScreen = viewToScreen.times(worldToView);
-    objectToScreen = worldToScreen.times(objectToWorld);
   }
   
-  /** Set the camera to parallel projection mode with the specified parameters. */
+  /**
+   * Set the camera to parallel projection mode with the specified parameters.
+   */
 
   public void setScreenParamsParallel(double newScale, int newHres, int newVres)
   {
     scale = newScale;
-    hres = newHres;
-    vres = newVres;
+    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale);
+    screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
+    setScreenTransform(screenTransform, newHres, newVres);
+    frontClipPlane = -Double.MAX_VALUE;
     perspective = false;
-    viewToScreen = Mat4.scale(-scale, -scale, scale);
-    viewToScreen = Mat4.translation((double) 0.5*hres, (double) 0.5*vres, 0.0).times(viewToScreen);
-    worldToScreen = viewToScreen.times(worldToView);
-    objectToScreen = worldToScreen.times(objectToWorld);
   }
   
-  /** Set the dimension's of the camera's viewport. */
+  /**
+   * Set the dimension's of the camera's viewport.
+   *
+   * @deprecated use setScreenTransform(), setScreenParams() or setScreenParamsParallel() instead
+   */
 
   public void setSize(int newHres, int newVres)
   {
@@ -152,13 +178,6 @@ public class Camera implements Cloneable
   public Dimension getSize()
   {
     return new Dimension(hres, vres);
-  }
-  
-  /** Get the camera's scale factor. */
-  
-  public double getScale()
-  {
-    return scale;
   }
 
   /** Set the grid spacing. */
@@ -711,7 +730,6 @@ public class Camera implements Cloneable
       {
         g.drawLine(x1/w1, y1/w1, xl4/wl4, yl4/wl4);
         g.drawLine(x4/w4, y4/w4, xl4/wl4, yl4/wl4);
-        return;
       }
     else
       {

@@ -83,7 +83,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     sc.setTime(start);
     theCamera.setCameraCoordinates(sceneCamera.getCoords().duplicate());
     SceneCamera scm = (SceneCamera) sceneCamera.getObject();
-    theCamera.setDistToScreen((h/200.0)/Math.tan(scm.getFieldOfView()*Math.PI/360.0));
+    cam.setScreenTransform(scm.getScreenTransform(w, h), w, h);
     rend.renderScene(sc, theCamera, this, scm);
     setVisible(true);
   }
@@ -358,7 +358,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     theScene.setTime(start+(currentFrame*subimages+currentSubimage)/(double) (fps*subimages));
     theCamera.setCameraCoordinates(sceneCamera.getCoords().duplicate());
     SceneCamera scm = (SceneCamera) sceneCamera.getObject();
-    theCamera.setDistToScreen((h/200.0)/Math.tan(scm.getFieldOfView()*Math.PI/360.0));
+    theCamera.setScreenTransform(scm.getScreenTransform(w, h), w, h);
     renderer.renderScene(theScene, theCamera, this, scm);
     statusChanged(Translate.text("Rendering"));
   }

@@ -142,8 +142,7 @@ public class RenderSetupDialog
       Camera cam = new Camera();
       SceneCamera sc = (SceneCamera) cameras[currentCamera].getObject();
       cam.setCameraCoordinates(cameras[currentCamera].getCoords().duplicate());
-      cam.setSize(width, height);
-      cam.setDistToScreen((height/200.0)/Math.tan(sc.getFieldOfView()*Math.PI/360.0));
+      cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
       if (movie)
       {
         int startFrameNumber = (int) Math.round(startTime*fps)+1;
@@ -186,8 +185,7 @@ public class RenderSetupDialog
     ObjectInfo cameraInfo = (ObjectInfo) cameras.elementAt(currentCamera);
     SceneCamera sc = (SceneCamera) cameraInfo.getObject();
     cam.setCameraCoordinates(cameraInfo.getCoords().duplicate());
-    cam.setSize(width, height);
-    cam.setDistToScreen((height/200.0)/Math.tan(sc.getFieldOfView()*Math.PI/360.0));
+    cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
     new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo);
   }
     

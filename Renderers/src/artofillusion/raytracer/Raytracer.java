@@ -42,6 +42,7 @@ public class Raytracer implements Renderer, Runnable
   protected MemoryImageSource imageSource;
   protected Scene theScene;
   protected Camera theCamera;
+  protected SceneCamera sceneCamera;
   protected RenderListener listener;
   protected Image img;
   protected volatile Thread renderThread;
@@ -49,8 +50,7 @@ public class Raytracer implements Renderer, Runnable
   protected double envParamValue[];
   protected TextureMapping envMapping;
   protected int envMode;
-  protected Vec3 hvec, vvec, center, viewpoint, cameraDir;
-  protected double time, dofScale, depthOfField, focalDist, fogDist, surfaceError = 0.02, stepSize = 1.0;
+  protected double time, fogDist, surfaceError = 0.02, stepSize = 1.0;
   protected double smoothing = 1.0, smoothScale, extraGISmoothing = 10.0, extraGIEnvSmoothing = 100.0;
   protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100;
   protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[], objectImage[];
@@ -134,14 +134,11 @@ public class Raytracer implements Renderer, Runnable
     this.theCamera = theCamera;
     if (sceneCamera == null)
     {
-      depthOfField = 0.0;
-      focalDist = theCamera.getDistToScreen();
+      sceneCamera = new SceneCamera();
+      sceneCamera.setDepthOfField(0.0);
+      sceneCamera.setFocalDistance(theCamera.getDistToScreen());
     }
-    else
-    {
-      depthOfField = sceneCamera.getDepthOfField();
-      focalDist = sceneCamera.getFocalDistance();
-    }
+    this.sceneCamera = sceneCamera;
     time = theScene.getTime();
     width = dim.width;
     height = dim.height;
@@ -149,7 +146,7 @@ public class Raytracer implements Renderer, Runnable
     imageSource = new MemoryImageSource(width, height, pixel, 0, width);
     imageSource.setAnimated(true);
     img = Toolkit.getDefaultToolkit().createImage(imageSource);
-    int requiredComponents = (sceneCamera == null ? 0 : sceneCamera.getComponentsForFilters());
+    int requiredComponents = sceneCamera.getComponentsForFilters();
     if (generateHDR || (requiredComponents&(ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE)) != 0)
       floatImage = new float [4][width*height];
     if ((requiredComponents&ComplexImage.DEPTH) != 0)
@@ -355,11 +352,7 @@ public class Raytracer implements Renderer, Runnable
     // Show the window.
     
     WindowWidget parent = UIUtilities.findWindow(ev.getWidget());
-    PanelDialog dlg;
-    if (parent instanceof BDialog)
-      dlg = new PanelDialog((BDialog) parent, Translate.text("advancedOptions"), content);
-    else
-      dlg = new PanelDialog((BFrame) parent, Translate.text("advancedOptions"), content);
+    PanelDialog dlg = new PanelDialog(parent, Translate.text("advancedOptions"), content);
     if (!dlg.clickedOk())
     {
       // Reset the components.
@@ -684,7 +677,7 @@ public class Raytracer implements Renderer, Runnable
     sceneObject = new RTObject [obj.size()];
     for (int i = 0; i < sceneObject.length; i++)
     {
-      sceneObject[i] = (RTObject) obj.get(i);
+      sceneObject[i] = obj.get(i);
       sceneObject[i].index = i;
       if (sceneObject[i].getMaterialMapping() != null)
       {
@@ -1090,9 +1083,9 @@ public class Raytracer implements Renderer, Runnable
         objectSources.add(src);
     }
     if (objectSources.size() > 0)
-      sources.add(new CompoundPhotonSource((PhotonSource[]) objectSources.toArray(new PhotonSource[objectSources.size()])));
+      sources.add(new CompoundPhotonSource(objectSources.toArray(new PhotonSource[objectSources.size()])));
     sources.add(new EnvironmentPhotonSource(theScene, map));
-    PhotonSource src[] = (PhotonSource []) sources.toArray(new PhotonSource [sources.size()]);
+    PhotonSource src[] = sources.toArray(new PhotonSource [sources.size()]);
     map.generatePhotons(src);
   }
   
@@ -1116,22 +1109,7 @@ public class Raytracer implements Renderer, Runnable
     int minRaysInUse = minRays;
     if (antialiasLevel == 0)
       minRaysInUse = maxRaysInUse = 1;
-
-    // First construct vectors to define the view.
-
-    viewpoint = theCamera.getCameraCoordinates().getOrigin();
-    Point p = new Point(width/2, height/2);
-    center = theCamera.convertScreenToWorld(p, focalDist);
-    cameraDir = center.minus(viewpoint);
-    cameraDir.normalize();
-    p.x++;
-    hvec = theCamera.convertScreenToWorld(p, focalDist).minus(center);
-    p.x--;
-    p.y++;
-    vvec = theCamera.convertScreenToWorld(p, focalDist).minus(center);
-    p.y--;
-    smoothScale = smoothing*hvec.length()/focalDist;
-    dofScale = (depthOfField == 0.0 ? 0.0 : 0.25*0.01*height*focalDist/depthOfField);
+    smoothScale = smoothing*2.0*Math.tan(sceneCamera.getFieldOfView()*Math.PI/360.0)/height;
 
     // If we are only using one ray/pixel, everything is simple.
 
@@ -1187,10 +1165,7 @@ public class Raytracer implements Renderer, Runnable
 
     rtWidth = 2*width+2;
     rtHeight = 2*height+2;
-    hvec.scale(0.5);
-    vvec.scale(0.5);
     smoothScale *= 0.5;
-    dofScale *= 2.0;
     final PixelInfo pix[][] = new PixelInfo [6][rtWidth];
     for (int i = 0; i < pix.length; i++)
       for (int j = 0; j < pix[i].length; j++)
@@ -1482,27 +1457,19 @@ public class Raytracer implements Renderer, Runnable
         h += (col+rt.random.nextDouble())/cols-0.5;
         v += (row+rt.random.nextDouble())/rows-0.5;
       }
-    orig.set(viewpoint);
+    double dof1 = 0.0, dof2 = 0.0;
     if (depth)
-      {
-        double angle, radius, dh, dv;
-        
-        angle = (rt.random.nextDouble()+distrib1[number&15])*Math.PI*0.5;
-        radius = (rt.random.nextDouble()+distrib2[number&15])*dofScale;
-        dh = radius*Math.cos(angle);
-        dv = radius*Math.sin(angle);
-        orig.x += dh*hvec.x + dv*vvec.x;
-        orig.y += dh*hvec.y + dv*vvec.y;
-        orig.z += dh*hvec.z + dv*vvec.z;
-      }
-    rt.rayIntensity[0].setRGB(1.0f, 1.0f, 1.0f);
-    dir.x = center.x + h*hvec.x + v*vvec.x - orig.x;
-    dir.y = center.y + h*hvec.y + v*vvec.y - orig.y;
-    dir.z = center.z + h*hvec.z + v*vvec.z - orig.z;
-    dir.normalize();
+    {
+      dof1 = 0.25*(rt.random.nextDouble()+distrib1[number&15]);
+      dof2 = 0.25*(rt.random.nextDouble()+distrib2[number&15]);
+    }
+    sceneCamera.getRayFromCamera(h/rtHeight, v/rtHeight, dof1, dof2, orig, dir);
+    theCamera.getCameraCoordinates().fromLocal().transform(orig);
+    theCamera.getCameraCoordinates().fromLocal().transformDirection(dir);
     ray.newID();
+    rt.rayIntensity[0].setRGB(1.0f, 1.0f, 1.0f);
     rt.firstObjectHit = null;
-    double distScale = 1.0/dir.dot(cameraDir);
+    double distScale = 1.0/dir.dot(theCamera.getCameraCoordinates().getZDirection());
     OctreeNode node = cameraNode;
     if (node == null)
       node = rootNode.findFirstNode(ray);
@@ -1832,7 +1799,7 @@ public class Raytracer implements Renderer, Runnable
             oldMaterial = currentMaterial;
             oldMatTrans = currentMatTrans;
             if (currentMaterial == null)
-              n = nextMaterial.indexOfRefraction()/1.0;
+              n = nextMaterial.indexOfRefraction();
             else
               n = nextMaterial.indexOfRefraction()/currentMaterial.indexOfRefraction();
             beta = -(dot+Math.sqrt(n*n-1.0+dot*dot));
@@ -1989,7 +1956,7 @@ public class Raytracer implements Renderer, Runnable
     TextureSpec spec = rt.surfSpec[treeDepth];
     Vec3 dir;
     Ray r = rt.ray[treeDepth+1];
-    double sign, distToLight = 0.0, dot;
+    double sign, distToLight, dot;
     boolean hilight;
     Light lt;
 
@@ -2385,10 +2352,7 @@ public class Raytracer implements Renderer, Runnable
                     {
                       v.set(origin.x+direction.x*x, origin.y+direction.y*x, origin.z+direction.z*x);
                       while (node != null && !node.contains(v))
-                        {
-                          OctreeNode nextNode = node.findNextNode(r);
-                          node = nextNode;
-                        }
+                        node = node.findNextNode(r);
                       if (node == null)
                         break;
                       getScatteredLight(r.rt, treeDepth+1, node, matSpec.eccentricity, totalDist, material, prevMaterial, currentMatTrans, prevMatTrans);
@@ -2551,7 +2515,7 @@ public class Raytracer implements Renderer, Runnable
     RGBColor filter = rt.rayIntensity[treeDepth], lightColor = rt.color[treeDepth];
     Ray r = rt.ray[treeDepth];
     Vec3 dir, pos = r.origin, viewDir = rt.ray[treeDepth-1].direction;
-    double distToLight = 0.0, fatt = 0.0, dot;
+    double distToLight, fatt, dot;
     double ec2 = eccentricity*eccentricity;
     Light lt;
 

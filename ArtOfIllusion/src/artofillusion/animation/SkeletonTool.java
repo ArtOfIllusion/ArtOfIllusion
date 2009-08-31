@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -68,7 +68,7 @@ public class SkeletonTool extends EditingTool
 
   /** Find the positions of all the degree-of-freedom handles. */
   
-  private void findHandlePositions(Mat4 objToScreen, Joint j, Camera cam)
+  private void findHandlePositions(Mat4 objToScreen, Joint j, ViewerCanvas view)
   {
     if (j.parent == null || whichHandles == NO_HANDLES)
       hideHandle = new boolean [] {true, true, true, true};
@@ -76,7 +76,7 @@ public class SkeletonTool extends EditingTool
       hideHandle = new boolean [] {j.angle1.fixed, j.angle2.fixed, j.length.fixed, j.twist.fixed};
     else
       hideHandle = new boolean [4];
-    double scale = 70.0/cam.getScale();
+    double scale = 70.0/view.getScale();
     handlePos = new Vec3 [] {new Vec3(0.0, scale, 0.0), new Vec3(scale, 0.0, 0.0),
         new Vec3(0.0, 0.0, scale), new Vec3(-scale*0.6, -scale*0.6, scale*0.4)};
     Vec3 jointPos = new Vec3(j.coords.getOrigin());
@@ -116,7 +116,7 @@ public class SkeletonTool extends EditingTool
     {
       // Draw the handles for each degree of freedom.
       
-      findHandlePositions(objToScreen, j, cam);
+      findHandlePositions(objToScreen, j, view);
       Vec3 jointPos = new Vec3(j.coords.getOrigin());
       objToScreen.transform(jointPos);
       int jointX = (int) jointPos.x;
@@ -220,7 +220,7 @@ public class SkeletonTool extends EditingTool
     
     if (selectedJoint != null)
     {
-      findHandlePositions(objToScreen, selectedJoint, cam);
+      findHandlePositions(objToScreen, selectedJoint, view);
       for (int i = 0; i < hideHandle.length; i++)
       {
         if (!hideHandle[i] && Math.abs(handlePos[i].x-clickPoint.x) <= 0.5*CLICK_TOL && Math.abs(handlePos[i].y-clickPoint.y) <= 0.5*CLICK_TOL)
@@ -326,7 +326,7 @@ public class SkeletonTool extends EditingTool
         case 2:
           dof = selectedJoint.length;
           origDof = origJoint.length;
-          dist /= -cam.getScale();
+          dist /= -view.getScale();
           name = "Length";
           break;
         case 3:

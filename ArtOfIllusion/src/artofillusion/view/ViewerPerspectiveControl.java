@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,7 +31,13 @@ public class ViewerPerspectiveControl implements ViewerControl
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
-        perspectiveChoice.setSelectedIndex(view.isPerspective() ? 0 : 1);
+        if (view.getBoundCamera() == null)
+        {
+          perspectiveChoice.setEnabled(true);
+          perspectiveChoice.setSelectedIndex(view.isPerspective() ? 0 : 1);
+        }
+        else
+          perspectiveChoice.setEnabled(false);
       }
     });
     perspectiveChoice.addEventLink(ValueChangedEvent.class, new Object() {

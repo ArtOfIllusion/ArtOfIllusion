@@ -26,6 +26,7 @@ import java.io.*;
 public class SceneCamera extends Object3D
 {
   private double fov, depthOfField, focalDist;
+  private boolean perspective;
   private ImageFilter filter[];
   private int extraComponents;
   
@@ -35,7 +36,8 @@ public class SceneCamera extends Object3D
   private static final Property PROPERTIES[] = new Property [] {
     new Property(Translate.text("fieldOfView"), 0.0, 180.0, 30.0),
       new Property(Translate.text("depthOfField"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN/2.0),
-      new Property(Translate.text("focalDist"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN)
+      new Property(Translate.text("focalDist"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN),
+      new Property(Translate.text("Perspective"), true)
   };
 
   static
@@ -129,6 +131,7 @@ public class SceneCamera extends Object3D
     fov = 30.0;
     depthOfField = Camera.DEFAULT_DISTANCE_TO_SCREEN/2.0;
     focalDist = Camera.DEFAULT_DISTANCE_TO_SCREEN;
+    perspective = true;
     filter = new ImageFilter [0];
   }
   
@@ -160,6 +163,16 @@ public class SceneCamera extends Object3D
   public void setFocalDistance(double dist)
   {
     focalDist = dist;
+  }
+
+  public boolean isPerspective()
+  {
+    return perspective;
+  }
+
+  public void setPerspective(boolean perspective)
+  {
+    this.perspective = perspective;
   }
 
   /** Get the list of ImageFilters for this camera. */
@@ -237,10 +250,20 @@ public class SceneCamera extends Object3D
 
   public Mat4 getScreenTransform(int width, int height)
   {
-    double scale = 0.5*height/Math.tan(getFieldOfView()*Math.PI/360.0);
-    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(0.0));
-    screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
-    return screenTransform;
+    if (perspective)
+    {
+      double scale = 0.5*height/Math.tan(getFieldOfView()*Math.PI/360.0);
+      Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(0.0));
+      screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
+      return screenTransform;
+    }
+    else
+    {
+      double scale = 0.5*height/(Math.tan(getFieldOfView()*Math.PI/360.0)*getFocalDistance());
+      Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.identity());
+      screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
+      return screenTransform;
+    }
   }
 
   /**
@@ -257,17 +280,38 @@ public class SceneCamera extends Object3D
 
   public void getRayFromCamera(double x, double y, double dof1, double dof2, Vec3 origin, Vec3 direction)
   {
-    origin.set(0.0, 0.0, 0.0);
-    double scale = focalDist*2.0*Math.tan(getFieldOfView()*Math.PI/360.0);
-    if (dof1 != 0.0)
+    if (perspective)
     {
-      double angle = dof1*2.0*Math.PI;
-      double dofScale = 0.01*scale*dof2*focalDist/depthOfField;
-      origin.x = dofScale*Math.cos(angle);
-      origin.y = dofScale*Math.sin(angle);
+      origin.set(0.0, 0.0, 0.0);
+      double scale = focalDist*2.0*Math.tan(getFieldOfView()*Math.PI/360.0);
+      if (dof1 != 0.0)
+      {
+        double angle = dof1*2.0*Math.PI;
+        double dofScale = 0.01*scale*dof2*focalDist/depthOfField;
+        origin.x = dofScale*Math.cos(angle);
+        origin.y = dofScale*Math.sin(angle);
+      }
+      direction.set(-x*scale-origin.x, -y*scale-origin.y, focalDist);
+      direction.normalize();
     }
-    direction.set(-x*scale-origin.x, -y*scale-origin.y, focalDist);
-    direction.normalize();
+    else
+    {
+      double scale = focalDist*2.0*Math.tan(getFieldOfView()*Math.PI/360.0);
+      origin.set(-scale*x, -scale*y, 0);
+      if (dof1 != 0.0)
+      {
+        double angle = dof1*2.0*Math.PI;
+        double dofScale = 0.01*scale*dof2*focalDist/depthOfField;
+        double dx = dofScale*Math.cos(angle);
+        double dy = dofScale*Math.sin(angle);
+        origin.x += dx;
+        origin.y += dy;
+        direction.set(-dx, -dy, focalDist);
+        direction.normalize();
+      }
+      else
+        direction.set(0.0, 0.0, 1.0);
+    }
   }
 
   public SceneCamera duplicate()
@@ -277,6 +321,7 @@ public class SceneCamera extends Object3D
     sc.fov = fov;
     sc.depthOfField = depthOfField;
     sc.focalDist = focalDist;
+    sc.perspective = perspective;
     sc.filter = new ImageFilter [filter.length];
     for (int i = 0; i < filter.length; i++)
       sc.filter[i] = filter[i].duplicate();
@@ -290,6 +335,7 @@ public class SceneCamera extends Object3D
     fov = sc.fov;
     depthOfField = sc.depthOfField;
     focalDist = sc.focalDist;
+    perspective = sc.perspective;
     filter = new ImageFilter [sc.filter.length];
     for (int i = 0; i < filter.length; i++)
       filter[i] = sc.filter[i].duplicate();
@@ -382,6 +428,7 @@ public class SceneCamera extends Object3D
     final ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
     final ValueField dofField = new ValueField(depthOfField, ValueField.POSITIVE);
     final ValueField fdField = new ValueField(focalDist, ValueField.POSITIVE);
+    BCheckBox perspectiveBox = new BCheckBox(Translate.text("Perspective"), perspective);
     BButton filtersButton = Translate.button("filters", new Object() {
       void processEvent()
       {
@@ -394,13 +441,14 @@ public class SceneCamera extends Object3D
       }
     }, "processEvent");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),
-		new Widget[] {fovSlider, dofField, fdField, filtersButton},
-		new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist"), null});
+		new Widget[] {fovSlider, dofField, fdField, perspectiveBox, filtersButton},
+		new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist"), null, null});
     if (dlg.clickedOk())
     {
       fov = fovSlider.getValue();
       depthOfField = dofField.getValue();
       focalDist = fdField.getValue();
+      perspective = perspectiveBox.getState();
     }
     
     // If there are any Pose tracks for this object, they need to have their subtracks updated
@@ -448,11 +496,15 @@ public class SceneCamera extends Object3D
     super(in, theScene);
 
     short version = in.readShort();
-    if (version < 0 ||version > 1)
+    if (version < 0 ||version > 2)
       throw new InvalidObjectException("");
     fov = in.readDouble();
     depthOfField = in.readDouble();
     focalDist = in.readDouble();
+    if (version < 2)
+      perspective = true;
+    else
+      perspective = in.readBoolean();
     if (version == 0)
       filter = new ImageFilter [0];
     else
@@ -479,10 +531,11 @@ public class SceneCamera extends Object3D
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(1);
+    out.writeShort(2);
     out.writeDouble(fov);
     out.writeDouble(depthOfField);
     out.writeDouble(focalDist);
+    out.writeBoolean(perspective);
     out.writeInt(filter.length);
     for (int i = 0; i < filter.length; i++)
     {
@@ -506,19 +559,22 @@ public class SceneCamera extends Object3D
         return depthOfField;
       case 2:
         return focalDist;
+      case 3:
+        return perspective;
     }
     return null;
   }
 
   public void setPropertyValue(int index, Object value)
   {
-    double val = (Double) value;
     if (index == 0)
-      fov = val;
+      fov = (Double) value;
     else if (index == 1)
-      depthOfField = val;
+      depthOfField = (Double) value;
     else if (index == 2)
-      focalDist = val;
+      focalDist = (Double) value;
+    else if (index == 3)
+      perspective = (Boolean) value;
   }
 
   /* Return a Keyframe which describes the current pose of this object. */

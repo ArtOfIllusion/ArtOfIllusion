@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ public class ViewerScaleControl implements ViewerControl
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
-        if (view.isPerspective())
+        if (view.isPerspective() || view.getBoundCamera() != null)
           scaleField.setEnabled(false);
         else
         {

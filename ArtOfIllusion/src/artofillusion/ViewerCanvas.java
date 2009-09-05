@@ -601,7 +601,7 @@ public abstract class ViewerCanvas extends CustomWidget
       Color minorColor = new Color(lineColor.getRed()*scale2 +backgroundColor.getRed()*scale1,
           lineColor.getGreen()*scale2 +backgroundColor.getGreen()*scale1,
           lineColor.getBlue()*scale2 +backgroundColor.getBlue()*scale1);
-      if (!isPerspective())
+      if ((boundCamera == null && !isPerspective()) || (boundCamera != null && !((SceneCamera) boundCamera.getObject()).isPerspective()))
       {
         // Parallel mode, so draw a flat grid.
         

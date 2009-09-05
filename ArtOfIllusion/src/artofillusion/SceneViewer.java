@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -112,7 +112,10 @@ public class SceneViewer extends ViewerCanvas
       repaint();
     }
     else
+    {
       boundCamera = null;
+      dispatchEvent(viewChangedEvent);
+    }
   }
   
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,

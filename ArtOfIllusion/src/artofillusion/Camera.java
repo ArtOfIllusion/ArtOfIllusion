@@ -135,7 +135,7 @@ public class Camera implements Cloneable
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
-    frontClipPlane = newViewDist/20.0;
+    frontClipPlane = distToScreen/20.0;
     perspective = true;
   }
   
@@ -147,7 +147,7 @@ public class Camera implements Cloneable
   {
     scale = newScale;
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale);
-    screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
+    screenTransform = Mat4.translation((double) newHres/2.0, (double) newVres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
     frontClipPlane = -Double.MAX_VALUE;
     perspective = false;

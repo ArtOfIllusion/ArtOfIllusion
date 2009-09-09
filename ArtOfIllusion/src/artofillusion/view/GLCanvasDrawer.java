@@ -103,16 +103,11 @@ public class GLCanvasDrawer implements CanvasDrawer
     lastObjectTransform = camera.getObjectToView();
     gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glLoadIdentity();
-    if (camera.isPerspective())
-    {
-      double scale = 0.01*camera.getClipDistance()/camera.getDistToScreen();
+    double scale = -1.0/camera.getViewToScreen().m11;
+    if (view.isPerspective())
       gl.glFrustum(-0.5*bounds.width*scale, 0.5*bounds.width*scale, -0.5*bounds.height*scale, 0.5*bounds.height*scale, minDepth, maxDepth);
-    }
     else
-    {
-      double scale = 1.0/view.getScale();
       gl.glOrtho(-0.5*bounds.width*scale, 0.5*bounds.width*scale, -0.5*bounds.height*scale, 0.5*bounds.height*scale, minDepth, maxDepth);
-    }
     Mat4 toView = lastObjectTransform;
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glLoadMatrixd(new double [] {
@@ -299,22 +294,21 @@ public class GLCanvasDrawer implements CanvasDrawer
     prepareBuffers(box.size()*12);
     vertBuffer.clear();
     float d = (float) -(minDepth+0.001);
-    for (int i = 0; i < box.size(); i++)
+    for (Rectangle r : box)
     {
-      Rectangle r = box.get(i);
       float y1 = bounds.height-r.y;
       float scale = (float) (view.isPerspective() ? -d/minDepth : 1.0);
-      vertBuffer.put((float) r.x*scale);
-      vertBuffer.put((float) y1*scale);
+      vertBuffer.put(r.x*scale);
+      vertBuffer.put(y1*scale);
       vertBuffer.put(d);
-      vertBuffer.put((float) r.x*scale);
-      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put(r.x*scale);
+      vertBuffer.put((y1-r.height)*scale);
       vertBuffer.put(d);
-      vertBuffer.put((float) (r.x+r.width)*scale);
-      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put((r.x+r.width)*scale);
+      vertBuffer.put((y1-r.height)*scale);
       vertBuffer.put(d);
-      vertBuffer.put((float) (r.x+r.width)*scale);
-      vertBuffer.put((float) y1*scale);
+      vertBuffer.put((r.x+r.width)*scale);
+      vertBuffer.put(y1*scale);
       vertBuffer.put(d);
     }
     gl.glDrawArrays(GL.GL_QUADS, 0, box.size()*4);
@@ -353,17 +347,17 @@ public class GLCanvasDrawer implements CanvasDrawer
       float y1 = bounds.height-r.y;
       float d = -depth.get(i).floatValue();
       float scale = (float) (view.isPerspective() ? -d/minDepth : 1.0);
-      vertBuffer.put((float) r.x*scale);
-      vertBuffer.put((float) y1*scale);
+      vertBuffer.put(r.x*scale);
+      vertBuffer.put(y1*scale);
       vertBuffer.put(d);
-      vertBuffer.put((float) r.x*scale);
-      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put(r.x*scale);
+      vertBuffer.put((y1-r.height)*scale);
       vertBuffer.put(d);
-      vertBuffer.put((float) (r.x+r.width)*scale);
-      vertBuffer.put((float) (y1-r.height)*scale);
+      vertBuffer.put((r.x+r.width)*scale);
+      vertBuffer.put((y1-r.height)*scale);
       vertBuffer.put(d);
-      vertBuffer.put((float) (r.x+r.width)*scale);
-      vertBuffer.put((float) y1*scale);
+      vertBuffer.put((r.x+r.width)*scale);
+      vertBuffer.put(y1*scale);
       vertBuffer.put(d);
     }
     gl.glDrawArrays(GL.GL_QUADS, 0, box.size()*4);
@@ -697,7 +691,6 @@ public class GLCanvasDrawer implements CanvasDrawer
     catch (InterruptedException ex)
     {
       ex.printStackTrace();
-      return;
     }
   }
 

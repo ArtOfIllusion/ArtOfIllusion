@@ -301,6 +301,8 @@ public abstract class ViewerCanvas extends CustomWidget
   
   public boolean isPerspective()
   {
+    if (boundCamera != null)
+      return ((SceneCamera) boundCamera.getObject()).isPerspective();
     return perspective;
   }
   
@@ -601,7 +603,7 @@ public abstract class ViewerCanvas extends CustomWidget
       Color minorColor = new Color(lineColor.getRed()*scale2 +backgroundColor.getRed()*scale1,
           lineColor.getGreen()*scale2 +backgroundColor.getGreen()*scale1,
           lineColor.getBlue()*scale2 +backgroundColor.getBlue()*scale1);
-      if ((boundCamera == null && !isPerspective()) || (boundCamera != null && !((SceneCamera) boundCamera.getObject()).isPerspective()))
+      if (!isPerspective())
       {
         // Parallel mode, so draw a flat grid.
         

@@ -535,34 +535,34 @@ public class Raytracer implements Renderer, Runnable
   public Map<String, Object> getConfiguration()
   {
     HashMap<String, Object> map = new HashMap<String, Object>();
-    map.put("maxRayDepth", new Integer(maxRayDepth));
-    map.put("minRayIntensity", new Float(minRayIntensity));
-    map.put("materialStepSize", new Double(stepSize));
-    map.put("textureSmoothing", new Double(smoothing));
-    map.put("extraGISmoothing", new Double(extraGISmoothing));
-    map.put("extraGIEnvSmoothing", new Double(extraGIEnvSmoothing));
-    map.put("reduceAccuracyForDistant", Boolean.valueOf(adaptive));
-    map.put("russianRouletteSampling", Boolean.valueOf(roulette));
-    map.put("useLessMemory", Boolean.valueOf(reducedMemory));
-    map.put("maxSurfaceError", new Double(surfaceError));
-    map.put("antialiasing", new Integer(antialiasLevel));
-    map.put("depthOfField", Boolean.valueOf(depth));
-    map.put("gloss", Boolean.valueOf(gloss));
-    map.put("softShadows", Boolean.valueOf(penumbra));
-    map.put("minRaysPerPixel", new Integer(minRays));
-    map.put("maxRaysPerPixel", new Integer(maxRays));
-    map.put("transparentBackground", Boolean.valueOf(transparentBackground));
-    map.put("highDynamicRange", Boolean.valueOf(generateHDR));
-    map.put("globalIlluminationMode", new Integer(giMode));
-    map.put("raysToSampleEnvironment", new Integer(diffuseRays));
-    map.put("globalIlluminationPhotons", new Integer(globalPhotons));
-    map.put("globalIlluminationPhotonsInEstimate", new Integer(globalNeighborPhotons));
-    map.put("caustics", Boolean.valueOf(caustics));
-    map.put("causticsPhotons", new Integer(causticsPhotons));
-    map.put("causticsPhotonsInEstimate", new Integer(causticsNeighborPhotons));
-    map.put("scatteringMode", new Integer(scatterMode));
-    map.put("scatteringPhotons", new Integer(volumePhotons));
-    map.put("scatteringPhotonsInEstimate", new Integer(volumeNeighborPhotons));
+    map.put("maxRayDepth", maxRayDepth);
+    map.put("minRayIntensity", minRayIntensity);
+    map.put("materialStepSize", stepSize);
+    map.put("textureSmoothing", smoothing);
+    map.put("extraGISmoothing", extraGISmoothing);
+    map.put("extraGIEnvSmoothing", extraGIEnvSmoothing);
+    map.put("reduceAccuracyForDistant", adaptive);
+    map.put("russianRouletteSampling", roulette);
+    map.put("useLessMemory", reducedMemory);
+    map.put("maxSurfaceError", surfaceError);
+    map.put("antialiasing", antialiasLevel);
+    map.put("depthOfField", depth);
+    map.put("gloss", gloss);
+    map.put("softShadows", penumbra);
+    map.put("minRaysPerPixel", minRays);
+    map.put("maxRaysPerPixel", maxRays);
+    map.put("transparentBackground", transparentBackground);
+    map.put("highDynamicRange", generateHDR);
+    map.put("globalIlluminationMode", giMode);
+    map.put("raysToSampleEnvironment", diffuseRays);
+    map.put("globalIlluminationPhotons", globalPhotons);
+    map.put("globalIlluminationPhotonsInEstimate", globalNeighborPhotons);
+    map.put("caustics", caustics);
+    map.put("causticsPhotons", causticsPhotons);
+    map.put("causticsPhotonsInEstimate", causticsNeighborPhotons);
+    map.put("scatteringMode", scatterMode);
+    map.put("scatteringPhotons", volumePhotons);
+    map.put("scatteringPhotonsInEstimate", volumeNeighborPhotons);
     return map;
   }
   
@@ -570,7 +570,7 @@ public class Raytracer implements Renderer, Runnable
   {
     needCopyToUI = true;
     if ("maxRayDepth".equals(property))
-      maxRayDepth = ((Integer) value).intValue();
+      maxRayDepth = (Integer) value;
     else if ("minRayIntensity".equals(property))
       minRayIntensity = ((Number) value).floatValue();
     else if ("materialStepSize".equals(property))
@@ -582,49 +582,49 @@ public class Raytracer implements Renderer, Runnable
     else if ("extraGIEnvSmoothing".equals(property))
       extraGIEnvSmoothing = ((Number) value).doubleValue();
     else if ("reduceAccuracyForDistant".equals(property))
-      adaptive = ((Boolean) value).booleanValue();
+      adaptive = (Boolean) value;
     else if ("russianRouletteSampling".equals(property))
-      roulette = ((Boolean) value).booleanValue();
+      roulette = (Boolean) value;
     else if ("useLessMemory".equals(property))
-      reducedMemory = ((Boolean) value).booleanValue();
+      reducedMemory = (Boolean) value;
     else if ("maxSurfaceError".equals(property))
       surfaceError = ((Number) value).doubleValue();
     else if ("antialiasing".equals(property))
-      antialiasLevel = ((Integer) value).intValue();
+      antialiasLevel = (Integer) value;
     else if ("depthOfField".equals(property))
-      depth = ((Boolean) value).booleanValue();
+      depth = (Boolean) value;
     else if ("gloss".equals(property))
-      gloss = ((Boolean) value).booleanValue();
+      gloss = (Boolean) value;
     else if ("softShadows".equals(property))
-      penumbra = ((Boolean) value).booleanValue();
+      penumbra = (Boolean) value;
     else if ("minRaysPerPixel".equals(property))
-      minRays = ((Integer) value).intValue();
+      minRays = (Integer) value;
     else if ("maxRaysPerPixel".equals(property))
-      maxRays = ((Integer) value).intValue();
+      maxRays = (Integer) value;
     else if ("transparentBackground".equals(property))
-      transparentBackground = ((Boolean) value).booleanValue();
+      transparentBackground = (Boolean) value;
     else if ("highDynamicRange".equals(property))
-      generateHDR = ((Boolean) value).booleanValue();
+      generateHDR = (Boolean) value;
     else if ("globalIlluminationMode".equals(property))
-      giMode = ((Integer) value).intValue();
+      giMode = (Integer) value;
     else if ("raysToSampleEnvironment".equals(property))
-      diffuseRays = ((Integer) value).intValue();
+      diffuseRays = (Integer) value;
     else if ("globalIlluminationPhotons".equals(property))
-      globalPhotons = ((Integer) value).intValue();
+      globalPhotons = (Integer) value;
     else if ("globalIlluminationPhotonsInEstimate".equals(property))
-      globalNeighborPhotons = ((Integer) value).intValue();
+      globalNeighborPhotons = (Integer) value;
     else if ("caustics".equals(property))
-      caustics = ((Boolean) value).booleanValue();
+      caustics = (Boolean) value;
     else if ("causticsPhotons".equals(property))
-      causticsPhotons = ((Integer) value).intValue();
+      causticsPhotons = (Integer) value;
     else if ("causticsPhotonsInEstimate".equals(property))
-      causticsNeighborPhotons = ((Integer) value).intValue();
+      causticsNeighborPhotons = (Integer) value;
     else if ("scatteringMode".equals(property))
-      scatterMode = ((Integer) value).intValue();
+      scatterMode = (Integer) value;
     else if ("scatteringPhotons".equals(property))
-      volumePhotons = ((Integer) value).intValue();
+      volumePhotons = (Integer) value;
     else if ("scatteringPhotonsInEstimate".equals(property))
-      volumeNeighborPhotons = ((Integer) value).intValue();
+      volumeNeighborPhotons = (Integer) value;
   }
   
   public void configurePreview()
@@ -971,16 +971,16 @@ public class Raytracer implements Renderer, Runnable
       // Find a bounding box around all objects that can generate caustics.
 
       BoundingBox bounds = null;
-      for (int i = 0; i < sceneObject.length; i++)
+      for (RTObject obj : sceneObject)
       {
-        Texture tex = sceneObject[i].getTextureMapping().getTexture();
-        MaterialMapping mm = sceneObject[i].getMaterialMapping();
+        Texture tex = obj.getTextureMapping().getTexture();
+        MaterialMapping mm = obj.getMaterialMapping();
         if (tex.hasComponent(Texture.SPECULAR_COLOR_COMPONENT) || (tex.hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT) && mm != null && mm.getMaterial().indexOfRefraction() != 1.0))
         {
           if (bounds == null)
-            bounds = sceneObject[i].getBounds();
+            bounds = obj.getBounds();
           else
-            bounds = bounds.merge(sceneObject[i].getBounds());
+            bounds = bounds.merge(obj.getBounds());
         }
       }
       if (bounds == null)
@@ -994,16 +994,16 @@ public class Raytracer implements Renderer, Runnable
       // Find a bounding box around all objects with scattering materials.
 
       BoundingBox bounds = null;
-      for (int i = 0; i < sceneObject.length; i++)
+      for (RTObject obj : sceneObject)
       {
-        Texture tex = sceneObject[i].getTextureMapping().getTexture();
-        MaterialMapping mm = sceneObject[i].getMaterialMapping();
+        Texture tex = obj.getTextureMapping().getTexture();
+        MaterialMapping mm = obj.getMaterialMapping();
         if (tex.hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT) && mm != null && mm.getMaterial().isScattering())
         {
           if (bounds == null)
-            bounds = sceneObject[i].getBounds();
+            bounds = obj.getBounds();
           else
-            bounds = bounds.merge(sceneObject[i].getBounds());
+            bounds = bounds.merge(obj.getBounds());
         }
       }
       if (bounds == null)
@@ -1020,13 +1020,13 @@ public class Raytracer implements Renderer, Runnable
   {
     List<PhotonSourceFactory> factories = PluginRegistry.getPlugins(PhotonSourceFactory.class);
     ArrayList<PhotonSource> sources = new ArrayList<PhotonSource>();
-    for (int i = 0; i < light.length; i++)
+    for (RTLight lt : light)
     {
       // First give plugins a chance to handle it.
 
       boolean processed = false;
       for (PhotonSourceFactory factory : factories)
-        if (factory.processLight(light[i], map, sources))
+        if (factory.processLight(lt, map, sources))
         {
           processed = true;
           break;
@@ -1036,21 +1036,21 @@ public class Raytracer implements Renderer, Runnable
 
       // Process it in the default way.
 
-      if (light[i].getLight() instanceof DirectionalLight)
-        sources.add(new DirectionalPhotonSource((DirectionalLight) light[i].getLight(), light[i].getCoords(), map));
-      else if (light[i].getLight() instanceof PointLight)
-        sources.add(new PointPhotonSource((PointLight) light[i].getLight(), light[i].getCoords(), map));
-      else if (light[i].getLight() instanceof SpotLight)
-        sources.add(new SpotlightPhotonSource((SpotLight) light[i].getLight(), light[i].getCoords(), map));
+      if (lt.getLight() instanceof DirectionalLight)
+        sources.add(new DirectionalPhotonSource((DirectionalLight) lt.getLight(), lt.getCoords(), map));
+      else if (lt.getLight() instanceof PointLight)
+        sources.add(new PointPhotonSource((PointLight) lt.getLight(), lt.getCoords(), map));
+      else if (lt.getLight() instanceof SpotLight)
+        sources.add(new SpotlightPhotonSource((SpotLight) lt.getLight(), lt.getCoords(), map));
     }
     ArrayList<PhotonSource> objectSources = new ArrayList<PhotonSource>();
-    for (int i = 0; i < sceneObject.length; i++)
+    for (RTObject obj : sceneObject)
     {
       // First give plugins a chance to handle it.
 
       boolean processed = false;
       for (PhotonSourceFactory factory : factories)
-        if (factory.processObject(sceneObject[i], map, sources))
+        if (factory.processObject(obj, map, sources))
         {
           processed = true;
           break;
@@ -1060,23 +1060,23 @@ public class Raytracer implements Renderer, Runnable
 
       // Process it in the default way.
 
-      if (!sceneObject[i].getTextureMapping().getTexture().hasComponent(Texture.EMISSIVE_COLOR_COMPONENT))
+      if (!obj.getTextureMapping().getTexture().hasComponent(Texture.EMISSIVE_COLOR_COMPONENT))
         continue;
       PhotonSource src;
-      if (sceneObject[i] instanceof RTTriangle)
-        src = new TrianglePhotonSource(((RTTriangle) sceneObject[i]).tri, map);
-      else if (sceneObject[i] instanceof RTTriangleLowMemory)
-        src = new TrianglePhotonSource(((RTTriangleLowMemory) sceneObject[i]).tri, map);
-      else if (sceneObject[i] instanceof RTDisplacedTriangle)
-        src = new DisplacedTrianglePhotonSource((RTDisplacedTriangle) sceneObject[i], map);
-      else if (sceneObject[i] instanceof RTEllipsoid)
-        src = new EllipsoidPhotonSource((RTEllipsoid) sceneObject[i], map);
-      else if (sceneObject[i] instanceof RTSphere)
-        src = new EllipsoidPhotonSource((RTSphere) sceneObject[i], map);
-      else if (sceneObject[i] instanceof RTCylinder)
-        src = new CylinderPhotonSource((RTCylinder) sceneObject[i], map);
-      else if (sceneObject[i] instanceof RTCube)
-        src = new CubePhotonSource((RTCube) sceneObject[i], map);
+      if (obj instanceof RTTriangle)
+        src = new TrianglePhotonSource(((RTTriangle) obj).tri, map);
+      else if (obj instanceof RTTriangleLowMemory)
+        src = new TrianglePhotonSource(((RTTriangleLowMemory) obj).tri, map);
+      else if (obj instanceof RTDisplacedTriangle)
+        src = new DisplacedTrianglePhotonSource((RTDisplacedTriangle) obj, map);
+      else if (obj instanceof RTEllipsoid)
+        src = new EllipsoidPhotonSource((RTEllipsoid) obj, map);
+      else if (obj instanceof RTSphere)
+        src = new EllipsoidPhotonSource((RTSphere) obj, map);
+      else if (obj instanceof RTCylinder)
+        src = new CylinderPhotonSource((RTCylinder) obj, map);
+      else if (obj instanceof RTCube)
+        src = new CubePhotonSource((RTCube) obj, map);
       else
         continue;
       if (src.getTotalIntensity() > 0.0)

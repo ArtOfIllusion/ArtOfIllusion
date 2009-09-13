@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Francois Guillet and Peter Eastman
+/* Copyright (C) 2006-2009 by Francois Guillet and Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -205,6 +205,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   public void setNPQAxes(Vec3 nDir, Vec3 pDir, Vec3 qDir)
   {
     npqModeAxes = new Vec3[] {new Vec3(pDir), new Vec3(qDir), new Vec3(nDir)};
+    npqRotHandles[0].setAxis(nDir, pDir);
+    npqRotHandles[1].setAxis(pDir, qDir);
+    npqRotHandles[2].setAxis(qDir, nDir);
   }
 
   /**

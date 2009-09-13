@@ -219,16 +219,20 @@ public class MoveScaleRotateObjectTool extends EditingTool
 
           CoordinateSystem coords = originalCoords[i].duplicate();
           coords.transformOrigin(transform);
-          objects.get(i).setCoords(coords);
+          objects.get(i).getCoords().copyCoords(coords);
         }
 
         // Work out the scale factors for the size.
 
         double xscale = 1.0, yscale = 1.0, zscale = 1.0;
-        Vec3 xdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(1.0, 0.0, 0.0)));
-        Vec3 ydir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 1.0, 0.0)));
-        Vec3 zdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 0.0, 1.0)));
-        if (ev.getAxis() == Compound3DManipulator.UV)
+        Vec3 xdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(1.0, 0.0, 0.0)).normalize());
+        Vec3 ydir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 1.0, 0.0)).normalize());
+        Vec3 zdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 0.0, 1.0)).normalize());
+        if (ev.getMouseEvent().isShiftDown())
+        {
+          xscale = yscale = zscale = ev.getPrimaryScale();
+        }
+        else if (ev.getAxis() == Compound3DManipulator.UV)
         {
           Vec3 uDir = manipulator.getAxisDirection(Compound3DManipulator.U, ev.getView());
           Vec3 vDir = manipulator.getAxisDirection(Compound3DManipulator.V, ev.getView());
@@ -292,14 +296,14 @@ public class MoveScaleRotateObjectTool extends EditingTool
         }
         CoordinateSystem coords = originalCoords[i].duplicate();
         coords.transformCoordinates(transform);
-        objects.get(i).setCoords(coords);
+        objects.get(i).getCoords().copyCoords(coords);
       }
     }
   }
 
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
-    if (e.getKeyCode() == KeyEvent.VK_W)
+    if (e.getKeyCode() == KeyEvent.VK_W && e.getModifiersEx() == 0)
     {
       // Change the axis mode.
 

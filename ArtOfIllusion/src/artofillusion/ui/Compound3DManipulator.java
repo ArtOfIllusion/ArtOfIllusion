@@ -752,7 +752,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
    * screen coordinates.
    */
 
-  private Rectangle findScreenBounds(BoundingBox b, Camera cam)
+  public Rectangle findScreenBounds(BoundingBox b, Camera cam)
   {
     Mat4 m = cam.getObjectToWorld();
     cam.setObjectTransform(cam.getViewToWorld());
@@ -1049,7 +1049,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   public class HandlePressedEvent extends HandleEvent
   {
-    private HandlePressedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event)
+    public HandlePressedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event)
     {
       super(view, handleType, axis, screenBounds, selectionBounds, event);
     }
@@ -1068,7 +1068,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
      * Create a HandleDraggedEvent for a MOVE drag.
      */
 
-    private HandleDraggedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event, Mat4 transform)
+    public HandleDraggedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event, Mat4 transform)
     {
       super(view, handleType, axis, screenBounds, selectionBounds, event);
       this.transform = transform;
@@ -1078,7 +1078,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
      * Create a HandleDraggedEvent for a ROTATE drag.
      */
 
-    private HandleDraggedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event, Mat4 transform, double angle)
+    public HandleDraggedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event, Mat4 transform, double angle)
     {
       this(view, handleType, axis, screenBounds, selectionBounds, event, transform);
       this.angle = angle;
@@ -1088,7 +1088,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
      * Create a HandleDraggedEvent for a SCALE drag.
      */
 
-    private HandleDraggedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event, Mat4 transform, double scale1, double scale2)
+    public HandleDraggedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event, Mat4 transform, double scale1, double scale2)
     {
       this(view, handleType, axis, screenBounds, selectionBounds, event, transform);
       this.scale1 = scale1;
@@ -1139,7 +1139,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   public class HandleReleasedEvent extends HandleEvent
   {
-    private HandleReleasedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event)
+    public HandleReleasedEvent(ViewerCanvas view, HandleType handleType, Axis axis, Rectangle screenBounds, BoundingBox selectionBounds, WidgetMouseEvent event)
     {
       super(view, handleType, axis, screenBounds, selectionBounds, event);
     }

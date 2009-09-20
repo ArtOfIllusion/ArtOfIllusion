@@ -16,6 +16,7 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 
 import java.awt.event.*;
+import java.awt.*;
 import java.util.*;
 
 import buoy.event.*;
@@ -27,10 +28,12 @@ import buoy.widget.*;
 
 public class MoveScaleRotateObjectTool extends EditingTool
 {
-  private boolean dragInProgress;
+  private boolean dragInProgress, draggingObjects;
   private ArrayList<ObjectInfo> objects;
   private CoordinateSystem originalCoords[];
   private Object3D originalObjects[];
+  private ObjectInfo clickedObject;
+  private Point clickPoint;
   private Vec3 rotationCenter[];
   private UndoRecord undo;
   private final Compound3DManipulator manipulator;
@@ -105,18 +108,54 @@ public class MoveScaleRotateObjectTool extends EditingTool
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
     dragInProgress = false;
+    draggingObjects = false;
     if (selectionBounds != null)
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
+  {
+    draggingObjects = true;
+    BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
+    Rectangle screenBounds = manipulator.findScreenBounds(selectionBounds, view.getCamera());
+    handlePressed(manipulator.new HandlePressedEvent(view, Compound3DManipulator.MOVE, Compound3DManipulator.ALL, screenBounds, selectionBounds, e));
+    clickedObject = view.getScene().getObject(obj);
+    clickPoint = e.getPoint();
+  }
+
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
-    manipulator.mouseDragged(e, view);
+    if (draggingObjects)
+    {
+      BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
+      Rectangle screenBounds = manipulator.findScreenBounds(selectionBounds, view.getCamera());
+      Point dragPoint = e.getPoint();
+      int dx = dragPoint.x - clickPoint.x;
+      int dy = dragPoint.y - clickPoint.y;
+      if (e.isShiftDown() && !e.isControlDown())
+        {
+          if (Math.abs(dx) > Math.abs(dy))
+            dy = 0;
+          else
+            dx = 0;
+        }
+      Vec3 v;
+      if (e.isControlDown())
+        v = view.getCamera().getCameraCoordinates().getZDirection().times(-dy*0.01);
+      else
+        v = view.getCamera().findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
+      handleDragged(manipulator.new HandleDraggedEvent(view, Compound3DManipulator.MOVE, Compound3DManipulator.ALL, screenBounds, selectionBounds, e, Mat4.translation(v.x, v.y, v.z)));
+    }
+    else
+      manipulator.mouseDragged(e, view);
   }
 
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    manipulator.mouseReleased(e, view);
+    if (draggingObjects)
+      handleReleased(null);
+    else
+      manipulator.mouseReleased(e, view);
   }
 
   protected void handlePressed(HandlePressedEvent ev)

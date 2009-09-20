@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -71,7 +71,7 @@ public class MoveObjectTool extends EditingTool
     objectPos = new Vec3 [toMove.size()];
     for (i = 0; i < objectPos.length; i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.elementAt(i);
         objectPos[i] = info.getCoords().getOrigin();
       }
     clickPoint = e.getPoint();
@@ -92,7 +92,7 @@ public class MoveObjectTool extends EditingTool
         theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
         for (i = 0; i < toMove.size(); i++)
           {
-            ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+            ObjectInfo info = toMove.elementAt(i);
             c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
@@ -113,7 +113,7 @@ public class MoveObjectTool extends EditingTool
       v = cam.findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
     for (i = 0; i < toMove.size(); i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.elementAt(i);
         c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
@@ -208,7 +208,7 @@ public class MoveObjectTool extends EditingTool
       toMove.addElement(theScene.getObject(sel[i]));
     for (i = 0; i < toMove.size(); i++)
     {
-      c = ((ObjectInfo) toMove.elementAt(i)).getCoords();
+      c = toMove.elementAt(i).getCoords();
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
       c.setOrigin(c.getOrigin().plus(v));
     }

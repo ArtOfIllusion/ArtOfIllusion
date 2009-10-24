@@ -42,7 +42,7 @@ public class AnimationPreviewer implements Runnable
   private byte imageData[][];
   private NumberFormat format;
   
-  static int currentCamera = 0, width = 320, height = 240, fps = 15;
+  static int currentCamera = 0, width = 320, height = 240, fps = 15, mode = 2;
   static double startTime = 0.0, endTime = 1.0;
 
   public AnimationPreviewer(LayoutWindow parent)
@@ -89,7 +89,7 @@ public class AnimationPreviewer implements Runnable
        Translate.text("menu.texturedDisplay"),
         Translate.text("menu.transparentDisplay")
     });
-    modeChoice.setSelectedIndex(parent.getView().getRenderMode());
+    modeChoice.setSelectedIndex(mode);
     widthField = new ValueField((double) width, ValueField.POSITIVE+ValueField.INTEGER);
     heightField = new ValueField((double) height, ValueField.POSITIVE+ValueField.INTEGER);
     startField = new ValueField(startTime, ValueField.NONE);
@@ -107,6 +107,7 @@ public class AnimationPreviewer implements Runnable
       return;
     currentCamera = camChoice.getSelectedIndex();
     sceneCamera = cameras[currentCamera];
+    mode = modeChoice.getSelectedIndex();
     width = (int) widthField.getValue();
     height = (int) heightField.getValue();
     startTime = startField.getValue();
@@ -127,7 +128,7 @@ public class AnimationPreviewer implements Runnable
     setLabels(0.0, 0);
     content.add(canvas = new SceneViewer(theScene, new RowContainer(), parent, true));
     canvas.setPreferredSize(new Dimension(AnimationPreviewer.width, AnimationPreviewer.height));
-    canvas.setRenderMode(modeChoice.getSelectedIndex());
+    canvas.setRenderMode(mode);
     canvas.setBoundCamera(sceneCamera);
     canvas.setPerspective(true);
     canvas.setTool(new MoveViewTool(parent) {

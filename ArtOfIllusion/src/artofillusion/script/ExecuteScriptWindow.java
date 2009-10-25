@@ -52,6 +52,7 @@ public class ExecuteScriptWindow extends BFrame
     buttons.add(Translate.button("Save", "...", this, "saveScript"));
     buttons.add(Translate.button("close", this, "closeWindow"));
     addEventLink(WindowClosingEvent.class, this, "closeWindow");
+    scriptText.setCaretPosition(0);
     pack();
     UIUtilities.centerWindow(this);
     setVisible(true);
@@ -84,6 +85,7 @@ public class ExecuteScriptWindow extends BFrame
         buf.append((char) c);
       in.close();
       scriptText.setText(buf.toString());
+      scriptText.setCaretPosition(0);
     }
     catch (Exception ex)
     {

@@ -51,6 +51,7 @@ public class ExecuteScriptWindow extends BFrame
     buttons.add(Translate.button("Load", "...", this, "loadScript"));
     buttons.add(Translate.button("Save", "...", this, "saveScript"));
     buttons.add(Translate.button("close", this, "closeWindow"));
+    addEventLink(WindowClosingEvent.class, this, "closeWindow");
     pack();
     UIUtilities.centerWindow(this);
     setVisible(true);

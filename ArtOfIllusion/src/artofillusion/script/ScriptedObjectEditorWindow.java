@@ -50,6 +50,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("Save", "...", this, "saveScript"));
     buttons.add(Translate.button("scriptParameters", this, "editParameters"));
     buttons.add(Translate.button("cancel", this, "dispose"));
+    addEventLink(WindowClosingEvent.class, this, "commitChanges");
     pack();
     UIUtilities.centerWindow(this);
     setVisible(true);

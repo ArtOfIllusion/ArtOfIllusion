@@ -113,6 +113,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     pack();
     UIUtilities.centerDialog(this, parent);
     UIUtilities.fitWindowToScreen(this);
+    addEventLink(WindowClosingEvent.class, this, "doCancel");
   }
   
   private void doCancel()

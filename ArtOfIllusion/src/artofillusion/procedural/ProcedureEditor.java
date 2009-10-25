@@ -102,8 +102,9 @@ public class ProcedureEditor extends CustomWidget
       top.add(new BLabel(Translate.text("Name")+':'), 1, 0);
       top.add(nameField = new BTextField(owner.getName()), 2, 0);
     }
-    top.add(Translate.button("ok", this, "actionPerformed"), 3, 0);
+    top.add(Translate.button("ok", this, "doOk"), 3, 0);
     top.add(Translate.button("cancel", this, "actionPerformed"), 4, 0);
+    parent.addEventLink(WindowClosingEvent.class, this, "doOk");
     content.add(top, BorderContainer.NORTH);
     
     // Let each output module calculate its preferred width, then set all of them to be
@@ -445,15 +446,6 @@ public class ProcedureEditor extends CustomWidget
         parent.dispose();
         return;
       }
-    if (command.equals("ok"))
-      {
-        if (owner.canEditName())
-          owner.setName(nameField.getText());
-        owner.acceptEdits(this);
-        owner.disposePreview(preview);
-        parent.dispose();
-        return;
-      }
     if (command.equals("undo"))
       {
         undo();
@@ -622,6 +614,17 @@ public class ProcedureEditor extends CustomWidget
     }
     setCursor(Cursor.getDefaultCursor());
     repaint();
+  }
+
+  /** Save changes and close the window. */
+
+  private void doOk()
+  {
+      if (owner.canEditName())
+        owner.setName(nameField.getText());
+      owner.acceptEdits(this);
+      owner.disposePreview(preview);
+      parent.dispose();
   }
   
   /** Add a module to the procedure. */

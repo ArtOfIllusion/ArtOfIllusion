@@ -79,6 +79,7 @@ public class CSGDialog extends BDialog
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "dispose"));
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
+    addEventLink(WindowClosingEvent.class, this, "doOk");
     makePreview();
     pack();
     UIUtilities.centerDialog(this, window.getFrame());

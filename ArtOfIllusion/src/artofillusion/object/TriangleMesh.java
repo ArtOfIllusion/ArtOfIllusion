@@ -414,14 +414,18 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     else if (cachedWire != null)
       vert = cachedWire.vert;
     else
-      {
-        getWireframeMesh();
-        vert = cachedWire.vert;
-      }
-    minx = maxx = vert[0].x;
-    miny = maxy = vert[0].y;
-    minz = maxz = vert[0].z;
-    for (i = 1; i < vert.length; i++)
+    {
+      getWireframeMesh();
+      vert = cachedWire.vert;
+    }
+    if (vert.length == 0)
+      minx = maxx = miny = maxy = minz = maxz = 0.0;
+    else
+    {
+      minx = maxx = vert[0].x;
+      miny = maxy = vert[0].y;
+      minz = maxz = vert[0].z;
+      for (i = 1; i < vert.length; i++)
       {
         if (vert[i].x < minx) minx = vert[i].x;
         if (vert[i].x > maxx) maxx = vert[i].x;
@@ -430,6 +434,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
         if (vert[i].z < minz) minz = vert[i].z;
         if (vert[i].z > maxz) maxz = vert[i].z;
       }
+    }
     bounds = new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
   }
 
@@ -752,7 +757,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     if (interactive && cachedMesh != null)
       return cachedMesh;
     if (face.length == 0)
-      return new RenderingMesh(new Vec3 [] {new Vec3()}, new Vec3 [] {Vec3.vx()}, new RenderingTriangle [0], texMapping, matMapping);
+    {
+      RenderingMesh rend = new RenderingMesh(new Vec3 [] {new Vec3()}, new Vec3 [] {Vec3.vx()}, new RenderingTriangle [0], texMapping, matMapping);
+      rend.setParameters(mesh.paramValue);
+      return rend;      
+    }
     
     // If appropriate, subdivide the mesh.
     

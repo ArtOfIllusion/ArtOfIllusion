@@ -359,12 +359,12 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     // We now have two lists of edges: one for each direction of traversal.  Determine which
     // which ones are duplicates, and add any unique edges from edges2 into edges1.
     
-    Hashtable edgeTable = new Hashtable();
+    Hashtable<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
     for (i = 0; i < numEdges1; i++)
-      edgeTable.put(new Point(edges1[i].v1, edges1[i].v2), new Integer(i));
+      edgeTable.put(new Point(edges1[i].v1, edges1[i].v2), i);
     for (i = 0; i < numEdges2; i++)
       {
-        Integer index = (Integer) edgeTable.get(new Point(edges2[i].v2, edges2[i].v1));
+        Integer index = edgeTable.get(new Point(edges2[i].v2, edges2[i].v1));
         if (index == null)
           {
             copiedEdges[i] = numEdges1+numCopied++;
@@ -372,8 +372,8 @@ public class TriangleMesh extends Object3D implements FacetedMesh
           }
         else
           {
-            copiedEdges[i] = index.intValue();
-            edges1[index.intValue()].f2 = edges2[i].f1;
+            copiedEdges[i] = index;
+            edges1[index].f2 = edges2[i].f1;
           }
       }
     if (numCopied > 0)
@@ -597,28 +597,28 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     // First, find every edge which is on a boundary.
     
-    Vector allEdges = new Vector();
+    Vector<Integer> allEdges = new Vector<Integer>();
     for (int i = 0; i < edge.length; i++)
       if (edge[i].f2 == -1)
-        allEdges.addElement(new Integer(i));
+        allEdges.addElement(i);
     
     // Form boundaries one at a time.
     
-    Vector boundary = new Vector();
+    Vector<Vector<Integer>> boundary = new Vector<Vector<Integer>>();
     while (allEdges.size() > 0)
       {
         // Take one edge as a starting point, and follow around.
 
-        Vector current = new Vector();
-        Integer start = (Integer) allEdges.elementAt(0);
+        Vector<Integer> current = new Vector<Integer>();
+        Integer start = allEdges.elementAt(0);
         allEdges.removeElementAt(0);
         current.addElement(start);
-        int i = start.intValue(), j = 0;
+        int i = start, j = 0;
         while (j < (allEdges.size()))
           {
             for (j = 0; j < allEdges.size(); j++)
               {
-                int k = ((Integer) allEdges.elementAt(j)).intValue();
+                int k = allEdges.elementAt(j);
                 if (edge[i].v1 == edge[k].v1 || edge[i].v1 == edge[k].v2 ||
                     edge[i].v2 == edge[k].v1 || edge[i].v2 == edge[k].v2)
                   {
@@ -638,10 +638,10 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     int index[][] = new int [boundary.size()][];
     for (int i = 0; i < index.length; i++)
       {
-        Vector current = (Vector) boundary.elementAt(i);
+        Vector<Integer> current = boundary.elementAt(i);
         index[i] = new int [current.size()];
         for (int j = 0; j < index[i].length; j++)
-          index[i][j] = ((Integer) current.elementAt(j)).intValue();
+          index[i][j] = current.elementAt(j);
       }
     return index;
   }
@@ -746,7 +746,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     TriangleMesh mesh = this;
     Vec3 vert[], normalArray[];
-    Vector norm;
+    Vector<Vec3> norm;
     Vertex v[];
     Edge e[];
     Face f[], tempFace;
@@ -794,7 +794,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     // Create the RenderingMesh.
 
     vert = new Vec3 [v.length];
-    norm = new Vector();
+    norm = new Vector<Vec3>();
     tri = new RenderingTriangle [f.length];
     facenorm = new int [f.length*3];
     normals = 0;
@@ -2249,7 +2249,7 @@ groups:     do
       an extraordinary vertex, it returns an array containing the subdivision coefficients
       to use for that vertex. */
   
-  private static final double [] getButterflyCoeff(int numEdges)
+  private static double [] getButterflyCoeff(int numEdges)
   {
     if (numEdges < BUTTERFLY_COEFF.length)
       return BUTTERFLY_COEFF[numEdges];
@@ -2270,7 +2270,7 @@ groups:     do
       TriangleMesh which the new edges and faces should belong to.  split is an array 
       specifying which edges of the old mesh should be split. */
 
-  private static final void doSubdivide(TriangleMesh mesh, Vertex vertex[], Edge edge[], Face face[], boolean split[], Vertex newvert[], Edge newedge[], Face newface[], double oldParamValue[][][], double newParamValue[][][], int paramType[])
+  private static void doSubdivide(TriangleMesh mesh, Vertex vertex[], Edge edge[], Face face[], boolean split[], Vertex newvert[], Edge newedge[], Face newface[], double oldParamValue[][][], double newParamValue[][][], int paramType[])
   {
     Edge tempEdge;
     Face tempFace;
@@ -3439,7 +3439,7 @@ groups:     do
 
   public Property[] getProperties()
   {
-    return (Property []) PROPERTIES.clone();
+    return PROPERTIES.clone();
   }
 
   public Object getPropertyValue(int index)
@@ -3478,7 +3478,7 @@ groups:     do
       for (int i = 0; i < texParam.length; i++)
         paramValue[i] = key.paramValue[i].duplicate();
     for (int i = 0; i < edge.length; i++)
-      edge[i].smoothness = (float) key.edgeSmoothness[i];
+      edge[i].smoothness = key.edgeSmoothness[i];
     skeleton.copy(key.skeleton);
     cachedMesh = null;
     cachedWire = null;

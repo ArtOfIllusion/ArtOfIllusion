@@ -29,13 +29,13 @@ public class PositionTrack extends Track
   WeightTrack theWeight;
   boolean enablex, enabley, enablez;
   
-  private static final int ABSOLUTE = 0;
-  private static final int RELATIVE = 1;
+  public static final int ABSOLUTE = 0;
+  public static final int RELATIVE = 1;
 
-  private static final int WORLD = 0;
-  private static final int PARENT = 1;
-  private static final int OBJECT = 2;
-  private static final int LOCAL = 3;
+  public static final int WORLD = 0;
+  public static final int PARENT = 1;
+  public static final int OBJECT = 2;
+  public static final int LOCAL = 3;
   
   public PositionTrack(ObjectInfo info)
   {

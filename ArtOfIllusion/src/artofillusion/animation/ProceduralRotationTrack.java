@@ -31,13 +31,13 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   ObjectRef relObject;
   WeightTrack theWeight;
   
-  private static final int ABSOLUTE = 0;
-  private static final int RELATIVE = 1;
+  public static final int ABSOLUTE = 0;
+  public static final int RELATIVE = 1;
 
-  private static final int WORLD = 0;
-  private static final int PARENT = 1;
-  private static final int OBJECT = 2;
-  private static final int LOCAL = 3;
+  public static final int WORLD = 0;
+  public static final int PARENT = 1;
+  public static final int OBJECT = 2;
+  public static final int LOCAL = 3;
   
   public ProceduralRotationTrack(ObjectInfo info)
   {
@@ -256,6 +256,51 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   public void setSmoothingMethod(int method)
   {
     smoothingMethod = method;
+  }
+
+  /** Determine whether this track is in absolute or relative mode. */
+
+  public boolean isRelative()
+  {
+    return (mode == RELATIVE);
+  }
+
+  /** Set whether this track is in absolute or relative mode. */
+
+  public void setRelative(boolean rel)
+  {
+    mode = (rel ? RELATIVE : ABSOLUTE);
+  }
+
+  /** Get the coordinate system of this track (WORLD, PARENT, OBJECT, or LOCAL). */
+
+  public int getCoordinateSystem()
+  {
+    return relCoords;
+  }
+
+  /** Set the coordinate system of this track (WORLD, PARENT, OBJECT, or LOCAL). */
+
+  public void setCoordinateSystem(int system)
+  {
+    relCoords = system;
+  }
+
+  /** Get the object reference for the parent coordinate system.  The return
+      value is undefined if getCoordinateSystem() does not return OBJECT. */
+
+  public ObjectRef getCoordsObject()
+  {
+    return relObject;
+  }
+
+  /** Set the object reference for the parent coordinate system.  This causes
+      the coordinate system to be set to OBJECT. */
+
+  public void setCoordsObject(ObjectRef obj)
+  {
+    relObject = obj;
+    relCoords = OBJECT;
   }
   
   /** Get the ID of the joint this track applies to, or -1 if it applies to the

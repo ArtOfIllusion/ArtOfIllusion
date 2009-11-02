@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -94,7 +94,7 @@ public class OBJImporter
                   {
                     try
                       {
-                        val[i] = new Double(fields[i+1]).doubleValue();
+                        val[i] = Double.parseDouble(fields[i+1]);
                         if (val[i] < min[i])
                           min[i] = val[i];
                         if (val[i] > max[i])
@@ -116,7 +116,7 @@ public class OBJImporter
                   {
                     try
                       {
-                        val[i] = new Double(fields[i+1]).doubleValue();
+                        val[i] = Double.parseDouble(fields[i+1]);
                       }
                     catch (NumberFormatException ex)
                       {
@@ -135,7 +135,7 @@ public class OBJImporter
                     try
                       {
                         if (i < fields.length-1)
-                          val[i] = new Double(fields[i+1]).doubleValue();
+                          val[i] = Double.parseDouble(fields[i+1]);
                         else
                           val[i] = 0.0;
                       }
@@ -161,24 +161,32 @@ public class OBJImporter
                         
                         face.get(i).addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
                       }
-                    else if (fields.length == 5)
+                    else
                       {
-                        // Add a 4 sided face.
-                        
-                        face.get(i).addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
-                        face.get(i).addElement(new FaceInfo(vertIndex[2], vertIndex[3], vertIndex[0], smoothingGroup, currentTexture));
-                      }
-                    else if (fields.length > 5)
-                      {
-                        // Add a face with more than 4 sides.
-                        
-                        int step, start;
-                        for (step = 1; 2*step < vertIndex.length; step *= 2)
+                        // Triangulate the outline.
+
+                        Vec3 v[] = new Vec3[fields.length-1];
+                        for (int j = 0; j < v.length; j++)
+                          v[j] = vertex.get(vertIndex[j].vert);
+                        Curve c = new Curve(v, new float[v.length], Mesh.NO_SMOOTHING, true);
+                        TriangleMesh m = c.convertToTriangleMesh(1.0);
+                        if (m != null)
                           {
-                            for (start = 0; start+2*step < vertIndex.length; start += 2*step)
-                              face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[start+2*step], smoothingGroup, currentTexture));
-                            if (start+step < vertIndex.length)
-                              face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[0], smoothingGroup, currentTexture));
+                            for (int j = 0; j < m.getFaceCount(); j++)
+                              face.get(i).addElement(new FaceInfo(vertIndex[m.getFaceVertexIndex(j, 0)], vertIndex[m.getFaceVertexIndex(j, 1)], vertIndex[m.getFaceVertexIndex(j, 2)], smoothingGroup, currentTexture));
+                          }
+                        else
+                          {
+                            // We couldn't triangulate it correctly, so do the best we can.
+
+                            int step, start;
+                            for (step = 1; 2*step < vertIndex.length; step *= 2)
+                              {
+                                for (start = 0; start+2*step < vertIndex.length; start += 2*step)
+                                  face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[start+2*step], smoothingGroup, currentTexture));
+                                if (start+step < vertIndex.length)
+                                  face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[0], smoothingGroup, currentTexture));
+                              }
                           }
                       }
                   }
@@ -300,8 +308,8 @@ public class OBJImporter
               {
                 if (edge[i].f2 == -1)
                   continue;
-                FaceInfo f1 = (FaceInfo) groupFaces.elementAt(edge[i].f1);
-                FaceInfo f2 = (FaceInfo) groupFaces.elementAt(edge[i].f2);
+                FaceInfo f1 = groupFaces.elementAt(edge[i].f1);
+                FaceInfo f2 = groupFaces.elementAt(edge[i].f2);
                 if (f1.smoothingGroup == 0 || f1.smoothingGroup != f2.smoothingGroup)
                   {
                     // They are in different smoothing groups.
@@ -367,7 +375,7 @@ public class OBJImporter
                 boolean needPerFace = false;
                 for (int j = 0; j < groupFaces.size() && !needPerFace; j++)
                   {
-                    FaceInfo fi = (FaceInfo) groupFaces.elementAt(j);
+                    FaceInfo fi = groupFaces.elementAt(j);
                     for (int k = 0; k < 3; k++)
                       {
                         VertexInfo vi = fi.getVertex(k);
@@ -393,7 +401,7 @@ public class OBJImporter
                   Vec2 uvf[][] = new Vec2 [groupFaces.size()][3];
                   for (int j = 0; j < groupFaces.size(); j++)
                   {
-                    FaceInfo fi = (FaceInfo) groupFaces.elementAt(j);
+                    FaceInfo fi = groupFaces.elementAt(j);
                     for (int k = 0; k < 3; k++)
                       {
                         VertexInfo vi = fi.getVertex(k);
@@ -401,7 +409,7 @@ public class OBJImporter
                         uvf[j][k] = new Vec2(texCoords.x, texCoords.y);
                       }
                   }
-                  map.setFaceTextureCoordinates((TriangleMesh) info.getObject(), uvf, uparam, vparam);
+                  map.setFaceTextureCoordinates(info.getObject(), uvf, uparam, vparam);
                 }
                 else
                 {
@@ -447,7 +455,6 @@ public class OBJImporter
         return;
       }
     ArtOfIllusion.newWindow(theScene);
-    return;
   }
   
   /** Separate a line into pieces divided by whitespace. */
@@ -484,7 +491,7 @@ public class OBJImporter
         try
           {
             int index = Integer.parseInt(value);
-            int total = 0;
+            int total;
             if (i == 0)
               total = vertex.size();
             else if (i == 1)
@@ -557,9 +564,9 @@ public class OBJImporter
             else if ("Ks".equals(fields[0]))
               currentTexture.specular = parseColor(fields);
             else if ("d".equals(fields[0]) || "Tr".equals(fields[0]))
-              currentTexture.transparency = 1.0-(new Double(fields[1]).doubleValue());
+              currentTexture.transparency = 1.0-Double.parseDouble(fields[1]);
             else if ("Ns".equals(fields[0]))
-              currentTexture.shininess = new Double(fields[1]).doubleValue();
+              currentTexture.shininess = Double.parseDouble(fields[1]);
             else if ("map_Kd".equals(fields[0]))
               currentTexture.diffuseMap = fields[1];
             else if ("map_Ka".equals(fields[0]))
@@ -650,7 +657,7 @@ public class OBJImporter
   {
     if (name == null)
       return null;
-    ImageMap map = (ImageMap) imageMaps.get(name);
+    ImageMap map = imageMaps.get(name);
     if (map != null)
       return map;
     File f = new File(baseDir, name);
@@ -677,9 +684,9 @@ public class OBJImporter
   {
     if (fields.length < 4)
       return null;
-    return new RGBColor(new Double(fields[1]).doubleValue(),
-        new Double(fields[2]).doubleValue(),
-        new Double(fields[3]).doubleValue());
+    return new RGBColor(Double.parseDouble(fields[1]),
+        Double.parseDouble(fields[2]),
+        Double.parseDouble(fields[3]));
   }
   
   /** Inner class for storing information about a vertex of a face. */

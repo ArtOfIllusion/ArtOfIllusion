@@ -81,8 +81,8 @@ public class CSGModeller
     trans = coords2.fromLocal();
     for (int i = 0; i < vert.length; i++)
       vert2.addElement(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
-    TriangleMesh.Edge edge[] = (TriangleMesh.Edge []) obj1.getEdges();
-    TriangleMesh.Face face[] = (TriangleMesh.Face []) obj1.getFaces();
+    TriangleMesh.Edge edge[] = obj1.getEdges();
+    TriangleMesh.Face face[] = obj1.getFaces();
     if (obj1.getSmoothingMethod() == Mesh.NO_SMOOTHING)
       for (int i = 0; i < face.length; i++)
         face1.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1, 0.0f, 0.0f, 0.0f));
@@ -90,8 +90,8 @@ public class CSGModeller
       for (int i = 0; i < face.length; i++)
         face1.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1,
             edge[face[i].e1].smoothness, edge[face[i].e2].smoothness, edge[face[i].e3].smoothness));
-    edge = (TriangleMesh.Edge []) obj2.getEdges();
-    face = (TriangleMesh.Face []) obj2.getFaces();
+    edge = obj2.getEdges();
+    face = obj2.getFaces();
     if (obj2.getSmoothingMethod() == Mesh.NO_SMOOTHING)
       for (int i = 0; i < face.length; i++)
         face2.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2, 0.0f, 0.0f, 0.0f));
@@ -128,7 +128,7 @@ public class CSGModeller
 
     for (int i = 0; i < vert1.size(); i++)
       {
-        VertexInfo v = (VertexInfo) vert1.elementAt(i);
+        VertexInfo v = vert1.elementAt(i);
         if (v.type == INSIDE && (op == CSGObject.INTERSECTION || op == CSGObject.DIFFERENCE21))
           {
             index1[i] = allVert.size();
@@ -159,8 +159,8 @@ public class CSGModeller
             else
               for (int j = firstBoundary; index1[i] == -1 && j < allVert.size(); j++)
                 {
-                  VertexInfo v2 = (VertexInfo) allVert.elementAt(j);
-                  if (v2.type == BOUNDARY && v2.r.distance(v.r) < TOL)
+                  VertexInfo v2 = allVert.elementAt(j);
+                  if (v2.type == BOUNDARY && areEqual(v2.r, v.r))
                     index1[i] = j;
                 }
             if (index1[i] == -1)
@@ -196,7 +196,7 @@ public class CSGModeller
             for (int j = firstBoundary; index2[i] == -1 && j < allVert.size(); j++)
               {
                 VertexInfo v2 = allVert.elementAt(j);
-                if (v2.type == BOUNDARY && v2.r.distance(v.r) < TOL)
+                if (v2.type == BOUNDARY && areEqual(v2.r, v.r))
                   index2[i] = j;
               }
             if (index2[i] == -1)
@@ -208,7 +208,7 @@ public class CSGModeller
 
     for (int i = 0; i < face1.size(); i++)
       {
-        FaceInfo f = (FaceInfo) face1.elementAt(i);
+        FaceInfo f = face1.elementAt(i);
         if (f.type == INSIDE && op == CSGObject.INTERSECTION)
           {
             faceIndex.addElement(new int [] {index1[f.v1], index1[f.v2], index1[f.v3]});
@@ -241,7 +241,7 @@ public class CSGModeller
 
     for (int i = 0; i < face2.size(); i++)
       {
-        FaceInfo f = (FaceInfo) face2.elementAt(i);
+        FaceInfo f = face2.elementAt(i);
         if (f.type == INSIDE && op == CSGObject.INTERSECTION)
           {
             faceIndex.addElement(new int [] {index2[f.v1], index2[f.v2], index2[f.v3]});
@@ -268,10 +268,10 @@ public class CSGModeller
     
     Vec3 v[] = new Vec3 [allVert.size()];
     for (int i = 0; i < v.length; i++)
-      v[i] = new Vec3(((VertexInfo) allVert.elementAt(i)).r);
+      v[i] = new Vec3(allVert.elementAt(i).r);
     int f[][] = new int [faceIndex.size()][];
     for (int i = 0; i < f.length; i++)
-      f[i] = (int []) faceIndex.elementAt(i);
+      f[i] = faceIndex.elementAt(i);
     TriangleMesh mesh = new TriangleMesh(v, f);
     if (texture != null)
       mesh.setTexture(texture, texture.getDefaultMapping(mesh));
@@ -280,7 +280,7 @@ public class CSGModeller
     
     TriangleMesh.Vertex mv[] = (TriangleMesh.Vertex []) mesh.getVertices();
     for (int i = 0; i < mv.length; i++)
-      mv[i].smoothness = ((VertexInfo) allVert.elementAt(i)).smoothness;
+      mv[i].smoothness = allVert.elementAt(i).smoothness;
     TriangleMesh.Edge edge[] = mesh.getEdges();
     TriangleMesh.Face face[] = mesh.getFaces();
     for (int i = 0; i < edge.length; i++)
@@ -290,7 +290,7 @@ public class CSGModeller
             int j = (k == 0 ? edge[i].f1 : edge[i].f2);
             if (j == -1)
               continue;
-            float smoothness[] = (float []) faceSmoothness.elementAt(j), s;
+            float smoothness[] = faceSmoothness.elementAt(j), s;
             if (face[j].v1 == edge[i].v1 && face[j].v2 == edge[i].v2)
               s = smoothness[0];
             else if (face[j].v1 == edge[i].v2 && face[j].v2 == edge[i].v1)
@@ -320,8 +320,8 @@ public class CSGModeller
       boolean any = false;
       for (int i = 0; i < edge.length; i++)
       {
-        VertexInfo vi1 = (VertexInfo) allVert.elementAt(edge[i].v1);
-        VertexInfo vi2 = (VertexInfo) allVert.elementAt(edge[i].v2);
+        VertexInfo vi1 = allVert.elementAt(edge[i].v1);
+        VertexInfo vi2 = allVert.elementAt(edge[i].v2);
         candidate[i] = (vi1.type == BOUNDARY && vi2.type == BOUNDARY);
         any |= candidate[i];
       }
@@ -358,15 +358,19 @@ public class CSGModeller
     Arrays.sort(faceIndex, new Comparator<Integer>() {
       public int compare(Integer index1, Integer index2)
       {
-        double min1 = f2.get(index1).min;
-        double min2 = f2.get(index2).min;
-        if (min1 < min2)
+        double max1 = f2.get(index1).max;
+        double max2 = f2.get(index2).max;
+        if (max1 < max2)
           return -1;
-        if (min2 < min1)
+        if (max2 < max1)
           return 1;
         return 0;
       }
     });
+    double minAfter[] = new double[f2.size()];
+    minAfter[f2.size()-1] = f2.get(faceIndex[f2.size()-1]).min;
+    for (int i = faceIndex.length-2; i >= 0; i--)
+      minAfter[i] = Math.min(minAfter[i+1], f2.get(faceIndex[i]).min);
 
 p1 :for (int i = 0; i < f1.size(); i++)
       {
@@ -384,7 +388,7 @@ p1 :for (int i = 0; i < f1.size(); i++)
         while (end > start+1)
         {
           int mid = (start+end)/2;
-          if (f2.get(faceIndex[mid]).max >= fa.min)
+          if (f2.get(faceIndex[mid]).max > fa.min+TOL)
             end = mid;
           else
             start = mid;
@@ -395,7 +399,7 @@ p1 :for (int i = 0; i < f1.size(); i++)
         for (int j = start; j < f2.size(); j++)
           {
             FaceInfo fb = f2.elementAt(faceIndex[j]);
-            if (fb.min > fa.max)
+            if (minAfter[j] > fa.max+TOL)
               break;
             if (!intersect(fa.bounds, fb.bounds))
               continue;
@@ -566,7 +570,6 @@ p1 :for (int i = 0; i < f1.size(); i++)
                     intersectVertB[index] = fb.v3;
                     double fract = distb1/(distb1-distb3);
                     intersectDistB[index] = fract*line.dot(vb3.r) + (1.0-fract)*line.dot(vb1.r);
-                    index++;
                   }
               }
 
@@ -607,10 +610,10 @@ p1 :for (int i = 0; i < f1.size(); i++)
   
   /** Split one face of one of the component objects. */
   
-  private void splitOneFace(Vector<VertexInfo> vert, Vector<FaceInfo> face, int which, int intersectVert[], double distA[], 
+  private void splitOneFace(Vector<VertexInfo> vert, Vector<FaceInfo> face, int which, int intersectVert[], double distA[],
       double distB[], int typeA[], int spanTypeA, Vec3 line, Vec3 root)
   {
-    FaceInfo f = (FaceInfo) face.elementAt(which);
+    FaceInfo f = face.elementAt(which);
     VertexInfo v1 = vert.elementAt(f.v1);
     VertexInfo v2 = vert.elementAt(f.v2);
     VertexInfo v3 = vert.elementAt(f.v3);
@@ -1090,7 +1093,6 @@ p1 :for (int i = 0; i < f1.size(); i++)
             face.addElement(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f));
           }
       }
-    return;
   }
   
   /** Determine which vertices of one object are inside or outside the other object. */
@@ -1162,8 +1164,8 @@ p1 :for (int i = 0; i < f1.size(); i++)
 
     orig.set(vi1.r.x+vi2.r.x+vi3.r.x, vi1.r.y+vi2.r.y+vi3.r.y, vi1.r.z+vi2.r.z+vi3.r.z);
     orig.scale(1.0/3.0);
-    int first = -1;
-    double firstDist = Double.MAX_VALUE;
+    int first;
+    double firstDist;
     do
       {
         first = -1;
@@ -1439,6 +1441,19 @@ p1 :for (int i = 0; i < f1.size(); i++)
     for (int i = 0; i < param.length; i++)
       param[i] = u*v1.param[i] + v*v2.param[i] + w*v3.param[i];
     return param;
+  }
+
+  /**
+   * Get whether two points are equal to within a tolerance.
+   */
+
+  private static boolean areEqual(Vec3 a, Vec3 b)
+  {
+    double dist = a.distance(b);
+    double norm = a.length();
+    if (norm < 1.0)
+      return (dist < TOL);
+    return (dist < TOL*norm);
   }
   
   /* Inner classes for keeping track of information about vertices and faces. */

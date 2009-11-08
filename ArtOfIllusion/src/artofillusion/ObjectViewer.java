@@ -104,7 +104,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     
     if (showScene && theScene != null)
     {
-      Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+      Vec3 viewdir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo obj = theScene.getObject(i);
@@ -114,7 +114,7 @@ public abstract class ObjectViewer extends ViewerCanvas
         if (!useWorldCoords && thisObjectInScene != null)
           objectTransform = thisObjectInScene.getCoords().toLocal().times(objectTransform);
         theCamera.setObjectTransform(objectTransform);
-        obj.getObject().renderObject(obj, this, viewdir);
+        obj.getObject().renderObject(obj, this, thisObjectInScene.getCoords().fromLocal().timesDirection(viewdir));
       }
     }
 
@@ -240,7 +240,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     int n = selectBoundsPoints.size(), x[] = new int [n], y[] = new int [n];
     for (int i = 0; i < n; i++)
     {
-      Point p = (Point) selectBoundsPoints.elementAt(i);
+      Point p = selectBoundsPoints.elementAt(i);
       x[i] = p.x;
       y[i] = p.y;
     }

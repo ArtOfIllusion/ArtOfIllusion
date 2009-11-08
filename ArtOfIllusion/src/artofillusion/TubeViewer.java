@@ -40,7 +40,7 @@ public class TubeViewer extends CurveViewer
       else
       {
         RenderingMesh mesh = objInfo.getPreviewMesh();
-        Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+        Vec3 viewDir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
         VertexShader shader;
         if (renderMode == RENDER_FLAT)
           shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);
@@ -67,7 +67,7 @@ public class TubeViewer extends CurveViewer
   
       // Draw the handles for the control points.
   
-      boolean selected[] = ((TubeEditorWindow) controller).getSelection();
+      boolean selected[] = controller.getSelection();
       for (int i = 0; i < v.length; i++)
         if (!selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
         {

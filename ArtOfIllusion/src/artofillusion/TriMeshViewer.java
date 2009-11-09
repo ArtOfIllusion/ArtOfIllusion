@@ -122,6 +122,7 @@ public class TriMeshViewer extends MeshViewer
           hide[i] = hideFace[faceIndex[i]];
       }
     }
+    Vec3 viewDir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
     if (renderMode == RENDER_WIREFRAME)
       renderWireframe(objInfo.getWireframePreview(), theCamera, surfaceColor);
     else if (renderMode == RENDER_TRANSPARENT)
@@ -129,12 +130,11 @@ public class TriMeshViewer extends MeshViewer
       VertexShader shader = new ConstantVertexShader(transparentColor);
       if (faceIndex != null && controller.getSelectionMode() == MeshEditController.FACE_MODE)
         shader = new SelectionVertexShader(new RGBColor(1.0, 0.4, 1.0), shader, faceIndex, controller.getSelection());
-      renderMeshTransparent(objInfo.getPreviewMesh(), shader, theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), hide);
+      renderMeshTransparent(objInfo.getPreviewMesh(), shader, theCamera, viewDir, hide);
     }
     else
     {
       RenderingMesh mesh = objInfo.getPreviewMesh();
-      Vec3 viewDir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
       VertexShader shader;
       if (renderMode == RENDER_FLAT)
         shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);

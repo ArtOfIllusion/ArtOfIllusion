@@ -379,7 +379,7 @@ public abstract class Object3D
       if (renderMode == ViewerCanvas.RENDER_TRANSPARENT)
       {
         shader = new ConstantVertexShader(ViewerCanvas.transparentColor);
-        canvas.renderMeshTransparent(mesh, shader, theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
+        canvas.renderMeshTransparent(mesh, shader, theCamera, obj.getCoords().toLocal().timesDirection(viewDir), null);
       }
       else
       {

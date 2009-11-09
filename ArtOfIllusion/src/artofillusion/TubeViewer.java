@@ -33,14 +33,14 @@ public class TubeViewer extends CurveViewer
     if (showSurface)
     {
       ObjectInfo objInfo = controller.getObject();
+      Vec3 viewDir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
       if (renderMode == RENDER_WIREFRAME)
         renderWireframe(objInfo.getWireframePreview(), theCamera, surfaceColor);
       else if (renderMode == RENDER_TRANSPARENT)
-        renderMeshTransparent(objInfo.getPreviewMesh(), new ConstantVertexShader(transparentColor), theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
+        renderMeshTransparent(objInfo.getPreviewMesh(), new ConstantVertexShader(transparentColor), theCamera, viewDir, null);
       else
       {
         RenderingMesh mesh = objInfo.getPreviewMesh();
-        Vec3 viewDir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
         VertexShader shader;
         if (renderMode == RENDER_FLAT)
           shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);

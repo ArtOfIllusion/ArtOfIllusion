@@ -87,7 +87,10 @@ public class TexturedVertexShader implements VertexShader
       {
         TexturedVertexShader shader = ref.get();
         if (shader != null && shader.textureID == textureID)
+        {
+          shader.viewDir = viewDir;
           return shader;
+        }
       }
       cachedShaderMap.put(mesh, new SoftReference<TexturedVertexShader>(this));
     }

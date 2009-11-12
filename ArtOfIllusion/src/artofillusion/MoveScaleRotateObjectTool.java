@@ -264,9 +264,12 @@ public class MoveScaleRotateObjectTool extends EditingTool
         // Work out the scale factors for the size.
 
         double xscale = 1.0, yscale = 1.0, zscale = 1.0;
-        Vec3 xdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(1.0, 0.0, 0.0)).normalize());
-        Vec3 ydir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 1.0, 0.0)).normalize());
-        Vec3 zdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 0.0, 1.0)).normalize());
+        Vec3 xdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(1.0, 0.0, 0.0)));
+        Vec3 ydir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 1.0, 0.0)));
+        Vec3 zdir = originalCoords[i].fromLocal().timesDirection(transform.timesDirection(new Vec3(0.0, 0.0, 1.0)));
+        xdir.normalize();
+        ydir.normalize();
+        zdir.normalize();
         if (ev.getMouseEvent().isShiftDown())
         {
           xscale = yscale = zscale = ev.getPrimaryScale();

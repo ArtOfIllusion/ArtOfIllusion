@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2001 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -118,48 +118,44 @@ public class Vec3
   
   /** Add another Vec3 to this one. */
   
-  public final Vec3 add(Vec3 v)
+  public final void add(Vec3 v)
   {
     x += v.x;
     y += v.y;
     z += v.z;
-    return this;
   }
 
   /** Subtract another Vec3 from this one. */
   
-  public final Vec3 subtract(Vec3 v)
+  public final void subtract(Vec3 v)
   {
     x -= v.x;
     y -= v.y;
     z -= v.z;
-    return this;
   }
 
   /** Multiply each component of this vector by the corresponding component of another vector. */
   
-  public final Vec3 multiply(Vec3 v)
+  public final void multiply(Vec3 v)
   {
     x *= v.x;
     y *= v.y;
     z *= v.z;
-    return this;
   }
 
   /** Multiply each component of this vector by a constant. */
   
-  public final Vec3 scale(double d)
+  public final void scale(double d)
   {
     x *= d;
     y *= d;
     z *= d;
-    return this;
   }
 
   /** Scale each component of this vector so that it has a length of 1.  If this vector has a length
       of 0, this method has no effect. */
   
-  public final Vec3 normalize()
+  public final void normalize()
   {
     double len = Math.sqrt(x*x+y*y+z*z);
     
@@ -169,7 +165,6 @@ public class Vec3
         y /= len;
         z /= len;
       }
-    return this;
   }
   
   /** Calculate the Euclidean distance between this vector and another one. */

@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2008 by Peter Eastman
+/* Copyright (C) 2005-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,6 +36,7 @@ public class ThreadManager
   private Task task;
   private Object controller;
   private boolean controllerWaiting;
+  private int maxThreads;
 
   /**
    * Create a new uninitialized ThreadManager.  You must invoke setNumIndices() and setTask()
@@ -62,6 +63,7 @@ public class ThreadManager
     controller = new Object();
     controllerWaiting = false;
     waitingThreads = new HashSet<Thread>();
+    maxThreads = -1;
   }
 
   /**
@@ -72,7 +74,10 @@ public class ThreadManager
   {
     // Create a worker thread for each processor.
 
-    thread = new Thread [Runtime.getRuntime().availableProcessors()];
+    int numThreads = Runtime.getRuntime().availableProcessors();
+    if (maxThreads > 0 && maxThreads < numThreads)
+      numThreads = maxThreads;
+    thread = new Thread [numThreads];
     for (int i = 0; i < thread.length; i++)
     {
       thread[i] = new Thread("Worker thread "+(i+1)) {
@@ -124,6 +129,15 @@ public class ThreadManager
   public void setTask(Task task)
   {
     this.task = task;
+  }
+
+  /**
+   * Set the maximum number of worker threads that should be used for executing the Task.
+   */
+
+  public void setMaxThreads(int maxThreads)
+  {
+    this.maxThreads = maxThreads;
   }
 
   /**

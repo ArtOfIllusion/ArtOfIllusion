@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,7 @@ import artofillusion.*;
 
 public class RasterContext
 {
-  public Vec3 tempVec[];
+  public Vec3 tempVec[], lightPosition[], lightDirection[];
   public RGBColor tempColor[];
   public TextureSpec surfSpec, surfSpec2;
   public Camera camera;
@@ -49,6 +49,8 @@ public class RasterContext
   public void cleanup()
   {
     tempVec = null;
+    lightPosition = null;
+    lightDirection = null;
     tempColor = null;
     surfSpec = null;
     surfSpec2 = null;

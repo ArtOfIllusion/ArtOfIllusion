@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2008 by Peter Eastman
+/* Copyright (C) 2001-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -43,13 +43,12 @@ public class Raster implements Renderer, Runnable
   private RenderListener listener;
   private Image img;
   private Thread renderThread;
-  private Vec3 lightPosition[], lightDirection[];
   private RGBColor ambColor, envColor, fogColor;
   private TextureMapping envMapping;
   private ThreadLocal threadRasterContext, threadCompositingContext;
   private RowLock lock[];
   private double envParamValue[];
-  private double time, smoothing = 1.0, smoothScale, depthOfField, focalDist, surfaceError = 0.02, fogDist;
+  private double time, smoothing = 1.0, smoothScale, focalDist, surfaceError = 0.02, fogDist;
   private boolean fog, transparentBackground = false, adaptive = true, hideBackfaces = true, generateHDR = false, positionNeeded, depthNeeded, needCopyToUI = true;
 
   public static final int GOURAUD = 0;
@@ -98,7 +97,6 @@ public class Raster implements Renderer, Runnable
       sceneCamera.setDepthOfField(0.0);
       sceneCamera.setFocalDistance(theCamera.getDistToScreen());
     }
-    depthOfField = sceneCamera.getDepthOfField();
     focalDist = sceneCamera.getFocalDistance();
     depthNeeded = ((sceneCamera.getComponentsForFilters()&ComplexImage.DEPTH) != 0);
     time = theScene.getTime();
@@ -134,15 +132,16 @@ public class Raster implements Renderer, Runnable
     if (t == null)
       return;
     try
+    {
+      while (t.isAlive())
       {
-        while (t.isAlive())
-          {
-            Thread.sleep(100);
-          }
+        Thread.sleep(100);
       }
+    }
     catch (InterruptedException ex)
-      {
-      }
+    {
+      // Ignore.
+    }
     finish(null);
     rl.renderingCanceled();
   }
@@ -270,19 +269,19 @@ public class Raster implements Renderer, Runnable
   public Map<String, Object> getConfiguration()
   {
     HashMap<String, Object> map = new HashMap<String, Object>();
-    map.put("textureSmoothing", new Double(smoothing));
-    map.put("reduceAccuracyForDistant", new Boolean(adaptive));
-    map.put("hideBackfaces", new Boolean(hideBackfaces));
-    map.put("highDynamicRange", Boolean.valueOf(generateHDR));
-    map.put("maxSurfaceError", new Double(surfaceError));
-    map.put("shadingMethod", new Integer(shadingMode));
-    map.put("transparentBackground", new Boolean(transparentBackground));
+    map.put("textureSmoothing", smoothing);
+    map.put("reduceAccuracyForDistant", adaptive);
+    map.put("hideBackfaces", hideBackfaces);
+    map.put("highDynamicRange", generateHDR);
+    map.put("maxSurfaceError", surfaceError);
+    map.put("shadingMethod", shadingMode);
+    map.put("transparentBackground", transparentBackground);
     int antialiasLevel = 0;
     if (samplesPerPixel == 2)
       antialiasLevel = subsample;
     else if (samplesPerPixel == 3)
       antialiasLevel = (subsample == 1 ? 3 : 4);
-    map.put("antialiasing", new Integer(antialiasLevel));
+    map.put("antialiasing", antialiasLevel);
     return map;
   }
 
@@ -292,20 +291,20 @@ public class Raster implements Renderer, Runnable
     if ("textureSmoothing".equals(property))
       smoothing = ((Number) value).doubleValue();
     else if ("reduceAccuracyForDistant".equals(property))
-      adaptive = ((Boolean) value).booleanValue();
+      adaptive = (Boolean) value;
     else if ("hideBackfaces".equals(property))
-      hideBackfaces = ((Boolean) value).booleanValue();
+      hideBackfaces = (Boolean) value;
     else if ("highDynamicRange".equals(property))
-      generateHDR = ((Boolean) value).booleanValue();
+      generateHDR = (Boolean) value;
     else if ("maxSurfaceError".equals(property))
       surfaceError = ((Number) value).doubleValue();
     else if ("shadingMethod".equals(property))
-      shadingMode = ((Integer) value).intValue();
+      shadingMode = (Integer) value;
     else if ("transparentBackground".equals(property))
-      transparentBackground = ((Boolean) value).booleanValue();
+      transparentBackground = (Boolean) value;
     else if ("antialiasing".equals(property))
     {
-      int antialiasLevel = ((Integer) value).intValue();
+      int antialiasLevel = (Integer) value;
       switch (antialiasLevel)
       {
         case 0:
@@ -361,12 +360,10 @@ public class Raster implements Renderer, Runnable
     light = new ObjectInfo [lt.size()];
     for (i = 0; i < light.length; i++)
       {
-        light[i] = (ObjectInfo) lt.elementAt(i);
+        light[i] = lt.elementAt(i);
         if (!(light[i].getObject() instanceof DirectionalLight))
           positionNeeded = true;
       }
-    lightPosition = new Vec3 [light.length];
-    lightDirection = new Vec3 [light.length];
   }
 
   /** Main method in which the image is rendered. */
@@ -483,7 +480,7 @@ public class Raster implements Renderer, Runnable
     Collections.sort(objects);
     ObjectInfo result[] = new ObjectInfo[objects.size()];
     for (int i = 0; i < result.length; i++)
-      result[i] = ((SortRecord) objects.get(i)).object;
+      result[i] = objects.get(i).object;
     return result;
   }
 
@@ -561,7 +558,7 @@ public class Raster implements Renderer, Runnable
                 ObjectMaterialInfo fragmentMaterial = f.getMaterialMapping();
                 ObjectMaterialInfo currentMaterial = null;
                 if (materialStack.size() > 0)
-                  currentMaterial = (ObjectMaterialInfo) materialStack.get(materialStack.size()-1);
+                  currentMaterial = materialStack.get(materialStack.size()-1);
                 adjustColorsForMaterial(currentMaterial, j2+m, i2+k, lastDepth, f.getDepth(), addColor, context.multColor, context);
                 addColor.multiply(subpixelMult);
                 subpixelColor.add(addColor);
@@ -860,11 +857,16 @@ public class Raster implements Renderer, Runnable
     if (mainThread != renderThread)
       return;
     viewdir = toLocal.timesDirection(viewdir);
+    if (context.lightPosition == null)
+    {
+      context.lightPosition = new Vec3 [light.length];
+      context.lightDirection = new Vec3 [light.length];
+    }
     for (i = light.length-1; i >= 0; i--)
     {
-      lightPosition[i] = toLocal.times(light[i].getCoords().getOrigin());
+      context.lightPosition[i] = toLocal.times(light[i].getCoords().getOrigin());
       if (!(light[i].getObject() instanceof PointLight))
-        lightDirection[i] = toLocal.timesDirection(light[i].getCoords().getZDirection());
+        context.lightDirection[i] = toLocal.timesDirection(light[i].getCoords().getZDirection());
     }
     boolean bumpMap = theObject.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     boolean cullBackfaces = (hideBackfaces && theObject.isClosed() && !theObject.getTexture().hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
@@ -927,8 +929,8 @@ public class Raster implements Renderer, Runnable
     for (int i = light.length-1; i >= 0; i--)
       {
         Light lt = (Light) light[i].getObject();
-        Vec3 lightPos = lightPosition[i];
-        double distToLight = 0.0, lightDot = 0.0;
+        Vec3 lightPos = context.lightPosition[i];
+        double distToLight, lightDot;
         if (lt instanceof PointLight)
           {
             lightDir.set(pos);
@@ -944,7 +946,7 @@ public class Raster implements Renderer, Runnable
             lightDir.scale(1.0/distToLight);
           }
         else if (lt instanceof DirectionalLight)
-          lightDir.set(lightDirection[i]);
+          lightDir.set(context.lightDirection[i]);
         lt.getLight(outputColor, light[i].getCoords().toLocal().times(pos));
         if (lt.getType() == Light.TYPE_AMBIENT)
           {
@@ -3493,7 +3495,7 @@ public class Raster implements Renderer, Runnable
       dv2.prepareToRender(tri, viewdir, ugrad, vgrad, shading, context);
     if (dv3.dispnorm == null)
       dv3.prepareToRender(tri, viewdir, ugrad, vgrad, shading, context);
-    Vec3 closestNorm = null;
+    Vec3 closestNorm;
     if (dv1.z < dv2.z && dv1.z < dv3.z)
       closestNorm = dv1.dispnorm;
     else if (dv2.z < dv1.z && dv2.z < dv3.z)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2007 by Peter Eastman
+/* Copyright (C) 2000-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -423,6 +423,7 @@ public class ProjectionMapping extends Mapping2D
   {
     TextureParameter param[] = mesh.getParameters();
     ParameterValue paramValue[] = mesh.getParameterValues();
+    Mat4 transform = getTransform();
     VertexParameterValue xval = null, yval = null, zval = null;
     if (coordsFromParams)
       for (int i = 0; i < param.length; i++)
@@ -451,7 +452,7 @@ public class ProjectionMapping extends Mapping2D
             y = yval.getValue()[i];
             z = zval.getValue()[i];
           }
-        uv[i] = new Vec2(x*ax+y*bx+z*cx-dx, x*ay+y*by+z*cy-dy);
+        uv[i] = transform.timesXY(new Vec3(x, y, z));
       }
     return uv;
   }

@@ -110,7 +110,8 @@ public class ObjectPropertiesPanel extends ColumnContainer
         add(Translate.label("noObjectsSelected"));
         UIUtilities.applyDefaultBackground(this);
         UIUtilities.applyDefaultFont(this);
-        layoutChildren();
+        if (getParent() != null)
+          getParent().layoutChildren();
         repaint();
       }
       return;
@@ -289,7 +290,8 @@ public class ObjectPropertiesPanel extends ColumnContainer
 
     UIUtilities.applyDefaultBackground(this);
     UIUtilities.applyDefaultFont(this);
-    layoutChildren();
+    if (getParent() != null)
+      getParent().layoutChildren();
     repaint();
   }
 

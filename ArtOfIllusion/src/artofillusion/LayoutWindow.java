@@ -160,11 +160,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     // Build the tool palette.
 
     tools = new ToolPalette(2, 7);
-    EditingTool metaTool, altTool, defaultTool;
+    EditingTool metaTool, altTool, defaultTool, compoundTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));
     tools.addTool(new ScaleObjectTool(this));
-    tools.addTool(new MoveScaleRotateObjectTool(this));
+    tools.addTool(compoundTool = new MoveScaleRotateObjectTool(this));
     tools.addTool(new CreateCubeTool(this));
     tools.addTool(new CreateSphereTool(this));
     tools.addTool(new CreateCylinderTool(this));
@@ -175,6 +175,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     tools.addTool(new CreateLightTool(this));
     tools.addTool(metaTool = new MoveViewTool(this));
     tools.addTool(altTool = new RotateViewTool(this));
+    if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
+      defaultTool = compoundTool;
+    tools.setDefaultTool(defaultTool);
     tools.selectTool(defaultTool);
     for (int i = 0; i < theView.length; i++)
     {

@@ -227,7 +227,6 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     // Handle arrow keys.
 
     Mesh mesh = (Mesh) controller.getObject().getObject();
-    baseVertPos = mesh.getVertexPositions();
     int i, selectDist[] = controller.getSelectionDistance();
     int key = e.getKeyCode();
     double dx, dy;
@@ -257,6 +256,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     else
       return;
     e.consume();
+    baseVertPos = mesh.getVertexPositions();
     for (i = 0; i < baseVertPos.length && selectDist[i] != 0; i++);
     if (i == baseVertPos.length)
       return;

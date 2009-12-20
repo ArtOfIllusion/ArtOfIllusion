@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2009 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -190,7 +190,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     sc.setFieldOfView(16.0);
     theCamera.setScreenTransform(sc.getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
     rend.configurePreview();
-    rend.renderScene(theScene, theCamera, this, null);
+    rend.renderScene(theScene, theCamera, this, sc);
     renderInProgress = true;
     repaint();
   }

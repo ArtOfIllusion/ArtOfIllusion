@@ -683,7 +683,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createPopupMenu()
   {
     popupMenu = new BPopupMenu();
-    popupMenuItem = new BMenuItem [14];
+    popupMenuItem = new BMenuItem [15];
     popupMenu.add(popupMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand", null));
     popupMenu.add(popupMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand", null));
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTexture", this, "setTextureCommand", null));
@@ -700,7 +700,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.addSeparator();
     popupMenu.add(popupMenuItem[11] = Translate.menuItem("cut", this, "cutCommand", null));
     popupMenu.add(popupMenuItem[12] = Translate.menuItem("copy", this, "copyCommand", null));
-    popupMenu.add(popupMenuItem[13] = Translate.menuItem("clear", this, "clearCommand", null));
+    popupMenu.add(popupMenuItem[13] = Translate.menuItem("paste", this, "pasteCommand", null));
+    popupMenu.add(popupMenuItem[14] = Translate.menuItem("clear", this, "clearCommand", null));
   }
 
   /** Display the popup menu. */
@@ -756,8 +757,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[10].setEnabled(canUnlock); // Unlock Selection
         popupMenuItem[11].setEnabled(sel.length > 0); // Cut
         popupMenuItem[12].setEnabled(sel.length > 0); // Copy
-        popupMenuItem[13].setEnabled(sel.length > 0); // Clear
+        popupMenuItem[14].setEnabled(sel.length > 0); // Clear
       }
+    popupMenuItem[13].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     popupMenu.show(w, x, y);
   }
 

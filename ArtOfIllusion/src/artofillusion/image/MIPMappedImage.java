@@ -469,6 +469,7 @@ public class MIPMappedImage extends ImageMap
     if (size <= scale[0])
       {
         getMapGradient(grad, component, 0, wrapx, wrapy, x, y);
+        grad.y = -grad.y;
         return;
       }
     if (size >= scale[maps.length-1])

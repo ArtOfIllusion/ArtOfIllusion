@@ -301,7 +301,7 @@ public abstract class ViewerCanvas extends CustomWidget
   
   public boolean isPerspective()
   {
-    if (boundCamera != null)
+    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
       return ((SceneCamera) boundCamera.getObject()).isPerspective();
     return perspective;
   }

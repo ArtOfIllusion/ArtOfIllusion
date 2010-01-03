@@ -10,6 +10,7 @@
 
 package artofillusion.view;
 
+import artofillusion.object.*;
 import buoy.widget.*;
 import buoy.event.*;
 import artofillusion.*;
@@ -31,13 +32,13 @@ public class ViewerPerspectiveControl implements ViewerControl
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
-        if (view.getBoundCamera() == null)
+        if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+          perspectiveChoice.setEnabled(false);
+        else
         {
           perspectiveChoice.setEnabled(true);
           perspectiveChoice.setSelectedIndex(view.isPerspective() ? 0 : 1);
         }
-        else
-          perspectiveChoice.setEnabled(false);
       }
     });
     perspectiveChoice.addEventLink(ValueChangedEvent.class, new Object() {

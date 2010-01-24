@@ -328,10 +328,7 @@ public class ImageModule extends Module
       return;
     }
     if (colorModel == RGB_MODEL || component == 3)
-    {
       map.getGradient(tempGrad, component, wrapx, wrapy, x, y, xsize, ysize);
-      tempGrad.y = -tempGrad.y;
-    }
     else
     {
       double value = getAverageValue(which, blur);

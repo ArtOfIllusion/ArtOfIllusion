@@ -231,7 +231,7 @@ public class ThemeManager {
         int count = 0;
         for (int i = 0; i < themeNodeList.getLength(); i++) {
             node = themeNodeList.item(i);
-            if (node.getNodeName() == "colorset") {
+            if (node.getNodeName().equals("colorset")) {
                 count++;
             }
         }
@@ -239,7 +239,7 @@ public class ThemeManager {
         count = 0;
         for (int i = 0; i < themeNodeList.getLength(); i++) {
             node = themeNodeList.item(i);
-            if (node.getNodeName() == "colorset")
+            if (node.getNodeName().equals("colorset"))
                 colorSets[count++] = new ColorSet(node);
         }
       }

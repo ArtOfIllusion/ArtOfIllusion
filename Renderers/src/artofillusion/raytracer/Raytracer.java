@@ -2011,9 +2011,9 @@ public class Raytracer implements Renderer, Runnable
         if (dot > 0.0)
           {
             lt.getLight(lightColor, light[i].getCoords().toLocal().times(pos));
-            if (lightColor.getRed()*(spec.diffuse.getRed()*dot+spec.hilight.getRed()) < minRayIntensity &&
-                lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen()) < minRayIntensity &&
-                lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue()) < minRayIntensity)
+            if (Math.abs(lightColor.getRed()*(spec.diffuse.getRed()*dot+spec.hilight.getRed())) < minRayIntensity &&
+                Math.abs(lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen())) < minRayIntensity &&
+                Math.abs(lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue())) < minRayIntensity)
               continue;
             if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(r, lt, treeDepth+1, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
               {

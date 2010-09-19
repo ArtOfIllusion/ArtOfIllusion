@@ -574,11 +574,31 @@ public class Scene
         ObjectInfo obj = objects.elementAt(i);
         if (obj.getObject().getTexture() == tex)
           obj.setTexture(def, def.getDefaultMapping(obj.getObject()));
+        if (obj.getObject().getTextureMapping() instanceof LayeredMapping)
+        {
+          LayeredMapping map = (LayeredMapping) obj.getObject().getTextureMapping();
+          for (int j = map.getNumLayers()-1; j >= 0; j--)
+            if (map.getLayer(j) == tex)
+              map.deleteLayer(j);
+          obj.setTexture(obj.getObject().getTexture(), map);
+        }
       }
     if (environTexture == tex)
     {
       environTexture = def;
       environMapping = def.getDefaultMapping(new Sphere(1.0, 1.0, 1.0));
+    }
+    if (environMapping instanceof LayeredMapping)
+    {
+      Sphere tempObject = new Sphere(1, 1, 1);
+      tempObject.setTexture(environTexture, environMapping);
+      tempObject.setParameterValues(environParamValue);
+      LayeredMapping map = (LayeredMapping) environMapping;
+      for (int j = map.getNumLayers()-1; j >= 0; j--)
+        if (map.getLayer(j) == tex)
+          map.deleteLayer(j);
+      tempObject.setTexture(environTexture, environMapping);
+      environParamValue = tempObject.getParameterValues();
     }
   }
   

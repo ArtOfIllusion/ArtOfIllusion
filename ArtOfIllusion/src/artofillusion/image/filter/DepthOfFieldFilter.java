@@ -1,4 +1,4 @@
-/* Copyright (C) 2009 by Peter Eastman
+/* Copyright (C) 2009-2010 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -75,8 +75,11 @@ public class DepthOfFieldFilter extends ImageFilter
         int nstart = Math.max(0, j-pixelRadius);
         int nend = Math.min(height-1, j+pixelRadius);
         float scale = (pixelRadius == 0 ? 1.0f : 1.0f/radius2);
-        for (int m = mstart; m < mend; m++)
-          for (int n = nstart; n < nend; n++)
+        float r = image.getPixelComponent(i, j, ComplexImage.RED);
+        float g = image.getPixelComponent(i, j, ComplexImage.GREEN);
+        float b = image.getPixelComponent(i, j, ComplexImage.BLUE);
+        for (int m = mstart; m <= mend; m++)
+          for (int n = nstart; n <= nend; n++)
           {
             int dist2 = (m-i)*(m-i)+(n-j)*(n-j);
             if (dist2 > radius2)
@@ -84,9 +87,9 @@ public class DepthOfFieldFilter extends ImageFilter
             float w = (pixelRadius-(float) Math.sqrt(dist2))*scale;
             int index = m+n*width;
             weight[index] += w;
-            red[index] += w*image.getPixelComponent(i, j, ComplexImage.RED);
-            green[index] += w*image.getPixelComponent(i, j, ComplexImage.GREEN);
-            blue[index] += w*image.getPixelComponent(i, j, ComplexImage.BLUE);
+            red[index] += w*r;
+            green[index] += w*g;
+            blue[index] += w*b;
           }
       }
     }

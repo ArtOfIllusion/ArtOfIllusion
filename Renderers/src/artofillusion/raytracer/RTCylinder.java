@@ -71,8 +71,8 @@ public class RTCylinder extends RTObject
           }
         else if (vx.z == 1.0 || vx.z == -1.0)
           {
-            rx = size.y/2.0;
-            rz = size.z/2.0;
+            rx = size.z/2.0;
+            rz = size.x/2.0;
             transform = false;
           }
         if (transform == false)

@@ -531,14 +531,10 @@ public class ArtOfIllusion
 
     try
     {
-      DataInputStream in = new DataInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f))));
-      Scene sc = new Scene(in, true);
-      sc.setName(f.getName());
-      sc.setDirectory(f.getParent());
+      Scene sc = new Scene(f, true);
       if (sc.errorsOccurredInLoading())
         new BStandardDialog("", new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new BScrollPane(new BTextArea(sc.getLoadingErrors()))}, BStandardDialog.ERROR).showMessageDialog(fr);
       newWindow(sc);
-      in.close();
       RecentFiles.addRecentFile(f);
     }
     catch (InvalidObjectException ex)

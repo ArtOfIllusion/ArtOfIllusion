@@ -1106,11 +1106,11 @@ public class Scene
   
   public Scene(File f, boolean fullScene) throws IOException, InvalidObjectException
   {
+    setName(f.getName());
+    setDirectory(f.getParent());
     DataInputStream in = new DataInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f))));
     initFromStream(in, fullScene);
     in.close();
-    setName(f.getName());
-    setDirectory(f.getParent());
   }
 
   /** The following constructor is used for reading from arbitrary input streams.  If fullScene

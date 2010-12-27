@@ -301,14 +301,11 @@ public class ExternalObject extends ObjectWrapper
     short version = in.readShort();
     if (version < 0 || version > 1)
       throw new InvalidObjectException("Unknown version: "+version);
-    externalFile = new File(in.readUTF());
+    File f = new File(in.readUTF());
     String relPath = in.readUTF();
-    if (!externalFile.isFile())
-    {
-      File f = new File(theScene.getDirectory(), relPath);
-      if (f.isFile())
-        externalFile = f;
-    }
+    externalFile = new File(theScene.getDirectory(), relPath);
+    if (!externalFile.isFile() && f.isFile())
+      externalFile = f;
     objectName = in.readUTF();
     objectId = (version > 0 ? in.readInt() : -1);
     includeChildren = (version > 0 ? in.readBoolean() : false);

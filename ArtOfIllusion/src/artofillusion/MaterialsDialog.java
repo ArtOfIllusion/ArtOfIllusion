@@ -88,7 +88,7 @@ public class MaterialsDialog extends BDialog implements ListChangeListener
   
   private void doCopy()
   {
-    String name = new BStandardDialog("", Translate.text("newTexName"), BStandardDialog.PLAIN).showInputDialog(this, null, "");
+    String name = new BStandardDialog("", Translate.text("newMatName"), BStandardDialog.PLAIN).showInputDialog(this, null, "");
     if (name == null)
       return;
     Material tex = theScene.getMaterial(matList.getSelectedIndex()).duplicate();

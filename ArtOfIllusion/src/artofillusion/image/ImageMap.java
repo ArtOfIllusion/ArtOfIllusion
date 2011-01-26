@@ -50,6 +50,8 @@ public abstract class ImageMap
             ex.printStackTrace();
           }
       }
+    if (name.endsWith(".svg"))
+      return new SVGImage(file);
     return new MIPMappedImage(file);
   }
   

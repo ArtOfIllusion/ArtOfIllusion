@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+
+<project name="ArtOfIllusion" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src" value="ArtOfIllusion/src" />
+  <property name="build" value="ArtOfIllusion/build" />
+  <property name="docs" value="ArtOfIllusion/docs" />
+  <property name="lib" value="lib" />
+  <property name="dist" value="." />
+<!--  <property name="build.compiler" value="classic" /> -->
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}" />
+    <!-- Create the docs directory structure used by documentation -->
+    <mkdir dir="${docs}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" debug="on" target="1.5" source="1.5">
+    <classpath>
+      <fileset dir="lib">
+        <include name="*.jar"/>
+      </fileset>
+    </classpath>
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <!-- Copy all necessary files into ${build}, then create the jar file -->
+    <copy todir="${build}/artofillusion/Icons">
+      <fileset dir="${src}/artofillusion/Icons" />
+    </copy>
+    <copy todir="${build}/artofillusion/titleImages">
+      <fileset dir="${src}/artofillusion/titleImages" />
+    </copy>
+    <copy todir="${build}/artofillusion/ui/manipulatorIcons">
+      <fileset dir="${src}/artofillusion/ui/manipulatorIcons" />
+    </copy>
+    <copy todir="${build}">
+      <fileset dir="${src}" includes="*.properties" /> 
+    </copy>
+    <copy todir="${build}">
+      <fileset dir="${src}" includes="keystrokes.xml" /> 
+    </copy>
+    <jar destfile="${dist}/ArtOfIllusion.jar">
+      <fileset dir="${build}"/>
+      <zipgroupfileset dir="${lib}" includes="*.jar"/>
+      <manifest>
+        <attribute name="Main-Class" value="artofillusion.ArtOfIllusion"/>
+        <attribute name="Class-Path" value="lib/jogl.jar lib/gluegen-rt.jar jmf.jar"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="docs" depends="init">
+    <javadoc packagenames="artofillusion.*"
+        sourcepath="${src}"
+        classpath="${lib}/*.jar"
+        source="1.5"
+        defaultexcludes="yes"
+        destdir="${docs}"
+        author="true"
+        version="true"
+        use="true"
+        windowtitle="Art of Illusion Documentation"
+	public="true">
+      <doctitle><![CDATA[<h1>Art of Illusion</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 1999-2011 by Peter Eastman.</i>]]></bottom>
+    </javadoc>
+  </target>
+
+  <target name="clean">
+    <!-- Delete the ${build} and ${docs} directory trees -->
+    <delete dir="${build}" />
+    <delete dir="${docs}" />
+  </target>
+</project>
+

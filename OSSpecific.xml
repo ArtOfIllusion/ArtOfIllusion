@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+
+<project name="OSSpecific" default="dist" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="src" value="OSSpecific/src" />
+  <property name="build" value="OSSpecific/build" />
+  <property name="docs" value="OSSpecific/docs" />
+  <property name="dist" value="Plugins" />
+  <property name="aoijar" value="ArtOfIllusion.jar" />
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${build}" />
+    <!-- Create the docs directory structure used by documentation -->
+    <mkdir dir="${docs}" />
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="1.5" source="1.5" />
+  </target>
+
+  <target name="dist" depends="compile">
+    <!-- Copy all necessary files into ${build}, then create the jar file -->
+    <copy file="${src}/extensions.xml" todir="${build}" />
+    <jar jarfile="${dist}/OSSpecific.jar" basedir="${build}" />
+  </target>
+
+  <target name="docs" depends="init">
+    <javadoc packagenames="artofillusion.*"
+        sourcepath="${src}"
+        classpath="${aoijar}"
+        defaultexcludes="yes"
+        destdir="${docs}"
+        author="true"
+        version="true"
+        use="true"
+        windowtitle="Art of Illusion Documentation"
+	public="true">
+      <doctitle><![CDATA[<h1>Art of Illusion</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 1999-2008 by Peter Eastman.</i>]]></bottom>
+    </javadoc>
+  </target>
+
+  <target name="clean">
+    <!-- Delete the ${build} and ${docs} directory trees -->
+    <delete dir="${build}" />
+    <delete dir="${docs}" />
+  </target>
+</project>
+

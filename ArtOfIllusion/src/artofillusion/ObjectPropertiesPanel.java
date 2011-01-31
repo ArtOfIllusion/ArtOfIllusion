@@ -19,9 +19,11 @@ import artofillusion.texture.*;
 import artofillusion.material.*;
 
 import javax.swing.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 
 /**
  * This is a panel which displays information about the currently selected objects, and allows them
@@ -67,6 +69,23 @@ public class ObjectPropertiesPanel extends ColumnContainer
     zRotField.addEventLink(ValueChangedEvent.class, this, "coordinatesChanged");
     textureChoice.addEventLink(ValueChangedEvent.class, this, "textureChanged");
     materialChoice.addEventLink(ValueChangedEvent.class, this, "materialChanged");
+    ListChangeListener listener = new ListChangeListener()
+    {
+      public void itemAdded(int index, Object obj)
+      {
+        rebuildContents();
+      }
+      public void itemRemoved(int index, Object obj)
+      {
+        rebuildContents();
+      }
+      public void itemChanged(int index, Object obj)
+      {
+        rebuildContents();
+      }
+    };
+    window.getScene().addTextureListener(listener);
+    window.getScene().addMaterialListener(listener);
   }
 
   /**
@@ -176,7 +195,19 @@ public class ObjectPropertiesPanel extends ColumnContainer
         selected = names.size();
         names.add(Translate.text("layeredTexture"));
       }
-      names.add(Translate.text("button.newTexture"));
+      List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
+      for (Texture texture : textureTypes)
+      {
+        try
+        {
+          Method mtd = texture.getClass().getMethod("getTypeName", null);
+          names.add(Translate.text("newTextureOfType", mtd.invoke(null, null)));
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
       textureChoice.setModel(new DefaultComboBoxModel(names));
       textureChoice.setSelectedIndex(selected);
     }
@@ -211,7 +242,19 @@ public class ObjectPropertiesPanel extends ColumnContainer
       else if (mat == null)
         selected = names.size();
       names.add(Translate.text("none"));
-      names.add(Translate.text("button.newMaterial"));
+      List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
+      for (Material material : materialTypes)
+      {
+        try
+        {
+          Method mtd = material.getClass().getMethod("getTypeName", null);
+          names.add(Translate.text("newMaterialOfType", mtd.invoke(null, null)));
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
       materialChoice.setModel(new DefaultComboBoxModel(names));
       materialChoice.setSelectedIndex(selected);
     }
@@ -417,11 +460,30 @@ public class ObjectPropertiesPanel extends ColumnContainer
     Texture tex = null;
     if (index < scene.getNumTextures())
       tex = scene.getTexture(index);
-    else if (index == textureChoice.getItemCount()-1)
+    else
     {
-      tex = TexturesDialog.showNewTextureWindow(window, scene);
-      if (tex == null)
-        rebuildContents(); // They pressed Cancel.
+      List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
+      if (index < scene.getNumTextures()+textureTypes.size())
+      {
+        try
+        {
+          tex = textureTypes.get(index-scene.getNumTextures()).getClass().newInstance();
+          int j = 0;
+          String name = "";
+          do
+          {
+            j++;
+            name = "Untitled "+j;
+          } while (scene.getTexture(name) != null);
+          tex.setName(name);
+          scene.addTexture(tex);
+          tex.edit(window, scene);
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
     }
     if (tex != null)
     {
@@ -450,11 +512,30 @@ public class ObjectPropertiesPanel extends ColumnContainer
     boolean noMaterial = (index == materialChoice.getItemCount()-2);
     if (index < scene.getNumMaterials())
       mat = scene.getMaterial(index);
-    else if (index == materialChoice.getItemCount()-1)
+    else
     {
-      mat = MaterialsDialog.showNewMaterialWindow(window, scene);
-      if (mat == null)
-        rebuildContents(); // They pressed Cancel.
+      List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
+      if (index < scene.getNumMaterials()+materialTypes.size()+1)
+      {
+        try
+        {
+          mat = materialTypes.get(index-scene.getNumMaterials()-1).getClass().newInstance();
+          int j = 0;
+          String name = "";
+          do
+          {
+            j++;
+            name = "Untitled "+j;
+          } while (scene.getMaterial(name) != null);
+          mat.setName(name);
+          scene.addMaterial(mat);
+          mat.edit(window, scene);
+        }
+        catch (Exception ex)
+        {
+          ex.printStackTrace();
+        }
+      }
     }
     if (noMaterial || mat != null)
     {

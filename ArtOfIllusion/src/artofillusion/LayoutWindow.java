@@ -492,23 +492,22 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     objectMenu = Translate.menu("object");
     menubar.add(objectMenu);
-    objectMenuItem = new BMenuItem [13];
+    objectMenuItem = new BMenuItem [12];
     objectMenu.add(objectMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand"));
     objectMenu.add(objectMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand"));
     objectMenu.add(objectMenuItem[2] = Translate.menuItem("transformObject", this, "transformObjectCommand"));
     objectMenu.add(objectMenuItem[3] = Translate.menuItem("alignObjects", this, "alignObjectsCommand"));
-    objectMenu.add(objectMenuItem[4] = Translate.menuItem("setTexture", this, "setTextureCommand"));
-    objectMenu.add(objectMenuItem[5] = Translate.menuItem("setMaterial", this, "setMaterialCommand"));
-    objectMenu.add(objectMenuItem[6] = Translate.menuItem("renameObject", this, "renameObjectCommand"));
-    objectMenu.add(objectMenuItem[7] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand"));
-    objectMenu.add(objectMenuItem[8] = Translate.menuItem("convertToActor", this, "convertToActorCommand"));
+    objectMenu.add(objectMenuItem[4] = Translate.menuItem("setTextureAndMaterial", this, "setTextureCommand"));
+    objectMenu.add(objectMenuItem[5] = Translate.menuItem("renameObject", this, "renameObjectCommand"));
+    objectMenu.add(objectMenuItem[6] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand"));
+    objectMenu.add(objectMenuItem[7] = Translate.menuItem("convertToActor", this, "convertToActorCommand"));
     objectMenu.addSeparator();
-    objectMenu.add(objectMenuItem[9] = Translate.menuItem("hideSelection", this, "actionPerformed"));
-    objectMenu.add(objectMenuItem[10] = Translate.menuItem("showSelection", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[8] = Translate.menuItem("hideSelection", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[9] = Translate.menuItem("showSelection", this, "actionPerformed"));
     objectMenu.add(Translate.menuItem("showAll", this, "actionPerformed"));
     objectMenu.addSeparator();
-    objectMenu.add(objectMenuItem[11] = Translate.menuItem("lockSelection", this, "actionPerformed"));
-    objectMenu.add(objectMenuItem[12] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[10] = Translate.menuItem("lockSelection", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[11] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
     objectMenu.add(Translate.menuItem("unlockAll", this, "actionPerformed"));
     objectMenu.addSeparator();
     objectMenu.add(createMenu = Translate.menu("createPrimitive"));
@@ -683,25 +682,24 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createPopupMenu()
   {
     popupMenu = new BPopupMenu();
-    popupMenuItem = new BMenuItem [15];
+    popupMenuItem = new BMenuItem [14];
     popupMenu.add(popupMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand", null));
     popupMenu.add(popupMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand", null));
-    popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTexture", this, "setTextureCommand", null));
-    popupMenu.add(popupMenuItem[3] = Translate.menuItem("setMaterial", this, "setMaterialCommand", null));
-    popupMenu.add(popupMenuItem[4] = Translate.menuItem("renameObject", this, "renameObjectCommand", null));
-    popupMenu.add(popupMenuItem[5] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand", null));
-    popupMenu.add(popupMenuItem[6] = Translate.menuItem("selectChildren", this, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTextureAndMaterial", this, "setTextureCommand", null));
+    popupMenu.add(popupMenuItem[3] = Translate.menuItem("renameObject", this, "renameObjectCommand", null));
+    popupMenu.add(popupMenuItem[4] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand", null));
+    popupMenu.add(popupMenuItem[5] = Translate.menuItem("selectChildren", this, "actionPerformed", null));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[7] = Translate.menuItem("hideSelection", this, "actionPerformed", null));
-    popupMenu.add(popupMenuItem[8] = Translate.menuItem("showSelection", this, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[6] = Translate.menuItem("hideSelection", this, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[7] = Translate.menuItem("showSelection", this, "actionPerformed", null));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[9] = Translate.menuItem("lockSelection", this, "actionPerformed"));
-    popupMenu.add(popupMenuItem[10] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
+    popupMenu.add(popupMenuItem[8] = Translate.menuItem("lockSelection", this, "actionPerformed"));
+    popupMenu.add(popupMenuItem[9] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[11] = Translate.menuItem("cut", this, "cutCommand", null));
-    popupMenu.add(popupMenuItem[12] = Translate.menuItem("copy", this, "copyCommand", null));
-    popupMenu.add(popupMenuItem[13] = Translate.menuItem("paste", this, "pasteCommand", null));
-    popupMenu.add(popupMenuItem[14] = Translate.menuItem("clear", this, "clearCommand", null));
+    popupMenu.add(popupMenuItem[10] = Translate.menuItem("cut", this, "cutCommand", null));
+    popupMenu.add(popupMenuItem[11] = Translate.menuItem("copy", this, "copyCommand", null));
+    popupMenu.add(popupMenuItem[12] = Translate.menuItem("paste", this, "pasteCommand", null));
+    popupMenu.add(popupMenuItem[13] = Translate.menuItem("clear", this, "clearCommand", null));
   }
 
   /** Display the popup menu. */
@@ -709,11 +707,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void showPopupMenu(Widget w, int x, int y)
   {
     Object sel[] = itemTree.getSelectedObjects();
-    boolean canConvert, canSetMaterial, canSetTexture, canHide, canShow, canLock, canUnlock, hasChildren;
+    boolean canConvert, canSetTexture, canHide, canShow, canLock, canUnlock, hasChildren;
     ObjectInfo info;
     Object3D obj;
 
-    canConvert = canSetMaterial = canSetTexture = (sel.length > 0);
+    canConvert = canSetTexture = (sel.length > 0);
     canHide = canShow = canLock = canUnlock = hasChildren = false;
     for (int i = 0; i < sel.length; i++)
       {
@@ -723,8 +721,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           canConvert = false;
         if (!obj.canSetTexture())
           canSetTexture = false;
-        if (!obj.canSetMaterial())
-          canSetMaterial = false;
         if (info.getChildren().length > 0)
           hasChildren = true;
         if (info.isVisible())
@@ -747,17 +743,16 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[0].setEnabled(sel.length == 1 && obj.isEditable()); // Edit Object
         popupMenuItem[1].setEnabled(true); // Object Layout
         popupMenuItem[2].setEnabled(canSetTexture); // Set Texture
-        popupMenuItem[3].setEnabled(canSetMaterial); // Set Material
-        popupMenuItem[4].setEnabled(sel.length == 1); // Rename Object
-        popupMenuItem[5].setEnabled(canConvert); // Convert to Triangle Mesh
-        popupMenuItem[6].setEnabled(sel.length == 1 && hasChildren); // Select Children
-        popupMenuItem[7].setEnabled(canHide); // Hide Selection
-        popupMenuItem[8].setEnabled(canShow); // Show Selection
-        popupMenuItem[9].setEnabled(canLock); // Lock Selection
-        popupMenuItem[10].setEnabled(canUnlock); // Unlock Selection
-        popupMenuItem[11].setEnabled(sel.length > 0); // Cut
-        popupMenuItem[12].setEnabled(sel.length > 0); // Copy
-        popupMenuItem[14].setEnabled(sel.length > 0); // Clear
+        popupMenuItem[3].setEnabled(sel.length == 1); // Rename Object
+        popupMenuItem[4].setEnabled(canConvert); // Convert to Triangle Mesh
+        popupMenuItem[5].setEnabled(sel.length == 1 && hasChildren); // Select Children
+        popupMenuItem[6].setEnabled(canHide); // Hide Selection
+        popupMenuItem[7].setEnabled(canShow); // Show Selection
+        popupMenuItem[8].setEnabled(canLock); // Lock Selection
+        popupMenuItem[9].setEnabled(canUnlock); // Unlock Selection
+        popupMenuItem[10].setEnabled(sel.length > 0); // Cut
+        popupMenuItem[11].setEnabled(sel.length > 0); // Copy
+        popupMenuItem[13].setEnabled(sel.length > 0); // Clear
       }
     popupMenuItem[13].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     popupMenu.show(w, x, y);
@@ -921,13 +916,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     int numSelTracks = selTrack.length;
     int numSelKeyframes = theScore.getSelectedKeyframes().length;
     ViewerCanvas view = theView[currentView];
-    boolean canConvert, canSetMaterial, canSetTexture;
+    boolean canConvert, canSetTexture;
     boolean curve, noncurve, enable, disable, hasChildren, hasParent;
     ObjectInfo info;
     Object3D obj;
     int i;
 
-    canConvert = canSetMaterial = canSetTexture = (numSelObjects > 0);
+    canConvert = canSetTexture = (numSelObjects > 0);
     curve = noncurve = enable = disable = hasChildren = hasParent = false;
     for (i = 0; i < numSelObjects; i++)
     {
@@ -941,8 +936,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         canConvert = false;
       if (!obj.canSetTexture())
         canSetTexture = false;
-      if (!obj.canSetMaterial())
-        canSetMaterial = false;
       if (info.getChildren().length > 0)
         hasChildren = true;
       if (info.getParent() != null)
@@ -979,14 +972,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       objectMenuItem[2].setEnabled(true); // Transform Object
       objectMenuItem[3].setEnabled(numSelObjects > 0); // Align Objects
       objectMenuItem[4].setEnabled(canSetTexture); // Set Texture
-      objectMenuItem[5].setEnabled(canSetMaterial); // Set Material
-      objectMenuItem[6].setEnabled(sel.length == 1); // Rename Object
-      objectMenuItem[7].setEnabled(canConvert && sel.length == 1); // Convert to Triangle Mesh
-      objectMenuItem[8].setEnabled(sel.length == 1 && ((ObjectInfo) sel[0]).getObject().canConvertToActor()); // Convert to Actor
-      objectMenuItem[9].setEnabled(true); // Hide Selection
-      objectMenuItem[10].setEnabled(true); // Show Selection
-      objectMenuItem[11].setEnabled(true); // Lock Selection
-      objectMenuItem[12].setEnabled(true); // Unlock Selection
+      objectMenuItem[5].setEnabled(sel.length == 1); // Rename Object
+      objectMenuItem[6].setEnabled(canConvert && sel.length == 1); // Convert to Triangle Mesh
+      objectMenuItem[7].setEnabled(sel.length == 1 && ((ObjectInfo) sel[0]).getObject().canConvertToActor()); // Convert to Actor
+      objectMenuItem[8].setEnabled(true); // Hide Selection
+      objectMenuItem[9].setEnabled(true); // Show Selection
+      objectMenuItem[10].setEnabled(true); // Lock Selection
+      objectMenuItem[11].setEnabled(true); // Unlock Selection
     }
     animationMenuItem[0].setEnabled(numSelTracks == 1); // Edit Track
     animationMenuItem[1].setEnabled(numSelTracks > 0); // Duplicate Tracks
@@ -2160,31 +2152,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
-  public void setMaterialCommand()
-  {
-    int sel[] = getSelectedIndices(), i, count = 0;
-    ObjectInfo obj[], info;
-
-    for (i = 0; i < sel.length; i++)
-      {
-        info = theScene.getObject(sel[i]);
-        if (info.getObject().canSetMaterial())
-          count++;
-      }
-    if (count == 0)
-      return;
-    obj = new ObjectInfo [count];
-    for (i = 0; i < sel.length; i++)
-      {
-        info = theScene.getObject(sel[i]);
-        if (info.getObject().canSetMaterial())
-          obj[i] = info;
-      }
-    new ObjectMaterialDialog(this, obj);
-    modified = true;
-    updateImage();
-  }
-
   public void renameObjectCommand()
   {
     int sel[] = getSelectedIndices();
@@ -2751,7 +2718,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       void processEvent()
       {
         envPanel.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        ObjectTextureDialog otd = new ObjectTextureDialog(LayoutWindow.this, new ObjectInfo [] {envInfo});
+        ObjectTextureDialog otd = new ObjectTextureDialog(LayoutWindow.this, new ObjectInfo [] {envInfo}, true, false);
         otd.setCallback(envTextureCallback);
         envPanel.getParent().setCursor(Cursor.getDefaultCursor());
       }

@@ -346,11 +346,13 @@ public class ImageMapTexture extends Texture2D
     ActionProcessor renderProcessor;
     ImageMapTexture newTexture;
     BFrame parent;
+    Scene scene;
     
     public Editor(BFrame fr, Scene sc)
     {
       super(fr, true);
       parent = fr;
+      scene = sc;
       newTexture = (ImageMapTexture) duplicate();
       BorderContainer content = new BorderContainer();
       setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
@@ -445,6 +447,9 @@ public class ImageMapTexture extends Texture2D
       tileY = newTexture.tileY;
       mirrorX = newTexture.mirrorX;
       mirrorY = newTexture.mirrorY;
+      int index = scene.indexOf(ImageMapTexture.this);
+      if (index > -1)
+        scene.changeTexture(index);
       dispose();
     }
     

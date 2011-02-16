@@ -10,12 +10,16 @@
 
 package artofillusion;
 
+import artofillusion.material.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
+
 import java.awt.*;
+import java.lang.reflect.*;
+import java.util.List;
 
 /** This class implements the dialog box which is used to choose textures for objects. 
     It presents a list of all available textures from which the user can select one.
@@ -27,11 +31,12 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private LayoutWindow window;
   private Scene scene;
   private ObjectInfo obj[], editObj;
-  private BList texList, layerList;
-  private BButton mapButton, addLayerButton, deleteLayerButton, moveUpButton, moveDownButton;
-  private BButton newTextureButton, editTexturesButton;
-  private BorderContainer content;
-  private FormContainer listPanel, layerPanel, paramsPanel;
+  private BTabbedPane tabs;
+  private BList texList, matList, layerList;
+  private BButton texMapButton, matMapButton, addLayerButton, deleteLayerButton, moveUpButton, moveDownButton, editTexturesButton;
+  private BComboBox newTextureChoice, newMaterialChoice;
+  private BorderContainer content, texturesTab, materialsTab;
+  private FormContainer texTitlePanel, texListPanel, matListPanel, layerPanel, paramsPanel;
   private MaterialPreviewer preview;
   private BComboBox typeChoice, blendChoice, paramTypeChoice[];
   private ValueSelector paramValueWidget[];
@@ -39,7 +44,9 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private BScrollPane paramsScroller;
   private Runnable callback;
   private Texture oldTexture;
-  private TextureMapping oldMapping;
+  private TextureMapping oldTexMapping;
+  Material oldMaterial;
+  MaterialMapping oldMatMapping;
   private LayeredTexture layeredTex;
   private LayeredMapping layeredMap;
   private ActionProcessor renderProcessor;
@@ -48,6 +55,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private static final int VERTEX_PARAM = 1;
   private static final int FACE_PARAM = 2;
   private static final int FACE_VERTEX_PARAM = 3;
+
+  private static final int PREVIEW_SIZE = 300;
   
   private static final String PARAM_TYPE_NAME[] = new String [] {
       Translate.text("Object"),
@@ -59,6 +68,11 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
   public ObjectTextureDialog(LayoutWindow parent, ObjectInfo objects[])
   {
+    this(parent, objects, true, true);
+  }
+
+  public ObjectTextureDialog(LayoutWindow parent, ObjectInfo objects[], boolean includeTextures, boolean includeMaterials)
+  {
     super(parent, Translate.text("objectTextureTitle"), false);
     
     window = parent;
@@ -68,10 +82,10 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     editObj = obj[0].duplicate();
     editObj.setObject(editObj.object.duplicate());
     oldTexture = editObj.getObject().getTexture();
-    oldMapping = editObj.getObject().getTextureMapping();
+    oldTexMapping = editObj.getObject().getTextureMapping();
     if (oldTexture instanceof LayeredTexture)
     {
-      layeredMap = (LayeredMapping) oldMapping;
+      layeredMap = (LayeredMapping) oldTexMapping;
       layeredTex = (LayeredTexture) oldTexture;;
     }
     else
@@ -79,18 +93,31 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       layeredTex = new LayeredTexture(editObj.getObject());
       layeredMap = (LayeredMapping) layeredTex.getDefaultMapping(editObj.getObject());
     }
+    oldMaterial =  editObj.getObject().getMaterial();
+    if (oldMaterial == null)
+      oldMatMapping = null;
+    else
+      oldMatMapping =  editObj.getObject().getMaterialMapping().duplicate();
+    tabs = new BTabbedPane();
+    texturesTab = new BorderContainer();
+    if (includeTextures)
+      tabs.add(texturesTab, Translate.text("Texture"));
+    materialsTab = new BorderContainer();
+    if (includeMaterials)
+      tabs.add(materialsTab, Translate.text("Material"));
 
     // Add the title and combo box at the top.
     
     content = new BorderContainer();
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
-    FormContainer northPanel = new FormContainer(1, 2);
+    content.add(tabs, BorderContainer.CENTER);
+    texTitlePanel = new FormContainer(1, 2);
     String title;
     if (obj.length == 1)
       title = Translate.text("chooseTextureForSingle", obj[0].getName());
     else
       title = Translate.text("chooseTextureForMultiple");
-    northPanel.add(new BLabel(title), 0, 0);
+    texTitlePanel.add(new BLabel(title), 0, 0);
     RowContainer typeRow = new RowContainer();
     typeRow.add(Translate.label("Type"));
     typeRow.add(typeChoice = new BComboBox(new String [] {
@@ -100,26 +127,68 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     typeChoice.setSelectedIndex((oldTexture instanceof LayeredTexture) ? 1 : 0);
     typeChoice.addEventLink(ValueChangedEvent.class, this, "typeChanged");
     if (obj.length == 1)
-      northPanel.add(typeRow, 0, 1);
-    content.add(northPanel, BorderContainer.NORTH);
-    
+      texTitlePanel.add(typeRow, 0, 1);
+
     // Create the list of textures and the buttons under it.
 
     texList = new BList();
     texList.setMultipleSelectionEnabled(false);
-    buildList();
-    texList.addEventLink(SelectionChangedEvent.class, this, "selectionChanged");
+    texList.addEventLink(SelectionChangedEvent.class, this, "textureSelectionChanged");
     texList.addEventLink(MouseClickedEvent.class, this, "textureClicked");
-    listPanel = new FormContainer(new double [] {1.0}, new double [] {1.0, 0.0});
-    listPanel.add(UIUtilities.createScrollingList(texList), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
+    texListPanel = new FormContainer(new double [] {1.0}, new double [] {1.0, 0.0});
+    texListPanel.add(UIUtilities.createScrollingList(texList), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     RowContainer texButtonRow = new RowContainer();
-    texButtonRow.add(newTextureButton = Translate.button("newTexture", this, "doNewTexture"));
-    texButtonRow.add(editTexturesButton = Translate.button("textures", this, "doEditTextures"));
-    listPanel.add(texButtonRow, 0, 1);
-    
+    texButtonRow.add(texMapButton = Translate.button("editMapping", this, "doEditTextureMapping"));
+    texButtonRow.add(newTextureChoice = new BComboBox());
+    newTextureChoice.add(Translate.text("button.newTexture"));
+    java.util.List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
+    for (Texture texture : textureTypes)
+    {
+      try
+      {
+        Method mtd = texture.getClass().getMethod("getTypeName", null);
+        newTextureChoice.add(mtd.invoke(null, null));
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+    newTextureChoice.addEventLink(ValueChangedEvent.class, this, "doNewTexture");
+    texListPanel.add(texButtonRow, 0, 1);
+
+    // Create the list of materials and the buttons under it.
+
+    matList = new BList();
+    matList.setMultipleSelectionEnabled(false);
+    matList.addEventLink(SelectionChangedEvent.class, this, "materialSelectionChanged");
+    matList.addEventLink(MouseClickedEvent.class, this, "materialClicked");
+    matListPanel = new FormContainer(new double [] {1.0}, new double [] {1.0, 0.0});
+    matListPanel.add(UIUtilities.createScrollingList(matList), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
+    RowContainer matButtonRow = new RowContainer();
+    matButtonRow.add(matMapButton = Translate.button("editMapping", this, "doEditMaterialMapping"));
+    matButtonRow.add(newMaterialChoice = new BComboBox());
+    newMaterialChoice.add(Translate.text("button.newMaterial"));
+    java.util.List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
+    for (Material material : materialTypes)
+    {
+      try
+      {
+        Method mtd = material.getClass().getMethod("getTypeName", null);
+        newMaterialChoice.add(mtd.invoke(null, null));
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
+    newMaterialChoice.addEventLink(ValueChangedEvent.class, this, "doNewMaterial");
+    matListPanel.add(matButtonRow, 0, 1);
+    materialsTab.add(matListPanel, BorderContainer.CENTER);
+
     // Create the section of the window for layered textures.
     
-    layerPanel = new FormContainer(new double [] {1.0, 1.0, 1.0}, new double [] {0.0, 0.0, 0.0, 0.0, 1.0});
+    layerPanel = new FormContainer(new double [] {1.0, 1.0}, new double [] {0.0, 0.0, 0.0, 0.0, 1.0});
     layerPanel.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
     layerPanel.add(addLayerButton = Translate.button("add", " >>", this, "doAddLayer"), 0, 0);
     layerPanel.add(deleteLayerButton = Translate.button("delete", this, "doDeleteLayer"), 0, 1);
@@ -132,39 +201,43 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       }
     };
     layerList.setMultipleSelectionEnabled(false);
-    layerList.addEventLink(SelectionChangedEvent.class, this, "selectionChanged");
+    layerList.addEventLink(SelectionChangedEvent.class, this, "textureSelectionChanged");
     for (int i = 0; i < layeredMap.getLayers().length; i++)
       layerList.add((layeredMap.getLayers())[i].getName());
     layerPanel.add(UIUtilities.createScrollingList(layerList), 1, 0, 1, 4, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
-    layerPanel.add(Translate.label("blendingMode"), 2, 0);
+    RowContainer blendRow = new RowContainer();
+    layerPanel.add(blendRow, 0, 4, 2, 1);
+    blendRow.add(Translate.label("blendingMode"));
     blendChoice = new BComboBox(new String [] {
       Translate.text("blend"),
       Translate.text("overlay"),
       Translate.text("overlayBumpsAdd"),
     });
     blendChoice.addEventLink(ValueChangedEvent.class, this, "blendTypeChanged");
-    layerPanel.add(blendChoice, 2, 1);
+    blendRow.add(blendChoice);
    
     // Create the material previewer.
     
     if (oldTexture instanceof LayeredTexture)
     {
-      preview = new MaterialPreviewer(layeredTex, editObj.getObject().getMaterial(), 160, 160);
+      preview = new MaterialPreviewer(layeredTex, editObj.getObject().getMaterial(), PREVIEW_SIZE, PREVIEW_SIZE);
       preview.setTexture(layeredTex, layeredMap);
     }
     else
     {
-      preview = new MaterialPreviewer(oldTexture, editObj.getObject().getMaterial(), 160, 160);
-      preview.setTexture(oldTexture, oldMapping);
+      preview = new MaterialPreviewer(oldTexture, editObj.getObject().getMaterial(), PREVIEW_SIZE, PREVIEW_SIZE);
+      preview.setTexture(oldTexture, oldTexMapping);
     }
+    preview.setMaximumSize(new Dimension(PREVIEW_SIZE, PREVIEW_SIZE));
     preview.setMaterial(editObj.getObject().getMaterial(), editObj.getObject().getMaterialMapping());
     updatePreviewParameterValues();
+    content.add(preview, BorderContainer.EAST);
 
     // Add the buttons at the bottom.
 
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-    buttons.add(mapButton = Translate.button("editMapping", this, "doEditMapping"));
+    buttons.add(editTexturesButton = Translate.button("textures", this, "doEditTextures"));
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
 
@@ -180,6 +253,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
     // Show the dialog.
 
+    buildLists();
     if (oldTexture instanceof LayeredTexture)
       layoutLayered();
     else
@@ -190,6 +264,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     UIUtilities.centerDialog(this, parent);
     updateComponents();
     scene.addTextureListener(this);
+    scene.addMaterialListener(this);
     setVisible(true);
   }
 
@@ -209,6 +284,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   public void dispose()
   {
     scene.removeTextureListener(this);
+    scene.removeMaterialListener(this);
     renderProcessor.stopProcessing();
     super.dispose();
   }
@@ -224,32 +300,32 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   
   private void layoutSimple()
   {
-    content.remove(BorderContainer.CENTER);
-    FormContainer center = new FormContainer(2, 2);
+    texturesTab.remove(BorderContainer.CENTER);
+    FormContainer center = new FormContainer(2, 3);
     center.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
-    center.add(listPanel, 0, 0);
-    center.add(preview, 1, 0, new LayoutInfo());
-    center.add(paramsPanel, 0, 1, 2, 1);
-    content.add(center, BorderContainer.CENTER);
+    center.add(texTitlePanel, 0, 0, 2, 1);
+    center.add(texListPanel, 0, 1);
+    center.add(paramsPanel, 0, 2, 2, 1);
+    texturesTab.add(center, BorderContainer.CENTER);
   }
   
   /** Layout the content panel for a layered texture. */
   
   private void layoutLayered()
   {
-    content.remove(BorderContainer.CENTER);
-    FormContainer center = new FormContainer(new double [] {1.0, 1.0, 0.0}, new double [] {1.0, 1.0});
+    texturesTab.remove(BorderContainer.CENTER);
+    FormContainer center = new FormContainer(new double [] {1.0, 1.0, 0.0}, new double [] {0.0, 1.0, 1.0});
     center.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
-    center.add(listPanel, 0, 0);
-    center.add(layerPanel, 1, 0, 2, 1);
-    center.add(paramsPanel, 0, 1, 2, 1);
-    center.add(preview, 2, 1, new LayoutInfo());
-    content.add(center, BorderContainer.CENTER);
+    center.add(texTitlePanel, 0, 0, 3, 1);
+    center.add(texListPanel, 0, 1);
+    center.add(layerPanel, 1, 1, 2, 1);
+    center.add(paramsPanel, 0, 2, 2, 1);
+    texturesTab.add(center, BorderContainer.CENTER);
   }
   
-  /** Build the list of all available textures. */
+  /** Build the lists of all available textures and materials. */
   
-  private void buildList()
+  private void buildLists()
   {
     texList.removeAll();
     for (int i = 0; i < scene.getNumTextures(); i++)
@@ -258,6 +334,20 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       if (editObj.getObject().getTexture() == scene.getTexture(i))
         texList.setSelected(i, true);
     }
+    matList.removeAll();
+    matList.add(Translate.text("none"));
+    boolean foundMaterial = false;
+    for (int i = 0; i < scene.getNumMaterials(); i++)
+    {
+      matList.add(scene.getMaterial(i).getName());
+      if (editObj.getObject().getMaterial() == scene.getMaterial(i))
+      {
+        matList.setSelected(i+1, true);
+        foundMaterial = true;
+      }
+    }
+    if (!foundMaterial)
+      matList.setSelected(0, true);
   }
   
   /** Build the list of texture parameters. */
@@ -285,6 +375,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     fieldParamIndex = new int [params.length];
     FormContainer paramsContainer = new FormContainer(3, params.length);
     paramsContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
+    LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE);
     final TextureParameter texParam[] = obj.getParameters();
     final ParameterValue paramValue[] = obj.getParameterValues();
     for (int i = 0; i < params.length; i++)
@@ -303,7 +394,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
         }
       final int whichParam = j, whichField = i;
       fieldParamIndex[i] = j;
-      paramsContainer.add(new BLabel(params[i].name), 0, i);
+      paramsContainer.add(new BLabel(params[i].name), 0, i, labelLayout);
       paramsContainer.add(paramTypeChoice[i] = new BComboBox(), 1, i);
       paramTypeChoice[i].add(PARAM_TYPE_NAME[0]);
       if (obj instanceof Mesh)
@@ -357,8 +448,23 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       renderPreview();
     }
   }
-  
-  private void doEditMapping()
+
+  private void materialClicked(MouseClickedEvent ev)
+  {
+    if (ev.getClickCount() == 2)
+    {
+      int which = matList.getSelectedIndex()-1;
+      if (which > -1)
+      {
+        Material mat = scene.getMaterial(which);
+        mat.edit(window, scene);
+        scene.changeMaterial(which);
+        preview.render();
+      }
+    }
+  }
+
+  private void doEditTextureMapping()
   {
     int index = layerList.getSelectedIndex();
     new TextureMappingDialog(window, editObj.getObject(), index);
@@ -368,22 +474,80 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     updatePreviewParameterValues();
     renderPreview();
   }
-  
+
+  private void doEditMaterialMapping()
+  {
+    new MaterialMappingDialog(window, editObj.getObject());
+    preview.setMaterial(editObj.getObject().getMaterial(), editObj.getObject().getMaterialMapping());
+    preview.render();
+  }
+
   private void doNewTexture()
   {
-    Texture tex = TexturesDialog.showNewTextureWindow(this, scene);
-    boolean layered = (typeChoice.getSelectedIndex() == 1);
-    if (!layered)
+    int index = newTextureChoice.getSelectedIndex();
+    if (index == 0)
+      return;
+    newTextureChoice.setSelectedIndex(0);
+    List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
+    try
     {
-      texList.setSelected(scene.indexOf(tex), true);
-      selectionChanged(new SelectionChangedEvent(texList));
+      Texture tex = textureTypes.get(index-1).getClass().newInstance();
+      int j = 0;
+      String name = "";
+      do
+      {
+        j++;
+        name = "Untitled "+j;
+      } while (scene.getTexture(name) != null);
+      tex.setName(name);
+      scene.addTexture(tex);
+      tex.edit(window, scene);
+      boolean layered = (typeChoice.getSelectedIndex() == 1);
+      if (!layered)
+      {
+        texList.setSelected(scene.indexOf(tex), true);
+        textureSelectionChanged(new SelectionChangedEvent(texList));
+      }
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
     }
   }
   
+  private void doNewMaterial()
+  {
+    int index = newMaterialChoice.getSelectedIndex();
+    if (index == 0)
+      return;
+    newMaterialChoice.setSelectedIndex(0);
+    List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
+    try
+    {
+      Material mat = materialTypes.get(index-1).getClass().newInstance();
+      int j = 0;
+      String name = "";
+      do
+      {
+        j++;
+        name = "Untitled "+j;
+      } while (scene.getMaterial(name) != null);
+      mat.setName(name);
+      scene.addMaterial(mat);
+      mat.edit(window, scene);
+      matList.setSelected(scene.indexOf(mat), true);
+      materialSelectionChanged();
+    }
+    catch (Exception ex)
+    {
+      ex.printStackTrace();
+    }
+  }
+
   private void doEditTextures()
   {
     scene.showTexturesDialog(window);
-    buildList();
+    buildLists();
     renderPreview();
   }
   
@@ -452,6 +616,13 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       for (int j = 0; j < param.length; j++)
         obj[i].getObject().setParameterValue(param[j], paramValue[j].duplicate());
     }
+    if (editObj.getObject().getMaterial() == null)
+      for (int i = 1; i < obj.length; i++)
+        obj[i].getObject().setMaterial(null, null);
+    else
+      for (int i = 1; i < obj.length; i++)
+        if (obj[i].getObject().canSetMaterial())
+          obj[i].getObject().setMaterial(editObj.getObject().getMaterial(), editObj.getObject().getMaterialMapping().duplicate());
     obj[0].getObject().copyObject(editObj.getObject());
     window.setUndoRecord(undo);
     window.updateImage();
@@ -531,7 +702,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     renderPreview();
   }
   
-  private void selectionChanged(SelectionChangedEvent ev)
+  private void textureSelectionChanged(SelectionChangedEvent ev)
   {
     boolean layered = (typeChoice.getSelectedIndex() == 1);
     boolean anyselection;
@@ -555,7 +726,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       if (!layered)
       {
         if (tex == oldTexture)
-          editObj.setTexture(tex, oldMapping.duplicate());
+          editObj.setTexture(tex, oldTexMapping.duplicate());
         else
           editObj.setTexture(tex, tex.getDefaultMapping(editObj.getObject()));
         preview.setTexture(tex, editObj.getObject().getTextureMapping());
@@ -564,7 +735,31 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     updateComponents();
     renderPreview();
   }
-  
+
+  private void materialSelectionChanged()
+  {
+    if (!editObj.getObject().canSetMaterial())
+      return;
+    if (matList.getSelectedIndex() < 0)
+      matList.setSelected(0, true);
+    if (matList.getSelectedIndex() == 0)
+    {
+      matMapButton.setEnabled(false);
+      editObj.getObject().setMaterial(null, null);
+      preview.setMaterial(null, null);
+      preview.render();
+      return;
+    }
+    Material mat = scene.getMaterial(matList.getSelectedIndex()-1);
+    if (mat == oldMaterial)
+      editObj.getObject().setMaterial(mat, oldMatMapping.duplicate());
+    else
+      editObj.getObject().setMaterial(mat, mat.getDefaultMapping(editObj.getObject()));
+    matMapButton.setEnabled(!(mat instanceof UniformMaterial));
+    preview.setMaterial(mat, editObj.getObject().getMaterialMapping());
+    preview.render();
+  }
+
   /* Utility routine.  This should be called whenever the list of texture parameters
      might have changed.  It ensures that all parameter lists are correctly updated,
      then re-renders the preview. */
@@ -591,14 +786,14 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       int index = layerList.getSelectedIndex();
       if (index == -1)
       {
-        mapButton.setEnabled(false);
+        texMapButton.setEnabled(false);
         deleteLayerButton.setEnabled(false);
         moveUpButton.setEnabled(false);
         moveDownButton.setEnabled(false);
         blendChoice.setEnabled(false);
         return;
       }
-      mapButton.setEnabled(true);
+      texMapButton.setEnabled(true);
       deleteLayerButton.setEnabled(true);
       moveUpButton.setEnabled(index > 0);
       moveDownButton.setEnabled(index < layeredMap.getLayers().length-1);
@@ -606,50 +801,80 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       blendChoice.setSelectedIndex(layeredMap.getLayerMode(index));
     }
     else if (anyselection)
-      mapButton.setEnabled(true);
+      texMapButton.setEnabled(true);
     else
-      mapButton.setEnabled(false);
+      texMapButton.setEnabled(false);
   }
   
   /* ListChangeListener methods. */
   
   public void itemAdded(int index, Object obj)
   {
-    Texture tex = (Texture) obj;
-    texList.add(index, tex.getName());
+    if (obj instanceof Texture)
+    {
+      Texture tex = (Texture) obj;
+      texList.add(index, tex.getName());
+    }
+    else
+    {
+      Material mat = (Material) obj;
+      matList.add(index+1, mat.getName());
+    }
   }
   
   public void itemRemoved(int index, Object obj)
   {
-    Texture tex = (Texture) obj;
-    
-    texList.remove(index);
-    preview.cancelRendering();
-    if (editObj.getObject().getTextureMapping() instanceof LayeredMapping)
+    if (obj instanceof Texture)
     {
-      Texture layers[] = layeredMap.getLayers();
-      for (int i = layers.length-1; i >= 0; i--)
-        if (layers[i] == tex)
-        {
-          layeredMap.deleteLayer(i);
-          layerList.remove(i);
-        }
-      renderPreview();
-      updateComponents();
+      Texture tex = (Texture) obj;
+      texList.remove(index);
+      preview.cancelRendering();
+      if (editObj.getObject().getTextureMapping() instanceof LayeredMapping)
+      {
+        Texture layers[] = layeredMap.getLayers();
+        for (int i = layers.length-1; i >= 0; i--)
+          if (layers[i] == tex)
+          {
+            layeredMap.deleteLayer(i);
+            layerList.remove(i);
+          }
+        renderPreview();
+        updateComponents();
+      }
+      else if (editObj.getObject().getTexture() == tex)
+      {
+        editObj.setTexture(scene.getDefaultTexture(), scene.getDefaultTexture().getDefaultMapping(editObj.getObject()));
+        preview.setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping());
+        renderPreview();
+        updateComponents();
+      }
     }
-    else if (editObj.getObject().getTexture() == tex)
+    else
     {
-      editObj.setTexture(scene.getDefaultTexture(), scene.getDefaultTexture().getDefaultMapping(editObj.getObject()));
-      preview.setTexture(editObj.getObject().getTexture(), editObj.getObject().getTextureMapping());
-      renderPreview();
-      updateComponents();
+      Material mat = (Material) obj;
+      matList.remove(index+1);
+      if (editObj.getObject().getMaterial() == mat)
+      {
+        editObj.getObject().setMaterial(null, null);
+        preview.setMaterial(editObj.getObject().getMaterial(), editObj.getObject().getMaterialMapping());
+        preview.render();
+        matMapButton.setEnabled(false);
+      }
     }
   }
   
   public void itemChanged(int index, Object obj)
   {
-    Texture tex = (Texture) obj;
-    texList.replace(index, tex.getName());
+    if (obj instanceof Texture)
+    {
+      Texture tex = (Texture) obj;
+      texList.replace(index, tex.getName());
+    }
+    else
+    {
+      Material mat = (Material) obj;
+      matList.replace(index+1, mat.getName());
+    }
   }
   
   /**

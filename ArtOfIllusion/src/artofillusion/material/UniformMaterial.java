@@ -200,6 +200,9 @@ public class UniformMaterial extends Material
     eccentricity = newMaterial.eccentricity;
     shadows = newMaterial.shadows;
     recalcColors();
+    int index = sc.indexOf(this);
+    if (index > -1)
+      sc.changeMaterial(index);
   }
   
   /* The following two methods are used for reading and writing files.  The first is a

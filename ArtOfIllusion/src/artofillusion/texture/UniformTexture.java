@@ -224,6 +224,9 @@ public class UniformTexture extends Texture
     specularColor.copy(newTexture.specularColor);
     transparentColor.copy(newTexture.transparentColor);
     emissiveColor.copy(newTexture.emissiveColor);
+    int index = sc.indexOf(this);
+    if (index > -1)
+      sc.changeTexture(index);
   }
   
   /** The following two methods are used for reading and writing files.  The first is a

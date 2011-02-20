@@ -21,13 +21,7 @@
 
   <target name="compile" depends="init">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" debug="on" target="1.5" source="1.5">
-    <classpath>
-      <fileset dir="lib">
-        <include name="*.jar"/>
-      </fileset>
-    </classpath>
-    </javac>
+    <javac srcdir="${src}" destdir="${build}" debug="on" target="1.5" source="1.5" classpath="${lib}/*.jar"/>
   </target>
 
   <target name="dist" depends="compile">
@@ -47,12 +41,17 @@
     <copy todir="${build}">
       <fileset dir="${src}" includes="keystrokes.xml" /> 
     </copy>
+    <fileset dir="${lib}" id="libraries">
+      <include name="*.jar"/>
+    </fileset>
+    <pathconvert pathsep=" " dirsep="/" property="libraries" refid="libraries">
+      <map from="${basedir}/" to=""/>
+    </pathconvert>
     <jar destfile="${dist}/ArtOfIllusion.jar">
       <fileset dir="${build}"/>
-      <zipgroupfileset dir="${lib}" includes="*.jar"/>
       <manifest>
         <attribute name="Main-Class" value="artofillusion.ArtOfIllusion"/>
-        <attribute name="Class-Path" value="lib/jogl.jar lib/gluegen-rt.jar jmf.jar"/>
+        <attribute name="Class-Path" value="${libraries} jmf.jar"/>
       </manifest>
     </jar>
   </target>

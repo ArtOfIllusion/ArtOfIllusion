@@ -21,7 +21,13 @@
 
   <target name="compile" depends="init">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" debug="on" target="1.5" source="1.5" classpath="${lib}/*.jar"/>
+    <javac srcdir="${src}" destdir="${build}" debug="on" target="1.5" source="1.5">
+     <classpath>
+       <fileset dir="lib">
+         <include name="*.jar"/>
+       </fileset>
+     </classpath>
+    </javac>
   </target>
 
   <target name="dist" depends="compile">

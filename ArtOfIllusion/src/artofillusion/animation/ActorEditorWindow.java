@@ -246,7 +246,11 @@ public class ActorEditorWindow extends BDialog
       return;
     for (int i = 0; i < currentPose.id.length; i++)
       if (currentPose.id[i] == theObject.gestureID[which])
+      {
         currentPose.deleteGesture(i);
+        i--;
+        updateDisplay();
+      }
     theObject.deleteGestureWithID(theObject.gestureID[which]);
     gestureList.remove(which);
     tableModel.fireTableDataChanged();

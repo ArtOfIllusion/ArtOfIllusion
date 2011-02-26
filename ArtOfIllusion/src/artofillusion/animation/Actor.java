@@ -463,6 +463,12 @@ public class Actor extends ObjectWrapper
   public void applyPoseKeyframe(Keyframe k)
   {
     currentPose = (ActorKeyframe) k.duplicate(this);
+    for (int i = 0; i < currentPose.id.length; i++)
+      if (getGestureIndex(currentPose.id[i]) == -1)
+      {
+        currentPose.deleteGesture(i);
+        i--;
+      }
     theObject.applyPoseKeyframe(currentPose.createObjectKeyframe(this));
   }
   

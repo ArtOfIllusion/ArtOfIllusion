@@ -1,4 +1,4 @@
-/* Copyright (C) 1999,2000,2002-2004 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -72,9 +72,10 @@ public class ComponentsDialog extends BDialog
         center.add(new BLabel(labels[i]), 0, i, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null));
         center.add(components[i], 1, i, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null));
       }
-      components[i].addEventLink(KeyPressedEvent.class, this, "keyPressed");
     }
-    
+    for (Widget w : UIUtilities.findAllChildren(this))
+      w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+
     // Add the buttons at the bottom.
     
     RowContainer buttons = new RowContainer();

@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -381,6 +381,8 @@ public class ConstraintTrack extends Track
       buttons.add(Translate.button("ok", this, "doOk"));
       buttons.add(Translate.button("cancel", this, "dispose"));
       content.add(buttons, 0, 6, 3, 1, new LayoutInfo());
+      for (Widget w : UIUtilities.findAllChildren(this))
+        w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
       pack();
       UIUtilities.centerDialog(this, win);
       updateComponents();
@@ -417,6 +419,12 @@ public class ConstraintTrack extends Track
       objSelector.setEnabled(orientEnabled);
       orientModeChoice.setEnabled(orientEnabled);
       orientPanel.setVisibleChild(orientModeChoice.getSelectedIndex() == FACES_OBJECT ? 0 : 1);
+    }
+
+    private void keyPressed(KeyPressedEvent ev)
+    {
+      if (ev.getKeyCode() == KeyPressedEvent.VK_ESCAPE)
+          dispose();
     }
   }
 }

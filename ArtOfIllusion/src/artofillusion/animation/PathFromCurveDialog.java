@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -52,7 +52,7 @@ public class PathFromCurveDialog extends BDialog
     for (int i = 0; i < sel.length; i++)
     {
       ObjectInfo info = (ObjectInfo) sel[i];
-      if (info.getObject() instanceof Curve)
+      if (info.getObject() instanceof Curve && !(info.getObject() instanceof Tube))
       {
         curves.addElement(info);
         curveList.add(info.getName());
@@ -170,7 +170,7 @@ public class PathFromCurveDialog extends BDialog
       NumberFormat nf = NumberFormat.getNumberInstance();
       nf.setMaximumFractionDigits(3);
       lengthLabel.setText(nf.format(curveLength));
-      lengthLabel.getParent().layoutChildren();
+      layoutChildren();
     }
   }
     

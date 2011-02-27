@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -928,7 +928,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       info = (ObjectInfo) sel[i];
       obj = info.getObject();
-      if (obj instanceof Curve)
+      if (obj instanceof Curve && !(obj instanceof Tube))
         curve = true;
       else
         noncurve = true;

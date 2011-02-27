@@ -16,6 +16,8 @@
     <mkdir dir="${build}" />
     <!-- Create the docs directory structure used by documentation -->
     <mkdir dir="${docs}" />
+    <!-- create the dist directory -->
+    <mkdir dir="${dist}" />
   </target>
 
   <target name="compile" depends="init">
@@ -25,8 +27,9 @@
 
   <target name="dist" depends="compile">
     <!-- Copy all necessary files into ${build}, then create the jar file -->
-    <copy file="${src}/extensions.xml" todir="${build}" />
-    <jar jarfile="${dist}/Tools.jar" basedir="${build}" />
+    <jar jarfile="${dist}/Tools.jar" basedir="${build}" >
+      <fileset dir="${src}" includes="*.xml" />
+    </jar>
   </target>
 
   <target name="docs" depends="init">

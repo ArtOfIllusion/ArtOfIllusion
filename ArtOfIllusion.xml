@@ -10,6 +10,12 @@
   <property name="dist" value="." />
 <!--  <property name="build.compiler" value="classic" /> -->
 
+  <!-- set of all library jars -->
+  <fileset id="libraries" dir="${lib}" includes="*.jar" />
+
+  <!-- set of all subproject build files -->
+  <fileset id="subproject.files" dir="." includes="*.xml" excludes="${ant.project.name}.xml" />
+
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -20,46 +26,35 @@
   </target>
 
   <target name="compile" depends="init">
+    <!-- generate a classpath from the "libraries" fileset -->
+    <pathconvert property="classpath" refid="libraries" />
+
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" debug="on" target="1.5" source="1.5">
-     <classpath>
-       <fileset dir="lib">
-         <include name="*.jar"/>
-       </fileset>
-     </classpath>
-    </javac>
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="1.5" source="1.5" />
   </target>
 
-  <target name="dist" depends="compile">
-    <!-- Copy all necessary files into ${build}, then create the jar file -->
-    <copy todir="${build}/artofillusion/Icons">
-      <fileset dir="${src}/artofillusion/Icons" />
-    </copy>
-    <copy todir="${build}/artofillusion/titleImages">
-      <fileset dir="${src}/artofillusion/titleImages" />
-    </copy>
-    <copy todir="${build}/artofillusion/ui/manipulatorIcons">
-      <fileset dir="${src}/artofillusion/ui/manipulatorIcons" />
-    </copy>
-    <copy todir="${build}">
-      <fileset dir="${src}" includes="*.properties" /> 
-    </copy>
-    <copy todir="${build}">
-      <fileset dir="${src}" includes="keystrokes.xml" /> 
-    </copy>
-    <fileset dir="${lib}" id="libraries">
-      <include name="*.jar"/>
-    </fileset>
+  <target name="core" depends="compile">
+    <!-- generate a Manifest classpath from the "libraries" fileset-->
     <pathconvert pathsep=" " dirsep="/" property="libraries" refid="libraries">
-      <map from="${basedir}/" to=""/>
+      <map from="${basedir}/" to="" />
     </pathconvert>
+
+    <!-- jar all the required files -->
     <jar destfile="${dist}/ArtOfIllusion.jar">
       <fileset dir="${build}"/>
+      <fileset dir="${src}" includes="**/*.xml, **/*.properties, **/*.png, **/*.jpg, **/*.gif" />
       <manifest>
         <attribute name="Main-Class" value="artofillusion.ArtOfIllusion"/>
         <attribute name="Class-Path" value="${libraries} jmf.jar"/>
       </manifest>
     </jar>
+  </target>
+
+  <target name="dist" depends="core" >
+    <!-- execute default target for all found Ant files -->
+    <subant target="" >
+      <fileset refid="subproject.files" />
+    </subant>
   </target>
 
   <target name="docs" depends="init">
@@ -83,6 +78,10 @@
     <!-- Delete the ${build} and ${docs} directory trees -->
     <delete dir="${build}" />
     <delete dir="${docs}" />
+
+    <!-- execute the "clean" target for all found subproject ant files -->
+    <subant target="clean">
+      <fileset refid="subproject.files" />
+    </subant>
   </target>
 </project>
-

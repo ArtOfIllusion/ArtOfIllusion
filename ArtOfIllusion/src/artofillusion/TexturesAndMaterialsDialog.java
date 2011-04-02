@@ -31,7 +31,6 @@ public class TexturesAndMaterialsDialog extends BDialog
   Scene theScene;
   EditingWindow parentFrame;
   BTree libraryList;
-  Scene libraryScene;
   File libraryFile;
   Scene selectedScene;
   Texture selectedTexture;
@@ -39,13 +38,11 @@ public class TexturesAndMaterialsDialog extends BDialog
   BButton duplicateButton, deleteButton, editButton;
   BButton loadLibButton, saveLibButton, deleteLibButton, newFileButton, includeFileButton, closeButton;
   BComboBox typeChoice;
-  List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class); // List<Texture>
-  List<Material> materialTypes = PluginRegistry.getPlugins(Material.class); // List<Material>
+  BRadioButton showTexturesButton, showMaterialsButton, showBothButton;
+  List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
+  List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
   MaterialPreviewer matPre;
-  BLabel status;
-  String[] statusLine = new String[3];
   BLabel matInfo;
-  String[] matInfoLine = new String[5];
   static String CURRENT_SCENE_TEXT = "Current Scene";
   Scene externalScene;
   File mainFolder;
@@ -55,23 +52,22 @@ public class TexturesAndMaterialsDialog extends BDialog
   static String TEXTURE_SYMBOL = "\u25E6 "; // white bullet
   static String MATERIAL_SYMBOL = "\u2022 "; // bullet
   static String EXTERNAL_FILE_SYMBOL = "# ";
-  static String LIBRARY_VERSION = "prototype 0.1";
 
   ListChangeListener listListener = new ListChangeListener()
   {
     public void itemAdded(int index, java.lang.Object obj)
     {
-      ((SceneTreeModel) libraryList.getModel()).rebuildScenes();
+      ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
     }
 
     public void itemChanged(int index, java.lang.Object obj)
     {
-      ((SceneTreeModel) libraryList.getModel()).rebuildScenes();
+      ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
     }
 
     public void itemRemoved(int index, java.lang.Object obj)
     {
-      ((SceneTreeModel) libraryList.getModel()).rebuildScenes();
+      ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
     }
   };
 
@@ -102,7 +98,17 @@ public class TexturesAndMaterialsDialog extends BDialog
     BScrollPane listWrapper = new BScrollPane(libraryList, BScrollPane.SCROLLBAR_AS_NEEDED, BScrollPane.SCROLLBAR_AS_NEEDED);
     listWrapper.setPreferredViewSize(new Dimension(250, 250));
 
-    content.add(listWrapper, BorderContainer.WEST);
+    // Radio buttons for filtering the tree
+
+    FormContainer leftPanel = new FormContainer(new double[] {1}, new double[] {1, 0, 0, 0});
+    leftPanel.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE));
+    leftPanel.add(listWrapper, 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
+    RadioButtonGroup group = new RadioButtonGroup();
+    leftPanel.add(showTexturesButton = new BRadioButton(Translate.text("showTextures"), true, group), 0, 1);
+    leftPanel.add(showMaterialsButton = new BRadioButton(Translate.text("showMaterials"), false, group), 0, 2);
+    leftPanel.add(showBothButton = new BRadioButton(Translate.text("showBoth"), false, group), 0, 3);
+    group.addEventLink(SelectionChangedEvent.class, this, "filterChanged");
+    content.add(leftPanel, BorderContainer.WEST);
 
     // preview:
 
@@ -116,7 +122,6 @@ public class TexturesAndMaterialsDialog extends BDialog
 
     matInfo = new BLabel();
     BOutline matBorder = BOutline.createEmptyBorder(matInfo, 3); // a little space around the text
-    setMatInfoText(matInfoLine); // init
     infoBox.add(matBorder);
     infoBox.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH));
 
@@ -182,15 +187,15 @@ public class TexturesAndMaterialsDialog extends BDialog
     buttons.add(label2);
 
     loadLibButton = new BButton("Load from Library");
-    loadLibButton.addEventLink(CommandEvent.class, this, "doLoadLib");
+    loadLibButton.addEventLink(CommandEvent.class, this, "doLoadFromLibrary");
     buttons.add(loadLibButton);
 
     saveLibButton = new BButton("Save to Library...");
-    saveLibButton.addEventLink(CommandEvent.class, this, "doSaveLib");
+    saveLibButton.addEventLink(CommandEvent.class, this, "doSaveToLibrary");
     buttons.add(saveLibButton);
 
     deleteLibButton = new BButton("Delete from Library...");
-    deleteLibButton.addEventLink(CommandEvent.class, this, "doDeleteLib");
+    deleteLibButton.addEventLink(CommandEvent.class, this, "doDeleteFromLibrary");
     buttons.add(deleteLibButton);
 
     newFileButton = new BButton("New File...");
@@ -207,11 +212,6 @@ public class TexturesAndMaterialsDialog extends BDialog
     closeButton = new BButton("Close");
     closeButton.addEventLink(CommandEvent.class, this, "dispose");
     buttons.add(closeButton);
-
-    status = new BLabel();
-    setStatusText(statusLine); // init
-    setStatusText(3, "Version: "+LIBRARY_VERSION);
-    content.add(status, BorderContainer.SOUTH);
 
     hilightButtons();
 
@@ -251,10 +251,6 @@ public class TexturesAndMaterialsDialog extends BDialog
 
   public void doSelectionChanged()
   {
-    // find selection:
-    // we need to find the index of the texture or material, since there may be more than one with the same name
-    // however, there will never be two files or folders on the same level with the same name
-
     TreePath selection = libraryList.getSelectedNode();
     selectedTexture = null;
     selectedMaterial = null;
@@ -265,6 +261,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       try
       {
         selectedScene = sceneNode.getScene();
+        libraryFile = sceneNode.file;
         Object node = selection.getLastPathComponent();
         if (node instanceof TextureTreeNode)
         {
@@ -272,8 +269,7 @@ public class TexturesAndMaterialsDialog extends BDialog
           matPre.setTexture(selectedTexture, selectedTexture.getDefaultMapping(matPre.getObject().getObject()));
           matPre.setMaterial(null, null);
           matPre.render();
-          setMatInfoText(1, "Texture Name: "+selectedTexture.getName());
-          setMatInfoText(2, "Texture Type: "+getTypeName(selectedTexture));
+          setInfoText(Translate.text("textureName")+" "+selectedTexture.getName(), Translate.text("textureType")+" "+getTypeName(selectedTexture));
         }
         else
         {
@@ -282,8 +278,7 @@ public class TexturesAndMaterialsDialog extends BDialog
           matPre.setTexture(tex, tex.getDefaultMapping(matPre.getObject().getObject()));
           matPre.setMaterial(selectedMaterial, selectedMaterial.getDefaultMapping(matPre.getObject().getObject()));
           matPre.render();
-          setMatInfoText(1, "Material Name: "+selectedMaterial.getName());
-          setMatInfoText(2, "Material Type: "+getTypeName(selectedMaterial));
+          setInfoText(Translate.text("materialName")+" "+selectedMaterial.getName(), Translate.text("materialType")+" "+getTypeName(selectedMaterial));
         }
       }
       catch (IOException ex)
@@ -297,10 +292,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       matPre.setTexture(tex, tex.getDefaultMapping(matPre.getObject().getObject()));
       matPre.setMaterial(null, null);
       matPre.render();
-      setMatInfoText(1, "(No selection)");
-      setMatInfoText(2, "");
-
-      // toggle: expand all child nodes?
+      setInfoText("(No selection)", "&nbsp;");
     }
 
     hilightButtons();
@@ -349,9 +341,6 @@ public class TexturesAndMaterialsDialog extends BDialog
       loadLibButton.setEnabled(false);
       saveLibButton.setEnabled(false);
       deleteLibButton.setEnabled(false);
-      //newFileButton.setEnabled(true);
-      //includeFileButton.setEnabled(true);
-      //closeButton.setEnabled(true);
     }
     else
     {
@@ -379,6 +368,27 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       doSelectionChanged();
     }
+  }
+
+  private void filterChanged(SelectionChangedEvent ev)
+  {
+    if (ev.getWidget() == showTexturesButton)
+    {
+      showTextures = true;
+      showMaterials = false;
+    }
+    else if (ev.getWidget() == showMaterialsButton)
+    {
+      showTextures = false;
+      showMaterials = true;
+    }
+    else
+    {
+      showTextures = true;
+      showMaterials = true;
+    }
+//    doSelectionChanged();
+    ((SceneTreeModel) libraryList.getModel()).resetFilter();
   }
 
   // -- keyboard handler:
@@ -521,15 +531,15 @@ public class TexturesAndMaterialsDialog extends BDialog
 
   // --
 
-  public void doLoadLib()
+  public void doLoadFromLibrary()
   {
     if (selectedTexture != null)
     {
       theScene.addTexture(selectedTexture.duplicate());
       parentFrame.setModified();
-      for (int i = 0; i < libraryScene.getNumImages(); i++)
+      for (int i = 0; i < selectedScene.getNumImages(); i++)
       {
-        ImageMap image = libraryScene.getImage(i);
+        ImageMap image = selectedScene.getImage(i);
         if (selectedTexture.usesImage(image))
         {
           theScene.addImage(image);
@@ -543,9 +553,9 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       theScene.addMaterial(selectedMaterial);
       parentFrame.setModified();
-      for (int i = 0; i < libraryScene.getNumImages(); i++)
+      for (int i = 0; i < selectedScene.getNumImages(); i++)
       {
-        ImageMap image = libraryScene.getImage(i);
+        ImageMap image = selectedScene.getImage(i);
         if (selectedMaterial.usesImage(image))
         {
           theScene.addImage(image);
@@ -559,7 +569,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   }
 
   // if the file is locked, AoI will make a tmp-file and try to save there
-  public void doSaveLib()
+  public void doSaveToLibrary()
   {
     String itemText;
     if (selectedTexture != null)
@@ -573,21 +583,18 @@ public class TexturesAndMaterialsDialog extends BDialog
     if (selectedTexture != null || selectedMaterial != null)
     {
       BFileChooser fcOut = new BFileChooser(BFileChooser.OPEN_FILE, "Choose an Art of Illusion Scene File (.aoi) to save the "+itemText+" to", mainFolder);
-      // ff = new FileNameExtensionFilter ("Art of Illusion Scene File", "aoi"); // halts here
-      // fcOut.setFileFilter (ff);
       if (fcOut.showDialog(this))
       {
         File saveFile = fcOut.getSelectedFile();
         if (saveFile.exists())
         {
-          // saveFileName = saveFile.getName();
           try
           {
             Scene saveScene = new Scene(saveFile, true);
             if (selectedTexture != null)
             {
               saveScene.addTexture(selectedTexture);
-              saveScene.writeToFile(saveFile); // ... but all the objects are preserved
+              saveScene.writeToFile(saveFile);
             }
             else if (selectedMaterial != null)
             {
@@ -600,16 +607,15 @@ public class TexturesAndMaterialsDialog extends BDialog
             ex.printStackTrace();
           }
         }
-        buildList(); // should use next statement instead, but ...
-        // updateNode (someSelection, saveScene); // ... how to get selection?
-        setSelection(libraryList.getRootNode(), theScene, theScene.getDefaultTexture());
+        ((SceneTreeModel) libraryList.getModel()).rebuildScenes(fcOut.getSelectedFile());
       }
     }
   }
 
-  // if the file is locked, AoI will make a tmp-file and try to save there
-  public void doDeleteLib()
+  public void doDeleteFromLibrary()
   {
+    if (selectedScene == null || selectedScene == theScene)
+      return;
     try
     {
       if (selectedTexture != null)
@@ -618,10 +624,10 @@ public class TexturesAndMaterialsDialog extends BDialog
         int choice = new BStandardDialog("", Translate.text("deleteTexture", selectedTexture.getName()), BStandardDialog.PLAIN).showOptionDialog(this, options, options[1]);
         if (choice == 0)
         {
-          int texIndex = libraryScene.indexOf(selectedTexture);
-          libraryScene.removeTexture(texIndex);
-          libraryScene.writeToFile(libraryFile);
-          buildList(); // should update only the affected file in the list
+          int texIndex = selectedScene.indexOf(selectedTexture);
+          selectedScene.removeTexture(texIndex);
+          selectedScene.writeToFile(libraryFile);
+          ((SceneTreeModel) libraryList.getModel()).rebuildScenes(libraryFile);
           setSelection(libraryList.getRootNode(), theScene, theScene.getDefaultTexture());
         }
       }
@@ -631,10 +637,10 @@ public class TexturesAndMaterialsDialog extends BDialog
         int choice = new BStandardDialog("", Translate.text("deleteMaterial", selectedMaterial.getName()), BStandardDialog.PLAIN).showOptionDialog(this, options, options[1]);
         if (choice == 0)
         {
-          int matIndex = libraryScene.indexOf(selectedMaterial);
-          libraryScene.removeMaterial(matIndex);
-          libraryScene.writeToFile(libraryFile);
-          buildList(); // should update only the affected file in the list
+          int matIndex = selectedScene.indexOf(selectedMaterial);
+          selectedScene.removeMaterial(matIndex);
+          selectedScene.writeToFile(libraryFile);
+          ((SceneTreeModel) libraryList.getModel()).rebuildScenes(libraryFile);
           setSelection(libraryList.getRootNode(), theScene, theScene.getDefaultTexture());
         }
       }
@@ -695,52 +701,10 @@ public class TexturesAndMaterialsDialog extends BDialog
     super.dispose();
   }
 
-  // -- textmessage fields:
-
-  // three lines of text:
-  // 1: (not used - could display tool tips)
-  // 2: time-consuming task info (building list)
-  // 3: version info
-  public void setStatusText(String[] lines)
+  private void setInfoText(String line1, String line2)
   {
-    String s = "<html>";
-    for (int i = 0; i < lines.length; i++)
-    {
-      if (lines[i] == null || lines[i].equals("")) statusLine[i] = "&nbsp;";
-      else statusLine[i] = lines[i];
-      s = s+"<p>"+statusLine[i]+"</p>";
-    }
-    s = s+"</html>";
-    status.setText(s);
-  }
-
-  public void setStatusText(int nr, String text)
-  {
-    statusLine[nr-1] = text;
-    setStatusText(statusLine);
-  }
-
-  // five lines of text:
-  // 1: item name & texture/material
-  // 2: item type
-  // 3-5: (for future use)
-  public void setMatInfoText(String[] lines)
-  {
-    String s = "<html>";
-    for (int i = 0; i < lines.length; i++)
-    {
-      if (lines[i] == null || lines[i].equals("")) matInfoLine[i] = "&nbsp;";
-      else matInfoLine[i] = lines[i];
-      s = s+"<p>"+matInfoLine[i]+"</p>";
-    }
-    s = s+"</html>";
+    String s = "<html><p>"+line1+"</p><p>"+line2+"</p></html>";
     matInfo.setText(s);
-  }
-
-  public void setMatInfoText(int nr, String text)
-  {
-    matInfoLine[nr-1] = text;
-    setMatInfoText(matInfoLine);
   }
 
   // -- list management:
@@ -872,7 +836,6 @@ public class TexturesAndMaterialsDialog extends BDialog
   public void buildList()
   {
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    setStatusText(2, "Rebuilding library list ..."); // does not appear?
     TreePath r = libraryList.getRootNode();
 
     deleteNodes(r);
@@ -886,7 +849,6 @@ public class TexturesAndMaterialsDialog extends BDialog
 
     addLibraryNodes(r, theScene);
 
-    setStatusText(2, "Finished building library list.");
     setCursor(Cursor.getDefaultCursor());
   }
 
@@ -1105,25 +1067,43 @@ public class TexturesAndMaterialsDialog extends BDialog
       return -1;
     }
 
-    void rebuildNode(Object node)
+    void rebuildNode(Object node, File file)
     {
       if (node instanceof SceneTreeNode)
       {
-        ((SceneTreeNode) node).textures = null;
-        ((SceneTreeNode) node).materials = null;
+        SceneTreeNode sct = (SceneTreeNode) node;
+        if (file == null || file.equals(sct.file))
+        {
+          sct.textures = null;
+          sct.materials = null;
+          sct.scene = null;
+        }
         return;
       }
       if (node instanceof FolderTreeNode && ((FolderTreeNode) node).children == null)
         return;
       int numChildren = getChildCount(node);
       for (int i = 0; i < numChildren; i++)
-        rebuildNode(getChild(node, i));
+        rebuildNode(getChild(node, i), file);
     }
 
-    void rebuildScenes()
+    void rebuildScenes(File file)
     {
       List<TreePath> expanded = Collections.list(libraryList.getComponent().getExpandedDescendants(libraryList.getRootNode()));
-      rebuildNode(root);
+      rebuildNode(root, file);
+      Object selection = (selectedTexture == null ? selectedMaterial : selectedTexture);
+      TreeModelEvent ev = new TreeModelEvent(this, new TreePath(root));
+      for (TreeModelListener listener : listeners)
+        listener.treeStructureChanged(ev);
+      for (TreePath path : expanded)
+        libraryList.setNodeExpanded(path, true);
+      if (selection != null)
+        setSelection(new TreePath(root), selectedScene, selection);
+    }
+
+    void resetFilter()
+    {
+      List<TreePath> expanded = Collections.list(libraryList.getComponent().getExpandedDescendants(libraryList.getRootNode()));
       Object selection = (selectedTexture == null ? selectedMaterial : selectedTexture);
       TreeModelEvent ev = new TreeModelEvent(this, new TreePath(root));
       for (TreeModelListener listener : listeners)

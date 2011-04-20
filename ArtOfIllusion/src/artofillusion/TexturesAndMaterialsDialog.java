@@ -17,9 +17,11 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 
+import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.tree.*;
 import java.awt.*;
+import java.awt.datatransfer.*;
 import java.io.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
@@ -35,6 +37,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   Scene selectedScene;
   Texture selectedTexture;
   Material selectedMaterial;
+  SceneTreeNode selectedSceneNode;
   BButton duplicateButton, deleteButton, editButton;
   BButton loadLibButton, saveLibButton, deleteLibButton, newFileButton, includeFileButton, closeButton;
   BComboBox typeChoice;
@@ -43,15 +46,12 @@ public class TexturesAndMaterialsDialog extends BDialog
   List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
   MaterialPreviewer matPre;
   BLabel matInfo;
-  static String CURRENT_SCENE_TEXT = "Current Scene";
-  Scene externalScene;
   File mainFolder;
   private boolean showTextures, showMaterials;
   private final ArrayList<Object> rootNodes;
 
-  static String TEXTURE_SYMBOL = "\u25E6 "; // white bullet
-  static String MATERIAL_SYMBOL = "\u2022 "; // bullet
-  static String EXTERNAL_FILE_SYMBOL = "# ";
+  private static DataFlavor TextureFlavor = new DataFlavor(Texture.class, "Texture");
+  private static DataFlavor MaterialFlavor = new DataFlavor(Material.class, "Material");
 
   ListChangeListener listListener = new ListChangeListener()
   {
@@ -94,6 +94,10 @@ public class TexturesAndMaterialsDialog extends BDialog
     libraryList.setMultipleSelectionEnabled(false);
     libraryList.addEventLink(SelectionChangedEvent.class, this, "doSelectionChanged");
     libraryList.addEventLink(MouseClickedEvent.class, this, "mouseClicked");
+    libraryList.getComponent().setDragEnabled(true);
+    libraryList.getComponent().setDropMode(DropMode.ON);
+    libraryList.getComponent().setTransferHandler(new DragHandler());
+    libraryList.setRootNodeShown(false);
 
     BScrollPane listWrapper = new BScrollPane(libraryList, BScrollPane.SCROLLBAR_AS_NEEDED, BScrollPane.SCROLLBAR_AS_NEEDED);
     listWrapper.setPreferredViewSize(new Dimension(250, 250));
@@ -104,9 +108,9 @@ public class TexturesAndMaterialsDialog extends BDialog
     leftPanel.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE));
     leftPanel.add(listWrapper, 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     RadioButtonGroup group = new RadioButtonGroup();
-    leftPanel.add(showTexturesButton = new BRadioButton(Translate.text("showTextures"), true, group), 0, 1);
+    leftPanel.add(showTexturesButton = new BRadioButton(Translate.text("showTextures"), false, group), 0, 1);
     leftPanel.add(showMaterialsButton = new BRadioButton(Translate.text("showMaterials"), false, group), 0, 2);
-    leftPanel.add(showBothButton = new BRadioButton(Translate.text("showBoth"), false, group), 0, 3);
+    leftPanel.add(showBothButton = new BRadioButton(Translate.text("showBoth"), true, group), 0, 3);
     group.addEventLink(SelectionChangedEvent.class, this, "filterChanged");
     content.add(leftPanel, BorderContainer.WEST);
 
@@ -219,7 +223,6 @@ public class TexturesAndMaterialsDialog extends BDialog
     rootNodes = new ArrayList<Object>();
     showTextures = true;
     showMaterials = true;
-    buildList();
     rootNodes.add(new SceneTreeNode(null, theScene));
     for (File file : mainFolder.listFiles())
     {
@@ -260,6 +263,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       SceneTreeNode sceneNode = (SceneTreeNode) parentNode.getLastPathComponent();
       try
       {
+        selectedSceneNode = sceneNode;
         selectedScene = sceneNode.getScene();
         libraryFile = sceneNode.file;
         Object node = selection.getLastPathComponent();
@@ -387,16 +391,8 @@ public class TexturesAndMaterialsDialog extends BDialog
       showTextures = true;
       showMaterials = true;
     }
-//    doSelectionChanged();
     ((SceneTreeModel) libraryList.getModel()).resetFilter();
   }
-
-  // -- keyboard handler:
-
-  // to be implemented:
-  // next - previous (arrow down/up)
-
-  // -- button handlers:
 
   public void doNew()
   {
@@ -405,7 +401,8 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       if (newType >= textureTypes.size())
       {
-        // material
+        // A new material
+
         int j = 0;
         String name = "";
         do
@@ -417,18 +414,19 @@ public class TexturesAndMaterialsDialog extends BDialog
         {
           Material mat = materialTypes.get(newType-textureTypes.size()).getClass().newInstance();
           mat.setName(name);
+          theScene.addMaterial(mat);
           mat.edit(parentFrame.getFrame(), theScene);
-          theScene.addMaterial(mat); // need to add it after edit for the name to be correct in the list
         }
         catch (Exception ex)
         {
         }
         parentFrame.setModified();
-        selectLastCurrentMaterial(); // does not work on procedurals(?)
+        selectLastCurrentMaterial();
       }
       else
       {
-        // texture
+        // A new texture
+        
         int j = 0;
         String name = "";
         do
@@ -440,21 +438,21 @@ public class TexturesAndMaterialsDialog extends BDialog
         {
           Texture tex = textureTypes.get(newType).getClass().newInstance();
           tex.setName(name);
+          theScene.addTexture(tex);
           tex.edit(parentFrame.getFrame(), theScene);
-          theScene.addTexture(tex); // need to add it after edit for the name to be correct in the list
         }
         catch (Exception ex)
         {
         }
         parentFrame.setModified();
-        selectLastCurrentTexture(); // does not work on procedurals(?)
+        selectLastCurrentTexture();
       }
       typeChoice.setSelectedIndex(0);
     }
   }
 
   public void doCopy()
-  { // the Duplicate button is only enabled when an item in the current scene is selected
+  {
     if (selectedTexture != null)
     {
       String name = new BStandardDialog("", Translate.text("newTexName"), BStandardDialog.PLAIN).showInputDialog(this, null, "");
@@ -546,7 +544,6 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
       }
       parentFrame.updateImage();
-//      updateCurrentScene();
       selectLastCurrentTexture();
     }
     else if (selectedMaterial != null)
@@ -562,13 +559,11 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
       }
       parentFrame.updateImage();
-//      updateCurrentScene();
       selectLastCurrentMaterial();
     }
     hilightButtons();
   }
 
-  // if the file is locked, AoI will make a tmp-file and try to save there
   public void doSaveToLibrary()
   {
     String itemText;
@@ -584,32 +579,34 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       BFileChooser fcOut = new BFileChooser(BFileChooser.OPEN_FILE, "Choose an Art of Illusion Scene File (.aoi) to save the "+itemText+" to", mainFolder);
       if (fcOut.showDialog(this))
+        saveToFile(fcOut.getSelectedFile());
+    }
+  }
+
+  private void saveToFile(File saveFile)
+  {
+    if (saveFile.exists())
+    {
+      try
       {
-        File saveFile = fcOut.getSelectedFile();
-        if (saveFile.exists())
+        Scene saveScene = new Scene(saveFile, true);
+        if (selectedTexture != null)
         {
-          try
-          {
-            Scene saveScene = new Scene(saveFile, true);
-            if (selectedTexture != null)
-            {
-              saveScene.addTexture(selectedTexture);
-              saveScene.writeToFile(saveFile);
-            }
-            else if (selectedMaterial != null)
-            {
-              saveScene.addMaterial(selectedMaterial);
-              saveScene.writeToFile(saveFile);
-            }
-          }
-          catch (IOException ex)
-          {
-            ex.printStackTrace();
-          }
+          saveScene.addTexture(selectedTexture);
+          saveScene.writeToFile(saveFile);
         }
-        ((SceneTreeModel) libraryList.getModel()).rebuildScenes(fcOut.getSelectedFile());
+        else if (selectedMaterial != null)
+        {
+          saveScene.addMaterial(selectedMaterial);
+          saveScene.writeToFile(saveFile);
+        }
+      }
+      catch (IOException ex)
+      {
+        ex.printStackTrace();
       }
     }
+    ((SceneTreeModel) libraryList.getModel()).rebuildScenes(saveFile);
   }
 
   public void doDeleteFromLibrary()
@@ -667,8 +664,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         {
           ex.printStackTrace();
         }
-        buildList(); // should build only affected folder
-        selectCurrent(0); // should select new file
+        ((SceneTreeModel) libraryList.getModel()).rebuildLibrary();
       }
       else
       {
@@ -686,13 +682,10 @@ public class TexturesAndMaterialsDialog extends BDialog
       File inputFile = fcInc.getSelectedFile();
       if (inputFile.exists())
       {
-        addExternalFile(inputFile);
-        selectCurrent(0); // not quite right
+        ((SceneTreeModel) libraryList.getModel()).addScene(inputFile);
       }
     }
   }
-
-  // --
 
   public void dispose()
   {
@@ -705,73 +698,6 @@ public class TexturesAndMaterialsDialog extends BDialog
   {
     String s = "<html><p>"+line1+"</p><p>"+line2+"</p></html>";
     matInfo.setText(s);
-  }
-
-  // -- list management:
-
-  private void addSceneNodes(TreePath parent, Scene scene)
-  {
-    if (scene.getNumTextures() > 0)
-    {
-      for (int i = 0; i < scene.getNumTextures(); i++)
-      {
-        String textureName = TEXTURE_SYMBOL+scene.getTexture(i).getName();
-        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(textureName, false);
-        libraryList.addNode(parent, newNode);
-      }
-    }
-    if (scene.getNumMaterials() > 0)
-    {
-      for (int i = 0; i < scene.getNumMaterials(); i++)
-      {
-        String materialName = MATERIAL_SYMBOL+scene.getMaterial(i).getName();
-        DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(materialName, false);
-        libraryList.addNode(parent, newNode);
-      }
-    }
-  }
-
-  private void deleteNodes(TreePath parent)
-  {
-    while (libraryList.getChildNodeCount(parent) > 0)
-    {
-      libraryList.removeNode(libraryList.getChildNode(parent, 0));
-    }
-  }
-
-  private void addFilesAndFolders(TreePath parent, Scene scene, File filesAndFolders[])
-  {
-    for (int i = 0; i < filesAndFolders.length; i++)
-    {
-      if (filesAndFolders[i].isFile())
-      {
-        if (filesAndFolders[i].getName().endsWith(".aoi"))
-        { // only .aoi-files
-          DefaultMutableTreeNode n0 = new DefaultMutableTreeNode(filesAndFolders[i].getName());
-          TreePath r0 = libraryList.addNode(parent, n0);
-          try
-          {
-            addSceneNodes(r0, new Scene(filesAndFolders[i], false));
-          }
-          catch (IOException ex)
-          {
-            ex.printStackTrace();
-          }
-        }
-      }
-      else if (filesAndFolders[i].isDirectory() && filesAndFolders[i].list().length > 0)
-      { // only folders with content (not alias/symlink files)
-        DefaultMutableTreeNode folderNodeText = new DefaultMutableTreeNode(filesAndFolders[i].getName());
-        TreePath folderNode = libraryList.addNode(parent, folderNodeText);
-        addFilesAndFolders(folderNode, scene, filesAndFolders[i].listFiles()); // recursion!
-      }
-    }
-  }
-
-  private void addLibraryNodes(TreePath parent, Scene scene)
-  {
-    File filesAndFolders[] = mainFolder.listFiles();
-    addFilesAndFolders(parent, scene, filesAndFolders);
   }
 
   private void selectCurrent(int sel)
@@ -801,55 +727,6 @@ public class TexturesAndMaterialsDialog extends BDialog
     int lastIndex = libraryList.getChildNodeCount(current)-1;
     libraryList.setNodeSelected(libraryList.getChildNode(current, lastIndex), true);
     doSelectionChanged();
-  }
-
-  private void addExternalFile(File f)
-  {
-    if (f.getName().endsWith(".aoi"))
-    { // only .aoi-files
-      TreePath r = libraryList.getRootNode();
-      // remove old external if it exists:
-      for (int n = libraryList.getChildNodeCount(r)-1; n >= 0; n--)
-      { // quicker to start at the end of the list
-        TreePath oldNode = libraryList.getChildNode(r, n);
-        Object nodePath[] = oldNode.getPath();
-        if (nodePath[1].toString().startsWith(EXTERNAL_FILE_SYMBOL))
-        {
-          libraryList.removeNode(oldNode);
-          break; // we have only one at the moment
-        }
-      }
-      DefaultMutableTreeNode newNode = new DefaultMutableTreeNode(EXTERNAL_FILE_SYMBOL+f.getName());
-      try
-      {
-        externalScene = new Scene(f, false);
-      }
-      catch (IOException ex)
-      {
-        ex.printStackTrace();
-      }
-      addSceneNodes(libraryList.addNode(r, newNode), externalScene);
-    }
-  }
-
-  // build list at startup and when a file/folder is changed:
-  public void buildList()
-  {
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    TreePath r = libraryList.getRootNode();
-
-    deleteNodes(r);
-
-    libraryList.setRootNodeShown(false);
-    libraryList.setNodeExpanded(r, true);
-
-    DefaultMutableTreeNode n0 = new DefaultMutableTreeNode(CURRENT_SCENE_TEXT);
-    TreePath r0 = libraryList.addNode(r, n0);
-    addSceneNodes(r0, theScene);
-
-    addLibraryNodes(r, theScene);
-
-    setCursor(Cursor.getDefaultCursor());
   }
 
   private class TextureTreeNode
@@ -1053,7 +930,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     public int getIndexOfChild(Object o, Object o1)
     {
       if (o == root)
-        return rootNodes.indexOf((SceneTreeNode) o1);
+        return rootNodes.indexOf(o1);
       if (o instanceof FolderTreeNode)
         return ((FolderTreeNode) o).getChildren().indexOf(o1);
       SceneTreeNode node = (SceneTreeNode) o;
@@ -1076,7 +953,8 @@ public class TexturesAndMaterialsDialog extends BDialog
         {
           sct.textures = null;
           sct.materials = null;
-          sct.scene = null;
+          if (sct.file != null)
+            sct.scene = null;
         }
         return;
       }
@@ -1087,10 +965,49 @@ public class TexturesAndMaterialsDialog extends BDialog
         rebuildNode(getChild(node, i), file);
     }
 
-    void rebuildScenes(File file)
+    void rebuildScenes(final File file)
+    {
+      updateTree(new Runnable()
+      {
+        public void run()
+        {
+          rebuildNode(root, file);
+        }
+      });
+    }
+
+    void rebuildLibrary()
+    {
+      updateTree(new Runnable()
+      {
+        public void run()
+        {
+          ((FolderTreeNode) rootNodes.get(1)).children = null;
+        }
+      });
+    }
+
+    void resetFilter()
+    {
+      updateTree(null);
+    }
+
+    void addScene(final File file)
+    {
+      updateTree(new Runnable()
+      {
+        public void run()
+        {
+          rootNodes.add(new SceneTreeNode(file));
+        }
+      });
+    }
+
+    void updateTree(Runnable updater)
     {
       List<TreePath> expanded = Collections.list(libraryList.getComponent().getExpandedDescendants(libraryList.getRootNode()));
-      rebuildNode(root, file);
+      if (updater != null)
+        updater.run();
       Object selection = (selectedTexture == null ? selectedMaterial : selectedTexture);
       TreeModelEvent ev = new TreeModelEvent(this, new TreePath(root));
       for (TreeModelListener listener : listeners)
@@ -1100,18 +1017,98 @@ public class TexturesAndMaterialsDialog extends BDialog
       if (selection != null)
         setSelection(new TreePath(root), selectedScene, selection);
     }
+  }
 
-    void resetFilter()
+  private class DragHandler extends TransferHandler
+  {
+    @Override
+    public int getSourceActions(JComponent jComponent)
     {
-      List<TreePath> expanded = Collections.list(libraryList.getComponent().getExpandedDescendants(libraryList.getRootNode()));
-      Object selection = (selectedTexture == null ? selectedMaterial : selectedTexture);
-      TreeModelEvent ev = new TreeModelEvent(this, new TreePath(root));
-      for (TreeModelListener listener : listeners)
-        listener.treeStructureChanged(ev);
-      for (TreePath path : expanded)
-        libraryList.setNodeExpanded(path, true);
-      if (selection != null)
-        setSelection(new TreePath(root), selectedScene, selection);
+      return COPY;
+    }
+
+    @Override
+    public boolean canImport(TransferSupport transferSupport)
+    {
+      SceneTreeNode sceneNode = findDropLocation(transferSupport);
+      if (sceneNode == null || sceneNode == selectedSceneNode)
+        return false;
+      transferSupport.setShowDropLocation(true);
+      return true;
+    }
+
+    @Override
+    protected Transferable createTransferable(JComponent jComponent)
+    {
+      if (selectedTexture != null)
+        return new DragTransferable(selectedTexture);
+      if (selectedMaterial != null)
+        return new DragTransferable(selectedMaterial);
+      return null;
+    }
+
+    @Override
+    public boolean importData(TransferSupport transferSupport)
+    {
+      SceneTreeNode sceneNode = findDropLocation(transferSupport);
+      if (sceneNode == null || sceneNode == selectedSceneNode)
+        return false;
+      try
+      {
+        Scene destScene = sceneNode.getScene();
+        if (destScene == theScene)
+          doLoadFromLibrary();
+        else
+          saveToFile(sceneNode.file);
+      }
+      catch (IOException ex)
+      {
+        ex.printStackTrace();
+      }
+      return true;
+    }
+
+    private SceneTreeNode findDropLocation(TransferSupport transferSupport)
+    {
+      TreePath location = libraryList.findNode(transferSupport.getDropLocation().getDropPoint());
+      if (location == null)
+        return null;
+      for (Object node : location.getPath())
+        if (node instanceof SceneTreeNode)
+          return (SceneTreeNode) node;
+      return null;
+    }
+  }
+
+  private class DragTransferable implements Transferable
+  {
+    private Object data;
+    private DataFlavor flavors[];
+
+    public DragTransferable(Object data)
+    {
+      this.data = data;
+      flavors = new DataFlavor[] {DataFlavor.stringFlavor, data instanceof Texture ? TextureFlavor : MaterialFlavor};
+    }
+
+    public Object getTransferData(DataFlavor dataFlavor) throws UnsupportedFlavorException, IOException
+    {
+      if (dataFlavor == DataFlavor.stringFlavor)
+        return data.toString();
+      return data;
+    }
+
+    public DataFlavor[] getTransferDataFlavors()
+    {
+      return flavors;
+    }
+
+    public boolean isDataFlavorSupported(DataFlavor dataFlavor)
+    {
+      for (DataFlavor flavor : flavors)
+        if (flavor == dataFlavor)
+          return true;
+      return false;
     }
   }
 }

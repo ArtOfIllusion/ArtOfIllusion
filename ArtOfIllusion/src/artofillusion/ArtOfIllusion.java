@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.List;
-import java.util.zip.*;
 import java.lang.reflect.*;
 import javax.swing.*;
 
@@ -236,14 +235,14 @@ public class ArtOfIllusion
 
   public static String getVersion()
   {
-    return getMajorVersion()+".1";
+    return getMajorVersion()+"ea1";
   }
 
   /** Get the major part of the version number of Art of Illusion. */
 
   public static String getMajorVersion()
   {
-    return "2.8";
+    return "2.9";
   }
 
   /** Get the application preferences object. */

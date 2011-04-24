@@ -163,8 +163,13 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     matList.setMultipleSelectionEnabled(false);
     matList.addEventLink(SelectionChangedEvent.class, this, "materialSelectionChanged");
     matList.addEventLink(MouseClickedEvent.class, this, "materialClicked");
-    matListPanel = new FormContainer(new double [] {1.0}, new double [] {1.0, 0.0});
-    matListPanel.add(UIUtilities.createScrollingList(matList), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
+    matListPanel = new FormContainer(new double [] {1.0}, new double [] {0.0, 1.0, 0.0});
+    if (obj.length == 1)
+      title = Translate.text("chooseMaterialForSingle", obj[0].getName());
+    else
+      title = Translate.text("chooseMaterialForMultiple");
+    matListPanel.add(new BLabel(title), 0, 0);
+    matListPanel.add(UIUtilities.createScrollingList(matList), 0, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     RowContainer matButtonRow = new RowContainer();
     matButtonRow.add(matMapButton = Translate.button("editMapping", this, "doEditMaterialMapping"));
     matButtonRow.add(newMaterialChoice = new BComboBox());
@@ -183,7 +188,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       }
     }
     newMaterialChoice.addEventLink(ValueChangedEvent.class, this, "doNewMaterial");
-    matListPanel.add(matButtonRow, 0, 1);
+    matListPanel.add(matButtonRow, 0, 2);
     materialsTab.add(matListPanel, BorderContainer.CENTER);
 
     // Create the section of the window for layered textures.
@@ -237,7 +242,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-    buttons.add(editTexturesButton = Translate.button("textures", this, "doEditTextures"));
+    buttons.add(editTexturesButton = Translate.button("texturesAndMaterials", this, "doEditTextures"));
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
 
@@ -547,8 +552,6 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private void doEditTextures()
   {
     scene.showTexturesDialog(window);
-    buildLists();
-    renderPreview();
   }
   
   private void doAddLayer()

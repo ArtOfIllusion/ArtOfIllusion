@@ -44,7 +44,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   FormContainer viewsContainer;
   FormContainer centerContainer;
   private DockingContainer dock[];
-  BSplitPane div1, div2;
   BScrollPane itemTreeScroller;
   Score theScore;
   ToolPalette tools;
@@ -672,7 +671,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     sceneMenu.add(Translate.menuItem("frameScene", this, "actionPerformed"));
     sceneMenu.addSeparator();
     sceneMenu.add(Translate.menuItem("textures", this, "texturesCommand"));
-    sceneMenu.add(Translate.menuItem("materials", this, "materialsCommand"));
     sceneMenu.add(Translate.menuItem("images", this, "actionPerformed"));
     sceneMenu.add(Translate.menuItem("environment", this, "environmentCommand"));
   }
@@ -2656,11 +2654,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void texturesCommand()
   {
     theScene.showTexturesDialog(this);
-  }
-
-  public void materialsCommand()
-  {
-    theScene.showMaterialsDialog(this);
   }
 
   public void environmentCommand()

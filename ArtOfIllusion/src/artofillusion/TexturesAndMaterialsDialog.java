@@ -74,7 +74,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   public TexturesAndMaterialsDialog(EditingWindow frame, Scene aScene)
   {
 
-    super(frame.getFrame(), "Textures and Materials Library", false);
+    super(frame.getFrame(), Translate.text("texturesTitle"), false);
 
     parentFrame = frame;
     theScene = aScene;
@@ -138,30 +138,29 @@ public class TexturesAndMaterialsDialog extends BDialog
     buttons.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
     content.add(buttons, BorderContainer.EAST);
 
-    BLabel label1 = new BLabel("Scene Functions:", BLabel.CENTER);
-    buttons.add(label1);
+    buttons.add(new BLabel(Translate.text("sceneFunctions"), BLabel.CENTER));
 
     typeChoice = new BComboBox();
-    typeChoice.add("New...");
+    typeChoice.add(Translate.text("button.new")+"...");
 
     java.lang.reflect.Method mtd;
 
-    for (int j = 0; j < textureTypes.size(); j++)
+    for (Texture tex : textureTypes)
     {
       try
       {
-        mtd = textureTypes.get(j).getClass().getMethod("getTypeName", null);
+        mtd = tex.getClass().getMethod("getTypeName", null);
         typeChoice.add((String) mtd.invoke(null, null)+" texture");
       }
       catch (Exception ex)
       {
       }
     }
-    for (int j = 0; j < materialTypes.size(); j++)
+    for (Material mat : materialTypes)
     {
       try
       {
-        mtd = materialTypes.get(j).getClass().getMethod("getTypeName", null);
+        mtd = mat.getClass().getMethod("getTypeName", null);
         typeChoice.add((String) mtd.invoke(null, null)+" material");
       }
       catch (Exception ex)
@@ -172,50 +171,22 @@ public class TexturesAndMaterialsDialog extends BDialog
 
     buttons.add(typeChoice);
 
-    duplicateButton = new BButton("Duplicate...");
-    duplicateButton.addEventLink(CommandEvent.class, this, "doCopy");
-    buttons.add(duplicateButton);
+    buttons.add(duplicateButton = Translate.button("duplicate", "...", this, "doCopy"));
+    buttons.add(deleteButton = Translate.button("delete", "...", this, "doDelete"));
+    buttons.add(editButton = Translate.button("edit", "...", this, "doEdit"));
 
-    deleteButton = new BButton("Delete...");
-    deleteButton.addEventLink(CommandEvent.class, this, "doDelete");
-    buttons.add(deleteButton);
+    buttons.add(new BSeparator());
 
-    editButton = new BButton("Edit...");
-    editButton.addEventLink(CommandEvent.class, this, "doEdit");
-    buttons.add(editButton);
+    buttons.add(new BLabel(Translate.text("libraryFunctions"), BLabel.CENTER));
+    buttons.add(loadLibButton = Translate.button("loadFromLibrary", this, "doLoadFromLibrary"));
+    buttons.add(saveLibButton = Translate.button("saveToLibrary", this, "doSaveToLibrary"));
+    buttons.add(deleteLibButton = Translate.button("deleteFromLibrary", this, "doDeleteFromLibrary"));
+    buttons.add(newFileButton = Translate.button("newLibraryFile", this, "doNewLib"));
+    buttons.add(includeFileButton = Translate.button("showExternalFile", this, "doIncludeLib"));
 
-    BSeparator space1 = new BSeparator();
-    buttons.add(space1);
+    buttons.add(new BSeparator());
 
-    BLabel label2 = new BLabel("Library Functions:", BLabel.CENTER);
-    buttons.add(label2);
-
-    loadLibButton = new BButton("Load from Library");
-    loadLibButton.addEventLink(CommandEvent.class, this, "doLoadFromLibrary");
-    buttons.add(loadLibButton);
-
-    saveLibButton = new BButton("Save to Library...");
-    saveLibButton.addEventLink(CommandEvent.class, this, "doSaveToLibrary");
-    buttons.add(saveLibButton);
-
-    deleteLibButton = new BButton("Delete from Library...");
-    deleteLibButton.addEventLink(CommandEvent.class, this, "doDeleteFromLibrary");
-    buttons.add(deleteLibButton);
-
-    newFileButton = new BButton("New File...");
-    newFileButton.addEventLink(CommandEvent.class, this, "doNewLib");
-    buttons.add(newFileButton);
-
-    includeFileButton = new BButton("Include File...");
-    includeFileButton.addEventLink(CommandEvent.class, this, "doIncludeLib");
-    buttons.add(includeFileButton);
-
-    BSeparator space2 = new BSeparator();
-    buttons.add(space2);
-
-    closeButton = new BButton("Close");
-    closeButton.addEventLink(CommandEvent.class, this, "dispose");
-    buttons.add(closeButton);
+    buttons.add(closeButton = Translate.button("close", this, "dispose"));
 
     hilightButtons();
 
@@ -296,7 +267,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       matPre.setTexture(tex, tex.getDefaultMapping(matPre.getObject().getObject()));
       matPre.setMaterial(null, null);
       matPre.render();
-      setInfoText("(No selection)", "&nbsp;");
+      setInfoText(Translate.text("noSelection"), "&nbsp;");
     }
 
     hilightButtons();
@@ -569,15 +540,15 @@ public class TexturesAndMaterialsDialog extends BDialog
     String itemText;
     if (selectedTexture != null)
     {
-      itemText = "texture";
+      itemText = "selectSceneToSaveTexture";
     }
     else
     {
-      itemText = "material";
+      itemText = "selectSceneToSaveMaterial";
     }
     if (selectedTexture != null || selectedMaterial != null)
     {
-      BFileChooser fcOut = new BFileChooser(BFileChooser.OPEN_FILE, "Choose an Art of Illusion Scene File (.aoi) to save the "+itemText+" to", mainFolder);
+      BFileChooser fcOut = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text(itemText), mainFolder);
       if (fcOut.showDialog(this))
         saveToFile(fcOut.getSelectedFile());
     }
@@ -650,7 +621,7 @@ public class TexturesAndMaterialsDialog extends BDialog
 
   public void doNewLib()
   {
-    BFileChooser fcNew = new BFileChooser(BFileChooser.SAVE_FILE, "Create new Art of Illusion Scene File (.aoi) in the library", mainFolder);
+    BFileChooser fcNew = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("selectNewLibraryName"), mainFolder);
     if (fcNew.showDialog(this))
     {
       File saveFile = fcNew.getSelectedFile();
@@ -668,7 +639,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       else
       {
-        BStandardDialog d = new BStandardDialog("Error", "File already exists.", BStandardDialog.ERROR);
+        BStandardDialog d = new BStandardDialog("", Translate.text("fileAlreadyExists"), BStandardDialog.ERROR);
         d.showMessageDialog(this);
       }
     }
@@ -676,7 +647,7 @@ public class TexturesAndMaterialsDialog extends BDialog
 
   public void doIncludeLib()
   {
-    BFileChooser fcInc = new BFileChooser(BFileChooser.OPEN_FILE, "Choose an Art of Illusion Scene File (.aoi)");
+    BFileChooser fcInc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectExternalFile"));
     if (fcInc.showDialog(this))
     {
       File inputFile = fcInc.getSelectedFile();

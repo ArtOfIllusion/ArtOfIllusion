@@ -18,7 +18,6 @@ import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import artofillusion.util.*;
-import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
@@ -47,8 +46,7 @@ public class Scene
   private double fogDist, gridSpacing, time;
   private boolean fog, showGrid, snapToGrid, errorsLoading;
   private String name, directory;
-  private TexturesDialog texDlg;
-  private MaterialsDialog matDlg;
+  private TexturesAndMaterialsDialog texDlg;
   private ParameterValue environParamValue[];
   private StringBuffer loadingErrors;
   
@@ -709,36 +707,21 @@ public class Scene
     return metadataMap.keySet();
   }
   
-  /** Show the dialog for editing textures. */
+  /** Show the dialog for editing textures and materials. */
   
-  public void showTexturesDialog(BFrame parent)
+  public void showTexturesDialog(EditingWindow parent)
+
   {
     if (texDlg == null)
-      texDlg = new TexturesDialog(parent, this);
+      texDlg = new TexturesAndMaterialsDialog(parent, this);
     else
     {
       Rectangle r = texDlg.getBounds();
       texDlg.dispose();
-      texDlg = new TexturesDialog(parent, this);
+      texDlg = new TexturesAndMaterialsDialog(parent, this);
       texDlg.setBounds(r);
     }
     texDlg.setVisible(true);
-  }
-  
-  /** Show the dialog for editing materials. */
-  
-  public void showMaterialsDialog(BFrame parent)
-  {
-    if (matDlg == null)
-      matDlg = new MaterialsDialog(parent, this);
-    else
-    {
-      Rectangle r = matDlg.getBounds();
-      matDlg.dispose();
-      matDlg = new MaterialsDialog(parent, this);
-      matDlg.setBounds(r);
-    }
-    matDlg.setVisible(true);
   }
   
   /** Add an image map to the scene. */

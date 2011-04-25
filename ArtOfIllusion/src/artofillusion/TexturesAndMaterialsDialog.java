@@ -564,11 +564,23 @@ public class TexturesAndMaterialsDialog extends BDialog
         if (selectedTexture != null)
         {
           saveScene.addTexture(selectedTexture);
+          for (int i = 0; i < selectedScene.getNumImages(); i++)
+          {
+            ImageMap image = selectedScene.getImage(i);
+            if (selectedTexture.usesImage(image))
+              saveScene.addImage(image);
+          }
           saveScene.writeToFile(saveFile);
         }
         else if (selectedMaterial != null)
         {
           saveScene.addMaterial(selectedMaterial);
+          for (int i = 0; i < selectedScene.getNumImages(); i++)
+          {
+            ImageMap image = selectedScene.getImage(i);
+            if (selectedMaterial.usesImage(image))
+              saveScene.addImage(image);
+          }
           saveScene.writeToFile(saveFile);
         }
       }

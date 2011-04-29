@@ -226,6 +226,8 @@ public class TexturesAndMaterialsDialog extends BDialog
   public void doSelectionChanged()
   {
     TreePath selection = libraryList.getSelectedNode();
+    Texture oldTexture = selectedTexture;
+    Material oldMaterial = selectedMaterial;
     selectedTexture = null;
     selectedMaterial = null;
     if (selection != null && libraryList.isLeafNode(selection))
@@ -241,19 +243,25 @@ public class TexturesAndMaterialsDialog extends BDialog
         if (node instanceof TextureTreeNode)
         {
           selectedTexture = selectedScene.getTexture(((TextureTreeNode) node).index);
-          matPre.setTexture(selectedTexture, selectedTexture.getDefaultMapping(matPre.getObject().getObject()));
-          matPre.setMaterial(null, null);
-          matPre.render();
-          setInfoText(Translate.text("textureName")+" "+selectedTexture.getName(), Translate.text("textureType")+" "+getTypeName(selectedTexture));
+          if (selectedTexture != oldTexture)
+          {
+            matPre.setTexture(selectedTexture, selectedTexture.getDefaultMapping(matPre.getObject().getObject()));
+            matPre.setMaterial(null, null);
+            matPre.render();
+            setInfoText(Translate.text("textureName")+" "+selectedTexture.getName(), Translate.text("textureType")+" "+getTypeName(selectedTexture));
+          }
         }
         else
         {
           selectedMaterial = selectedScene.getMaterial(((MaterialTreeNode) node).index);
-          Texture tex = UniformTexture.invisibleTexture();
-          matPre.setTexture(tex, tex.getDefaultMapping(matPre.getObject().getObject()));
-          matPre.setMaterial(selectedMaterial, selectedMaterial.getDefaultMapping(matPre.getObject().getObject()));
-          matPre.render();
-          setInfoText(Translate.text("materialName")+" "+selectedMaterial.getName(), Translate.text("materialType")+" "+getTypeName(selectedMaterial));
+          if (selectedMaterial != oldMaterial)
+          {
+            Texture tex = UniformTexture.invisibleTexture();
+            matPre.setTexture(tex, tex.getDefaultMapping(matPre.getObject().getObject()));
+            matPre.setMaterial(selectedMaterial, selectedMaterial.getDefaultMapping(matPre.getObject().getObject()));
+            matPre.render();
+            setInfoText(Translate.text("materialName")+" "+selectedMaterial.getName(), Translate.text("materialType")+" "+getTypeName(selectedMaterial));
+          }
         }
       }
       catch (IOException ex)

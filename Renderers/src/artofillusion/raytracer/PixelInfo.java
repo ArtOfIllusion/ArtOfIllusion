@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,7 @@ public class PixelInfo
   public float redSquare, greenSquare, blueSquare;
   public int raysSent;
   public boolean needsMore, converged;
-  public RTObject object;
+  public float object;
   
   public PixelInfo()
   {
@@ -35,7 +35,7 @@ public class PixelInfo
   {
     red = green = blue = redSquare = greenSquare = blueSquare = transparency = 0.0f;
     depth = Float.MAX_VALUE;
-    object = null;
+    object = 0.0f;
     raysSent = 0;
     needsMore = true;
   }

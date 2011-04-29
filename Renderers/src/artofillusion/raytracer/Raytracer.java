@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,7 +33,7 @@ public class Raytracer implements Renderer, Runnable
   protected RTLight light[];
   protected OctreeNode rootNode, cameraNode, lightNode[];
   protected ColumnContainer configPanel;
-  protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, hdrBox, adaptiveBox, rouletteBox, reducedMemoryBox;
+  protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, adaptiveBox, rouletteBox, reducedMemoryBox;
   protected BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice;
   protected ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField;
   protected ValueField extraGIField, extraGIEnvField;
@@ -54,7 +54,7 @@ public class Raytracer implements Renderer, Runnable
   protected double smoothing = 1.0, smoothScale, extraGISmoothing = 10.0, extraGIEnvSmoothing = 100.0;
   protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100;
   protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[], objectImage[];
-  protected boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, generateHDR = true, adaptive = true, roulette = false, reducedMemory = false;
+  protected boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, adaptive = true, roulette = false, reducedMemory = false;
   protected boolean needCopyToUI = true;
   protected PhotonMap globalMap, causticsMap, volumeMap;
   protected BoundingBox materialBounds;
@@ -147,8 +147,7 @@ public class Raytracer implements Renderer, Runnable
     imageSource.setAnimated(true);
     img = Toolkit.getDefaultToolkit().createImage(imageSource);
     int requiredComponents = sceneCamera.getComponentsForFilters();
-    if (generateHDR || (requiredComponents&(ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE)) != 0)
-      floatImage = new float [4][width*height];
+    floatImage = new float [4][width*height];
     if ((requiredComponents&ComplexImage.DEPTH) != 0)
       depthImage = new float [width*height];
     if ((requiredComponents&ComplexImage.NOISE) != 0)
@@ -252,7 +251,6 @@ public class Raytracer implements Renderer, Runnable
 
       buttons.add(Translate.button("output", this, "showOutputOptionsWindow"));
       transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground);
-      hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR);
 
       // Create components for the Advanced Options window.
 
@@ -443,18 +441,16 @@ public class Raytracer implements Renderer, Runnable
     // Record the current settings.
 
     transparentBackground = transparentBox.getState();
-    generateHDR = hdrBox.getState();
-    
+
     // Show the window.
     
     WindowWidget parent = UIUtilities.findWindow(ev.getWidget());
-    ComponentsDialog dlg = new ComponentsDialog(parent, Translate.text("outputOptions"), new Widget [] {transparentBox, hdrBox}, new String [] {"", ""});
+    ComponentsDialog dlg = new ComponentsDialog(parent, Translate.text("outputOptions"), new Widget [] {transparentBox}, new String [] {""});
     if (!dlg.clickedOk())
     {
       // Reset the components.
       
       transparentBox.setState(transparentBackground);
-      hdrBox.setState(generateHDR);
     }
   }
 
@@ -492,7 +488,6 @@ public class Raytracer implements Renderer, Runnable
     volumePhotonsField.setValue(volumePhotons);
     volumeNeighborPhotonsField.setValue(volumeNeighborPhotons);
     transparentBox.setState(transparentBackground);
-    hdrBox.setState(generateHDR);
 
     // Generate events to force appropriate components to be enabled or disabled.
 
@@ -517,7 +512,6 @@ public class Raytracer implements Renderer, Runnable
     minRays = Integer.parseInt((String) minRaysChoice.getSelectedValue());
     maxRays = Integer.parseInt((String) maxRaysChoice.getSelectedValue());
     transparentBackground = transparentBox.getState();
-    generateHDR = hdrBox.getState();
     giMode = giModeChoice.getSelectedIndex();
     diffuseRays = Integer.parseInt((String) diffuseRaysChoice.getSelectedValue());
     globalPhotons = (int) globalPhotonsField.getValue();
@@ -552,7 +546,6 @@ public class Raytracer implements Renderer, Runnable
     map.put("minRaysPerPixel", minRays);
     map.put("maxRaysPerPixel", maxRays);
     map.put("transparentBackground", transparentBackground);
-    map.put("highDynamicRange", generateHDR);
     map.put("globalIlluminationMode", giMode);
     map.put("raysToSampleEnvironment", diffuseRays);
     map.put("globalIlluminationPhotons", globalPhotons);
@@ -603,8 +596,6 @@ public class Raytracer implements Renderer, Runnable
       maxRays = (Integer) value;
     else if ("transparentBackground".equals(property))
       transparentBackground = (Boolean) value;
-    else if ("highDynamicRange".equals(property))
-      generateHDR = (Boolean) value;
     else if ("globalIlluminationMode".equals(property))
       giMode = (Integer) value;
     else if ("raysToSampleEnvironment".equals(property))
@@ -634,8 +625,10 @@ public class Raytracer implements Renderer, Runnable
     maxRayDepth = 6;
     minRayIntensity = 0.02f;
     antialiasLevel = 0;
-    depth = gloss = penumbra = transparentBackground = generateHDR = false;
-    minRays = maxRays = 1;
+    depth = gloss = penumbra = transparentBackground = false;
+    minRays = 4;
+    maxRays = 4;
+    antialiasLevel = 2;
     stepSize = 1.0;
     smoothing = 1.0;
     extraGISmoothing = 10.0;
@@ -1094,7 +1087,7 @@ public class Raytracer implements Renderer, Runnable
   public void run()
   {
     long updateTime = System.currentTimeMillis();
-    Thread thisThread = Thread.currentThread();
+    final Thread thisThread = Thread.currentThread();
 
     listener.statusChanged(Translate.text("Processing Scene"));
     buildScene(theScene, theCamera);
@@ -1111,44 +1104,75 @@ public class Raytracer implements Renderer, Runnable
       minRaysInUse = maxRaysInUse = 1;
     smoothScale = smoothing*2.0*Math.tan(sceneCamera.getFieldOfView()*Math.PI/360.0)/height;
 
-    // If we are only using one ray/pixel, everything is simple.
+    // Rendering is done in two phases.  In the first phase, we send one ray per pixel, ordered so that a
+    // rough image appears quickly then progressively becomes more detailed.
 
     if (maxRaysInUse == 1)
     {
       rtWidth = width;
       rtHeight = height;
-      final int currentRow[] = new int [1];
-      ThreadManager threads = new ThreadManager(width, new ThreadManager.Task() {
-        public void execute(int index)
-        {
-          RaytracerContext context = (RaytracerContext) threadContext.get();
-          PixelInfo pixel = context.tempPixel;
-          pixel.clear();
-          pixel.depth = (float) spawnEyeRay(context, index, currentRow[0], 0, 1);
-          pixel.object = context.firstObjectHit;
-          pixel.add(context.color[0], (float) context.transparency[0]);
-          recordPixel(index, currentRow[0], pixel);
-        }
-        public void cleanup()
-        {
-          ((RaytracerContext) threadContext.get()).cleanup();
-        }
-      });
-      for (currentRow[0] = 0; currentRow[0] < height; currentRow[0]++)
+    }
+    else
+    {
+      rtWidth = 2*width+2;
+      rtHeight = 2*height+2;
+      smoothScale *= 0.5;
+    }
+
+    final int finalMinRays = minRaysInUse;
+    final int currentScale[] = new int [1];
+    final int currentWidth[] = new int [1];
+    final boolean isFirstPass[] = new boolean[] {true};
+    ThreadManager threads = new ThreadManager(width, new ThreadManager.Task() {
+      public void execute(int index)
       {
-        threads.run();
         if (renderThread != thisThread)
-        {
-          threads.finish();
           return;
-        }
-        if (System.currentTimeMillis()-updateTime > 5000)
-        {
-          imageSource.newPixels();
-          listener.imageUpdated(img);
-          updateTime = System.currentTimeMillis();
-        }
+        int row = index/currentWidth[0];
+        int col = index-row*currentWidth[0];
+        if (!isFirstPass[0] && row%2 == 0 && col%2 == 0)
+          return;
+        int subsample = (finalMinRays > 1 ? 2 : 1);
+        RaytracerContext context = (RaytracerContext) threadContext.get();
+        PixelInfo pixel = context.tempPixel;
+        pixel.clear();
+        pixel.depth = (float) spawnEyeRay(context, col*subsample*currentScale[0], row*subsample*currentScale[0], 0, finalMinRays);
+        pixel.object = (context.firstObjectHit == null ? 0.0f : Float.intBitsToFloat(context.firstObjectHit.getObject().hashCode()));
+        pixel.add(context.color[0], (float) context.transparency[0]);
+        recordPixel(col*currentScale[0], row*currentScale[0], currentScale[0], pixel);
       }
+      public void cleanup()
+      {
+        ((RaytracerContext) threadContext.get()).cleanup();
+      }
+    });
+    for (currentScale[0] = 1<<(int)(Math.log(width/4)/Math.log(2.0)); currentScale[0] >= 1; currentScale[0] /= 2)
+    {
+      currentWidth[0] = (int) Math.ceil((double) width/currentScale[0]);
+      int currentHeight = (int) Math.ceil((double) height/currentScale[0]);
+      threads.setNumIndices(currentWidth[0]*currentHeight);
+      threads.run();
+      isFirstPass[0] = false;
+      if (renderThread != thisThread)
+      {
+        threads.finish();
+        return;
+      }
+      long currentTime = System.currentTimeMillis();
+      if (currentTime-updateTime > 500 || currentScale[0] == 1 && currentTime-updateTime > 150)
+      {
+        imageSource.newPixels();
+        listener.imageUpdated(img);
+        updateTime = System.currentTimeMillis();
+      }
+    }
+
+    // At this point, we have sent one ray/pixel.  If that's all they requested, we can just
+    // return now.  Otherwise, go on to phase 2 where we send out more rays to improve the
+    // image quality.
+
+    if (maxRaysInUse == 1)
+    {
       imageSource.newPixels();
       threads.finish();
       finish();
@@ -1162,18 +1186,18 @@ public class Raytracer implements Renderer, Runnable
     // or we reach maxRays.
 
     PixelInfo tempPixel = new PixelInfo();
-
-    rtWidth = 2*width+2;
-    rtHeight = 2*height+2;
-    smoothScale *= 0.5;
+    RGBColor tempColor = new RGBColor();
     final PixelInfo pix[][] = new PixelInfo [6][rtWidth];
     for (int i = 0; i < pix.length; i++)
       for (int j = 0; j < pix[i].length; j++)
         pix[i][j] = new PixelInfo();
+    loadRow(pix[0], 0, tempColor);
+    loadRow(pix[2], 1, tempColor);
+    loadRow(pix[4], 2, tempColor);
     int minPerSubpixel = minRaysInUse/4, maxPerSubpixel = maxRaysInUse/4;
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];
-    ThreadManager threads = new ThreadManager(rtWidth, new ThreadManager.Task() {
+    threads = new ThreadManager(rtWidth, new ThreadManager.Task() {
       public void execute(int index)
       {
         RaytracerContext context = (RaytracerContext) threadContext.get();
@@ -1196,7 +1220,7 @@ public class Raytracer implements Renderer, Runnable
                 if (dist < thisPixel.depth)
                 {
                   thisPixel.depth = dist;
-                  thisPixel.object = context.firstObjectHit;
+                  thisPixel.object = (context.firstObjectHit == null ? 0.0f : Float.intBitsToFloat(context.firstObjectHit.getObject().hashCode()));
                 }
               }
               else
@@ -1205,7 +1229,7 @@ public class Raytracer implements Renderer, Runnable
                 if (dist < tempPixel.depth)
                 {
                   tempPixel.depth = dist;
-                  tempPixel.object = context.firstObjectHit;
+                  tempPixel.object = (context.firstObjectHit == null ? 0.0f : Float.intBitsToFloat(context.firstObjectHit.getObject().hashCode()));
                 }
               }
             }
@@ -1294,10 +1318,8 @@ public class Raytracer implements Renderer, Runnable
       pix[4] = temp1;
       pix[5] = temp2;
       for (int j = 0; j < rtWidth; j++)
-      {
-        pix[4][j].clear();
         pix[5][j].clear();
-      }
+      loadRow(pix[4], currentRow[0]+2, tempColor);
     }
 
     // Copy the final row of pixels into the image.
@@ -1309,6 +1331,27 @@ public class Raytracer implements Renderer, Runnable
     imageSource.newPixels();
     threads.finish();
     finish();
+  }
+
+  /** Load a row of pixels from the image. */
+
+  protected void loadRow(PixelInfo pix[], int y, RGBColor temp)
+  {
+    for (PixelInfo p : pix)
+      p.clear();
+    if (y >= height)
+      return;
+    for (int i = 0; i < width; i++)
+    {
+      int x = i*2+1;
+      int index = i+y*width;
+      temp.setRGB(floatImage[0][index], floatImage[1][index], floatImage[2][index]);
+      pix[x].add(temp, 1.0f-floatImage[3][index]);
+      if (depthImage != null)
+        pix[x].depth = depthImage[index];
+      if (objectImage != null)
+        pix[x].object = objectImage[index];
+    }
   }
   
   /** Record a row of pixels into the image. */
@@ -1334,7 +1377,7 @@ public class Raytracer implements Renderer, Runnable
             tempPixel.add(pix[1][x+2]);
             tempPixel.add(pix[2][x+2]);
           }
-        recordPixel(i, row, tempPixel);
+        recordPixel(i, row, 1, tempPixel);
         if (errorImage != null)
         {
           // If we only have one ray/subpixel, we need to estimate standard deviation from the differences between subpixels.
@@ -1370,22 +1413,29 @@ public class Raytracer implements Renderer, Runnable
   
   /** Record a single pixel into the image. */
 
-  protected void recordPixel(int x, int y, PixelInfo pix)
+  protected void recordPixel(int x, int y, int size, PixelInfo pix)
   {
     int index = x+y*width;
-    pixel[index] = pix.calcARGB();
-    if (floatImage != null)
+    if (size == 1)
+      pixel[index] = pix.calcARGB();
+    else
     {
-	    float ninv = 1.0f/pix.raysSent;
-	    floatImage[0][index] = pix.red*ninv;
-	    floatImage[1][index] = pix.green*ninv;
-	    floatImage[2][index] = pix.blue*ninv;
-	    floatImage[3][index] = 1.0f-pix.transparency*ninv;
+      int rows = Math.min(size, width-x);
+      int cols = Math.min(size, height-y);
+      int argb = pix.calcARGB();
+      for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+          pixel[(x+i)+(y+j)*width] = argb;
     }
+    float ninv = 1.0f/pix.raysSent;
+    floatImage[0][index] = pix.red*ninv;
+    floatImage[1][index] = pix.green*ninv;
+    floatImage[2][index] = pix.blue*ninv;
+    floatImage[3][index] = 1.0f-pix.transparency*ninv;
     if (depthImage != null)
       depthImage[index] = pix.depth;
     if (objectImage != null)
-      objectImage[index] = (pix.object == null ? 0.0f : Float.intBitsToFloat(pix.object.getObject().hashCode()));
+      objectImage[index] = pix.object;
   }
 
   /** This routine is called when rendering is finished.  It sets variables to null and
@@ -1409,13 +1459,10 @@ public class Raytracer implements Renderer, Runnable
     ComplexImage im = new ComplexImage(img);
     if (rl != null)
       {
-        if (floatImage != null)
-          {
-            im.setComponentValues(ComplexImage.RED, floatImage[0]);
-            im.setComponentValues(ComplexImage.GREEN, floatImage[1]);
-            im.setComponentValues(ComplexImage.BLUE, floatImage[2]);
-            im.setComponentValues(ComplexImage.ALPHA, floatImage[3]);
-          }
+        im.setComponentValues(ComplexImage.RED, floatImage[0]);
+        im.setComponentValues(ComplexImage.GREEN, floatImage[1]);
+        im.setComponentValues(ComplexImage.BLUE, floatImage[2]);
+        im.setComponentValues(ComplexImage.ALPHA, floatImage[3]);
         if (depthImage != null)
           im.setComponentValues(ComplexImage.DEPTH, depthImage);
         if (objectImage != null)

@@ -350,17 +350,33 @@ public abstract class ObjectViewer extends ViewerCanvas
   
   public void previewObject()
   {
-    Scene sc = new Scene();
     Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
-
     if (rend == null)
       return;
-    sc.addObject(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), theCamera.getCameraCoordinates(), "", null);
-    ObjectInfo obj = getController().getObject();
-    sc.addObject(obj.duplicate(obj.getObject().duplicate()), null);
     adjustCamera(true);
+    Scene sc;
+    if (showScene)
+    {
+      sc = theScene;
+      if (!useWorldCoords && thisObjectInScene != null)
+      {
+        theCamera.getCameraCoordinates().transformCoordinates(thisObjectInScene.getCoords().fromLocal());
+        theCamera.setCameraCoordinates(theCamera.getCameraCoordinates());
+      }
+    }
+    else
+    {
+      sc = new Scene();
+      sc.addObject(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), theCamera.getCameraCoordinates(), "", null);
+      ObjectInfo obj = getController().getObject();
+      obj = obj.duplicate(obj.getObject().duplicate());
+      obj.getCoords().transformCoordinates(getDisplayCoordinates().fromLocal());
+      sc.addObject(obj, null);
+    }
     rend.configurePreview();
-    ObjectInfo cameraInfo = new ObjectInfo(new SceneCamera(), theCamera.getCameraCoordinates(), "");
+    SceneCamera sceneCamera = new SceneCamera();
+    sceneCamera.setFieldOfView(Math.atan(0.5*getBounds().height/(theCamera.getDistToScreen()*getScale()))*360.0/Math.PI);
+    ObjectInfo cameraInfo = new ObjectInfo(sceneCamera, theCamera.getCameraCoordinates(), "");
     new RenderingDialog(UIUtilities.findFrame(this), rend, sc, theCamera, cameraInfo);
     adjustCamera(isPerspective());
   }

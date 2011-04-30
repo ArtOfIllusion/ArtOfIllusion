@@ -82,7 +82,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     theScene.addMaterialListener(listListener);
     theScene.addTextureListener(listListener);
 
-    mainFolder = new File(System.getProperties().getProperty("user.dir"), "Textures and Materials");
+    mainFolder = new File(ArtOfIllusion.APP_DIRECTORY, "Textures and Materials");
 
     BorderContainer content = new BorderContainer();
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));

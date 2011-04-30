@@ -355,13 +355,15 @@ public abstract class ObjectViewer extends ViewerCanvas
       return;
     adjustCamera(true);
     Scene sc;
+    CoordinateSystem cameraCoords = theCamera.getCameraCoordinates();
     if (showScene)
     {
       sc = theScene;
       if (!useWorldCoords && thisObjectInScene != null)
       {
-        theCamera.getCameraCoordinates().transformCoordinates(thisObjectInScene.getCoords().fromLocal());
-        theCamera.setCameraCoordinates(theCamera.getCameraCoordinates());
+        CoordinateSystem newCoords = cameraCoords.duplicate();
+        newCoords.transformCoordinates(thisObjectInScene.getCoords().fromLocal());
+        theCamera.setCameraCoordinates(newCoords);
       }
     }
     else
@@ -378,6 +380,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     sceneCamera.setFieldOfView(Math.atan(0.5*getBounds().height/(theCamera.getDistToScreen()*getScale()))*360.0/Math.PI);
     ObjectInfo cameraInfo = new ObjectInfo(sceneCamera, theCamera.getCameraCoordinates(), "");
     new RenderingDialog(UIUtilities.findFrame(this), rend, sc, theCamera, cameraInfo);
+    theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
 }

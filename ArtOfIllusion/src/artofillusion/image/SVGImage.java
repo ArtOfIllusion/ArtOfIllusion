@@ -280,36 +280,36 @@ public class SVGImage extends ImageMap
     float xfract = scaledx-(int) scaledx;
     float yfract = scaledy-(int) scaledy;
     getPixels((int) scaledx, (int) scaledy, scale, wrapx, wrapy, values);
-    theColor.setRGB(scaleFract*SCALE*((1-xfract)*(1-yfract)*(values[0]&0xFF) +
-                                      (xfract)*(1-yfract)*(values[1]&0xFF) +
-                                      (1-xfract)*(yfract)*(values[2]&0xFF) +
-                                      (xfract)*(yfract)*(values[3]&0xFF)),
+    theColor.setRGB(scaleFract*SCALE*((1-xfract)*(1-yfract)*((values[0]>>16)&0xFF) +
+                                      (xfract)*(1-yfract)*((values[1]>>16)&0xFF) +
+                                      (1-xfract)*(yfract)*((values[2]>>16)&0xFF) +
+                                      (xfract)*(yfract)*((values[3]>>16)&0xFF)),
                     scaleFract*SCALE*((1-xfract)*(1-yfract)*((values[0]>>8)&0xFF) +
                                       (xfract)*(1-yfract)*((values[1]>>8)&0xFF) +
                                       (1-xfract)*(yfract)*((values[2]>>8)&0xFF) +
                                       (xfract)*(yfract)*((values[3]>>8)&0xFF)),
-                    scaleFract*SCALE*((1-xfract)*(1-yfract)*((values[0]>>16)&0xFF) +
-                                      (xfract)*(1-yfract)*((values[1]>>16)&0xFF) +
-                                      (1-xfract)*(yfract)*((values[2]>>16)&0xFF) +
-                                      (xfract)*(yfract)*((values[3]>>16)&0xFF)));
+                    scaleFract*SCALE*((1-xfract)*(1-yfract)*(values[0]&0xFF) +
+                                      (xfract)*(1-yfract)*(values[1]&0xFF) +
+                                      (1-xfract)*(yfract)*(values[2]&0xFF) +
+                                      (xfract)*(yfract)*(values[3]&0xFF)));
     scaledx = (float) (0.5*x*scale);
     scaledy = (float) (0.5*y*scale);
     getPixels((int) scaledx, (int) scaledy, scale/2, wrapx, wrapy, values);
     scaleFract = 1-scaleFract;
     xfract = scaledx-(int) scaledx;
     yfract = scaledy-(int) scaledy;
-    theColor.add(scaleFract*SCALE*((1-xfract)*(1-yfract)*(values[0]&0xFF) +
-                                   (xfract)*(1-yfract)*(values[1]&0xFF) +
-                                   (1-xfract)*(yfract)*(values[2]&0xFF) +
-                                   (xfract)*(yfract)*(values[3]&0xFF)),
+    theColor.add(scaleFract*SCALE*((1-xfract)*(1-yfract)*((values[0]>>16)&0xFF) +
+                                   (xfract)*(1-yfract)*((values[1]>>16)&0xFF) +
+                                   (1-xfract)*(yfract)*((values[2]>>16)&0xFF) +
+                                   (xfract)*(yfract)*((values[3]>>16)&0xFF)),
                  scaleFract*SCALE*((1-xfract)*(1-yfract)*((values[0]>>8)&0xFF) +
                                    (xfract)*(1-yfract)*((values[1]>>8)&0xFF) +
                                    (1-xfract)*(yfract)*((values[2]>>8)&0xFF) +
                                    (xfract)*(yfract)*((values[3]>>8)&0xFF)),
-                 scaleFract*SCALE*((1-xfract)*(1-yfract)*((values[0]>>16)&0xFF) +
-                                   (xfract)*(1-yfract)*((values[1]>>16)&0xFF) +
-                                   (1-xfract)*(yfract)*((values[2]>>16)&0xFF) +
-                                   (xfract)*(yfract)*((values[3]>>16)&0xFF)));
+                 scaleFract*SCALE*((1-xfract)*(1-yfract)*(values[0]&0xFF) +
+                                   (xfract)*(1-yfract)*(values[1]&0xFF) +
+                                   (1-xfract)*(yfract)*(values[2]&0xFF) +
+                                   (xfract)*(yfract)*(values[3]&0xFF)));
   }
 
   /** Get the gradient of a single component at a particular location in the image.

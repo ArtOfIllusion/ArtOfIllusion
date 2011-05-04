@@ -100,6 +100,8 @@ public class TexturesAndMaterialsDialog extends BDialog
     libraryList.setRootNodeShown(false);
 
     BScrollPane listWrapper = new BScrollPane(libraryList, BScrollPane.SCROLLBAR_AS_NEEDED, BScrollPane.SCROLLBAR_AS_NEEDED);
+    listWrapper.setBackground(libraryList.getBackground());
+    listWrapper.setForceWidth(true);
     listWrapper.setPreferredViewSize(new Dimension(250, 250));
 
     // Radio buttons for filtering the tree

@@ -236,7 +236,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     selected = sel;
     findSelectionDistance();
     updateMenus();
-    updateImage();
+    for (ViewerCanvas view : theView)
+      view.repaint();
     repaint();
   }
 

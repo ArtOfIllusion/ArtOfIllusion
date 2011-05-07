@@ -982,7 +982,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     selected = sel;
     findSelectionDistance();
     updateMenus();
-    updateImage();
+    for (ViewerCanvas view : theView)
+      view.repaint();
   }
   
   /** Get an array of flags telling which parts of the mesh are currently selected.  Depending

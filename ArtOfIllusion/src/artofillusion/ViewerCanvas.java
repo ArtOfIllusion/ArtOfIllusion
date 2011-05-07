@@ -36,7 +36,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected double gridSpacing, scale;
   protected boolean perspective, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected ActionProcessor mouseProcessor;
-  protected Image templateImage;
+  protected Image templateImage, renderedImage;
   protected CanvasDrawer drawer;
   protected Dimension prefSize;
   protected Map<ViewerControl,Widget> controlMap;
@@ -78,6 +78,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int RENDER_SMOOTH = 2;
   public static final int RENDER_TEXTURED = 3;
   public static final int RENDER_TRANSPARENT = 4;
+  public static final int RENDER_RENDERED = 5;
 
   public static final int VIEW_FRONT = 0;
   public static final int VIEW_BACK = 1;
@@ -149,7 +150,7 @@ public abstract class ViewerCanvas extends CustomWidget
         controlMap.put(controls.get(i), w);
       }
     }
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
   }
   
   private void processMousePressed(WidgetMouseEvent ev)
@@ -194,6 +195,7 @@ public abstract class ViewerCanvas extends CustomWidget
       Vec3 delta = coords.getZDirection().times(-0.1*amount);
       coords.setOrigin(coords.getOrigin().plus(delta));
       theCamera.setCameraCoordinates(coords);
+      viewChanged(false);
       repaint();
     }
     else
@@ -293,7 +295,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setPerspective(boolean perspective)
   {
     this.perspective = perspective;
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
     repaint();
   }
   
@@ -321,7 +323,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     if (scale > 0.0)
       this.scale = scale;
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
     repaint();
   }
   
@@ -351,7 +353,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setShowAxes(boolean show)
   {
     showAxes = show;
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
   }
   
   /** Determine whether the template image is currently showing. */
@@ -366,7 +368,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setShowTemplate(boolean show)
   {
     showTemplate = show;
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
   }
   
   /** Get the template image. */
@@ -382,7 +384,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     templateImage = im;
     drawer.setTemplateImage(im);
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
   }
   
   /** Set the template image based on an image file. */
@@ -487,7 +489,7 @@ public abstract class ViewerCanvas extends CustomWidget
       theCamera.setGrid(spacing/subdivisions);
     else
       theCamera.setGrid(0.0);
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
   }
 
   /** Get whether the grid is shown. */
@@ -580,7 +582,18 @@ public abstract class ViewerCanvas extends CustomWidget
    */
   
   public abstract double[] estimateDepthRange();
-  
+
+  /**
+   * This is called when the content of the view has changed.
+   *
+   * @param selectionOnly   if true, the only change to the view is what is currently selected
+   */
+
+  public void viewChanged(boolean selectionOnly)
+  {
+    dispatchEvent(viewChangedEvent);
+  }
+
   /** Subclasses should override this to draw the contents of the canvas, but should begin
       by calling super.updateImage() to display the grid. */
 
@@ -766,7 +779,8 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setRenderMode(int mode)
   {
     renderMode = mode;
-    dispatchEvent(viewChangedEvent);
+    renderedImage = null;
+    viewChanged(false);
     repaint();
   }
   
@@ -837,7 +851,7 @@ public abstract class ViewerCanvas extends CustomWidget
       coords = new CoordinateSystem(center, Vec3.vy(), Vec3.vz());
     }
     theCamera.setCameraCoordinates(coords);
-    dispatchEvent(viewChangedEvent);
+    viewChanged(false);
     repaint();
   }
   

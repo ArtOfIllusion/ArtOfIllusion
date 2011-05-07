@@ -738,6 +738,11 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glDisable(imageRenderMode);
   }
 
+  public void imageChanged(Image image)
+  {
+    imageMap.remove(image);
+  }
+
   /** Get a GLImage for an Image, attempting to reuse objects for efficiency. */
 
   private GLImage getCachedImage(Image image, boolean texture) throws InterruptedException

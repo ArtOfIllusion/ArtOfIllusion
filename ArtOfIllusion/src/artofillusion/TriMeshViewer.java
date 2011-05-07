@@ -31,6 +31,7 @@ public class TriMeshViewer extends MeshViewer
   private int deselect;
   private Point screenVert[];
   private double screenZ[];
+  private Vec2 screenVec2[];
   boolean visible[];
 
   public TriMeshViewer(MeshEditController window, RowContainer p)
@@ -40,13 +41,13 @@ public class TriMeshViewer extends MeshViewer
     visible = new boolean [mesh.getVertices().length];
   }
 
-  protected void drawObject()
+  @Override
+  public void updateImage()
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
     RenderingMesh previewMesh = getController().getObject().getPreviewMesh();
     boolean project = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).getProjectOntoSurface() : false);
-    Vec2 p[];
 
     // Calculate the screen coordinates of every vertex.
 
@@ -54,17 +55,23 @@ public class TriMeshViewer extends MeshViewer
     screenZ = new double [v.length];
     if (visible.length != v.length)
       visible = new boolean [v.length];
-    p = new Vec2 [v.length];
+    screenVec2 = new Vec2 [v.length];
     double clipDist = theCamera.getClipDistance();
     boolean hideVert[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideVert : new boolean [v.length]);
     for (int i = 0; i < v.length; i++)
       {
         Vec3 pos = (project ? previewMesh.vert[i] : v[i].r);
-        p[i] = theCamera.getObjectToScreen().timesXY(pos);
-        screenVert[i] = new Point((int) p[i].x, (int) p[i].y);
+        screenVec2[i] = theCamera.getObjectToScreen().timesXY(pos);
+        screenVert[i] = new Point((int) screenVec2[i].x, (int) screenVec2[i].y);
         screenZ[i] = theCamera.getObjectToView().timesZ(pos);
         visible[i] = (!hideVert[i] && screenZ[i] > clipDist);
       }
+    super.updateImage();
+  }
+
+  protected void drawObject()
+  {
+    TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
 
     // Now draw the object.
 
@@ -84,11 +91,11 @@ public class TriMeshViewer extends MeshViewer
       }
     if (controller.getSelectionMode() == MeshEditController.POINT_MODE)
       {
-        drawEdges(p, disabledColor, disabledColor);
+        drawEdges(screenVec2, disabledColor, disabledColor);
         drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
       }
     else
-      drawEdges(p, meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+      drawEdges(screenVec2, meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
     if (currentTool instanceof SkeletonTool)
       if (showSkeleton && mesh.getSkeleton() != null)
         mesh.getSkeleton().draw(this, true);

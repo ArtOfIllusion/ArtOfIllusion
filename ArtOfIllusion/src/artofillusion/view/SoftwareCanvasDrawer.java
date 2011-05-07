@@ -1713,6 +1713,11 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     }, camera, false, null);
   }
 
+  public void imageChanged(Image image)
+  {
+    imageMap.remove(image);
+  }
+
   /** Get an ImageRecord for an Image, attempting to cache objects for efficiency. */
 
   private ImageRecord getCachedImage(Image image)

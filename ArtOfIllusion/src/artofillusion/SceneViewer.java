@@ -108,13 +108,13 @@ public class SceneViewer extends ViewerCanvas
       CoordinateSystem coords = theCamera.getCameraCoordinates();
       coords.copyCoords(boundCamera.getCoords());
       theCamera.setCameraCoordinates(coords);
-      dispatchEvent(viewChangedEvent);
+      viewChanged(false);
       repaint();
     }
     else
     {
       boundCamera = null;
-      dispatchEvent(viewChangedEvent);
+      viewChanged(false);
     }
   }
   

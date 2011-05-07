@@ -127,6 +127,21 @@ public class Raytracer implements Renderer, Runnable
 
   public synchronized void renderScene(Scene theScene, Camera theCamera, RenderListener rl, SceneCamera sceneCamera)
   {
+    if (renderThread != null && renderThread.isAlive())
+    {
+      // A render is currently in progress, so cancel it.
+
+      Thread oldRenderThread = renderThread;
+      renderThread = null;
+      try
+      {
+        oldRenderThread.join();
+      }
+      catch (InterruptedException ex)
+      {
+        // Ignore.
+      }
+    }
     Dimension dim = theCamera.getSize();
 
     listener = rl;

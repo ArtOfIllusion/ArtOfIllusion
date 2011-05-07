@@ -177,6 +177,8 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   public void setSelection(boolean selected[])
   {
     this.selected = selected;
+    for (ViewerCanvas view : theView)
+      view.repaint();
   }
   
   /** Selection distance is not used for anything in this window, so this simply returns

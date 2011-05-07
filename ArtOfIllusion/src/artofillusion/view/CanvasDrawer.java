@@ -127,4 +127,11 @@ public interface CanvasDrawer
   /** Draw a filled Shape onto the canvas. */
 
   public void fillShape(Shape shape, Color color);
+
+  /**
+   * This should be called to indicate that a previously drawn image has changed, and cached information
+   * for it needs to be discarded.
+   */
+
+  public void imageChanged(Image image);
 }

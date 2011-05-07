@@ -224,8 +224,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
 
   public void updateImage()
   {
-    for (int i = 0; i < theView.length; i++)
-      theView[i].repaint();
+    for (ViewerCanvas view : theView)
+      view.repaint();
   }
 
   public void setUndoRecord(UndoRecord command)

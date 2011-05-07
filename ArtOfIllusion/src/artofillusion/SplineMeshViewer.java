@@ -41,7 +41,8 @@ public class SplineMeshViewer extends MeshViewer
     visible = new boolean [mesh.getVertices().length];
   }
 
-  protected void drawObject()
+  @Override
+  public void updateImage()
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
@@ -58,6 +59,12 @@ public class SplineMeshViewer extends MeshViewer
         screenZ[i] = theCamera.getObjectToView().timesZ(v[i].r);
         visible[i] = (screenZ[i] > clipDist);
       }
+    super.updateImage();
+  }
+
+  protected void drawObject()
+  {
+    SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
 
     // Draw the object surface.
 

@@ -113,6 +113,7 @@ public class RotateViewTool extends EditingTool
         c.transformCoordinates(Mat4.axisRotation(axis, -angle));
         c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
         cam.setCameraCoordinates(c);
+        view.viewChanged(false);
         view.repaint();
       }
   }

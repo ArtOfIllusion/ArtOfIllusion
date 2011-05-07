@@ -10,6 +10,7 @@
 
 package artofillusion;
 
+import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
@@ -94,8 +95,85 @@ public abstract class ObjectViewer extends ViewerCanvas
     return new double [] {min, max};
   }
 
+  @Override
+  public void viewChanged(boolean selectionOnly)
+  {
+    super.viewChanged(selectionOnly);
+    if (renderMode == RENDER_RENDERED && !selectionOnly)
+    {
+      // Re-render the image.
+
+      Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
+      if (rend == null)
+        return;
+      adjustCamera(true);
+      Scene sc;
+      Camera cam = theCamera.duplicate();
+      if (showScene)
+      {
+        sc = theScene;
+        if (!useWorldCoords && thisObjectInScene != null)
+        {
+          CoordinateSystem newCoords = cam.getCameraCoordinates();
+          newCoords.transformCoordinates(thisObjectInScene.getCoords().fromLocal());
+          cam.setCameraCoordinates(newCoords);
+        }
+      }
+      else
+      {
+        sc = new Scene();
+        RGBColor background = new RGBColor();
+        background.setARGB(backgroundColor.getRGB());
+        sc.setEnvironmentColor(background);
+        sc.addObject(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), cam.getCameraCoordinates(), "", null);
+        ObjectInfo obj = getController().getObject();
+        obj = obj.duplicate(obj.getObject().duplicate());
+        obj.getCoords().transformCoordinates(getDisplayCoordinates().fromLocal());
+        sc.addObject(obj, null);
+      }
+      rend.configurePreview();
+      Rectangle bounds = getBounds();
+      SceneCamera sceneCamera = new SceneCamera();
+      sceneCamera.setFieldOfView(Math.atan(0.5*bounds.height/(cam.getDistToScreen()*getScale()))*360.0/Math.PI);
+      adjustCamera(isPerspective());
+      RenderListener listener = new RenderListener()
+      {
+        public void imageUpdated(Image image)
+        {
+          renderedImage = image;
+          getCanvasDrawer().imageChanged(renderedImage);
+          repaint();
+        }
+        public void statusChanged(String status)
+        {
+        }
+        public void imageComplete(ComplexImage image)
+        {
+          renderedImage = image.getImage();
+          getCanvasDrawer().imageChanged(renderedImage);
+          repaint();
+        }
+        public void renderingCanceled()
+        {
+        }
+      };
+      rend.renderScene(sc, cam, listener, sceneCamera);
+    }
+  }
+
   public synchronized void updateImage()
   {
+    if (renderMode == RENDER_RENDERED)
+    {
+      if (renderedImage != null && renderedImage.getWidth(null) > 0)
+        drawImage(renderedImage, 0, 0);
+      else
+        viewChanged(false);
+      drawBorder();
+      if (showAxes)
+        drawCoordinateAxes();
+      return;
+    }
     super.updateImage();
     if (controller.getObject() == null)
       return;
@@ -184,6 +262,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   public void setSceneVisible(boolean visible)
   {
     showScene = visible;
+    viewChanged(false);
   }
 
   /** Get whether to use world coordinates. */
@@ -198,6 +277,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   public void setUseWorldCoords(boolean use)
   {
     useWorldCoords = use;
+    viewChanged(false);
   }
   
   /** Begin dragging a selection region.  The variable square determines whether

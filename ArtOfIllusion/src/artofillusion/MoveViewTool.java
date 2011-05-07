@@ -113,6 +113,7 @@ public class MoveViewTool extends EditingTool
     m = Mat4.translation(-move.x, -move.y, -move.z);
     c.transformOrigin(m);
     cam.setCameraCoordinates(c);
+    view.viewChanged(false);
     view.repaint();
   }
 

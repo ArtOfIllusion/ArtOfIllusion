@@ -123,12 +123,12 @@ public class CreateCubeTool extends EditingTool
     objInfo.getCoords().setOrigin(orig);
     objInfo.getCoords().setOrientation(zdir, ydir);
     objInfo.clearCachedMeshes();
+    theWindow.setModified();
     theWindow.updateImage();
   }
   
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     objInfo = null;
-    theWindow.setModified();
   }
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +18,7 @@ import buoy.event.*;
 import buoy.widget.*;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -124,6 +125,22 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseMovedEvent.class, this, "processMouseDragged"); // Workaround for Mac OS X bug
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
+    getComponent().addComponentListener(new ComponentListener()
+    {
+      public void componentResized(ComponentEvent componentEvent)
+      {
+        viewChanged(false);
+      }
+      public void componentMoved(ComponentEvent componentEvent)
+      {
+      }
+      public void componentShown(ComponentEvent componentEvent)
+      {
+      }
+      public void componentHidden(ComponentEvent componentEvent)
+      {
+      }
+    });
     orientation = 0;
     perspective = false;
     scale = 100.0;

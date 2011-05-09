@@ -158,17 +158,6 @@ public class Raytracer implements Renderer, Runnable
     width = dim.width;
     height = dim.height;
     pixel = new int [width*height];
-    imageSource = new MemoryImageSource(width, height, pixel, 0, width);
-    imageSource.setAnimated(true);
-    img = Toolkit.getDefaultToolkit().createImage(imageSource);
-    int requiredComponents = sceneCamera.getComponentsForFilters();
-    floatImage = new float [4][width*height];
-    if ((requiredComponents&ComplexImage.DEPTH) != 0)
-      depthImage = new float [width*height];
-    if ((requiredComponents&ComplexImage.NOISE) != 0)
-      errorImage = new float [width*height];
-    if ((requiredComponents&ComplexImage.OBJECT) != 0)
-      objectImage = new float [width*height];
     renderThread = new Thread(this, "Raytracer main thread");
     renderThread.setPriority(Thread.NORM_PRIORITY);
     renderThread.start();
@@ -1103,7 +1092,20 @@ public class Raytracer implements Renderer, Runnable
   {
     long updateTime = System.currentTimeMillis();
     final Thread thisThread = Thread.currentThread();
+    if (renderThread != thisThread)
+      return;
 
+    imageSource = new MemoryImageSource(width, height, pixel, 0, width);
+    imageSource.setAnimated(true);
+    img = Toolkit.getDefaultToolkit().createImage(imageSource);
+    int requiredComponents = sceneCamera.getComponentsForFilters();
+    floatImage = new float [4][width*height];
+    if ((requiredComponents&ComplexImage.DEPTH) != 0)
+      depthImage = new float [width*height];
+    if ((requiredComponents&ComplexImage.NOISE) != 0)
+      errorImage = new float [width*height];
+    if ((requiredComponents&ComplexImage.OBJECT) != 0)
+      objectImage = new float [width*height];
     listener.statusChanged(Translate.text("Processing Scene"));
     buildScene(theScene, theCamera);
     if (renderThread != thisThread)
@@ -1161,7 +1163,7 @@ public class Raytracer implements Renderer, Runnable
         ((RaytracerContext) threadContext.get()).cleanup();
       }
     });
-    for (currentScale[0] = 1<<(int)(Math.log(width/4)/Math.log(2.0)); currentScale[0] >= 1; currentScale[0] /= 2)
+    for (currentScale[0] = 1<<(int)(Math.log(width/32)/Math.log(2.0)); currentScale[0] >= 1; currentScale[0] /= 2)
     {
       currentWidth[0] = (int) Math.ceil((double) width/currentScale[0]);
       int currentHeight = (int) Math.ceil((double) height/currentScale[0]);
@@ -1174,7 +1176,7 @@ public class Raytracer implements Renderer, Runnable
         return;
       }
       long currentTime = System.currentTimeMillis();
-      if (currentTime-updateTime > 500 || currentScale[0] == 1 && currentTime-updateTime > 150)
+      if (currentTime-updateTime > 250 || currentScale[0] == 1 && currentTime-updateTime > 150)
       {
         imageSource.newPixels();
         listener.imageUpdated(img);

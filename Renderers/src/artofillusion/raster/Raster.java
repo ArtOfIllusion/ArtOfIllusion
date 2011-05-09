@@ -86,6 +86,21 @@ public class Raster implements Renderer, Runnable
 
   public synchronized void renderScene(Scene theScene, Camera camera, RenderListener rl, SceneCamera sceneCamera)
   {
+    if (renderThread != null && renderThread.isAlive())
+    {
+      // A render is currently in progress, so cancel it.
+
+      Thread oldRenderThread = renderThread;
+      renderThread = null;
+      try
+      {
+        oldRenderThread.join();
+      }
+      catch (InterruptedException ex)
+      {
+        // Ignore.
+      }
+    }
     Dimension dim = camera.getSize();
 
     listener = rl;

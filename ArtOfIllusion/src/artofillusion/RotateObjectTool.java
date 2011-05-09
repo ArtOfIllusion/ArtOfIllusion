@@ -184,6 +184,7 @@ public class RotateObjectTool extends EditingTool
             c.transformCoordinates(rotMatrix);
           }
       }
+    theWindow.setModified();
     theWindow.updateImage();
     theWindow.setHelpText(Translate.text("rotateMeshTool.dragText", Double.toString(Math.round(angle*1e5*180.0/Math.PI)/1e5)));
   }
@@ -196,7 +197,6 @@ public class RotateObjectTool extends EditingTool
     objectCoords = null;
     rotationCenter = null;
     theWindow.updateImage();
-    theWindow.setModified();
   }
 
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,6 +10,7 @@
 
 package artofillusion;
 
+import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
@@ -161,20 +162,73 @@ public class SceneViewer extends ViewerCanvas
     return bounds.getCenter();
   }
 
-  public void updateImage()
+  @Override
+  public void viewChanged(boolean selectionOnly)
   {
-    super.updateImage();
-    
-    // Draw the objects.
-    
-    Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    super.viewChanged(selectionOnly);
+    if (renderMode == RENDER_RENDERED && !selectionOnly)
     {
-      ObjectInfo obj = theScene.getObject(i);
-      if (obj == boundCamera || !obj.isVisible())
-        continue;
-      theCamera.setObjectTransform(obj.getCoords().fromLocal());
-      obj.getObject().renderObject(obj, this, viewdir);
+      // Re-render the image.
+
+      Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
+      if (rend == null)
+        return;
+      adjustCamera(true);
+      Camera cam = theCamera.duplicate();
+      rend.configurePreview();
+      Rectangle bounds = getBounds();
+      SceneCamera sceneCamera = new SceneCamera();
+      sceneCamera.setFieldOfView(Math.atan(0.5*bounds.height/cam.getViewToScreen().m33)*360.0/Math.PI);
+      adjustCamera(isPerspective());
+      RenderListener listener = new RenderListener()
+      {
+        public void imageUpdated(Image image)
+        {
+          renderedImage = image;
+          getCanvasDrawer().imageChanged(renderedImage);
+          repaint();
+        }
+        public void statusChanged(String status)
+        {
+        }
+        public void imageComplete(ComplexImage image)
+        {
+          renderedImage = image.getImage();
+          getCanvasDrawer().imageChanged(renderedImage);
+          repaint();
+        }
+        public void renderingCanceled()
+        {
+        }
+      };
+      rend.renderScene(theScene, cam, listener, sceneCamera);
+    }
+  }
+
+  public synchronized void updateImage()
+  {
+    if (renderMode == RENDER_RENDERED)
+    {
+      if (renderedImage != null && renderedImage.getWidth(null) > 0)
+        drawImage(renderedImage, 0, 0);
+      else
+        viewChanged(false);
+    }
+    else
+    {
+      super.updateImage();
+
+      // Draw the objects.
+
+      Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+      for (int i = 0; i < theScene.getNumObjects(); i++)
+      {
+        ObjectInfo obj = theScene.getObject(i);
+        if (obj == boundCamera || !obj.isVisible())
+          continue;
+        theCamera.setObjectTransform(obj.getCoords().fromLocal());
+        obj.getObject().renderObject(obj, this, viewdir);
+      }
     }
 
     // Hilight the selection.

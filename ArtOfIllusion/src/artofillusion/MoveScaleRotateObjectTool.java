@@ -216,6 +216,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
       }
     }
     transformObjects(ev);
+    theWindow.setModified();
     theWindow.updateImage();
     if (ev.getHandleType() == Compound3DManipulator.MOVE)
     {

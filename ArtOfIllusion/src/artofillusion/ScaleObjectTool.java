@@ -373,6 +373,7 @@ public class ScaleObjectTool extends EditingTool
         c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
+    theWindow.setModified();
     theWindow.updateImage();
     theWindow.setHelpText(Translate.text("moveObjectTool.dragText", 
       Math.round(v.x*1e5)/1e5+", "+Math.round(v.y*1e5)/1e5+", "+Math.round(v.z*1e5)/1e5));
@@ -454,6 +455,7 @@ public class ScaleObjectTool extends EditingTool
       info.getCoords().setOrigin(oldCoords[i].fromLocal().times(offset));
       theScene.objectModified(obj);
     }
+    theWindow.setModified();
     theWindow.updateImage();
     if (scaleAll)
       theWindow.setHelpText(Translate.text("scaleMeshTool.dragText", Double.toString(Math.round(Math.max(hscale, vscale)*1e5)/1e5)));
@@ -483,7 +485,6 @@ public class ScaleObjectTool extends EditingTool
     bounds = null;
     scaleCenter = null;
     theWindow.updateImage();
-    theWindow.setModified();
     theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
   

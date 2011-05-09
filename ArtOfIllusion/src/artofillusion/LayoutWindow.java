@@ -654,12 +654,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     sceneMenu.add(Translate.menuItem("renderImmediately", this, "actionPerformed"));
     sceneMenu.addSeparator();
     sceneMenu.add(displayMenu = Translate.menu("displayMode"));
-    displayItem = new BCheckBoxMenuItem [5];
+    displayItem = new BCheckBoxMenuItem [6];
     displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
     displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_FLAT));
     displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
     displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
     displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
     sceneMenu.add(sceneMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
     sceneMenu.add(sceneMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
     sceneMenu.add(Translate.menuItem("grid", this, "setGridCommand"));
@@ -1002,6 +1003,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
     displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
     displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
+    displayItem[4].setState(view.getRenderMode() == ViewerCanvas.RENDER_TRANSPARENT);
+    displayItem[5].setState(view.getRenderMode() == ViewerCanvas.RENDER_RENDERED);
   }
 
   /** Set the UndoRecord which will be executed if the user chooses Undo from the Edit menu. */
@@ -1009,7 +1012,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setUndoRecord(UndoRecord command)
   {
     undoStack.addRecord(command);
-    setModified();
+    boolean modified = false;
+    for (int c : command.command)
+      if (c != UndoRecord.SET_SCENE_SELECTION)
+        modified = true;
+    if (modified)
+      setModified();
+    else
+      dispatchSceneChangedEvent();
     updateMenus();
   }
 
@@ -1018,6 +1028,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setModified()
   {
     modified = true;
+    for (ViewerCanvas view : theView)
+      view.viewChanged(false);
     dispatchSceneChangedEvent();
   }
 
@@ -1164,6 +1176,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         displayItem[1].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_FLAT);
         displayItem[2].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
         displayItem[3].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
+        displayItem[4].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TRANSPARENT);
+        displayItem[5].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_RENDERED);
         currentView = i;
         updateImage();
         updateMenus();
@@ -1247,6 +1261,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_TEXTURED);
     else if (source == displayItem[4])
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
+    else if (source == displayItem[5])
+      theView[currentView].setRenderMode(ViewerCanvas.RENDER_RENDERED);
     for (int i = 0; i < displayItem.length; i++)
       displayItem[i].setState(source == displayItem[i]);
     savePreferences();
@@ -1636,6 +1652,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void undoCommand()
   {
     undoStack.executeUndo();
+    for (ViewerCanvas view : theView)
+      view.viewChanged(false);
     rebuildItemList();
     updateImage();
     updateMenus();
@@ -1644,6 +1662,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void redoCommand()
   {
     undoStack.executeRedo();
+    for (ViewerCanvas view : theView)
+      view.viewChanged(false);
     rebuildItemList();
     updateImage();
     updateMenus();

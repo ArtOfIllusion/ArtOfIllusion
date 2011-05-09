@@ -117,6 +117,7 @@ public class MoveObjectTool extends EditingTool
         c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
+    theWindow.setModified();
     theWindow.updateImage();
     theWindow.setHelpText(Translate.text("moveObjectTool.dragText", 
       Math.round(v.x*1e5)/1e5+", "+Math.round(v.y*1e5)/1e5+", "+Math.round(v.z*1e5)/1e5));
@@ -129,7 +130,6 @@ public class MoveObjectTool extends EditingTool
     toMove = null;
     objectPos = null;
     theWindow.updateImage();
-    theWindow.setModified();
   }
 
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)

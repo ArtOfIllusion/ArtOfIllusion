@@ -76,7 +76,6 @@ public class CreateCylinderTool extends EditingTool
     
     // Determine the size and position for the cylinder.
     
-    Scene theScene = ((LayoutWindow) theWindow).getScene();
     Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     Vec3 v1, v2, v3, orig, xdir, ydir, zdir;
@@ -124,13 +123,13 @@ public class CreateCylinderTool extends EditingTool
     objInfo.getCoords().setOrigin(orig);
     objInfo.getCoords().setOrientation(zdir, ydir);
     objInfo.clearCachedMeshes();
+    theWindow.setModified();
     theWindow.updateImage();
   }
   
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     objInfo = null;
-    theWindow.setModified();
   }
   
   public void iconDoubleClicked()

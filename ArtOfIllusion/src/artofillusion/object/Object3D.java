@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -311,7 +311,7 @@ public abstract class Object3D
       ParameterValue thisValue[] = new ParameterValue [objValue.length];
       for (int i = 0; i < thisValue.length; i++)
       {
-        thisParam[i] = (i < texParam.length ? texParam[i] : objParam[i]);
+        thisParam[i] = (texParam != null && i < texParam.length ? texParam[i] : objParam[i]);
         thisValue[i] = objValue[i].duplicate();
       }
       setParameters(thisParam);

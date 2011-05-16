@@ -18,9 +18,9 @@ import artofillusion.math.*;
 
 public class Ray
 {
-  public Vec3 origin, direction;
-  public Vec3 tempVec1, tempVec2, tempVec3, tempVec4;
-  public RaytracerContext rt;
+  public final Vec3 origin, direction;
+  public final Vec3 tempVec1, tempVec2, tempVec3, tempVec4;
+  public final RaytracerContext rt;
   private int id;
   private static int nextid = 0;
   
@@ -88,8 +88,8 @@ public class Ray
     int index = object.index;
     if (rt.lastRayID[index] != id)
     {
-      rt.lastRayResult[index] = object.checkIntersection(this);
       rt.lastRayID[index] = id;
+      rt.lastRayResult[index] = object.checkIntersection(this);
     }
     return rt.lastRayResult[index];
   }

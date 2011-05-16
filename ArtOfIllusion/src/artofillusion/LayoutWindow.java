@@ -484,7 +484,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenu.add(editMenuItem[7] = Translate.menuItem("duplicate", this, "duplicateCommand"));
     editMenu.add(editMenuItem[8] = Translate.menuItem("sever", this, "severCommand"));
     editMenu.addSeparator();
-    editMenu.add(Translate.menuItem("preferences", this, "actionPerformed"));
+    editMenu.add(Translate.menuItem("preferences", this, "preferencesCommand"));
   }
 
   private void createObjectMenu()
@@ -1395,8 +1395,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
             setSelection(getSelectionWithChildren());
             updateImage();
           }
-        else if (command.equals("preferences"))
-          new PreferencesWindow(this);
       }
     else if (menu == objectMenu)
       {
@@ -1751,6 +1749,19 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
     setSelection(which);
     updateImage();
+  }
+
+  public void preferencesCommand()
+  {
+    Renderer previewRenderer = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
+    new PreferencesWindow(this);
+    if (previewRenderer != ArtOfIllusion.getPreferences().getObjectPreviewRenderer())
+    {
+      previewRenderer.cancelRendering(theScene);
+      for (ViewerCanvas view : theView)
+        view.viewChanged(false);
+      updateImage();
+    }
   }
 
   public void duplicateCommand()

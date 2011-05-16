@@ -19,7 +19,7 @@ import artofillusion.texture.*;
     parameter values of the vertices.  If any normal vector is null, then each triangle 
     uses its own normal vector at the corresponding vertex. */
 
-public class RenderingMesh
+public class RenderingMesh implements Cloneable
 {
   public Vec3 vert[], norm[], faceNorm[];
   public ParameterValue param[];
@@ -28,7 +28,7 @@ public class RenderingMesh
   public MaterialMapping matMapping;
   private int indices[];
   private boolean hasCheckedForSmoothness;
-  
+
   /** Construct a rendering mesh. */
   
   public RenderingMesh(Vec3 vert[], Vec3 norm[], RenderingTriangle triangle[], TextureMapping mapping, MaterialMapping matMapping)
@@ -84,6 +84,33 @@ public class RenderingMesh
           j++;
         }
     this.norm = newNorm;
+  }
+
+  /** Create a clone of this mesh. */
+
+  @Override
+  public RenderingMesh clone()
+  {
+    try
+    {
+      RenderingMesh mesh = (RenderingMesh) super.clone();
+      mesh.vert = vert.clone();
+      mesh.norm = norm.clone();
+      mesh.faceNorm = faceNorm.clone();
+      mesh.triangle = new RenderingTriangle[triangle.length];
+      for (int i = 0; i < triangle.length; i++)
+      {
+        mesh.triangle[i] = triangle[i].clone();
+        mesh.triangle[i].setMesh(mesh, mapping, i);
+      }
+      return mesh;
+    }
+    catch (CloneNotSupportedException ex)
+    {
+      // This should never happen.
+
+      return null;
+    }
   }
 
   /** Set the texture parameters for the mesh. */

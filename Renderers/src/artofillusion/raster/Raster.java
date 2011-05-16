@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2009 by Peter Eastman
+/* Copyright (C) 2001-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -50,6 +50,7 @@ public class Raster implements Renderer, Runnable
   private double envParamValue[];
   private double time, smoothing = 1.0, smoothScale, focalDist, surfaceError = 0.02, fogDist;
   private boolean fog, transparentBackground = false, adaptive = true, hideBackfaces = true, generateHDR = false, positionNeeded, depthNeeded, needCopyToUI = true;
+  private boolean isPreview;
 
   public static final int GOURAUD = 0;
   public static final int HYBRID = 1;
@@ -126,12 +127,7 @@ public class Raster implements Renderer, Runnable
     }
     width = imageWidth*samplesPerPixel;
     height = imageHeight*samplesPerPixel;
-    fragment = new Fragment [width*height];
-    Arrays.fill(fragment, BACKGROUND_FRAGMENT);
     theCamera.setScreenTransform(sceneCamera.getScreenTransform(width, height), width, height);
-    lock = new RowLock[height];
-    for (int i = 0; i < lock.length; i++)
-      lock[i] = new RowLock();
     renderThread = new Thread(this, "Raster Renderer Main Thread");
     renderThread.start();
   }
@@ -277,6 +273,7 @@ public class Raster implements Renderer, Runnable
         samplesPerPixel = sampleChoice.getSelectedIndex()+2;
         subsample = 1;
       }
+    isPreview = false;
     return true;
   }
 
@@ -303,6 +300,7 @@ public class Raster implements Renderer, Runnable
   public void setConfiguration(String property, Object value)
   {
     needCopyToUI = true;
+    isPreview = false;
     if ("textureSmoothing".equals(property))
       smoothing = ((Number) value).doubleValue();
     else if ("reduceAccuracyForDistant".equals(property))
@@ -353,9 +351,10 @@ public class Raster implements Renderer, Runnable
     smoothing = 1.0;
     adaptive = hideBackfaces = true;
     generateHDR = false;
-    surfaceError = 0.02;
+    surfaceError = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
     shadingMode = HYBRID;
     samplesPerPixel = subsample = 1;
+    isPreview = true;
   }
 
   /** Find all the light sources in the scene. */
@@ -388,6 +387,11 @@ public class Raster implements Renderer, Runnable
     final Thread thisThread = Thread.currentThread();
     if (renderThread != thisThread)
       return;
+    fragment = new Fragment [width*height];
+    Arrays.fill(fragment, BACKGROUND_FRAGMENT);
+    lock = new RowLock[height];
+    for (int i = 0; i < lock.length; i++)
+      lock[i] = new RowLock();
     updateTime = System.currentTimeMillis();
 
     // Record information about the scene.
@@ -866,7 +870,7 @@ public class Raster implements Renderer, Runnable
       }
     else
       tol = surfaceError;
-    mesh = obj.getRenderingMesh(tol);
+    mesh = (isPreview ? obj.getPreviewMesh() : obj.getRenderingMesh(tol));
     if (mesh == null)
       return;
     if (mainThread != renderThread)

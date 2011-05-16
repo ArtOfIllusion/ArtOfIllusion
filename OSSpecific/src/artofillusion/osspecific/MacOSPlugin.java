@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -136,12 +136,24 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     }
     else if ("handlePreferences".equals(method.getName()))
     {
-      BFrame f = new BFrame();
-      Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-      f.setBounds(screenBounds);
-      UIUtilities.centerWindow(f);
-      new PreferencesWindow(f);
-      f.dispose();
+      Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+      boolean frontIsLayoutWindow = false;
+      for (EditingWindow window : ArtOfIllusion.getWindows())
+        if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
+        {
+          ((LayoutWindow) window).preferencesCommand();
+          frontIsLayoutWindow = true;
+          break;
+        }
+      if (!frontIsLayoutWindow)
+      {
+        BFrame f = new BFrame();
+        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        f.setBounds(screenBounds);
+        UIUtilities.centerWindow(f);
+        new PreferencesWindow(f);
+        f.dispose();
+      }
     }
     else if ("handleQuit".equals(method.getName()))
     {
@@ -152,8 +164,8 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     {
       try
       {
-        Method getFilename = args[0].getClass().getMethod("getFilename", new Class [0]);
-        String path = (String) getFilename.invoke(args[0], new Object [0]);
+        Method getFilename = args[0].getClass().getMethod("getFilename");
+        String path = (String) getFilename.invoke(args[0]);
         ArtOfIllusion.newWindow(new Scene(new File(path), true));
       }
       catch (Exception ex)
@@ -171,7 +183,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     try
     {
       Method setHandled = args[0].getClass().getMethod("setHandled", new Class [] {Boolean.TYPE});
-      setHandled.invoke(args[0], new Object [] {Boolean.valueOf(handled)});
+      setHandled.invoke(args[0], handled);
     }
     catch (Exception ex)
     {

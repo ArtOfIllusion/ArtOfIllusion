@@ -55,7 +55,7 @@ public class Raytracer implements Renderer, Runnable
   protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100;
   protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[], objectImage[];
   protected boolean fog, depth = false, gloss = false, penumbra = false, caustics = false, transparentBackground = false, adaptive = true, roulette = false, reducedMemory = false;
-  protected boolean needCopyToUI = true;
+  protected boolean needCopyToUI = true, isPreview;
   protected PhotonMap globalMap, causticsMap, volumeMap;
   protected BoundingBox materialBounds;
   protected ThreadLocal threadContext;
@@ -157,7 +157,6 @@ public class Raytracer implements Renderer, Runnable
     time = theScene.getTime();
     width = dim.width;
     height = dim.height;
-    pixel = new int [width*height];
     renderThread = new Thread(this, "Raytracer main thread");
     renderThread.setPriority(Thread.NORM_PRIORITY);
     renderThread.start();
@@ -527,6 +526,7 @@ public class Raytracer implements Renderer, Runnable
     volumePhotons = (int) volumePhotonsField.getValue();
     volumeNeighborPhotons = (int) volumeNeighborPhotonsField.getValue();
     reducedMemory = reducedMemoryBox.getState();
+    isPreview = false;
     return true;
   }
   
@@ -566,6 +566,7 @@ public class Raytracer implements Renderer, Runnable
   public void setConfiguration(String property, Object value)
   {
     needCopyToUI = true;
+    isPreview = false;
     if ("maxRayDepth".equals(property))
       maxRayDepth = (Integer) value;
     else if ("minRayIntensity".equals(property))
@@ -640,10 +641,11 @@ public class Raytracer implements Renderer, Runnable
     adaptive = true;
     reducedMemory = false;
     roulette = false;
-    surfaceError = 0.02;
+    surfaceError = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
     giMode = GI_NONE;
     scatterMode = SCATTER_SINGLE;
     caustics = false;
+    isPreview = true;
   }
 
   /** Construct the list of RTObjects and lights in the scene. */
@@ -701,7 +703,7 @@ public class Raytracer implements Renderer, Runnable
   }
   
   /** Add a single object to the scene. */
-  
+
   protected void addObject(List<RTObject> obj, List<RTLight> lt, ObjectInfo info, Camera camera,
                 Thread mainThread, List<RTObjectFactory> factories)
   {
@@ -810,7 +812,15 @@ public class Raytracer implements Renderer, Runnable
         return;
       }
     }
-    RenderingMesh mesh = info.getRenderingMesh(tol);
+    RenderingMesh mesh;
+    if (isPreview)
+    {
+      mesh = info.getPreviewMesh();
+      if (mesh != null)
+        mesh = mesh.clone();
+    }
+    else
+      mesh = info.getRenderingMesh(tol);
     if (mesh == null)
       return;
     mesh.transformMesh(fromLocal);
@@ -1095,6 +1105,7 @@ public class Raytracer implements Renderer, Runnable
     if (renderThread != thisThread)
       return;
 
+    pixel = new int [width*height];
     imageSource = new MemoryImageSource(width, height, pixel, 0, width);
     imageSource.setAnimated(true);
     img = Toolkit.getDefaultToolkit().createImage(imageSource);

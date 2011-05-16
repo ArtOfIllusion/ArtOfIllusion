@@ -19,7 +19,7 @@ import artofillusion.texture.*;
     the triangle are specified as indices into the RenderingMesh's array of vertices. 
     Similarly, the normals are specified as indices into the array of normals. */
 
-public abstract class RenderingTriangle
+public abstract class RenderingTriangle implements Cloneable
 {
   public int index, v1, v2, v3, n1, n2, n3;
   public RenderingMesh theMesh;
@@ -36,7 +36,7 @@ public abstract class RenderingTriangle
     this.n2 = n2;
     this.n3 = n3;
   }
-  
+
   /** Get the TextureMapping for this triangle. */
   
   public TextureMapping getTextureMapping()
@@ -88,5 +88,20 @@ public abstract class RenderingTriangle
     for (int i = value.length-1; i >= 0; i--)
       value[i] = param[i].getValue(index, v1, v2, v3, u, v, w);
     return value;
+  }
+
+  @Override
+  public RenderingTriangle clone()
+  {
+    try
+    {
+      return (RenderingTriangle) super.clone();
+    }
+    catch (CloneNotSupportedException ex)
+    {
+      // This should never happen.
+
+      return null;
+    }
   }
 }

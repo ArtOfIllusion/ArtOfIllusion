@@ -109,9 +109,24 @@ public abstract class ObjectViewer extends ViewerCanvas
       adjustCamera(true);
       Scene sc;
       Camera cam = theCamera.duplicate();
-      if (showScene)
+      if (showScene && theScene != null)
       {
-        sc = theScene;
+        sc = new Scene();
+        sc.setEnvironmentColor(theScene.getEnvironmentColor());
+        sc.setEnvironmentTexture(theScene.getEnvironmentTexture());
+        sc.setEnvironmentMapping(theScene.getEnvironmentMapping());
+        sc.setEnvironmentParameterValues(theScene.getEnvironmentParameterValues());
+        sc.setEnvironmentMode(theScene.getEnvironmentMode());
+        sc.setAmbientColor(theScene.getAmbientColor());
+        Object3D thisObject = (thisObjectInScene == null ? null : thisObjectInScene.getObject());
+        for (int i = 0; i < theScene.getNumObjects(); i++)
+        {
+          ObjectInfo obj = theScene.getObject(i);
+          if (obj.getObject() == thisObject)
+            sc.addObject(obj.duplicate(controller.getObject().getObject()), null);
+          else
+            sc.addObject(obj, null);
+        }
         if (!useWorldCoords && thisObjectInScene != null)
         {
           CoordinateSystem newCoords = cam.getCameraCoordinates();

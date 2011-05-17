@@ -117,7 +117,7 @@ public class Raytracer implements Renderer, Runnable
       }
     };
   }
-  
+
   /** Methods from the Renderer interface. */
 
   public String getName()
@@ -146,13 +146,15 @@ public class Raytracer implements Renderer, Runnable
 
     listener = rl;
     this.theScene = theScene;
-    this.theCamera = theCamera;
+    this.theCamera = theCamera.duplicate();
     if (sceneCamera == null)
     {
       sceneCamera = new SceneCamera();
       sceneCamera.setDepthOfField(0.0);
       sceneCamera.setFocalDistance(theCamera.getDistToScreen());
     }
+    else
+      sceneCamera = sceneCamera.duplicate();
     this.sceneCamera = sceneCamera;
     time = theScene.getTime();
     width = dim.width;

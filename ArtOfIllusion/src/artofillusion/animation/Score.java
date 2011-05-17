@@ -1007,4 +1007,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     return null;
   }
+
+  public ViewerCanvas[] getAllViews()
+  {
+    return null;
+  }
 }

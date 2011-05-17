@@ -268,6 +268,11 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       return null;
     }
 
+    public ViewerCanvas[] getAllViews()
+    {
+      return null;
+    }
+
     public boolean confirmClose()
     {
       dispose();

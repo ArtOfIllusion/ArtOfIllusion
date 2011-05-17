@@ -574,6 +574,11 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     return mapView;
   }
 
+  public ViewerCanvas[] getAllViews()
+  {
+    return new ViewerCanvas[] {mapView};
+  }
+
   /** Confirm whether this window should be closed (possibly by displaying a message to the
       user), and then close it.  If the closing is canceled, this should return false. */
 

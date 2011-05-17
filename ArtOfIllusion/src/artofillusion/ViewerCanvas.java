@@ -795,6 +795,15 @@ public abstract class ViewerCanvas extends CustomWidget
   
   public void setRenderMode(int mode)
   {
+    if (mode == RENDER_RENDERED && currentTool != null)
+    {
+      for (ViewerCanvas view : currentTool.getWindow().getAllViews())
+        if (view != this && view.getRenderMode() == RENDER_RENDERED)
+        {
+          new BStandardDialog("", Translate.text("renderedModeMultipleViews"), BStandardDialog.ERROR).showMessageDialog(UIUtilities.findWindow(this));
+          return;
+        }
+    }
     renderMode = mode;
     renderedImage = null;
     viewChanged(false);

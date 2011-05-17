@@ -60,6 +60,11 @@ public interface EditingWindow
   
   public ViewerCanvas getView();
 
+  /** Get all ViewerCanvases contained in this window.  This may return null
+      if there is no ViewerCanvas. */
+
+  public ViewerCanvas[] getAllViews();
+
   /** Confirm whether this window should be closed (possibly by displaying a message to the
       user), and then close it.  If the closing is canceled, this should return false. */
 

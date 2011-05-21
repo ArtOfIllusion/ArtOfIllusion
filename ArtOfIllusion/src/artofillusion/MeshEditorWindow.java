@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -108,11 +108,6 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     viewMenu.add(axesItem = Translate.menuItem(view.getShowAxes() ? "hideCoordinateAxes" : "showCoordinateAxes", this, "showAxesCommand"));
     viewMenu.add(templateItem = Translate.menuItem("showTemplate", this, "showTemplateCommand"));
     viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
-    if (ArtOfIllusion.getPreferences().getObjectPreviewRenderer() != null)
-    {
-      viewMenu.addSeparator();
-      viewMenu.add(Translate.menuItem("renderPreview", this, "renderPreviewCommand"));
-    }
   }
 
   protected BMenu createShowMenu()

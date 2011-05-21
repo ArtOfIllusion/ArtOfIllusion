@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
+import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -268,6 +269,7 @@ public class Cylinder extends Object3D
     return true;
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     Vec3 vert[], norm[];
@@ -354,18 +356,28 @@ public class Cylinder extends Object3D
     return mesh;
   }
 
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
     cachedMesh = null;
     cachedWire = null;
   }
+  
+  @Override
+  public void setMaterial(Material mat, MaterialMapping map)
+  {
+    super.setMaterial(mat, map);
+    cachedMesh = null;
+  }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     ValueField xField = new ValueField(rx, ValueField.POSITIVE, 5);

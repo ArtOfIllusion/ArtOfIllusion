@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
+import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -445,11 +446,13 @@ public class Tube extends Curve
     return (w1*t[i] + w2*t[j] + w1*t[k]);
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return true;
   }
   
+  @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
@@ -458,6 +461,7 @@ public class Tube extends Curve
   /** Get a rendering mesh representing the surface of this object at the
       specified accuracy. */
   
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     if (interactive && cachedMesh != null)
@@ -506,6 +510,7 @@ public class Tube extends Curve
 
   /** When setting the texture, we need to clear the cached meshes. */
   
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
@@ -513,9 +518,19 @@ public class Tube extends Curve
     cachedWire = null;
   }
 
+  /** When setting the material, we need to clear the cached meshes. */
+
+  @Override
+  public void setMaterial(Material mat, MaterialMapping map)
+  {
+    super.setMaterial(mat, map);
+    cachedMesh = null;
+  }
+
   /** Get a wireframe mesh representing the surface of this object at the
       specified accuracy. */
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     if (cachedWire != null)
@@ -526,6 +541,7 @@ public class Tube extends Curve
   /** Get a triangle mesh which approximates the surface of this object at
       the specified accuracy. */
 
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     // Subdivide the surface and create the triangle mesh.

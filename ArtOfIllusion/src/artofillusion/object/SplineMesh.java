@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
+import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -963,11 +964,13 @@ public class SplineMesh extends Object3D implements Mesh
     
   }
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
   }
   
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     int i, j, k, udim, vdim, faces[][];
@@ -1048,6 +1051,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** When setting the texture, we need to clear the caches. */
   
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
@@ -1055,8 +1059,18 @@ public class SplineMesh extends Object3D implements Mesh
     cachedWire = null;
   }
 
+  /** When setting the material, we need to clear the caches. */
+
+  @Override
+  public void setMaterial(Material mat, MaterialMapping map)
+  {
+    super.setMaterial(mat, map);
+    cachedMesh = null;
+  }
+
   /** When setting texture parameters, we need to clear the caches. */
 
+  @Override
   public void setParameterValues(ParameterValue val[])
   {
     super.setParameterValues(val);
@@ -1065,6 +1079,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** When setting texture parameters, we need to clear the caches. */
 
+  @Override
   public void setParameterValue(TextureParameter param, ParameterValue val)
   {
     super.setParameterValue(param, val);
@@ -1073,6 +1088,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** Get the skeleton for the object. */
 
+  @Override
   public Skeleton getSkeleton()
   {
     return skeleton;

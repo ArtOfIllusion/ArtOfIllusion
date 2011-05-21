@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
+import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -1019,6 +1020,7 @@ groups:     do
 
   /** When setting the texture, we need to clear the caches. */
   
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
@@ -1026,8 +1028,18 @@ groups:     do
     cachedWire = null;
   }
 
+  /** When setting the material, we need to clear the caches. */
+
+  @Override
+  public void setMaterial(Material mat, MaterialMapping map)
+  {
+    super.setMaterial(mat, map);
+    cachedMesh = null;
+  }
+
   /** When setting texture parameters, we need to clear the caches. */
 
+  @Override
   public void setParameterValues(ParameterValue val[])
   {
     super.setParameterValues(val);
@@ -1036,6 +1048,7 @@ groups:     do
   
   /** When setting texture parameters, we need to clear the caches. */
   
+  @Override
   public void setParameterValue(TextureParameter param, ParameterValue val)
   {
     super.setParameterValue(param, val);
@@ -1044,6 +1057,7 @@ groups:     do
 
   /** Get the skeleton for this object. */
 
+  @Override
   public Skeleton getSkeleton()
   {
     return skeleton;

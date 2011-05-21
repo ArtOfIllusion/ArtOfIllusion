@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
+import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -127,11 +128,13 @@ public class Sphere extends Object3D
     return (cachedWire = new WireframeMesh(vert, from, to));
   }
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
   }
   
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     int i, j, k, m, size, index[][][] = new int [8][][], faces[][];
@@ -217,9 +220,17 @@ public class Sphere extends Object3D
     return mesh;
   }
 
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
+    cachedMesh = null;
+  }
+
+  @Override
+  public void setMaterial(Material mat, MaterialMapping map)
+  {
+    super.setMaterial(mat, map);
     cachedMesh = null;
   }
 

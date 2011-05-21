@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.*;
 import artofillusion.animation.*;
+import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -75,11 +76,13 @@ public class Cube extends Object3D
     cachedWire = null;
   }
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     return EXACTLY;
   }
   
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     Vec3 v[] = new Vec3 [14];
@@ -118,6 +121,7 @@ public class Cube extends Object3D
     return (cachedWire = new WireframeMesh(vert, from, to));
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     Vec3 vert[], norm[];
@@ -153,13 +157,22 @@ public class Cube extends Object3D
     return mesh;
   }
 
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
     cachedMesh = null;
     cachedWire = null;
   }
-  
+
+  @Override
+  public void setMaterial(Material mat, MaterialMapping map)
+  {
+    super.setMaterial(mat, map);
+    cachedMesh = null;
+  }
+
+  @Override
   public boolean isEditable()
   {
     return true;
@@ -167,6 +180,7 @@ public class Cube extends Object3D
   
   /* Allow the user to edit the cube's shape. */
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     ValueField xField = new ValueField(2.0*halfx, ValueField.POSITIVE, 5);

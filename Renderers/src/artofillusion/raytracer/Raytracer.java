@@ -1486,21 +1486,26 @@ public class Raytracer implements Renderer, Runnable
     causticsMap = null;
     volumeMap = null;
     RenderListener rl = listener;
-    ComplexImage im = new ComplexImage(img);
-    if (rl != null)
-      {
-        im.setComponentValues(ComplexImage.RED, floatImage[0]);
-        im.setComponentValues(ComplexImage.GREEN, floatImage[1]);
-        im.setComponentValues(ComplexImage.BLUE, floatImage[2]);
-        im.setComponentValues(ComplexImage.ALPHA, floatImage[3]);
-        if (depthImage != null)
-          im.setComponentValues(ComplexImage.DEPTH, depthImage);
-        if (objectImage != null)
-          im.setComponentValues(ComplexImage.OBJECT, objectImage);
-        if (errorImage != null)
-          im.setComponentValues(ComplexImage.NOISE, errorImage);
-        listener = null;
-      }
+    ComplexImage im =  null;
+    Image image = img;
+    if (image != null)
+    {
+      im = new ComplexImage(image);
+      if (rl != null)
+        {
+          im.setComponentValues(ComplexImage.RED, floatImage[0]);
+          im.setComponentValues(ComplexImage.GREEN, floatImage[1]);
+          im.setComponentValues(ComplexImage.BLUE, floatImage[2]);
+          im.setComponentValues(ComplexImage.ALPHA, floatImage[3]);
+          if (depthImage != null)
+            im.setComponentValues(ComplexImage.DEPTH, depthImage);
+          if (objectImage != null)
+            im.setComponentValues(ComplexImage.OBJECT, objectImage);
+          if (errorImage != null)
+            im.setComponentValues(ComplexImage.NOISE, errorImage);
+          listener = null;
+        }
+    }
     img = null;
     imageSource = null;
     pixel = null;
@@ -1509,7 +1514,7 @@ public class Raytracer implements Renderer, Runnable
     errorImage = null;
     objectImage = null;
     System.gc();
-    if (rl != null)
+    if (rl != null && im != null)
       rl.imageComplete(im);
   }
 

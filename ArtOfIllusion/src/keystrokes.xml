@@ -17,6 +17,7 @@ window.updateMenus();</keystroke><keystroke name="Display Mode: Smooth" code="51
 window.updateMenus();</keystroke><keystroke name="Display Mode: Textured" code="52" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_TEXTURED);
 window.updateMenus();</keystroke><keystroke name="Display Mode: Transparent" code="53" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
 window.updateMenus();</keystroke><keystroke name="Display Mode: Wireframe" code="49" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_WIREFRAME);
+window.updateMenus();</keystroke><keystroke name="Display Mode: Rendered" code="54" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_RENDERED);
 window.updateMenus();</keystroke><keystroke name="Select Tool: Next" code="34" modifiers="0">tools = window.getToolPalette();
 selected = tools.getSelection();
 selected = (selected == tools.getNumTools()-1 ? 0 : selected+1);

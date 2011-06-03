@@ -1133,6 +1133,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         Integer.toString((int) Math.round(time*theScene.getFramesPerSecond()))));
     theScore.repaint();
     itemTree.repaint();
+    for (SceneViewer view : theView)
+      view.viewChanged(false);
     updateImage();
     dispatchSceneChangedEvent();
   }

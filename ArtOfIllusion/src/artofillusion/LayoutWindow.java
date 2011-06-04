@@ -753,7 +753,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[11].setEnabled(sel.length > 0); // Copy
         popupMenuItem[13].setEnabled(sel.length > 0); // Clear
       }
-    popupMenuItem[13].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
+    popupMenuItem[12].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     popupMenu.show(w, x, y);
   }
 

@@ -16,14 +16,22 @@ import buoy.event.*;
 import buoy.widget.*;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
+import java.awt.event.*;
 import java.util.*;
 import java.util.List;
+
+/**
+ * This is the menu that appears in the procedure editor window.  It displays modules organized into categories,
+ * and allows the user to add them to their procedure.
+ */
 
 public class ModuleMenu extends CustomWidget
 {
   private final ProcedureEditor editor;
   private final ArrayList<Category> categories;
+  private final double expandedFraction[];
   private int expandedCategory;
   private Module newModule;
   private boolean isDraggingModule;
@@ -125,6 +133,10 @@ public class ModuleMenu extends CustomWidget
         }
       }
     }
+    expandedFraction = new double[categories.size()];
+    expandedFraction[expandedCategory] = 1.0;
+
+    // Compute the width of the menu.
 
     FontMetrics metrics = Toolkit.getDefaultToolkit().getFontMetrics(editor.getFont());
     int width = 0;
@@ -147,6 +159,9 @@ public class ModuleMenu extends CustomWidget
     int width = getBounds().width;
     final Color categoryColor = new Color(0.9f, 0.9f, 0.9f);
     Color selectedCategoryColor = new Color(0.7f, 0.7f, 1.0f);
+
+    // Loop over categories.
+
     for (int i = 0; i < categories.size(); i++)
     {
       Category cat = categories.get(i);
@@ -157,18 +172,26 @@ public class ModuleMenu extends CustomWidget
       g.drawString(cat.name, (width-metrics.stringWidth(cat.name))/2,
           y+(categoryHeight/2)+(metrics.getAscent()/2));
       y += categoryHeight;
-      if (i == expandedCategory)
+      if (expandedFraction[i] > 0)
       {
+        // This category is expanded, so draw its entries.
+
+        int endy = y+(int)(expandedFraction[i]*entryHeight*cat.entries.size());
+        g.setClip(0, 0, width, endy);
         for (Entry entry : cat.entries)
         {
           g.setColor(Color.WHITE);
-          entry.bounds = new Rectangle(0, y, width, entryHeight);
-          g.fill3DRect(entry.bounds.x, entry.bounds.y, entry.bounds.width, entry.bounds.height, true);
+          Rectangle bounds = new Rectangle(0, y, width, entryHeight);
+          g.fill3DRect(bounds.x, bounds.y, bounds.width, bounds.height, true);
           g.setColor(Color.BLACK);
           g.drawString(entry.name, (width-metrics.stringWidth(entry.name))/2,
               y+(entryHeight/2)+(metrics.getAscent()/2));
           y += entryHeight;
+          if (i == expandedCategory)
+            entry.bounds = bounds;
         }
+        y = endy;
+        g.setClip(null);
       }
       else
       {
@@ -187,20 +210,23 @@ public class ModuleMenu extends CustomWidget
       Category cat = categories.get(i);
       if (expandedCategory != i && cat.bounds.contains(ev.getPoint()))
       {
+        // They clicked on a new category.  Animate collapsing the old category and expanding the new one.
+
         expandedCategory = i;
-        repaint();
+        new Timer(10, new ExpandAnimator()).start();
         return;
       }
       for (Entry entry : cat.entries)
       {
         if (entry.bounds != null && entry.bounds.contains(ev.getPoint()))
         {
-          Point position = new Point(500, 500);
+          // They clicked on an entry, so construct a Module object.
+
           Object args[] = new Object[entry.args.length];
           Class argTypes[] = new Class[entry.args.length];
           for (int j = 0; j < args.length; j++)
           {
-            args[j] = (entry.args[j] == null ? position : entry.args[j]);
+            args[j] = (entry.args[j] == null ? new Point() : entry.args[j]);
             argTypes[j] = args[j].getClass();
             if (argTypes[j] == Integer.class)
               argTypes[j] = Integer.TYPE;
@@ -208,7 +234,6 @@ public class ModuleMenu extends CustomWidget
           try
           {
             newModule = entry.moduleClass.getDeclaredConstructor(argTypes).newInstance(args);
-            newModule.setPosition(position.x, position.y);
           }
           catch (Exception ex)
           {
@@ -232,6 +257,8 @@ public class ModuleMenu extends CustomWidget
       SwingUtilities.convertPointFromScreen(viewPoint, editor.getParent().getComponent());
       if (viewPoint.x >= 0 && viewPoint.y >= 0 && viewPoint.x < editor.getParent().getBounds().width && viewPoint.y < editor.getParent().getBounds().height)
       {
+        // They dragged from the ModuleMenu into the editor, so add the Module to the procedure and begin dragging it.
+
         isDraggingModule = true;
         editor.saveState(false);
         Point editorPoint = new Point(screenPoint);
@@ -246,6 +273,8 @@ public class ModuleMenu extends CustomWidget
     }
     else
     {
+      // Continue dragging the module.
+
       Point editorPoint = new Point(screenPoint);
       SwingUtilities.convertPointFromScreen(editorPoint, editor.getComponent());
       editor.mouseDragged(new MouseDraggedEvent(editor, ev.getWhen(), ev.getModifiers(), editorPoint.x, editorPoint.y));
@@ -258,12 +287,20 @@ public class ModuleMenu extends CustomWidget
       return;
     if (!isDraggingModule)
     {
+      // They just clicked on an entry, so add the Module to the procedure.
+
+      Rectangle bounds = editor.getParent().getBounds();
+      Point p = new Point((int) (0.5*bounds.width*Math.random()), (int) (0.5*bounds.height*Math.random()));
+      p = SwingUtilities.convertPoint(editor.getParent().getComponent(), p, editor.getComponent());
+      newModule.setPosition(p.x, p.y);
       editor.saveState(false);
       editor.addModule(newModule);
       editor.repaint();
     }
     else
     {
+      // Finish dragging the Module.
+
       Point screenPoint = ev.getPoint();
       SwingUtilities.convertPointToScreen(screenPoint, getComponent());
       Point editorPoint = new Point(screenPoint);
@@ -309,6 +346,32 @@ public class ModuleMenu extends CustomWidget
       this.name = name;
       this.moduleClass = moduleClass;
       this.args = args;
+    }
+  }
+
+  /**
+   * This class animates expanding and contracting categories.
+   */
+  private class ExpandAnimator implements ActionListener
+  {
+    private double fraction = 0;
+    private double initialFraction[], finalFraction[];
+
+    public ExpandAnimator()
+    {
+      initialFraction = expandedFraction.clone();
+      finalFraction = new double[initialFraction.length];
+      finalFraction[expandedCategory] = 1;
+    }
+
+    public void actionPerformed(ActionEvent ev)
+    {
+      fraction = Math.min(fraction+0.05, 1.0);
+      for (int i = 0; i < expandedFraction.length; i++)
+        expandedFraction[i] = fraction*finalFraction[i] + (1-fraction)*initialFraction[i];
+      repaint();
+      if (fraction == 1.0)
+        ((Timer) ev.getSource()).stop();
     }
   }
 }

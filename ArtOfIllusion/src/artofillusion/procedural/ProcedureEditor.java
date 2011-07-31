@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2007 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,6 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
-import java.util.List;
 
 /** This is the editor for editing procedures.  It subclasses CustomWidget, but you should never
     add it to any Container.  Instead, it will automatically create a BFrame and add itself
@@ -32,6 +31,7 @@ public class ProcedureEditor extends CustomWidget
   private Scene theScene;
   private EditingWindow win;
   private Dimension size;
+  private ModuleMenu moduleMenu;
   private BMenuItem undoItem, cutItem, copyItem, pasteItem, clearItem;
   private BTextField nameField;
   private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox, undoIsRedo;
@@ -106,6 +106,11 @@ public class ProcedureEditor extends CustomWidget
     top.add(Translate.button("cancel", this, "actionPerformed"), 4, 0);
     parent.addEventLink(WindowClosingEvent.class, this, "doOk");
     content.add(top, BorderContainer.NORTH);
+
+    // Create the module menu.
+
+    moduleMenu = new ModuleMenu(this);
+    content.add(moduleMenu, BorderContainer.WEST);
     
     // Let each output module calculate its preferred width, then set all of them to be
     // as wide as the widest one.
@@ -131,7 +136,6 @@ public class ProcedureEditor extends CustomWidget
     BMenuBar mb = new BMenuBar();
     parent.setMenuBar(mb);
     mb.add(getEditMenu());
-    mb.add(getInsertMenu());
     updateMenus();
     
     // Display the window.
@@ -163,113 +167,20 @@ public class ProcedureEditor extends CustomWidget
     return editMenu;
   }
 
-  /** Create the Insert menu. */
-  
-  private BMenu getInsertMenu()
-  {
-    BMenu insertMenu = Translate.menu("insert"), subMenu;
-    
-    insertMenu.add(subMenu = Translate.menu("values"));
-    subMenu.add(Translate.menuItem("numberModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("colorModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("xModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("yModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("zModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("timeModule", this, "actionPerformed"));
-    if (owner.allowViewAngle())
-      subMenu.add(Translate.menuItem("viewAngleModule", this, "actionPerformed"));
-    if (owner.allowParameters())
-      subMenu.add(Translate.menuItem("parameterModule", this, "actionPerformed"));
-    subMenu.addSeparator();
-    subMenu.add(Translate.menuItem("commentModule", this, "actionPerformed"));
-
-    insertMenu.add(subMenu = Translate.menu("functions"));
-    subMenu.add(Translate.menuItem("expressionModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("customFunctionModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("scaleShiftModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("addModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("subtractModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("multiplyModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("divideModule", this, "actionPerformed"));
-    subMenu.addSeparator();
-    subMenu.add(Translate.menuItem("absModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("blurModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("clipModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("greaterThanModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("minModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("maxModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("interpolateModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("modModule", this, "actionPerformed"));
-    subMenu.addSeparator();
-    subMenu.add(Translate.menuItem("sineModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("cosineModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("sqrtModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("expModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("logModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("powModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("biasModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("gainModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("randomModule", this, "actionPerformed"));
-    
-    insertMenu.add(subMenu = Translate.menu("colorFunctions"));
-    subMenu.add(Translate.menuItem("customColorFunctionModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("blendModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("addColorModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("subtractColorModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("multiplyColorModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("lighterModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("darkerModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("scaleColorModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("RGBModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("HSVModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("HLSModule", this, "actionPerformed"));
-
-    insertMenu.add(subMenu = Translate.menu("transforms"));
-    subMenu.add(Translate.menuItem("linearModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("polarModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("sphericalModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("jitterModule", this, "actionPerformed"));
-
-    insertMenu.add(subMenu = Translate.menu("patterns"));
-    subMenu.add(Translate.menuItem("noiseModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("turbulenceModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("gridModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("cellsModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("marbleModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("woodModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("checkerModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("bricksModule", this, "actionPerformed"));
-    subMenu.add(Translate.menuItem("imageModule", this, "actionPerformed"));
-
-    List<Module> plugins = PluginRegistry.getPlugins(Module.class);
-    if (plugins.size() > 0)
-    {
-      insertMenu.add(subMenu = Translate.menu("plugins"));
-      for (int i = 0; i < plugins.size(); i++)
-      {
-        try
-        {
-          BMenuItem mi = new BMenuItem((plugins.get(i).getClass().newInstance()).getName());
-          mi.setActionCommand(plugins.get(i).getClass().getName());
-          mi.addEventLink(CommandEvent.class, this, "actionPerformed");
-          subMenu.add(mi);
-        }
-        catch (Exception ex)
-        {
-          ex.printStackTrace();
-        }
-      }
-    }
-    return insertMenu;
-  }
-  
   /** Get the editor's parent Frame. */
   
   public BFrame getParentFrame()
   {
     return parent;
   }
-  
+
+  /** Get the editor's owner. */
+
+  public ProcedureOwner getOwner()
+  {
+    return owner;
+  }
+
   /** Get the scene the procedure is part of. */
   
   public Scene getScene()
@@ -316,8 +227,8 @@ public class ProcedureEditor extends CustomWidget
     
     // Draw the output modules.
 
-    for (int i = 0; i < output.length; i++)
-      output[i].draw(g, false);
+    for (OutputModule mod : output)
+      mod.draw(g, false);
     
     // Draw the modules.
     
@@ -369,16 +280,6 @@ public class ProcedureEditor extends CustomWidget
             g.drawLine(clickPos.x, clickPos.y, pos.x, pos.y);
           }
       }
-    if (draggingModule && lastPos != null)
-      {
-        int dx = lastPos.x-clickPos.x, dy = lastPos.y-clickPos.y;
-        for (int i = 0; i < selectedModule.length; i++)
-          if (selectedModule[i])
-            {
-              Rectangle rect = module[i].getBounds();
-              g.drawRect(rect.x+dx, rect.y+dy, rect.width, rect.height);
-            }
-      }
   }
 
   private Shape createBezierCurve(Link link)
@@ -416,11 +317,11 @@ public class ProcedureEditor extends CustomWidget
   private void updateMenus()
   {
     boolean anyModule = false, anyLink = false;
-    for (int i = 0; i < selectedModule.length; i++)
-      if (selectedModule[i])
+    for (boolean selected : selectedModule)
+      if (selected)
         anyModule = true;
-    for (int i = 0; i < selectedLink.length; i++)
-      if (selectedLink[i])
+    for (boolean selected : selectedLink)
+      if (selected)
         anyLink = true;
     cutItem.setEnabled(anyModule);
     copyItem.setEnabled(anyModule);
@@ -444,192 +345,53 @@ public class ProcedureEditor extends CustomWidget
         undo();
         owner.disposePreview(preview);
         parent.dispose();
-        return;
       }
-    if (command.equals("undo"))
+    else if (command.equals("undo"))
       {
         undo();
-        return;
       }
-    if (command.equals("cut"))
+    else if (command.equals("cut"))
       {
         clipboard = new ClipboardSelection(proc, selectedModule, selectedLink);
         deleteSelection();
         updateMenus();
-        return;
       }
-    if (command.equals("copy"))
+    else if (command.equals("copy"))
       {
         clipboard = new ClipboardSelection(proc, selectedModule, selectedLink);
         updateMenus();
-        return;
       }
-    if (command.equals("paste") && clipboard != null)
+    else if (command.equals("paste") && clipboard != null)
       {
         saveState(false);
         clipboard.paste(this);
         repaint();
-        return;
       }
-    if (command.equals("clear"))
+    else if (command.equals("clear"))
       {
         deleteSelection();
-        return;
       }
-    if (command.equals("properties"))
+    else if (command.equals("properties"))
     {
       owner.editProperties(this);
       updatePreview();
-      return;
     }
-    saveState(false);
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    if (command.equals("numberModule"))
-      addModule(new NumberModule(p));
-    else if (command.equals("colorModule"))
-      addModule(new ColorModule(p));
-    else if (command.equals("xModule"))
-      addModule(new CoordinateModule(p, CoordinateModule.X));
-    else if (command.equals("yModule"))
-      addModule(new CoordinateModule(p, CoordinateModule.Y));
-    else if (command.equals("zModule"))
-      addModule(new CoordinateModule(p, CoordinateModule.Z));
-    else if (command.equals("timeModule"))
-      addModule(new CoordinateModule(p, CoordinateModule.T));
-    else if (command.equals("viewAngleModule"))
-      addModule(new ViewAngleModule(p));
-    else if (command.equals("parameterModule"))
-      addModule(new ParameterModule(p));
-    else if (command.equals("commentModule"))
-      addModule(new CommentModule(p));
-    else if (command.equals("addModule"))
-      addModule(new SumModule(p));
-    else if (command.equals("subtractModule"))
-      addModule(new DifferenceModule(p));
-    else if (command.equals("multiplyModule"))
-      addModule(new ProductModule(p));
-    else if (command.equals("divideModule"))
-      addModule(new RatioModule(p));
-    else if (command.equals("scaleShiftModule"))
-      addModule(new ScaleShiftModule(p));
-    else if (command.equals("interpolateModule"))
-      addModule(new InterpModule(p));
-    else if (command.equals("greaterThanModule"))
-      addModule(new CompareModule(p));
-    else if (command.equals("minModule"))
-      addModule(new MinModule(p));
-    else if (command.equals("maxModule"))
-      addModule(new MaxModule(p));
-    else if (command.equals("modModule"))
-      addModule(new ModModule(p));
-    else if (command.equals("absModule"))
-      addModule(new AbsModule(p));
-    else if (command.equals("clipModule"))
-      addModule(new ClipModule(p));
-    else if (command.equals("sineModule"))
-      addModule(new SineModule(p));
-    else if (command.equals("cosineModule"))
-      addModule(new CosineModule(p));
-    else if (command.equals("sqrtModule"))
-      addModule(new SqrtModule(p));
-    else if (command.equals("expModule"))
-      addModule(new ExpModule(p));
-    else if (command.equals("logModule"))
-      addModule(new LogModule(p));
-    else if (command.equals("powModule"))
-      addModule(new PowerModule(p));
-    else if (command.equals("biasModule"))
-      addModule(new BiasModule(p));
-    else if (command.equals("gainModule"))
-      addModule(new GainModule(p));
-    else if (command.equals("randomModule"))
-      addModule(new RandomModule(p));
-    else if (command.equals("blurModule"))
-      addModule(new BlurModule(p));
-    else if (command.equals("customFunctionModule"))
-      addModule(new FunctionModule(p));
-    else if (command.equals("expressionModule"))
-      addModule(new ExprModule(p));
-    else if (command.equals("linearModule"))
-      addModule(new TransformModule(p));
-    else if (command.equals("polarModule"))
-      addModule(new PolarModule(p));
-    else if (command.equals("sphericalModule"))
-      addModule(new SphericalModule(p));
-    else if (command.equals("jitterModule"))
-      addModule(new JitterModule(p));
-    else if (command.equals("addColorModule"))
-      addModule(new ColorSumModule(p));
-    else if (command.equals("subtractColorModule"))
-      addModule(new ColorDifferenceModule(p));
-    else if (command.equals("multiplyColorModule"))
-      addModule(new ColorProductModule(p));
-    else if (command.equals("lighterModule"))
-      addModule(new ColorLightenModule(p));
-    else if (command.equals("darkerModule"))
-      addModule(new ColorDarkenModule(p));
-    else if (command.equals("scaleColorModule"))
-      addModule(new ColorScaleModule(p));
-    else if (command.equals("blendModule"))
-      addModule(new BlendModule(p));
-    else if (command.equals("customColorFunctionModule"))
-      addModule(new SpectrumModule(p));
-    else if (command.equals("RGBModule"))
-      addModule(new RGBModule(p));
-    else if (command.equals("HSVModule"))
-      addModule(new HSVModule(p));
-    else if (command.equals("HLSModule"))
-      addModule(new HLSModule(p));
-    else if (command.equals("noiseModule"))
-      addModule(new NoiseModule(p));
-    else if (command.equals("turbulenceModule"))
-      addModule(new TurbulenceModule(p));
-    else if (command.equals("marbleModule"))
-      addModule(new MarbleModule(p));
-    else if (command.equals("woodModule"))
-      addModule(new WoodModule(p));
-    else if (command.equals("gridModule"))
-      addModule(new GridModule(p));
-    else if (command.equals("cellsModule"))
-      addModule(new CellsModule(p));
-    else if (command.equals("checkerModule"))
-      addModule(new CheckerModule(p));
-    else if (command.equals("bricksModule"))
-      addModule(new BrickModule(p));
-    else if (command.equals("imageModule"))
-      addModule(new ImageModule(p));
-    else
-    {
-      try
-      {
-        Class cl = ArtOfIllusion.getClass(command);
-        Module mod = (Module) cl.newInstance();
-        mod.setPosition(p.x, p.y);
-        addModule(mod);
-      }
-      catch (Exception ex)
-      {
-        ex.printStackTrace();
-      }
-    }
-    setCursor(Cursor.getDefaultCursor());
-    repaint();
   }
 
   /** Save changes and close the window. */
 
   private void doOk()
   {
-      if (owner.canEditName())
-        owner.setName(nameField.getText());
-      owner.acceptEdits(this);
-      owner.disposePreview(preview);
-      parent.dispose();
+    if (owner.canEditName())
+      owner.setName(nameField.getText());
+    owner.acceptEdits(this);
+    owner.disposePreview(preview);
+    parent.dispose();
   }
   
   /** Add a module to the procedure. */
   
-  private void addModule(Module mod)
+  public void addModule(Module mod)
   {
     selectedModule = new boolean [selectedModule.length+1];
     selectedModule[selectedModule.length-1] = true;
@@ -720,14 +482,7 @@ public class ProcedureEditor extends CustomWidget
   {
     owner.updatePreview(preview);
   }
-    
-  /** The canvas needs to be able to accept focus. */
-  
-  public boolean isFocusTraversable()
-  {
-    return true;
-  }
-  
+
   /** Respond to mouse clicks. */
   
   private void mouseClicked(MouseClickedEvent e)
@@ -738,11 +493,11 @@ public class ProcedureEditor extends CustomWidget
         // See if the click was on a module.  If so, call its edit() method.
         
         Module module[] = proc.getModules();
-        for (int i = 0; i < module.length; i++)
-          if (module[i].getBounds().contains(pos))
+        for (Module mod : module)
+          if (mod.getBounds().contains(pos))
             {
               saveState(false);
-              if (module[i].edit(parent, theScene))
+              if (mod.edit(parent, theScene))
                 {
                   repaint();
                   updatePreview();
@@ -754,14 +509,14 @@ public class ProcedureEditor extends CustomWidget
 
   /** Respond to mouse presses. */
 
-  private void mousePressed(MousePressedEvent e)
+  protected void mousePressed(MousePressedEvent e)
   {
     OutputModule output[] = proc.getOutputModules();
     Module module[] = proc.getModules();
     Link link[] = proc.getLinks();
     IOPort port;
-    int i, j;
-    
+    int i;
+
     requestFocus();
     clickPos = e.getPoint();
     lastPos = null;
@@ -793,6 +548,9 @@ public class ProcedureEditor extends CustomWidget
       if (selectedModule[i] && module[i].getBounds().contains(clickPos))
         {
           draggingModule = true;
+          if (e.getWidget() == this) // Otherwise, it's a synthetic mouse event being sent from the ModuleMenu
+            saveState(false);
+          lastPos = clickPos;
           repaint();
           return;
         }
@@ -803,12 +561,14 @@ public class ProcedureEditor extends CustomWidget
       if (!selectedModule[i] && module[i].getBounds().contains(clickPos))
         {
           draggingModule = true;
+          saveState(false);
           if (!e.isShiftDown())
           {
             Arrays.fill(selectedModule, false);
             Arrays.fill(selectedLink, false);
           }
           selectedModule[i] = true;
+          lastPos = clickPos;
           repaint();
           updateMenus();
           return;
@@ -844,10 +604,8 @@ public class ProcedureEditor extends CustomWidget
     updateMenus();
   }
   
-  private void mouseReleased(MouseReleasedEvent e)
+  protected void mouseReleased()
   {
-    Point pos = e.getPoint();
-    
     if (draggingLink)
       {
         draggingLink = false;
@@ -878,28 +636,14 @@ public class ProcedureEditor extends CustomWidget
         updateMenus();
         return;
       }
-    
-    // Move any selected modules.
-    
     if (draggingModule)
-    {
-      saveState(false);
       draggingModule = false;
-      int dx = pos.x-clickPos.x, dy = pos.y-clickPos.y;
-      Module module[] = proc.getModules();
-      for (int i = 0; i < selectedModule.length; i++)
-        if (selectedModule[i])
-          {
-            Rectangle rect = module[i].getBounds();
-            module[i].setPosition(rect.x+dx, rect.y+dy);
-          }
-    }
     repaint();
   }
   
   /** Deal with mouse drags. */
   
-  private void mouseDragged(MouseDraggedEvent e)
+  protected void mouseDragged(MouseDraggedEvent e)
   {
     Point pos = e.getPoint();
     
@@ -929,42 +673,30 @@ public class ProcedureEditor extends CustomWidget
         
         if (dragToPort != null && dragToPort.contains(pos))
           return;
-        
-        // If the mouse has been moved off a port, redraw everything.  Otherwise, just
-        // erase the previous line.
-        
-        Graphics2D g = (Graphics2D) getComponent().getGraphics();
-        boolean isInput = (dragFromPort.getType() == IOPort.INPUT);
-        if (dragToPort != null)
-          {
-            dragToPort = null;
-            paint(g);
-          }
-        g.setColor(Color.black);
-        g.setXORMode(Color.white);
-        if (lastPos != null)
-          g.drawLine(clickPos.x, clickPos.y, lastPos.x, lastPos.y);
-        
+
         // See whether the mouse is now over a port.
         
+        boolean isInput = (dragFromPort.getType() == IOPort.INPUT);
+        if (dragToPort != null)
+          dragToPort = null;
         OutputModule output[] = proc.getOutputModules();
         Module module[] = proc.getModules();
-        for (int i = 0; i < module.length; i++)
+        for (Module mod : module)
           {
-            IOPort port[] = isInput ? module[i].getOutputPorts() : module[i].getInputPorts();
+            IOPort port[] = isInput ? mod.getOutputPorts() : mod.getInputPorts();
             for (int j = 0; j < port.length; j++)
-              if (isInput || !module[i].inputConnected(j))
+              if (isInput || !mod.inputConnected(j))
                 if (port[j].getValueType() == dragFromPort.getValueType() && port[j].contains(pos))
                   dragToPort = port[j];
             if (dragToPort != null)
               break;
           }
         if (!isInput)
-          for (int i = 0; i < output.length; i++)
+          for (OutputModule mod : output)
             {
-              IOPort port[] = output[i].getInputPorts();
+              IOPort port[] = mod.getInputPorts();
               for (int j = 0; j < port.length; j++)
-                if (!output[i].inputConnected(j))
+                if (!mod.inputConnected(j))
                   if (port[j].getValueType() == dragFromPort.getValueType() && port[j].contains(pos))
                     dragToPort = port[j];
               if (dragToPort != null)
@@ -983,12 +715,9 @@ public class ProcedureEditor extends CustomWidget
             else
               info.setPosition(pos.x+10, pos.y-rect.height/2);
             info.setText(dragToPort.getDescription());
-            repaint();
           }
-        else
-          g.drawLine(clickPos.x, clickPos.y, pos.x, pos.y);
-        g.dispose();
         lastPos = pos;
+        repaint();
         return;
       }
     
@@ -996,25 +725,20 @@ public class ProcedureEditor extends CustomWidget
     
     if (!draggingModule)
       return;
-    int dx = pos.x-clickPos.x, dy = pos.y-clickPos.y, lastdx = 0, lastdy = 0;
+    int dx = 0, dy = 0;
     Module module[] = proc.getModules();
-    Graphics g = getComponent().getGraphics();
     if (lastPos != null)
       {
-        lastdx = lastPos.x-clickPos.x;
-        lastdy = lastPos.y-clickPos.y;
+        dx = pos.x-lastPos.x;
+        dy = pos.y-lastPos.y;
       }
-    g.setColor(Color.black);
-    g.setXORMode(Color.white);
     for (int i = 0; i < selectedModule.length; i++)
       if (selectedModule[i])
         {
           Rectangle rect = module[i].getBounds();
-          if (lastPos != null)
-            g.drawRect(rect.x+lastdx, rect.y+lastdy, rect.width, rect.height);
-          g.drawRect(rect.x+dx, rect.y+dy, rect.width, rect.height);
+          module[i].setPosition(rect.x+dx, rect.y+dy);
         }
-    g.dispose();
+    repaint();
     lastPos = pos;
   }
     
@@ -1125,25 +849,26 @@ public class ProcedureEditor extends CustomWidget
     {
       // Determine which modules and links to copy.
       
-      Vector mod = new Vector(), ln = new Vector();
+      ArrayList<Module> mod = new ArrayList<Module>();
+      ArrayList<Link> ln = new ArrayList<Link>();
       Module allModules[] = proc.getModules();
       Link allLinks[] = proc.getLinks();
       for (int i = 0; i < selectedModule.length; i++)
         if (selectedModule[i])
-          mod.addElement(allModules[i]);
+          mod.add(allModules[i]);
       for (int i = 0; i < selectedLink.length; i++)
         if (mod.indexOf(allLinks[i].from.getModule()) > -1 && mod.indexOf(allLinks[i].to.getModule()) > -1)
-          ln.addElement(allLinks[i]);
+          ln.add(allLinks[i]);
       
       // Duplicate them and build the arrays.
       
       module = new Module [mod.size()];
       link = new Link [ln.size()];
       for (int i = 0; i < module.length; i++)
-        module[i] = ((Module) mod.elementAt(i)).duplicate();
+        module[i] = mod.get(i).duplicate();
       for (int i = 0; i < link.length; i++)
         {
-          Link thisLink = (Link) ln.elementAt(i);
+          Link thisLink = ln.get(i);
           int from = mod.indexOf(thisLink.from.getModule());
           int to = mod.indexOf(thisLink.to.getModule());
           int fromPort = thisLink.getFromPortIndex();
@@ -1175,15 +900,17 @@ public class ProcedureEditor extends CustomWidget
       
       // Add the links.
       
-      for (int i = 0; i < link.length; i++)
+      for (Link ln : link)
         {
           int from, to;
-          for (from = 0; module[from] != link[i].from.getModule(); from++);
-          for (to = 0; module[to] != link[i].to.getModule(); to++);
+          for (from = 0; module[from] != ln.from.getModule(); from++)
+            ;
+          for (to = 0; module[to] != ln.to.getModule(); to++)
+            ;
           if (realMod[from] == null || realMod[to] == null)
             continue;
-          int fromPort = link[i].getFromPortIndex();
-          int toPort = link[i].getToPortIndex();
+          int fromPort = ln.getFromPortIndex();
+          int toPort = ln.getToPortIndex();
           editor.addLink(realMod[from].getOutputPorts()[fromPort], realMod[to].getInputPorts()[toPort]);
         }
       

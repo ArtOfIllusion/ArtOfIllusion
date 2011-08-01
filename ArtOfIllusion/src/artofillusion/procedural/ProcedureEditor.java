@@ -32,15 +32,16 @@ public class ProcedureEditor extends CustomWidget
   private EditingWindow win;
   private Dimension size;
   private ModuleMenu moduleMenu;
-  private BMenuItem undoItem, cutItem, copyItem, pasteItem, clearItem;
+  private BMenuItem undoItem, redoItem, cutItem, copyItem, pasteItem, clearItem;
   private BTextField nameField;
-  private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox, undoIsRedo;
+  private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox;
   private Point clickPos, lastPos;
   private InfoBox inputInfo, outputInfo;
   private IOPort dragFromPort, dragToPort;
   private BScrollPane scroll;
   private Object preview;
-  private ByteArrayOutputStream undoBuffer, cancelBuffer;
+  private ByteArrayOutputStream cancelBuffer;
+  private ArrayList<ByteArrayOutputStream> undoStack, redoStack;
 
   private final Color darkLinkColor = Color.darkGray;
   private final Color blueLinkColor = new Color(40, 40, 255);
@@ -62,8 +63,9 @@ public class ProcedureEditor extends CustomWidget
     selectedLink = new boolean [proc.getLinks().length];
     inputInfo = new InfoBox();
     outputInfo = new InfoBox();
-    undoBuffer = new ByteArrayOutputStream();
     cancelBuffer = new ByteArrayOutputStream();
+    undoStack = new ArrayList<ByteArrayOutputStream>();
+    redoStack = new ArrayList<ByteArrayOutputStream>();
     parent = new BFrame(owner.getWindowTitle());
     BorderContainer content = new BorderContainer();
     parent.setContent(content);
@@ -155,8 +157,10 @@ public class ProcedureEditor extends CustomWidget
   private BMenu getEditMenu()
   {
     BMenu editMenu = Translate.menu("edit");    
-    editMenu.add(undoItem = Translate.menuItem("undo", this, "actionPerformed"));
+    editMenu.add(undoItem = Translate.menuItem("undo", this, "undo"));
+    editMenu.add(redoItem = Translate.menuItem("redo", this, "redo"));
     undoItem.setEnabled(false);
+    redoItem.setEnabled(false);
     editMenu.addSeparator();
     editMenu.add(cutItem = Translate.menuItem("cut", this, "actionPerformed"));
     editMenu.add(copyItem = Translate.menuItem("copy", this, "actionPerformed"));
@@ -341,14 +345,10 @@ public class ProcedureEditor extends CustomWidget
     p.y += (int) (0.5*bounds.height*Math.random());
     if (command.equals("cancel"))
       {
-        undoBuffer = cancelBuffer;
+        undoStack.add(cancelBuffer);
         undo();
         owner.disposePreview(preview);
         parent.dispose();
-      }
-    else if (command.equals("undo"))
-      {
-        undo();
       }
     else if (command.equals("cut"))
       {
@@ -436,30 +436,37 @@ public class ProcedureEditor extends CustomWidget
   
   public void saveState(boolean redo)
   {
-    undoBuffer.reset();
-    DataOutputStream out = new DataOutputStream(undoBuffer);
+    ArrayList<ByteArrayOutputStream> stack = (redo ? redoStack : undoStack);
+    if (stack.size() == ArtOfIllusion.getPreferences().getUndoLevels())
+      stack.remove(0);
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    DataOutputStream out = new DataOutputStream(buffer);
     try
       {
         proc.writeToStream(out, theScene);
         out.close();
+        stack.add(buffer);
+        if (redo)
+          redoItem.setEnabled(true);
+        else
+          undoItem.setEnabled(true);
       }
     catch (IOException ex)
       {
         ex.printStackTrace();
       }
-    undoIsRedo = redo & !undoIsRedo;
-    undoItem.setText(undoIsRedo ? "Redo" : "Undo");
-    undoItem.setEnabled(true);
   }
   
   /** Undo the last action. */
   
   private void undo()
   {
-    byte buffer[] = undoBuffer.toByteArray();
-    DataInputStream in = new DataInputStream(new ByteArrayInputStream(buffer));
-    
+    if (undoStack.size() == 0)
+      return;
     saveState(true);
+    ByteArrayOutputStream buffer = undoStack.get(undoStack.size()-1);
+    undoStack.remove(undoStack.size()-1);
+    DataInputStream in = new DataInputStream(new ByteArrayInputStream(buffer.toByteArray()));
     try
       {
         proc.readFromStream(in, theScene);
@@ -469,13 +476,45 @@ public class ProcedureEditor extends CustomWidget
       {
         ex.printStackTrace();
       }
+    if (redoStack.size() == ArtOfIllusion.getPreferences().getUndoLevels())
+      redoStack.remove(0);
+    undoItem.setEnabled(undoStack.size() > 0);
     selectedModule = new boolean [proc.getModules().length];
     selectedLink = new boolean [proc.getLinks().length];
     repaint();
     updatePreview();
     updateMenus();
   }
-  
+
+  /** Redo the last action that was undone. */
+
+  private void redo()
+  {
+    if (redoStack.size() == 0)
+      return;
+    saveState(false);
+    ByteArrayOutputStream buffer = redoStack.get(redoStack.size()-1);
+    redoStack.remove(redoStack.size()-1);
+    DataInputStream in = new DataInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+    try
+      {
+        proc.readFromStream(in, theScene);
+        in.close();
+      }
+    catch (IOException ex)
+      {
+        ex.printStackTrace();
+      }
+    if (undoStack.size() == ArtOfIllusion.getPreferences().getUndoLevels())
+      undoStack.remove(0);
+    redoItem.setEnabled(redoStack.size() > 0);
+    selectedModule = new boolean [proc.getModules().length];
+    selectedLink = new boolean [proc.getLinks().length];
+    repaint();
+    updatePreview();
+    updateMenus();
+  }
+
   /** Update the preview. */
   
   public void updatePreview()

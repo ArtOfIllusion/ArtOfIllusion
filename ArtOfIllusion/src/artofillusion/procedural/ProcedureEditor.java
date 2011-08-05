@@ -536,11 +536,13 @@ public class ProcedureEditor extends CustomWidget
           if (mod.getBounds().contains(pos))
             {
               saveState(false);
-              if (mod.edit(parent, theScene))
+              if (mod.edit(this, theScene))
                 {
                   repaint();
                   updatePreview();
                 }
+              else
+                undo();
               return;
             }
       }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -209,17 +210,25 @@ public class TurbulenceModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
-    ValueField ampField = new ValueField(amplitude, ValueField.NONE);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectTurbulenceProperties"), new Widget [] {ampField, octavesField},
+    final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
+    final ValueField ampField = new ValueField(amplitude, ValueField.NONE);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        octaves = (int) octavesField.getValue();
+        amplitude = ampField.getValue();
+        sign = new double [octaves];
+        editor.updatePreview();
+      }
+    };
+    octavesField.addEventLink(ValueChangedEvent.class, listener);
+    ampField.addEventLink(ValueChangedEvent.class, listener);
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectTurbulenceProperties"), new Widget [] {ampField, octavesField},
       new String [] {Translate.text("Amplitude"), Translate.text("Octaves")});
     if (!dlg.clickedOk())
       return false;
-    octaves = (int) octavesField.getValue();
-    amplitude = ampField.getValue();
-    sign = new double [octaves];
     return true;
   }
   

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2003-2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -220,19 +221,28 @@ public class MarbleModule extends Module
   
   /** Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
-    ValueField ampField = new ValueField(amplitude, ValueField.NONE);
-    ValueField spacingField = new ValueField(spacing, ValueField.POSITIVE);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectMarbleProperties"), 
+    final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
+    final ValueField ampField = new ValueField(amplitude, ValueField.NONE);
+    final ValueField spacingField = new ValueField(spacing, ValueField.POSITIVE);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        octaves = (int) octavesField.getValue();
+        amplitude = ampField.getValue();
+        spacing = spacingField.getValue();
+        editor.updatePreview();
+      }
+    };
+    octavesField.addEventLink(ValueChangedEvent.class, listener);
+    ampField.addEventLink(ValueChangedEvent.class, listener);
+    spacingField.addEventLink(ValueChangedEvent.class, listener);
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectMarbleProperties"),
       new Widget [] {ampField, spacingField, octavesField},
       new String [] {Translate.text("Noise Amplitude"), Translate.text("Band Spacing"), Translate.text("Octaves")});
     if (!dlg.clickedOk())
       return false;
-    octaves = (int) octavesField.getValue();
-    amplitude = ampField.getValue();
-    spacing = spacingField.getValue();
     return true;
   }
   

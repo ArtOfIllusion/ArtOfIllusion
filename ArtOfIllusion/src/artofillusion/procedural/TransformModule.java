@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
+import buoy.event.*;
 import java.awt.*;
 import java.io.*;
 
@@ -244,36 +244,43 @@ public class TransformModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    Vec3 orig = coords.getOrigin();
-    double angles[] = coords.getRotationAngles();
-    TransformDialog dlg = new TransformDialog(fr, Translate.text("selectTransformProperties"), 
+    final Vec3 orig = coords.getOrigin();
+    final double angles[] = coords.getRotationAngles();
+    final TransformDialog dlg = new TransformDialog(editor.getParentFrame(), Translate.text("selectTransformProperties"),
         new double [] {orig.x, orig.y, orig.z, angles[0], angles[1], angles[2],
-        xscale, yscale, zscale}, true, false);
-    double values[] = dlg.getValues();
-    if (!Double.isNaN(values[0]))
-      orig.x = values[0];
-    if (!Double.isNaN(values[1]))
-      orig.y = values[1];
-    if (!Double.isNaN(values[2]))
-      orig.z = values[2];
-    if (!Double.isNaN(values[3]))
-      angles[0] = values[3];
-    if (!Double.isNaN(values[4]))
-      angles[1] = values[4];
-    if (!Double.isNaN(values[5]))
-      angles[2] = values[5];
-    if (!Double.isNaN(values[6]))
-      xscale = values[6];
-    if (!Double.isNaN(values[7]))
-      yscale = values[7];
-    if (!Double.isNaN(values[8]))
-      zscale = values[8];
-    coords.setOrigin(orig);
-    coords.setOrientation(angles[0], angles[1], angles[2]);
-    updateTransforms();
-    return true;
+        xscale, yscale, zscale}, true, false, false);
+    dlg.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        double values[] = dlg.getValues();
+        if (!Double.isNaN(values[0]))
+          orig.x = values[0];
+        if (!Double.isNaN(values[1]))
+          orig.y = values[1];
+        if (!Double.isNaN(values[2]))
+          orig.z = values[2];
+        if (!Double.isNaN(values[3]))
+          angles[0] = values[3];
+        if (!Double.isNaN(values[4]))
+          angles[1] = values[4];
+        if (!Double.isNaN(values[5]))
+          angles[2] = values[5];
+        if (!Double.isNaN(values[6]))
+          xscale = values[6];
+        if (!Double.isNaN(values[7]))
+          yscale = values[7];
+        if (!Double.isNaN(values[8]))
+          zscale = values[8];
+        coords.setOrigin(orig);
+        coords.setOrientation(angles[0], angles[1], angles[2]);
+        updateTransforms();
+        editor.updatePreview();
+      }
+    });
+    dlg.setVisible(true);
+    return dlg.clickedOk();
   }
   
   /* Create a duplicate of this module. */

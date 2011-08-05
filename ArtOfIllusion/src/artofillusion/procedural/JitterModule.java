@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -190,14 +191,35 @@ public class JitterModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField amp1 = new ValueField(xamp, ValueField.NONE, 4);
-    ValueField amp2 = new ValueField(yamp, ValueField.NONE, 4);
-    ValueField amp3 = new ValueField(zamp, ValueField.NONE, 4);
-    ValueField scale1 = new ValueField(xscale, ValueField.POSITIVE, 4);
-    ValueField scale2 = new ValueField(yscale, ValueField.POSITIVE, 4);
-    ValueField scale3 = new ValueField(zscale, ValueField.POSITIVE, 4);
+    final ValueField amp1 = new ValueField(xamp, ValueField.NONE, 4);
+    final ValueField amp2 = new ValueField(yamp, ValueField.NONE, 4);
+    final ValueField amp3 = new ValueField(zamp, ValueField.NONE, 4);
+    final ValueField scale1 = new ValueField(xscale, ValueField.POSITIVE, 4);
+    final ValueField scale2 = new ValueField(yscale, ValueField.POSITIVE, 4);
+    final ValueField scale3 = new ValueField(zscale, ValueField.POSITIVE, 4);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        xamp = amp1.getValue();
+        yamp = amp2.getValue();
+        zamp = amp3.getValue();
+        xscale = scale1.getValue();
+        yscale = scale2.getValue();
+        zscale = scale3.getValue();
+        invxscale = 1.0/xscale;
+        invyscale = 1.0/yscale;
+        invzscale = 1.0/zscale;
+        editor.updatePreview();
+      }
+    };
+    amp1.addEventLink(ValueChangedEvent.class, listener);
+    amp2.addEventLink(ValueChangedEvent.class, listener);
+    amp3.addEventLink(ValueChangedEvent.class, listener);
+    scale1.addEventLink(ValueChangedEvent.class, listener);
+    scale2.addEventLink(ValueChangedEvent.class, listener);
+    scale3.addEventLink(ValueChangedEvent.class, listener);
     FormContainer p = new FormContainer(4, 3);
     p.add(new BLabel(), 0, 0);
     p.add(new BLabel("X"), 1, 0);
@@ -211,18 +233,9 @@ public class JitterModule extends Module
     p.add(scale1, 1, 2);
     p.add(scale2, 2, 2);
     p.add(scale3, 3, 2);
-    PanelDialog dlg = new PanelDialog(fr, Translate.text("selectJitterParameters"), p);
+    PanelDialog dlg = new PanelDialog(editor.getParentFrame(), Translate.text("selectJitterParameters"), p);
     if (!dlg.clickedOk())
       return false;
-    xamp = amp1.getValue();
-    yamp = amp2.getValue();
-    zamp = amp3.getValue();
-    xscale = scale1.getValue();
-    yscale = scale2.getValue();
-    zscale = scale3.getValue();
-    invxscale = 1.0/xscale;
-    invyscale = 1.0/yscale;
-    invzscale = 1.0/zscale;
     return true;
   }
   

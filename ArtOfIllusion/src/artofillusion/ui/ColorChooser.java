@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,7 +10,6 @@
 
 package artofillusion.ui;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -28,6 +27,7 @@ public class ColorChooser extends BDialog
   private BLabel label1, label2, label3;
   private Widget oldColorPatch, newColorPatch;
   private BComboBox modeC, rangeC;
+  private boolean ok;
   
   private static final int RECENT_COLOR_COUNT = 15;
   private static ArrayList<RGBColor> recentColors;
@@ -52,6 +52,11 @@ public class ColorChooser extends BDialog
   }
   
   public ColorChooser(BFrame parent, String title, RGBColor c)
+  {
+    this(parent, title, c, true);
+  }
+
+  public ColorChooser(BFrame parent, String title, RGBColor c, boolean show)
   {
     super(parent, title, true);
     BorderContainer content = new BorderContainer();
@@ -117,7 +122,22 @@ public class ColorChooser extends BDialog
     pack();
     setResizable(false);
     UIUtilities.centerDialog(this, parent);
-    setVisible(true);
+    if (show)
+      setVisible(true);
+  }
+
+  /** Get the color which is currently specified in the window. */
+
+  public RGBColor getColor()
+  {
+    return newColor.duplicate();
+  }
+
+  /** Determine whether the user dismissed the window by clicking OK or Cancel. */
+
+  public boolean clickedOk()
+  {
+    return ok;
   }
 
   /** Add this as a key listener to every component. */
@@ -144,6 +164,7 @@ public class ColorChooser extends BDialog
     if (recentColors.size() == RECENT_COLOR_COUNT)
       recentColors.remove(recentColors.size()-1);
     recentColors.add(0, newColor.duplicate());
+    ok = true;
     dispose();
   }
 
@@ -164,6 +185,7 @@ public class ColorChooser extends BDialog
       newColor.setHLS(values[0]*360.0f, values[1], values[2]);
     newColorPatch.setBackground(newColor.getColor());
     newColorPatch.repaint();
+    dispatchEvent(new ValueChangedEvent(this));
   }
 
   private void setColor(RGBColor color)
@@ -171,6 +193,7 @@ public class ColorChooser extends BDialog
     newColor.copy(color);
     newColorPatch.setBackground(newColor.getColor());
     newColorPatch.repaint();
+    dispatchEvent(new ValueChangedEvent(this));
     modeChanged();
   }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -104,11 +105,24 @@ public class ClipModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField minField = new ValueField(min, ValueField.NONE);
-    ValueField maxField = new ValueField(max, ValueField.NONE);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectClipRange"), 
+    final ValueField minField = new ValueField(min, ValueField.NONE);
+    final ValueField maxField = new ValueField(max, ValueField.NONE);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        if (minField.getValue() <= maxField.getValue())
+        {
+          min = minField.getValue();
+          max = maxField.getValue();
+          editor.updatePreview();
+        }
+      }
+    };
+    minField.addEventLink(ValueChangedEvent.class, listener);
+    maxField.addEventLink(ValueChangedEvent.class, listener);
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectClipRange"),
       new Widget [] {minField, maxField},
       new String [] {Translate.text("Minimum"), Translate.text("Maximum")});
     if (!dlg.clickedOk())
@@ -117,8 +131,8 @@ public class ClipModule extends Module
     max = maxField.getValue();
     if (min > max)
     {
-      new BStandardDialog("", Translate.text("minimumAboveMaxError"), BStandardDialog.INFORMATION).showMessageDialog(fr);
-      edit(fr, theScene);
+      new BStandardDialog("", Translate.text("minimumAboveMaxError"), BStandardDialog.INFORMATION).showMessageDialog(editor.getParent());
+      return edit(editor, theScene);
     }
     return true;
   }

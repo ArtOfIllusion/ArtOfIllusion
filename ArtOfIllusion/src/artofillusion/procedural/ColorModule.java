@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
+import buoy.event.*;
 import java.awt.*;
 import java.io.*;
 
@@ -52,10 +52,18 @@ public class ColorModule extends Module
   
   /* Allow the user to set a new value. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    new ColorChooser(fr, "Select Color", color);
-    return true;
+    final ColorChooser cc = new ColorChooser(editor.getParentFrame(), "Select Color", color, false);
+    cc.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        color.copy(cc.getColor());
+        editor.updatePreview();
+      }
+    });
+    cc.setVisible(true);
+    return cc.clickedOk();
   }
 
   /* This module simply outputs the color. */

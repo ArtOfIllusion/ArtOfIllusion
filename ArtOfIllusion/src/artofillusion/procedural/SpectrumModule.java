@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -290,9 +290,9 @@ public class SpectrumModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(ProcedureEditor editor, Scene theScene)
   {
-    EditingDialog dlg = new EditingDialog(fr);
+    EditingDialog dlg = new EditingDialog(editor);
     calcCoefficients();
     return dlg.clickedOk;
   }
@@ -301,6 +301,7 @@ public class SpectrumModule extends Module
   
   private class EditingDialog extends BDialog
   {
+    ProcedureEditor editor;
     CustomWidget canvas;
     ValueField indexField;
     Widget preview;
@@ -308,15 +309,15 @@ public class SpectrumModule extends Module
     BButton deleteButton;
     Point clickPoint, handlePos[];
     int selected, rows = 1;
-    SpectrumModule oldModule;
     boolean clickedOk;
     
     static final int HANDLE_SIZE = 5;
     static final int INSET = 3;
     
-    public EditingDialog(BFrame parent)
+    public EditingDialog(ProcedureEditor editor)
     {
-      super(parent, "Function", true);
+      super(editor.getParentFrame(), "Function", true);
+      this.editor = editor;
       FormContainer content = new FormContainer(1, 5);
       setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
       content.add(Translate.label("functionModuleInstructions"), 0, 0);
@@ -344,17 +345,17 @@ public class SpectrumModule extends Module
       row.add(Translate.button("add", this, "doAdd"));
       row.add(deleteButton = Translate.button("delete", this, "doDelete"));
       content.add(repeatBox = new BCheckBox(Translate.text("functionIsPeriodic"), repeat), 0, 3);
+      repeatBox.addEventLink(ValueChangedEvent.class, this, "repeatChanged");
       RowContainer buttons = new RowContainer();
       content.add(buttons, 0, 4);
       buttons.add(Translate.button("ok", this, "doOk"));
       buttons.add(Translate.button("cancel", this, "doCancel"));
-      oldModule = (SpectrumModule) SpectrumModule.this.duplicate();
       adjustComponents();
       handlePos = new Point [index.length];
       for (int i = 0; i < index.length; i++)
         handlePos[i] = new Point(0, 0);
       pack();
-      UIUtilities.centerDialog(this, parent);
+      UIUtilities.centerDialog(this, editor.getParentFrame());
       setVisible(true);
     }
     
@@ -468,6 +469,7 @@ public class SpectrumModule extends Module
       calcCoefficients();
       adjustComponents();
       canvas.repaint();
+      editor.updatePreview();
     }
     
     /* Delete the currently selected handle. */
@@ -502,6 +504,7 @@ public class SpectrumModule extends Module
       calcCoefficients();
       adjustComponents();
       canvas.repaint();
+      editor.updatePreview();
     }
     
     private void doAdd()
@@ -512,16 +515,11 @@ public class SpectrumModule extends Module
     private void doOk()
     {
       clickedOk = true;
-      repeat = repeatBox.getState();
       dispose();
     }
     
     private void doCancel()
     {
-      color = oldModule.color;
-      index = oldModule.index;
-      repeat = oldModule.repeat;
-      calcCoefficients();
       dispose();
     }
     
@@ -547,6 +545,7 @@ public class SpectrumModule extends Module
       preview.setBackground(color[selected].getColor());
       canvas.repaint();
       preview.repaint();
+      editor.updatePreview();
     }
     
     /** Respond to mouse presses on the canvas. */
@@ -630,6 +629,7 @@ public class SpectrumModule extends Module
       clickPoint = null;
       calcCoefficients();
       canvas.repaint();
+      editor.updatePreview();
     }
 
     private void indexChanged()
@@ -637,6 +637,13 @@ public class SpectrumModule extends Module
       index[selected] = indexField.getValue();
       calcCoefficients();
       canvas.repaint();
+      editor.updatePreview();
+    }
+
+    private void repeatChanged()
+    {
+      repeat = repeatBox.getState();
+      editor.updatePreview();
     }
   }
 }

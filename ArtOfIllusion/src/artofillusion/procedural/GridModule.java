@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -184,21 +185,30 @@ public class GridModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField xField = new ValueField(xspace, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(yspace, ValueField.POSITIVE, 5);
-    ValueField zField = new ValueField(zspace, ValueField.POSITIVE, 5);
-    ComponentsDialog dlg = new ComponentsDialog(fr, "Set Grid Spacing:", new Widget [] {xField, yField, zField},
+    final ValueField xField = new ValueField(xspace, ValueField.POSITIVE, 5);
+    final ValueField yField = new ValueField(yspace, ValueField.POSITIVE, 5);
+    final ValueField zField = new ValueField(zspace, ValueField.POSITIVE, 5);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        xspace = xField.getValue();
+        yspace = yField.getValue();
+        zspace = zField.getValue();
+        xinv = 1.0/xspace;
+        yinv = 1.0/yspace;
+        zinv = 1.0/zspace;
+        editor.updatePreview();
+      }
+    };
+    xField.addEventLink(ValueChangedEvent.class, listener);
+    yField.addEventLink(ValueChangedEvent.class, listener);
+    zField.addEventLink(ValueChangedEvent.class, listener);
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), "Set Grid Spacing:", new Widget [] {xField, yField, zField},
       new String [] {"X", "Y", "Z"});
     if (!dlg.clickedOk())
       return false;
-    xspace = xField.getValue();
-    yspace = yField.getValue();
-    zspace = zField.getValue();
-    xinv = 1.0/xspace;
-    yinv = 1.0/yspace;
-    zinv = 1.0/zspace;
     return true;
   }
   

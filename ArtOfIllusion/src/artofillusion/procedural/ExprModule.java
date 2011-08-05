@@ -1,4 +1,4 @@
-/* Copyright (C) 2001 by David M. Turner <novalis@novalis.org> 
+/* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
  
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
    
@@ -14,6 +14,7 @@
  
 package artofillusion.procedural; 
  
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*; 
 import java.util.*; 
@@ -298,13 +299,27 @@ public class ExprModule extends Module
     /* Write out the expression */ 
     /* Allow the user to set the parameters. */ 
    
-    public boolean edit(BFrame fr, Scene theScene) 
+    public boolean edit(final ProcedureEditor editor, Scene theScene)
     { 
-        BTextField exprField = new BTextField(expr, 40);      
-        ComponentsDialog dlg = new ComponentsDialog(fr, "Set Expression:", new Widget [] {exprField},
-          new String [] {"Calculate:"}); 
-        if (!dlg.clickedOk()) 
-            return false; 
+        final BTextField exprField = new BTextField(expr, 40);
+        exprField.addEventLink(ValueChangedEvent.class, new Object() {
+          void processEvent()
+          {
+            try
+            {
+              setExpr(exprField.getText().toLowerCase());
+              editor.updatePreview();
+            }
+            catch (Exception ex)
+            {
+              // Ignore.
+            }
+          }
+        });
+        ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), "Set Expression:", new Widget [] {exprField},
+          new String [] {"Calculate:"});
+        if (!dlg.clickedOk())
+            return false;
         errors = new Vector();
         try
         {
@@ -315,7 +330,10 @@ public class ExprModule extends Module
           addError("The expression could not be evaluated.");
         }
         if (errors.size() > 0)
-          displayErrors(fr);
+        {
+          displayErrors(editor.getParentFrame());
+          return edit(editor, theScene);
+        }
         errors = null;
         layout(); 
         return true; 

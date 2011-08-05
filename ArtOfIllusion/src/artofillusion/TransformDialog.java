@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,24 +30,31 @@ public class TransformDialog extends BDialog
   private BCheckBox childrenBox;
   private BRadioButton objectCenterBox, selectionCenterBox;
   private RadioButtonGroup centerGroup;
-  private boolean clicked, ok;
+  private boolean ok;
   
   private static boolean children = true;
   private static boolean selectionCenter = true;
 
-  public TransformDialog(BFrame parent, String title, double values[], boolean transformLabels, boolean extraOptions)
+  public TransformDialog(BFrame parent, String title, double values[], boolean transformLabels, boolean extraOptions, boolean show)
   {
     super(parent, title, true);
-    initialValues = finalValues = values;
+    initialValues = values;
+    finalValues = values.clone();
     fields = new ValueField [9];
     layoutDialog(transformLabels, extraOptions);
     pack();
     setResizable(false);
     UIUtilities.centerDialog(this, parent);
     fields[0].requestFocus();
-    setVisible(true);
+    if (show)
+      setVisible(true);
   }
-  
+
+  public TransformDialog(BFrame parent, String title, double values[], boolean transformLabels, boolean extraOptions)
+  {
+    this(parent, title, values, transformLabels, extraOptions, true);
+  }
+
   public TransformDialog(BFrame parent, String title, boolean transformLabels, boolean extraOptions)
   {
     this(parent, title, new double [] {Double.NaN, Double.NaN, Double.NaN, 
@@ -107,15 +114,32 @@ public class TransformDialog extends BDialog
     center.add(new BLabel("X"), 1, 0, centerLayout);
     center.add(new BLabel("Y"), 2, 0, centerLayout);
     center.add(new BLabel("Z"), 3, 0, centerLayout);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        for (int i = 0; i < finalValues.length; i++)
+          finalValues[i] = fields[i].getValue();
+        if (childrenBox != null)
+          children = childrenBox.getState();
+        if (centerGroup != null)
+          selectionCenter = (centerGroup.getSelection() == selectionCenterBox);
+        dispatchEvent(new ValueChangedEvent(TransformDialog.this));
+      }
+    };
     for (int i = 0; i < 9; i++)
+    {
       center.add(fields[i] = new ValueField(initialValues[i], ValueField.NONE), (i%3)+1, (i/3)+1);
+      fields[i].addEventLink(ValueChangedEvent.class, listener);
+    }
     if (extraOptions)
     {
       center.add(childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), children), 0, 4, 4, 1);
+      childrenBox.addEventLink(ValueChangedEvent.class, listener);
       FormContainer extra = new FormContainer(2, 2);
       center.add(extra, 0, 5, 4, 1);
       extra.add(new BLabel(Translate.text("rotateScaleAround")), 0, 0, 1, 2, eastLayout);
       centerGroup = new RadioButtonGroup();
+      centerGroup.addEventLink(SelectionChangedEvent.class, listener);
       LayoutInfo westLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
       extra.add(objectCenterBox = new BRadioButton(Translate.text("individualObjectCenters"), !selectionCenter, centerGroup), 1, 0, westLayout);
       extra.add(selectionCenterBox = new BRadioButton(Translate.text("centerOfSelection"), selectionCenter, centerGroup), 1, 1, westLayout);
@@ -130,13 +154,6 @@ public class TransformDialog extends BDialog
 
   private void doOk()
   {
-    finalValues = new double [9];
-    for (int i = 0; i < finalValues.length; i++)
-      finalValues[i] = fields[i].getValue();
-    if (childrenBox != null)
-      children = childrenBox.getState();
-    if (centerGroup != null)
-      selectionCenter = (centerGroup.getSelection() == selectionCenterBox);
     ok = true;
     dispose();
   }

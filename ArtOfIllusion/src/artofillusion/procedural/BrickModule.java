@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2008 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -222,12 +223,24 @@ public class BrickModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueSlider heightSlider = new ValueSlider(0.0, 1.0, 100, height);
-    ValueSlider gapSlider = new ValueSlider(0.0, 0.5, 50, gap);
-    ValueSlider offsetSlider = new ValueSlider(0.0, 0.5, 50, offset);
-    ComponentsDialog dlg = new ComponentsDialog(fr, "Set brick properties:", new Widget [] {heightSlider, gapSlider, offsetSlider},
+    final ValueSlider heightSlider = new ValueSlider(0.0, 1.0, 100, height);
+    final ValueSlider gapSlider = new ValueSlider(0.0, 0.5, 50, gap);
+    final ValueSlider offsetSlider = new ValueSlider(0.0, 0.5, 50, offset);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        height = heightSlider.getValue();
+        gap = gapSlider.getValue();
+        offset = offsetSlider.getValue();
+        editor.updatePreview();
+      }
+    };
+    heightSlider.addEventLink(ValueChangedEvent.class, listener);
+    gapSlider.addEventLink(ValueChangedEvent.class, listener);
+    offsetSlider.addEventLink(ValueChangedEvent.class, listener);
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), "Set brick properties:", new Widget [] {heightSlider, gapSlider, offsetSlider},
       new String [] {"Brick Height", "Gap Width", "Row Offset"});
     if (!dlg.clickedOk())
       return false;

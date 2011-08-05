@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -426,9 +426,9 @@ public class FunctionModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(ProcedureEditor editor, Scene theScene)
   {
-    EditingDialog dlg = new EditingDialog(fr);
+    EditingDialog dlg = new EditingDialog(editor);
     return dlg.clickedOk;
   }
   
@@ -436,6 +436,7 @@ public class FunctionModule extends Module
   
   private class EditingDialog extends BDialog
   {
+    ProcedureEditor editor;
     CustomWidget canvas;
     ValueField xField, yField;
     BCheckBox repeatBox, smoothBox;
@@ -445,15 +446,15 @@ public class FunctionModule extends Module
     FontMetrics fm;
     NumberFormat hFormat, vFormat;
     int selected;
-    FunctionModule editModule;
     boolean clickedOk, fixRange;
-    double x[], y[], miny, maxy, labelstep;
+    double miny, maxy, labelstep;
     
     static final int HANDLE_SIZE = 5;
     
-    public EditingDialog(BFrame parent)
+    public EditingDialog(ProcedureEditor editor)
     {
-      super(parent, "Function", true);
+      super(editor.getParentFrame(), "Function", true);
+      this.editor = editor;
       FormContainer content = new FormContainer(1, 5);
       setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
       content.add(Translate.label("functionModuleInstructions"), 0, 0);
@@ -492,9 +493,6 @@ public class FunctionModule extends Module
       content.add(buttons, 0, 4);
       buttons.add(Translate.button("ok", this, "doOk"));
       buttons.add(Translate.button("cancel", this, "dispose"));
-      editModule = (FunctionModule) FunctionModule.this.duplicate();
-      x = editModule.x;
-      y = editModule.y;
       hFormat = NumberFormat.getInstance();
       vFormat = NumberFormat.getInstance();
       hFormat.setMaximumFractionDigits(1);
@@ -508,7 +506,7 @@ public class FunctionModule extends Module
           handlePos[i] = new Point(0, 0);
         }
       pack();
-      UIUtilities.centerDialog(this, parent);
+      UIUtilities.centerDialog(this, editor.getParentFrame());
       fm = canvas.getComponent().getFontMetrics(canvas.getFont());
       setVisible(true);
     }
@@ -624,7 +622,7 @@ public class FunctionModule extends Module
                 }
               for (int j = 1; j < 8; j++)
                 {
-                  double xf = x[i]+j*0.125*dx, yf = editModule.calcValue(xf);
+                  double xf = x[i]+j*0.125*dx, yf = calcValue(xf);
                   int nextx = (int) (graphBounds.x+xf*graphBounds.width);
                   int nexty = (int) (graphBounds.y+(maxy-yf)*graphBounds.height/(maxy-miny));
                   g.drawLine(lastx, lasty, nextx, nexty);
@@ -669,16 +667,17 @@ public class FunctionModule extends Module
           newx[i+1] = x[i];
           newy[i+1] = y[i];
         }
-      editModule.x = x = newx;
-      editModule.y = y = newy;
+      x = newx;
+      y = newy;
       handlePos = new Point [x.length];
       for (i = 0; i < handlePos.length; i++)
         handlePos[i] = new Point(0, 0);
-      editModule.calcCoefficients();
+      calcCoefficients();
       adjustComponents();
       findRange();
       positionHandles(graphBounds);
       canvas.repaint();
+      editor.updatePreview();
     }
     
     /* Delete the currently selected handle. */
@@ -704,16 +703,17 @@ public class FunctionModule extends Module
             }
         }
       selected = 0;
-      editModule.x = x = newx;
-      editModule.y = y = newy;
+      x = newx;
+      y = newy;
       handlePos = new Point [x.length];
       for (i = 0; i < handlePos.length; i++)
         handlePos[i] = new Point(0, 0);
-      editModule.calcCoefficients();
+      calcCoefficients();
       adjustComponents();
       findRange();
       positionHandles(graphBounds);
       canvas.repaint();
+      editor.updatePreview();
     }
     
     private void doAdd()
@@ -724,11 +724,6 @@ public class FunctionModule extends Module
     private void doOk()
     {
       clickedOk = true;
-      FunctionModule.this.x = x;
-      FunctionModule.this.y = y;
-      repeat = repeatBox.getState();
-      shape = smoothBox.getState() ? SMOOTH_INTERPOLATE : LINEAR;
-      calcCoefficients();
       dispose();
     }
     
@@ -799,7 +794,7 @@ public class FunctionModule extends Module
       y[selected] = 0.001*((int) (1000.0*newy));
       if (selected == 0 || selected == x.length-1)
       {
-        editModule.calcCoefficients();
+        calcCoefficients();
         adjustComponents();
         canvas.repaint();
         return;
@@ -831,7 +826,7 @@ public class FunctionModule extends Module
         handlePos[selected+1] = tempPos;
         selected++;
       }
-      editModule.calcCoefficients();
+      calcCoefficients();
       adjustComponents();
       canvas.repaint();
     }
@@ -841,18 +836,19 @@ public class FunctionModule extends Module
     private void mouseReleased(MouseReleasedEvent ev)
     {
       clickPoint = null;
-      editModule.calcCoefficients();
+      calcCoefficients();
       fixRange = false;
       findRange();
       positionHandles(graphBounds);
       canvas.repaint();
+      editor.updatePreview();
     }
     
     private void textChanged()
     {
       x[selected] = xField.getValue();
       y[selected] = yField.getValue();
-      while (x[selected] < x[selected-1])
+      while (selected > 0 && x[selected] < x[selected-1])
       {
         double temp = x[selected];
         x[selected] = x[selected-1];
@@ -865,7 +861,7 @@ public class FunctionModule extends Module
         handlePos[selected-1] = tempPos;
         selected--;
       }
-      while (x[selected] > x[selected+1])
+      while (selected < x.length-1 && x[selected] > x[selected+1])
       {
         double temp = x[selected];
         x[selected] = x[selected+1];
@@ -883,15 +879,16 @@ public class FunctionModule extends Module
     
     private void functionChanged()
     {
-      editModule.repeat = repeatBox.getState();
-      editModule.shape = smoothBox.getState() ? SMOOTH_INTERPOLATE : LINEAR;
-      editModule.calcCoefficients();
+      repeat = repeatBox.getState();
+      shape = smoothBox.getState() ? SMOOTH_INTERPOLATE : LINEAR;
+      calcCoefficients();
       if (!fixRange)
       {
         findRange();
         positionHandles(graphBounds);
       }
       canvas.repaint();
+      editor.updatePreview();
     }
   }
 }

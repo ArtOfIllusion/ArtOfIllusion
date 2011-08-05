@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -145,13 +146,13 @@ public class WoodModule extends Module
       linkFrom[0].getValueGradient(linkFromIndex[0], tempVec, blur);
     if (r == 0.0)
       {
-	gradient.set(0.0, 0.0, 0.0);
-	error = 1.0e6;
+        gradient.set(0.0, 0.0, 0.0);
+        error = 1.0e6;
       }
     else
       {
-	gradient.set(x*rinv*scale*tempVec.x+gradient.x, y*rinv*scale*tempVec.y+gradient.y, gradient.z);
-	error = Math.abs(xsize*gradient.x) + Math.abs(ysize*gradient.y) + Math.abs(zsize*gradient.z);
+        gradient.set(x*rinv*scale*tempVec.x+gradient.x, y*rinv*scale*tempVec.y+gradient.y, gradient.z);
+        error = Math.abs(xsize*gradient.x) + Math.abs(ysize*gradient.y) + Math.abs(zsize*gradient.z);
       }
     if (!mod)
       value = r*scale+value;
@@ -202,21 +203,31 @@ public class WoodModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
-    ValueField ampField = new ValueField(amplitude, ValueField.NONE);
-    ValueField spacingField = new ValueField(spacing, ValueField.POSITIVE);
-    BCheckBox modBox = new BCheckBox("Only Output Fraction", mod);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectWoodProperties"), 
+    final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
+    final ValueField ampField = new ValueField(amplitude, ValueField.NONE);
+    final ValueField spacingField = new ValueField(spacing, ValueField.POSITIVE);
+    final BCheckBox modBox = new BCheckBox("Only Output Fraction", mod);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        octaves = (int) octavesField.getValue();
+        amplitude = ampField.getValue();
+        spacing = spacingField.getValue();
+        mod = modBox.getState();
+        editor.updatePreview();
+      }
+    };
+    octavesField.addEventLink(ValueChangedEvent.class, listener);
+    ampField.addEventLink(ValueChangedEvent.class, listener);
+    spacingField.addEventLink(ValueChangedEvent.class, listener);
+    modBox.addEventLink(ValueChangedEvent.class, listener);
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectWoodProperties"),
       new Widget [] {ampField, spacingField, octavesField, modBox},
       new String [] {Translate.text("noiseAmplitude"), Translate.text("ringSpacing"), Translate.text("noiseOctaves"), null});
     if (!dlg.clickedOk())
       return false;
-    octaves = (int) octavesField.getValue();
-    amplitude = ampField.getValue();
-    spacing = spacingField.getValue();
-    mod = modBox.getState();
     return true;
   }
   
@@ -224,12 +235,13 @@ public class WoodModule extends Module
   
   public Module duplicate()
   {
-    WoodModule mod = new WoodModule(new Point(bounds.x, bounds.y));
+    WoodModule module = new WoodModule(new Point(bounds.x, bounds.y));
     
-    mod.octaves = octaves;
-    mod.amplitude = amplitude;
-    mod.spacing = spacing;
-    return mod;
+    module.octaves = octaves;
+    module.amplitude = amplitude;
+    module.spacing = spacing;
+    module.mod = mod;
+    return module;
   }
 
   /* Write out the parameters. */

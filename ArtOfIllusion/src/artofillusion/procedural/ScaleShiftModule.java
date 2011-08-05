@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -94,16 +95,26 @@ public class ScaleShiftModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField scaleField = new ValueField(scale, ValueField.NONE, 5);
-    ValueField shiftField = new ValueField(shift, ValueField.NONE, 5);
+    final ValueField scaleField = new ValueField(scale, ValueField.NONE, 5);
+    final ValueField shiftField = new ValueField(shift, ValueField.NONE, 5);
+    Object listener = new Object() {
+      void processEvent()
+      {
+        scale = scaleField.getValue();
+        shift = shiftField.getValue();
+        editor.updatePreview();
+      }
+    };
+    scaleField.addEventLink(ValueChangedEvent.class, listener);
+    shiftField.addEventLink(ValueChangedEvent.class, listener);
     RowContainer row = new RowContainer();
     row.add(new BLabel(Translate.text("scaleShiftEquation")));
     row.add(scaleField);
     row.add(new BLabel(" + "));
     row.add(shiftField);
-    PanelDialog dlg = new PanelDialog(fr, Translate.text("selectScaleShiftProperties"), row);
+    PanelDialog dlg = new PanelDialog(editor.getParentFrame(), Translate.text("selectScaleShiftProperties"), row);
     if (!dlg.clickedOk())
       return false;
     scale = scaleField.getValue();

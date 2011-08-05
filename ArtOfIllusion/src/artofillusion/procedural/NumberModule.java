@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -54,10 +55,17 @@ public class NumberModule extends Module
 
   /** Allow the user to set a new value. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    ValueField field = new ValueField(value, ValueField.NONE);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectValue"), new Widget [] {field},
+    final ValueField field = new ValueField(value, ValueField.NONE);
+    field.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        value = field.getValue();
+        editor.updatePreview();
+      }
+    });
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectValue"), new Widget [] {field},
       new String [] {null});
     if (!dlg.clickedOk())
       return false;

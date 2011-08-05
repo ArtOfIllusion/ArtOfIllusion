@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2007 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -466,16 +466,46 @@ public class ImageModule extends Module
   
   /** Allow the user to set a new value. */
   
-  public boolean edit(final BFrame fr, final Scene theScene)
+  public boolean edit(final ProcedureEditor editor, final Scene theScene)
   {
     ImageMap oldMap = map;
     final ValueField xField = new ValueField(xscale, ValueField.NONE, 10);
     final ValueField yField = new ValueField(yscale, ValueField.NONE, 10);
-    BCheckBox tilexBox = new BCheckBox("X", tilex);
-    BCheckBox tileyBox = new BCheckBox("Y", tiley);
-    BCheckBox mirrorxBox = new BCheckBox("X", mirrorx);
-    BCheckBox mirroryBox = new BCheckBox("Y", mirrory);
-    BComboBox modelChoice = new BComboBox(new String[] {"RGB", "HSV", "HLS"});
+    final BCheckBox tilexBox = new BCheckBox("X", tilex);
+    final BCheckBox tileyBox = new BCheckBox("Y", tiley);
+    final BCheckBox mirrorxBox = new BCheckBox("X", mirrorx);
+    final BCheckBox mirroryBox = new BCheckBox("Y", mirrory);
+    final BComboBox modelChoice = new BComboBox(new String[] {"RGB", "HSV", "HLS"});
+    Object listener = new Object() {
+      void processEvent()
+      {
+        xscale = xField.getValue();
+        yscale = yField.getValue();
+        xinv = 1.0/xscale;
+        yinv = 1.0/yscale;
+        tilex = tilexBox.getState();
+        tiley = tileyBox.getState();
+        mirrorx = mirrorxBox.getState();
+        mirrory = mirroryBox.getState();
+        colorModel = modelChoice.getSelectedIndex();
+        if (map == null)
+          maxComponent = 0;
+        else if (colorModel == RGB_MODEL)
+          maxComponent = map.getComponentCount()-1;
+        else if (map.getComponentCount() > 3)
+          maxComponent = 3;
+        else
+          maxComponent = 2;
+        editor.updatePreview();
+      }
+    };
+    xField.addEventLink(ValueChangedEvent.class, listener);
+    yField.addEventLink(ValueChangedEvent.class, listener);
+    tilexBox.addEventLink(ValueChangedEvent.class, listener);
+    tileyBox.addEventLink(ValueChangedEvent.class, listener);
+    mirrorxBox.addEventLink(ValueChangedEvent.class, listener);
+    mirroryBox.addEventLink(ValueChangedEvent.class, listener);
+    modelChoice.addEventLink(ValueChangedEvent.class, listener);
     modelChoice.setSelectedIndex(colorModel);
     final BLabel preview = new BLabel() {
       public Dimension getPreferredSize()
@@ -495,7 +525,7 @@ public class ImageModule extends Module
     preview.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        ImagesDialog dlg = new ImagesDialog(fr, theScene, map);
+        ImagesDialog dlg = new ImagesDialog(editor.getParentFrame(), theScene, map);
         if (dlg.getSelection() != map && dlg.getSelection() != null)
           {
             int w = dlg.getSelection().getWidth();
@@ -512,34 +542,23 @@ public class ImageModule extends Module
               }
           }
         map = dlg.getSelection();
+        if (map == null)
+          maxComponent = 0;
+        else if (colorModel == RGB_MODEL)
+          maxComponent = map.getComponentCount()-1;
+        else if (map.getComponentCount() > 3)
+          maxComponent = 3;
+        else
+          maxComponent = 2;
         preview.setIcon(map == null ? null : new ImageIcon(map.getPreview()));
+        editor.updatePreview();
       }
     });
-    ComponentsDialog dlg = new ComponentsDialog(fr, "Click to Set Image:", 
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), "Click to Set Image:",
       new Widget [] {outline, xField, yField, tilexBox, tileyBox, mirrorxBox, mirroryBox, modelChoice},
       new String [] {null, "X Size", "Y Size", "Tile", "", "Mirror", "", "Outputs"});
     if (!dlg.clickedOk())
-      {
-        map = oldMap;
-        return false;
-      }
-    xscale = xField.getValue();
-    yscale = yField.getValue();
-    xinv = 1.0/xscale;
-    yinv = 1.0/yscale;
-    tilex = tilexBox.getState();
-    tiley = tileyBox.getState();
-    mirrorx = mirrorxBox.getState();
-    mirrory = mirroryBox.getState();
-    colorModel = modelChoice.getSelectedIndex();
-    if (map == null)
-      maxComponent = 0;
-    else if (colorModel == RGB_MODEL)
-      maxComponent = map.getComponentCount()-1;
-    else if (map.getComponentCount() > 3)
-      maxComponent = 3;
-    else
-      maxComponent = 2;
+      return false;
     setupOutputs();
     return true;
   }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +12,7 @@ package artofillusion.procedural;
 
 import artofillusion.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -125,13 +126,20 @@ public class ParameterModule extends Module
 
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     BTextField nameField = new BTextField(name);
     ValueField minField = new ValueField(minVal, ValueField.NONE);
     ValueField maxField = new ValueField(maxVal, ValueField.NONE);
-    ValueField defaultField = new ValueField(defaultVal, ValueField.NONE);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectParameterProperties"), 
+    final ValueField defaultField = new ValueField(defaultVal, ValueField.NONE);
+    defaultField.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        defaultVal = defaultField.getValue();
+        editor.updatePreview();
+      }
+    });
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectParameterProperties"),
       new Widget [] {nameField, minField, maxField, defaultField},
       new String [] {Translate.text("Name"), Translate.text("Minimum"), Translate.text("Maximum"), Translate.text("Default")});
     if (!dlg.clickedOk())
@@ -142,13 +150,13 @@ public class ParameterModule extends Module
     defaultVal = defaultField.getValue();
     if (minVal > maxVal)
       {
-        new BStandardDialog("", Translate.text("minimumAboveMaxError"), BStandardDialog.ERROR).showMessageDialog(fr);
-        edit(fr, theScene);
+        new BStandardDialog("", Translate.text("minimumAboveMaxError"), BStandardDialog.ERROR).showMessageDialog(editor.getParentFrame());
+        return edit(editor, theScene);
       }
     if (minVal > defaultVal || maxVal < defaultVal)
       {
-        new BStandardDialog("", Translate.text("defaultOutOfRangeError"), BStandardDialog.ERROR).showMessageDialog(fr);
-        edit(fr, theScene);
+        new BStandardDialog("", Translate.text("defaultOutOfRangeError"), BStandardDialog.ERROR).showMessageDialog(editor.getParentFrame());
+        return edit(editor, theScene);
       }
     layout();
     return true;

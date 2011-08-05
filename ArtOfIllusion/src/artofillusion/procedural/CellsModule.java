@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2006 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -217,24 +218,35 @@ public class CellsModule extends Module
   
   /** Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    RadioButtonGroup metricGroup = new RadioButtonGroup();
+    final RadioButtonGroup metricGroup = new RadioButtonGroup();
     int metric = cells.getMetric();
-    BRadioButton euclidBox = new BRadioButton("Euclidean", metric == Cells.EUCLIDEAN, metricGroup);
-    BRadioButton cityBox = new BRadioButton("City Block", metric == Cells.CITY_BLOCK, metricGroup);
-    BRadioButton chessBox = new BRadioButton("Chess Board", metric == Cells.CHESS_BOARD, metricGroup);
-    ComponentsDialog dlg = new ComponentsDialog(fr, "Select which distance metric to use:", 
+    final BRadioButton euclidBox = new BRadioButton("Euclidean", metric == Cells.EUCLIDEAN, metricGroup);
+    final BRadioButton cityBox = new BRadioButton("City Block", metric == Cells.CITY_BLOCK, metricGroup);
+    final BRadioButton chessBox = new BRadioButton("Chess Board", metric == Cells.CHESS_BOARD, metricGroup);
+    metricGroup.addEventLink(SelectionChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        if (metricGroup.getSelection() == euclidBox)
+          cells.setMetric(Cells.EUCLIDEAN);
+        else if (metricGroup.getSelection() == cityBox)
+          cells.setMetric(Cells.CITY_BLOCK);
+        else if (metricGroup.getSelection() == chessBox)
+          cells.setMetric(Cells.CHESS_BOARD);
+        editor.updatePreview();
+      }
+    });
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), "Select which distance metric to use:",
       new Widget [] {euclidBox, cityBox, chessBox}, new String [] {"", "", ""});
     if (!dlg.clickedOk())
       return false;
     if (metricGroup.getSelection() == euclidBox)
-      metric = Cells.EUCLIDEAN;
+      cells.setMetric(Cells.EUCLIDEAN);
     else if (metricGroup.getSelection() == cityBox)
-      metric = Cells.CITY_BLOCK;
+      cells.setMetric(Cells.CITY_BLOCK);
     else if (metricGroup.getSelection() == chessBox)
-      metric = Cells.CHESS_BOARD;
-    cells.setMetric(metric);
+      cells.setMetric(Cells.CHESS_BOARD);
     return true;
   }
 

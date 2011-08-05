@@ -1,4 +1,4 @@
-/* Copyright (C) 2000,2004 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -254,13 +254,28 @@ public class Module
   }
   
   /** This should display a user interface for editing the module, and return true if the
-      module is changed.  The default implementation does nothing. */
+      module is changed.  The default implementation does nothing.
+
+      @param editor    the ProcedureEditor in which this module is being edited
+      @param theScene  the Scene to which this module belongs
+      @return true if the edits were accepted, false if they should be cancelled.  Returning false
+              will cause all edits to be reverted automatically.  The module does not need to do
+              that itself.
+   */
+  
+  public boolean edit(ProcedureEditor editor, Scene theScene)
+  {
+    return edit(editor.getParentFrame(), theScene);
+  }
+
+  /** This is an old form of edit() that exists only to maintain compatibility with old plugins.
+      Subclasses should override the other form, not this one. */
   
   public boolean edit(BFrame fr, Scene theScene)
   {
     return false;
   }
-  
+
   /** This method initializes the module in preparation for evaluating the procedure at a
       new point.  The default implementation does nothing.  Subclasses whose output depends
       on the point should override this method. */

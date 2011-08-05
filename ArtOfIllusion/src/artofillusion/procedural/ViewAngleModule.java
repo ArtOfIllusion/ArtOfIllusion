@@ -1,4 +1,4 @@
-/* Copyright (C) 2003 by Peter Eastman
+/* Copyright (C) 2003-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.procedural;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
@@ -73,14 +74,20 @@ public class ViewAngleModule extends Module
   
   /* Allow the user to set the parameters. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
-    BCheckBox absBox = new BCheckBox(Translate.text("outputAbsValue"), abs);
-    ComponentsDialog dlg = new ComponentsDialog(fr, Translate.text("selectOutputProperties"), 
+    final BCheckBox absBox = new BCheckBox(Translate.text("outputAbsValue"), abs);
+    absBox.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        abs = absBox.getState();
+        editor.updatePreview();
+      }
+    });
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectOutputProperties"),
       new Widget [] {absBox}, new String [] {null});
     if (!dlg.clickedOk())
       return false;
-    abs = absBox.getState();
     return true;
   }
 

@@ -33,10 +33,10 @@ public class CommentModule extends Module
 
   /** Allow the user to edit the comment text. */
   
-  public boolean edit(BFrame fr, Scene theScene)
+  public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     BTextArea ta = new BTextArea(name, 10, 40);
-    PanelDialog dlg = new PanelDialog(fr, Translate.text("editComment"), BOutline.createBevelBorder(new BScrollPane(ta), false));
+    PanelDialog dlg = new PanelDialog(editor.getParentFrame(), Translate.text("editComment"), BOutline.createBevelBorder(new BScrollPane(ta), false));
     if (!dlg.clickedOk())
       return false;
     name = ta.getText();

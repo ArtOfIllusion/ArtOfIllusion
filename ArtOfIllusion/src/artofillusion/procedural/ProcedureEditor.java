@@ -267,7 +267,7 @@ public class ProcedureEditor extends CustomWidget
         if (!isInput || dragToPort != null)
           outputInfo.draw(g);
       }
-    g.setXORMode(Color.WHITE);
+    g.setColor(Color.BLACK);
     if (draggingBox && lastPos != null)
       {
         Rectangle rect;

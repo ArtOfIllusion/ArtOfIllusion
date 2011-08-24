@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 by Peter Eastman
+/* Copyright (C) 2008-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,5 +39,11 @@ public class RTDirectionalLight extends RTLight
       dir.normalize();
     }
     return Double.MAX_VALUE;
+  }
+
+  @Override
+  public boolean getSoftShadows()
+  {
+    return radius != 0.0 && getLight().getType() == Light.TYPE_NORMAL;
   }
 }

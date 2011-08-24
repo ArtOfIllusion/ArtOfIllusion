@@ -1,4 +1,4 @@
-/* Copyright (C) 2008 by Peter Eastman
+/* Copyright (C) 2008-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,8 +12,6 @@ package artofillusion.raytracer;
 
 import artofillusion.object.*;
 import artofillusion.math.*;
-
-import java.util.*;
 
 /**
  * RTLight represents a light source in the scene to be raytraced.  It is an abstract
@@ -60,4 +58,9 @@ public abstract class RTLight
    * @return the distance from the ray origin to the light
    */
   public abstract double findRayToLight(Vec3 origin, Ray ray, int rayNumber);
+
+  /**
+   * Get whether this light generates soft shadows.
+   */
+  public abstract boolean getSoftShadows();
 }

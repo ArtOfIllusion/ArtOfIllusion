@@ -34,11 +34,11 @@ public class Raytracer implements Renderer, Runnable
   protected OctreeNode rootNode, cameraNode, lightNode[];
   protected ColumnContainer configPanel;
   protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, adaptiveBox, rouletteBox, reducedMemoryBox;
-  protected BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice;
+  protected BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice, glossRaysChoice, shadowRaysChoice;
   protected ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField;
   protected ValueField extraGIField, extraGIEnvField;
   protected ValueField globalPhotonsField, globalNeighborPhotonsField, causticsPhotonsField, causticsNeighborPhotonsField, volumePhotonsField, volumeNeighborPhotonsField;
-  protected int pixel[], width, height, rtWidth, rtHeight, maxRayDepth = 8, minRays = 4, maxRays = 16, diffuseRays, antialiasLevel;
+  protected int pixel[], width, height, rtWidth, rtHeight, maxRayDepth = 8, minRays = 4, maxRays = 16, diffuseRays, glossRays, shadowRays, antialiasLevel;
   protected MemoryImageSource imageSource;
   protected Scene theScene;
   protected Camera theCamera;
@@ -221,7 +221,34 @@ public class Raytracer implements Renderer, Runnable
       boxes.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
       boxes.add(depthBox = new BCheckBox(Translate.text("depthOfField"), depth));
       boxes.add(glossBox = new BCheckBox(Translate.text("glossTranslucency"), gloss));
+      RowContainer row;
+      LayoutInfo indent = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 30, 0, 0), null);
+      boxes.add(row = new RowContainer());
+      row.add(Translate.label("raysToSample"), indent);
+      row.add(glossRaysChoice = new BComboBox());
       boxes.add(shadowBox = new BCheckBox(Translate.text("softShadows"), penumbra));
+      boxes.add(row = new RowContainer());
+      row.add(Translate.label("raysToSample"), indent);
+      row.add(shadowRaysChoice = new BComboBox());
+      glossRaysChoice.add("1");
+      shadowRaysChoice.add("1");
+      for (int i = 4; i <= 64; i *= 2)
+      {
+        glossRaysChoice.add(Integer.toString(i));
+        shadowRaysChoice.add(Integer.toString(i));
+      }
+      glossBox.addEventLink(ValueChangedEvent.class, new Object() {
+        void processEvent()
+        {
+          UIUtilities.setEnabled(glossRaysChoice.getParent(), aliasChoice.getSelectedIndex() > 0 && glossBox.getState());
+        }
+      });
+      shadowBox.addEventLink(ValueChangedEvent.class, new Object() {
+        void processEvent()
+        {
+          UIUtilities.setEnabled(shadowRaysChoice.getParent(), aliasChoice.getSelectedIndex() > 0 && shadowBox.getState());
+        }
+      });
 
       // Create components for the Illumination Options window.
 
@@ -282,6 +309,8 @@ public class Raytracer implements Renderer, Runnable
           shadowBox.setEnabled(multi);
           minRaysChoice.setEnabled(multi);
           maxRaysChoice.setEnabled(multi);
+          UIUtilities.setEnabled(glossRaysChoice.getParent(), multi && glossBox.getState());
+          UIUtilities.setEnabled(shadowRaysChoice.getParent(), multi && shadowBox.getState());
           if (minRaysChoice.getSelectedIndex() > maxRaysChoice.getSelectedIndex())
           {
             if (ev.getWidget() == maxRaysChoice)
@@ -478,7 +507,9 @@ public class Raytracer implements Renderer, Runnable
     aliasChoice.setSelectedIndex(antialiasLevel);
     depthBox.setState(depth);
     glossBox.setState(gloss);
+    glossRaysChoice.setSelectedValue(Integer.toString(glossRays));
     shadowBox.setState(penumbra);
+    shadowRaysChoice.setSelectedValue(Integer.toString(shadowRays));
     minRaysChoice.setSelectedValue(Integer.toString(minRays));
     maxRaysChoice.setSelectedValue(Integer.toString(maxRays));
     reducedMemoryBox.setState(reducedMemory);
@@ -513,7 +544,9 @@ public class Raytracer implements Renderer, Runnable
     antialiasLevel = aliasChoice.getSelectedIndex();
     depth = depthBox.getState();
     gloss = glossBox.getState();
+    glossRays = Integer.parseInt((String) glossRaysChoice.getSelectedValue());
     penumbra = shadowBox.getState();
+    shadowRays = Integer.parseInt((String) shadowRaysChoice.getSelectedValue());
     minRays = Integer.parseInt((String) minRaysChoice.getSelectedValue());
     maxRays = Integer.parseInt((String) maxRaysChoice.getSelectedValue());
     transparentBackground = transparentBox.getState();
@@ -548,7 +581,9 @@ public class Raytracer implements Renderer, Runnable
     map.put("antialiasing", antialiasLevel);
     map.put("depthOfField", depth);
     map.put("gloss", gloss);
+    map.put("raysToSampleGloss", glossRays);
     map.put("softShadows", penumbra);
+    map.put("raysToSampleShadows", shadowRays);
     map.put("minRaysPerPixel", minRays);
     map.put("maxRaysPerPixel", maxRays);
     map.put("transparentBackground", transparentBackground);
@@ -595,8 +630,12 @@ public class Raytracer implements Renderer, Runnable
       depth = (Boolean) value;
     else if ("gloss".equals(property))
       gloss = (Boolean) value;
+    else if ("raysToSampleGloss".equals(property))
+      glossRays = (Integer) value;
     else if ("softShadows".equals(property))
       penumbra = (Boolean) value;
+    else if ("raysToSampleShadows".equals(property))
+      shadowRays = (Integer) value;
     else if ("minRaysPerPixel".equals(property))
       minRays = (Integer) value;
     else if ("maxRaysPerPixel".equals(property))
@@ -1166,7 +1205,7 @@ public class Raytracer implements Renderer, Runnable
         RaytracerContext context = (RaytracerContext) threadContext.get();
         PixelInfo pixel = context.tempPixel;
         pixel.clear();
-        pixel.depth = (float) spawnEyeRay(context, col*subsample*currentScale[0], row*subsample*currentScale[0], 0, finalMinRays);
+        pixel.depth = (float) spawnEyeRay(context, col*subsample*currentScale[0], row*subsample*currentScale[0], 4, finalMinRays);
         pixel.object = (context.firstObjectHit == null ? 0.0f : Float.intBitsToFloat(context.firstObjectHit.getObject().hashCode()));
         pixel.add(context.color[0], (float) context.transparency[0]);
         recordPixel(col*currentScale[0], row*currentScale[0], currentScale[0], pixel);
@@ -1861,7 +1900,7 @@ public class Raytracer implements Renderer, Runnable
         col.multiply(spec.transparent);
         col.scale(transmittedScale);
         rt.ray[treeDepth+1].getOrigin().set(intersectionPoint);
-        temp = rt.ray[treeDepth+1].getDirection();
+        temp = rt.ray[treeDepth].tempVec1;
         if (first.getMaterialMapping() == null)
           {
             // Not a solid object, so the bulk material does not change.
@@ -1939,12 +1978,20 @@ public class Raytracer implements Renderer, Runnable
                 temp.normalize();
               }
             rt.ray[treeDepth+1].newID();
-            if (gloss)
-              randomizeDirection(temp, norm, rt.random, spec.cloudiness, rayNumber+treeDepth+1);
-            spawnRay(rt, treeDepth+1, nextNode, second, nextMaterial, oldMaterial, nextMatTrans, oldMatTrans, rayNumber, totalDist, transmitted, diffuse);
-            color.add(rt.color[treeDepth+1]);
+            int numRays = (gloss && spec.cloudiness != 0.0 ? glossRays : 1);
             if (transmitted && transparentBackground)
-              rt.transparency[treeDepth] = rt.transparency[treeDepth+1];
+              rt.transparency[treeDepth] = 0.0;
+            for (int i = 0; i < numRays; i++)
+            {
+              rt.ray[treeDepth+1].getDirection().set(temp);
+              if (gloss)
+                randomizeDirection(rt.ray[treeDepth+1].getDirection(), norm, rt.random, spec.cloudiness, rayNumber+treeDepth+1);
+              spawnRay(rt, treeDepth+1, nextNode, second, nextMaterial, oldMaterial, nextMatTrans, oldMatTrans, rayNumber, totalDist, transmitted, diffuse);
+              rt.color[treeDepth+1].scale(1.0/numRays);
+              color.add(rt.color[treeDepth+1]);
+              if (transmitted && transparentBackground)
+                rt.transparency[treeDepth] += rt.transparency[treeDepth+1]/numRays;
+            }
           }
       }
     if (spawnSpecular || totalReflect)
@@ -1956,7 +2003,7 @@ public class Raytracer implements Renderer, Runnable
         if (totalReflect)
           col.add(spec.transparent.getRed()*transmittedScale, spec.transparent.getGreen()*transmittedScale, spec.transparent.getBlue()*transmittedScale);
         col.multiply(rayIntensity);
-        temp = rt.ray[treeDepth+1].getDirection();
+        temp = rt.ray[treeDepth].tempVec1;
         temp.set(norm);
         temp.scale(-2.0*dot);
         temp.add(r.getDirection());
@@ -1973,10 +2020,16 @@ public class Raytracer implements Renderer, Runnable
           }
         rt.ray[treeDepth+1].getOrigin().set(intersectionPoint);
         rt.ray[treeDepth+1].newID();
-        if (gloss)
-          randomizeDirection(temp, norm, rt.random, spec.roughness, rayNumber+treeDepth+1);
-        spawnRay(rt, treeDepth+1, nextNode, null, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, diffuse);
-        color.add(rt.color[treeDepth+1]);
+        int numRays = (gloss && spec.roughness != 0.0 ? glossRays : 1);
+        for (int i = 0; i < numRays; i++)
+        {
+          rt.ray[treeDepth+1].getDirection().set(temp);
+          if (gloss)
+            randomizeDirection(rt.ray[treeDepth+1].getDirection(), norm, rt.random, spec.roughness, rayNumber+treeDepth+1+i);
+          spawnRay(rt, treeDepth+1, nextNode, null, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, diffuse);
+          rt.color[treeDepth+1].scale(1.0/numRays);
+          color.add(rt.color[treeDepth+1]);
+        }
       }
     if (spawnDiffuse)
       {
@@ -2080,45 +2133,49 @@ public class Raytracer implements Renderer, Runnable
     hilight = (spec.hilight.getRed() != 0.0 || spec.hilight.getGreen() != 0.0 || spec.hilight.getBlue() != 0.0);
     for (i = light.length-1; i >= 0; i--)
       {
-        lt = light[i].getLight();
-        distToLight = light[i].findRayToLight(pos, r, rayNumber+treeDepth+1);
-        r.newID();
+        int numRays = (light[i].getSoftShadows() ? shadowRays : 1);
+        for (int j = 0; j < numRays; j++)
+        {
+          lt = light[i].getLight();
+          distToLight = light[i].findRayToLight(pos, r, rayNumber+treeDepth+1+j);
+          r.newID();
 
-        // Now scan through the list of objects, and see if the light is blocked.
+          // Now scan through the list of objects, and see if the light is blocked.
 
-        if (lt.getType() == Light.TYPE_AMBIENT)
-          dot = 1.0;
-        else
-          dot = sign*dir.dot(normal);
-        if (dot > 0.0)
-          {
-            lt.getLight(lightColor, light[i].getCoords().toLocal().times(pos));
-            if (Math.abs(lightColor.getRed()*(spec.diffuse.getRed()*dot+spec.hilight.getRed())) < minRayIntensity &&
-                Math.abs(lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen())) < minRayIntensity &&
-                Math.abs(lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue())) < minRayIntensity)
-              continue;
-            if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(r, lt, treeDepth+1, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
-              {
-                RGBColor tempColor = rt.tempColor;
-                tempColor.copy(lightColor);
-                tempColor.multiply(spec.diffuse);
-                tempColor.scale(dot);
-                finalColor.add(tempColor);
-                if (hilight)
-                  {
-                    dir.subtract(viewDir);
-                    dir.normalize();
-                    dot = sign*dir.dot(normal);
-                    if (dot > 0.0)
-                      {
-                        tempColor.copy(lightColor);
-                        tempColor.multiply(spec.hilight);
-                        tempColor.scale(FastMath.pow(dot, (int) ((1.0-spec.roughness)*128.0)+1));
-                        finalColor.add(tempColor);
-                      }
-                  }
-              }
-          }
+          if (lt.getType() == Light.TYPE_AMBIENT)
+            dot = 1.0;
+          else
+            dot = sign*dir.dot(normal);
+          if (dot > 0.0)
+            {
+              lt.getLight(lightColor, light[i].getCoords().toLocal().times(pos));
+              if (Math.abs(lightColor.getRed()*(spec.diffuse.getRed()*dot+spec.hilight.getRed())) < minRayIntensity &&
+                  Math.abs(lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen())) < minRayIntensity &&
+                  Math.abs(lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue())) < minRayIntensity)
+                continue;
+              if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(r, lt, treeDepth+1, node, lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
+                {
+                  RGBColor tempColor = rt.tempColor;
+                  tempColor.copy(lightColor);
+                  tempColor.multiply(spec.diffuse);
+                  tempColor.scale(dot/numRays);
+                  finalColor.add(tempColor);
+                  if (hilight)
+                    {
+                      dir.subtract(viewDir);
+                      dir.normalize();
+                      dot = sign*dir.dot(normal);
+                      if (dot > 0.0)
+                        {
+                          tempColor.copy(lightColor);
+                          tempColor.multiply(spec.hilight);
+                          tempColor.scale(FastMath.pow(dot, (int) ((1.0-spec.roughness)*128.0)+1)/numRays);
+                          finalColor.add(tempColor);
+                        }
+                    }
+                }
+            }
+        }
       }
   }
 

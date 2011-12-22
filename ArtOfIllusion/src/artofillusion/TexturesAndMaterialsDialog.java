@@ -651,7 +651,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       {
         try
         {
-          theScene.writeToFile(saveFile);
+          new Scene().writeToFile(saveFile);
         }
         catch (IOException ex)
         {

@@ -38,6 +38,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   Texture selectedTexture;
   Material selectedMaterial;
   SceneTreeNode selectedSceneNode;
+  int insertLocation;
   BButton duplicateButton, deleteButton, editButton;
   BButton loadLibButton, saveLibButton, deleteLibButton, newFileButton, includeFileButton, closeButton;
   BComboBox typeChoice;
@@ -232,6 +233,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     Material oldMaterial = selectedMaterial;
     selectedTexture = null;
     selectedMaterial = null;
+    insertLocation = -1;
     if (selection != null && libraryList.isLeafNode(selection))
     {
       TreePath parentNode = libraryList.getParentNode(selection);
@@ -514,7 +516,8 @@ public class TexturesAndMaterialsDialog extends BDialog
   {
     if (selectedTexture != null)
     {
-      theScene.addTexture(selectedTexture.duplicate());
+      Texture newTexture = selectedTexture.duplicate();
+      theScene.addTexture(newTexture, insertLocation == -1 ? theScene.getNumTextures() : insertLocation);
       parentFrame.setModified();
       for (int i = 0; i < selectedScene.getNumImages(); i++)
       {
@@ -525,11 +528,12 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
       }
       parentFrame.updateImage();
-      selectLastCurrentTexture();
+      setSelection(libraryList.getRootNode(), theScene, newTexture);
     }
     else if (selectedMaterial != null)
     {
-      theScene.addMaterial(selectedMaterial);
+      Material newMaterial = selectedMaterial.duplicate();
+      theScene.addMaterial(newMaterial, insertLocation == -1 ? theScene.getNumMaterials() : insertLocation);
       parentFrame.setModified();
       for (int i = 0; i < selectedScene.getNumImages(); i++)
       {
@@ -540,7 +544,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
       }
       parentFrame.updateImage();
-      selectLastCurrentMaterial();
+      setSelection(libraryList.getRootNode(), theScene, newMaterial);
     }
     hilightButtons();
   }
@@ -573,7 +577,8 @@ public class TexturesAndMaterialsDialog extends BDialog
         Scene saveScene = new Scene(saveFile, true);
         if (selectedTexture != null)
         {
-          saveScene.addTexture(selectedTexture);
+          Texture newTexture = selectedTexture.duplicate();
+          saveScene.addTexture(newTexture, insertLocation == -1 ? saveScene.getNumTextures() : insertLocation);
           for (int i = 0; i < selectedScene.getNumImages(); i++)
           {
             ImageMap image = selectedScene.getImage(i);
@@ -584,7 +589,8 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         else if (selectedMaterial != null)
         {
-          saveScene.addMaterial(selectedMaterial);
+          Material newMaterial = selectedMaterial.duplicate();
+          saveScene.addMaterial(newMaterial, insertLocation == -1 ? saveScene.getNumMaterials() : insertLocation);
           for (int i = 0; i < selectedScene.getNumImages(); i++)
           {
             ImageMap image = selectedScene.getImage(i);
@@ -691,15 +697,6 @@ public class TexturesAndMaterialsDialog extends BDialog
   {
     String s = "<html><p>"+line1+"</p><p>"+line2+"</p></html>";
     matInfo.setText(s);
-  }
-
-  private void selectCurrent(int sel)
-  {
-    TreePath r = libraryList.getRootNode();
-    TreePath current = libraryList.getChildNode(r, 0);
-    libraryList.setNodeExpanded(current, true);
-    libraryList.setNodeSelected(libraryList.getChildNode(current, sel), true);
-    doSelectionChanged();
   }
 
   private void selectLastCurrentTexture()
@@ -1024,8 +1021,26 @@ public class TexturesAndMaterialsDialog extends BDialog
     public boolean canImport(TransferSupport transferSupport)
     {
       SceneTreeNode sceneNode = findDropLocation(transferSupport);
-      if (sceneNode == null || sceneNode == selectedSceneNode)
+      if (sceneNode == null)
         return false;
+      if (sceneNode == selectedSceneNode)
+      {
+        int current = -1;
+        try
+        {
+          if (selectedTexture != null)
+            current = selectedSceneNode.getScene().indexOf(selectedTexture);
+          else if (selectedMaterial != null)
+            current = selectedSceneNode.getScene().indexOf(selectedMaterial);
+        }
+        catch (IOException ex)
+        {
+          ex.printStackTrace();
+          return false;
+        }
+        if (insertLocation == -1 || insertLocation == current)
+          return false;
+      }
       transferSupport.setShowDropLocation(true);
       return true;
     }
@@ -1044,12 +1059,23 @@ public class TexturesAndMaterialsDialog extends BDialog
     public boolean importData(TransferSupport transferSupport)
     {
       SceneTreeNode sceneNode = findDropLocation(transferSupport);
-      if (sceneNode == null || sceneNode == selectedSceneNode)
+      if (sceneNode == null)
         return false;
       try
       {
         Scene destScene = sceneNode.getScene();
-        if (destScene == theScene)
+        if (sceneNode == selectedSceneNode)
+        {
+          Scene saveScene = (destScene == theScene ? theScene : new Scene(sceneNode.file, true));
+          if (selectedTexture != null)
+            saveScene.reorderTexture(destScene.indexOf(selectedTexture), insertLocation);
+          else if (selectedMaterial != null)
+            saveScene.reorderMaterial(destScene.indexOf(selectedMaterial), insertLocation);
+          if (destScene != theScene)
+            saveScene.writeToFile(sceneNode.file);
+          ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
+        }
+        else if (destScene == theScene)
           doLoadFromLibrary();
         else
           saveToFile(sceneNode.file);
@@ -1066,6 +1092,11 @@ public class TexturesAndMaterialsDialog extends BDialog
       TreePath location = libraryList.findNode(transferSupport.getDropLocation().getDropPoint());
       if (location == null)
         return null;
+      insertLocation = -1;
+      if (selectedTexture != null && location.getLastPathComponent() instanceof TextureTreeNode)
+        insertLocation = ((TextureTreeNode) location.getLastPathComponent()).index;
+      if (selectedMaterial != null && location.getLastPathComponent() instanceof MaterialTreeNode)
+        insertLocation = ((MaterialTreeNode) location.getLastPathComponent()).index;
       for (Object node : location.getPath())
         if (node instanceof SceneTreeNode)
           return (SceneTreeNode) node;

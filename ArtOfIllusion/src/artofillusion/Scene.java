@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -518,7 +518,19 @@ public class Scene
   
   public void addMaterial(Material mat)
   {
-    materials.addElement(mat);
+    addMaterial(mat, materials.size());
+  }
+
+  /**
+   * Add a new Material to the scene.
+   *
+   * @param mat    the Material to add
+   * @param index  the position in the list to add it at
+   */
+
+  public void addMaterial(Material mat, int index)
+  {
+    materials.add(index, mat);
     for (int i = 0; i < materialListeners.size(); i++)
       materialListeners.elementAt(i).itemAdded(materials.size()-1, mat);
   }
@@ -539,12 +551,39 @@ public class Scene
           obj.setMaterial(null, null);
       }
   }
-  
+
+  /**
+   * Reorder the list of Materials by moving a Material to a new position in the list.
+   *
+   * @param oldIndex    the index of the Material to move
+   * @param newIndex    the new position to move it to
+   */
+
+  public void reorderMaterial(int oldIndex, int newIndex)
+  {
+    if (newIndex < 0 || newIndex >= materials.size())
+      throw new IllegalArgumentException("Illegal value for newIndex: "+newIndex);
+    Material mat = materials.remove(oldIndex);
+    materials.add(newIndex, mat);
+  }
+
   /** Add a new Texture to the scene. */
 
   public void addTexture(Texture tex)
   {
-    textures.addElement(tex);
+    addTexture(tex, textures.size());
+  }
+
+  /**
+   * Add a new Texture to the scene.
+   *
+   * @param tex    the Texture to add
+   * @param index  the position in the list to add it at
+   */
+
+  public void addTexture(Texture tex, int index)
+  {
+    textures.add(index, tex);
     for (int i = 0; i < textureListeners.size(); i++)
       textureListeners.elementAt(i).itemAdded(textures.size()-1, tex);
   }
@@ -598,6 +637,21 @@ public class Scene
       tempObject.setTexture(environTexture, environMapping);
       environParamValue = tempObject.getParameterValues();
     }
+  }
+
+  /**
+   * Reorder the list of Textures by moving a Texture to a new position in the list.
+   *
+   * @param oldIndex    the index of the Texture to move
+   * @param newIndex    the new position to move it to
+   */
+
+  public void reorderTexture(int oldIndex, int newIndex)
+  {
+    if (newIndex < 0 || newIndex >= textures.size())
+      throw new IllegalArgumentException("Illegal value for newIndex: "+newIndex);
+    Texture tex = textures.remove(oldIndex);
+    textures.add(newIndex, tex);
   }
   
   /** This method should be called after a Material has been edited.  It notifies 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2006 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +14,8 @@ import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
+import ch.randelshofer.media.quicktime.*;
+
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
@@ -30,7 +32,7 @@ public class ImageSaver
   private boolean ok, premultiply;
   private double quality;
   private BFrame parent;
-  private MovieEncoder movie;
+  private QuickTimeWriter qt;
 
   public static final int FORMAT_JPEG = 0;
   public static final int FORMAT_TIFF = 1;
@@ -74,13 +76,14 @@ public class ImageSaver
       @param startFrameNumber   the default number for the first frame of the animation
   */
 
-  public ImageSaver(BFrame parent, int width, int height, int fps, int startFrameNumber)
+  public ImageSaver(BFrame parent, int width, int height, int fps, int startFrameNumber) throws IOException
   {
     init(parent, startFrameNumber);
     if (format == FORMAT_QUICKTIME && this.clickedOk())
     {
-      movie = new MovieEncoder(width, height, fps, new File(directory, name));
-      movie.doIt(); // will start polling for images.
+      qt = new QuickTimeWriter(new File(directory, name));
+      qt.addVideoTrack(QuickTimeWriter.VideoFormat.JPG, fps, width, height);
+      qt.setCompressionQuality(0, (float) quality*0.01f);
     }
   }
 
@@ -194,34 +197,23 @@ public class ImageSaver
   
   /** Save the next image to disk.  Returns false if an error occurs.*/
   
-  public boolean saveImage(Image im)
+  public boolean saveImage(Image im) throws IOException
   {
     return saveImage(new ComplexImage(im));
   }
   
   /** Save the next image to disk.  Returns false if an error occurs.*/
   
-  public boolean saveImage(ComplexImage img)
+  public boolean saveImage(ComplexImage img) throws IOException
   {
     String filename = name;
-    if (movie != null) // Ken : to optimize.
+    if (qt != null)
     {
-      // Save the next frame to the movie file.
-      
-      Image im = img.getImage();
-      im = premultiplyTransparency(im);
-      java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-      java.io.BufferedOutputStream bos = new java.io.BufferedOutputStream(baos);
-      try
-      {
-        writeJpegToStream(im, bos, (int) quality);
-        movie.pushBytes(baos.toByteArray());
-        bos.close();
-      }
-      catch (IOException iox)
-      {
-        iox.printStackTrace(); // normally we can recover.  
-      }
+      BufferedImage buffer = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+      Graphics2D g = buffer.createGraphics();
+      g.drawImage(img.getImage(), 0, 0, parent.getComponent());
+      g.dispose();
+      qt.writeFrame(0, buffer, 1);
       return true;
     }
     if (index != Integer.MIN_VALUE)
@@ -326,14 +318,10 @@ public class ImageSaver
 
   /** This should be called after the last frame of an animation has been saved. */
 
-  public void lastMovieImage()
+  public void lastMovieImage() throws IOException
   {
-    if (movie != null)
-    {
-      movie.signalDone();
-      movie = null;
-    }
-    return; // do nothing.
+    if (qt != null)
+      qt.close();
   }
   
   /** Determine whether this image is partially transparent, and if so, create a new image

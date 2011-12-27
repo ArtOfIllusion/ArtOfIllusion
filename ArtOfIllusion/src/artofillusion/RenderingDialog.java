@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +17,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.io.*;
 
 /** This class implements the dialog box in which the user can watch a scene being rendered. */
 
@@ -123,7 +124,14 @@ public class RenderingDialog extends BDialog implements RenderListener
     if (imgsaver != null)
     {
       theScene.setTime(originalTime);
-      imgsaver.lastMovieImage(); // Ken: soft abort; file should be readable.
+      try
+      {
+        imgsaver.lastMovieImage(); // Ken: soft abort; file should be readable.
+      }
+      catch (IOException ex)
+      {
+        new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+      }
     }
     dispose();
     if (hasModifiedFilters)
@@ -140,7 +148,16 @@ public class RenderingDialog extends BDialog implements RenderListener
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     ImageSaver saver = new ImageSaver(parent);
     if (saver.clickedOk())
-      saver.saveImage(filteredImage);
+    {
+      try
+      {
+        saver.saveImage(filteredImage);
+      }
+      catch (IOException ex)
+      {
+        new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+      }
+    }
     setCursor(Cursor.getDefaultCursor());
     toFront();
   }
@@ -298,20 +315,33 @@ public class RenderingDialog extends BDialog implements RenderListener
       EventQueue.invokeAndWait(new Runnable() {
         public void run()
         {
-          if (imgsaver != null)
-            nextFrame();
-          if (currentFrame == totalFrames)
+          try
           {
-            done = true;
             if (imgsaver != null)
-              imgsaver.lastMovieImage(); // forwards to instance of MovieEncoder
-            label1.setText(Translate.text("doneRendering"));
-            closeButton.setText(Translate.text("button.close"));
-            saveButton.setVisible(imgsaver == null);
-            filterButton.setVisible(imgsaver == null);
-            ((WidgetContainer) getContent()).layoutChildren();
+              nextFrame();
+            if (currentFrame == totalFrames)
+            {
+              done = true;
+              if (imgsaver != null)
+                imgsaver.lastMovieImage();
+              label1.setText(Translate.text("doneRendering"));
+              closeButton.setText(Translate.text("button.close"));
+              saveButton.setVisible(imgsaver == null);
+              filterButton.setVisible(imgsaver == null);
+              ((WidgetContainer) getContent()).layoutChildren();
+            }
+            updateTimeLabel();
           }
-          updateTimeLabel();
+          catch (final IOException ex)
+          {
+            EventQueue.invokeLater(new Runnable() {
+              public void run()
+              {
+                new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+                doCancel();
+              }
+            });
+          }
         }
       });
     }
@@ -332,7 +362,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   /** Save the image which has just finished rendering, and begin the next one. */
   
-  private void nextFrame()
+  private void nextFrame() throws IOException
   {
     if (done)
       return;

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2011 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,6 +16,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 
@@ -146,11 +147,18 @@ public class RenderSetupDialog
       if (movie)
       {
         int startFrameNumber = (int) Math.round(startTime*fps)+1;
-        ImageSaver saver = new ImageSaver(parent, width, height, fps, startFrameNumber);
-        if (!saver.clickedOk())
-          return;
-        new RenderingDialog(parent, currentRenderer, theScene, 
-          cam, cameras[currentCamera], startTime, endTime, fps, subimages, saver);
+        try
+        {
+          ImageSaver saver = new ImageSaver(parent, width, height, fps, startFrameNumber);
+          if (!saver.clickedOk())
+            return;
+          new RenderingDialog(parent, currentRenderer, theScene,
+            cam, cameras[currentCamera], startTime, endTime, fps, subimages, saver);
+        }
+        catch (IOException ex)
+        {
+          new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+        }
       }
       else
         new RenderingDialog(parent, currentRenderer, theScene, cam, cameras[currentCamera]);

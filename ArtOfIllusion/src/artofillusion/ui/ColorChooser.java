@@ -14,8 +14,10 @@ import artofillusion.math.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.prefs.*;
+import javax.swing.*;
 
 /** ColorChooser is a BDialog in which the user can edit an RGBColor object.  It allows the
     color to be specified using the RGB, HSV, or HLS color models. */
@@ -76,14 +78,21 @@ public class ColorChooser extends BDialog
     FormContainer center = new FormContainer(new double [] {0, 1, 0}, new double [] {1, 1, 1, 1, 1, 1, 1, 1, 1});
     center.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, null, null));
     content.add(center, BorderContainer.CENTER);
-    center.add(label1 = Translate.label("Red"), 0, 0, 2, 1);
-    center.add(label2 = Translate.label("Green"), 0, 2, 2, 1);
-    center.add(label3 = Translate.label("Blue"), 0, 4, 2, 1);
+    LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(5, 0, 0, 10), null);
+    center.add(label1 = Translate.label("Red"), 0, 0, 2, 1, labelLayout);
+    center.add(label2 = Translate.label("Green"), 0, 2, 2, 1, labelLayout);
+    center.add(label3 = Translate.label("Blue"), 0, 4, 2, 1, labelLayout);
     LayoutInfo sliderLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(0, 0, 0, 5), null);
     double componentMax = (rangeMode == 0 ? 1.0 : 255.0);
     center.add(slider1 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getRed()), 0, 1, 2, 1, sliderLayout);
     center.add(slider2 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getGreen()), 0, 3, 2, 1, sliderLayout);
     center.add(slider3 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getBlue()), 0, 5, 2, 1, sliderLayout);
+    label1.setAlignment(BLabel.EAST);
+    label2.setAlignment(BLabel.EAST);
+    label3.setAlignment(BLabel.EAST);
+    label1.setTextPosition(BLabel.WEST);
+    label2.setTextPosition(BLabel.WEST);
+    label3.setTextPosition(BLabel.WEST);
     slider1.addEventLink(ValueChangedEvent.class, this, "valueChanged");
     slider2.addEventLink(ValueChangedEvent.class, this, "valueChanged");
     slider3.addEventLink(ValueChangedEvent.class, this, "valueChanged");
@@ -120,11 +129,16 @@ public class ColorChooser extends BDialog
     addAsListener(this);
     modeChanged();
     pack();
+    addEventLink(WindowActivatedEvent.class, new Object() {
+      void processEvent() {
+        updateColorGradients();
+      }
+    });
     setResizable(false);
     UIUtilities.centerDialog(this, parent);
     if (show)
       setVisible(true);
-  }
+   }
 
   /** Get the color which is currently specified in the window. */
 
@@ -185,6 +199,7 @@ public class ColorChooser extends BDialog
       newColor.setHLS(values[0]*360.0f, values[1], values[2]);
     newColorPatch.setBackground(newColor.getColor());
     newColorPatch.repaint();
+    updateColorGradients();
     dispatchEvent(new ValueChangedEvent(this));
   }
 
@@ -244,6 +259,7 @@ public class ColorChooser extends BDialog
     slider2.setValue(scale*values[1]);
     slider3.setValue(scale*values[2]);
     Preferences.userNodeForPackage(ColorChooser.class).putInt("defaultColorModel", mode);
+    updateColorGradients();
   }
 
   private void rangeChanged()
@@ -255,5 +271,48 @@ public class ColorChooser extends BDialog
     slider3.setMaximumValue(componentMax);
     Preferences.userNodeForPackage(ColorChooser.class).putInt("defaultColorRange", rangeMode);
     modeChanged();
+  }
+ 
+  private void updateColorGradients()
+  {
+    int width = slider1.slider.getBounds().width;
+    if (width <= 0)
+      return;
+    BLabel labels[] = new BLabel[] {label1, label2, label3};
+    for (int whichPatch = 0; whichPatch < 3; whichPatch++)
+    {
+      BLabel label = labels[whichPatch];
+      ImageIcon icon = (ImageIcon) label.getIcon();
+      if (icon == null)
+      {
+        icon = new ImageIcon(new BufferedImage(width-10, 15, BufferedImage.TYPE_INT_RGB));
+        label.setIcon(icon);
+      }
+      BufferedImage image = (BufferedImage) icon.getImage();
+      int gradientRange = image.getWidth();
+      int gradientHeight = image.getHeight();
+      float[] tempVals = new float[] {(float) slider1.getValue(), (float) slider2.getValue(), (float) slider3.getValue() };
+      RGBColor workingColor = new RGBColor();
+      if (rangeMode == 1)
+      {
+        tempVals[0] /= 255.0;
+        tempVals[1] /= 255.0;
+        tempVals[2] /= 255.0;
+      }
+      for (int i = 0; i < gradientRange; i++)
+      {
+        tempVals[whichPatch] = (i / (float) gradientRange);
+        if (mode == 0)
+            workingColor.setRGB(tempVals[0], tempVals[1], tempVals[2]);
+        else if (mode == 1)
+            workingColor.setHSV(tempVals[0]*360.0f, tempVals[1], tempVals[2]);
+        else
+            workingColor.setHLS(tempVals[0]*360.0f, tempVals[1], tempVals[2]);
+        int javaRGB = workingColor.getColor().getRGB();
+        for (int h = 0; h < gradientHeight; h++)
+          image.setRGB(i, h, javaRGB);
+      }
+      label.repaint();
+    }
   }
 }

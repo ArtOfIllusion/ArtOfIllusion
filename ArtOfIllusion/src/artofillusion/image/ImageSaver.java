@@ -99,12 +99,8 @@ public class ImageSaver
     index = startFrameNumber;
 
     final BComboBox formatChoice = new BComboBox();
-    boolean allowQuicktime = (gotJMF() && animate);
     for (int i = 0; i < FORMAT_NAME.length; i++)
-      if (allowQuicktime || i != FORMAT_QUICKTIME)
-        formatChoice.add(FORMAT_NAME[i]);
-    if (animate && !allowQuicktime && lastMovieFormat == FORMAT_QUICKTIME)
-      lastMovieFormat = FORMAT_JPEG;
+      formatChoice.add(FORMAT_NAME[i]);
     formatChoice.setSelectedValue(FORMAT_NAME[animate ? lastMovieFormat : lastImageFormat]);
     BCheckBox premultBox = new BCheckBox("Premultiply Transparency", premultiplyDefault);
     final ValueSlider qualitySlider = new ValueSlider(0.0, 100.0, 100, qualityDefault);
@@ -172,20 +168,6 @@ public class ImageSaver
         }
       }
     }
-  }
-  
-  /** Determine whether the Java Media Framework is installed. */
-
-  private boolean gotJMF()
-  {
-    try {
-      Class c = Class.forName("javax.media.protocol.DataSource");
-      return true;
-    
-    } catch (ClassNotFoundException nfx) {
-      // don't have JMF.  
-    }
-    return false;
   }
 
   /** Determine whether the user canceled saving the image. */

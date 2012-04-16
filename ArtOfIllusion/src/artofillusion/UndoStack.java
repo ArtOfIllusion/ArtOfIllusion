@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2004 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,12 +17,12 @@ import java.util.*;
 
 public class UndoStack
 {
-  private LinkedList undoList, redoList;
+  private LinkedList<UndoRecord> undoList, redoList;
   
   public UndoStack()
   {
-    undoList = new LinkedList();
-    redoList = new LinkedList();
+    undoList = new LinkedList<UndoRecord>();
+    redoList = new LinkedList<UndoRecord>();
   }
   
   /**
@@ -58,6 +58,7 @@ public class UndoStack
       undoList.removeFirst();
     undoList.add(record);
     redoList.clear();
+    record.cacheToDisk();
   }
   
   /**

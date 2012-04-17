@@ -17,6 +17,8 @@ import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 
+import java.lang.ref.*;
+
 /** ObjectInfo represents information about an object within a Scene: its position, 
     orientation, name, visibility, etc.  The internal properties (i.e. geometry) of
     the object are defined by the "object" property.
@@ -36,8 +38,8 @@ public class ObjectInfo
   public int id;
   private boolean locked;
   private Distortion distortion, prevDistortion;
-  private RenderingMesh cachedMesh;
-  private WireframeMesh cachedWire;
+  private SoftReference<RenderingMesh> cachedMesh;
+  private SoftReference<WireframeMesh> cachedWire;
   private BoundingBox cachedBounds;
   private boolean lastPreviewWasWireframe;
 
@@ -107,7 +109,7 @@ public class ObjectInfo
   {
     setObject(info.getObject());
     getCoords().copyCoords(info.getCoords());
-    setName(info.name.toString());
+    setName(info.name);
     setVisible(info.visible);
     setLocked(info.locked);
     setId(info.id);
@@ -303,18 +305,22 @@ public class ObjectInfo
   public RenderingMesh getPreviewMesh()
   {
     checkDistortionChanged();
-    if (cachedMesh == null)
+    RenderingMesh cached = null;
+    if (cachedMesh != null)
+      cached = cachedMesh.get();
+    if (cached == null)
       {
         if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
           getObject().applyPoseKeyframe(getPose());
         double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
-        cachedMesh = obj.getRenderingMesh(tol, true, this);
+        cached = obj.getRenderingMesh(tol, true, this);
+        cachedMesh = new SoftReference<RenderingMesh>(cached);
         if (cachedBounds == null)
           cachedBounds = obj.getBounds();
       }
     lastPreviewWasWireframe = false;
-    return cachedMesh;
+    return cached;
   }
   
   /** Get a wireframe mesh for interactive previews. */
@@ -322,18 +328,22 @@ public class ObjectInfo
   public WireframeMesh getWireframePreview()
   {
     checkDistortionChanged();
-    if (cachedWire == null)
+    WireframeMesh cached = null;
+    if (cachedWire != null)
+      cached = cachedWire.get();
+    if (cached == null)
       {
         if (getPose() != null && !getPose().equals(getObject().getPoseKeyframe()))
           getObject().applyPoseKeyframe(getPose());
         double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
-        cachedWire = obj.getWireframeMesh();
+        cached = obj.getWireframeMesh();
+        cachedWire = new SoftReference<WireframeMesh>(cached);
         if (cachedBounds == null)
           cachedBounds = obj.getBounds();
       }
     lastPreviewWasWireframe = true;
-    return cachedWire;
+    return cached;
   }
   
   /** Get a bounding box for the object.  The bounding box is defined in the object's local coordinate system. */
@@ -354,9 +364,9 @@ public class ObjectInfo
         if (!(realObject instanceof ObjectCollection))
         {
           if (lastPreviewWasWireframe && cachedWire == null)
-            cachedWire = obj.getWireframeMesh();
+            cachedWire = new SoftReference<WireframeMesh>(obj.getWireframeMesh());
           else if (!lastPreviewWasWireframe && cachedMesh == null)
-            cachedMesh = obj.getRenderingMesh(tol, true, this);
+            cachedMesh = new SoftReference<RenderingMesh>(obj.getRenderingMesh(tol, true, this));
         }
       }
     return cachedBounds;

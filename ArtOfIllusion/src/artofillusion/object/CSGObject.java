@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2009 by Peter Eastman
+/* Copyright (C) 2001-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +17,7 @@ import artofillusion.math.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import java.io.*;
+import java.lang.ref.*;
 import java.lang.reflect.*;
 
 /** A CSGObject is an Object3D that represents the union, intersection, or difference of 
@@ -26,8 +27,8 @@ public class CSGObject extends Object3D
 {
   ObjectInfo obj1, obj2;
   int operation;
-  RenderingMesh cachedMesh;
-  WireframeMesh cachedWire;
+  SoftReference<RenderingMesh> cachedMesh;
+  SoftReference<WireframeMesh> cachedWire;
   BoundingBox bounds;
 
   public static final int UNION = 0;
@@ -143,18 +144,24 @@ public class CSGObject extends Object3D
   void findBounds()
   {
     double minx, miny, minz, maxx, maxy, maxz;
-    Vec3 vert[];
+    Vec3 vert[] = null;
     int i;
-    
+
     if (cachedMesh != null)
-      vert = cachedMesh.vert;
-    else if (cachedWire != null)
-      vert = cachedWire.vert;
-    else
-      {
-        getWireframeMesh();
-        vert = cachedWire.vert;
-      }
+    {
+      RenderingMesh cached = cachedMesh.get();
+      if (cached != null)
+        vert = cached.vert;
+    }
+    if (vert == null && cachedWire != null)
+    {
+      WireframeMesh cached = cachedWire.get();
+      if (cached != null)
+        vert = cached.vert;
+      vert = cached.vert;
+    }
+    if (vert == null)
+      vert = getWireframeMesh().vert;
 
     minx = maxx = vert[0].x;
     miny = maxy = vert[0].y;
@@ -273,9 +280,13 @@ public class CSGObject extends Object3D
   {
     if (interactive)
       {
-        if (cachedMesh == null)
-          cacheMeshes(tol, info);
-        return cachedMesh;
+        if (cachedMesh != null)
+        {
+          RenderingMesh cached = cachedMesh.get();
+          if (cached != null)
+            return cached;
+        }
+        return (RenderingMesh) cacheMeshes(tol, info)[0];
       }
     return convertToTriangleMesh(tol).getRenderingMesh(tol, false, info);
   }
@@ -284,17 +295,21 @@ public class CSGObject extends Object3D
   
   public WireframeMesh getWireframeMesh()
   {
-    if (cachedWire == null)
-      cacheMeshes(ArtOfIllusion.getPreferences().getInteractiveSurfaceError(), null);
-    return cachedWire;
+    if (cachedWire != null)
+    {
+      WireframeMesh cached = cachedWire.get();
+      if (cached != null)
+        return cached;
+    }
+    return (WireframeMesh) cacheMeshes(ArtOfIllusion.getPreferences().getInteractiveSurfaceError(), null)[1];
   }
 
   /** Build the preview meshes and save them for later use. */
   
-  private void cacheMeshes(double tol, ObjectInfo info)
+  private Object[] cacheMeshes(double tol, ObjectInfo info)
   {
     TriangleMesh mesh = convertToTriangleMesh(tol);
-    cachedMesh = mesh.getRenderingMesh(tol, true, info);
+    RenderingMesh rendering = mesh.getRenderingMesh(tol, true, info);
     TriangleMesh.Edge edge[] = mesh.getEdges();
     int to[] = new int [edge.length], from[] = new int [edge.length];
     
@@ -303,7 +318,10 @@ public class CSGObject extends Object3D
         to[i] = edge[i].v1;
         from[i] = edge[i].v2;
       }
-    cachedWire = new WireframeMesh(cachedMesh.vert, from, to);
+    WireframeMesh wire = new WireframeMesh(rendering.vert, from, to);
+    cachedMesh = new SoftReference<RenderingMesh>(rendering);
+    cachedWire = new SoftReference<WireframeMesh>(wire);
+    return new Object[] {rendering, wire}; // Return these to make sure the references don't get cleared instantly.
   }
 
   /** Save this object to an output stream. */

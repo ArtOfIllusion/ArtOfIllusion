@@ -19,6 +19,7 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.lang.ref.*;
 import java.util.*;
 
 /** The TriangleMesh class represents an aritrary surface defined by a mesh of triangular 
@@ -202,8 +203,8 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   private boolean closed;
   private BoundingBox bounds;
   private int smoothingMethod = SMOOTH_SHADING;
-  private RenderingMesh cachedMesh;
-  private WireframeMesh cachedWire;
+  private SoftReference<RenderingMesh> cachedMesh;
+  private SoftReference<WireframeMesh> cachedWire;
   
   private static double LOOP_BETA[], BUTTERFLY_COEFF[][];
   private static final int MAX_SUBDIVISIONS = 20;
@@ -407,18 +408,24 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   private void findBounds()
   {
     double minx, miny, minz, maxx, maxy, maxz;
-    Vec3 vert[];
+    Vec3 vert[] = null;
     int i;
     
     if (cachedMesh != null)
-      vert = cachedMesh.vert;
-    else if (cachedWire != null)
-      vert = cachedWire.vert;
-    else
     {
-      getWireframeMesh();
-      vert = cachedWire.vert;
+      RenderingMesh cached = cachedMesh.get();
+      if (cached != null)
+        vert = cached.vert;
     }
+    if (vert == null && cachedWire != null)
+    {
+      WireframeMesh cached = cachedWire.get();
+      if (cached != null)
+        vert = cached.vert;
+      vert = cached.vert;
+    }
+    if (vert == null)
+      vert = getWireframeMesh().vert;
     if (vert.length == 0)
       minx = maxx = miny = maxy = minz = maxz = 0.0;
     else
@@ -709,7 +716,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     boolean split[];
 
     if (cachedWire != null)
-      return cachedWire;
+    {
+      WireframeMesh cached = cachedWire.get();
+      if (cached != null)
+        return cached;
+    }
     
     // If appropriate, subdivide the mesh.
     
@@ -740,7 +751,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
         from[i] = e[i].v1;
         to[i] = e[i].v2;
       }
-    return (cachedWire = new WireframeMesh(point, from, to));
+    WireframeMesh wire = new WireframeMesh(point, from, to);
+    cachedWire = new SoftReference<WireframeMesh>(wire);
+    return wire;
   }
 
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
@@ -756,7 +769,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     boolean split[];
 
     if (interactive && cachedMesh != null)
-      return cachedMesh;
+    {
+      RenderingMesh cached = cachedMesh.get();
+      if (cached != null)
+        return cached;
+    }
     if (face.length == 0)
     {
       RenderingMesh rend = new RenderingMesh(new Vec3 [] {new Vec3()}, new Vec3 [] {Vec3.vx()}, new RenderingTriangle [0], texMapping, matMapping);
@@ -1014,7 +1031,7 @@ groups:     do
     RenderingMesh rend = new RenderingMesh(vert, normalArray, tri, texMapping, matMapping);
     rend.setParameters(mesh.paramValue);
     if (interactive)
-      cachedMesh = rend;
+      cachedMesh = new SoftReference<RenderingMesh>(rend);
     return rend;
   }
 

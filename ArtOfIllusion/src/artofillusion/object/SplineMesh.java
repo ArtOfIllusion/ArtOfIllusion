@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,8 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
-import java.util.Vector;
+import java.lang.ref.*;
+import java.util.*;
 
 /** The SplineMesh class represents a parametric surface defined as a tensor product of
     spline curves.  Depending on the selected smoothing method, the surface may either 
@@ -32,8 +33,8 @@ public class SplineMesh extends Object3D implements Mesh
   BoundingBox bounds;
   int usize, vsize, cachedUSize, cachedVSize, smoothingMethod;
   float usmoothness[], vsmoothness[];
-  RenderingMesh cachedMesh;
-  WireframeMesh cachedWire;
+  SoftReference<RenderingMesh> cachedMesh;
+  SoftReference<WireframeMesh> cachedWire;
 
   private static final int MAX_SUBDIVISIONS = 20;
   private static final Property PROPERTIES[] = new Property [] {
@@ -104,18 +105,24 @@ public class SplineMesh extends Object3D implements Mesh
   void findBounds()
   {
     double minx, miny, minz, maxx, maxy, maxz;
-    Vec3 vert[];
+    Vec3 vert[] = null;
     int i;
-    
+
     if (cachedMesh != null)
-      vert = cachedMesh.vert;
-    else if (cachedWire != null)
-      vert = cachedWire.vert;
-    else
-      {
-        getWireframeMesh();
-        vert = cachedWire.vert;
-      }
+    {
+      RenderingMesh cached = cachedMesh.get();
+      if (cached != null)
+        vert = cached.vert;
+    }
+    if (vert == null && cachedWire != null)
+    {
+      WireframeMesh cached = cachedWire.get();
+      if (cached != null)
+        vert = cached.vert;
+      vert = cached.vert;
+    }
+    if (vert == null)
+      vert = getWireframeMesh().vert;
 
     minx = maxx = vert[0].x;
     miny = maxy = vert[0].y;
@@ -709,13 +716,20 @@ public class SplineMesh extends Object3D implements Mesh
     int i, j, k, udim, vdim, from[], to[];
 
     if (cachedWire != null)
-      return cachedWire;
+    {
+      WireframeMesh cached = cachedWire.get();
+      if (cached != null)
+        return cached;
+    }
     
     // First get the array of points.
-    
+
+    RenderingMesh cached = null;
     if (cachedMesh != null)
+      cached = cachedMesh.get();
+    if (cached != null)
       {
-        point = cachedMesh.vert;
+        point = cached.vert;
         udim = cachedUSize;
         vdim = cachedVSize;
       }
@@ -771,7 +785,9 @@ public class SplineMesh extends Object3D implements Mesh
           from[k] = i;
           to[k++] = i+udim*(vdim-1);
         }
-    return (cachedWire = new WireframeMesh(point, from, to));
+    WireframeMesh wire = new WireframeMesh(point, from, to);
+    cachedWire = new SoftReference<WireframeMesh>(wire);
+    return wire;
   }
 
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
@@ -779,12 +795,15 @@ public class SplineMesh extends Object3D implements Mesh
     float us[], vs[];
     Vec3 point[], norm[];
     int i, j, k, u1, u2, v1, v2, udim, vdim, normIndex[][][];
-    Vector normal;
     RenderingTriangle tri[];
     RenderingMesh mesh;
 
     if (interactive && cachedMesh != null)
-      return cachedMesh;
+    {
+      RenderingMesh cached = cachedMesh.get();
+      if (cached != null)
+        return cached;
+    }
     
     // First get the array of points.
     
@@ -799,7 +818,7 @@ public class SplineMesh extends Object3D implements Mesh
     
     // Construct the list of normals.
     
-    normal = new Vector(point.length);
+    ArrayList<Vec3> normal = new ArrayList<Vec3>(point.length);
     normIndex = new int [udim][vdim][4];
     k = 0;
     for (i = 0; i < udim; i++)
@@ -839,10 +858,10 @@ public class SplineMesh extends Object3D implements Mesh
             }
           if (us[i] < 1.0f && vs[j] < 1.0f) // Creases in both directions.
             {
-              normal.addElement(calcNormal(point, i, j, u1, i, v1, j, udim));
-              normal.addElement(calcNormal(point, i, j, i, u2, v1, j, udim));
-              normal.addElement(calcNormal(point, i, j, u1, i, j, v2, udim));
-              normal.addElement(calcNormal(point, i, j, i, u2, j, v2, udim));
+              normal.add(calcNormal(point, i, j, u1, i, v1, j, udim));
+              normal.add(calcNormal(point, i, j, i, u2, v1, j, udim));
+              normal.add(calcNormal(point, i, j, u1, i, j, v2, udim));
+              normal.add(calcNormal(point, i, j, i, u2, j, v2, udim));
               normIndex[i][j][0] = k++;
               normIndex[i][j][1] = k++;
               normIndex[i][j][2] = k++;
@@ -850,27 +869,27 @@ public class SplineMesh extends Object3D implements Mesh
             }
           else if (us[i] < 1.0f) // Crease in the u direction.
             {
-              normal.addElement(calcNormal(point, i, j, u1, i, v1, v2, udim));
-              normal.addElement(calcNormal(point, i, j, i, u2, v1, v2, udim));
+              normal.add(calcNormal(point, i, j, u1, i, v1, v2, udim));
+              normal.add(calcNormal(point, i, j, i, u2, v1, v2, udim));
               normIndex[i][j][0] = normIndex[i][j][2] = k++;
               normIndex[i][j][1] = normIndex[i][j][3] = k++;
             }
           else if ( vs[j] < 1.0f) // Crease in the v direction.
             {
-              normal.addElement(calcNormal(point, i, j, u1, u2, v1, j, udim));
-              normal.addElement(calcNormal(point, i, j, u1, u2, j, v2, udim));
+              normal.add(calcNormal(point, i, j, u1, u2, v1, j, udim));
+              normal.add(calcNormal(point, i, j, u1, u2, j, v2, udim));
               normIndex[i][j][0] = normIndex[i][j][1] = k++;
               normIndex[i][j][2] = normIndex[i][j][3] = k++;
             }
           else // Smooth vertex.
             {
-              normal.addElement(calcNormal(point, i, j, u1, u2, v1, v2, udim));
+              normal.add(calcNormal(point, i, j, u1, u2, v1, v2, udim));
               normIndex[i][j][0] = normIndex[i][j][1] = normIndex[i][j][2] = normIndex[i][j][3] = k++;
             }
         }
     norm = new Vec3 [normal.size()];
     for (i = 0; i < norm.length; i++)
-      norm[i] = (Vec3) normal.elementAt(i);
+      norm[i] = normal.get(i);
     
     // Determine how many triangles there will be.
     
@@ -913,7 +932,7 @@ public class SplineMesh extends Object3D implements Mesh
     mesh = new RenderingMesh(point, norm, tri, texMapping, matMapping);
     mesh.setParameters(newmesh.paramValue);
     if (interactive)
-      cachedMesh = mesh;
+      cachedMesh = new SoftReference<RenderingMesh>(mesh);
     return mesh;
   }
   

@@ -1,5 +1,3 @@
-/* This class enumerates the objects defined by a ScriptedObject. */
-
 /* Copyright (C) 2002 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -16,7 +14,9 @@ import artofillusion.*;
 import artofillusion.object.*;
 import java.util.*;
 
-public class ScriptedObjectEnumeration implements Enumeration
+/* This class enumerates the objects defined by a ScriptedObject. */
+
+public class ScriptedObjectEnumeration implements Enumeration<ObjectInfo>
 {
   private ObjectInfo next;
   private boolean complete;
@@ -71,7 +71,7 @@ public class ScriptedObjectEnumeration implements Enumeration
   
   /** Get the next ObjectInfo, or null if there are no more. */
   
-  public synchronized Object nextElement()
+  public synchronized ObjectInfo nextElement()
   {
     while (next == null && !complete)
       {

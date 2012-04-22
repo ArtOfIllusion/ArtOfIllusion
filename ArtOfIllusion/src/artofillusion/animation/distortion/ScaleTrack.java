@@ -44,7 +44,7 @@ public class ScaleTrack extends Track
   public void apply(double time)
   {
     Vec3 scale = (VectorKeyframe) tc.evaluate(time, smoothingMethod);
-    if (scale == null)
+    if (scale == null || (scale.x == 1.0 && scale.y == 1.0 && scale.z == 1.0))
       return;
     double weight = theWeight.getWeight(time), w2 = 1.0-weight;
     if (worldCoords)

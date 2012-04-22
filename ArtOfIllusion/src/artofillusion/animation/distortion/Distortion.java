@@ -1,4 +1,4 @@
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,22 +14,34 @@ import artofillusion.object.*;
 
 /** This interface defines an object that transforms one mesh into another one. */
 
-public interface Distortion
+public abstract class Distortion
 {
+  protected Distortion previous;
+
   /** Set another distortion which should be applied before this one.
       This allows Distortions to be chained. */
   
-  public void setPreviousDistortion(Distortion previous);
-  
+  public void setPreviousDistortion(Distortion previous)
+  {
+    this.previous = previous;
+  }
+
+  /** Get the previous distortion that should be applied before this one.  This may be null. */
+
+  public Distortion getPreviousDistortion()
+  {
+    return previous;
+  }
+
   /** Determine whether this distortion is identical to another one. */
   
-  public boolean isIdenticalTo(Distortion d);
+  public abstract boolean isIdenticalTo(Distortion d);
   
   /** Create a duplicate of this object. */
   
-  public Distortion duplicate();
+  public abstract Distortion duplicate();
   
   /** Apply the Distortion, and return a transformed mesh. */
   
-  public Mesh transform(Mesh obj);
+  public abstract Mesh transform(Mesh obj);
 }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,12 +18,11 @@ import java.util.Random;
 
 /** This is a distortion which shatters an object. */
 
-public class ShatterDistortion implements Distortion
+public class ShatterDistortion extends Distortion
 {
   private double time, size, speed, randomness, gravity, spin, disappear;
   private int gravityAxis;
   private Mat4 gravityDirTransform;
-  private Distortion previous;
 
   public static final int X_AXIS = 0;
   public static final int Y_AXIS = 1;
@@ -42,14 +41,6 @@ public class ShatterDistortion implements Distortion
     this.gravityDirTransform = gravityDirTransform;
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)

@@ -323,7 +323,7 @@ public class ExternalObject extends ObjectWrapper
       this.objects = objects;
     }
 
-    protected Enumeration enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
+    protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
     {
       return Collections.enumeration(objects);
     }

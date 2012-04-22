@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2007 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +11,10 @@
 package artofillusion.object;
 
 import artofillusion.*;
+import artofillusion.animation.distortion.*;
 import artofillusion.math.*;
+import artofillusion.texture.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -21,13 +24,14 @@ import java.util.*;
 
 public abstract class ObjectCollection extends Object3D
 {
-  protected Vector cachedObjects;
+  protected Vector<ObjectInfo> cachedObjects;
   protected BoundingBox cachedBounds;
   protected double lastTime;
   protected CoordinateSystem lastCoords;
   protected Scene lastScene;
   protected ObjectInfo lastInfo;
   protected boolean usesTime, usesCoords;
+  protected Distortion previousDistortion;
   
   public ObjectCollection()
   {
@@ -40,30 +44,52 @@ public abstract class ObjectCollection extends Object3D
   }
   
   /** Get an enumeration of ObjectInfos listing the objects which this object
-      is composed of.  This simply calls the protected method enumerateObjects()
-      (which must be provided by subclasses), while caching objects for
-      interactive previews. */
+      is composed of.  This calls the protected method enumerateObjects()
+      (which must be provided by subclasses), while applying Distortions and
+      caching objects for interactive previews. */
   
-  public synchronized Enumeration getObjects(ObjectInfo info, boolean interactive, Scene scene)
+  public synchronized Enumeration<ObjectInfo> getObjects(ObjectInfo info, boolean interactive, Scene scene)
   {
+    if (interactive && cachedObjects != null && info.getDistortion() == previousDistortion)
+      return cachedObjects.elements();
+    Vector<ObjectInfo> objectVec = new Vector<ObjectInfo>();
+    Enumeration<ObjectInfo> objects = enumerateObjects(info, interactive, scene);
+    while (objects.hasMoreElements())
+    {
+      ObjectInfo childInfo = objects.nextElement();
+      applyDistortion(info, childInfo);
+      objectVec.add(childInfo);
+    }
     if (!interactive)
-      return enumerateObjects(info, interactive, scene);
-    if (cachedObjects == null)
-      {
-        cachedObjects = new Vector();
-        Enumeration objects = enumerateObjects(info, interactive, scene);
-        while (objects.hasMoreElements())
-          cachedObjects.addElement(objects.nextElement());
-      }
+      return objectVec.elements();
+    cachedObjects = objectVec;
+    previousDistortion = info.getDistortion();
     return cachedObjects.elements();
   }
 
   /** Get an enumeration of ObjectInfos listing the objects which this object
       is composed of. */
   
-  protected abstract Enumeration enumerateObjects(ObjectInfo info, boolean interactive, Scene scene);
+  protected abstract Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene);
 
-  /* Get a BoundingBox which just encloses the object. */
+  /** If this object has a distortion applied to it, then apply it to one of its component objects. */
+
+  private void applyDistortion(ObjectInfo thisInfo, ObjectInfo childInfo)
+  {
+    childInfo.clearDistortion();
+    if (thisInfo.isDistorted())
+    {
+      Distortion d = thisInfo.getDistortion().duplicate();
+      Distortion first = d;
+      while (first.getPreviousDistortion() != null)
+        first = first.getPreviousDistortion();
+      first.setPreviousDistortion(new TransformDistortion(childInfo.getCoords().fromLocal()));
+      childInfo.setDistortion(d);
+      childInfo.addDistortion(new TransformDistortion(childInfo.getCoords().toLocal()));
+    }
+  }
+
+  /** Get a BoundingBox which just encloses the object. */
 
   public BoundingBox getBounds()
   {
@@ -185,6 +211,11 @@ public abstract class ObjectCollection extends Object3D
     allFace.copyInto(face);
     TriangleMesh mesh = new TriangleMesh(vert, face);
     mesh.copyTextureAndMaterial(this);
+    if (getTexture() == null)
+    {
+      Texture tex = new UniformTexture();
+      mesh.setTexture(tex, tex.getDefaultMapping(mesh));
+    }
     return mesh;
   }
   

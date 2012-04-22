@@ -258,11 +258,25 @@ public class ObjectInfo
     distortion = d;
   }
 
+  /** Get the current Distortion applied to this object. */
+
+  public Distortion getDistortion()
+  {
+    return distortion;
+  }
+
   /** Returns true if a Distortion has been applied to this object. */
   
   public boolean isDistorted()
   {
     return (distortion != null);
+  }
+
+  /** Set the current Distortion applied to this object.  Any previously applied Distortion is discarded. */
+
+  public void setDistortion(Distortion d)
+  {
+    distortion = d;
   }
 
   /** See if the Distortion has changed, and clear the cached meshes if it has. */

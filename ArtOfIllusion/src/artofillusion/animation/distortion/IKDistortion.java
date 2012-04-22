@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,14 +16,13 @@ import artofillusion.object.*;
 
 /** This is a distortion which applies constraints to an object through inverse kinematics. */
 
-public class IKDistortion implements Distortion
+public class IKDistortion extends Distortion
 {
   private boolean locked[], moving[];
   private Vec3 target[];
   private double weight;
   private Actor actor;
-  private Distortion previous;
-  
+
   public IKDistortion(boolean locked[], Vec3 target[], double weight, Actor actor)
   {
     this.locked = locked;
@@ -35,14 +34,6 @@ public class IKDistortion implements Distortion
       moving[i] = (target[i] != null);
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)
@@ -88,7 +79,6 @@ public class IKDistortion implements Distortion
       obj = previous.transform(obj);
     Mesh newmesh = (Mesh) obj.duplicate();
     Skeleton skeleton = newmesh.getSkeleton();
-    Joint joint[] = skeleton.getJoints();
     IKSolver ik = new IKSolver(skeleton, locked, moving);
     ik.solve(target, 1500);
     if (weight < 1.0)

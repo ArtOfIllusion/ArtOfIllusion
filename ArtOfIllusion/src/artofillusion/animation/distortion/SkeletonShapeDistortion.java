@@ -1,4 +1,4 @@
-/* Copyright (C) 2004 by Peter Eastman
+/* Copyright (C) 2004-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,13 +16,12 @@ import artofillusion.object.*;
 
 /** This is a distortion which reshapes an object's skeleton. */
 
-public class SkeletonShapeDistortion implements Distortion
+public class SkeletonShapeDistortion extends Distortion
 {
   private Skeleton skeleton;
   private double weight;
   private Actor actor;
-  private Distortion previous;
-  
+
   public SkeletonShapeDistortion(Skeleton skeleton, double weight, Actor actor)
   {
     this.skeleton = skeleton;
@@ -30,14 +29,6 @@ public class SkeletonShapeDistortion implements Distortion
     this.actor = actor;
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)

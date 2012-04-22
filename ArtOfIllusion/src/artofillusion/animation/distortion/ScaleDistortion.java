@@ -1,6 +1,4 @@
-/* This is a distortion which changes the size of an object. */
-
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,12 +13,13 @@ package artofillusion.animation.distortion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 
-public class ScaleDistortion implements Distortion
+/** This is a distortion which changes the size of an object. */
+
+public class ScaleDistortion extends Distortion
 {
   private double xscale, yscale, zscale;
   private Mat4 preTransform, postTransform;
-  private Distortion previous;
-  
+
   public ScaleDistortion(double xscale, double yscale, double zscale, Mat4 preTransform, Mat4 postTransform)
   {
     this.xscale = xscale;
@@ -30,14 +29,6 @@ public class ScaleDistortion implements Distortion
     this.postTransform = postTransform;
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)

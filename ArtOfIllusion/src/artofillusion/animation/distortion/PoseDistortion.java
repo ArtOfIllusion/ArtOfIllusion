@@ -1,4 +1,4 @@
-/* Copyright (C) 2004 by Peter Eastman
+/* Copyright (C) 2004-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,14 +16,13 @@ import artofillusion.object.*;
 
 /** This is a distortion which applies a pose to an object. */
 
-public class PoseDistortion implements Distortion
+public class PoseDistortion extends Distortion
 {
   private double weight;
   private Keyframe pose;
   private Actor actor;
   private boolean relative;
-  private Distortion previous;
-  
+
   public PoseDistortion(double weight, Keyframe pose, Actor actor, boolean relative)
   {
     this.weight = weight;
@@ -32,14 +31,6 @@ public class PoseDistortion implements Distortion
     this.relative = relative;
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)

@@ -1,6 +1,4 @@
-/* This is a distortion which uses a procedure to distort an object. */
-
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,15 +14,16 @@ import artofillusion.math.*;
 import artofillusion.procedural.*;
 import artofillusion.object.*;
 
-public class CustomDistortion implements Distortion
+/** This is a distortion which uses a procedure to distort an object. */
+
+public class CustomDistortion extends Distortion
 {
   private Procedure proc;
   private int procVersion;
   PointInfo point;
   private double weight;
   private Mat4 preTransform, postTransform;
-  private Distortion previous;
-  
+
   public CustomDistortion(Procedure proc, int procVersion, PointInfo point, double weight, Mat4 preTransform, Mat4 postTransform)
   {
     this.proc = proc;
@@ -35,14 +34,6 @@ public class CustomDistortion implements Distortion
     this.postTransform = postTransform;
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)

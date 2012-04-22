@@ -1,6 +1,4 @@
-/* This is a distortion which bends an object. */
-
-/* Copyright (C) 2002 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,12 +13,13 @@ package artofillusion.animation.distortion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 
-public class BendDistortion implements Distortion
+/** This is a distortion which bends an object. */
+
+public class BendDistortion extends Distortion
 {
   private int axis, direction;
   private double angle;
   private Mat4 preTransform, postTransform;
-  private Distortion previous;
   private boolean forward;
 
   public static final int POS_X = 0;
@@ -44,14 +43,6 @@ public class BendDistortion implements Distortion
     this.postTransform = postTransform;
   }
 
-  /** Set another distortion which should be applied before this one.
-      This allows Distortions to be chained. */
-  
-  public void setPreviousDistortion(Distortion previous)
-  {
-    this.previous = previous;
-  }
-  
   /** Determine whether this distortion is identical to another one. */
   
   public boolean isIdenticalTo(Distortion d)

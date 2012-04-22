@@ -125,7 +125,7 @@ public class ScriptedObject extends ObjectCollection
   /** Get an enumeration of ObjectInfos listing the objects which this object
       is composed of. */
   
-  protected Enumeration enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
+  protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
   {
     return new ScriptedObjectEnumeration(info, interactive, scene);
   }

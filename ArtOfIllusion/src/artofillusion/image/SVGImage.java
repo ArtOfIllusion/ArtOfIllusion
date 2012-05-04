@@ -67,6 +67,7 @@ public class SVGImage extends ImageMap
     }
     preview = new BufferedImage(previewWidth, previewHeight, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = preview.createGraphics();
+    g.setClip(0, 0, (int) svg.getWidth(), (int) svg.getHeight());
     g.setTransform(new AffineTransform(previewWidth/svg.getWidth(), 0, 0, previewHeight/svg.getHeight(), 0, 0));
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     svg.render(g);
@@ -92,6 +93,7 @@ public class SVGImage extends ImageMap
   {
     BufferedImage image = new BufferedImage(TILE_SIZE, TILE_SIZE, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = image.createGraphics();
+    g.setClip(0, 0, (int) svg.getWidth(), (int) svg.getHeight());
     g.setTransform(new AffineTransform(scale/svg.getWidth(), 0, 0, -scale/svg.getHeight(), -x, scale-y));
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     svg.render(g);

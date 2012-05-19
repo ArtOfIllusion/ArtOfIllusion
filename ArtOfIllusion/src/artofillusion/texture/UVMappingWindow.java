@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2009 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -471,8 +471,10 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       map.setTextureCoordinates((Object3D) editObj, coords);
       map.setTextureCoordinates(preview.getObject().getObject(), coords);
     }
-    if (!mapView.isDragInProgress())
+    if (!mapView.isDragInProgress()) {
+      preview.getObject().clearCachedMeshes();
       preview.render();
+    }
   }
 
   public ToolPalette getToolPalette()

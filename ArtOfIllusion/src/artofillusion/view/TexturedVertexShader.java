@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2008 by Peter Eastman
+/* Copyright (C) 2004-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -228,5 +228,13 @@ public class TexturedVertexShader implements VertexShader
   public void getTextureSpec(TextureSpec spec)
   {
     mesh.mapping.getTexture().getAverageSpec(spec, time, null);
+  }
+
+  /**
+   * Clear any cached information about a RenderingMesh.
+   */
+  public static void clearCachedShaders(RenderingMesh mesh)
+  {
+    cachedShaderMap.remove(mesh);
   }
 }

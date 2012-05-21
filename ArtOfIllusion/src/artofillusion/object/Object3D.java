@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,6 +31,7 @@ public abstract class Object3D
   protected MaterialMapping matMapping;
   protected TextureParameter texParam[];
   protected ParameterValue paramValue[];
+  protected boolean parametersChanged;
 
   public static final int CANT_CONVERT = 0;
   public static final int EXACTLY = 1;
@@ -267,6 +268,7 @@ public abstract class Object3D
   public void setParameterValues(ParameterValue val[])
   {
     paramValue = val;
+    parametersChanged = true;
   }
   
   /** Get the object defining the value of a particular texture parameter.  If the parameter is not
@@ -288,6 +290,7 @@ public abstract class Object3D
       if (texParam[i].equals(param))
       {
         paramValue[i] = val;
+        parametersChanged = true;
         return;
       }
   }
@@ -375,6 +378,11 @@ public abstract class Object3D
     RenderingMesh mesh = obj.getPreviewMesh();
     if (mesh != null)
     {
+      if (parametersChanged)
+      {
+        TexturedVertexShader.clearCachedShaders(mesh);
+        parametersChanged = false;
+      }
       VertexShader shader;
       if (renderMode == ViewerCanvas.RENDER_TRANSPARENT)
       {

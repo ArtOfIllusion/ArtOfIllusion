@@ -1,4 +1,4 @@
-/* Copyright (C) 2011 by Peter Eastman
+/* Copyright (C) 2011-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -87,6 +87,7 @@ public class SVGImage extends ImageMap
       }
     for (int i = 0; i < 4; i++)
       average[i] /= 255.0f*previewWidth*previewHeight;
+    average[3] = 1-average[3];
   }
 
   private BufferedImage createImage(int x, int y, int scale) throws SVGException
@@ -247,6 +248,8 @@ public class SVGImage extends ImageMap
                    (xfract)*(1-yfract)*((values[1]>>shift)&0xFF) +
                    (1-xfract)*(yfract)*((values[2]>>shift)&0xFF) +
                    (xfract)*(yfract)*((values[3]>>shift)&0xFF));
+    if (component == 3)
+      result = 1-result;
     return result;
   }
 
@@ -355,6 +358,11 @@ public class SVGImage extends ImageMap
                                       (yfract)*((values[3]>>shift)&0xFF)-((values[2]>>shift)&0xFF));
     grad.y += scaleFract*scale*SCALE*((1-xfract)*((values[2]>>shift)&0xFF)-((values[0]>>shift)&0xFF) +
                                       (xfract)*((values[3]>>shift)&0xFF)-((values[1]>>shift)&0xFF));
+    if (component == 3)
+    {
+      grad.x = -grad.x;
+      grad.y = -grad.y;
+    }
   }
 
   /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger

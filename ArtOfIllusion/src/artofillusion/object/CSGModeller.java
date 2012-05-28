@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2009 by Peter Eastman
+/* Copyright (C) 2001-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1180,6 +1180,8 @@ p1 :for (int i = 0; i < f1.size(); i++)
             VertexInfo vb2 = (VertexInfo) v2.elementAt(fb.v2);
             VertexInfo vb3 = (VertexInfo) v2.elementAt(fb.v3);
             dist = rayFaceIntersectionDist(orig, dir, fb, vb1.r, vb2.r, vb3.r);
+            if (dist == -Double.MAX_VALUE && fb.norm.length2() == 0.0)
+              continue;
             if (dist < firstDist)
               {
                 first = j;

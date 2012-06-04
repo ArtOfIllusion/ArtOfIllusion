@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2009 by Peter Eastman
+/* Copyright (C) 2001-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -131,7 +131,7 @@ public class AnimationPreviewer implements Runnable
     canvas.setRenderMode(mode);
     canvas.setBoundCamera(sceneCamera);
     canvas.setPerspective(true);
-    canvas.setTool(new MoveViewTool(parent) {
+    canvas.setTool(new EditingTool(parent) {
       public boolean hilightSelection()
       {
         return false;

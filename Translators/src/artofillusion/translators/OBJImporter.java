@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2009 by Peter Eastman
+/* Copyright (C) 2002-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -213,7 +213,9 @@ public class OBJImporter
             else if ("g".equals(fields[0]))
               {
                 // Set the current group or groups.
-                
+
+                if (fields.length == 1)
+                  fields = new String[] {"g", "default"};
                 face.setSize(fields.length-1);
                 for (int i = 0; i < face.size(); i++)
                   {

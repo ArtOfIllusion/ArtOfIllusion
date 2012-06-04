@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1106,7 +1106,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {parent, info, new Integer(childIndex)});
     theScene.removeObject(which, undo);
     for (int i = 0; i < theView.length ; i++)
+    {
+      if (theView[i].getBoundCamera() == info)
+        theView[i].setOrientation(ViewerCanvas.VIEW_OTHER);
       theView[i].rebuildCameraList();
+    }
     theScore.rebuildList();
   }
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -87,6 +87,8 @@ public class ViewerOrientationControl implements ViewerControl
         add(getItemCount()-1, cameras[i].getName());
         if (cameras[i] == view.getBoundCamera())
           selected = getItemCount()-2;
+        else if (selected == getItemCount()-2)
+          selected = Integer.MAX_VALUE;
       }
       if (selected < getItemCount())
         setSelectedIndex(selected);

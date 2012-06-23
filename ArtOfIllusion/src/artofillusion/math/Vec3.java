@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2001 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -94,12 +94,24 @@ public class Vec3
   {
     return new Vec3(x*d, y*d, z*d);
   }
-  
+
+
   /** Determine whether two vectors are identical. */
-  
-  public final boolean equals(Vec3 v)
+
+  @Override
+  public final boolean equals(Object o)
   {
-    return (v.x == x && v.y == y && v.z == z);
+    if (o instanceof Vec3) {
+      Vec3 v = (Vec3) o;
+      return (v.x == x && v.y == y && v.z == z);
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Float.floatToIntBits((float) x);
   }
   
   /** Calculate the length of this vector. */

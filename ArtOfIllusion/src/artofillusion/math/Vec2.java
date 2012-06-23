@@ -1,4 +1,4 @@
-/* Copyright (C) 1999,2000,2003-2004 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -85,12 +85,23 @@ public class Vec2
   }
   
   /** Determine whether two vectors are identical. */
-  
-  public final boolean equals(Vec2 v)
+
+  @Override
+  public final boolean equals(Object o)
   {
-    return (v.x == x && v.y == y);
+    if (o instanceof Vec2) {
+      Vec2 v = (Vec2) o;
+      return (v.x == x && v.y == y);
+    }
+    return false;
   }
-  
+
+  @Override
+  public int hashCode()
+  {
+    return Float.floatToIntBits((float) x);
+  }
+
   /** Calculate the length of this vector. */
   
   public final double length()

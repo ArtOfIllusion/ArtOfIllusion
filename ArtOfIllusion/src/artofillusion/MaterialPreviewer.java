@@ -274,6 +274,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     shape[object].setTexture(info.getObject().getTexture(), info.getObject().getTextureMapping());
     shape[object].setMaterial(info.getObject().getMaterial(), info.getObject().getMaterialMapping());
     info.setObject(shape[object]);
+    info.clearCachedMeshes();
     render();
   }
 

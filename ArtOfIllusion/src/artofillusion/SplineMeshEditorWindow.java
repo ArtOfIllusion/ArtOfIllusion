@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -153,14 +153,15 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   {
     skeletonMenu = Translate.menu("skeleton");
     menubar.add(skeletonMenu);
-    skeletonMenuItem = new BMenuItem [6];
+    skeletonMenuItem = new BMenuItem [7];
     skeletonMenu.add(skeletonMenuItem[0] = Translate.menuItem("editBone", this, "editJointCommand"));
     skeletonMenu.add(skeletonMenuItem[1] = Translate.menuItem("deleteBone", this, "deleteJointCommand"));
     skeletonMenu.add(skeletonMenuItem[2] = Translate.menuItem("setParentBone", this, "setJointParentCommand"));
     skeletonMenu.add(skeletonMenuItem[3] = Translate.menuItem("importSkeleton", this, "importSkeletonCommand"));
     skeletonMenu.addSeparator();
     skeletonMenu.add(skeletonMenuItem[4] = Translate.menuItem("bindSkeleton", this, "bindSkeletonCommand"));
-    skeletonMenu.add(skeletonMenuItem[5] = Translate.checkboxMenuItem("detachSkeleton", this, "skeletonDetachedChanged", false));
+    skeletonMenu.add(skeletonMenuItem[5] = Translate.menuItem("unbindSkeleton", this, "unbindSkeletonCommand"));
+    skeletonMenu.add(skeletonMenuItem[6] = Translate.checkboxMenuItem("detachSkeleton", this, "skeletonDetachedChanged", false));
   }
   
   /** Get the object being edited in this window. */
@@ -396,6 +397,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     skeletonMenuItem[1].setEnabled(selJoint != null && selJoint.children.length == 0);
     skeletonMenuItem[2].setEnabled(selJoint != null);
     skeletonMenuItem[4].setEnabled(count > 0);
+    skeletonMenuItem[5].setEnabled(selJoint != null);
   }
 
   /** Add an extra texture parameter to the mesh which will be used for keeping track of
@@ -537,11 +539,12 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   private void skeletonDetachedChanged()
   {
     for (int i = 0; i < theView.length; i++)
-      ((SplineMeshViewer) theView[i]).setSkeletonDetached(((BCheckBoxMenuItem) skeletonMenuItem[5]).getState());
+      ((SplineMeshViewer) theView[i]).setSkeletonDetached(((BCheckBoxMenuItem) skeletonMenuItem[6]).getState());
   }
 
   /** This is overridden to update jointWeightParam after weights are changed. */
 
+  @Override
   public void bindSkeletonCommand()
   {
     super.bindSkeletonCommand();
@@ -551,6 +554,17 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   /** This is overridden to update jointWeightParam after weights are changed. */
 
+  @Override
+  public void unbindSkeletonCommand()
+  {
+    super.unbindSkeletonCommand();
+    updateJointWeightParam();
+    updateImage();
+  }
+
+  /** This is overridden to update jointWeightParam after weights are changed. */
+
+  @Override
   public void setPointsCommand()
   {
     super.setPointsCommand();

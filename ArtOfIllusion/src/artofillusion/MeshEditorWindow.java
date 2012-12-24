@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1378,6 +1378,36 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       }
       vert[i].ikWeight = 0.001*Math.round(vert[i].ikWeight*1000.0);
     }
+  }
+
+  /** Detach points from the selected bone. */
+
+  public void unbindSkeletonCommand()
+  {
+    Mesh theMesh = (Mesh) getObject().getObject();
+    Skeleton s = theMesh.getSkeleton();
+    if (s == null)
+      return;
+    Joint j = s.getJoint(((MeshViewer) theView[currentView]).getSelectedJoint());
+    if (j == null)
+      return;
+
+    // Get confirmation from the user.
+
+    BStandardDialog dlg = new BStandardDialog("", Translate.text("unbindPointsFromBone"), BStandardDialog.QUESTION);
+    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+      return;
+
+    // Detach the vertices.
+
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    for (MeshVertex vert : theMesh.getVertices())
+      if (vert.ikJoint == j.id)
+      {
+        vert.ikJoint = -1;
+        vert.ikWeight = 1.0;
+      }
   }
 
   /* Calculate the distance between a vertex and a bone. */

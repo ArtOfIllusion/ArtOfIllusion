@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2006 by Peter Eastman
+/* Copyright (C) 2001-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,6 +19,7 @@ import buoy.widget.*;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.*;
+import java.text.*;
 import java.util.*;
 
 /** This is a Widget which displays all the tracks for objects in a scene, and shows
@@ -29,7 +30,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   LayoutWindow window;
   TreeList theList;
   TimeAxis theAxis;
-  Vector graphs;
+  Vector<TrackDisplay> graphs;
   BScrollBar scroll;
   ToolPalette viewTools, modeTools;
   BLabel helpText;
@@ -41,6 +42,14 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   int scrollPos, mode, view;
   double startTime, timeScale;
   int yoffset;
+  private boolean hasRepaintedView[], isAnimating;
+  private long animateStartClockTime;
+  private double animateStartSceneTime;
+  private double playbackSpeed;
+  private final BButton playButton, rewindButton, endButton;
+  private final BSlider speedSlider;
+  private final BLabel speedLabel, timeFrameLabel;
+  private final ImageIcon playIcon, stopIcon;
 
   public static final int TRACKS_MODE = 0;
   public static final int SINGLE_GRAPH_MODE = 1;
@@ -53,9 +62,38 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       Translate.text("moveKeyframeTool.helpText"),
       Translate.text("moveScoreTool.helpText")};
 
+  private final double SPEEDS[] = {0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1, 1.5, 2, 2.5, 3, 4, 5};
+
   public Score(LayoutWindow win)
   {
     window = win;
+    playIcon = ThemeManager.getIcon("play");
+    stopIcon = ThemeManager.getIcon("stop");
+    playButton = new BButton(playIcon);
+    rewindButton = new BButton(ThemeManager.getIcon("rewind"));
+    endButton = new BButton(ThemeManager.getIcon("forward"));
+    playButton.addEventLink(CommandEvent.class, this, "clickedPlay");
+    rewindButton.addEventLink(CommandEvent.class, this, "clickedRewind");
+    endButton.addEventLink(CommandEvent.class, this, "clickedEnd");
+    speedSlider = new BSlider(SPEEDS.length/2, 0, SPEEDS.length-1, BSlider.HORIZONTAL);
+    speedSlider.addEventLink(ValueChangedEvent.class, this, "speedChanged");
+    speedSlider.setMinorTickSpacing(1);
+    speedSlider.setSnapToTicks(true);
+    speedSlider.getComponent().setPreferredSize(new Dimension(1, speedSlider.getPreferredSize().height));
+    speedLabel = new BLabel();
+    speedLabel.setAlignment(BLabel.CENTER);
+    timeFrameLabel = new BLabel();
+    timeFrameLabel.setAlignment(BLabel.NORTH);
+    RowContainer controlButtons = new RowContainer();
+    controlButtons.add(rewindButton);
+    controlButtons.add(playButton);
+    controlButtons.add(endButton);
+    FormContainer controlsContainer = new FormContainer(new double[] {1, 0}, new double[] {0, 0, 0, 1});
+    controlsContainer.add(controlButtons, 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE));
+    controlsContainer.add(speedLabel, 0, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL));
+    controlsContainer.add(speedSlider, 0, 2, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL));
+    controlsContainer.add(timeFrameLabel, 0, 3, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
+    controlsContainer.add(new BSeparator(BSeparator.VERTICAL), 1, 0, 1, 4);
     theList = new TreeList(win);
     theList.setPreferredSize(new Dimension(130, 0));
     theList.addEventLink(TreeList.ElementMovedEvent.class, this, "elementsMoved");
@@ -67,7 +105,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     int fps = window.getScene().getFramesPerSecond();
     timeScale = fps*5.0;
     theAxis = new TimeAxis(fps, timeScale, this);
-    graphs = new Vector();
+    graphs = new Vector<TrackDisplay>();
     timeMarker = new Marker(window.getScene().getTime(), Translate.text("Time"), Color.green);
     theAxis.addMarker(timeMarker);
     scroll = new BScrollBar(0, 0, 0, 0, BScrollBar.VERTICAL);
@@ -92,11 +130,15 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     rightSide.add(scroll, 0, 0, 1, 3, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.VERTICAL, null, null));
     rightSide.add(viewTools, 1, 0);
     rightSide.add(modeTools, 1, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 5, 0, 0), null));
+    add(controlsContainer, BorderContainer.WEST);
     add(rightSide, BorderContainer.EAST);
     add(helpText = new BLabel(MODE_HELP_TEXT[mode]), BorderContainer.SOUTH);
     rebuildList();
     createPopupMenu();
     setFocusable(true);
+    setPlaybackSeed(1);
+    UIUtilities.applyDefaultBackground(controlsContainer);
+    UIUtilities.applyDefaultBackground(rightSide);
   }
 
   /** Create the popup menu. */
@@ -349,8 +391,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       div.add(graphContainer, 1);
       graphContainer.addEventLink(MouseScrolledEvent.class, this, "mouseScrolled");
     }
+    for (Widget child : div.getChildren())
+      UIUtilities.applyDefaultBackground(child);
     UIUtilities.applyDefaultFont(div);
-    UIUtilities.applyDefaultBackground(div);
     div.setDividerLocation(divider);
     div.layoutChildren();
     repaintAll();
@@ -369,7 +412,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     theAxis.setStartTime(time);
     for (int i = 0; i < graphs.size(); i++)
-      ((TrackDisplay) graphs.elementAt(i)).setStartTime(time);
+      graphs.elementAt(i).setStartTime(time);
     startTime = time;
     repaintGraphs();
   }
@@ -396,8 +439,107 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   
   public void setTime(double time)
   {
+    if (hasRepaintedView != null)
+      Arrays.fill(hasRepaintedView, false);
     timeMarker.position = time;
-    repaintGraphs();
+    NumberFormat nf = NumberFormat.getNumberInstance();
+    nf.setMaximumFractionDigits(3);
+    timeFrameLabel.setText(Translate.text("timeFrameLabel", nf.format(time), Integer.toString((int) Math.round(time*window.getScene().getFramesPerSecond()))));
+    int graphWidth = ((Widget) graphs.elementAt(0)).getBounds().width;
+    if (time < startTime)
+      setStartTime(time);
+    else if (time > startTime+graphWidth/timeScale)
+      setStartTime(time-0.5*graphWidth/timeScale);
+    else
+      repaintGraphs();
+  }
+
+  /** Start animating the display. */
+
+  public void startAnimating()
+  {
+    if (hasRepaintedView == null)
+    {
+      // The first time this is called, add a listener to all the views in the window so we can tell when they've all
+      // been repainted.
+
+      hasRepaintedView = new boolean[window.getAllViews().length];
+      Object listener = new Object() {
+        void viewRepainted(RepaintEvent ev)
+        {
+          boolean allRepainted = true;
+          for (int i = 0; i < hasRepaintedView.length; i++)
+          {
+            if (ev.getWidget() == window.getAllViews()[i])
+              hasRepaintedView[i] = true;
+            allRepainted &= hasRepaintedView[i];
+          }
+          if (isAnimating && (!window.getSplitView() || allRepainted))
+          {
+            // Update the time to show the next frame.
+
+            double elapsedTime = (System.currentTimeMillis()-animateStartClockTime)*0.001;
+            double sceneTime = animateStartSceneTime+elapsedTime*playbackSpeed;
+            int fps = window.getScene().getFramesPerSecond();
+            sceneTime = ((int) (sceneTime*fps))/(double) fps;
+            window.setTime(sceneTime);
+          }
+        }
+      };
+      for (ViewerCanvas view : window.getAllViews())
+        view.addEventLink(RepaintEvent.class, listener, "viewRepainted");
+    }
+    animateStartSceneTime = window.getScene().getTime();
+    animateStartClockTime = System.currentTimeMillis();
+    isAnimating = true;
+    playButton.setIcon(stopIcon);
+    rewindButton.setEnabled(false);
+    endButton.setEnabled(false);
+    window.setTime(animateStartSceneTime);
+  }
+
+  /** Stop animating the display. */
+
+  public void stopAnimating()
+  {
+    isAnimating = false;
+    playButton.setIcon(playIcon);
+    rewindButton.setEnabled(true);
+    endButton.setEnabled(true);
+  }
+
+  /** Get whether the display is currently being animated. */
+
+  public boolean getAnimating()
+  {
+    return isAnimating;
+  }
+
+  /**
+   * Get the playback speed.
+   */
+
+  public double getPlaybackSpeed()
+  {
+    return playbackSpeed;
+  }
+
+  /**
+   * Set the playback speed.
+   */
+
+  public void setPlaybackSeed(double speed)
+  {
+    playbackSpeed = speed;
+    int speedIndex;
+    for (speedIndex = 0; speedIndex < SPEEDS.length && speed > SPEEDS[speedIndex]; speedIndex++)
+      ;
+    speedSlider.setValue(speedIndex);
+    NumberFormat nf = NumberFormat.getNumberInstance();
+    nf.setMaximumFractionDigits(1);
+    speedLabel.setText(Translate.text("playbackSpeedLabel", nf.format(speed)));
+    animateStartSceneTime = window.getScene().getTime();
+    animateStartClockTime = System.currentTimeMillis();
   }
   
   /** Respond to the scroll wheel. */
@@ -545,7 +687,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       return;
     theList.setYOffset(-pos);
     for (int i = 0; i < graphs.size(); i++)
-      ((TrackDisplay) graphs.elementAt(i)).setYOffset(-pos);
+      graphs.elementAt(i).setYOffset(-pos);
     yoffset = -pos;
     theList.repaint();
     repaintGraphs();
@@ -941,6 +1083,55 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     tracksModified(true);
   }
 
+  private void clickedPlay()
+  {
+    if (isAnimating)
+      stopAnimating();
+    else
+      startAnimating();
+  }
+
+  private void clickedRewind()
+  {
+    // Find the earliest keyframe on any track of any object.
+
+    double minTime = Math.min(0.0, window.getScene().getTime());
+    for (ObjectInfo obj : window.getScene().getAllObjects())
+    {
+      for (Track track : obj.getTracks())
+      {
+        double keyTimes[] = track.getKeyTimes();
+        if (keyTimes.length > 0)
+          minTime = Math.min(minTime, keyTimes[0]);
+      }
+    }
+    if (minTime != window.getScene().getTime())
+      window.setTime(minTime);
+  }
+
+  private void clickedEnd()
+  {
+    // Find the latest keyframe on any track of any object.
+
+    double maxTime = Math.max(0.0, window.getScene().getTime());
+    for (ObjectInfo obj : window.getScene().getAllObjects())
+    {
+      for (Track track : obj.getTracks())
+      {
+        double keyTimes[] = track.getKeyTimes();
+        if (keyTimes.length > 0)
+          maxTime = Math.max(maxTime, keyTimes[keyTimes.length-1]);
+      }
+    }
+    if (maxTime != window.getScene().getTime())
+      window.setTime(maxTime);
+  }
+
+  private void speedChanged()
+  {
+    setPlaybackSeed(SPEEDS[speedSlider.getValue()]);
+  }
+
   /** EditingWindow methods.  Most of these either do nothing, or simply call through to 
       the corresponding methods of the LayoutWindow the Score is in. */
 
@@ -965,7 +1156,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       {
         mode = modeTools.getSelection();
         for (int i = 0; i < graphs.size(); i++)
-          ((TrackDisplay) graphs.elementAt(i)).setMode(mode);
+          graphs.elementAt(i).setMode(mode);
         setHelpText(MODE_HELP_TEXT[mode]);
       }
   }

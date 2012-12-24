@@ -47,7 +47,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   BScrollPane itemTreeScroller;
   Score theScore;
   ToolPalette tools;
-  BLabel helpText, timeFrameLabel;
+  BLabel helpText;
   TreeList itemTree;
   Scene theScene;
   BMenuBar menubar;
@@ -187,7 +187,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     // Fill in the left hand panel.
 
     centerContainer.add(tools, 0, 0);
-    centerContainer.add(timeFrameLabel = new BLabel(Translate.text("timeFrameLabel", "0.0", "0"), BLabel.CENTER), 0, 2, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
 
     // Build the menubar.
 
@@ -232,6 +231,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
     setBounds(screenBounds);
     tools.requestFocus();
+    setTime(theScene.getTime());
   }
 
   /** Load all the preferences into memory. */
@@ -1131,10 +1131,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     theScene.setTime(time);
     theScore.setTime(time);
-    NumberFormat nf = NumberFormat.getNumberInstance();
-    nf.setMaximumFractionDigits(3);
-    timeFrameLabel.setText(Translate.text("timeFrameLabel", nf.format(time),
-        Integer.toString((int) Math.round(time*theScene.getFramesPerSecond()))));
     theScore.repaint();
     itemTree.repaint();
     for (SceneViewer view : theView)
@@ -1238,6 +1234,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     if ((numViewsShown == 1) == split)
       toggleViewsCommand();
+  }
+
+  /** Get whether the window is split into four views. */
+
+  public boolean getSplitView()
+  {
+    return (numViewsShown > 1);
   }
 
   /** This is called when the selection in the object tree changes. */

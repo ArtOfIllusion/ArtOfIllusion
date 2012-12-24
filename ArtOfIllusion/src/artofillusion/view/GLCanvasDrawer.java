@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2009 by Peter Eastman
+/* Copyright (C) 2005-2012 by Peter Eastman
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -22,6 +22,8 @@ import java.util.*;
 import java.lang.ref.*;
 
 import javax.media.opengl.*;
+
+import buoy.event.*;
 import com.sun.opengl.util.*;
 
 /** This is a CanvasDrawer which uses OpenGL to render the contents of a ViewerCanvas. */
@@ -934,6 +936,10 @@ public class GLCanvasDrawer implements CanvasDrawer
         gl.glDeleteTextures(1, new int[] {((TextureReference) ref).textureId}, 0);
         textureReferences.remove(ref);
       }
+
+      // Send out a RepaintEvent so anyone who is listening will know the view has been repainted.
+
+      view.dispatchEvent(new RepaintEvent(view, null));
     }
 
     public void displayChanged(GLAutoDrawable drawable, boolean arg1, boolean arg2)

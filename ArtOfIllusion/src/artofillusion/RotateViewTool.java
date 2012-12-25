@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -73,46 +73,43 @@ public class RotateViewTool extends EditingTool
 
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
-    Camera cam = view.getCamera();
+    // Compute the vertical axis to rotate around.
+
+    Vec3 cameray = viewToWorld.timesDirection(Vec3.vy());
+    Vec3 cameraz = viewToWorld.timesDirection(Vec3.vz());
+    Vec3 vertical = cameray.times(cameray.y).plus(cameraz.times(cameraz.y));
+    if (vertical.length2() < 1e-5)
+      vertical = cameray;
+    else
+      vertical.normalize();
+
+    // Compute the rotation matrix.
+
     Point dragPoint = e.getPoint();
-    CoordinateSystem c = oldCoords.duplicate();
-    int dx, dy;
-    double angle;
-    Vec3 axis;
-    
-    dx = dragPoint.x-clickPoint.x;
-    dy = dragPoint.y-clickPoint.y;
+    int dx = dragPoint.x-clickPoint.x;
+    int dy = dragPoint.y-clickPoint.y;
+    Mat4 rotation;
     if (controlDown)
-      {
-        axis = viewToWorld.timesDirection(Vec3.vz());
-        angle = dx * DRAG_SCALE;
-      }
+      rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vz()), -dx*DRAG_SCALE);
     else if (e.isShiftDown())
       {
         if (Math.abs(dx) > Math.abs(dy))
-          {
-            axis = viewToWorld.timesDirection(Vec3.vy());
-            angle = dx * DRAG_SCALE;
-          }
+          rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE);
         else
-          {
-            axis = viewToWorld.timesDirection(Vec3.vx());
-            angle = -dy * DRAG_SCALE;
-          }
+          rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dy*DRAG_SCALE);
       }
     else
       {
-        axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
-        angle = axis.length();
-        axis = axis.times(1.0/angle);
-        axis = viewToWorld.timesDirection(axis);
+        rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dy*DRAG_SCALE);
+        rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE).times(rotation);
       }
-    if (angle != 0.0)
+    if (!rotation.equals(Mat4.identity()))
       {
+        CoordinateSystem c = oldCoords.duplicate();
         c.transformCoordinates(Mat4.translation(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z));
-        c.transformCoordinates(Mat4.axisRotation(axis, -angle));
+        c.transformCoordinates(rotation);
         c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
-        cam.setCameraCoordinates(c);
+        view.getCamera().setCameraCoordinates(c);
         view.viewChanged(false);
         view.repaint();
       }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2011 by Peter Eastman
+/* Copyright (C) 2000-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,7 +34,7 @@ public class ProcedureEditor extends CustomWidget
   private ModuleMenu moduleMenu;
   private BMenuItem undoItem, redoItem, cutItem, copyItem, pasteItem, clearItem;
   private BTextField nameField;
-  private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox;
+  private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox, draggingMultiple;
   private Point clickPos, lastPos;
   private InfoBox inputInfo, outputInfo;
   private IOPort dragFromPort, dragToPort;
@@ -244,10 +244,10 @@ public class ProcedureEditor extends CustomWidget
     g.setStroke(bold);
     for (int i = 0; i < link.length; i++)
       if (!selectedLink[i])
-        {
-          g.setColor(link[i].from.getValueType() == IOPort.NUMBER ? darkLinkColor : blueLinkColor);
-          g.draw(createBezierCurve(link[i]));
-        }
+      {
+        g.setColor(link[i].from.getValueType() == IOPort.NUMBER ? darkLinkColor : blueLinkColor);
+        g.draw(createBezierCurve(link[i]));
+      }
     
     // Draw the selected links.
 
@@ -260,30 +260,68 @@ public class ProcedureEditor extends CustomWidget
     // If we are in the middle of dragging something, draw the thing being dragged.
     
     if (draggingLink)
-      {
-        boolean isInput = (dragFromPort.getType() == IOPort.INPUT);
-        if (isInput || dragToPort != null)
-          inputInfo.draw(g);
-        if (!isInput || dragToPort != null)
-          outputInfo.draw(g);
-      }
+    {
+      // Draw the info boxes on the input and output ports.
+
+      boolean isInput = (dragFromPort.getType() == IOPort.INPUT);
+      if (isInput || dragToPort != null)
+        inputInfo.draw(g);
+      if (!isInput || dragToPort != null)
+        outputInfo.draw(g);
+    }
     g.setColor(Color.BLACK);
     if (draggingBox && lastPos != null)
-      {
-        Rectangle rect;
-        rect = getRectangle(clickPos, lastPos);
-        g.drawRect(rect.x, rect.y, rect.width, rect.height);
-      }
+    {
+      // Draw the selection box.
+
+      Rectangle rect;
+      rect = getRectangle(clickPos, lastPos);
+      g.drawRect(rect.x, rect.y, rect.width, rect.height);
+    }
     if (draggingLink && lastPos != null)
+    {
+      if (dragToPort == null)
       {
-        if (dragToPort == null)
-          g.drawLine(clickPos.x, clickPos.y, lastPos.x, lastPos.y);
+        // Draw lines from the origin port(s) to the current mouse position.
+
+        if (draggingMultiple)
+        {
+          int dx = lastPos.x-clickPos.x;
+          int dy = lastPos.y-clickPos.y;
+          IOPort ports[] = (dragFromPort.getType() == IOPort.OUTPUT ? dragFromPort.getModule().getOutputPorts() : dragFromPort.getModule().getInputPorts());
+          for (IOPort port : ports)
+            if (port.getType() == IOPort.OUTPUT || !port.getModule().inputConnected(port.getIndex()))
+              g.drawLine(port.getPosition().x, port.getPosition().y, port.getPosition().x+dx, port.getPosition().y+dy);
+        }
         else
-          {
-            Point pos = dragToPort.getPosition();
-            g.drawLine(clickPos.x, clickPos.y, pos.x, pos.y);
-          }
+          g.drawLine(clickPos.x, clickPos.y, lastPos.x, lastPos.y);
       }
+      else
+      {
+        // Draw lines between the origin and target port(s).
+
+        if (draggingMultiple)
+        {
+          IOPort outputPort = (dragFromPort.getType() == IOPort.OUTPUT ? dragFromPort : dragToPort);
+          IOPort inputPort = (dragFromPort.getType() == IOPort.INPUT ? dragFromPort : dragToPort);
+          IOPort outputs[] = outputPort.getModule().getOutputPorts();
+          IOPort inputs[] = inputPort.getModule().getInputPorts();
+          int outputIndex = outputPort.getIndex();
+          int inputIndex = inputPort.getIndex();
+          for (int i = 0; i < outputs.length; i++)
+          {
+            int j = i-outputIndex+inputIndex;
+            if (j >= 0 && j < inputs.length && !inputPort.getModule().inputConnected(j))
+              g.drawLine(outputs[i].getPosition().x, outputs[i].getPosition().y, inputs[j].getPosition().x, inputs[j].getPosition().y);
+          }
+        }
+        else
+        {
+          Point pos = dragToPort.getPosition();
+          g.drawLine(clickPos.x, clickPos.y, pos.x, pos.y);
+        }
+      }
+    }
   }
 
   private Shape createBezierCurve(Link link)
@@ -561,6 +599,7 @@ public class ProcedureEditor extends CustomWidget
     requestFocus();
     clickPos = e.getPoint();
     lastPos = null;
+    draggingMultiple = false;
 
     // First see if the mouse was pressed on a port.
     
@@ -570,6 +609,7 @@ public class ProcedureEditor extends CustomWidget
         if (port != null)
           {
             startDragLink(port);
+            draggingMultiple = e.isShiftDown();
             return;
           }
       }
@@ -579,6 +619,7 @@ public class ProcedureEditor extends CustomWidget
         if (port != null)
           {
             startDragLink(port);
+            draggingMultiple = e.isShiftDown();
             return;
           }
       }
@@ -653,7 +694,28 @@ public class ProcedureEditor extends CustomWidget
         if (dragToPort != null)
           {
             saveState(false);
-            addLink(dragFromPort, dragToPort);
+            if (draggingMultiple)
+            {
+              // Connect up multiple input and output ports.
+
+              int numLinks = selectedLink.length;
+              IOPort outputPort = (dragFromPort.getType() == IOPort.OUTPUT ? dragFromPort : dragToPort);
+              IOPort inputPort = (dragFromPort.getType() == IOPort.INPUT ? dragFromPort : dragToPort);
+              IOPort outputs[] = outputPort.getModule().getOutputPorts();
+              IOPort inputs[] = inputPort.getModule().getInputPorts();
+              int outputIndex = outputPort.getIndex();
+              int inputIndex = inputPort.getIndex();
+              for (int i = 0; i < outputs.length; i++)
+              {
+                int j = i-outputIndex+inputIndex;
+                if (j >= 0 && j < inputs.length && !inputPort.getModule().inputConnected(j))
+                  addLink(outputs[i], inputs[j]);
+              }
+              for (int i = numLinks; i < selectedLink.length; i++)
+                selectedLink[i] = true;
+            }
+            else
+              addLink(dragFromPort, dragToPort);
             updatePreview();
           }
         repaint();

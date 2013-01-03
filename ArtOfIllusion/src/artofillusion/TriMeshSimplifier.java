@@ -225,40 +225,43 @@ public class TriMeshSimplifier implements Runnable
     // Update surface parameters.
 
     ParameterValue paramValue[] = mesh.getParameterValues();
-    for (int i = 0; i < paramValue.length; i++)
+    if (paramValue != null)
     {
-      if (paramValue[i] instanceof VertexParameterValue)
+      for (int i = 0; i < paramValue.length; i++)
       {
-        VertexParameterValue value = (VertexParameterValue) paramValue[i];
-        double oldValue[] = value.getValue();
-        double newValue[] = new double [vertex.length];
-        for (int j = 0; j < newValue.length; j++)
-          newValue[index[j]] = oldValue[j];
-        value.setValue(newValue);
-      }
-      else if (paramValue[i] instanceof FaceParameterValue)
-      {
-        FaceParameterValue value = (FaceParameterValue) paramValue[i];
-        double oldValue[] = value.getValue();
-        double newValue[] = new double [faces];
-        for (int j = 0; j < newValue.length; j++)
-          newValue[j] = oldValue[face[j].origIndex];
-        value.setValue(newValue);
-      }
-      else if (paramValue[i] instanceof FaceVertexParameterValue)
-      {
-        FaceVertexParameterValue value = (FaceVertexParameterValue) paramValue[i];
-        double newValue[][] = new double [faces][3];
-        for (int j = 0; j < newValue.length; j++)
+        if (paramValue[i] instanceof VertexParameterValue)
         {
-          newValue[j][0] = value.getValue(face[j].origIndex, 0);
-          newValue[j][1] = value.getValue(face[j].origIndex, 1);
-          newValue[j][2] = value.getValue(face[j].origIndex, 2);
+          VertexParameterValue value = (VertexParameterValue) paramValue[i];
+          double oldValue[] = value.getValue();
+          double newValue[] = new double [vertex.length];
+          for (int j = 0; j < newValue.length; j++)
+            newValue[index[j]] = oldValue[j];
+          value.setValue(newValue);
         }
-        value.setValue(newValue);
+        else if (paramValue[i] instanceof FaceParameterValue)
+        {
+          FaceParameterValue value = (FaceParameterValue) paramValue[i];
+          double oldValue[] = value.getValue();
+          double newValue[] = new double [faces];
+          for (int j = 0; j < newValue.length; j++)
+            newValue[j] = oldValue[face[j].origIndex];
+          value.setValue(newValue);
+        }
+        else if (paramValue[i] instanceof FaceVertexParameterValue)
+        {
+          FaceVertexParameterValue value = (FaceVertexParameterValue) paramValue[i];
+          double newValue[][] = new double [faces][3];
+          for (int j = 0; j < newValue.length; j++)
+          {
+            newValue[j][0] = value.getValue(face[j].origIndex, 0);
+            newValue[j][1] = value.getValue(face[j].origIndex, 1);
+            newValue[j][2] = value.getValue(face[j].origIndex, 2);
+          }
+          value.setValue(newValue);
+        }
       }
+      mesh.setParameterValues(paramValue);
     }
-    mesh.setParameterValues(paramValue);
   }
 
   /* Build the data structures necessary for simplifying the mesh. */

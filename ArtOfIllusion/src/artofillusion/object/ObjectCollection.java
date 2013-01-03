@@ -184,37 +184,76 @@ public abstract class ObjectCollection extends Object3D
 
   public TriangleMesh convertToTriangleMesh(double tol)
   {
-    Vector<Vec3> allVert = new Vector<Vec3>();
-    Vector<int[]> allFace = new Vector<int[]>();
+    ArrayList<Vec3> allVert = new ArrayList<Vec3>();
+    ArrayList<Float> vertSmoothness = new ArrayList<Float>();
+    ArrayList<int[]> allFace = new ArrayList<int[]>();
+    class Edge {
+      public int v1, v2;
+      public float smoothness;
+      public Edge(int v1, int v2, float smoothness)
+      {
+        this.v1 = v1;
+        this.v2 = v2;
+        this.smoothness = smoothness;
+      }
+    }
+    ArrayList<Edge> edgeSmoothness = new ArrayList<Edge>();
     int start = 0;
     Enumeration objects = getObjects(new ObjectInfo(this, lastCoords, ""), false, lastScene);
     while (objects.hasMoreElements())
       {
+        // Convert the object to a TriangleMesh.
+
         ObjectInfo obj = (ObjectInfo) objects.nextElement();
         if (obj.getObject().canConvertToTriangleMesh() == CANT_CONVERT)
           continue;
         Mat4 trans = obj.getCoords().fromLocal();
-        TriangleMesh tri = obj.getObject().convertToTriangleMesh(tol);
-        MeshVertex vert[] = tri.getVertices();
-        for (int i = 0; i < vert.length; i++)
-          allVert.addElement(trans.times(vert[i].r));
-        TriangleMesh.Face face[] = tri.getFaces();
-        for (int i = 0; i < face.length; i++)
-          allFace.addElement(new int [] {face[i].v1+start, face[i].v2+start, face[i].v3+start});
-        start += vert.length;
+        TriangleMesh tri = (obj.getObject() instanceof TriangleMesh ? (TriangleMesh) obj.getObject().duplicate() : obj.getObject().convertToTriangleMesh(tol));
+
+        // Add its vertices and faces.
+
+        for (MeshVertex vert : tri.getVertices())
+        {
+          allVert.add(trans.times(vert.r));
+          vertSmoothness.add(((TriangleMesh.Vertex) vert).smoothness);
+        }
+        for (TriangleMesh.Face face : tri.getFaces())
+          allFace.add(new int [] {face.v1+start, face.v2+start, face.v3+start});
+
+        // Record edges with non-default smoothness.
+
+        for (TriangleMesh.Edge edge : tri.getEdges())
+          if (edge.smoothness != 1.0f)
+            edgeSmoothness.add(new Edge(edge.v1+start, edge.v2+start, edge.smoothness));
+        start += tri.getVertices().length;
       }
     if (allVert.size() == 0)
-      allVert.addElement(new Vec3());
+      allVert.add(new Vec3());
+
+    // Create the new mesh.
+
     Vec3 vert[] = new Vec3 [allVert.size()];
-    allVert.copyInto(vert);
+    allVert.toArray(vert);
     int face[][] = new int [allFace.size()][];
-    allFace.copyInto(face);
+    allFace.toArray(face);
     TriangleMesh mesh = new TriangleMesh(vert, face);
     mesh.copyTextureAndMaterial(this);
     if (getTexture() == null)
     {
       Texture tex = new UniformTexture();
       mesh.setTexture(tex, tex.getDefaultMapping(mesh));
+    }
+
+    // Set vertex and edge smoothness values.
+
+    for (int i = 0; i < vertSmoothness.size(); i++)
+      mesh.getVertex(i).smoothness = vertSmoothness.get(i);
+    TriangleMesh.Edge edges[] = mesh.getEdges();
+    for (Edge edge : edgeSmoothness)
+    {
+      for (int edgeIndex : mesh.getVertex(edge.v1).getEdges())
+        if (edges[edgeIndex].v1 == edge.v2 || edges[edgeIndex].v2 == edge.v2)
+          edges[edgeIndex].smoothness = edge.smoothness;
     }
     return mesh;
   }

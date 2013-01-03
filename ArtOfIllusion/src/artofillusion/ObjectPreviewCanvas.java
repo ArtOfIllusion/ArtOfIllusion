@@ -23,6 +23,7 @@ import java.awt.*;
 public class ObjectPreviewCanvas extends ViewerCanvas
 {
   private ObjectInfo objInfo;
+  private Scene scene;
   private boolean sizeSet;
   private boolean hasBeenDrawn;
 
@@ -39,12 +40,15 @@ public class ObjectPreviewCanvas extends ViewerCanvas
   public ObjectPreviewCanvas(ObjectInfo obj, RowContainer p)
   {
     super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
+    scene = new Scene();
     if (obj != null)
     {
       objInfo = obj.duplicate();
       objInfo.getCoords().setOrigin(new Vec3());
       objInfo.getCoords().setOrientation(Vec3.vz(), Vec3.vy());
       objInfo.clearDistortion();
+      scene.addObject(objInfo, null);
+      objInfo.getObject().sceneChanged(objInfo, scene);
     }
     buildChoices(p);
     setTool(new RotateViewTool(null));
@@ -59,6 +63,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
   public void objectChanged()
   {
     getObject().clearCachedMeshes();
+    getObject().getObject().sceneChanged(getObject(), scene);
   }
   
   /** Get the object being previewed. */
@@ -77,6 +82,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     else
       objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
+    obj.sceneChanged(objInfo, scene);
   }
   
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,

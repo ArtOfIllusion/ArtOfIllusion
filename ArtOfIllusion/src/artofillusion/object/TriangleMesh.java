@@ -464,6 +464,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     return vertex;
   }
+
+  public Vertex getVertex(int i)
+  {
+    return vertex[i];
+  }
   
   public Edge[] getEdges()
   {
@@ -3225,7 +3230,7 @@ groups:     do
         while (true)
           {
             int best = -1;
-            double maxScore = 0.0;
+            double maxScore = 0.01;
             for (int i = 0; i < candidate.length; i++)
               if (candidate[i] && score[i] > maxScore)
                 {

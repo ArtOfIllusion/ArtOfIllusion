@@ -1,6 +1,6 @@
-package artofillusion.object;
+package artofillusion.tools;
 
-/* Copyright (C) 2012 by Peter Eastman and Julio Sangrador-Patón
+/* Copyright (C) 2006-2013 by Peter Eastman and Julio Sangrador-Patón
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,126 +10,40 @@ package artofillusion.object;
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-
 import artofillusion.*;
-import artofillusion.animation.*;
 import artofillusion.math.*;
+import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
 
 import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.*;
 
-public class Text extends ObjectCollection
+public class TextTool implements ModellingTool
 {
-  public static enum TextType {Outline, Tube, Surface, Solid};
-  private TextType type;
-  private String fontName, text;
-  private boolean bold, italic;
-  private double thickness;
-  private int subdivisions;
+  public static enum TextType {Outline, Tube, Surface, Solid}
 
-  private double tolerance = 0.1; // What to do about this?
-
-  public Text()
+  public TextTool()
   {
-    type = TextType.Outline;
-    text = "Text";
-    fontName = "Serif";
-    thickness = 0.1;
-    subdivisions = 1;
   }
 
-  public String getText()
+  /** Get the text that appear as the menu item.*/
+
+  public String getName()
   {
-    return text;
+    return Translate.text("menu.textTool");
   }
 
-  public void setText(String text)
+  /** Display the dialog. */
+
+  public void commandSelected(LayoutWindow window)
   {
-    this.text = text;
-    cachedObjects = null;
-    cachedBounds = null;
+    new TextDialog(window);
   }
 
-  public TextType getType()
-  {
-    return type;
-  }
-
-  public void setType(TextType type)
-  {
-    this.type = type;
-    cachedObjects = null;
-    cachedBounds = null;
-  }
-
-  public boolean getBold()
-  {
-    return bold;
-  }
-
-  public void setBold(boolean bold)
-  {
-    this.bold = bold;
-    cachedObjects = null;
-    cachedBounds = null;
-  }
-
-  public boolean getItalic()
-  {
-    return italic;
-  }
-
-  public void setItalic(boolean italic)
-  {
-    this.italic = italic;
-    cachedObjects = null;
-    cachedBounds = null;
-  }
-
-  public String getFontName()
-  {
-    return fontName;
-  }
-
-  public void setFontName(String fontName)
-  {
-    this.fontName = fontName;
-    cachedObjects = null;
-    cachedBounds = null;
-  }
-
-  public int getSubdivisions()
-  {
-    return subdivisions;
-  }
-
-  public void setSubdivisions(int subdivisions)
-  {
-    this.subdivisions = subdivisions;
-    cachedObjects = null;
-    cachedBounds = null;
-  }
-
-  public double getThickness()
-  {
-    return thickness;
-  }
-
-  public void setThickness(double thickness)
-  {
-    this.thickness = thickness;
-    cachedObjects = null;
-    cachedBounds = null;
-  }
-
-  @Override
-  protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
+  public static ArrayList<ObjectInfo> createText(String text, String fontName, TextType type, boolean bold, boolean italic, double thickness, Texture texture)
   {
     ArrayList<ObjectInfo> objects = new ArrayList<ObjectInfo>();
     int style = Font.PLAIN;
@@ -138,7 +52,6 @@ public class Text extends ObjectCollection
     if (italic)
       style |= Font.ITALIC;
     Font font = new Font(fontName, style, 1);
-    Texture texture = getTexture();
     try
     {
       GlyphVector glyphVector = font.createGlyphVector(new FontRenderContext(null, true, true), text);
@@ -197,11 +110,27 @@ public class Text extends ObjectCollection
               currentGlyphOI.setTexture(texture, texture.getDefaultMapping(currentGlyphOI.object));
               if(type == TextType.Surface || type == TextType.Solid) {
                 // try to triangulate the curve
-                TriangleMesh theMesh = theCurve.subdivideCurve(subdivisions).convertToTriangleMesh(tolerance);
+                Curve subdividedCurve = theCurve.subdivideCurve(1);
+                TriangleMesh theMesh = subdividedCurve.convertToTriangleMesh(1);
                 if (theMesh == null)
                 {
-                  pathIterator.next();
-                  continue;
+                  // Try subdividing it a second time.
+
+                  subdividedCurve = subdividedCurve.subdivideCurve(1);
+                  theMesh = subdividedCurve.convertToTriangleMesh(1);
+                  if (theMesh == null)
+                  {
+                    // Perhaps we can triangulate the original, unsubdivided curve?
+
+                    theMesh = theCurve.convertToTriangleMesh(1);
+                    if (theMesh == null)
+                    {
+                      // Just give up.
+
+                      pathIterator.next();
+                      continue;
+                    }
+                  }
                 }
                 currentGlyphOI = new ObjectInfo(theMesh, new CoordinateSystem(), glyphName);
                 currentGlyphOI.setTexture(texture, texture.getDefaultMapping(currentGlyphOI.object));
@@ -214,7 +143,7 @@ public class Text extends ObjectCollection
                   Vec3 coordsDiff = currentGlyphOI.getBounds().getCenter().minus(meshToTestForIntersection.getBounds().getCenter());
                   meshToTestForIntersection.coords.setOrigin(meshToTestForIntersection.coords.getOrigin().plus(coordsDiff));
                   CSGObject testCSG = new CSGObject(fullLetterOI,meshToTestForIntersection,CSGObject.INTERSECTION);
-                  TriangleMesh testCSGMesh = testCSG.convertToTriangleMesh(tolerance);
+                  TriangleMesh testCSGMesh = testCSG.convertToTriangleMesh(1);
                   if(testCSGMesh.getEdges().length > 0) { // Intersects
                     BoundingBox bounds1 = fullLetterOI.getBounds();
                     BoundingBox bounds2 = currentGlyphOI.getBounds();
@@ -226,8 +155,7 @@ public class Text extends ObjectCollection
                     coordsDiff = secondMesh.getBounds().getCenter().minus(meshToCut.getBounds().getCenter());
                     meshToCut.coords.setOrigin(meshToCut.coords.getOrigin().plus(coordsDiff));
                     CSGObject aCSG = new CSGObject(firstMesh, meshToCut, CSGObject.DIFFERENCE12);
-                    TriangleMesh aCSGMesh = aCSG.convertToTriangleMesh(tolerance);
-  //                  fullLetterOI = new ObjectInfo(meshToCut.object,fullLetterOI.coords.duplicate(), glyphName);
+                    TriangleMesh aCSGMesh = aCSG.convertToTriangleMesh(1);
 
                     // Make sure that vertices around the cutout region have the correct smoothness.
 
@@ -244,7 +172,7 @@ public class Text extends ObjectCollection
                   }
                   else { // Unites
                     CSGObject aCSG = new CSGObject(fullLetterOI, currentGlyphOI, CSGObject.UNION);
-                    TriangleMesh aCSGMesh = aCSG.convertToTriangleMesh(tolerance);
+                    TriangleMesh aCSGMesh = aCSG.convertToTriangleMesh(1);
                     fullLetterOI = new ObjectInfo(aCSGMesh,fullLetterOI.coords.duplicate(), glyphName);
                     fullLetterOI.setTexture(texture, texture.getDefaultMapping(fullLetterOI.object));
                   }
@@ -277,6 +205,9 @@ public class Text extends ObjectCollection
         } /* Curves loop */
         if (fullLetterOI != null) {
           if(type == TextType.Surface || type == TextType.Solid) {
+            boolean selection[] = new boolean [((TriangleMesh) fullLetterOI.getObject()).getEdges().length];
+            Arrays.fill(selection, true);
+            new TriMeshSimplifier((TriangleMesh) fullLetterOI.getObject(), selection, 1e-6, null);
             try { // Final optimization of the mesh, maybe it is redundant.
               TriangleMesh mesh = (TriangleMesh) fullLetterOI.getObject();
               mesh.setSmoothingMethod(Mesh.APPROXIMATING);
@@ -286,19 +217,12 @@ public class Text extends ObjectCollection
             catch (Exception e) {e.printStackTrace();} // Again, should we act?
           }
           if(type == TextType.Solid) { // Extrude the shape.
-            boolean selection[] = new boolean [((TriangleMesh) fullLetterOI.getObject()).getEdges().length];
-            Arrays.fill(selection, true);
-            new TriMeshSimplifier((TriangleMesh) fullLetterOI.getObject(), selection, 1e-6, null);
             TriangleMesh mesh = solidify((TriangleMesh) fullLetterOI.getObject(), thickness);
             ObjectInfo extrudedMeshOI = new ObjectInfo(mesh, fullLetterOI.coords.duplicate(), glyphName);
             extrudedMeshOI.setTexture(texture, texture.getDefaultMapping(extrudedMeshOI.object));  // for getBounds() to work
             Vec3 coordsDiff = fullLetterOI.getBounds().getCenter().minus(extrudedMeshOI.getBounds().getCenter());
             extrudedMeshOI.coords.setOrigin(extrudedMeshOI.coords.getOrigin().plus(coordsDiff));
             fullLetterOI = extrudedMeshOI;
-  //          boolean selection[] = new boolean [mesh.getEdges().length];
-  //          Arrays.fill(selection, true);
-  //          new TriMeshSimplifier(mesh, selection, tolerance*0.01, null);
-  //          mesh.autosmoothMeshEdges(1.5);
             mesh.setSmoothingMethod(Mesh.APPROXIMATING);
             fullLetterOI.object = mesh = TriangleMesh.optimizeMesh(mesh);
             fullLetterOI.clearCachedMeshes();
@@ -314,7 +238,7 @@ public class Text extends ObjectCollection
     {
       ex.printStackTrace();
     }
-    return Collections.enumeration(objects);
+    return objects;
   }
 
   private static TriangleMesh solidify(TriangleMesh mesh, double thickness)
@@ -326,18 +250,16 @@ public class Text extends ObjectCollection
 
     TriangleMesh.Vertex newVert[] = new TriangleMesh.Vertex [vert.length*2];
     double offset = 0.5*thickness;
-    for (int i = 0; i < norm.length; i++)
-      if (norm[i].z != 0.0)
+    for (Vec3 n : norm)
+      if (n.z != 0.0)
       {
-        offset = 0.5*thickness*norm[i].z;
+        offset = 0.5*thickness*n.z;
         break;
       }
     for (int i = 0; i < vert.length; i++)
     {
       newVert[i] = mesh.new Vertex((TriangleMesh.Vertex) vert[i]);
       newVert[i+vert.length] = mesh.new Vertex((TriangleMesh.Vertex) vert[i]);
-//      newVert[i].r.add(norm[i].times(0.5*thickness));
-//      newVert[i+vert.length].r.add(norm[i].times(-0.5*thickness));
       newVert[i].r.z += offset;
       newVert[i+vert.length].r.z -= offset;
     }
@@ -419,150 +341,5 @@ public class Text extends ObjectCollection
       if (newMesh.getVertex(e.v1).smoothness == 0.0f && newMesh.getVertex(e.v2).smoothness == 0.0f)
         e.smoothness = 0.0f;
     return newMesh;
-  }
-
-  @Override
-  public boolean isEditable()
-  {
-    return true;
-  }
-
-  @Override
-  public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
-  {
-    RadioButtonGroup meshType = new RadioButtonGroup();
-    final BRadioButton meshSpline = new BRadioButton("Silhouette", type == TextType.Outline, meshType);
-    final BRadioButton mesh2D = new BRadioButton("2D surface", type == TextType.Surface, meshType);
-    final BRadioButton mesh3D = new BRadioButton("3D solid", type == TextType.Solid, meshType);
-    final BRadioButton meshTube = new BRadioButton("Tube", type == TextType.Tube, meshType);
-
-    GridContainer kindOfMesh = new GridContainer(2, 2);
-    kindOfMesh.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(2, 2, 2, 2), null));
-    kindOfMesh.add(meshSpline, 0, 0);
-    kindOfMesh.add(mesh2D, 0, 1);
-    kindOfMesh.add(mesh3D, 1, 0);
-    kindOfMesh.add(meshTube, 1, 1);
-
-    String fonts[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-    final BList fontsList = new BList(fonts);
-    fontsList.setPreferredVisibleRows(10);
-    fontsList.setMultipleSelectionEnabled(false);
-    int theSelectedIndex = 0;
-    for(int y=0;y<fonts.length;y++) {
-      if(fonts[y].equals(fontName)) {
-        theSelectedIndex = y;
-      }
-    }
-    fontsList.setSelected(theSelectedIndex, true);
-    fontsList.scrollToItem(theSelectedIndex);
-
-    final BCheckBox wantsBoldCheck = new BCheckBox("Bold", bold);
-    final BCheckBox wantsItalicCheck = new BCheckBox("Italic", italic);
-    RowContainer fontStyle = new RowContainer();
-    fontStyle.add(wantsBoldCheck);
-    fontStyle.add(wantsItalicCheck);
-
-    final BTextField textToShow = new BTextField(text);
-    final ValueField toleranceValue = new ValueField(tolerance, ValueField.POSITIVE);
-    final ValueField thicknessValue = new ValueField(thickness, ValueField.POSITIVE);
-    final ValueField degreeOfSubdivision = new ValueField(subdivisions, ValueField.NONNEGATIVE);
-
-    final ObjectPreviewCanvas preview = new ObjectPreviewCanvas(new ObjectInfo(this.duplicate(), new CoordinateSystem(), ""));
-    BoundingBox bounds = preview.getObject().getBounds();
-    bounds.outset((bounds.maxx-bounds.minx)/10);
-    preview.frameBox(bounds);
-
-    final ActionProcessor actionProcessor = new ActionProcessor();
-    Object listener = new Object() {
-      void processEvent()
-      {
-        actionProcessor.addEvent(new Runnable()
-        {
-          public void run()
-          {
-            Text text = (Text) preview.getObject().getObject();
-            text.setBold(wantsBoldCheck.getState());
-            text.setItalic(wantsItalicCheck.getState());
-            text.setFontName(fontsList.getSelectedValue().toString());
-            text.setText(textToShow.getText());
-            text.tolerance = toleranceValue.getValue();
-            text.setType(meshSpline.getState()?TextType.Outline:mesh2D.getState()?TextType.Surface:mesh3D.getState()?TextType.Solid:TextType.Tube);
-            text.setThickness(thicknessValue.getValue());
-            text.setSubdivisions((int) degreeOfSubdivision.getValue());
-            preview.objectChanged();
-            BoundingBox bounds = preview.getObject().getBounds();
-            bounds.outset((bounds.maxx-bounds.minx)/10);
-            preview.frameBox(bounds);
-            preview.repaint();
-          }
-        });
-      }
-    };
-    wantsBoldCheck.addEventLink(ValueChangedEvent.class, listener);
-    wantsItalicCheck.addEventLink(ValueChangedEvent.class, listener);
-    fontsList.addEventLink(SelectionChangedEvent.class, listener);
-    textToShow.addEventLink(ValueChangedEvent.class, listener);
-    toleranceValue.addEventLink(ValueChangedEvent.class, listener);
-    meshType.addEventLink(SelectionChangedEvent.class, listener);
-    thicknessValue.addEventLink(ValueChangedEvent.class, listener);
-    degreeOfSubdivision.addEventLink(ValueChangedEvent.class, listener);
-
-/* Create and show the dialog */
-
-    ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), "Select Parameters for Text Tool",
-        new Widget [] {kindOfMesh, UIUtilities.createScrollingList(fontsList), fontStyle, textToShow, toleranceValue, thicknessValue, degreeOfSubdivision, preview},
-        new String [] {"Type of Object", "Font", "Style", "Text to Render","Tolerance", "Thickness", "Degree of subdivision", null});
-    actionProcessor.stopProcessing();
-    if (!dlg.clickedOk()) {
-      return;
-    }
-
-/* Obtain the user values */
-
-    if (!dlg.clickedOk())
-      return;
-    copyObject(preview.getObject().getObject());
-    cb.run();
-  }
-
-  @Override
-  public Object3D duplicate()
-  {
-    Text copy = new Text();
-    copy.copyObject(this);
-    return copy;
-  }
-
-  @Override
-  public void copyObject(Object3D obj)
-  {
-    Text text = (Text) obj;
-    setType(text.type);
-    setFontName(text.fontName);
-    setText(text.text);
-    setBold(text.bold);
-    setItalic(text.italic);
-    setThickness(text.thickness);
-    setSubdivisions(text.subdivisions);
-    tolerance = text.tolerance;
-    copyTextureAndMaterial(obj);
-  }
-
-  @Override
-  public void setSize(double xsize, double ysize, double zsize)
-  {
-    //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
-  public Keyframe getPoseKeyframe()
-  {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
-  public void applyPoseKeyframe(Keyframe k)
-  {
-    //To change body of implemented methods use File | Settings | File Templates.
   }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="yes"?>
-<extension name="Tools" version="2.5">
+<extension name="Tools" version="3.0">
   <author>Peter Eastman</author>
-  <date>2007</date>
+  <date>2013</date>
   <description>
 This plugin contains the standard modeling tools which are included with Art of Illusion.
   </description>
@@ -17,6 +17,9 @@ This plugin contains the standard modeling tools which are included with Art of 
     <export method="latheCurve" id="artofillusion.tools.LatheTool.latheCurve"/>
   </plugin>
   <plugin class="artofillusion.tools.SkinTool"/>
+  <plugin class="artofillusion.tools.TextTool">
+    <export method="createText" id="artofillusion.tools.TextTool.createText"/>
+  </plugin>
   <plugin class="artofillusion.tools.TubeTool"/>
 </extension>
 

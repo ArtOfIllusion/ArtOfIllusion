@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2012 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -143,6 +143,7 @@ public class TriMeshSimplifier implements Runnable
       numLabel.setText(Translate.text("Final")+":");
       status.setText(String.valueOf(faces));
       cancelButton.setText(Translate.text("Done"));
+      dial.setDefaultButton(cancelButton);
     }
   }
 
@@ -351,9 +352,18 @@ public class TriMeshSimplifier implements Runnable
         vertex[f[i].v2].crown[vertex[f[i].v2].faces++] = face[i];
         vertex[f[i].v3].crown[vertex[f[i].v3].faces++] = face[i];
         con = new Constraint();
-        con.a = face[i].normal.x;
-        con.b = face[i].normal.y;
-        con.c = face[i].normal.z;
+        if (face[i].normal.length2() == 0.0)
+        {
+          con.a = 1;
+          con.b = 1;
+          con.c = 1;
+        }
+        else
+        {
+          con.a = face[i].normal.x;
+          con.b = face[i].normal.y;
+          con.c = face[i].normal.z;
+        }
         con.d = -(con.a*v[f[i].v1].r.x + con.b*v[f[i].v1].r.y + con.c*v[f[i].v1].r.z);
         vertex[f[i].v1].zone.con[vertex[f[i].v1].zone.constraints++] = con;
         vertex[f[i].v2].zone.con[vertex[f[i].v2].zone.constraints++] = con;
@@ -792,17 +802,61 @@ public class TriMeshSimplifier implements Runnable
   private void updateCost(MeshEdge ed)
   {
     double cost = findCost(ed);
-    int i = ed.v1;
+    int v1 = ed.v1;
 
     ed.v1 = ed.v2;
-    ed.v2 = i;
+    ed.v2 = v1;
     ed.cost = findCost(ed);
     if (ed.cost > cost)
       {
         ed.v2 = ed.v1;
-        ed.v1 = i;
+        ed.v1 = v1;
         ed.cost = cost;
       }
+    if (ed.cost < tol)
+    {
+      // If this edge is adjacent to a face whose other edges are both boundaries, then
+      // collapsing this edge would leave a dangling edge.  This should not be allowed.
+
+      MeshFace f = ed.f1;
+      if ((f.e1 == ed || f.e1.f2 == null) && (f.e2 == ed || f.e2.f2 == null) && (f.e3 == ed || f.e3.f2 == null))
+      {
+        ed.cost = tol;
+        return;
+      }
+      f = ed.f2;
+      if (f != null)
+        if ((f.e1 == ed || f.e1.f2 == null) && (f.e2 == ed || f.e2.f2 == null) && (f.e3 == ed || f.e3.f2 == null))
+        {
+          ed.cost = tol;
+          return;
+        }
+
+      // If this is a non-boundary edge connecting two different boundaries, then contracting it
+      // would produce a non-manifold mesh.  That should not be allowed.
+
+      if (ed.f2 != null)
+      {
+        MeshEdge star[] = vertex[ed.v1].star;
+        boolean v1IsBoundary = false;
+        for (int i = 0; i < star.length; i++)
+          if (star[i].f2 == null)
+          {
+            v1IsBoundary = true;
+            break;
+          }
+        if (v1IsBoundary)
+        {
+          star = vertex[ed.v2].star;
+          for (int i = 0; i < star.length; i++)
+            if (star[i].f2 == null)
+            {
+              ed.cost = tol;
+              return;
+            }
+        }
+      }
+    }
   }
 
   /* Find the cost associated with contracting a given edge.  If the cost is determined 
@@ -855,17 +909,6 @@ public class TriMeshSimplifier implements Runnable
           }
         zone = zone.next;
       }
-    
-    // If this edge is adjacent to a face whose other edges are both boundaries, then
-    // collapsing this edge would leave a dangling edge.  This should not be allowed.
-    
-    f = ed.f1;
-    if ((f.e1 == ed || f.e1.f2 == null) && (f.e2 == ed || f.e2.f2 == null) && (f.e3 == ed || f.e3.f2 == null))
-      return tol;
-    f = ed.f2;
-    if (f != null)
-      if ((f.e1 == ed || f.e1.f2 == null) && (f.e2 == ed || f.e2.f2 == null) && (f.e3 == ed || f.e3.f2 == null))
-        return tol;
     return max;
   }
 
@@ -880,7 +923,7 @@ public class TriMeshSimplifier implements Runnable
     normal.set(temp1.y*temp2.z-temp1.z*temp2.y, temp1.z*temp2.x-temp1.x*temp2.z, temp1.x*temp2.y-temp1.y*temp2.x);
     double length = normal.length();
     if (length < 1e-10)
-      normal.set(1.0, 0.0, 0.0);
+      normal.set(0.0, 0.0, 0.0);
     else
       normal.scale(1.0/length);
   }

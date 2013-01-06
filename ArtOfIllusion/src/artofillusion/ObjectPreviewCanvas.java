@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,7 +12,6 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.view.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -136,8 +135,6 @@ public class ObjectPreviewCanvas extends ViewerCanvas
 
   protected void renderObject()
   {
-    RenderingMesh mesh;
-    
     if (objInfo == null)
       return;
     if (!sizeSet)
@@ -151,28 +148,8 @@ public class ObjectPreviewCanvas extends ViewerCanvas
       theCamera.setScreenParams(0, scale, dim.width, dim.height);
       sizeSet = true;
     }
-    if (renderMode == RENDER_WIREFRAME)
-      renderWireframe(objInfo.getWireframePreview(), theCamera, lineColor);
-    else
-    {
-      mesh = objInfo.getPreviewMesh();
-      if (mesh == null)
-        renderWireframe(objInfo.getWireframePreview(), theCamera, lineColor);
-      else if (renderMode == RENDER_TRANSPARENT)
-        renderMeshTransparent(mesh, new ConstantVertexShader(transparentColor), theCamera, theCamera.getViewToWorld().timesDirection(Vec3.vz()), null);
-      else
-      {
-        Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-        VertexShader shader;
-        if (renderMode == RENDER_FLAT)
-          shader = new FlatVertexShader(mesh, surfaceRGBColor, viewDir);
-        else if (renderMode == RENDER_SMOOTH)
-          shader = new SmoothVertexShader(mesh, surfaceRGBColor, viewDir);
-        else
-          shader = new TexturedVertexShader(mesh, objInfo.getObject(), 0.0, viewDir).optimize();
-        renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), null);
-      }
-    }
+    Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+    objInfo.getObject().renderObject(objInfo, this, viewDir);
   }
 
   /** When the user presses the mouse, forward events to the current tool. */

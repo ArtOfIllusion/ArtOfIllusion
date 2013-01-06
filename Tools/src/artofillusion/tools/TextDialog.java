@@ -22,6 +22,10 @@ import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
 
+/**
+ * TextDialog displays the user interface for creating text.
+ */
+
 public class TextDialog extends BDialog
 {
   private final LayoutWindow window;
@@ -33,6 +37,12 @@ public class TextDialog extends BDialog
   private final ObjectPreviewCanvas preview;
   private final BButton okButton, cancelButton;
   private ArrayList<ObjectInfo> objects;
+
+  /**
+   * Create a new TextDialog.
+   *
+   * @param window    the window the objects will be added to
+   */
 
   public TextDialog(LayoutWindow window)
   {
@@ -136,7 +146,6 @@ public class TextDialog extends BDialog
       updateComponents();
     }
   }
-
 
   /** Recenter and redraw the preview. */
 

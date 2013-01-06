@@ -21,6 +21,9 @@ import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.*;
 
+/**
+ * TextTool creates meshes or curves that represent text.
+ */
 public class TextTool implements ModellingTool
 {
   public static enum TextType {Outline, Tube, Surface, Solid}
@@ -43,6 +46,18 @@ public class TextTool implements ModellingTool
     new TextDialog(window);
   }
 
+  /**
+   * Create a set of objects that represent a line of text.
+   *
+   * @param text         the text string to generate objects for
+   * @param fontName     the name of the font to use
+   * @param type         the type of objects to create
+   * @param bold         whether to use a bold font
+   * @param italic       whether to use an italic font
+   * @param thickness    if type is Tube, the thickness of the Tube objects to create.  If type is Solid, the thickness of the extruded letters.
+   * @param texture      the texture to assign to the created objects (ignored if type is Outline, since then the objects are Curves)
+   * @return the objects that were created (one or more for each letter)
+   */
   public static ArrayList<ObjectInfo> createText(String text, String fontName, TextType type, boolean bold, boolean italic, double thickness, Texture texture)
   {
     ArrayList<ObjectInfo> objects = new ArrayList<ObjectInfo>();
@@ -54,62 +69,69 @@ public class TextTool implements ModellingTool
     Font font = new Font(fontName, style, 1);
     try
     {
-      GlyphVector glyphVector = font.createGlyphVector(new FontRenderContext(null, true, true), text);
-      int numGlyphs = glyphVector.getNumGlyphs();
+      // Loop over all glyphs (roughly speaking, letters) and create objects for them.
 
-      for (int glyphIndex = 0; glyphIndex < numGlyphs; glyphIndex++) {
-        Shape currentOutline = glyphVector.getGlyphOutline(glyphIndex);
-        PathIterator pathIterator = currentOutline.getPathIterator(null);
+      GlyphVector glyphVector = font.createGlyphVector(new FontRenderContext(null, true, true), text);
+      for (int glyphIndex = 0; glyphIndex < glyphVector.getNumGlyphs(); glyphIndex++)
+      {
         float segmentCoords[] = new float[6];
-        Vec3 pointsRuntimeTypeArray[] = new Vec3[1];
-        Vector<Vec3> points = new Vector<Vec3>();
-        Vector<Float> smoothnesses = new Vector<Float>();
+        ArrayList<Vec3> points = new ArrayList<Vec3>();
+        ArrayList<Float> smoothnesses = new ArrayList<Float>();
         boolean firstCurveOfGlyph = true;
         String glyphName = Character.toString(text.charAt(glyphVector.getGlyphCharIndex(glyphIndex)));
         ObjectInfo fullLetterOI = null;
-        while(!pathIterator.isDone()){
-          switch(pathIterator.currentSegment(segmentCoords)) {
+
+        // Loop over all segments in the outline of the current glyph and process them.
+
+        Shape currentOutline = glyphVector.getGlyphOutline(glyphIndex);
+        PathIterator pathIterator = currentOutline.getPathIterator(null);
+        while (!pathIterator.isDone())
+        {
+          switch(pathIterator.currentSegment(segmentCoords))
+          {
             case PathIterator.SEG_MOVETO:
-              points.add(new Vec3((double)segmentCoords[0],-(double)segmentCoords[1],0));
+              points.add(new Vec3(segmentCoords[0], -segmentCoords[1], 0));
               smoothnesses.add(1.0f);
               break;
             case PathIterator.SEG_LINETO:
               if (smoothnesses.size() > 0)
                 smoothnesses.set(smoothnesses.size()-1, 0.0f);
-              points.add(new Vec3((double)segmentCoords[0],-(double)segmentCoords[1],0));
+              points.add(new Vec3(segmentCoords[0], -segmentCoords[1], 0));
               smoothnesses.add(0.0f);
               break;
             case PathIterator.SEG_QUADTO:
-              points.add(new Vec3((double)segmentCoords[0],-(double)segmentCoords[1],0));
+              points.add(new Vec3(segmentCoords[0], -segmentCoords[1], 0));
               smoothnesses.add(1.0f);
-              points.add(new Vec3((double)segmentCoords[2],-(double)segmentCoords[3],0));
+              points.add(new Vec3(segmentCoords[2], -segmentCoords[3], 0));
               smoothnesses.add(1.0f);
               break;
             case PathIterator.SEG_CUBICTO:
-              points.add(new Vec3((double)segmentCoords[0],-(double)segmentCoords[1],0));
+              points.add(new Vec3(segmentCoords[0], -segmentCoords[1], 0));
               smoothnesses.add(1.0f);
-              points.add(new Vec3((double)segmentCoords[2],-(double)segmentCoords[3],0));
+              points.add(new Vec3(segmentCoords[2], -segmentCoords[3], 0));
               smoothnesses.add(1.0f);
-              points.add(new Vec3((double)segmentCoords[4],-(double)segmentCoords[5],0));
+              points.add(new Vec3(segmentCoords[4], -segmentCoords[5], 0));
               smoothnesses.add(1.0f);
               break;
             case PathIterator.SEG_CLOSE:
               // Sometimes the initial point is duplicated at the end,
               // so try to remove the duplicate
-              if((points.elementAt(0)).distance(points.elementAt(points.size()-1))<0.0001) {
-                points.removeElementAt(points.size()-1);
-                smoothnesses.removeElementAt(smoothnesses.size()-1);
+              if ((points.get(0)).distance(points.get(points.size()-1)) < 0.0001)
+              {
+                points.remove(points.size()-1);
+                smoothnesses.remove(smoothnesses.size()-1);
               }
-              // Convert the vectors into arrays
+              // Convert the ArrayLists into arrays
               float smoothnessesArray[] = new float[smoothnesses.size()];
-              for (int i = 0; i < smoothnesses.size(); i++) {
-                smoothnessesArray[i] = smoothnesses.elementAt(i);
-              }
-              Curve theCurve = new Curve(points.toArray(pointsRuntimeTypeArray),smoothnessesArray,Mesh.APPROXIMATING,true);
+              for (int i = 0; i < smoothnesses.size(); i++)
+                smoothnessesArray[i] = smoothnesses.get(i);
+              Curve theCurve = new Curve(points.toArray(new Vec3[points.size()]), smoothnessesArray, Mesh.APPROXIMATING, true);
               ObjectInfo currentGlyphOI = new ObjectInfo(theCurve, new CoordinateSystem(), glyphName);
               currentGlyphOI.setTexture(texture, texture.getDefaultMapping(currentGlyphOI.object));
-              if(type == TextType.Surface || type == TextType.Solid) {
-                // try to triangulate the curve
+              if (type == TextType.Surface || type == TextType.Solid)
+              {
+                // Try to triangulate the curve.
+
                 Curve subdividedCurve = theCurve.subdivideCurve(1);
                 TriangleMesh theMesh = subdividedCurve.convertToTriangleMesh(1);
                 if (theMesh == null)
@@ -134,17 +156,22 @@ public class TextTool implements ModellingTool
                 }
                 currentGlyphOI = new ObjectInfo(theMesh, new CoordinateSystem(), glyphName);
                 currentGlyphOI.setTexture(texture, texture.getDefaultMapping(currentGlyphOI.object));
-                if(firstCurveOfGlyph) {
+                if (firstCurveOfGlyph)
+                {
                   fullLetterOI = currentGlyphOI;
                 }
-                else { // More curves, see if they intersect or unite what we already have
+                else
+                {
+                  // More curves, see if they intersect or unite what we already have
                   ObjectInfo meshToTestForIntersection = new ObjectInfo(solidify((TriangleMesh) currentGlyphOI.getObject(), 0.2), currentGlyphOI.coords.duplicate(), glyphName);
                   meshToTestForIntersection.setTexture(texture, texture.getDefaultMapping(meshToTestForIntersection.object)); // for getBounds() to work
                   Vec3 coordsDiff = currentGlyphOI.getBounds().getCenter().minus(meshToTestForIntersection.getBounds().getCenter());
                   meshToTestForIntersection.coords.setOrigin(meshToTestForIntersection.coords.getOrigin().plus(coordsDiff));
-                  CSGObject testCSG = new CSGObject(fullLetterOI,meshToTestForIntersection,CSGObject.INTERSECTION);
+                  CSGObject testCSG = new CSGObject(fullLetterOI, meshToTestForIntersection, CSGObject.INTERSECTION);
                   TriangleMesh testCSGMesh = testCSG.convertToTriangleMesh(1);
-                  if(testCSGMesh.getEdges().length > 0) { // Intersects
+                  if (testCSGMesh.getEdges().length > 0)
+                  {
+                    // Intersects
                     BoundingBox bounds1 = fullLetterOI.getBounds();
                     BoundingBox bounds2 = currentGlyphOI.getBounds();
                     boolean firstIsLarger = ((bounds1.maxx-bounds1.minx)*(bounds1.maxy-bounds1.miny) >= (bounds2.maxx-bounds2.minx)*(bounds2.maxy-bounds2.miny));
@@ -167,56 +194,75 @@ public class TextTool implements ModellingTool
                           if (cutout.getVertex(i).r.distance2(aCSGMesh.getVertex(j).r) < 1e-10)
                             aCSGMesh.getVertex(j).smoothness = 0.0f;
                       }
-                    fullLetterOI = new ObjectInfo(aCSGMesh,fullLetterOI.coords.duplicate(), glyphName);
+                    fullLetterOI = new ObjectInfo(aCSGMesh, fullLetterOI.coords.duplicate(), glyphName);
                     fullLetterOI.setTexture(texture, texture.getDefaultMapping(fullLetterOI.object));
                   }
-                  else { // Unites
+                  else
+                  {
+                    // Unites
                     CSGObject aCSG = new CSGObject(fullLetterOI, currentGlyphOI, CSGObject.UNION);
                     TriangleMesh aCSGMesh = aCSG.convertToTriangleMesh(1);
-                    fullLetterOI = new ObjectInfo(aCSGMesh,fullLetterOI.coords.duplicate(), glyphName);
+                    fullLetterOI = new ObjectInfo(aCSGMesh, fullLetterOI.coords.duplicate(), glyphName);
                     fullLetterOI.setTexture(texture, texture.getDefaultMapping(fullLetterOI.object));
                   }
-                  try { // Optimize the mesh while we are building it
+                  try
+                  {
+                    // Optimize the mesh while we are building it
                     fullLetterOI.object = TriangleMesh.optimizeMesh((TriangleMesh) fullLetterOI.object);
                     fullLetterOI.clearCachedMeshes();
-                  } catch (Exception e) {e.printStackTrace();} // Should we act? Not sure...
+                  }
+                  catch (Exception e)
+                  {
+                    e.printStackTrace();
+                  }
                 }
                 firstCurveOfGlyph = false;
               }
-              else if(type == TextType.Tube) {
-                int nVerts = theCurve.getVertices().length;
-                double tubeThickness[] = new double[nVerts];
-                for(int t = 0; t < nVerts; t++) {
-                  tubeThickness[t]=thickness;
-                }
+              else if (type == TextType.Tube)
+              {
+                double tubeThickness[] = new double[theCurve.getVertices().length];
+                Arrays.fill(tubeThickness, thickness);
                 Tube theTube = new Tube(theCurve, tubeThickness, Tube.CLOSED_ENDS);
                 theTube.setTexture(texture, texture.getDefaultMapping(theTube));
                 objects.add(new ObjectInfo(theTube, new CoordinateSystem(), glyphName));
               }
-              else { // User wants only the curves
+              else
+              {
+                // User wants only the curves
                 objects.add(currentGlyphOI);
               }
-              segmentCoords = new float[6];
-              pointsRuntimeTypeArray = new Vec3[1];
-              points = new Vector<Vec3>();
-              smoothnesses = new Vector<Float>();
-          } /* Segments loop */
+              points = new ArrayList<Vec3>();
+              smoothnesses = new ArrayList<Float>();
+          } // Segments loop
           pathIterator.next();
-        } /* Curves loop */
-        if (fullLetterOI != null) {
-          if(type == TextType.Surface || type == TextType.Solid) {
+        } // Curves loop
+        if (fullLetterOI != null)
+        {
+          if (type == TextType.Surface || type == TextType.Solid)
+          {
             boolean selection[] = new boolean [((TriangleMesh) fullLetterOI.getObject()).getEdges().length];
             Arrays.fill(selection, true);
             new TriMeshSimplifier((TriangleMesh) fullLetterOI.getObject(), selection, 1e-6, null);
-            try { // Final optimization of the mesh, maybe it is redundant.
+            try
+            {
+              // Set any edge connecting two non-smooth vertices to not be smooth.
+
               TriangleMesh mesh = (TriangleMesh) fullLetterOI.getObject();
+              for (TriangleMesh.Edge e : mesh.getEdges())
+                if (mesh.getVertex(e.v1).smoothness == 0.0f && mesh.getVertex(e.v2).smoothness == 0.0f)
+                  e.smoothness = 0.0f;
               mesh.setSmoothingMethod(Mesh.APPROXIMATING);
               fullLetterOI.object = TriangleMesh.optimizeMesh(mesh);
               fullLetterOI.clearCachedMeshes();
             }
-            catch (Exception e) {e.printStackTrace();} // Again, should we act?
+            catch (Exception e)
+            {
+              e.printStackTrace();
+            }
           }
-          if(type == TextType.Solid) { // Extrude the shape.
+          if (type == TextType.Solid)
+          {
+            // Extrude the shape.
             TriangleMesh mesh = solidify((TriangleMesh) fullLetterOI.getObject(), thickness);
             ObjectInfo extrudedMeshOI = new ObjectInfo(mesh, fullLetterOI.coords.duplicate(), glyphName);
             extrudedMeshOI.setTexture(texture, texture.getDefaultMapping(extrudedMeshOI.object));  // for getBounds() to work
@@ -227,12 +273,14 @@ public class TextTool implements ModellingTool
             fullLetterOI.object = mesh = TriangleMesh.optimizeMesh(mesh);
             fullLetterOI.clearCachedMeshes();
           }
-          if(type != TextType.Outline && type != TextType.Tube && !firstCurveOfGlyph){ // We had already added them for these
+          if (type != TextType.Outline && type != TextType.Tube && !firstCurveOfGlyph)
+          {
+            // We had already added them for these
             objects.add(fullLetterOI);
           }
         }
 
-      } /* Glyphs loop */
+      } // Glyphs loop
     }
     catch (Exception ex)
     {
@@ -335,7 +383,7 @@ public class TextTool implements ModellingTool
         e.smoothness = 0.0f;
     }
 
-    // Set any edge connecting two non-smooth vertices to all not be smooth.
+    // Set any edge connecting two non-smooth vertices to not be smooth.
 
     for (TriangleMesh.Edge e : newe)
       if (newMesh.getVertex(e.v1).smoothness == 0.0f && newMesh.getVertex(e.v2).smoothness == 0.0f)

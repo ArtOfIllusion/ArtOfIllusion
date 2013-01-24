@@ -52,7 +52,7 @@ public class ScriptedObjectController
         catch (Exception ex)
           {
             enumeration.executionComplete();
-            ScriptRunner.displayError(ex, 1);
+            ScriptRunner.displayError(object.getLanguage(), ex, 1);
           }
       }
     }.start();

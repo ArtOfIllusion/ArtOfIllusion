@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -235,14 +235,14 @@ public class ArtOfIllusion
 
   public static String getVersion()
   {
-    return getMajorVersion()+".2";
+    return getMajorVersion()+"ea1";
   }
 
   /** Get the major part of the version number of Art of Illusion. */
 
   public static String getMajorVersion()
   {
-    return "2.9";
+    return "3.0";
   }
 
   /** Get the application preferences object. */
@@ -392,19 +392,26 @@ public class ArtOfIllusion
   {
     String files[] = new File(STARTUP_SCRIPT_DIRECTORY).list();
     if (files != null)
-      for (int i = 0; i < files.length; i++)
-        if (files[i].endsWith(".bsh"))
+      for (String file : files)
+      {
+        try
+        {
+          String language = ScriptRunner.getLanguageForFilename(file);
+          try
           {
-            try
-              {
-                String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, files[i]));
-                ScriptRunner.executeScript(script);
-              }
-            catch (IOException ex)
-              {
-                ex.printStackTrace();
-              }
+            String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
+            ScriptRunner.executeScript(language, script);
           }
+          catch (IOException ex)
+          {
+            ex.printStackTrace();
+          }
+        }
+        catch (IllegalArgumentException ex)
+        {
+          // This file isn't a known scripting language.
+        }
+      }
   }
 
   /** Get a class specified by name.  This checks both the system classes, and all plugins.

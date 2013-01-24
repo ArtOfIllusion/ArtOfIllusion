@@ -1,4 +1,4 @@
-/* Copyright (C) 2002,2004 by Peter Eastman
+/* Copyright (C) 2002-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,13 +12,10 @@ package artofillusion.script;
 
 import artofillusion.*;
 import artofillusion.ui.*;
-import bsh.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import java.util.*;
-import javax.swing.*;
 
 /** This class presents a user interface for entering scripts to be executed. */
 
@@ -140,14 +137,15 @@ public class ExecuteScriptWindow extends BFrame
   
   private void executeScript()
   {
+    String language = ScriptRunner.LANGUAGES[0];
     try
     {
-      ToolScript script = ScriptRunner.parseToolScript(scriptText.getText());
+      ToolScript script = ScriptRunner.parseToolScript(language, scriptText.getText());
       script.execute(window);
     }
     catch (Exception e)
     {
-      int line = ScriptRunner.displayError(e, 1);
+      int line = ScriptRunner.displayError(language, e, 1);
       if (line > -1)
         {
           // Find the start of the line containing the error.

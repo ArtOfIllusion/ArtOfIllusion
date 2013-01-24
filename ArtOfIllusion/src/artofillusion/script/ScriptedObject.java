@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2008 by Peter Eastman
+/* Copyright (C) 2002-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +14,6 @@ import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import bsh.*;
 import java.io.*;
 import java.util.*;
 import java.awt.*;
@@ -24,15 +23,22 @@ import java.awt.*;
 public class ScriptedObject extends ObjectCollection
 {
   private String script;
+  private String language;
   private ObjectScript parsedScript;
   private String paramName[];
   private double paramValue[];
   
-  public ScriptedObject(String scriptText)
+  public ScriptedObject(String scriptText, String language)
   {
     script = scriptText;
+    this.language = language;
     paramName = new String [0];
     paramValue = new double [0];
+  }
+
+  public ScriptedObject(String scriptText)
+  {
+    this(scriptText, ScriptRunner.LANGUAGES[0]);
   }
 
   /** Get the script which defines this object. */
@@ -51,22 +57,39 @@ public class ScriptedObject extends ObjectCollection
     cachedObjects = null;
     cachedBounds = null;
   }
-  
+
+  /** Get the language the script is written in. */
+
+  public String getLanguage()
+  {
+    return language;
+  }
+
+  /** Set the language the script is written in. */
+
+  public void setLanguage(String language)
+  {
+    this.language = language;
+    parsedScript = null;
+    cachedObjects = null;
+    cachedBounds = null;
+  }
+
   /** Get the parsed form of the script. */
   
-  public ObjectScript getObjectScript() throws EvalError
+  public ObjectScript getObjectScript()
   {
     if (parsedScript == null)
       {
         try
           {
-            parsedScript = ScriptRunner.parseObjectScript(script);
+            parsedScript = ScriptRunner.parseObjectScript(language, script);
           }
         catch (final Exception ex)
           {
             EventQueue.invokeLater(new Runnable() {
               public void run() {
-                ScriptRunner.displayError(ex, 1);
+                ScriptRunner.displayError(language, ex, 1);
               }
             });
             parsedScript = new ObjectScript() {
@@ -180,7 +203,7 @@ public class ScriptedObject extends ObjectCollection
 
   public Object getPropertyValue(int index)
   {
-    return new Double(paramValue[index]);
+    return paramValue[index];
   }
 
   /** Set the value of one of this object's editable properties.
@@ -190,7 +213,7 @@ public class ScriptedObject extends ObjectCollection
 
   public void setPropertyValue(int index, Object value)
   {
-    paramValue[index] = ((Double) value).doubleValue();
+    paramValue[index] = (Double) value;
     cachedObjects = null;
     cachedBounds = null;
   }
@@ -211,11 +234,11 @@ public class ScriptedObject extends ObjectCollection
     ScriptedObjectKeyframe key = (ScriptedObjectKeyframe) k;
     for (int i = 0; i < paramName.length; i++)
       {
-        Double d = (Double) key.valueTable.get(paramName[i]);
+        Double d = key.valueTable.get(paramName[i]);
         if (d == null)
           paramValue[i] = 0.0;
         else
-          paramValue[i] = d.doubleValue();
+          paramValue[i] = d;
       }
     cachedObjects = null;
     cachedBounds = null;
@@ -266,14 +289,14 @@ public class ScriptedObject extends ObjectCollection
         if (d == null)
           valField[i] = new ValueField(0.0, ValueField.NONE, 5);
         else
-          valField[i] = new ValueField(d.doubleValue(), ValueField.NONE, 5);
+          valField[i] = new ValueField(d, ValueField.NONE, 5);
       }
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editScriptedObjTitle"),
         valField, paramName);
     if (!dlg.clickedOk())
       return;
     for (int i = 0; i < paramName.length; i++)
-      key.valueTable.put(paramName[i], new Double(valField[i].getValue()));
+      key.valueTable.put(paramName[i], valField[i].getValue());
   }
 
   public boolean isEditable()
@@ -336,7 +359,7 @@ public class ScriptedObject extends ObjectCollection
       script = object;
       valueTable = new Hashtable<String, Double>();
       for (int i = 0; i < names.length; i++)
-        valueTable.put(names[i], new Double(values[i]));
+        valueTable.put(names[i], values[i]);
     }
     
     /* Create a duplicate of this keyframe. */
@@ -367,7 +390,7 @@ public class ScriptedObject extends ObjectCollection
           if (d == null)
             values[i] = script.paramValue[i];
           else
-            values[i] = d.doubleValue();
+            values[i] = d;
         }
       return values;
     }
@@ -378,7 +401,7 @@ public class ScriptedObject extends ObjectCollection
     {
       String names[] = script.paramName;
       for (int i = 0; i < names.length; i++)
-        valueTable.put(names[i], new Double(values[i]));
+        valueTable.put(names[i], values[i]);
     }
 
     /* These methods return a new Keyframe which is a weighted average of this one and one,
@@ -416,7 +439,7 @@ public class ScriptedObject extends ObjectCollection
               ScriptedObjectKeyframe key = (ScriptedObjectKeyframe) k[j];
               Double v = (Double) key.valueTable.get(names[i]);
               if (v != null)
-                d += weight[j]*v.doubleValue();
+                d += weight[j]*v;
             }
           values[i] = d;
         }
@@ -430,16 +453,15 @@ public class ScriptedObject extends ObjectCollection
       if (!(k instanceof ScriptedObjectKeyframe))
         return false;
       ScriptedObjectKeyframe key = (ScriptedObjectKeyframe) k;
-      String names[] = script.paramName;
-      for (int i = 0; i < names.length; i++)
+      for (String name : script.paramName)
         {
-          Double d1 = (Double) valueTable.get(names[i]);
-          Double d2 = (Double) key.valueTable.get(names[i]);
+          Double d1 = (Double) valueTable.get(name);
+          Double d2 = (Double) key.valueTable.get(name);
           if (d1 == null && d2 == null)
             continue;
           if (d1 == null || d2 == null)
             return false;
-          double diff = d1.doubleValue()-d2.doubleValue();
+          double diff = d1-d2;
           if (diff > 1e-12 || diff < -1e12)
             return false;
         }
@@ -451,12 +473,11 @@ public class ScriptedObject extends ObjectCollection
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0);
-      double values[] = getGraphValues();
-      for (int i = 0; i < values.length; i++)
-        out.writeDouble(values[i]);
+      for (double value : getGraphValues())
+        out.writeDouble(value);
     }
 
-    /* Reconstructs the keyframe from its serialized representation. */
+    /** Reconstructs the keyframe from its serialized representation. */
 
     public ScriptedObjectKeyframe(DataInputStream in, Object parent) throws IOException
     {
@@ -469,7 +490,7 @@ public class ScriptedObject extends ObjectCollection
         values[i] = in.readDouble();
       valueTable = new Hashtable<String, Double>();
       for (int i = 0; i < values.length; i++)
-        valueTable.put(script.paramName[i], new Double(values[i]));
+        valueTable.put(script.paramName[i], values[i]);
     }
   }
 }

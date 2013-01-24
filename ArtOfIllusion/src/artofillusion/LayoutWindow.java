@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2012 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -577,12 +577,20 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         menu.add(m);
         addScriptsToMenu(m, f);
       }
-      else if (file.endsWith(".bsh") && file.length() > 4)
+      else
       {
-        BMenuItem item = new BMenuItem(file.substring(0, file.length()-4));
-        item.setActionCommand(f.getAbsolutePath());
-        item.addEventLink(CommandEvent.class, this, "executeScriptCommand");
-        menu.add(item);
+        try
+        {
+          ScriptRunner.getLanguageForFilename(file);
+          BMenuItem item = new BMenuItem(file.substring(0, file.lastIndexOf('.')));
+          item.setActionCommand(f.getAbsolutePath());
+          item.addEventLink(CommandEvent.class, this, "executeScriptCommand");
+          menu.add(item);
+        }
+        catch (IllegalArgumentException ex)
+        {
+          // This file isn't a known scripting language.
+        }
       }
     }
   }
@@ -2486,10 +2494,21 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     BComboBox scriptChoice = new BComboBox();
     scriptChoice.add(Translate.text("newScript"));
     String files[] = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY).list();
+    ArrayList<String> scriptNames = new ArrayList<String>();
     if (files != null)
-      for (int i = 0; i < files.length; i++)
-        if (files[i].endsWith(".bsh") && files[i].length() > 4)
-          scriptChoice.add(files[i].substring(0, files[i].length()-4));
+      for (String file : files)
+      {
+        try
+        {
+          ScriptRunner.getLanguageForFilename(file);
+          scriptChoice.add(file.substring(0, file.lastIndexOf(".")));
+          scriptNames.add(file);
+        }
+        catch (IllegalArgumentException ex)
+        {
+          // This file isn't a known scripting language.
+        }
+      }
     ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("newScriptedObject"),
       new Widget [] {nameField, scriptChoice}, new String [] {Translate.text("Name"), Translate.text("Script")});
     if (!dlg.clickedOk())
@@ -2502,8 +2521,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       try
       {
-        String scriptName = scriptChoice.getSelectedValue()+".bsh";
-        File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptName);
+        File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptNames.get(scriptChoice.getSelectedIndex()-1));
         scriptText = ArtOfIllusion.loadFile(f);
       }
       catch (IOException ex)
@@ -2820,8 +2838,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     // Read the script from the file.
 
     String scriptText = null;
+    String language = null;
     try
     {
+      language = ScriptRunner.getLanguageForFilename(f.getName());
       scriptText = ArtOfIllusion.loadFile(f);
     }
     catch (IOException ex)
@@ -2831,12 +2851,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     try
     {
-      ToolScript script = ScriptRunner.parseToolScript(scriptText);
+      ToolScript script = ScriptRunner.parseToolScript(language, scriptText);
       script.execute(this);
     }
     catch (Exception e)
     {
-      ScriptRunner.displayError(e, 1);
+      ScriptRunner.displayError(language, e, 1);
     }
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().

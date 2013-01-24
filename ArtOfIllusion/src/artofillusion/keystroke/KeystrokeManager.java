@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,8 +18,7 @@ import java.util.*;
 import java.awt.event.*;
 import java.io.*;
 
-import bsh.*;
-
+import javax.script.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -34,8 +33,8 @@ import org.w3c.dom.Node;
 
 public class KeystrokeManager
 {
-  private static ArrayList records = new ArrayList();
-  private static HashMap keyIndex = new HashMap();
+  private static ArrayList<KeystrokeRecord> records = new ArrayList<KeystrokeRecord>();
+  private static HashMap<Integer, ArrayList<KeystrokeRecord>> keyIndex = new HashMap<Integer, ArrayList<KeystrokeRecord>>();
 
   private static final String KEYSTROKE_FILENAME = "keystrokes.xml";
 
@@ -45,18 +44,18 @@ public class KeystrokeManager
 
   public static KeystrokeRecord[] getAllRecords()
   {
-    return (KeystrokeRecord []) records.toArray(new KeystrokeRecord [records.size()]);
+    return records.toArray(new KeystrokeRecord [records.size()]);
   }
 
   /**
-   * Set the list of all defined KyestrokeRecords, completely replacing the existing ones.
+   * Set the list of all defined KeystrokeRecords, completely replacing the existing ones.
    */
 
   public static void setAllRecords(KeystrokeRecord allRecords[])
   {
     records.clear();
-    for (int i = 0; i < allRecords.length; i++)
-      records.add(allRecords[i]);
+    for (KeystrokeRecord record : allRecords)
+      records.add(record);
     recordModified();
   }
 
@@ -102,15 +101,14 @@ public class KeystrokeManager
     {
       // We need to build an index for quickly looking up KeystrokeRecords.
 
-      keyIndex = new HashMap(records.size());
-      for (int i = 0; i < records.size(); i++)
+      keyIndex = new HashMap<Integer, ArrayList<KeystrokeRecord>>(records.size());
+      for (KeystrokeRecord record : records)
       {
-        KeystrokeRecord record = (KeystrokeRecord) records.get(i);
-        ArrayList list = (ArrayList) keyIndex.get(new Integer(record.getKeyCode()));
+        ArrayList<KeystrokeRecord> list = keyIndex.get(record.getKeyCode());
         if (list == null)
         {
-          list = new ArrayList(1);
-          keyIndex.put(new Integer(record.getKeyCode()), list);
+          list = new ArrayList<KeystrokeRecord>(1);
+          keyIndex.put(record.getKeyCode(), list);
         }
         list.add(record);
       }
@@ -118,23 +116,23 @@ public class KeystrokeManager
 
     // Get the list of all records with the correct ID.
 
-    ArrayList list = (ArrayList) keyIndex.get(new Integer(event.getKeyCode()));
+    ArrayList<KeystrokeRecord> list = keyIndex.get(event.getKeyCode());
     if (list == null)
       return;
-    for (int i = 0; i < list.size(); i++)
+    for (KeystrokeRecord record : list)
     {
-      KeystrokeRecord record = (KeystrokeRecord) list.get(i);
       if (record.getModifiers() == event.getModifiers())
       {
         // Execute it.
 
-        Interpreter interpreter = ScriptRunner.getInterpreter();
+        String language = ScriptRunner.LANGUAGES[0];
+        ScriptEngine engine = ScriptRunner.getScriptEngine(language);
         try
         {
-          interpreter.set("window", window);
-          interpreter.eval(record.getScript());
+          engine.put("window", window);
+          engine.eval(record.getScript());
         }
-        catch (EvalError error)
+        catch (ScriptException error)
         {
           error.printStackTrace();
         }
@@ -177,9 +175,9 @@ public class KeystrokeManager
   {
     // Build a table of existing records.
 
-    HashMap existing = new HashMap();
-    for (int i = 0; i < records.size() ; i++)
-      existing.put(((KeystrokeRecord) records.get(i)).getName(), records.get(i));
+    HashMap<String, KeystrokeRecord> existing = new HashMap<String, KeystrokeRecord>();
+    for (KeystrokeRecord record : records)
+      existing.put(record.getName(), record);
 
     // Parse the XML and load the records.
 
@@ -213,9 +211,8 @@ public class KeystrokeManager
     Document doc = builder.newDocument();
     Element root = doc.createElement("keystrokes");
     doc.appendChild(root);
-    for (int i = 0; i < records.size(); i++)
+    for (KeystrokeRecord record : records)
     {
-      KeystrokeRecord record = (KeystrokeRecord) records.get(i);
       Element recordElement = doc.createElement("keystroke");
       recordElement.setAttribute("name", record.getName());
       recordElement.setAttribute("code", Integer.toString(record.getKeyCode()));

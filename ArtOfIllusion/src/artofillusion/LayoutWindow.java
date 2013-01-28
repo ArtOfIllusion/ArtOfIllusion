@@ -2517,12 +2517,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     // If they are using a predefined script, load it.
 
     String scriptText = "";
+    String language = ScriptRunner.LANGUAGES[0];
     if (scriptChoice.getSelectedIndex() > 0)
     {
       try
       {
         File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptNames.get(scriptChoice.getSelectedIndex()-1));
         scriptText = ArtOfIllusion.loadFile(f);
+        language = ScriptRunner.getLanguageForFilename(f.getName());
       }
       catch (IOException ex)
       {
@@ -2530,7 +2532,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         return;
       }
     }
-    ScriptedObject obj = new ScriptedObject("");
+    ScriptedObject obj = new ScriptedObject(scriptText, language);
     ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(), nameField.getText());
     UndoRecord undo = new UndoRecord(this, false);
     int sel[] = getSelectedIndices();
@@ -2539,7 +2541,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     setSelection(theScene.getNumObjects()-1);
     setUndoRecord(undo);
     updateImage();
-    obj.setScript(scriptText);
     editObjectCommand();
   }
 

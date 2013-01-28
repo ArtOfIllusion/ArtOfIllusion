@@ -23,9 +23,19 @@ import javax.script.*;
 
 public class ScriptRunner
 {
-  public static final String LANGUAGES[] = {"BeanShell"};
+  public static final String LANGUAGES[] = {"Groovy", "BeanShell"};
   private static ScriptEngineManager manager;
   private static final HashMap<String, ScriptEngine> engines = new HashMap<String, ScriptEngine>();
+  private static final String IMPORTS = "import artofillusion.*;"+
+                                        "import artofillusion.image.*;"+
+                                        "import artofillusion.material.*;"+
+                                        "import artofillusion.math.*;"+
+                                        "import artofillusion.object.*;"+
+                                        "import artofillusion.script.*;"+
+                                        "import artofillusion.texture.*;"+
+                                        "import artofillusion.ui.*;"+
+                                        "import buoy.event.*;"+
+                                        "import buoy.widget.*;";
 
   /** Get the ScriptEngine for running scripts written in a particular language. */
   
@@ -42,23 +52,14 @@ public class ScriptRunner
         }
         ScriptEngine engine = null;
         for (ScriptEngineFactory factory : manager.getEngineFactories())
-          if (factory.getLanguageName() == language)
+          if (factory.getLanguageName().equals(language))
             engine = factory.getScriptEngine();
         if (engine == null)
           throw new IllegalArgumentException("Unknown name for scripting language: "+language);
         engines.put(language, engine);
         try
           {
-            engine.eval("import artofillusion.*");
-            engine.eval("import artofillusion.image.*");
-            engine.eval("import artofillusion.material.*");
-            engine.eval("import artofillusion.math.*");
-            engine.eval("import artofillusion.object.*");
-            engine.eval("import artofillusion.script.*");
-            engine.eval("import artofillusion.texture.*");
-            engine.eval("import artofillusion.ui.*");
-            engine.eval("import buoy.event.*");
-            engine.eval("import buoy.widget.*");
+            engine.eval(IMPORTS);
           }
         catch (ScriptException e)
           {
@@ -90,18 +91,28 @@ public class ScriptRunner
   
   public static ToolScript parseToolScript(String language, String script) throws Exception
   {
-    String prefix = "return new ToolScript() {void execute(LayoutWindow window) {\n";
-    String suffix = "\n;}}";
-    return (ToolScript) getScriptEngine(language).eval(prefix+script+suffix);
+    if (language.equals("BeanShell"))
+    {
+      String prefix = "return new ToolScript() {void execute(LayoutWindow window) {\n";
+      String suffix = "\n;}}";
+      return (ToolScript) getScriptEngine(language).eval(prefix+script+suffix);
+    }
+    Compilable engine = (Compilable) getScriptEngine(language);
+    return new CompiledToolScript(engine.compile(IMPORTS+script));
   }
   
   /** Parse an Object script. */
   
   public static ObjectScript parseObjectScript(String language, String script) throws Exception
   {
-    String prefix = "return new ObjectScript() {void execute(ScriptedObjectController script) {\n";
-    String suffix = "\n;}}";
-    return (ObjectScript) getScriptEngine(language).eval(prefix+script+suffix);
+    if (language.equals("BeanShell"))
+    {
+      String prefix = "return new ObjectScript() {void execute(ScriptedObjectController script) {\n";
+      String suffix = "\n;}}";
+      return (ObjectScript) getScriptEngine(language).eval(prefix+script+suffix);
+    }
+    Compilable engine = (Compilable) getScriptEngine(language);
+    return new CompiledObjectScript(engine.compile(IMPORTS+script));
   }
 
   /** Display a dialog showing an exception thrown by a script.  This returns the line number
@@ -202,5 +213,45 @@ public class ScriptRunner
   public static String getFilenameExtension(String language)
   {
     return getScriptEngine(language).getFactory().getExtensions().get(0);
+  }
+
+  /** Inner class used to represent a compiled ToolScript. */
+
+  private static class CompiledToolScript implements ToolScript
+  {
+    private CompiledScript script;
+
+    public CompiledToolScript(CompiledScript script)
+    {
+      this.script = script;
+    }
+
+    public void execute(LayoutWindow window) throws ScriptException
+    {
+      Bindings bindings = new SimpleBindings();
+      bindings.put("window", window);
+      script.getEngine().setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+      script.eval();
+    }
+  }
+
+  /** Inner class used to represent a compiled ObjectScript. */
+
+  private static class CompiledObjectScript implements ObjectScript
+  {
+    private CompiledScript script;
+
+    public CompiledObjectScript(CompiledScript script)
+    {
+      this.script = script;
+    }
+
+    public void execute(ScriptedObjectController controller) throws ScriptException
+    {
+      Bindings bindings = new SimpleBindings();
+      bindings.put("script", controller);
+      script.getEngine().setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+      script.eval();
+    }
   }
 }

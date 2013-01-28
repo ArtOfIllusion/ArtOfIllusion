@@ -1,5 +1,3 @@
-/* This interface represents a parsed Object script. */
-
 /* Copyright (C) 2002 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,9 +10,11 @@
 
 package artofillusion.script;
 
-import artofillusion.*;
+import javax.script.*;
+
+/** This interface represents a parsed Object script. */
 
 public interface ObjectScript
 {
-  public void execute(ScriptedObjectController script);
+  public void execute(ScriptedObjectController script) throws ScriptException;
 }

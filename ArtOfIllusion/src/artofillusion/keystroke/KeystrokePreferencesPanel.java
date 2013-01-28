@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,6 +10,7 @@
 
 package artofillusion.keystroke;
 
+import artofillusion.script.*;
 import buoy.widget.*;
 import buoy.event.*;
 
@@ -27,7 +28,7 @@ import artofillusion.ui.*;
 
 public class KeystrokePreferencesPanel extends FormContainer
 {
-  private ArrayList records;
+  private ArrayList<KeystrokeRecord> records;
   private BTable table;
   private BButton editButton, addButton, deleteButton;
   private boolean changed;
@@ -37,7 +38,7 @@ public class KeystrokePreferencesPanel extends FormContainer
   {
     super(new double [] {1}, new double [] {1, 0});
     KeystrokeRecord allRecords[] = KeystrokeManager.getAllRecords();
-    records = new ArrayList(allRecords.length);
+    records = new ArrayList<KeystrokeRecord>(allRecords.length);
     for (int i = 0; i < allRecords.length; i++)
       records.add(allRecords[i]);
     table = new BTable(new KeystrokeTableModel());
@@ -131,7 +132,7 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void addRecord()
   {
-    KeystrokeRecord record = new KeystrokeRecord(0, 0, "", "");
+    KeystrokeRecord record = new KeystrokeRecord(0, 0, "", "", ScriptRunner.LANGUAGES[0]);
     KeystrokeRecord edited = KeystrokeEditor.showEditorDialog(record, UIUtilities.findWindow(this));
     if (edited == null)
       return;
@@ -161,11 +162,10 @@ public class KeystrokePreferencesPanel extends FormContainer
   private void sortRecords()
   {
     final Comparator stringComparator = Collator.getInstance(Translate.getLocale());
-    Collections.sort(records, new Comparator()
+    Collections.sort(records, new Comparator<KeystrokeRecord>()
     {
-      public int compare(Object o1, Object o2)
+      public int compare(KeystrokeRecord r1, KeystrokeRecord r2)
       {
-        KeystrokeRecord r1 = (KeystrokeRecord) o1, r2 = (KeystrokeRecord) o2;
         String s1, s2;
         if (sortColumn == 0)
         {

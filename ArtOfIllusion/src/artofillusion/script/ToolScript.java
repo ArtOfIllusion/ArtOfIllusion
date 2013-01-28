@@ -1,5 +1,3 @@
-/* This interface represents a parsed Tool script. */
-
 /* Copyright (C) 2002 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -14,7 +12,11 @@ package artofillusion.script;
 
 import artofillusion.*;
 
+import javax.script.*;
+
+/** This interface represents a parsed Tool script. */
+
 public interface ToolScript
 {
-  public void execute(LayoutWindow window);
+  public void execute(LayoutWindow window) throws ScriptException;
 }

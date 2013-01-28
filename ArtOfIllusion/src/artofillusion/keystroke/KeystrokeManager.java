@@ -125,8 +125,7 @@ public class KeystrokeManager
       {
         // Execute it.
 
-        String language = ScriptRunner.LANGUAGES[0];
-        ScriptEngine engine = ScriptRunner.getScriptEngine(language);
+        ScriptEngine engine = ScriptRunner.getScriptEngine(record.getLanguage());
         try
         {
           engine.put("window", window);
@@ -189,12 +188,13 @@ public class KeystrokeManager
     {
       Node keystroke = keystrokes.item(i);
       String name = keystroke.getAttributes().getNamedItem("name").getNodeValue();
+      String language = (keystroke.getAttributes().getNamedItem("language") == null ? "BeanShell" : keystroke.getAttributes().getNamedItem("language").getNodeValue());
       int code = Integer.parseInt(keystroke.getAttributes().getNamedItem("code").getNodeValue());
       int modifiers = Integer.parseInt(keystroke.getAttributes().getNamedItem("modifiers").getNodeValue());
       String script = keystroke.getFirstChild().getNodeValue();
       if (existing.containsKey(name))
         records.remove(existing.get(name));
-      addRecord(new KeystrokeRecord(code, modifiers, name, script));
+      addRecord(new KeystrokeRecord(code, modifiers, name, script, language));
     }
   }
 
@@ -215,6 +215,7 @@ public class KeystrokeManager
     {
       Element recordElement = doc.createElement("keystroke");
       recordElement.setAttribute("name", record.getName());
+      recordElement.setAttribute("language", record.getLanguage());
       recordElement.setAttribute("code", Integer.toString(record.getKeyCode()));
       recordElement.setAttribute("modifiers", Integer.toString(record.getModifiers()));
       Text scriptElement = doc.createTextNode(record.getScript());

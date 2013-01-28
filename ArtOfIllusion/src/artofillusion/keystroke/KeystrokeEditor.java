@@ -1,4 +1,4 @@
-/* Copyright (C) 2006 by Peter Eastman
+/* Copyright (C) 2006-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,6 +26,7 @@ import java.awt.event.*;
 public class KeystrokeEditor extends BDialog
 {
   private BTextField keyField, nameField;
+  private BComboBox languageChoice;
   private ScriptEditor scriptArea;
   private BButton okButton;
   private KeystrokeRecord record;
@@ -55,24 +56,28 @@ public class KeystrokeEditor extends BDialog
   private KeystrokeEditor(KeystrokeRecord record, WindowWidget parent)
   {
     super(parent, true);
-    FormContainer content = new FormContainer(new double [] {0, 1}, new double [] {0, 0, 0, 1, 0});
+    FormContainer content = new FormContainer(new double [] {0, 1}, new double [] {0, 0, 0, 0, 1, 0});
     setContent(content);
     this.record = record.duplicate();
     keyField = new BTextField(KeystrokePreferencesPanel.getKeyDescription(record.getKeyCode(), record.getModifiers()));
     keyField.setEditable(false);
     keyField.addEventLink(KeyPressedEvent.class, this, "setKey");
     nameField = new BTextField(record.getName());
+    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice.setSelectedValue(record.getLanguage());
     scriptArea = new ScriptEditor(record.getScript());
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE);
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null);
     content.add(Translate.label("Key"), 0, 0, rightLayout);
     content.add(Translate.label("Name"), 0, 1, rightLayout);
+    content.add(Translate.label("language"), 0, 2, rightLayout);
     content.add(keyField, 1, 0, fillLayout);
     content.add(nameField, 1, 1, fillLayout);
-    content.add(Translate.label("Script"), 0, 2, 2, 1, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-    content.add(scriptArea.createContainer(), 0, 3, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
+    content.add(languageChoice, 1, 2, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE));
+    content.add(Translate.label("Script"), 0, 3, 2, 1, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
+    content.add(scriptArea.createContainer(), 0, 4, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     RowContainer buttons = new RowContainer();
-    content.add(buttons, 0, 4, 2, 1);
+    content.add(buttons, 0, 5, 2, 1);
     okButton = Translate.button("ok", this, "clickedOk");
     buttons.add(okButton);
     buttons.add(Translate.button("cancel", this, "clickedCancel"));
@@ -83,6 +88,7 @@ public class KeystrokeEditor extends BDialog
   private void clickedOk()
   {
     record.setName(nameField.getText());
+    record.setLanguage(languageChoice.getSelectedValue().toString());
     record.setScript(scriptArea.getText());
     dispose();
   }

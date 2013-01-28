@@ -23,11 +23,12 @@ public class ExecuteScriptWindow extends BFrame
 {
   private LayoutWindow window;
   private ScriptEditor scriptText;
+  private BComboBox languageChoice;
   private String scriptName;
-  
+
   private static File scriptDir;
   private static String lastScript;
-  private static String lastScriptName = "Untitled.bsh";
+  private static String lastScriptName = "Untitled";
   
   public ExecuteScriptWindow(LayoutWindow win)
   {
@@ -42,6 +43,11 @@ public class ExecuteScriptWindow extends BFrame
     if (lastScript != null)
       scriptText.setText(lastScript);
     content.add(scriptText.createContainer(), BorderContainer.CENTER);
+    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    RowContainer languageRow = new RowContainer();
+    languageRow.add(Translate.label("language"));
+    languageRow.add(languageChoice);
+    content.add(languageRow, BorderContainer.NORTH, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
     buttons.add(Translate.button("executeScript", this, "executeScript"));
@@ -52,6 +58,7 @@ public class ExecuteScriptWindow extends BFrame
     scriptText.setCaretPosition(0);
     pack();
     UIUtilities.centerWindow(this);
+    scriptText.requestFocus();
     setVisible(true);
   }
   
@@ -89,8 +96,16 @@ public class ExecuteScriptWindow extends BFrame
       new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
         ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
-    lastScriptName = scriptName = fc.getSelectedFile().getName();
-    setTitle(scriptName);
+    String filename = fc.getSelectedFile().getName();
+    try
+    {
+      languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
+    }
+    catch (IllegalArgumentException ex)
+    {
+      languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
+    }
+    setScriptNameFromFile(filename);
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
   
@@ -100,7 +115,7 @@ public class ExecuteScriptWindow extends BFrame
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
     fc.setDirectory(scriptDir);
-    fc.setSelectedFile(new File(scriptDir, scriptName));
+    fc.setSelectedFile(new File(scriptDir, scriptName+'.'+ScriptRunner.getFilenameExtension((String) languageChoice.getSelectedValue())));
     fc.showDialog(this);
     if (fc.getSelectedFile() == null)
       return;
@@ -121,9 +136,8 @@ public class ExecuteScriptWindow extends BFrame
       new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
         ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
-    lastScriptName = scriptName = fc.getSelectedFile().getName();
-    setTitle(scriptName);
-    
+    setScriptNameFromFile(fc.getSelectedFile().getName());
+
     // Update the Scripts menus in all windows.
     
     EditingWindow allWindows[] = ArtOfIllusion.getWindows();
@@ -132,12 +146,24 @@ public class ExecuteScriptWindow extends BFrame
         ((LayoutWindow) allWindows[i]).rebuildScriptsMenu();
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
+
+  /** Set the script name based on the name of a file that was loaded or saved. */
+
+  private void setScriptNameFromFile(String filename)
+  {
+    if (filename.contains("."))
+      scriptName = filename.substring(0, filename.lastIndexOf("."));
+    else
+      scriptName = filename;
+    lastScriptName = scriptName;
+    setTitle(scriptName);
+  }
   
   /** Execute the script. */
   
   private void executeScript()
   {
-    String language = ScriptRunner.LANGUAGES[0];
+    String language = (String) languageChoice.getSelectedValue();
     try
     {
       ToolScript script = ScriptRunner.parseToolScript(language, scriptText.getText());

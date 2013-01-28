@@ -157,7 +157,7 @@ public class ScriptedObject extends ObjectCollection
   
   public Object3D duplicate()
   {
-    ScriptedObject so = new ScriptedObject(script);
+    ScriptedObject so = new ScriptedObject(script, language);
     so.paramName = new String [paramName.length];
     System.arraycopy(paramName, 0, so.paramName, 0, paramName.length);
     so.paramValue = new double [paramValue.length];
@@ -173,6 +173,7 @@ public class ScriptedObject extends ObjectCollection
   {
     ScriptedObject so = (ScriptedObject) obj;
     script = so.script;
+    language = so.language;
     paramName = new String [so.paramName.length];
     System.arraycopy(so.paramName, 0, paramName, 0, paramName.length);
     paramValue = new double [so.paramValue.length];
@@ -318,9 +319,11 @@ public class ScriptedObject extends ObjectCollection
     super(in, theScene);
 
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     script = in.readUTF();
+    if (version > 0)
+      language = in.readUTF();
     short numParams = in.readShort();
     paramName = new String [numParams];
     paramValue = new double [numParams];
@@ -337,8 +340,9 @@ public class ScriptedObject extends ObjectCollection
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(0);
+    out.writeShort(1);
     out.writeUTF(script);
+    out.writeUTF(language);
     out.writeShort(paramName.length);
     for (int i = 0; i < paramName.length; i++)
       {

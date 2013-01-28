@@ -1,4 +1,4 @@
-/* Copyright (C) 2002,2004 by Peter Eastman
+/* Copyright (C) 2002-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,6 +25,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   private EditingWindow window;
   private ObjectInfo info;
   private ScriptEditor scriptText;
+  private BComboBox languageChoice;
   private String scriptName;
   private Runnable onClose;
   
@@ -36,12 +37,18 @@ public class ScriptedObjectEditorWindow extends BFrame
     window = parent;
     info = obj;
     this.onClose = onClose;
-    scriptName = "Untitled.bsh";
+    scriptName = "Untitled";
     if (scriptDir == null)
       scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
     BorderContainer content = new BorderContainer();
     setContent(content);
     scriptText = new ScriptEditor(((ScriptedObject) info.getObject()).getScript());
+    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
+    RowContainer languageRow = new RowContainer();
+    languageRow.add(Translate.label("language"));
+    languageRow.add(languageChoice);
+    content.add(languageRow, BorderContainer.NORTH, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
     content.add(BOutline.createBevelBorder(scriptText.createContainer(), false), BorderContainer.CENTER);
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
@@ -54,6 +61,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     scriptText.setCaretPosition(0);
     pack();
     UIUtilities.centerWindow(this);
+    scriptText.requestFocus();
     setVisible(true);
   }
   
@@ -91,7 +99,16 @@ public class ScriptedObjectEditorWindow extends BFrame
       new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
         ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
       }
-    scriptName = fc.getSelectedFile().getName();
+    String filename = fc.getSelectedFile().getName();
+    try
+    {
+      languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
+    }
+    catch (IllegalArgumentException ex)
+    {
+      languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
+    }
+    setScriptNameFromFile(filename);
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
   
@@ -101,7 +118,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
     fc.setDirectory(scriptDir);
-    fc.setSelectedFile(new File(scriptDir, scriptName));
+    fc.setSelectedFile(new File(scriptDir, scriptName+'.'+ScriptRunner.getFilenameExtension((String) languageChoice.getSelectedValue())));
     fc.showDialog(this);
     if (fc.getSelectedFile() == null)
       return;
@@ -122,10 +139,20 @@ public class ScriptedObjectEditorWindow extends BFrame
       new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
         ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
-    scriptName = fc.getSelectedFile().getName();
+    setScriptNameFromFile(fc.getSelectedFile().getName());
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
-  
+
+  /** Set the script name based on the name of a file that was loaded or saved. */
+
+  private void setScriptNameFromFile(String filename)
+  {
+    if (filename.contains("."))
+      scriptName = filename.substring(0, filename.lastIndexOf("."));
+    else
+      scriptName = filename;
+  }
+
   /** Commit changes to the scripted object. */
   
   private void commitChanges()
@@ -133,6 +160,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     ScriptedObject so = (ScriptedObject) info.getObject();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     so.setScript(scriptText.getText());
+    so.setLanguage(languageChoice.getSelectedValue().toString());
     so.sceneChanged(info, window.getScene());
     if (onClose != null)
       onClose.run();

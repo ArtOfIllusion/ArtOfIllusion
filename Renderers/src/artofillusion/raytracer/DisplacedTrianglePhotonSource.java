@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -45,7 +45,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
     
     // Find the average emissive intensity.
     
-    TextureSpec spec = map.getContext().surfSpec[0];
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
     double third = 1.0/3.0;
     color = new RGBColor();
     tri.tri.getTextureSpec(spec, 1.0, third, third, third, avgSize, map.getRaytracer().time);
@@ -70,9 +70,10 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
   
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Raytracer rt = map.getRaytracer();
-    TextureSpec spec = map.getContext().surfSpec[0];
-    Ray r = new Ray(map.getContext());
+    RaytracerRenderer renderer = map.getRenderer();
+    RenderWorkspace workspace = map.getWorkspace();
+    TextureSpec spec = workspace.surfSpec[0];
+    Ray r = new Ray(workspace.context);
     Vec3 vert1 = tri.tri.theMesh.vert[tri.tri.v1];
     Vec3 vert2 = tri.tri.theMesh.vert[tri.tri.v2];
     Vec3 vert3 = tri.tri.theMesh.vert[tri.tri.v3];
@@ -83,7 +84,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
     Vec3 normal = new Vec3();
     Vec3 orig = r.getOrigin();
     Vec3 dir = r.getDirection();
-    double emittedIntensity = 0.0, tol = rt.surfaceError;
+    double emittedIntensity = 0.0, tol = renderer.surfaceError;
 
     // Send out the photons.
     
@@ -101,10 +102,10 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
         
         // Determine the position and normal of the surface at that point.
         
-        double disp = tri.tri.getDisplacement(u, v, w, tol, rt.time);
+        double disp = tri.tri.getDisplacement(u, v, w, tol, renderer.time);
         orig.set(vert1.x+disp*norm1.x, vert1.y+disp*norm1.y, vert1.z+disp*norm1.z);
-        double dhdu = (tri.tri.getDisplacement(u+(1e-5), v, w-(1e-5), tol, rt.time)-disp)*1e5;
-        double dhdv = (tri.tri.getDisplacement(u, v+(1e-5), w-(1e-5), tol, rt.time)-disp)*1e5;
+        double dhdu = (tri.tri.getDisplacement(u+(1e-5), v, w-(1e-5), tol, renderer.time)-disp)*1e5;
+        double dhdv = (tri.tri.getDisplacement(u, v+(1e-5), w-(1e-5), tol, renderer.time)-disp)*1e5;
         normal.set(u*norm1.x+v*norm2.x+w*norm3.x, u*norm1.y+v*norm2.y+w*norm3.y, u*norm1.z+v*norm2.z+w*norm3.z);
         normal.normalize();
         temp1.set(vert1.x+disp*norm1.x, vert1.y+disp*norm1.y, vert1.z+disp*norm1.z);
@@ -135,7 +136,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
         
         // Evaluate the texture at the ray origin.
         
-        tri.tri.getTextureSpec(spec, dot, u, v, w, rt.smoothScale, rt.time);
+        tri.tri.getTextureSpec(spec, dot, u, v, w, renderer.smoothScale, renderer.time);
         color.copy(spec.emissive);
         float sum = color.getRed()+color.getGreen()+color.getBlue();
         emittedIntensity += sum;

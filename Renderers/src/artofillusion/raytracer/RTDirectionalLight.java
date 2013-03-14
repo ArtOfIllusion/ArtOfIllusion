@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 by Peter Eastman
+/* Copyright (C) 2008-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@ public class RTDirectionalLight extends RTLight
     radius = (softShadows ? Math.tan(light.getRadius()*Math.PI/180.0) : 0.0);
   }
 
-  public double findRayToLight(Vec3 origin, Ray ray, int rayNumber)
+  public double findRayToLight(Vec3 origin, Ray ray, RaytracerRenderer renderer, int rayNumber)
   {
     ray.getOrigin().set(origin);
     Vec3 dir = ray.getDirection();
@@ -35,7 +35,7 @@ public class RTDirectionalLight extends RTLight
     dir.scale(-1.0);
     if (rayNumber != -1)
     {
-      ray.rt.rt.randomizePoint(dir, ray.rt.random, radius, rayNumber);
+      renderer.randomizePoint(dir, ray.rt.random, radius, rayNumber);
       dir.normalize();
     }
     return Double.MAX_VALUE;

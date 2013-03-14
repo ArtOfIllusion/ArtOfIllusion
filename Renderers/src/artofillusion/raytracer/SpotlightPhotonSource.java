@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2008 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -62,11 +62,13 @@ public class SpotlightPhotonSource implements PhotonSource
     return lightIntensity;
   }
   
-  /** Generate photons and add them to a map.
-   @param map          the PhotonMap to add the Photons to
-    * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+  /**
+   * Generate photons and add them to a map.
+   *
+   * @param map          the PhotonMap to add the Photons to
+   * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
    * @param threads
-  */
+   */
   
   public void generatePhotons(final PhotonMap map, double intensity, ThreadManager threads)
   {
@@ -78,7 +80,7 @@ public class SpotlightPhotonSource implements PhotonSource
     final double exp = light.getExponent()+1.0, expInv = 1.0/exp;
     final double maxu = 1.0/exp;
     final double usize = maxu-minu;
-    final boolean randomizeOrigin = map.getRaytracer().penumbra;
+    final boolean randomizeOrigin = map.getRaytracer().softShadows;
     int num = (int) intensity;
 
     // Send out the photons.  To reduce noise, we use stratified sampling.  Repeatedly find the largest
@@ -94,13 +96,13 @@ public class SpotlightPhotonSource implements PhotonSource
         {
           public void execute(int index)
           {
-            if (map.getRaytracer().renderThread != currentThread)
+            if (map.getRenderer().renderThread != currentThread)
               return;
             int i = index/n;
             int j = index-(i*n);
             double baseu = minu+i*du;
             double basev = j+dv;
-            Ray r = new Ray(map.getContext());
+            Ray r = new Ray(map.getWorkspace().context);
             Vec3 orig = r.getOrigin();
             Vec3 dir = r.getDirection();
             double u = baseu+map.random.nextDouble()*du, v = basev+map.random.nextDouble()*dv;
@@ -118,7 +120,7 @@ public class SpotlightPhotonSource implements PhotonSource
           }
           public void cleanup()
           {
-            map.getContext().cleanup();
+            map.getWorkspace().cleanup();
           }
         });
         threads.run();

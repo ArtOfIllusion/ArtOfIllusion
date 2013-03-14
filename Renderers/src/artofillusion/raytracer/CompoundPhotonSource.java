@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Peter Eastman
+/* Copyright (C) 2007-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -49,13 +49,13 @@ public class CompoundPhotonSource implements PhotonSource
     {
       public void execute(int index)
       {
-        if (map.getRaytracer().renderThread != currentThread)
+        if (map.getRenderer().renderThread != currentThread)
           return;
         source[index].generatePhotons(map, intensity*sourceIntensity[index]/totalSourceIntensity, null);
       }
       public void cleanup()
       {
-        map.getContext().cleanup();
+        map.getWorkspace().cleanup();
       }
     });
     threads.run();

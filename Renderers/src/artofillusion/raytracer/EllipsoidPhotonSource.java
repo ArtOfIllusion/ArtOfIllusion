@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2005 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -75,7 +75,7 @@ public class EllipsoidPhotonSource implements PhotonSource
 
     // Find the average emissive intensity.
     
-    TextureSpec spec = map.getContext().surfSpec[0];
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
     texMap.getTexture().getAverageSpec(spec, map.getRaytracer().time, obj.param);
     color.copy(spec.emissive);
     lightIntensity = 0.5f*(color.getRed()+color.getGreen()+color.getBlue())*(float) area;
@@ -101,7 +101,7 @@ public class EllipsoidPhotonSource implements PhotonSource
 
     // Find the average emissive intensity.
     
-    TextureSpec spec = map.getContext().surfSpec[0];
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
     texMap.getTexture().getAverageSpec(spec, map.getRaytracer().time, obj.param);
     color.copy(spec.emissive);
     lightIntensity = 0.5f*(color.getRed()+color.getGreen()+color.getBlue())*(float) area;
@@ -114,15 +114,16 @@ public class EllipsoidPhotonSource implements PhotonSource
     return lightIntensity;
   }
   
-  /** Generate photons and add them to a map.
-   @param map          the PhotonMap to add the Photons to
-    * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
+  /**
+   * Generate photons and add them to a map.
+   * @param map          the PhotonMap to add the Photons to
+   * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
    * @param threads
-  */
+   */
   
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Ray r = new Ray(map.getContext());
+    Ray r = new Ray(map.getWorkspace().context);
     Vec3 orig = r.getOrigin();
     Vec3 norm = new Vec3();
     double nx = 1.0/rx, ny = 1.0/ry, nz = 1.0/rz;
@@ -153,8 +154,8 @@ public class EllipsoidPhotonSource implements PhotonSource
   
   private float generateOnePhoton(PhotonMap map, Ray r, Vec3 norm)
   {
-    Raytracer rt = map.getRaytracer();
-    TextureSpec spec = map.getContext().surfSpec[0];
+    RaytracerRenderer rt = map.getRenderer();
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
     Vec3 dir = r.getDirection();
     float intensity = 1.0f;
     double dot, absdot;

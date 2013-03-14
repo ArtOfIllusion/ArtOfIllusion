@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,7 +54,7 @@ public class CubePhotonSource implements PhotonSource
 
     // Find the average emissive intensity.
 
-    TextureSpec spec = map.getContext().surfSpec[0];
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
     texMap.getTexture().getAverageSpec(spec, map.getRaytracer().time, obj.param);
     color.copy(spec.emissive);
     lightIntensity = 0.5f*(color.getRed()+color.getGreen()+color.getBlue())*(float) totalArea;
@@ -77,7 +77,8 @@ public class CubePhotonSource implements PhotonSource
 
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Ray r = new Ray(map.getContext());
+    RenderWorkspace workspace = map.getWorkspace();
+    Ray r = new Ray(workspace.context);
     Vec3 orig = r.getOrigin();
     Vec3 norm = new Vec3();
     double xsize = cube.maxx-cube.minx;
@@ -121,21 +122,22 @@ public class CubePhotonSource implements PhotonSource
           orig.set(xsize*u+cube.minx, ysize*v+cube.miny, cube.maxz);
           norm.set(0.0, 0.0, 1.0);
         }
-        emittedIntensity += generateOnePhoton(map, r, norm);
+        emittedIntensity += generateOnePhoton(map, r, workspace, norm);
       }
   }
 
   /** Generate a Photon from a point on the cylinder.
       @param map       the PhotonMap to add the Photon to
       @param r         a ray whose origin is the point from which to generate the photon (in local coordinates)
+      @param workspace the current workspace for this thread
       @param norm      the surface normal at the point (in local coordinates)
       @return the intensity of the emitted ray
   */
 
-  private float generateOnePhoton(PhotonMap map, Ray r, Vec3 norm)
+  private float generateOnePhoton(PhotonMap map, Ray r, RenderWorkspace workspace, Vec3 norm)
   {
-    Raytracer rt = map.getRaytracer();
-    TextureSpec spec = r.rt.surfSpec[0];
+    RaytracerRenderer renderer = map.getRenderer();
+    TextureSpec spec = workspace.surfSpec[0];
     Vec3 dir = r.getDirection();
     float intensity = 1.0f;
     double dot, absdot;
@@ -156,7 +158,7 @@ public class CubePhotonSource implements PhotonSource
 
     // Determine the photon color.
 
-    texMap.getTextureSpec(dir, spec, dot, rt.smoothScale, rt.time, param);
+    texMap.getTextureSpec(dir, spec, dot, renderer.smoothScale, renderer.time, param);
     color.copy(spec.emissive);
     intensity = color.getRed()+color.getGreen()+color.getBlue();
     if (intensity < 1.0)

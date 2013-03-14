@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2008 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,6 +28,7 @@ import java.util.*;
 public class PhotonMap
 {
   private Raytracer rt;
+  private RaytracerRenderer renderer;
   private ArrayList<Photon> photonList;
   private Photon photon[], workspace[];
   private int numWanted, filter, numEstimate;
@@ -46,12 +47,13 @@ public class PhotonMap
    * @param includeIndirect     true if this PhotonMap should include photons that represent indirect illumination
    * @param includeVolume
    * @param raytracer           the Raytracer for which this PhotonMap is being generated
+   * @param renderer            the renderer for which this PhotonMap is being generated
    * @param bounds              a bounding box enclosing all objects at which photons should be directed
    * @param filter              specifies which type of filter to apply to the photon intensities
    * @param shared              another PhotonMap with which this one may share data structures to save memory (may be null)
    */
   
-  public PhotonMap(int totalPhotons, int numEstimate, boolean includeCaustics, boolean includeDirect, boolean includeIndirect, boolean includeVolume, Raytracer raytracer, BoundingBox bounds, int filter, PhotonMap shared)
+  public PhotonMap(int totalPhotons, int numEstimate, boolean includeCaustics, boolean includeDirect, boolean includeIndirect, boolean includeVolume, Raytracer raytracer, RaytracerRenderer renderer, BoundingBox bounds, int filter, PhotonMap shared)
   {
     numWanted = totalPhotons;
     this.bounds = bounds;
@@ -62,6 +64,7 @@ public class PhotonMap
     this.filter = filter;
     this.numEstimate = numEstimate;
     rt = raytracer;
+    this.renderer = renderer;
     if (shared != null)
       direction = shared.direction;
     else
@@ -76,11 +79,18 @@ public class PhotonMap
     return rt;
   }
 
-  /** Get the RaytracerContext in which the map is being built. */
+  /** Get the renderer for which this map holds photons. */
 
-  public RaytracerContext getContext()
+  public RaytracerRenderer getRenderer()
   {
-    return (RaytracerContext) getRaytracer().threadContext.get();
+    return renderer;
+  }
+
+  /** Get the RenderWorkspace in which the map is being built. */
+
+  public RenderWorkspace getWorkspace()
+  {
+    return renderer.getWorkspace();
   }
 
   /** Get a bounding box enclosing all objects at which photons should be directed. */
@@ -125,7 +135,7 @@ public class PhotonMap
       {
         for (int i = 0; i < source.length; i++)
           {
-            if (rt.renderThread != currentThread)
+            if (renderer.renderThread != currentThread)
               return;
             source[i].generatePhotons(this, currentIntensity*sourceIntensity[i]/totalSourceIntensity, threads);
             totalRequested += currentIntensity*sourceIntensity[i]/totalSourceIntensity;
@@ -210,7 +220,7 @@ public class PhotonMap
     if (node == null)
       return;
     color = color.duplicate();
-    RTObject materialObject = rt.getMaterialAtPoint(r.rt, r.getOrigin(), node);
+    RTObject materialObject = renderer.getMaterialAtPoint(getWorkspace(), r.getOrigin(), node);
     if (materialObject == null)
       tracePhoton(r, color, 0, node, null, null, null, null, null, 0.0, indirect, false);
     else
@@ -236,9 +246,9 @@ public class PhotonMap
   {
     RTObject second = null;
     double dist, truedot, n = 1.0, beta = 0.0, d;
-    RaytracerContext context = (RaytracerContext) getRaytracer().threadContext.get();
-    Vec3 intersectionPoint = context.pos[treeDepth], norm = context.normal[treeDepth], trueNorm = context.trueNormal[treeDepth];
-    TextureSpec spec = context.surfSpec[treeDepth];
+    RenderWorkspace workspace = getWorkspace();
+    Vec3 intersectionPoint = workspace.pos[treeDepth], norm = workspace.normal[treeDepth], trueNorm = workspace.trueNormal[treeDepth];
+    TextureSpec spec = workspace.surfSpec[treeDepth];
     MaterialMapping nextMaterial, oldMaterial;
     Mat4 nextMatTrans, oldMatTrans = null;
     OctreeNode nextNode;
@@ -258,9 +268,9 @@ public class PhotonMap
       nextNode = rt.traceRay(r, node);
       if (nextNode == null)
         return;
-      first = context.intersect.first;
-      second = context.intersect.second;
-      intersect = context.lastRayResult[first.index];
+      first = workspace.context.intersect.first;
+      second = workspace.context.intersect.second;
+      intersect = workspace.context.lastRayResult[first.index];
       intersect.intersectionPoint(0, intersectionPoint);
     }
     
@@ -270,7 +280,7 @@ public class PhotonMap
     totalDist += dist;
     intersect.trueNormal(trueNorm);
     truedot = trueNorm.dot(r.getDirection());
-    double texSmoothing = (diffuse ? rt.smoothScale*rt.extraGISmoothing : rt.smoothScale);
+    double texSmoothing = (diffuse ? renderer.smoothScale*renderer.extraGISmoothing : renderer.smoothScale);
     if (truedot > 0.0)
       intersect.intersectionProperties(spec, norm, r.getDirection(), totalDist*texSmoothing*3.0/(2.0+truedot), rt.time);
     else
@@ -289,12 +299,12 @@ public class PhotonMap
       else
       {
         RGBColor emissive = new RGBColor(); // This will be ignored.
-        rt.propagateRay(r, nextNode, dist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, emissive, color, treeDepth, totalDist);
+        workspace.rt.propagateRay(workspace, r, nextNode, dist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, emissive, color, treeDepth, totalDist);
       }
     }
-    else if (rt.fog)
-      color.scale((float) Math.exp(-dist/rt.fogDist));
-    if (color.getRed()+color.getGreen()+color.getBlue() < rt.minRayIntensity)
+    else if (renderer.fog)
+      color.scale((float) Math.exp(-dist/renderer.fogDist));
+    if (color.getRed()+color.getGreen()+color.getBlue() < renderer.minRayIntensity)
       return;  // The photon color is too dim to matter.
 
     // Decide whether to store a photon here.
@@ -306,36 +316,36 @@ public class PhotonMap
           (includeCaustics && caustic))
         {
           if (spec.diffuse.getRed()+spec.diffuse.getGreen()+spec.diffuse.getBlue()+
-              spec.hilight.getRed()+spec.hilight.getGreen()+spec.hilight.getBlue() > rt.minRayIntensity)
+              spec.hilight.getRed()+spec.hilight.getGreen()+spec.hilight.getBlue() > renderer.minRayIntensity)
             addPhoton(intersectionPoint, r.getDirection(), color);
         }
     }
 
     // Decide whether to spawn reflected and/or transmitted photons.
     
-    if (treeDepth == rt.maxRayDepth-1)
+    if (treeDepth == renderer.maxRayDepth-1)
       return;
     boolean spawnSpecular = false, spawnTransmitted = false, spawnDiffuse = false;
     if (includeCaustics || includeVolume)
     {
-      if (spec.specular.getRed()+spec.specular.getGreen()+spec.specular.getBlue() > rt.minRayIntensity)
+      if (spec.specular.getRed()+spec.specular.getGreen()+spec.specular.getBlue() > renderer.minRayIntensity)
         spawnSpecular = true;
     }
     if (includeCaustics || includeVolume)
     {
-      if (spec.transparent.getRed()+spec.transparent.getGreen()+spec.transparent.getBlue() > rt.minRayIntensity)
+      if (spec.transparent.getRed()+spec.transparent.getGreen()+spec.transparent.getBlue() > renderer.minRayIntensity)
         spawnTransmitted = true;
     }
     if (includeIndirect && !includeVolume)
       {
-        if (spec.diffuse.getRed()+spec.diffuse.getGreen()+spec.diffuse.getBlue() > rt.minRayIntensity)
+        if (spec.diffuse.getRed()+spec.diffuse.getGreen()+spec.diffuse.getBlue() > renderer.minRayIntensity)
           spawnDiffuse = true;
       }
     
     // Spawn additional photons.
     
     double dot = norm.dot(r.getDirection());
-    RGBColor col = context.rayIntensity[treeDepth+1];
+    RGBColor col = workspace.rayIntensity[treeDepth+1];
     boolean totalReflect = false;
     if (spawnTransmitted)
       {
@@ -343,8 +353,8 @@ public class PhotonMap
 
         col.copy(color);
         col.multiply(spec.transparent);
-        context.ray[treeDepth+1].getOrigin().set(intersectionPoint);
-        Vec3 temp = context.ray[treeDepth+1].getDirection();
+        workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
+        Vec3 temp = workspace.ray[treeDepth+1].getDirection();
         if (first.getMaterialMapping() == null)
           {
             // Not a solid object, so the bulk material does not change.
@@ -421,11 +431,11 @@ public class PhotonMap
                 temp.z -= d*trueNorm.z;
                 temp.normalize();
               }
-            context.ray[treeDepth+1].newID();
-            if (rt.gloss)
+            workspace.ray[treeDepth+1].newID();
+            if (renderer.gloss)
               randomizeDirection(temp, norm, spec.cloudiness);
             boolean newCaustic = (caustic || n != 1.0);
-            tracePhoton(context.ray[treeDepth+1], col, treeDepth+1, nextNode, second, nextMaterial, oldMaterial, nextMatTrans, oldMatTrans, totalDist, diffuse, newCaustic);
+            tracePhoton(workspace.ray[treeDepth+1], col, treeDepth+1, nextNode, second, nextMaterial, oldMaterial, nextMatTrans, oldMatTrans, totalDist, diffuse, newCaustic);
           }
       }
     if (spawnSpecular || totalReflect)
@@ -436,7 +446,7 @@ public class PhotonMap
         if (totalReflect)
           col.add(spec.transparent.getRed(), spec.transparent.getGreen(), spec.transparent.getBlue());
         col.multiply(color);
-        Vec3 temp = context.ray[treeDepth+1].getDirection();
+        Vec3 temp = workspace.ray[treeDepth+1].getDirection();
         temp.set(norm);
         temp.scale(-2.0*dot);
         temp.add(r.getDirection());
@@ -451,11 +461,11 @@ public class PhotonMap
             temp.z += d*trueNorm.z;
             temp.normalize();
           }
-        context.ray[treeDepth+1].getOrigin().set(intersectionPoint);
-        context.ray[treeDepth+1].newID();
-        if (rt.gloss)
+        workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
+        workspace.ray[treeDepth+1].newID();
+        if (renderer.gloss)
           randomizeDirection(temp, norm, spec.roughness);
-        tracePhoton(context.ray[treeDepth+1], col, treeDepth+1, nextNode, second, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, totalDist, diffuse, true);
+        tracePhoton(workspace.ray[treeDepth+1], col, treeDepth+1, nextNode, second, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, totalDist, diffuse, true);
       }
     if (spawnDiffuse)
       {
@@ -463,7 +473,7 @@ public class PhotonMap
 
         col.copy(spec.diffuse);
         col.multiply(color);
-        Vec3 temp = context.ray[treeDepth+1].getDirection();
+        Vec3 temp = workspace.ray[treeDepth+1].getDirection();
         do
           {
             temp.set(0.0, 0.0, 0.0);
@@ -477,9 +487,9 @@ public class PhotonMap
             
             temp.scale(-1.0);
           }
-        context.ray[treeDepth+1].getOrigin().set(intersectionPoint);
-        context.ray[treeDepth+1].newID();
-        tracePhoton(context.ray[treeDepth+1], col, treeDepth+1, nextNode, second, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, totalDist, true, caustic);
+        workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
+        workspace.ray[treeDepth+1].newID();
+        tracePhoton(workspace.ray[treeDepth+1], col, treeDepth+1, nextNode, second, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, totalDist, true, caustic);
       }
   }
 
@@ -505,12 +515,13 @@ public class PhotonMap
 
   void propagateRay(Ray r, OctreeNode node, RTObject first, double dist, MaterialMapping material, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, RGBColor color, int treeDepth, double totalDist, boolean caustic, boolean scattered)
   {
-    MaterialSpec matSpec = r.rt.matSpec;
+    RenderWorkspace workspace = getWorkspace();
+    MaterialSpec matSpec = workspace.matSpec;
 
     // Integrate the material properties by stepping along the ray.
 
-    Vec3 v = r.rt.ray[treeDepth+1].origin, origin = r.origin, direction = r.direction;
-    double x = 0.0, newx, dx, distToScreen = rt.theCamera.getDistToScreen(), step;
+    Vec3 v = workspace.ray[treeDepth+1].origin, origin = r.origin, direction = r.direction;
+    double x = 0.0, newx, dx, distToScreen = renderer.theCamera.getDistToScreen(), step;
     double origx, origy, origz, dirx, diry, dirz;
 
     // Find the ray origin and direction in the object's local coordinates.
@@ -528,12 +539,12 @@ public class PhotonMap
 
     // Do the integration.
 
-    step = rt.stepSize*material.getStepSize();
+    step = renderer.stepSize*material.getStepSize();
     do
     {
       // Find the new point along the ray.
 
-      dx = step*(1.5*r.rt.random.nextDouble());
+      dx = step*(1.5*workspace.context.random.nextDouble());
       if (this.rt.adaptive && totalDist > distToScreen)
         dx *= totalDist/distToScreen;
       newx = x+dx;
@@ -579,17 +590,17 @@ public class PhotonMap
       float scatProb = (scat.getRed()+scat.getGreen()+scat.getBlue())/3.0f;
       if (scatProb > 0.98f)
         scatProb = 0.98f; // Otherwise photons just bounce around forever and never get stored.
-      if (random.nextFloat() < scatProb && treeDepth < this.rt.maxRayDepth-1)
+      if (random.nextFloat() < scatProb && treeDepth < this.renderer.maxRayDepth-1)
       {
         // The photon is scattered.
 
-        if (treeDepth < this.rt.maxRayDepth-1)
+        if (treeDepth < this.renderer.maxRayDepth-1)
         {
-          RGBColor rayIntensity = r.rt.rayIntensity[treeDepth+1];
+          RGBColor rayIntensity = workspace.rayIntensity[treeDepth+1];
           rayIntensity.copy(color);
           rayIntensity.multiply(matSpec.scattering);
           rayIntensity.scale(1.0f/scatProb);
-          if (rayIntensity.getMaxComponent() > this.rt.minRayIntensity)
+          if (rayIntensity.getMaxComponent() > this.renderer.minRayIntensity)
           {
             // Send out a scattered ray.
 
@@ -602,7 +613,7 @@ public class PhotonMap
             if (node == null)
               break;
             double g = matSpec.eccentricity;
-            Vec3 newdir = r.rt.ray[treeDepth+1].getDirection();
+            Vec3 newdir = workspace.ray[treeDepth+1].getDirection();
             if (g > 0.01 || g < -0.01)
             {
               // Importance sample the phase function.
@@ -621,7 +632,7 @@ public class PhotonMap
               randomizePoint(newdir, 1.0);
               newdir.normalize();
             }
-            tracePhoton(r.rt.ray[treeDepth+1], rayIntensity, treeDepth+1, node, first, material, prevMaterial, currentMatTrans, prevMatTrans, totalDist, true, caustic);
+            tracePhoton(workspace.ray[treeDepth+1], rayIntensity, treeDepth+1, node, first, material, prevMaterial, currentMatTrans, prevMatTrans, totalDist, true, caustic);
           }
         }
         color.setRGB(0.0, 0.0, 0.0);
@@ -631,7 +642,7 @@ public class PhotonMap
       // The photon is absorbed.
 
       color.scale(1.0/(1.0-scatProb));
-      if ((includeDirect || scattered) && color.getMaxComponent() > this.rt.minRayIntensity)
+      if ((includeDirect || scattered) && color.getMaxComponent() > this.renderer.minRayIntensity)
         addPhoton(v, direction, color);
       color.setRGB(0.0, 0.0, 0.0);
       break;
@@ -893,7 +904,7 @@ public class PhotonMap
       return;
     float r2inv = 1.0f/nearbyPhotons.cutoff2;
     boolean hilight = false;
-    if (spec.hilight.getMaxComponent() > rt.minRayIntensity)
+    if (spec.hilight.getMaxComponent() > renderer.minRayIntensity)
     {
       hilight = true;
       tempColor2.setRGB(0.0f, 0.0f, 0.0f);

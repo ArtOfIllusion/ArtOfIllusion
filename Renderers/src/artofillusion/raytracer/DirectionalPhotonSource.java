@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2008 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -80,13 +80,13 @@ public class DirectionalPhotonSource implements PhotonSource
         {
           public void execute(int index)
           {
-            if (map.getRaytracer().renderThread != currentThread)
+            if (map.getRenderer().renderThread != currentThread)
               return;
             int i = index/n;
             int j = index-(i*n);
             double basex = -0.5*xsize+i*dx;
             double basey = -0.5*ysize+j*dy;
-            Ray r = new Ray(map.getContext());
+            Ray r = new Ray(map.getWorkspace().context);
             Vec3 orig = r.getOrigin();
             r.getDirection().set(coords.getZDirection());
             double x = basex+map.random.nextDouble()*dx, y = basey+map.random.nextDouble()*dy;
@@ -96,7 +96,7 @@ public class DirectionalPhotonSource implements PhotonSource
           }
           public void cleanup()
           {
-            map.getContext().cleanup();
+            map.getWorkspace().cleanup();
           }
         });
         threads.run();

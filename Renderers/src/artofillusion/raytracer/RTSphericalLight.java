@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 by Peter Eastman
+/* Copyright (C) 2008-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,13 +34,13 @@ public class RTSphericalLight extends RTLight
     radius = (softShadows ? light.getRadius() : 0.0);
   }
 
-  public double findRayToLight(Vec3 origin, Ray ray, int rayNumber)
+  public double findRayToLight(Vec3 origin, Ray ray, RaytracerRenderer renderer, int rayNumber)
   {
     ray.getOrigin().set(origin);
     Vec3 dir = ray.getDirection();
     dir.set(getCoords().getOrigin());
     if (rayNumber != -1)
-      ray.rt.rt.randomizePoint(dir, ray.rt.random, radius, rayNumber);
+      renderer.randomizePoint(dir, ray.rt.random, radius, rayNumber);
     dir.subtract(origin);
     double distToLight = dir.length();
     dir.normalize();

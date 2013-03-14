@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2008 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -45,7 +45,7 @@ public class TrianglePhotonSource implements PhotonSource
     
     // Find the average emissive intensity.
     
-    TextureSpec spec = map.getContext().surfSpec[0];
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
     double third = 1.0/3.0;
     color = new RGBColor();
     tri.getTextureSpec(spec, 1.0, third, third, third, avgSize, map.getRaytracer().time);
@@ -72,9 +72,9 @@ public class TrianglePhotonSource implements PhotonSource
   
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
-    Raytracer rt = map.getRaytracer();
-    TextureSpec spec = map.getContext().surfSpec[0];
-    Ray r = new Ray(map.getContext());
+    RaytracerRenderer rt = map.getRenderer();
+    TextureSpec spec = map.getWorkspace().surfSpec[0];
+    Ray r = new Ray(map.getWorkspace().context);
     Vec3 vert1 = tri.theMesh.vert[tri.v1];
     Vec3 vert2 = tri.theMesh.vert[tri.v2];
     Vec3 vert3 = tri.theMesh.vert[tri.v3];

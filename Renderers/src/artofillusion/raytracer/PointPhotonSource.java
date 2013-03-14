@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2008 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -69,7 +69,7 @@ public class PointPhotonSource implements PhotonSource
   public void generatePhotons(final PhotonMap map, double intensity, ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
-    final boolean randomizeOrigin = map.getRaytracer().penumbra;
+    final boolean randomizeOrigin = map.getRaytracer().softShadows;
     int num = (int) intensity;
 
     // Send out the photons.  To reduce noise, we use stratified sampling.  Repeatedly find the largest
@@ -85,13 +85,13 @@ public class PointPhotonSource implements PhotonSource
         {
           public void execute(int index)
           {
-            if (map.getRaytracer().renderThread != currentThread)
+            if (map.getRenderer().renderThread != currentThread)
               return;
             int i = index/n;
             int j = index-(i*n);
             double baseu = -1.0+i*du;
             double basephi = j*dphi;
-            Ray r = new Ray(map.getContext());
+            Ray r = new Ray(map.getWorkspace().context);
             Vec3 orig = r.getOrigin();
             Vec3 dir = r.getDirection();
             orig.set(pos);
@@ -106,7 +106,7 @@ public class PointPhotonSource implements PhotonSource
           }
           public void cleanup()
           {
-            map.getContext().cleanup();
+            map.getWorkspace().cleanup();
           }
         });
         threads.run();

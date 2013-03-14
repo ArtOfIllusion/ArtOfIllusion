@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2008 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -86,7 +86,7 @@ public class EnvironmentPhotonSource implements PhotonSource
   public void generatePhotons(final PhotonMap map, final double intensity, final ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
-    final Raytracer rt = map.getRaytracer();
+    final RaytracerRenderer renderer = map.getRenderer();
     final double emittedIntensity[] = new double[] {0.0};
 
     // Send out the photons.
@@ -96,7 +96,7 @@ public class EnvironmentPhotonSource implements PhotonSource
     {
       public void execute(int index)
       {
-        if (rt.renderThread != currentThread)
+        if (renderer.renderThread != currentThread)
           return;
 
         // Select an origin and direction.
@@ -106,7 +106,7 @@ public class EnvironmentPhotonSource implements PhotonSource
         double phi = (((index>>2)&3)+map.random.nextDouble())*0.5*Math.PI;
         double sphi = Math.sin(phi);
         double cphi = Math.cos(phi);
-        Ray r = new Ray(map.getContext());
+        Ray r = new Ray(map.getWorkspace().context);
         Vec3 orig = r.getOrigin();
         Vec3 dir = r.getDirection();
         orig.set(stheta*sphi, stheta*cphi, ctheta);
@@ -130,8 +130,8 @@ public class EnvironmentPhotonSource implements PhotonSource
         double photonIntensity;
         if (envMode == Scene.ENVIRON_DIFFUSE || envMode == Scene.ENVIRON_EMISSIVE)
           {
-            TextureSpec spec = map.getContext().surfSpec[0];
-            envMapping.getTextureSpec(dir.times(-1.0), spec, 1.0, rt.smoothScale*rt.extraGIEnvSmoothing, rt.time, null);
+            TextureSpec spec = map.getWorkspace().surfSpec[0];
+            envMapping.getTextureSpec(dir.times(-1.0), spec, 1.0, renderer.smoothScale*renderer.extraGIEnvSmoothing, renderer.time, null);
             if (envMode == Scene.ENVIRON_DIFFUSE)
               color.copy(spec.diffuse);
             else
@@ -165,7 +165,7 @@ public class EnvironmentPhotonSource implements PhotonSource
       }
       public void cleanup()
       {
-        map.getContext().cleanup();
+        map.getWorkspace().cleanup();
       }
     });
     while (emittedIntensity[0] < intensity)

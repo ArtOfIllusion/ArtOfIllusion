@@ -1,4 +1,4 @@
-/* Copyright (C) 2008-2011 by Peter Eastman
+/* Copyright (C) 2008-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -52,12 +52,13 @@ public abstract class RTLight
    * @param origin      the location from which to trace a ray
    * @param ray         this should be configured to be a ray pointing from the specified
    *                    origin to a randomly chosen point inside the light
+   * @param renderer    the renderer being used to render an image
    * @param rayNumber   a number which will be different for different rays, and can be used
    *                    for stratified sampling.  If this is -1, that indicates that soft
    *                    shadows should be disabled.
    * @return the distance from the ray origin to the light
    */
-  public abstract double findRayToLight(Vec3 origin, Ray ray, int rayNumber);
+  public abstract double findRayToLight(Vec3 origin, Ray ray, RaytracerRenderer renderer, int rayNumber);
 
   /**
    * Get whether this light generates soft shadows.

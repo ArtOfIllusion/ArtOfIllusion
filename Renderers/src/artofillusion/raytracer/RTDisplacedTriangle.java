@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -292,7 +292,7 @@ public class RTDisplacedTriangle extends RTObject
     // The ray intersects the volume, so step along it and check for intersections.  Determine
     // how many steps to use.
 
-    double time = r.rt.rt.time;
+    double time = r.rt.rt.getTime();
     double disp = tri.getDisplacement(u, v, w, tol, time), height = disp*temp1.z/temp1.length();
     double prevDelta = z-height;
     boolean above = (z > height);
@@ -714,6 +714,11 @@ public class RTDisplacedTriangle extends RTObject
     public short numIntersections;
     public Ray ray;
 
+    public RTObject getObject()
+    {
+      return rtTri;
+    }
+
     public DisplacedTriangleIntersection()
     {
       tint = new double [1];
@@ -786,7 +791,7 @@ public class RTDisplacedTriangle extends RTObject
       z = orig.z+t*dir.z;
       Vec3 temp1 = ray.tempVec1;
       temp1.set(u*extra.n1x+v*extra.n2x+w*extra.n3x, u*extra.n1y+v*extra.n2y+w*extra.n3y, u*extra.n1z+v*extra.n2z+w*extra.n3z);
-      double time = ray.rt.rt.time;
+      double time = ray.rt.rt.getTime();
       double disp = rtTri.tri.getDisplacement(u, v, w, rtTri.tol, time), height = disp*temp1.z/temp1.length();
       double prevDelta = z-height, prevt = t;
       boolean above = (z > height);

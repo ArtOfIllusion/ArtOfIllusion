@@ -17,38 +17,90 @@ import artofillusion.texture.*;
 import java.util.*;
 import java.util.List;
 
-/** Raytracer is a Renderer which generates images by raytracing. */
+/**
+ * Raytracer implements a raytracing engine.  It compares rays to objects in a scene to identify what they hit.
+ * <p/>
+ * To use it, first you must define the scene.  Do this by calling {@link #addObject(ObjectInfo)} for each object
+ * you want included in the scene.  When all objects have been added, call {@link #finishConstruction()} to analyze
+ * the scene and build data structures for use during raytracing.  There are several properties you can set that
+ * affect how the objects are interpreted.  For example, {@link #setSurfaceError(double) setSurfaceError()} determines
+ * how finely surfaces should be triangulated, and {@link #setAdaptive(boolean) setAdaptive()} determines whether
+ * the surface accuracy should vary based on the distance of the object from a camera.
+ * <p/>
+ * While building the scene, it also records a list of {@link RTLight} objects representing light sources in the scene.
+ * You can query the list by calling {@link #getLights()}, but otherwise it is not used.
+ * <p/>
+ * To trace a ray and see what it hits, call {@link #traceRay(Vec3, Vec3)}.  There is also a second version of the
+ * method that is more efficient, but requires more preparation by the caller before it is invoked.
+ * <p/>
+ * When you are all finished with the Raytracer, it is a good idea to call {@link #cleanup()} to set internal pointers
+ * to null.  This is not required, but may help the garbage collector to work more efficiently.
+ */
 
 public class Raytracer
 {
-  protected RTObject sceneObject[];
-  protected RTLight light[];
-  protected OctreeNode rootNode, cameraNode, lightNode[];
-  protected Scene theScene;
-  protected Camera camera;
-  protected double time, surfaceError = 0.02;
-  protected boolean preview, softShadows, adaptive = true, reducedMemory;
-  protected ThreadLocal<RaytracerContext> threadContext;
+  private RTObject sceneObject[];
+  private RTLight light[];
+  private OctreeNode rootNode, cameraNode, lightNode[];
+  private Scene theScene;
+  private Camera camera;
+  private double time, surfaceError = 0.02;
+  private boolean preview, softShadows, adaptive = true, reducedMemory;
+  private ThreadLocal<RaytracerContext> threadContext;
   private List<RTObjectFactory> factories;
   private List<RTObject> objectList;
   private List<RTLight> lightList;
 
   public static final double TOL = 1e-12;
 
-  /** When a ray is traced to determine what objects it intersects, a RayIntersection object
-     is used for returning the results.  To avoid creating excess objects, only one 
-     RayIntersection object is created and used for all rays. */
+  /**
+   * When a ray is traced to determine what objects it intersects, a RayIntersection object
+   * is used for returning the results.  Typically it reports only the first object that was
+   * hit, but when when two objects are almost exactly the same distance away, it reports both
+   * of them to ensure that neither is missed.
+   */
 
   public static class RayIntersection
   {
-    public RTObject first, second;
-    public double dist;
+    private SurfaceIntersection first, second;
+    private double distance;
     
     public RayIntersection()
     {
     }
+
+    /**
+     * Get the details of the first intersection.  If no object was hit, this will equal {@link SurfaceIntersection#NO_INTERSECTION}.
+     */
+    public SurfaceIntersection getFirst()
+    {
+      return first;
+    }
+
+    /**
+     * Get the details of the second intersection.  In most cases, this will equal {@link SurfaceIntersection#NO_INTERSECTION}.
+     */
+    public SurfaceIntersection getSecond()
+    {
+      return second;
+    }
+
+    /**
+     * Get the distance to the intersection point.
+     */
+    public double getDistance()
+    {
+      return distance;
+    }
   }
 
+  /**
+   * Create a Raytracer object.
+   *
+   * @param camera    if {@link #isAdaptive()} is true (the default), this Camera is used as the viewpoint for determining
+   *                  surface accuracy.  Some objects may also vary their properties based on how they are positioned relative
+   *                  to the camera.
+   */
   public Raytracer(Camera camera)
   {
     this.camera = camera;
@@ -63,64 +115,128 @@ public class Raytracer
     };
   }
 
+  /**
+   * Get the error tolerance to use when triangulating objects.  This is the maximum distance any point on the triangulated
+   * surface may be from the true surface.  The default value is 0.02.
+   */
   public double getSurfaceError()
   {
     return surfaceError;
   }
 
+  /**
+   * Set the error tolerance to use when triangulating objects.  This is the maximum distance any point on the triangulated
+   * surface may be from the true surface.  Calling this method affects all future calls to {@link #addObject(ObjectInfo) addObject()},
+   * but does not affect objects that have already been added.
+   */
   public void setSurfaceError(double surfaceError)
   {
     this.surfaceError = surfaceError;
   }
 
-  public double getTime()
-  {
-    return time;
-  }
-
-  public void setTime(double time)
-  {
-    this.time = time;
-  }
-
+  /**
+   * Get whether a decreased surface accuracy should be used for objects that are distant from the camera.  The default value is true.
+   */
   public boolean isAdaptive()
   {
     return adaptive;
   }
 
+  /**
+   * Set whether a decreased surface accuracy should be used for objects that are distant from the camera.  Calling this method
+   * affects all future calls to {@link #addObject(ObjectInfo) addObject()}, but does not affect objects that have already been added.
+   */
   public void setAdaptive(boolean adaptive)
   {
     this.adaptive = adaptive;
   }
 
-  public boolean isPreview()
+  /**
+   * Get the current time.  This affects objects whose properties vary with time.  The default value is 0.
+   */
+  public double getTime()
+  {
+    return time;
+  }
+
+  /**
+   * Get the current time.  This affects objects whose properties vary with time.  Calling this method affects all future calls
+   * to {@link #addObject(ObjectInfo) addObject()}, but does not affect objects that have already been added.
+   */
+  public void setTime(double time)
+  {
+    this.time = time;
+  }
+
+  /**
+   * Get whether the raytracer should use the existing preview meshes for objects, instead of constructing new meshes based
+   * on the requested surface accuracy.  The default value is false.
+   */
+  public boolean getUsePreviewMeshes()
   {
     return preview;
   }
 
-  public void setPreview(boolean preview)
+  /**
+   * Set whether the raytracer should use the existing preview meshes for objects, instead of constructing new meshes based
+   * on the requested surface accuracy.  Calling this method affects all future calls to {@link #addObject(ObjectInfo) addObject()},
+   * but does not affect objects that have already been added.
+   */
+  public void setUsePreviewMeshes(boolean preview)
   {
     this.preview = preview;
   }
 
-  public boolean isReducedMemory()
+  /**
+   * Get whether the raytracer should use an alternate representation of triangles that uses less memory but requires more computation
+   * to identify ray intersections.  The default value is false.
+   */
+  public boolean getUseReducedMemory()
   {
     return reducedMemory;
   }
 
-  public void setReducedMemory(boolean reducedMemory)
+  /**
+   * Set whether the raytracer should use an alternate representation of triangles that uses less memory but requires more computation
+   * to identify ray intersections.  Calling this method affects all future calls to {@link #addObject(ObjectInfo) addObject()},
+   * but does not affect objects that have already been added.
+   */
+  public void setUseReducedMemory(boolean reducedMemory)
   {
     this.reducedMemory = reducedMemory;
   }
 
-  public boolean isSoftShadows()
+  /**
+   * Get whether RTLight objects should be configured to generate soft shadows.  The default value is false.
+   */
+  public boolean getUseSoftShadows()
   {
     return softShadows;
   }
 
-  public void setSoftShadows(boolean softShadows)
+  /**
+   * Set whether RTLight objects should be configured to generate soft shadows.  Calling this method affects all future
+   * calls to {@link #addObject(ObjectInfo) addObject()}, but does not affect objects that have already been added.
+   */
+  public void setUseSoftShadows(boolean softShadows)
   {
     this.softShadows = softShadows;
+  }
+
+  /**
+   * Get a list of all objects in the scene, as represented by RTObject objects.
+   */
+  public RTObject[] getObjects()
+  {
+    return sceneObject;
+  }
+
+  /**
+   * Get a list of all light sources in the scene, as represented by RTLight objects.
+   */
+  public RTLight[] getLights()
+  {
+    return light;
   }
 
   /** Get the RaytracerContext for the current thread. */
@@ -130,12 +246,38 @@ public class Raytracer
     return threadContext.get();
   }
 
+  /**
+   * Get the root node of the octree.
+   */
+  public OctreeNode getRootNode()
+  {
+    return rootNode;
+  }
+
+  /**
+   * Get the octree node containing the camera.
+   */
+  public OctreeNode getCameraNode()
+  {
+    return cameraNode;
+  }
+
+  /**
+   * Get a list of the octree nodes containing each light source.
+   */
+  public OctreeNode[] getLightNodes()
+  {
+    return lightNode;
+  }
+
   /** Add a single object to the scene. */
 
   public void addObject(ObjectInfo info)
   {
-    boolean displaced = false;
-    double tol;
+    if (sceneObject != null)
+      throw new IllegalStateException("finishConstruction() has already been called");
+    if (objectList == null)
+      throw new IllegalStateException("cleanup() has already been called");
 
     // First give plugins a chance to handle the object.
 
@@ -181,6 +323,7 @@ public class Raytracer
     }
     Vec3 cameraOrig = camera.getCameraCoordinates().getOrigin();
     double distToScreen = camera.getDistToScreen();
+    double tol;
     if (adaptive)
     {
       double dist = info.getBounds().distanceToPoint(toLocal.times(cameraOrig));
@@ -191,6 +334,7 @@ public class Raytracer
     }
     else
       tol = surfaceError;
+    boolean displaced = false;
     Texture tex = theObject.getTexture();
     if (tex != null && tex.hasComponent(Texture.DISPLACEMENT_COMPONENT))
     {
@@ -323,11 +467,16 @@ public class Raytracer
           objectList.add(new RTTriangle(mesh, i, fromLocal, toLocal));
       }
   }
-  
-  /** Build the octree. */
-  
+
+  /**
+   * This must be called after all objects have been added to the scene and before any calls to {@link #traceRay(Vec3, Vec3) traceRay()}.
+   */
   public void finishConstruction()
   {
+    if (sceneObject != null)
+      throw new IllegalStateException("finishConstruction() has already been called");
+    if (objectList == null)
+      throw new IllegalStateException("cleanup() has already been called");
     sceneObject = objectList.toArray(new RTObject [objectList.size()]);
     for (int i = 0; i < sceneObject.length; i++)
       sceneObject[i].index = i;
@@ -389,6 +538,8 @@ public class Raytracer
 
   public void cleanup()
   {
+    objectList = null;
+    lightList = null;
     sceneObject = null;
     light = null;
     rootNode = null;
@@ -396,6 +547,22 @@ public class Raytracer
     lightNode = null;
     theScene = null;
     camera = null;
+    factories = null;
+  }
+
+  public RayIntersection traceRay(Vec3 origin, Vec3 direction)
+  {
+    if (objectList == null)
+      throw new IllegalStateException("cleanup() has already been called");
+    if (sceneObject == null)
+      throw new IllegalStateException("finishConstruction() has not been called");
+    RaytracerContext context = getContext();
+    Ray r = new Ray(context);
+    r.origin.set(origin);
+    r.direction.set(direction);
+    RayIntersection intersect = new RayIntersection();
+    traceRay(r, rootNode.findFirstNode(r), intersect);
+    return intersect;
   }
 
   /** Trace a ray, and determine the first object it intersects.  If it is immediately followed
@@ -404,7 +571,7 @@ public class Raytracer
      the ray intersects.  If an intersection is found, the octree node containing the
      intersection point is returned.  Otherwise, the return value is null. */
   
-  protected OctreeNode traceRay(Ray r, OctreeNode node)
+  public OctreeNode traceRay(Ray r, OctreeNode node, RayIntersection intersect)
   {
     RTObject first = null, second = null, obj[];
     double dist, firstDist = Double.MAX_VALUE, secondDist = Double.MAX_VALUE;
@@ -442,16 +609,18 @@ public class Raytracer
       {
         node = node.findNextNode(r);
         if (node == null)
+        {
+          intersect.first = SurfaceIntersection.NO_INTERSECTION;
           return null;
+        }
       }
     }
-    RayIntersection intersect = r.rt.intersect;
-    intersect.first = first;
-    intersect.dist = firstDist;
+    intersect.first = r.rt.lastRayResult[first.index];
+    intersect.distance = firstDist;
     if (secondDist-firstDist < TOL)
-      intersect.second = second;
+      intersect.second = r.rt.lastRayResult[second.index];
     else
-      intersect.second = null;
+      intersect.second = SurfaceIntersection.NO_INTERSECTION;
     return node;
   }
 }

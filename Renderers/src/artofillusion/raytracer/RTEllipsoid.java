@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2005 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -327,6 +327,11 @@ public class RTEllipsoid extends RTObject
       r2z = point2.z;
       trueNorm = new Vec3();
       pos = new Vec3();
+    }
+
+    public RTObject getObject()
+    {
+      return ellipse;
     }
 
     public int numIntersections()

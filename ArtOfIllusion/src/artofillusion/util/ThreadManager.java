@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2009 by Peter Eastman
+/* Copyright (C) 2005-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -192,9 +192,19 @@ public class ThreadManager
 
   public void finish()
   {
-    if (thread != null)
-      for (int i = 0; i < thread.length; i++)
-        thread[i].interrupt();
+    if (thread != null) {
+      for (Thread t : thread)
+        t.interrupt();
+      try
+      {
+        for (Thread t : thread)
+          t.join();
+      }
+      catch (InterruptedException ex)
+      {
+        // Ignore.
+      }
+    }
   }
 
   private int nextIndex() throws InterruptedException

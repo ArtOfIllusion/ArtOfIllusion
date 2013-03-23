@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2008 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -375,6 +375,11 @@ public class RTTriangleLowMemory extends RTObject
       this.rix = rix;
       this.riy = riy;
       this.riz = riz;
+    }
+
+    public RTObject getObject()
+    {
+      return rtTri;
     }
 
     public int numIntersections()

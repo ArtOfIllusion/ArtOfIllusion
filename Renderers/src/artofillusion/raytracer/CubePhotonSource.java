@@ -55,7 +55,7 @@ public class CubePhotonSource implements PhotonSource
     // Find the average emissive intensity.
 
     TextureSpec spec = map.getWorkspace().surfSpec[0];
-    texMap.getTexture().getAverageSpec(spec, map.getRaytracer().time, obj.param);
+    texMap.getTexture().getAverageSpec(spec, map.getRaytracer().getTime(), obj.param);
     color.copy(spec.emissive);
     lightIntensity = 0.5f*(color.getRed()+color.getGreen()+color.getBlue())*(float) totalArea;
     if (texMap.appliesTo() == TextureMapping.FRONT_AND_BACK)

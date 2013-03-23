@@ -1,4 +1,4 @@
-/* Copyright (C) 2005 by Peter Eastman
+/* Copyright (C) 2005-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,6 +25,10 @@ public interface SurfaceIntersection
    */
 
   public static final SurfaceIntersection NO_INTERSECTION = new SurfaceIntersection() {
+    public RTObject getObject()
+    {
+      return null;
+    }
     public int numIntersections()
     {
       return 0;
@@ -46,6 +50,10 @@ public interface SurfaceIntersection
     {
     }
   };
+
+  /** Get the object that was hit by the ray.  If no object was hit, this will be null. */
+
+  public RTObject getObject();
 
   /** Get the number of times the ray intersects the object. */
 

@@ -48,9 +48,9 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
     TextureSpec spec = map.getWorkspace().surfSpec[0];
     double third = 1.0/3.0;
     color = new RGBColor();
-    tri.tri.getTextureSpec(spec, 1.0, third, third, third, avgSize, map.getRaytracer().time);
+    tri.tri.getTextureSpec(spec, 1.0, third, third, third, avgSize, map.getRaytracer().getTime());
     color.copy(spec.emissive);
-    tri.tri.getTextureSpec(spec, -1.0, third, third, third, avgSize, map.getRaytracer().time);
+    tri.tri.getTextureSpec(spec, -1.0, third, third, third, avgSize, map.getRaytracer().getTime());
     color.add(spec.emissive);
     lightIntensity = 0.5f*(color.getRed()+color.getGreen()+color.getBlue())*(float) area;
   }

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2006 by Peter Eastman
+/* Copyright (C) 2004-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -158,7 +158,7 @@ public class RTImplicitObject extends RTObject
     // The ray intersects the bounding box, so we need to step along it through the volume
     // looking for actual intersections.
 
-    double time = r.rt.rt.time;
+    double time = r.rt.rt.getTime();
     boolean wasInside = false;
     double t = mint;
     double cutoff = theObject.getCutoff();
@@ -393,6 +393,11 @@ public class RTImplicitObject extends RTObject
       maxt = maxDist;
     }
 
+    public RTObject getObject()
+    {
+      return obj;
+    }
+
     public int numIntersections()
     {
       if (numIntersections == -1)
@@ -456,7 +461,7 @@ public class RTImplicitObject extends RTObject
     private void findAllIntersections()
     {
       double cutoff = obj.theObject.getCutoff();
-      double time = ray.rt.rt.time;
+      double time = ray.rt.rt.getTime();
       double t = tint[0];
       double prevT = t;
       double x = orig.x+t*dir.x;

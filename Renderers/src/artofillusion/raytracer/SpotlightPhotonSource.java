@@ -80,7 +80,7 @@ public class SpotlightPhotonSource implements PhotonSource
     final double exp = light.getExponent()+1.0, expInv = 1.0/exp;
     final double maxu = 1.0/exp;
     final double usize = maxu-minu;
-    final boolean randomizeOrigin = map.getRaytracer().softShadows;
+    final boolean randomizeOrigin = map.getRaytracer().getUseSoftShadows();
     int num = (int) intensity;
 
     // Send out the photons.  To reduce noise, we use stratified sampling.  Repeatedly find the largest

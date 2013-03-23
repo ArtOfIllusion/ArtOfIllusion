@@ -36,14 +36,14 @@ public class RaytracerContext
     tempVec = new Vec3();
     intersect = new Raytracer.RayIntersection();
     random = new FastRandom(0);
-    if (rt.reducedMemory)
+    if (rt.getUseReducedMemory())
       rtTriPool = new ResourcePool(RTTriangleLowMemory.TriangleIntersection.class);
     else
       rtTriPool = new ResourcePool(RTTriangle.TriangleIntersection.class);
     rtDispTriPool = new ResourcePool(RTDisplacedTriangle.DisplacedTriangleIntersection.class);
     rtImplicitPool = new ResourcePool(RTImplicitObject.ImplicitIntersection.class);
-    lastRayID = new int [rt.sceneObject.length];
-    lastRayResult = new SurfaceIntersection [rt.sceneObject.length];
+    lastRayID = new int [rt.getObjects().length];
+    lastRayResult = new SurfaceIntersection [rt.getObjects().length];
   }
 
   /**

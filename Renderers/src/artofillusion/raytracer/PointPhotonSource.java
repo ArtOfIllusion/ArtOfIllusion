@@ -69,7 +69,7 @@ public class PointPhotonSource implements PhotonSource
   public void generatePhotons(final PhotonMap map, double intensity, ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
-    final boolean randomizeOrigin = map.getRaytracer().softShadows;
+    final boolean randomizeOrigin = map.getRaytracer().getUseSoftShadows();
     int num = (int) intensity;
 
     // Send out the photons.  To reduce noise, we use stratified sampling.  Repeatedly find the largest

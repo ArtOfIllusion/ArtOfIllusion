@@ -135,9 +135,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     raytracer.setSurfaceError(surfaceError);
     raytracer.setTime(time);
     raytracer.setAdaptive(adaptive);
-    raytracer.setPreview(isPreview);
-    raytracer.setReducedMemory(reducedMemory);
-    raytracer.setSoftShadows(softShadows);
+    raytracer.setUsePreviewMeshes(isPreview);
+    raytracer.setUseReducedMemory(reducedMemory);
+    raytracer.setUseSoftShadows(softShadows);
     Dimension dim = theCamera.getSize();
 
     listener = rl;
@@ -709,7 +709,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     threads.run();
     threads.finish();
     raytracer.finishConstruction();
-    for (RTObject obj : raytracer.sceneObject)
+    for (RTObject obj : raytracer.getObjects())
     {
       if (obj.getMaterialMapping() != null)
       {
@@ -742,13 +742,13 @@ public class RaytracerRenderer implements Renderer, Runnable
     if (giMode == GI_PHOTON)
     {
       listener.statusChanged("Building Global Photon Map");
-      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, false, false, true, false, raytracer, this, raytracer.rootNode, 1, null);
+      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, false, false, true, false, raytracer, this, raytracer.getRootNode(), 1, null);
       generatePhotons(globalMap);
     }
     else if (giMode == GI_HYBRID)
     {
       listener.statusChanged("Building Global Photon Map");
-      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, true, true, true, false, raytracer, this, raytracer.rootNode, 0, null);
+      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, true, true, true, false, raytracer, this, raytracer.getRootNode(), 0, null);
       generatePhotons(globalMap);
     }
     if (caustics)
@@ -756,7 +756,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       // Find a bounding box around all objects that can generate caustics.
 
       BoundingBox bounds = null;
-      for (RTObject obj : raytracer.sceneObject)
+      for (RTObject obj : raytracer.getObjects())
       {
         Texture tex = obj.getTextureMapping().getTexture();
         MaterialMapping mm = obj.getMaterialMapping();
@@ -779,7 +779,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       // Find a bounding box around all objects with scattering materials.
 
       BoundingBox bounds = null;
-      for (RTObject obj : raytracer.sceneObject)
+      for (RTObject obj : raytracer.getObjects())
       {
         Texture tex = obj.getTextureMapping().getTexture();
         MaterialMapping mm = obj.getMaterialMapping();
@@ -805,7 +805,7 @@ public class RaytracerRenderer implements Renderer, Runnable
   {
     List<PhotonSourceFactory> factories = PluginRegistry.getPlugins(PhotonSourceFactory.class);
     ArrayList<PhotonSource> sources = new ArrayList<PhotonSource>();
-    for (RTLight lt : raytracer.light)
+    for (RTLight lt : raytracer.getLights())
     {
       // First give plugins a chance to handle it.
 
@@ -829,7 +829,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         sources.add(new SpotlightPhotonSource((SpotLight) lt.getLight(), lt.getCoords(), map));
     }
     ArrayList<PhotonSource> objectSources = new ArrayList<PhotonSource>();
-    for (RTObject obj : raytracer.sceneObject)
+    for (RTObject obj : raytracer.getObjects())
     {
       // First give plugins a chance to handle it.
 
@@ -1325,9 +1325,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     workspace.rayIntensity[0].setRGB(1.0f, 1.0f, 1.0f);
     workspace.firstObjectHit = null;
     double distScale = 1.0/dir.dot(theCamera.getCameraCoordinates().getZDirection());
-    OctreeNode node = raytracer.cameraNode;
+    OctreeNode node = raytracer.getCameraNode();
     if (node == null)
-      node = raytracer.rootNode.findFirstNode(ray);
+      node = raytracer.getRootNode().findFirstNode(ray);
     if (node == null)
     {
       RGBColor color = workspace.color[0];
@@ -1364,7 +1364,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
    @param workspace      contains information for the thread currently being executed
    @param pos     the point at which to determine the material
-   @param node    the first octree node which the ray intersects
+   @param node    the octree node containing the point
    @return the object with a material which the point is inside, or null if it is not inside any material.
    */
 
@@ -1394,27 +1394,27 @@ public class RaytracerRenderer implements Renderer, Runnable
     int matCount = 0;
     MaterialIntersection matChange[] = workspace.matChange;
     Vec3 trueNorm = workspace.trueNormal[0];
-    RTObject first, next = null;
+    SurfaceIntersection first, next = null;
+    Raytracer.RayIntersection intersect = workspace.context.intersect;
     while (true)
     {
       if (next == null)
       {
-        node = raytracer.traceRay(r, node);
+        node = raytracer.traceRay(r, node, intersect);
         if (node == null)
           return null;
-        first = workspace.context.intersect.first;
-        next = workspace.context.intersect.second;
+        first = intersect.getFirst();
+        next = intersect.getSecond();
       }
       else
       {
         first = next;
         next = null;
       }
-      SurfaceIntersection intersection = workspace.context.lastRayResult[first.index];
-      MaterialMapping mat = first.getMaterialMapping();
+      MaterialMapping mat = first.getObject().getMaterialMapping();
       if (mat != null)
       {
-        intersection.trueNormal(trueNorm);
+        first.trueNormal(trueNorm);
         double angle = -trueNorm.dot(r.getDirection());
         boolean entered = (angle > 0.0);
         if (entered)
@@ -1429,11 +1429,11 @@ public class RaytracerRenderer implements Renderer, Runnable
         else if (matCount > 0 && matChange[matCount-1].mat == mat)
           matCount--;
         else
-          return first;
+          return first.getObject();
       }
       if (next == null)
       {
-        intersection.intersectionPoint(0, r.getOrigin());
+        first.intersectionPoint(0, r.getOrigin());
         r.newID();
       }
     }
@@ -1445,7 +1445,7 @@ public class RaytracerRenderer implements Renderer, Runnable
    calling this method, and the light color is returned in the appropriate RGBColor
    object.
 
-   @param workspace                 contains information for the thread currently being executed
+   @param workspace          contains information for the thread currently being executed
    @param treeDepth          the depth of this ray within the ray tree
    @param node               the first octree node which the ray intersects
    @param first              the first object which the ray intersects, or null if this is not known
@@ -1460,9 +1460,9 @@ public class RaytracerRenderer implements Renderer, Runnable
    @return the distance to the first object hit by the ray
    */
 
-  protected double spawnRay(RenderWorkspace workspace, int treeDepth, OctreeNode node, RTObject first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, int rayNumber, double totalDist, boolean transmitted, boolean diffuse)
+  protected double spawnRay(RenderWorkspace workspace, int treeDepth, OctreeNode node, SurfaceIntersection first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, int rayNumber, double totalDist, boolean transmitted, boolean diffuse)
   {
-    RTObject second = null;
+    SurfaceIntersection second = null;
     double dist, dot, truedot, n, beta = 0.0, d;
     Vec3 intersectionPoint = workspace.pos[treeDepth], norm = workspace.normal[treeDepth], trueNorm = workspace.trueNormal[treeDepth], temp;
     boolean totalReflect = false;
@@ -1479,7 +1479,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     SurfaceIntersection intersection = SurfaceIntersection.NO_INTERSECTION;
     if (first != null)
     {
-      intersection = r.findIntersection(first);
+      intersection = r.findIntersection(first.getObject());
       if (intersection == SurfaceIntersection.NO_INTERSECTION)
       {
         // If the intersection is very close to the ray origin, findIntersection() may have
@@ -1491,17 +1491,18 @@ public class RaytracerRenderer implements Renderer, Runnable
         r2.origin.x -= Raytracer.TOL*r.direction.x;
         r2.origin.y -= Raytracer.TOL*r.direction.y;
         r2.origin.z -= Raytracer.TOL*r.direction.z;
-        intersection = r2.findIntersection(first);
+        intersection = r2.findIntersection(first.getObject());
       }
     }
     if (intersection != SurfaceIntersection.NO_INTERSECTION)
     {
       intersection.intersectionPoint(0, intersectionPoint);
-      nextNode = raytracer.rootNode.findNode(intersectionPoint);
+      nextNode = raytracer.getRootNode().findNode(intersectionPoint);
     }
     else
     {
-      nextNode = raytracer.traceRay(r, node);
+      Raytracer.RayIntersection intersect = workspace.context.intersect;
+      nextNode = raytracer.traceRay(r, node, intersect);
       if (nextNode == null)
       {
         if (transmitted && transparentBackground)
@@ -1525,13 +1526,13 @@ public class RaytracerRenderer implements Renderer, Runnable
         color.multiply(rayIntensity);
         return Float.MAX_VALUE;
       }
-      first = workspace.context.intersect.first;
-      second = workspace.context.intersect.second;
-      intersection = workspace.context.lastRayResult[first.index];
+      first = intersect.getFirst();
+      second = intersect.getSecond();
+      intersection = first;
       intersection.intersectionPoint(0, intersectionPoint);
     }
     if (treeDepth == 0)
-      workspace.firstObjectHit = first;
+      workspace.firstObjectHit = first.getObject();
     dist = intersection.intersectionDist(0);
     totalDist += dist;
     intersection.trueNormal(trueNorm);
@@ -1636,7 +1637,8 @@ public class RaytracerRenderer implements Renderer, Runnable
       col.scale(transmittedScale);
       workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
       temp = workspace.ray[treeDepth].tempVec1;
-      if (first.getMaterialMapping() == null)
+      RTObject hitObject = first.getObject();
+      if (hitObject.getMaterialMapping() == null)
       {
         // Not a solid object, so the bulk material does not change.
 
@@ -1650,8 +1652,8 @@ public class RaytracerRenderer implements Renderer, Runnable
       {
         // Entering an object.
 
-        nextMaterial = first.getMaterialMapping();
-        nextMatTrans = first.toLocal();
+        nextMaterial = hitObject.getMaterialMapping();
+        nextMatTrans = hitObject.toLocal();
         oldMaterial = currentMaterial;
         oldMatTrans = currentMatTrans;
         if (currentMaterial == null)
@@ -1668,7 +1670,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       {
         // Exiting an object.
 
-        if (currentMaterial == first.getMaterialMapping())
+        if (currentMaterial == hitObject.getMaterialMapping())
         {
           nextMaterial = prevMaterial;
           nextMatTrans = prevMatTrans;
@@ -1682,7 +1684,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         {
           nextMaterial = currentMaterial;
           nextMatTrans = currentMatTrans;
-          if (prevMaterial == first.getMaterialMapping())
+          if (prevMaterial == hitObject.getMaterialMapping())
             oldMaterial = null;
           else
           {
@@ -1860,15 +1862,14 @@ public class RaytracerRenderer implements Renderer, Runnable
       finalColor.add(lightColor);
     }
 
-
     // Now loop over the list of lights.
 
     dir = r.getDirection();
     sign = front ? 1.0 : -1.0;
     hilight = (spec.hilight.getRed() != 0.0 || spec.hilight.getGreen() != 0.0 || spec.hilight.getBlue() != 0.0);
-    for (i = raytracer.light.length-1; i >= 0; i--)
+    for (i = raytracer.getLights().length-1; i >= 0; i--)
     {
-      RTLight light = raytracer.light[i];
+      RTLight light = raytracer.getLights()[i];
       int numRays = (light.getSoftShadows() ? shadowRays : 1);
       for (int j = 0; j < numRays; j++)
       {
@@ -1889,7 +1890,7 @@ public class RaytracerRenderer implements Renderer, Runnable
               Math.abs(lightColor.getGreen()*(spec.diffuse.getGreen()*dot+spec.hilight.getGreen())) < minRayIntensity &&
               Math.abs(lightColor.getBlue()*(spec.diffuse.getBlue()*dot+spec.hilight.getBlue())) < minRayIntensity)
             continue;
-          if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(workspace, r, treeDepth+1, node, raytracer.lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
+          if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(workspace, r, treeDepth+1, node, raytracer.getLightNodes()[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
           {
             RGBColor tempColor = workspace.tempColor;
             tempColor.copy(lightColor);
@@ -2340,9 +2341,9 @@ public class RaytracerRenderer implements Renderer, Runnable
 
     workspace.tempColor2.setRGB(0.0f, 0.0f, 0.0f);
     dir = r.getDirection();
-    for (i = raytracer.light.length-1; i >= 0; i--)
+    for (i = raytracer.getLights().length-1; i >= 0; i--)
     {
-      RTLight light = raytracer.light[i];
+      RTLight light = raytracer.getLights()[i];
       lt = light.getLight();
       distToLight = light.findRayToLight(pos, r, this, -1);
       r.newID();
@@ -2360,7 +2361,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       if (lightColor.getRed() < minRayIntensity && lightColor.getGreen() < minRayIntensity &&
           lightColor.getBlue() < minRayIntensity)
         continue;
-      if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(workspace, r, treeDepth, node, raytracer.lightNode[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
+      if (lt.getType() == Light.TYPE_AMBIENT || lt.getType() == Light.TYPE_SHADOWLESS || traceLightRay(workspace, r, treeDepth, node, raytracer.getLightNodes()[i], distToLight, totalDist, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans))
         workspace.tempColor2.add(lightColor);
     }
     workspace.color[treeDepth].copy(workspace.tempColor2);

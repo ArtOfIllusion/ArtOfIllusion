@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2005 by Peter Eastman
+/* Copyright (C) 2004-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -380,6 +380,11 @@ public class RTCube extends RTObject
       normy = trueNorm.y;
       normz = trueNorm.z;
       pos = new Vec3();
+    }
+
+    public RTObject getObject()
+    {
+      return cube;
     }
 
     public int numIntersections()

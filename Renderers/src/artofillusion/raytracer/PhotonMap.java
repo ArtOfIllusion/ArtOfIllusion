@@ -214,9 +214,9 @@ public class PhotonMap
   {
     if (!r.intersects(bounds))
       return;
-    OctreeNode node = rt.rootNode.findNode(r.getOrigin());
+    OctreeNode node = rt.getRootNode().findNode(r.getOrigin());
     if (node == null)
-      node = rt.rootNode.findFirstNode(r);
+      node = rt.getRootNode().findFirstNode(r);
     if (node == null)
       return;
     color = color.duplicate();
@@ -242,9 +242,9 @@ public class PhotonMap
       @param caustic            true if this ray has been specularly reflected or refracted since leaving the eye
   */
   
-  private void tracePhoton(Ray r, RGBColor color, int treeDepth, OctreeNode node, RTObject first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, double totalDist, boolean diffuse, boolean caustic)
+  private void tracePhoton(Ray r, RGBColor color, int treeDepth, OctreeNode node, SurfaceIntersection first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, double totalDist, boolean diffuse, boolean caustic)
   {
-    RTObject second = null;
+    SurfaceIntersection second = null;
     double dist, truedot, n = 1.0, beta = 0.0, d;
     RenderWorkspace workspace = getWorkspace();
     Vec3 intersectionPoint = workspace.pos[treeDepth], norm = workspace.normal[treeDepth], trueNorm = workspace.trueNormal[treeDepth];
@@ -257,20 +257,20 @@ public class PhotonMap
 
     SurfaceIntersection intersect = SurfaceIntersection.NO_INTERSECTION;
     if (first != null)
-      intersect = r.findIntersection(first);
+      intersect = r.findIntersection(first.getObject());
     if (intersect != SurfaceIntersection.NO_INTERSECTION)
     {
       intersect.intersectionPoint(0, intersectionPoint);
-      nextNode = rt.rootNode.findNode(intersectionPoint);
+      nextNode = rt.getRootNode().findNode(intersectionPoint);
     }
     else
     {
-      nextNode = rt.traceRay(r, node);
+      nextNode = rt.traceRay(r, node, workspace.context.intersect);
       if (nextNode == null)
         return;
-      first = workspace.context.intersect.first;
-      second = workspace.context.intersect.second;
-      intersect = workspace.context.lastRayResult[first.index];
+      first = workspace.context.intersect.getFirst();
+      second = workspace.context.intersect.getSecond();
+      intersect = first;
       intersect.intersectionPoint(0, intersectionPoint);
     }
     
@@ -282,9 +282,9 @@ public class PhotonMap
     truedot = trueNorm.dot(r.getDirection());
     double texSmoothing = (diffuse ? renderer.smoothScale*renderer.extraGISmoothing : renderer.smoothScale);
     if (truedot > 0.0)
-      intersect.intersectionProperties(spec, norm, r.getDirection(), totalDist*texSmoothing*3.0/(2.0+truedot), rt.time);
+      intersect.intersectionProperties(spec, norm, r.getDirection(), totalDist*texSmoothing*3.0/(2.0+truedot), rt.getTime());
     else
-      intersect.intersectionProperties(spec, norm, r.getDirection(), totalDist*texSmoothing*3.0/(2.0-truedot), rt.time);
+      intersect.intersectionProperties(spec, norm, r.getDirection(), totalDist*texSmoothing*3.0/(2.0-truedot), rt.getTime());
 
       // Reduce the photon intensity based on the current material or fog.
 
@@ -355,7 +355,8 @@ public class PhotonMap
         col.multiply(spec.transparent);
         workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
         Vec3 temp = workspace.ray[treeDepth+1].getDirection();
-        if (first.getMaterialMapping() == null)
+        RTObject hitObject = first.getObject();
+        if (hitObject.getMaterialMapping() == null)
           {
             // Not a solid object, so the bulk material does not change.
             
@@ -369,8 +370,8 @@ public class PhotonMap
           {
             // Entering an object.
 
-            nextMaterial = first.getMaterialMapping();
-            nextMatTrans = first.toLocal();
+            nextMaterial = hitObject.getMaterialMapping();
+            nextMatTrans = hitObject.toLocal();
             oldMaterial = currentMaterial;
             oldMatTrans = currentMatTrans;
             if (currentMaterial == null)
@@ -387,7 +388,7 @@ public class PhotonMap
           {
             // Exiting an object.
 
-            if (currentMaterial == first.getMaterialMapping())
+            if (currentMaterial == hitObject.getMaterialMapping())
               {
                 nextMaterial = prevMaterial;
                 nextMatTrans = prevMatTrans;
@@ -401,7 +402,7 @@ public class PhotonMap
               {
                 nextMaterial = currentMaterial;
                 nextMatTrans = currentMatTrans;
-                if (prevMaterial == first.getMaterialMapping())
+                if (prevMaterial == hitObject.getMaterialMapping())
                   oldMaterial = null;
                 else
                   {
@@ -513,7 +514,7 @@ public class PhotonMap
       @param scattered         true if this ray has already been scattered by the material
    */
 
-  void propagateRay(Ray r, OctreeNode node, RTObject first, double dist, MaterialMapping material, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, RGBColor color, int treeDepth, double totalDist, boolean caustic, boolean scattered)
+  void propagateRay(Ray r, OctreeNode node, SurfaceIntersection first, double dist, MaterialMapping material, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, RGBColor color, int treeDepth, double totalDist, boolean caustic, boolean scattered)
   {
     RenderWorkspace workspace = getWorkspace();
     MaterialSpec matSpec = workspace.matSpec;
@@ -545,7 +546,7 @@ public class PhotonMap
       // Find the new point along the ray.
 
       dx = step*(1.5*workspace.context.random.nextDouble());
-      if (this.rt.adaptive && totalDist > distToScreen)
+      if (this.rt.isAdaptive() && totalDist > distToScreen)
         dx *= totalDist/distToScreen;
       newx = x+dx;
       if (newx > dist)
@@ -560,7 +561,7 @@ public class PhotonMap
 
       // Find the material properties at that point.
 
-      material.getMaterialSpec(v, matSpec, dx, this.rt.time);
+      material.getMaterialSpec(v, matSpec, dx, this.rt.getTime());
       RGBColor trans = matSpec.transparency;
       RGBColor scat = matSpec.scattering;
 

@@ -89,7 +89,7 @@ public class ScriptedObject extends ObjectCollection
           {
             EventQueue.invokeLater(new Runnable() {
               public void run() {
-                ScriptRunner.displayError(language, ex, 1);
+                ScriptRunner.displayError(language, ex);
               }
             });
             parsedScript = new ObjectScript() {

@@ -10,8 +10,6 @@
 
 package artofillusion.script;
 
-import javax.script.*;
-
 /** This interface represents a parsed Object script. */
 
 public interface ObjectScript

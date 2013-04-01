@@ -171,7 +171,7 @@ public class ExecuteScriptWindow extends BFrame
     }
     catch (Exception e)
     {
-      int line = ScriptRunner.displayError(language, e, 1);
+      int line = ScriptRunner.displayError(language, e);
       if (line > -1)
         {
           // Find the start of the line containing the error.

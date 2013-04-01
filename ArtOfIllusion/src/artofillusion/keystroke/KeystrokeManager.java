@@ -18,7 +18,6 @@ import java.util.*;
 import java.awt.event.*;
 import java.io.*;
 
-import javax.script.*;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -54,8 +53,7 @@ public class KeystrokeManager
   public static void setAllRecords(KeystrokeRecord allRecords[])
   {
     records.clear();
-    for (KeystrokeRecord record : allRecords)
-      records.add(record);
+    Collections.addAll(records, allRecords);
     recordModified();
   }
 
@@ -125,16 +123,9 @@ public class KeystrokeManager
       {
         // Execute it.
 
-        ScriptEngine engine = ScriptRunner.getScriptEngine(record.getLanguage());
-        try
-        {
-          engine.put("window", window);
-          engine.eval(record.getScript());
-        }
-        catch (ScriptException error)
-        {
-          error.printStackTrace();
-        }
+        HashMap<String, Object> variables = new HashMap<String, Object>();
+        variables.put("window", window);
+        ScriptRunner.executeScript(record.getLanguage(), record.getScript(), variables);
         event.consume();
       }
     }

@@ -12,8 +12,6 @@ package artofillusion.script;
 
 import artofillusion.*;
 
-import javax.script.*;
-
 /** This interface represents a parsed Tool script. */
 
 public interface ToolScript

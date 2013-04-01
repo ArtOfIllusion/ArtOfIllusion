@@ -2857,7 +2857,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     catch (Exception e)
     {
-      ScriptRunner.displayError(language, e, 1);
+      ScriptRunner.displayError(language, e);
     }
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().

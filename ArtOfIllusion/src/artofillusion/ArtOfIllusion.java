@@ -391,6 +391,7 @@ public class ArtOfIllusion
   private static void runStartupScripts()
   {
     String files[] = new File(STARTUP_SCRIPT_DIRECTORY).list();
+    HashMap<String, Object> variables = new HashMap<String, Object>();
     if (files != null)
       for (String file : files)
       {
@@ -400,7 +401,7 @@ public class ArtOfIllusion
           try
           {
             String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
-            ScriptRunner.executeScript(language, script);
+            ScriptRunner.executeScript(language, script, variables);
           }
           catch (IOException ex)
           {

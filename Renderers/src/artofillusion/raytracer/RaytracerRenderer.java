@@ -1356,8 +1356,8 @@ public class RaytracerRenderer implements Renderer, Runnable
       workspace.materialAtCameraIsFixed = !depth;
     }
     if (workspace.materialAtCamera == null)
-      return distScale*spawnRay(workspace, 0, node, null, null, null, null, null, number, 0.0, true, false);
-    return distScale*spawnRay(workspace, 0, node, null, workspace.materialAtCamera.getMaterialMapping(), null, workspace.materialAtCamera.toLocal(), null, number, 0.0, true, false);
+      return distScale*spawnRay(workspace, 0, node, SurfaceIntersection.NO_INTERSECTION, null, null, null, null, number, 0.0, true, false);
+    return distScale*spawnRay(workspace, 0, node, SurfaceIntersection.NO_INTERSECTION, workspace.materialAtCamera.getMaterialMapping(), null, workspace.materialAtCamera.toLocal(), null, number, 0.0, true, false);
   }
 
   /** Determine what material is present at a particular point in the scene.
@@ -1462,7 +1462,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
   protected double spawnRay(RenderWorkspace workspace, int treeDepth, OctreeNode node, SurfaceIntersection first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, int rayNumber, double totalDist, boolean transmitted, boolean diffuse)
   {
-    SurfaceIntersection second = null;
+    SurfaceIntersection second = SurfaceIntersection.NO_INTERSECTION;
     double dist, dot, truedot, n, beta = 0.0, d;
     Vec3 intersectionPoint = workspace.pos[treeDepth], norm = workspace.normal[treeDepth], trueNorm = workspace.trueNormal[treeDepth], temp;
     boolean totalReflect = false;
@@ -1477,7 +1477,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
     workspace.transparency[treeDepth] = 0.0;
     SurfaceIntersection intersection = SurfaceIntersection.NO_INTERSECTION;
-    if (first != null)
+    if (first != SurfaceIntersection.NO_INTERSECTION)
     {
       intersection = r.findIntersection(first.getObject());
       if (intersection == SurfaceIntersection.NO_INTERSECTION)
@@ -1763,7 +1763,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         workspace.ray[treeDepth+1].getDirection().set(temp);
         if (gloss)
           randomizeDirection(workspace.ray[treeDepth+1].getDirection(), norm, random, spec.roughness, rayNumber+treeDepth+1+i);
-        spawnRay(workspace, treeDepth+1, nextNode, null, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, diffuse);
+        spawnRay(workspace, treeDepth+1, nextNode, SurfaceIntersection.NO_INTERSECTION, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, diffuse);
         workspace.color[treeDepth+1].scale(1.0/numRays);
         color.add(workspace.color[treeDepth+1]);
       }
@@ -1794,7 +1794,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         }
         workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
         workspace.ray[treeDepth+1].newID();
-        spawnRay(workspace, treeDepth+1, nextNode, null, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, true);
+        spawnRay(workspace, treeDepth+1, nextNode, SurfaceIntersection.NO_INTERSECTION, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, true);
         workspace.color[treeDepth+1].scale(1.0f/numRays);
         color.add(workspace.color[treeDepth+1]);
       }

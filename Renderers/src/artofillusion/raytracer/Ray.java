@@ -12,9 +12,14 @@ package artofillusion.raytracer;
 
 import artofillusion.math.*;
 
-/** A Ray is defined by two vectors: an origin and a direction.  In addition, every ray has
-    a unique ID number which can be used to avoid repeated intersection tests.  Call newID()
-    to update the ID number any time the ray has been modified. */
+/**
+ * A Ray is defined by two vectors: an origin and a direction.  In addition, every ray has
+ * a unique ID number which can be used to avoid repeated intersection tests.  Call newID()
+ * to update the ID number any time the ray has been modified.
+ *
+ * Each Ray is bound to a particular {@link RaytracerContext} which is specified when it is created.
+ * This means it is specific to that context's thread, and should only ever be used on that thread.
+ */
 
 public class Ray
 {

@@ -550,27 +550,44 @@ public class Raytracer
     factories = null;
   }
 
+  /**
+   * Trace a ray and determine the first object it hits (or the first two objects, if they are almost exactly the same
+   * distance away).
+   *
+   * @param origin     the origin of the ray
+   * @param direction  a unit vector pointing in the ray direction
+   * @return a RayIntersection describing what the ray hit
+   */
   public RayIntersection traceRay(Vec3 origin, Vec3 direction)
   {
-    if (objectList == null)
-      throw new IllegalStateException("cleanup() has already been called");
     if (sceneObject == null)
+    {
+      if (objectList == null)
+        throw new IllegalStateException("cleanup() has already been called");
       throw new IllegalStateException("finishConstruction() has not been called");
+    }
     RaytracerContext context = getContext();
     Ray r = new Ray(context);
     r.origin.set(origin);
     r.direction.set(direction);
     RayIntersection intersect = new RayIntersection();
-    traceRay(r, rootNode.findFirstNode(r), intersect);
+    OctreeNode firstNode = rootNode.findFirstNode(r);
+    if (firstNode == null)
+      intersect.first = intersect.second = SurfaceIntersection.NO_INTERSECTION;
+    else
+      traceRay(r, firstNode, intersect);
     return intersect;
   }
 
-  /** Trace a ray, and determine the first object it intersects.  If it is immediately followed
-     by a second object, both are returned.  To avoid creating excess objects, the results
-     are returned in the global RayIntersection object.  node is the first octree node which
-     the ray intersects.  If an intersection is found, the octree node containing the
-     intersection point is returned.  Otherwise, the return value is null. */
-  
+  /**
+   * Trace a ray and determine the first object it hits (or the first two objects, if they are almost exactly the same
+   * distance away).  This version of traceRay() is more efficient, but requires more setup work by the caller.
+   *
+   * @param r         the ray to check for intersections with
+   * @param node      the octree node containing the ray origin
+   * @param intersect the details of what was hit are returned in this object
+   * @return the octree node containing the intersection point, or null if nothing was hit
+   */
   public OctreeNode traceRay(Ray r, OctreeNode node, RayIntersection intersect)
   {
     RTObject first = null, second = null, obj[];

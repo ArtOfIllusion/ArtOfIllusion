@@ -222,9 +222,9 @@ public class PhotonMap
     color = color.duplicate();
     RTObject materialObject = renderer.getMaterialAtPoint(getWorkspace(), r.getOrigin(), node);
     if (materialObject == null)
-      tracePhoton(r, color, 0, node, null, null, null, null, null, 0.0, indirect, false);
+      tracePhoton(r, color, 0, node, SurfaceIntersection.NO_INTERSECTION, null, null, null, null, 0.0, indirect, false);
     else
-      tracePhoton(r, color, 0, node, null, materialObject.getMaterialMapping(), null, materialObject.toLocal(), null, 0.0, indirect, false);
+      tracePhoton(r, color, 0, node, SurfaceIntersection.NO_INTERSECTION, materialObject.getMaterialMapping(), null, materialObject.toLocal(), null, 0.0, indirect, false);
   }
   
   /** Trace a photon through the scene, and record where it is absorbed.
@@ -244,7 +244,7 @@ public class PhotonMap
   
   private void tracePhoton(Ray r, RGBColor color, int treeDepth, OctreeNode node, SurfaceIntersection first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, double totalDist, boolean diffuse, boolean caustic)
   {
-    SurfaceIntersection second = null;
+    SurfaceIntersection second = SurfaceIntersection.NO_INTERSECTION;
     double dist, truedot, n = 1.0, beta = 0.0, d;
     RenderWorkspace workspace = getWorkspace();
     Vec3 intersectionPoint = workspace.pos[treeDepth], norm = workspace.normal[treeDepth], trueNorm = workspace.trueNormal[treeDepth];
@@ -256,7 +256,7 @@ public class PhotonMap
     // Find whether it hits anything.
 
     SurfaceIntersection intersect = SurfaceIntersection.NO_INTERSECTION;
-    if (first != null)
+    if (first != SurfaceIntersection.NO_INTERSECTION)
       intersect = r.findIntersection(first.getObject());
     if (intersect != SurfaceIntersection.NO_INTERSECTION)
     {

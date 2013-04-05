@@ -131,7 +131,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         // Ignore.
       }
     }
-    raytracer = new Raytracer(theCamera);
+    raytracer = new Raytracer(theScene, theCamera);
     raytracer.setSurfaceError(surfaceError);
     raytracer.setTime(time);
     raytracer.setAdaptive(adaptive);

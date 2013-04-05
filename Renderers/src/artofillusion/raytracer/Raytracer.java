@@ -42,7 +42,7 @@ public class Raytracer
   private RTObject sceneObject[];
   private RTLight light[];
   private OctreeNode rootNode, cameraNode, lightNode[];
-  private Scene theScene;
+  private Scene scene;
   private Camera camera;
   private double time, surfaceError = 0.02;
   private boolean preview, softShadows, adaptive = true, reducedMemory;
@@ -97,12 +97,14 @@ public class Raytracer
   /**
    * Create a Raytracer object.
    *
+   * @param scene     the Scene which the objects that will be added with {@link #addObject(ObjectInfo)} belong to
    * @param camera    if {@link #isAdaptive()} is true (the default), this Camera is used as the viewpoint for determining
    *                  surface accuracy.  Some objects may also vary their properties based on how they are positioned relative
    *                  to the camera.
    */
-  public Raytracer(Camera camera)
+  public Raytracer(Scene scene, Camera camera)
   {
+    this.scene = scene;
     this.camera = camera;
     factories = PluginRegistry.getPlugins(RTObjectFactory.class);
     objectList = Collections.synchronizedList(new ArrayList<RTObject>());
@@ -282,7 +284,7 @@ public class Raytracer
     // First give plugins a chance to handle the object.
 
     for (RTObjectFactory factory : factories)
-      if (factory.processObject(info, theScene, camera, objectList, lightList))
+      if (factory.processObject(info, scene, camera, objectList, lightList))
         return;
 
     // Handle it in the default way.
@@ -309,7 +311,7 @@ public class Raytracer
       theObject = ((ObjectWrapper) theObject).getWrappedObject();
     if (theObject instanceof ObjectCollection)
     {
-      Enumeration enm = ((ObjectCollection) theObject).getObjects(info, false, theScene);
+      Enumeration enm = ((ObjectCollection) theObject).getObjects(info, false, scene);
       while (enm.hasMoreElements())
       {
         ObjectInfo elem = (ObjectInfo) enm.nextElement();
@@ -545,7 +547,7 @@ public class Raytracer
     rootNode = null;
     cameraNode = null;
     lightNode = null;
-    theScene = null;
+    scene = null;
     camera = null;
     factories = null;
   }

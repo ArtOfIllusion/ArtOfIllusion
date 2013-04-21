@@ -47,7 +47,7 @@ public class GroovyScriptEngine implements ScriptEngine
 
   public void setOutput(PrintStream out)
   {
-    config.setOutput(new PrintWriter(out));
+    config.setOutput(new PrintWriter(out, true));
   }
 
   public void addImport(String packageOrClass) throws Exception

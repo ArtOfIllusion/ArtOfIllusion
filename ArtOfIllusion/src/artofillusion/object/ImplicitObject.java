@@ -159,6 +159,16 @@ public abstract class ImplicitObject extends Object3D
   {
     if (interactive && cachedMesh != null)
       return cachedMesh;
+    if (interactive)
+    {
+      // Limit the tolerance to avoid creating huge interactive meshes.
+
+      BoundingBox bounds = getBounds();
+      double volume = (bounds.maxx-bounds.minx)*(bounds.maxy-bounds.miny)*(bounds.maxz-bounds.minz);
+      double cells = volume/(tol*tol*tol);
+      if (cells > 1e6)
+        tol = Math.pow(volume/1e6, 1.0/3.0);
+    }
     ArrayList<Vec3> vertices = new ArrayList<Vec3>();
     ArrayList<int[]> faces = new ArrayList<int[]>();
     generateMesh(tol, vertices, faces);

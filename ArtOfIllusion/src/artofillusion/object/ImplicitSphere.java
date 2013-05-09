@@ -23,7 +23,8 @@ import java.io.*;
 /**
  * This is a spherical implicit object (i.e. a metaball).  It is characterized by two numbers: a radius, which is the
  * radius of the sphere it creates in isolation, and an "influence radius", which is the distance it extends outward
- * before the implicit function becomes zero.  It is not generally useful on its own, but collections of ImplicitSpheres
+ * before the implicit function becomes zero.  The influence radius <i>must</i> by larger than the radius, or the behavior
+ * becomes undefined.  This class is generally not useful on its own, but collections of ImplicitSpheres
  * are useful for many sorts of effects where balls should smoothly merge together when they come close.
  */
 public class ImplicitSphere extends ImplicitObject
@@ -68,10 +69,9 @@ public class ImplicitSphere extends ImplicitObject
 
   private void sizeChanged()
   {
-    double effectiveInfluence = (influenceRadius > radius ? influenceRadius : radius);
-    double f = effectiveInfluence/radius-1;
+    double f = influenceRadius/radius-1;
     scale = 1/(f*f);
-    bounds = new BoundingBox(-effectiveInfluence, effectiveInfluence, -effectiveInfluence, effectiveInfluence, -effectiveInfluence, effectiveInfluence);
+    bounds = new BoundingBox(-influenceRadius, influenceRadius, -influenceRadius, influenceRadius, -influenceRadius, influenceRadius);
     cachedWire = null;
     cachedMesh = null;
   }
@@ -91,25 +91,23 @@ public class ImplicitSphere extends ImplicitObject
   @Override
   public double getFieldValue(double x, double y, double z, double size, double time)
   {
-    double effectiveInfluence = (influenceRadius > radius ? influenceRadius : radius);
     double r = Math.sqrt(x*x+y*y+z*z);
-    if (r >= effectiveInfluence)
+    if (r >= influenceRadius)
       return 0;
-    double f = effectiveInfluence/r-1;
+    double f = influenceRadius/r-1;
     return scale*f*f;
   }
 
   @Override
   public void getFieldGradient(double x, double y, double z, double size, double time, Vec3 grad)
   {
-    double effectiveInfluence = (influenceRadius > radius ? influenceRadius : radius);
     double r = Math.sqrt(x*x+y*y+z*z);
-    if (r >= effectiveInfluence)
+    if (r >= influenceRadius)
       grad.set(0, 0, 0);
     else
     {
-      double f = effectiveInfluence/r-1;
-      double c = -scale*2*f*effectiveInfluence/r;
+      double f = influenceRadius/r-1;
+      double c = -scale*2*f*influenceRadius/(r*r*r);
       grad.set(c*x, c*y, c*z);
     }
   }

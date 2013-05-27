@@ -193,6 +193,11 @@ public abstract class ImplicitObject extends Object3D
     return mesh;
   }
 
+  protected void clearCachedMesh()
+  {
+    cachedMesh = null;
+  }
+
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     if (lastTime != scene.getTime())

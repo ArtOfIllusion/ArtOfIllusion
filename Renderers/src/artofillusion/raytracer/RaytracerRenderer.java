@@ -1324,7 +1324,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     ray.newID();
     workspace.rayIntensity[0].setRGB(1.0f, 1.0f, 1.0f);
     workspace.firstObjectHit = null;
-    double distScale = 1.0/dir.dot(theCamera.getCameraCoordinates().getZDirection());
+    double distScale = dir.dot(theCamera.getCameraCoordinates().getZDirection());
     OctreeNode node = raytracer.getCameraNode();
     if (node == null)
       node = raytracer.getRootNode().findFirstNode(ray);

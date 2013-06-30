@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,6 +54,8 @@ public class Scene
   public static final int ENVIRON_SOLID = 0;
   public static final int ENVIRON_DIFFUSE = 1;
   public static final int ENVIRON_EMISSIVE = 2;
+
+  private static final byte FILE_PREFIX[] = {'A', 'o', 'I', 'S', 'c', 'e', 'n', 'e'};
 
   public Scene()
   {
@@ -473,7 +475,7 @@ public class Scene
     objects.insertElementAt(info, index);
     objectIndexMap = null;
     if (undo != null)
-      undo.addCommandAtBeginning(UndoRecord.DELETE_OBJECT, new Object [] {Integer.valueOf(index)});
+      undo.addCommandAtBeginning(UndoRecord.DELETE_OBJECT, new Object [] {index});
     updateSelectionInfo();
   }
   
@@ -486,13 +488,13 @@ public class Scene
     objects.removeElementAt(which);
     objectIndexMap = null;
     if (undo != null)
-      undo.addCommandAtBeginning(UndoRecord.ADD_OBJECT, new Object [] {info, Integer.valueOf(which)});
+      undo.addCommandAtBeginning(UndoRecord.ADD_OBJECT, new Object [] {info, which});
     if (info.getParent() != null)
       {
         int j;
         for (j = 0; info.getParent().getChildren()[j] != info; j++);
         if (undo != null)
-          undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {info.getParent(), info, Integer.valueOf(j)});
+          undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {info.getParent(), info, j});
         info.getParent().removeChild(j);
       }
     for (int i = 0; i < objects.size(); i++)
@@ -868,7 +870,7 @@ public class Scene
   {
     ObjectInfo info = objects.elementAt(which);
     if (!info.selected)
-      selection.addElement(Integer.valueOf(which));
+      selection.addElement(which);
     info.selected = true;
     updateSelectionInfo();
   }
@@ -894,7 +896,7 @@ public class Scene
   public void removeFromSelection(int which)
   {
     ObjectInfo info = objects.elementAt(which);
-    selection.removeElement(Integer.valueOf(which));
+    selection.removeElement(which);
     info.selected = false;
     updateSelectionInfo();
   }
@@ -979,7 +981,7 @@ public class Scene
 
       objectIndexMap = new HashMap<ObjectInfo, Integer>();
       for (int i = 0; i < objects.size(); i++)
-        objectIndexMap.put(objects.get(i), Integer.valueOf(i));
+        objectIndexMap.put(objects.get(i), i);
     }
     Integer index = objectIndexMap.get(info);
     return (index == null ? -1 : index);
@@ -1145,7 +1147,30 @@ public class Scene
   {
     setName(f.getName());
     setDirectory(f.getParent());
-    DataInputStream in = new DataInputStream(new GZIPInputStream(new BufferedInputStream(new FileInputStream(f))));
+    BufferedInputStream buf = new BufferedInputStream(new FileInputStream(f));
+    buf.mark(FILE_PREFIX.length);
+
+    // See if the file begins with the expected prefix.
+
+    boolean hasPrefix = true;
+    for (int i = 0; hasPrefix && i < FILE_PREFIX.length; i++)
+      hasPrefix &= (buf.read() == FILE_PREFIX[i]);
+    if (!hasPrefix)
+      buf.reset(); // This is an old file that doesn't start with the prefix.
+
+    // We expect the data to be gzipped, but if it's somehow gotten decompressed we should accept that to.
+
+    DataInputStream in;
+    try
+    {
+      in = new DataInputStream(new GZIPInputStream(buf));
+    }
+    catch (IOException ex)
+    {
+      buf.close();
+      buf = new BufferedInputStream(new FileInputStream(f));
+      in = new DataInputStream(buf);
+    }
     initFromStream(in, fullScene);
     in.close();
   }
@@ -1492,7 +1517,9 @@ public class Scene
   {
     int mode = (ArtOfIllusion.getPreferences().getKeepBackupFiles() ? SafeFileOutputStream.OVERWRITE+SafeFileOutputStream.KEEP_BACKUP : SafeFileOutputStream.OVERWRITE);
     SafeFileOutputStream safeOut = new SafeFileOutputStream(f, mode);
-    DataOutputStream out = new DataOutputStream(new GZIPOutputStream(new BufferedOutputStream(safeOut)));
+    BufferedOutputStream bout = new BufferedOutputStream(safeOut);
+    bout.write(FILE_PREFIX);
+    DataOutputStream out = new DataOutputStream(new GZIPOutputStream(bout));
     writeToStream(out);
     out.close();
   }
@@ -1641,7 +1668,7 @@ public class Scene
         byte bytes[] = bos.toByteArray();
         out.writeInt(bytes.length);
         out.write(bytes, 0, bytes.length);
-        key = Integer.valueOf(index++);
+        key = index++;
         table.put(info.getObject(), key);
       }
     else

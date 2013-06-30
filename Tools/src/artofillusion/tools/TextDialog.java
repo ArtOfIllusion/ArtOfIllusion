@@ -170,6 +170,7 @@ public class TextDialog extends BDialog
 
         TriangleMesh mesh = new TextCollection().convertToTriangleMesh(1);
         mesh.setSmoothingMethod(TriangleMesh.APPROXIMATING);
+        mesh.setTexture(window.getScene().getDefaultTexture(), window.getScene().getDefaultTexture().getDefaultMapping(mesh));
         window.addObject(new ObjectInfo(mesh, new CoordinateSystem(), text.getText()), undo);
         window.setSelection(window.getScene().getNumObjects()-1);
       }

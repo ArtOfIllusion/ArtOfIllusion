@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -105,13 +105,13 @@ public class RenderSetupDialog
     top.add(new BLabel(Translate.text("FramesPerSec")+":"), 2, 3, labelLayout);
     top.add(new BLabel(Translate.text("ImagesPerFrame")+":"), 2, 4, labelLayout);
     top.add(rendChoice = new BComboBox(), 3, 0);
-    for (int i = 0; i < renderers.size(); i++)
-      rendChoice.add(renderers.get(i).getName());
+    for (Renderer renderer : renderers)
+      rendChoice.add(renderer.getName());
     rendChoice.setSelectedValue(currentRenderer.getName());
     rendChoice.addEventLink(ValueChangedEvent.class, this, "rendererChanged");
     top.add(camChoice = new BComboBox(), 3, 1);
-    for (int i = 0; i < cameras.length; i++)
-      camChoice.add(cameras[i].getName());
+    for (ObjectInfo camera : cameras)
+      camChoice.add(camera.getName());
     camChoice.setSelectedIndex(currentCamera);
     top.add(fpsField = new ValueField(fps, ValueField.POSITIVE+ValueField.INTEGER), 3, 3);
     top.add(subimagesField = new ValueField(subimages, ValueField.POSITIVE+ValueField.INTEGER), 3, 4);
@@ -119,7 +119,8 @@ public class RenderSetupDialog
     content.add(top, BorderContainer.NORTH);
     
     // Add the panel containing renderer-specific options.
-    
+
+    loadRenderSettings(theScene);
     content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     enableMovieComponents();
     PanelDialog dlg = new PanelDialog(parent, Translate.text("renderTitle"), content);
@@ -140,6 +141,7 @@ public class RenderSetupDialog
     currentCamera = camChoice.getSelectedIndex();
     if (currentRenderer.recordConfiguration())
     {
+      theScene.setMetadata(currentRenderer.getClass().getName()+" settings", currentRenderer.getConfiguration());
       Camera cam = new Camera();
       SceneCamera sc = (SceneCamera) cameras[currentCamera].getObject();
       cam.setCameraCoordinates(cameras[currentCamera].getCoords().duplicate());
@@ -171,10 +173,10 @@ public class RenderSetupDialog
   {
     // Find the camera to render from.
     
-    Vector cameras = new Vector();
+    ArrayList<ObjectInfo> cameras = new ArrayList<ObjectInfo>();
     for (int i = 0; i < theScene.getNumObjects(); i++)
       if (theScene.getObject(i).getObject() instanceof SceneCamera)
-        cameras.addElement(theScene.getObject(i));
+        cameras.add(theScene.getObject(i));
     if (cameras.size() == 0)
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
@@ -189,8 +191,9 @@ public class RenderSetupDialog
       currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
     currentRenderer.getConfigPanel();
     currentRenderer.recordConfiguration();
+    loadRenderSettings(theScene);
     Camera cam = new Camera();
-    ObjectInfo cameraInfo = (ObjectInfo) cameras.elementAt(currentCamera);
+    ObjectInfo cameraInfo = cameras.get(currentCamera);
     SceneCamera sc = (SceneCamera) cameraInfo.getObject();
     cam.setCameraCoordinates(cameraInfo.getCoords().duplicate());
     cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
@@ -201,6 +204,7 @@ public class RenderSetupDialog
   {
     content.remove(BorderContainer.CENTER);
     currentRenderer = renderers.get(rendChoice.getSelectedIndex());
+    loadRenderSettings(theScene);
     content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     UIUtilities.findWindow(content).pack();
   }
@@ -213,5 +217,26 @@ public class RenderSetupDialog
     endField.setEnabled(enable);
     fpsField.setEnabled(enable);
     subimagesField.setEnabled(enable);
+  }
+
+  /**
+   * See if the scene contains saved settings for the current renderer and load them.
+   */
+  private static void loadRenderSettings(Scene scene)
+  {
+    try
+    {
+      Object settings = scene.getMetadata(currentRenderer.getClass().getName()+" settings");
+      if (settings instanceof Map)
+      {
+        Map<String, Object> savedSettings = (Map<String, Object>) settings;
+        for (Map.Entry<String, Object> entry : savedSettings.entrySet())
+          currentRenderer.setConfiguration(entry.getKey(), entry.getValue());
+      }
+    }
+    catch (ClassCastException ex)
+    {
+      // Unexpected objects in the map.  Just ignore.
+    }
   }
 }

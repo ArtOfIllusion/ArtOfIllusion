@@ -120,7 +120,7 @@ public class RenderSetupDialog
     
     // Add the panel containing renderer-specific options.
     
-    content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo());
+    content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     enableMovieComponents();
     PanelDialog dlg = new PanelDialog(parent, Translate.text("renderTitle"), content);
     content.remove(BorderContainer.CENTER);
@@ -201,7 +201,7 @@ public class RenderSetupDialog
   {
     content.remove(BorderContainer.CENTER);
     currentRenderer = renderers.get(rendChoice.getSelectedIndex());
-    content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo());    
+    content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     UIUtilities.findWindow(content).pack();
   }
   

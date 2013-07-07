@@ -29,7 +29,7 @@ import java.util.*;
 public class Raster implements Renderer, Runnable
 {
   private ObjectInfo light[];
-  private FormContainer configPanel;
+  private BTabbedPane configPanel;
   private BCheckBox transparentBox, adaptiveBox, hideBackfaceBox, hdrBox;
   private BComboBox shadeChoice, aliasChoice, sampleChoice;
   private ValueField errorField, smoothField;
@@ -161,67 +161,53 @@ public class Raster implements Renderer, Runnable
   {
     if (configPanel == null)
     {
-      configPanel = new FormContainer(3, 5);
+      // General options panel.
+
+      FormContainer generalPanel = new FormContainer(3, 4);
       LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
       LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
-      configPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
-      configPanel.add(Translate.label("shadingMethod"), 0, 1, leftLayout);
-      configPanel.add(Translate.label("supersampling"), 0, 2, leftLayout);
-      configPanel.add(errorField = new ValueField(surfaceError, ValueField.POSITIVE, 6), 1, 0, rightLayout);
-      configPanel.add(shadeChoice = new BComboBox(new String [] {
-        Translate.text("gouraud"),
-        Translate.text("hybrid"),
-        Translate.text("phong")
+      generalPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
+      generalPanel.add(Translate.label("shadingMethod"), 0, 1, leftLayout);
+      generalPanel.add(Translate.label("supersampling"), 0, 2, leftLayout);
+      generalPanel.add(errorField = new ValueField(surfaceError, ValueField.POSITIVE, 6), 1, 0, rightLayout);
+      generalPanel.add(shadeChoice = new BComboBox(new String[]{
+          Translate.text("gouraud"),
+          Translate.text("hybrid"),
+          Translate.text("phong")
       }), 1, 1, rightLayout);
-      configPanel.add(aliasChoice = new BComboBox(new String [] {
-        Translate.text("none"),
-        Translate.text("Edges"),
-        Translate.text("Everything")
+      generalPanel.add(aliasChoice = new BComboBox(new String[]{
+          Translate.text("none"),
+          Translate.text("Edges"),
+          Translate.text("Everything")
       }), 1, 2, rightLayout);
-      configPanel.add(sampleChoice = new BComboBox(new String [] {"2x2", "3x3"}), 2, 2, rightLayout);
+      generalPanel.add(sampleChoice = new BComboBox(new String[]{"2x2", "3x3"}), 2, 2, rightLayout);
       sampleChoice.setEnabled(false);
-      configPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
-      configPanel.add(Translate.button("advanced", this, "showAdvancedWindow"), 0, 4, 3, 1);
-      smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE);
-      adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive);
-      hideBackfaceBox = new BCheckBox(Translate.text("eliminateBackfaces"), hideBackfaces);
-      hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR);
+      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
       aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
         void processEvent()
         {
           sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
         }
       });
+
+      // Advanced options panel.
+
+      FormContainer advancedPanel = new FormContainer(new double [] {0.0, 1.0}, new double [4]);
+      advancedPanel.add(Translate.label("texSmoothing"), 0, 0, leftLayout);
+      advancedPanel.add(smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE), 1, 0, rightLayout);
+      advancedPanel.add(adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive), 0, 1, 2, 1, rightLayout);
+      advancedPanel.add(hideBackfaceBox = new BCheckBox(Translate.text("eliminateBackfaces"), hideBackfaces), 0, 2, 2, 1, rightLayout);
+      advancedPanel.add(hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR), 0, 3, 2, 1, rightLayout);
+
+      // Create the tabbed pane.
+
+      configPanel = new BTabbedPane();
+      configPanel.add(generalPanel, Translate.text("general"));
+      configPanel.add(advancedPanel, Translate.text("advanced"));
     }
     if (needCopyToUI)
       copyConfigurationToUI();
     return configPanel;
-  }
-
-  private void showAdvancedWindow(WidgetEvent ev)
-  {
-    // Record the current settings.
-
-    smoothing = smoothField.getValue();
-    adaptive = adaptiveBox.getState();
-    hideBackfaces = hideBackfaceBox.getState();
-    generateHDR = hdrBox.getState();
-
-    // Show the window.
-
-    WindowWidget parent = UIUtilities.findWindow(ev.getWidget());
-    ComponentsDialog dlg  = new ComponentsDialog(parent, Translate.text("advancedOptions"),
-          new Widget [] {smoothField, adaptiveBox, hideBackfaceBox, hdrBox},
-          new String [] {Translate.text("texSmoothing"), null, null, null});
-    if (!dlg.clickedOk())
-    {
-      // Reset the components.
-
-      smoothField.setValue(smoothing);
-      adaptiveBox.setState(adaptive);
-      hideBackfaceBox.setState(hideBackfaces);
-      hdrBox.setState(generateHDR);
-    }
   }
 
   /** Copy the current configuration to the user interface. */

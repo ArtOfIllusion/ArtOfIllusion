@@ -30,7 +30,7 @@ import java.util.List;
 public class RaytracerRenderer implements Renderer, Runnable
 {
   protected Raytracer raytracer;
-  protected ColumnContainer configPanel;
+  protected BTabbedPane configPanel;
   protected BCheckBox depthBox, glossBox, shadowBox, causticsBox, transparentBox, adaptiveBox, rouletteBox, reducedMemoryBox;
   protected BComboBox aliasChoice, maxRaysChoice, minRaysChoice, giModeChoice, scatterModeChoice, diffuseRaysChoice, glossRaysChoice, shadowRaysChoice;
   protected ValueField errorField, rayDepthField, rayCutoffField, smoothField, stepSizeField;
@@ -191,9 +191,11 @@ public class RaytracerRenderer implements Renderer, Runnable
   {
     if (configPanel == null)
     {
-      configPanel = new ColumnContainer();
+      // General options panel.
+
+      ColumnContainer generalPanel = new ColumnContainer();
       FormContainer choicesPanel = new FormContainer(2, 4);
-      configPanel.add(choicesPanel);
+      generalPanel.add(choicesPanel);
       LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
       LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
       choicesPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
@@ -214,7 +216,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         maxRaysChoice.add(Integer.toString(i));
       }
       ColumnContainer boxes = new ColumnContainer();
-      configPanel.add(boxes);
+      generalPanel.add(boxes);
       boxes.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
       boxes.add(depthBox = new BCheckBox(Translate.text("depthOfField"), depth));
       boxes.add(glossBox = new BCheckBox(Translate.text("glossTranslucency"), gloss));
@@ -227,6 +229,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       boxes.add(row = new RowContainer());
       row.add(Translate.label("raysToSample"), indent);
       row.add(shadowRaysChoice = new BComboBox());
+      boxes.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground));
       glossRaysChoice.add("1");
       shadowRaysChoice.add("1");
       for (int i = 4; i <= 64; i *= 2)
@@ -247,11 +250,8 @@ public class RaytracerRenderer implements Renderer, Runnable
         }
       });
 
-      // Create components for the Illumination Options window.
+      // Illumination options panel.
 
-      RowContainer buttons = new RowContainer();
-      configPanel.add(buttons);
-      buttons.add(Translate.button("illumination", this, "showIlluminationWindow"));
       giModeChoice = new BComboBox(new String [] {
           Translate.text("none"),
           Translate.text("ambientOcclusion"),
@@ -275,15 +275,38 @@ public class RaytracerRenderer implements Renderer, Runnable
       volumePhotonsField = new ValueField(volumePhotons, ValueField.POSITIVE+ValueField.INTEGER, 7);
       volumeNeighborPhotonsField = new ValueField(volumeNeighborPhotons, ValueField.POSITIVE+ValueField.INTEGER, 4);
       causticsBox = new BCheckBox(Translate.text("useCausticsMap"), caustics);
+      ColumnContainer illuminationPanel = new ColumnContainer();
+      LayoutInfo indent0 = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
+      LayoutInfo indent1 = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 20, 0, 0), null);
+      illuminationPanel.add(row = new RowContainer(), indent0);
+      row.add(Translate.label("globalIllumination"));
+      row.add(giModeChoice);
+      illuminationPanel.add(row = new RowContainer(), indent1);
+      row.add(Translate.label("raysToSampleEnvironment"));
+      row.add(diffuseRaysChoice);
+      illuminationPanel.add(row = new RowContainer(), indent1);
+      row.add(Translate.label("totalPhotons"));
+      row.add(globalPhotonsField);
+      row.add(Translate.label("numToEstimateLight"));
+      row.add(globalNeighborPhotonsField);
+      illuminationPanel.add(causticsBox, indent0);
+      illuminationPanel.add(row = new RowContainer(), indent1);
+      row.add(Translate.label("totalPhotons"));
+      row.add(causticsPhotonsField);
+      row.add(Translate.label("numToEstimateLight"));
+      row.add(causticsNeighborPhotonsField);
+      illuminationPanel.add(row = new RowContainer(), indent0);
+      row.add(Translate.label("materialScattering"));
+      row.add(scatterModeChoice);
+      illuminationPanel.add(row = new RowContainer(), indent1);
+      row.add(Translate.label("totalPhotons"));
+      row.add(volumePhotonsField);
+      row.add(Translate.label("numToEstimateLight"));
+      row.add(volumeNeighborPhotonsField);
+      causticsBox.dispatchEvent(new ValueChangedEvent(causticsBox));
 
-      // Create components for the Output Options window.
+      // Advanced options panel.
 
-      buttons.add(Translate.button("output", this, "showOutputOptionsWindow"));
-      transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground);
-
-      // Create components for the Advanced Options window.
-
-      buttons.add(Translate.button("advanced", this, "showAdvancedOptionsWindow"));
       rayDepthField = new ValueField(maxRayDepth, ValueField.POSITIVE+ValueField.INTEGER);
       rayCutoffField = new ValueField(minRayIntensity, ValueField.NONNEGATIVE);
       smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE);
@@ -293,6 +316,34 @@ public class RaytracerRenderer implements Renderer, Runnable
       adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive);
       rouletteBox = new BCheckBox(Translate.text("russianRoulette"), roulette);
       reducedMemoryBox = new BCheckBox(Translate.text("useLessMemory"), reducedMemory);
+      FormContainer advancedPanel = new FormContainer(2, 8);
+      advancedPanel.add(Translate.label("maxRayTreeDepth"), 0, 0, leftLayout);
+      advancedPanel.add(Translate.label("minRayIntensity"), 0, 1, leftLayout);
+      advancedPanel.add(Translate.label("matStepSize"), 0, 3, leftLayout);
+      advancedPanel.add(Translate.label("texSmoothing"), 0, 4, leftLayout);
+      advancedPanel.add(rayDepthField, 1, 0, rightLayout);
+      advancedPanel.add(rayCutoffField, 1, 1, rightLayout);
+      advancedPanel.add(stepSizeField, 1, 3, rightLayout);
+      advancedPanel.add(smoothField, 1, 4, rightLayout);
+      advancedPanel.add(Translate.label("extraGISmoothing"), 0, 5, 2, 1);
+      advancedPanel.add(row = new RowContainer(), 0, 6, 2, 1);
+      row.add(new BLabel(Translate.text("Textures")+":"));
+      row.add(extraGIField);
+      row.add(new BLabel(Translate.text("environment")+":"));
+      row.add(extraGIEnvField);
+      boxes = new ColumnContainer();
+      advancedPanel.add(boxes, 0, 7, 2, 1);
+      boxes.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
+      boxes.add(adaptiveBox);
+      boxes.add(reducedMemoryBox);
+      boxes.add(rouletteBox);
+
+      // Create the tabbed pane.
+
+      configPanel = new BTabbedPane();
+      configPanel.add(generalPanel, Translate.text("general"));
+      configPanel.add(illuminationPanel, Translate.text("illumination"));
+      configPanel.add(advancedPanel, Translate.text("advanced"));
 
       // Set up listeners for components.
 
@@ -338,151 +389,6 @@ public class RaytracerRenderer implements Renderer, Runnable
     if (needCopyToUI)
       copyConfigurationToUI();
     return configPanel;
-  }
-
-  protected void showAdvancedOptionsWindow(WidgetEvent ev)
-  {
-    // Layout the window.
-
-    FormContainer content = new FormContainer(2, 10);
-    content.setColumnWeight(0, 0.0);
-    LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
-    LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, null, null);
-    content.add(Translate.label("maxRayTreeDepth"), 0, 0, leftLayout);
-    content.add(Translate.label("minRayIntensity"), 0, 1, leftLayout);
-    content.add(Translate.label("matStepSize"), 0, 3, leftLayout);
-    content.add(Translate.label("texSmoothing"), 0, 4, leftLayout);
-    content.add(rayDepthField, 1, 0, rightLayout);
-    content.add(rayCutoffField, 1, 1, rightLayout);
-    content.add(stepSizeField, 1, 3, rightLayout);
-    content.add(smoothField, 1, 4, rightLayout);
-    content.add(Translate.label("extraGISmoothing"), 0, 5, 2, 1, rightLayout);
-    RowContainer row = new RowContainer();
-    content.add(row, 0, 6, 2, 1);
-    row.add(new BLabel(Translate.text("Textures")+":"));
-    row.add(extraGIField);
-    row.add(new BLabel(Translate.text("environment")+":"));
-    row.add(extraGIEnvField);
-    content.add(adaptiveBox, 0, 7, 2, 1, rightLayout);
-    content.add(reducedMemoryBox, 0, 8, 2, 1, rightLayout);
-    content.add(rouletteBox, 0, 9, 2, 1, rightLayout);
-
-    // Record the current settings.
-
-    maxRayDepth = (int) rayDepthField.getValue();
-    minRayIntensity = (float) rayCutoffField.getValue();
-    stepSize = stepSizeField.getValue();
-    smoothing = smoothField.getValue();
-    extraGISmoothing = extraGIField.getValue();
-    extraGIEnvSmoothing = extraGIEnvField.getValue();
-    adaptive = adaptiveBox.getState();
-    roulette = rouletteBox.getState();
-
-    // Show the window.
-
-    WindowWidget parent = UIUtilities.findWindow(ev.getWidget());
-    PanelDialog dlg = new PanelDialog(parent, Translate.text("advancedOptions"), content);
-    if (!dlg.clickedOk())
-    {
-      // Reset the components.
-
-      rayDepthField.setValue(maxRayDepth);
-      rayCutoffField.setValue(minRayIntensity);
-      stepSizeField.setValue(stepSize);
-      smoothField.setValue(smoothing);
-      extraGIField.setValue(extraGISmoothing);
-      extraGIEnvField.setValue(extraGIEnvSmoothing);
-      adaptiveBox.setState(adaptive);
-      rouletteBox.setState(roulette);
-      reducedMemoryBox.setState(reducedMemory);
-    }
-  }
-
-  protected void showIlluminationWindow(WidgetEvent ev)
-  {
-    // Layout the window.
-
-    ColumnContainer content = new ColumnContainer();
-    LayoutInfo indent0 = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
-    LayoutInfo indent1 = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 20, 0, 0), null);
-    RowContainer row;
-    content.add(row = new RowContainer(), indent0);
-    row.add(Translate.label("globalIllumination"));
-    row.add(giModeChoice);
-    content.add(row = new RowContainer(), indent1);
-    row.add(Translate.label("raysToSampleEnvironment"));
-    row.add(diffuseRaysChoice);
-    content.add(row = new RowContainer(), indent1);
-    row.add(Translate.label("totalPhotons"));
-    row.add(globalPhotonsField);
-    row.add(Translate.label("numToEstimateLight"));
-    row.add(globalNeighborPhotonsField);
-    content.add(causticsBox, indent0);
-    content.add(row = new RowContainer(), indent1);
-    row.add(Translate.label("totalPhotons"));
-    row.add(causticsPhotonsField);
-    row.add(Translate.label("numToEstimateLight"));
-    row.add(causticsNeighborPhotonsField);
-    content.add(row = new RowContainer(), indent0);
-    row.add(Translate.label("materialScattering"));
-    row.add(scatterModeChoice);
-    content.add(row = new RowContainer(), indent1);
-    row.add(Translate.label("totalPhotons"));
-    row.add(volumePhotonsField);
-    row.add(Translate.label("numToEstimateLight"));
-    row.add(volumeNeighborPhotonsField);
-    causticsBox.dispatchEvent(new ValueChangedEvent(causticsBox));
-
-    // Record the current settings.
-
-    giMode = giModeChoice.getSelectedIndex();
-    diffuseRays = Integer.parseInt((String) diffuseRaysChoice.getSelectedValue());
-    globalPhotons = (int) globalPhotonsField.getValue();
-    globalNeighborPhotons = (int) globalNeighborPhotonsField.getValue();
-    caustics = causticsBox.getState();
-    causticsPhotons = (int) causticsPhotonsField.getValue();
-    causticsNeighborPhotons = (int) causticsNeighborPhotonsField.getValue();
-    scatterMode = scatterModeChoice.getSelectedIndex();
-    volumePhotons = (int) volumePhotonsField.getValue();
-    volumeNeighborPhotons = (int) volumeNeighborPhotonsField.getValue();
-
-    // Show the window.
-
-    WindowWidget parent = UIUtilities.findWindow(ev.getWidget());
-    PanelDialog dlg = new PanelDialog(parent, Translate.text("illuminationOptions"), content);
-    if (!dlg.clickedOk())
-    {
-      // Reset the components.
-
-      giModeChoice.setSelectedIndex(giMode);
-      diffuseRaysChoice.setSelectedValue(Integer.toString(diffuseRays));
-      globalPhotonsField.setValue(globalPhotons);
-      globalNeighborPhotonsField.setValue(globalNeighborPhotons);
-      causticsBox.setState(caustics);
-      causticsPhotonsField.setValue(causticsPhotons);
-      causticsNeighborPhotonsField.setValue(causticsNeighborPhotons);
-      scatterModeChoice.setSelectedIndex(scatterMode);
-      volumePhotonsField.setValue(volumePhotons);
-      volumeNeighborPhotonsField.setValue(volumeNeighborPhotons);
-    }
-  }
-
-  protected void showOutputOptionsWindow(WidgetEvent ev)
-  {
-    // Record the current settings.
-
-    transparentBackground = transparentBox.getState();
-
-    // Show the window.
-
-    WindowWidget parent = UIUtilities.findWindow(ev.getWidget());
-    ComponentsDialog dlg = new ComponentsDialog(parent, Translate.text("outputOptions"), new Widget [] {transparentBox}, new String [] {""});
-    if (!dlg.clickedOk())
-    {
-      // Reset the components.
-
-      transparentBox.setState(transparentBackground);
-    }
   }
 
   /** Copy the current configuration to the user interface. */

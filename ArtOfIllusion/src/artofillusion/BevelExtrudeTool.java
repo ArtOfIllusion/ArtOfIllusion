@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2007 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,6 +27,7 @@ public class BevelExtrudeTool extends MeshEditingTool
   private TriMeshBeveler beveler;
   private Point clickPoint;
   private double width, height;
+  private UndoRecord undo;
   private final NinePointManipulator manipulator;
 
   public BevelExtrudeTool(EditingWindow fr, MeshEditController controller)
@@ -134,11 +135,16 @@ public class BevelExtrudeTool extends MeshEditingTool
     }
     
     // Update the mesh and redisplay.
-    
+
+    if (undo == null)
+    {
+      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, origMesh});
+      undo.addCommand(UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), controller.getSelection().clone()});
+    }
     mesh.copyObject(beveler.bevelMesh(height, width));
     controller.setMesh(mesh);
     controller.setSelection(beveler.getNewSelection());
-    theWindow.setHelpText(Translate.text("bevelExtrudeTool.dragText", new Double(width), new Double(height)));
+    theWindow.setHelpText(Translate.text("bevelExtrudeTool.dragText", width, height));
   }
 
   protected void handleReleased(HandleReleasedEvent ev)
@@ -146,11 +152,13 @@ public class BevelExtrudeTool extends MeshEditingTool
     if (width != 0.0 || height != 0.0)
     {
       TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
-      theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, origMesh}));
+      if (undo != null)
+        theWindow.setUndoRecord(undo);
       controller.objectChanged();
     }
     theWindow.updateImage();
     dragInProgress = false;
+    undo = null;
   }
 
   public void iconDoubleClicked()

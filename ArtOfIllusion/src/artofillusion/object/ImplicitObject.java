@@ -13,6 +13,7 @@ package artofillusion.object;
 import artofillusion.math.*;
 import artofillusion.*;
 
+import java.awt.Point;
 import java.io.*;
 import java.util.*;
 
@@ -35,6 +36,7 @@ import java.util.*;
 public abstract class ImplicitObject extends Object3D
 {
   private RenderingMesh cachedMesh;
+  private WireframeMesh cachedWireframe;
   private double lastTime;
 
   /**
@@ -193,9 +195,38 @@ public abstract class ImplicitObject extends Object3D
     return mesh;
   }
 
+  @Override
+  public WireframeMesh getWireframeMesh()
+  {
+    if (cachedWireframe == null)
+    {
+      RenderingMesh mesh = cachedMesh;
+      if (mesh == null)
+        mesh = getRenderingMesh(ArtOfIllusion.getPreferences().getInteractiveSurfaceError(), false, null);
+      HashSet<Point> edges = new HashSet<Point>();
+      for (RenderingTriangle tri : mesh.triangle)
+      {
+        edges.add(new Point(Math.min(tri.v1, tri.v2), Math.max(tri.v1, tri.v2)));
+        edges.add(new Point(Math.min(tri.v2, tri.v3), Math.max(tri.v2, tri.v3)));
+        edges.add(new Point(Math.min(tri.v3, tri.v1), Math.max(tri.v3, tri.v1)));
+      }
+      int from[] = new int[edges.size()];
+      int to[] = new int[edges.size()];
+      int index = 0;
+      for (Point point : edges)
+      {
+        from[index] = point.x;
+        to[index++] = point.y;
+      }
+      cachedWireframe = new WireframeMesh(mesh.vert, from, to);
+    }
+    return cachedWireframe;
+  }
+
   protected void clearCachedMesh()
   {
     cachedMesh = null;
+    cachedWireframe = null;
   }
 
   public void sceneChanged(ObjectInfo info, Scene scene)

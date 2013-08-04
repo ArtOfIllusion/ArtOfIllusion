@@ -243,12 +243,6 @@ public class CompoundImplicitObject extends ImplicitObject
   }
 
   @Override
-  public WireframeMesh getWireframeMesh()
-  {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
-  }
-
-  @Override
   public Keyframe getPoseKeyframe()
   {
     ArrayList<Keyframe> key = new ArrayList<Keyframe>();

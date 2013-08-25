@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2004 by Peter Eastman
+/* Copyright (C) 2002-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -454,7 +454,7 @@ public class TextureTrack extends Track
     smoothChoice.setSelectedIndex(smoothingMethod);
     TreeList tree = new TreeList(win);
     BScrollPane sp = new BScrollPane(tree);
-    Vector elements = new Vector();
+    Vector<TreeElement> elements = new Vector<TreeElement>();
     
     // Create a tree of all the texture parameters.
     
@@ -466,17 +466,16 @@ public class TextureTrack extends Track
       Texture layer[] = map.getLayers();
       for (int i = 0; i < layer.length; i++)
       {
-        Vector v = new Vector();
-        TextureParameter p[] = map.getLayerParameters(i);
-        for (int j = 0; j < p.length; j++)
+        Vector<TreeElement> v = new Vector<TreeElement>();
+        for (TextureParameter p : map.getLayerParameters(i))
         {
           int k;
-          for (k = 0; !texParam[k].equals(p[j]); k++);
+          for (k = 0; !texParam[k].equals(p); k++);
           if (!(paramValue[k] instanceof ConstantParameterValue))
             continue;
-          TreeElement el = new GenericTreeElement(p[j].name, p[j].duplicate(), null, tree, null);
+          TreeElement el = new GenericTreeElement(p.name, p.duplicate(), null, tree, null);
           for (k = 0; k < param.length; k++)
-            if (param[k].equals(p[j]))
+            if (param[k].equals(p))
               el.setSelected(true);
           v.addElement(el);
         }
@@ -490,18 +489,24 @@ public class TextureTrack extends Track
           null, null, tree, v);
         el.setSelectable(false);
         el.setExpanded(true);
-        elements.addElement(el);
+        elements.add(el);
       }
     }
     else
       for (int i = 0; i < texParam.length; i++)
         if (paramValue[i] instanceof ConstantParameterValue)
-          elements.addElement(new GenericTreeElement(texParam[i].name, texParam[i], null, tree, null));
+        {
+          TreeElement el = new GenericTreeElement(texParam[i].name, texParam[i], null, tree, null);
+          for (TextureParameter p : param)
+            if (p.equals(texParam[i]))
+              el.setSelected(true);
+          elements.add(el);
+        }
     if (elements.size() == 0)
       {
         TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
         el.setSelectable(false);
-        elements.addElement(el);
+        elements.add(el);
       }
     TreeElement texElem = new GenericTreeElement(Translate.text("Texture"), null, null, tree,  elements);
     texElem.setSelectable(false);

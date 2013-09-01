@@ -1690,9 +1690,9 @@ public class RaytracerRenderer implements Renderer, Runnable
           temp.set(0.0, 0.0, 0.0);
           randomizePoint(temp, random, 1.0, rayNumber+treeDepth+1+i);
           temp.normalize();
-          d = temp.dot(trueNorm) * (truedot > 0.0 ? 1.0 : -1.0);
+          d = temp.dot(norm) * (dot > 0.0 ? 1.0 : -1.0);
         } while (random.nextDouble() > (d < 0.0 ? -d : d));
-        if (d > 0.0)
+        if (temp.dot(trueNorm) * (truedot > 0.0 ? 1.0 : -1.0) > 0.0)
         {
           // Make sure it comes out the correct side.
 

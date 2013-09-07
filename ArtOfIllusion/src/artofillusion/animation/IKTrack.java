@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2004 by Peter Eastman
+/* Copyright (C) 2003-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
-import java.util.Vector;
+import java.util.*;
 
 /** This is a Track which modifies the shape of an object using inverse kinematics. */
 
@@ -220,6 +220,22 @@ public class IKTrack extends Track
       Constraint c = (Constraint) constraints.elementAt(i);
       if (c.target != null && c.target.getObject() == obj)
         constraints.removeElementAt(i);
+    }
+  }
+
+  public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
+  {
+    for (int i = constraints.size()-1; i >= 0; i--)
+    {
+      Constraint c = (Constraint) constraints.elementAt(i);
+      if (c.target != null && objectMap.containsKey(c.target.getObject()))
+      {
+        ObjectInfo newObject = objectMap.get(c.target.getObject());
+        if (c.target.getJoint() == null)
+          c.target = new ObjectRef(newObject);
+        else
+          c.target = new ObjectRef(newObject, newObject.getSkeleton().getJoint(c.target.getJoint().id));
+      }
     }
   }
 

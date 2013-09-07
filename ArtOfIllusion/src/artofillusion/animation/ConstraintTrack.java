@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2011 by Peter Eastman
+/* Copyright (C) 2001-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +17,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
+import java.util.*;
 
 /** This is a Track which places constraints on the position or orientation of an object. */
 
@@ -257,6 +258,18 @@ public class ConstraintTrack extends Track
   {
     if (faceToward.getObject() == obj)
       faceToward = new ObjectRef();
+  }
+
+  public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
+  {
+    if (objectMap.containsKey(faceToward.getObject()))
+    {
+      ObjectInfo newObject = objectMap.get(faceToward.getObject());
+      if (faceToward.getJoint() == null)
+        faceToward = new ObjectRef(newObject);
+      else
+        faceToward = new ObjectRef(newObject, newObject.getSkeleton().getJoint(faceToward.getJoint().id));
+    }
   }
 
   /** Write a serialized representation of this track to a stream. */

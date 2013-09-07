@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2003 by Peter Eastman
+/* Copyright (C) 2001-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,7 @@ package artofillusion.animation;
 import artofillusion.*;
 import artofillusion.object.*;
 import java.io.*;
+import java.util.*;
 
 /** This is an abstract class representing an aspect of the scene which changes with time.
     Tracks are typically defined either by a Timecourse or a Procedure. */
@@ -219,6 +220,16 @@ public abstract class Track
       object is deleted from the scene. */
   
   public void deleteDependencies(ObjectInfo obj)
+  {
+  }
+
+  /**
+   * Update any references to objects this track depends on.  Any reference to an object found as a key
+   * in the map should be replaced with the corresponding object.  This is used, for example, when copying
+   * and pasting objects between scenes.
+   */
+
+  public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
   }
   

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +18,7 @@ import artofillusion.math.*;
 import artofillusion.texture.*;
 
 import java.lang.ref.*;
+import java.util.*;
 
 /** ObjectInfo represents information about an object within a Scene: its position, 
     orientation, name, visibility, etc.  The internal properties (i.e. geometry) of
@@ -89,16 +90,24 @@ public class ObjectInfo
   public static ObjectInfo [] duplicateAll(ObjectInfo info[])
   {
     ObjectInfo newobj[] = new ObjectInfo [info.length];
+    HashMap<ObjectInfo, ObjectInfo> objectMap = new HashMap<ObjectInfo, ObjectInfo>();
     for (int i = 0; i < newobj.length; i++)
+    {
       newobj[i] = info[i].duplicate(info[i].getObject().duplicate());
+      objectMap.put(info[i], newobj[i]);
+    }
     for (int i = 0; i < info.length; i++)
       for (int k = info[i].getChildren().length-1; k >= 0; k--)
-	{
-	  int j;
-	  for (j = 0; j < info.length && info[j] != info[i].getChildren()[k]; j++);
-	  if (j < info.length)
-	    newobj[i].addChild(newobj[j], 0);
-	}
+        {
+          int j;
+          for (j = 0; j < info.length && info[j] != info[i].getChildren()[k]; j++);
+          if (j < info.length)
+            newobj[i].addChild(newobj[j], 0);
+        }
+    for (int i = 0; i < newobj.length; i++)
+      if (newobj[i].tracks != null)
+        for (int j = 0; j < newobj[i].tracks.length; j++)
+          newobj[i].tracks[j].updateObjectReferences(objectMap);
     return newobj;
   }
 

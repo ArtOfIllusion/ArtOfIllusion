@@ -73,18 +73,18 @@ public class ObjectRef
   public ObjectInfo getObject()
   {
     if (object == null)
+    {
+      if (theScene == null)
+        return null;
+      for (int i = theScene.getNumObjects()-1; i >= 0; i--)
       {
-	if (theScene == null)
-	  return null;
-	for (int i = theScene.getNumObjects()-1; i >= 0; i--)
-	  {
-	    ObjectInfo info = theScene.getObject(i);
-	    if (info.getId() != objectID)
-	      continue;
-	    object = info;
-	    break;
-	  }
+        ObjectInfo info = theScene.getObject(i);
+        if (info.getId() != objectID)
+          continue;
+        object = info;
+        break;
       }
+    }
     return object;
   }
   

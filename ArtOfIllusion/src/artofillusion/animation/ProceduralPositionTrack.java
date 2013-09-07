@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2008 by Peter Eastman
+/* Copyright (C) 2001-2013 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +18,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
+import java.util.*;
 
 /** This is a Track which uses a procedure to control the position of an object. */
 
@@ -392,6 +393,18 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   {
     if (relObject.getObject() == obj)
       relObject = new ObjectRef();
+  }
+
+  public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
+  {
+    if (objectMap.containsKey(relObject.getObject()))
+    {
+      ObjectInfo newObject = objectMap.get(relObject.getObject());
+      if (relObject.getJoint() == null)
+        relObject = new ObjectRef(newObject);
+      else
+        relObject = new ObjectRef(newObject, newObject.getSkeleton().getJoint(relObject.getJoint().id));
+    }
   }
 
   /** Find all the parameters for the procedure. */

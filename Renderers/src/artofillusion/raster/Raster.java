@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2011 by Peter Eastman
+/* Copyright (C) 2001-2014 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -37,11 +37,10 @@ public class Raster implements Renderer, Runnable
   private int shadingMode = PHONG, samplesPerPixel = 1, subsample = 1;
   private Fragment fragment[];
   private long updateTime;
-  private MemoryImageSource imageSource;
   private Scene theScene;
   private Camera theCamera;
   private RenderListener listener;
-  private Image img;
+  private BufferedImage img;
   private Thread renderThread;
   private RGBColor ambColor, envColor, fogColor;
   private TextureMapping envMapping;
@@ -103,6 +102,8 @@ public class Raster implements Renderer, Runnable
       }
     }
     Dimension dim = camera.getSize();
+    if (dim.width == 0 || dim.height == 0)
+      return;
 
     listener = rl;
     this.theScene = theScene;
@@ -120,10 +121,8 @@ public class Raster implements Renderer, Runnable
     {
       imageWidth = dim.width;
       imageHeight = dim.height;
-      imagePixel = new int [imageWidth*imageHeight];
-      imageSource = new MemoryImageSource(imageWidth, imageHeight, imagePixel, 0, imageWidth);
-      imageSource.setAnimated(true);
-      img = Toolkit.getDefaultToolkit().createImage(imageSource);
+      img = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB_PRE);
+      imagePixel = ((DataBufferInt) ((BufferedImage) img).getRaster().getDataBuffer()).getData();
     }
     width = imageWidth*samplesPerPixel;
     height = imageHeight*samplesPerPixel;
@@ -502,7 +501,6 @@ public class Raster implements Renderer, Runnable
           fragment[i2*width+j2].getAdditiveColor(frontColor);
           imagePixel[i1*imageWidth+j1] = frontColor.getARGB();
         }
-    imageSource.newPixels();
     listener.imageUpdated(img);
     updateTime = System.currentTimeMillis();
   }
@@ -513,7 +511,6 @@ public class Raster implements Renderer, Runnable
   {
     if (System.currentTimeMillis()-updateTime < 5000)
       return;
-    imageSource.newPixels();
     listener.imageUpdated(img);
     updateTime = System.currentTimeMillis();
   }
@@ -653,7 +650,6 @@ public class Raster implements Renderer, Runnable
 
     // Create the ComplexImage.
 
-    imageSource.newPixels();
     ComplexImage image = new ComplexImage(img);
     if (generateHDR)
     {

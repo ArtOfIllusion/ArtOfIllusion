@@ -1297,11 +1297,11 @@ public class RaytracerRenderer implements Renderer, Runnable
     int matCount = 0;
     MaterialIntersection matChange[] = workspace.matChange;
     Vec3 trueNorm = workspace.trueNormal[0];
-    SurfaceIntersection first, next = null;
+    SurfaceIntersection first, next = SurfaceIntersection.NO_INTERSECTION;
     Raytracer.RayIntersection intersect = workspace.context.intersect;
     while (true)
     {
-      if (next == null)
+      if (next == SurfaceIntersection.NO_INTERSECTION)
       {
         node = raytracer.traceRay(r, node, intersect);
         if (node == null)
@@ -1312,7 +1312,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       else
       {
         first = next;
-        next = null;
+        next = SurfaceIntersection.NO_INTERSECTION;
       }
       MaterialMapping mat = first.getObject().getMaterialMapping();
       if (mat != null)
@@ -1334,7 +1334,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         else
           return first.getObject();
       }
-      if (next == null)
+      if (next == SurfaceIntersection.NO_INTERSECTION)
       {
         first.intersectionPoint(0, r.getOrigin());
         r.newID();

@@ -509,32 +509,31 @@ public class ObjectPropertiesPanel extends ColumnContainer
     int index = materialChoice.getSelectedIndex();
     Scene scene = window.getScene();
     Material mat = null;
-    boolean noMaterial = (index == materialChoice.getItemCount()-2);
+    boolean noMaterial = (index == scene.getNumMaterials());
     if (index < scene.getNumMaterials())
+    {
       mat = scene.getMaterial(index);
-    else
+    }
+    else if (index > scene.getNumMaterials())
     {
       List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
-      if (index < scene.getNumMaterials()+materialTypes.size()+1)
+      try
       {
-        try
+        mat = materialTypes.get(index-scene.getNumMaterials()-1).getClass().newInstance();
+        int j = 0;
+        String name = "";
+        do
         {
-          mat = materialTypes.get(index-scene.getNumMaterials()-1).getClass().newInstance();
-          int j = 0;
-          String name = "";
-          do
-          {
-            j++;
-            name = "Untitled "+j;
-          } while (scene.getMaterial(name) != null);
-          mat.setName(name);
-          scene.addMaterial(mat);
-          mat.edit(window, scene);
-        }
-        catch (Exception ex)
-        {
-          ex.printStackTrace();
-        }
+          j++;
+          name = "Untitled "+j;
+        } while (scene.getMaterial(name) != null);
+        mat.setName(name);
+        scene.addMaterial(mat);
+        mat.edit(window, scene);
+      }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
       }
     }
     if (noMaterial || mat != null)

@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2012 by Peter Eastman
+/* Copyright (C) 2004-2014 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -127,7 +127,7 @@ public class TexturedVertexShader implements VertexShader
           dot = viewDir.dot(mesh.norm[tri.n1]);
           if (diffuseCache[vert] == null)
           {
-            tri.getTextureSpec(spec, dot, 1.0, 0.0, 0.0, 0.1, time);
+            tri.getTextureSpec(spec, -dot, 1.0, 0.0, 0.0, 0.1, time);
             diffuseCache[vert] = spec.diffuse.duplicate();
             emissiveCache[vert] = spec.emissive.duplicate();
             hilightCache[vert] = spec.hilight.duplicate();
@@ -139,7 +139,7 @@ public class TexturedVertexShader implements VertexShader
           dot = viewDir.dot(mesh.norm[tri.n2]);
           if (diffuseCache[vert] == null)
           {
-            tri.getTextureSpec(spec, dot, 0.0, 1.0, 0.0, 0.1, time);
+            tri.getTextureSpec(spec, -dot, 0.0, 1.0, 0.0, 0.1, time);
             diffuseCache[vert] = spec.diffuse.duplicate();
             emissiveCache[vert] = spec.emissive.duplicate();
             hilightCache[vert] = spec.hilight.duplicate();
@@ -151,7 +151,7 @@ public class TexturedVertexShader implements VertexShader
           dot = viewDir.dot(mesh.norm[tri.n3]);
           if (diffuseCache[vert] == null)
           {
-            tri.getTextureSpec(spec, dot, 0.0, 0.0, 1.0, 0.1, time);
+            tri.getTextureSpec(spec, -dot, 0.0, 0.0, 1.0, 0.1, time);
             diffuseCache[vert] = spec.diffuse.duplicate();
             emissiveCache[vert] = spec.emissive.duplicate();
             hilightCache[vert] = spec.hilight.duplicate();
@@ -171,15 +171,15 @@ public class TexturedVertexShader implements VertexShader
       {
         case 0:
           dot = viewDir.dot(mesh.norm[tri.n1]);
-          tri.getTextureSpec(spec, dot, 1.0, 0.0, 0.0, 0.01, time);
+          tri.getTextureSpec(spec, -dot, 1.0, 0.0, 0.0, 0.01, time);
           break;
         case 1:
           dot = viewDir.dot(mesh.norm[tri.n2]);
-          tri.getTextureSpec(spec, dot, 0.0, 1.0, 0.0, 0.01, time);
+          tri.getTextureSpec(spec, -dot, 0.0, 1.0, 0.0, 0.01, time);
           break;
         default:
           dot = viewDir.dot(mesh.norm[tri.n3]);
-          tri.getTextureSpec(spec, dot, 0.0, 0.0, 1.0, 0.01, time);
+          tri.getTextureSpec(spec, -dot, 0.0, 0.0, 1.0, 0.01, time);
       }
       diffuse = spec.diffuse;
       emissive = spec.emissive;

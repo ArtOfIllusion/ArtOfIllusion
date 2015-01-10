@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2013 by Peter Eastman
+/* Copyright (C) 1999-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -37,7 +37,7 @@ public class RenderSetupDialog
   private BorderContainer content;
   
   static Renderer currentRenderer;
-  static int currentCamera = 0, width = 400, height = 300;
+  static int currentCamera = 0, width = 640, height = 480;
   static int fps = 30, subimages = 1;
   static double startTime = 0.0, endTime = 1.0;
   static boolean movie;

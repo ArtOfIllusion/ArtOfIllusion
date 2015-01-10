@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2012 by Peter Eastman
+/* Copyright (C) 2001-2015 by Peter Eastman and Marco Brenco
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,8 +35,9 @@ public class CSGModeller
   static final int VERTEX = 0;
   static final int FACE = 1;
   static final int EDGE = 2;
-  static final int POINT_ON_EDGE = 3; // for issues #457 and #479
-
+  static final int POINT_ON_EDGE = 3; // this didn't exist in the original algorithm but it's a convenient way
+                                      // to mark two polygons that have in common a single point along one of
+                                      // their edges (introduced to fix issues #457 and #479)
   static final int UNKNOWN = 0;
   static final int BOUNDARY = 1;
   static final int INSIDE = 2;
@@ -125,84 +126,19 @@ public class CSGModeller
     int index1[] = new int [vert1.size()], index2[] = new int [vert2.size()];
     int firstBoundary = -1, faces1;
 
-    // Add vertices from object 1.
+    // Original algorithm has been modified. It claimed that BOUNDARY vertices must never be deleted,
+    // but this is not always true when doing difference between two objects with an overlapping surface.
+    // Therefore, vertices are added only together with the polygons they belong to.
 
-    for (int i = 0; i < vert1.size(); i++)
+    // Initialize index1 and index2
+
+    for (int i = 0; i < vert1.size(); i ++)
     {
-      VertexInfo v = vert1.elementAt(i);
-      if (v.type == INSIDE && (op == CSGObject.INTERSECTION || op == CSGObject.DIFFERENCE21))
-      {
-        index1[i] = allVert.size();
-        allVert.addElement(v);
-      }
-      else if (v.type == OUTSIDE && (op == CSGObject.UNION || op == CSGObject.DIFFERENCE12))
-      {
-        index1[i] = allVert.size();
-        allVert.addElement(v);
-      }
-      else if (v.type == SAME && (op == CSGObject.UNION || op == CSGObject.INTERSECTION))
-      {
-        index1[i] = allVert.size();
-        allVert.addElement(v);
-      }
-      else if (v.type == OPPOSITE && (op == CSGObject.DIFFERENCE12 || op == CSGObject.DIFFERENCE21))
-      {
-        index1[i] = allVert.size();
-        allVert.addElement(v);
-      }
-      else if (v.type == BOUNDARY)
-      {
-        // See if this is the same as a vertex we have already added.
-
-        index1[i] = -1;
-        if (firstBoundary == -1)
-          firstBoundary = allVert.size();
-        else
-          for (int j = firstBoundary; index1[i] == -1 && j < allVert.size(); j++)
-          {
-            VertexInfo v2 = allVert.elementAt(j);
-            if (v2.type == BOUNDARY && areEqual(v2.r, v.r))
-              index1[i] = j;
-          }
-        if (index1[i] == -1)
-        {
-          // This is a new vertex.
-
-          index1[i] = allVert.size();
-          allVert.addElement(v);
-        }
-      }
+      index1[i] = -1;
     }
-
-    // Add vertices from object 2.
-
-    for (int i = 0; i < vert2.size(); i++)
+    for (int i = 0; i < vert2.size(); i ++)
     {
-      VertexInfo v = vert2.elementAt(i);
-      if (v.type == INSIDE && (op == CSGObject.INTERSECTION || op == CSGObject.DIFFERENCE12))
-      {
-        index2[i] = allVert.size();
-        allVert.addElement(v);
-      }
-      else if (v.type == OUTSIDE && (op == CSGObject.UNION || op == CSGObject.DIFFERENCE21))
-      {
-        index2[i] = allVert.size();
-        allVert.addElement(v);
-      }
-      else if (v.type == BOUNDARY)
-      {
-        // Find the corresponding vertex from object 1.
-
-        index2[i] = -1;
-        for (int j = firstBoundary; index2[i] == -1 && j < allVert.size(); j++)
-        {
-          VertexInfo v2 = allVert.elementAt(j);
-          if (v2.type == BOUNDARY && areEqual(v2.r, v.r))
-            index2[i] = j;
-        }
-        if (index2[i] == -1)
-          System.out.println("Unknown!");
-      }
+      index2[i] = -1;
     }
 
     // Add the faces from object 1.
@@ -212,28 +148,23 @@ public class CSGModeller
       FaceInfo f = face1.elementAt(i);
       if (f.type == INSIDE && op == CSGObject.INTERSECTION)
       {
-        faceIndex.addElement(new int [] {index1[f.v1], index1[f.v2], index1[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+        addPolygon(f, false, vert1, allVert, index1, faceIndex, faceSmoothness);
       }
-      else if (f.type == INSIDE && op == CSGObject.DIFFERENCE21)
+      else if ((f.type == INSIDE || f.type == OPPOSITE) && op == CSGObject.DIFFERENCE21)
       {
-        faceIndex.addElement(new int [] {index1[f.v2], index1[f.v1], index1[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness3, f.smoothness2});
+        addPolygon(f, true, vert1, allVert, index1, faceIndex, faceSmoothness);
       }
       else if (f.type == OUTSIDE && (op == CSGObject.UNION || op == CSGObject.DIFFERENCE12))
       {
-        faceIndex.addElement(new int [] {index1[f.v1], index1[f.v2], index1[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+        addPolygon(f, false, vert1, allVert, index1, faceIndex, faceSmoothness);
       }
       else if (f.type == SAME && (op == CSGObject.UNION || op == CSGObject.INTERSECTION))
       {
-        faceIndex.addElement(new int [] {index1[f.v1], index1[f.v2], index1[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+        addPolygon(f, false, vert1, allVert, index1, faceIndex, faceSmoothness);
       }
-      else if (f.type == OPPOSITE && (op == CSGObject.DIFFERENCE12 || op == CSGObject.DIFFERENCE21))
+      else if (f.type == OPPOSITE && op == CSGObject.DIFFERENCE12)
       {
-        faceIndex.addElement(new int [] {index1[f.v1], index1[f.v2], index1[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+        addPolygon(f, false, vert1, allVert, index1, faceIndex, faceSmoothness);
       }
     }
     faces1 = faceIndex.size();
@@ -245,18 +176,15 @@ public class CSGModeller
       FaceInfo f = face2.elementAt(i);
       if (f.type == INSIDE && op == CSGObject.INTERSECTION)
       {
-        faceIndex.addElement(new int [] {index2[f.v1], index2[f.v2], index2[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+        addPolygon(f, false, vert2, allVert, index2, faceIndex, faceSmoothness);
       }
       else if (f.type == INSIDE && op == CSGObject.DIFFERENCE12)
       {
-        faceIndex.addElement(new int [] {index2[f.v2], index2[f.v1], index2[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness3, f.smoothness2});
+        addPolygon(f, true, vert2, allVert, index2, faceIndex, faceSmoothness);
       }
       else if (f.type == OUTSIDE && (op == CSGObject.UNION || op == CSGObject.DIFFERENCE21))
       {
-        faceIndex.addElement(new int [] {index2[f.v1], index2[f.v2], index2[f.v3]});
-        faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+        addPolygon(f, false, vert2, allVert, index2, faceIndex, faceSmoothness);
       }
     }
 
@@ -323,7 +251,7 @@ public class CSGModeller
       {
         VertexInfo vi1 = allVert.elementAt(edge[i].v1);
         VertexInfo vi2 = allVert.elementAt(edge[i].v2);
-        candidate[i] = (vi1.type == BOUNDARY && vi2.type == BOUNDARY);
+        candidate[i] = (vi1.type == BOUNDARY || vi2.type == BOUNDARY);
         any |= candidate[i];
       }
       if (any)
@@ -336,6 +264,61 @@ public class CSGModeller
     }
     return mesh;
   }
+
+  /** Add a polygon with its vertices to the final mesh */
+
+  private void addPolygon(FaceInfo f, boolean reverseNormal, Vector<VertexInfo> objVert,
+                          Vector<VertexInfo> allVert, int[] vertIndex, Vector<int[]> faceIndex, Vector<float[]> faceSmoothness)
+  {
+    // Add polygon's vertices
+
+    for (int n = 1; n <= 3; n ++)
+    {
+      int i = (n == 1 ? f.v1 : (n == 2 ? f.v2 : f.v3));
+      if (vertIndex[i] == -1)
+      {
+        VertexInfo v = objVert.elementAt(i);
+
+        if (v.type == BOUNDARY)
+        {
+          // See if this is the same as a vertex we have already added.
+
+          for (int j = 0; vertIndex[i] == -1 && j < allVert.size(); j++)
+          {
+            VertexInfo v2 = allVert.elementAt(j);
+            if (v2.type == BOUNDARY && areEqual(v2.r, v.r))
+              vertIndex[i] = j;
+          }
+          if (vertIndex[i] == -1)
+          {
+            // This is a new vertex.
+
+            vertIndex[i] = allVert.size();
+            allVert.addElement(v);
+          }
+        }
+        else
+        {
+          vertIndex[i] = allVert.size();
+          allVert.addElement(v);
+        }
+      }
+    }
+
+    // Add the polygon
+
+    if (reverseNormal)
+    {
+      faceIndex.addElement(new int [] {vertIndex[f.v2], vertIndex[f.v1], vertIndex[f.v3]});
+      faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness3, f.smoothness2});
+    }
+    else
+    {
+      faceIndex.addElement(new int [] {vertIndex[f.v1], vertIndex[f.v2], vertIndex[f.v3]});
+      faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+    }
+  }
+
 
   /** Split the faces in one mesh so that they do not intersect the faces of the other mesh. */
 
@@ -350,6 +333,7 @@ public class CSGModeller
     int spanTypeA;
     double m[][] = new double [3][3], b[] = new double [3];
     Vec3 root = new Vec3();
+    Vec3 line;
 
     // Sort the faces in the second mesh along the main axis.
 
@@ -424,217 +408,331 @@ public class CSGModeller
         int signa2 = (dista2 > TOL ? 1 : (dista2 < -TOL ? -1 : 0));
         int signa3 = (dista3 > TOL ? 1 : (dista3 < -TOL ? -1 : 0));
         if (signa1 == 0 && signa2 == 0 && signa3 == 0)
-          continue;
-        distb1 = vb1.r.dot(fa.norm)-fa.distRoot;
-        distb2 = vb2.r.dot(fa.norm)-fa.distRoot;
-        distb3 = vb3.r.dot(fa.norm)-fa.distRoot;
-        if (distb1 > TOL && distb2 > TOL && distb3 > TOL)
-          continue;
-        if (distb1 < -TOL && distb2 < -TOL && distb3 < -TOL)
-          continue;
+        {
+          // Coplanar faces: the original algorithm mandates that such polygons are not split at all.
+          // But this is wrong. If object A and object B are overlapping in one area, the first time
+          // splitFaces() is called all polygons of A crossing that area will get split to create a boundary,
+          // and new boundary vertices will be added.
+          // Such new vertices may also be added to some polygons of B at the second call to splitFaces(),
+          // but NOT to the coplanar polygons. Thus an irregular mesh will be created in the overlapping area
+          // by some boolean operation, e.g. the union.
+          // What follows corrects this, and fixes issue #25.
 
-        // Find the line of intersection between the planes of the two faces.  Find
-        // the span along that line where face A intersects it.
+          Vec3 a1a2 = va2.r.minus(va1.r);
+          a1a2.normalize();
+          Vec3 a1a3 = va3.r.minus(va1.r);
+          a1a3.normalize();
+          Vec3 a2a3 = va3.r.minus(va2.r);
+          a2a3.normalize();
+          Vec3 a1b1 = vb1.r.minus(va1.r);
+          a1b1.normalize();
+          Vec3 a1b2 = vb2.r.minus(va1.r);
+          a1b2.normalize();
+          Vec3 a1b3 = vb3.r.minus(va1.r);
+          a1b3.normalize();
+          Vec3 a2b1 = vb1.r.minus(va2.r);
+          a2b1.normalize();
+          Vec3 a2b2 = vb2.r.minus(va2.r);
+          a2b2.normalize();
+          Vec3 a2b3 = vb3.r.minus(va2.r);
+          a2b3.normalize();
 
-        Vec3 line = fa.norm.cross(fb.norm);
-        line.normalize();
-        int index = 0;
-        if (signa1 == 0)
-        {
-          intersectVertA[index] = fa.v1;
-          intersectDistA[index] = line.dot(va1.r);
-          intersectTypeA[index++] = VERTEX;
-          if (signa2 == signa3)
+          int b1Aligned = (a1a2.dot(a1b1) > 1 - TOL ? 1 : 0);
+          int b2Aligned = (a1a2.dot(a1b2) > 1 - TOL ? 1 : 0);
+          int b3Aligned = (a1a2.dot(a1b3) > 1 - TOL ? 1 : 0);
+          if (b1Aligned + b2Aligned + b3Aligned >= 2)
           {
-            intersectVertA[index] = fa.v1;
-            intersectDistA[index] = intersectDistA[index-1];
-            intersectTypeA[index++] = VERTEX;
+            // Two vertices of B are aligned with a1a2
+            line = a1a2;
+            root.set(va1.r);
+            intersectVertA[0] = fa.v1;
+            intersectDistA[0] = 0;
+            intersectVertA[1] = fa.v2;
+            intersectDistA[1] = va1.r.distance(va2.r);
           }
-        }
-        if (signa2 == 0)
-        {
-          intersectVertA[index] = fa.v2;
-          intersectDistA[index] = line.dot(va2.r);
-          intersectTypeA[index++] = VERTEX;
-          if (signa1 == signa3)
-          {
-            intersectVertA[index] = fa.v2;
-            intersectDistA[index] = intersectDistA[index-1];
-            intersectTypeA[index++] = VERTEX;
-          }
-        }
-        if (signa3 == 0)
-        {
-          intersectVertA[index] = fa.v3;
-          intersectDistA[index] = line.dot(va3.r);
-          intersectTypeA[index++] = VERTEX;
-          if (signa1 == signa2)
-          {
-            intersectVertA[index] = fa.v3;
-            intersectDistA[index] = intersectDistA[index-1];
-            intersectTypeA[index++] = VERTEX;
-          }
-        }
-        if (index == 2)
-        {
-          if (intersectVertA[0] == intersectVertA[1])
-            spanTypeA = VERTEX;
           else
-            spanTypeA = EDGE;
+          {
+            b1Aligned = (a1a3.dot(a1b1) > 1 - TOL ? 1 : 0);
+            b2Aligned = (a1a3.dot(a1b2) > 1 - TOL ? 1 : 0);
+            b3Aligned = (a1a3.dot(a1b3) > 1 - TOL ? 1 : 0);
+            if (b1Aligned + b2Aligned + b3Aligned >= 2)
+            {
+              // Two vertices of B are aligned with a1a3
+              line = a1a3;
+              root.set(va1.r);
+              intersectVertA[0] = fa.v1;
+              intersectDistA[0] = 0;
+              intersectVertA[1] = fa.v3;
+              intersectDistA[1] = va1.r.distance(va3.r);
+            }
+            else
+            {
+              b1Aligned = (a2a3.dot(a2b1) > 1 - TOL ? 1 : 0);
+              b2Aligned = (a2a3.dot(a2b2) > 1 - TOL ? 1 : 0);
+              b3Aligned = (a2a3.dot(a2b3) > 1 - TOL ? 1 : 0);
+              if (b1Aligned + b2Aligned + b3Aligned >= 2)
+              {
+                // Two vertices of B are aligned with a2a3
+
+                line = a2a3;
+                root.set(va2.r);
+                intersectVertA[0] = fa.v2;
+                intersectDistA[0] = 0;
+                intersectVertA[1] = fa.v3;
+                intersectDistA[1] = va2.r.distance(va3.r);
+              }
+              else
+              {
+                // No common edge, skip to next polygon
+                continue;
+              }
+            }
+          }
+
+          // If we get here, a common edge was found. Check whether a split is needed
+          intersectTypeA[0] = intersectTypeA[1] = VERTEX;
+          spanTypeA = EDGE;
+          boolean splitNeeded = false;
+          int index = 0;
+          if (b1Aligned == 1)
+          {
+            intersectDistB[index] = vb1.r.minus(root).dot(line);
+            if (vb1.type == BOUNDARY && intersectDistB[index] > TOL && intersectDistB[index] < intersectDistA[1]-TOL)
+              splitNeeded = true;
+            index ++;
+          }
+          if (b2Aligned == 1)
+          {
+            intersectDistB[index] = vb2.r.minus(root).dot(line);
+            if (vb2.type == BOUNDARY && intersectDistB[index] > TOL && intersectDistB[index] < intersectDistA[1]-TOL)
+              splitNeeded = true;
+            index ++;
+          }
+          if (b3Aligned == 1 && index < 2)
+          {
+            intersectDistB[index] = vb3.r.minus(root).dot(line);
+            if (vb3.type == BOUNDARY && intersectDistB[index] > TOL && intersectDistB[index] < intersectDistA[1]-TOL)
+              splitNeeded = true;
+          }
+
+          if (!splitNeeded)
+            continue;
         }
         else
         {
-          if ((signa1 == 1 && signa2 == -1) || (signa1 == -1 && signa2 == 1))
+          // Non coplanar faces
+
+          distb1 = vb1.r.dot(fa.norm)-fa.distRoot;
+          distb2 = vb2.r.dot(fa.norm)-fa.distRoot;
+          distb3 = vb3.r.dot(fa.norm)-fa.distRoot;
+          if (distb1 > TOL && distb2 > TOL && distb3 > TOL)
+            continue;
+          if (distb1 < -TOL && distb2 < -TOL && distb3 < -TOL)
+            continue;
+
+          // Find the line of intersection between the planes of the two faces.  Find
+          // the span along that line where face A intersects it.
+
+          line = fa.norm.cross(fb.norm);
+          line.normalize();
+          int index = 0;
+          if (signa1 == 0)
           {
             intersectVertA[index] = fa.v1;
-            double fract = dista2/(dista2-dista1);
-            intersectDistA[index] = fract*line.dot(va1.r) + (1.0-fract)*line.dot(va2.r);
-            intersectTypeA[index++] = EDGE;
+            intersectDistA[index] = line.dot(va1.r);
+            intersectTypeA[index++] = VERTEX;
+            if (signa2 == signa3)
+            {
+              intersectVertA[index] = fa.v1;
+              intersectDistA[index] = intersectDistA[index-1];
+              intersectTypeA[index++] = VERTEX;
+            }
           }
-          if ((signa2 == 1 && signa3 == -1) || (signa2 == -1 && signa3 == 1))
+          if (signa2 == 0)
           {
             intersectVertA[index] = fa.v2;
-            double fract = dista3/(dista3-dista2);
-            intersectDistA[index] = fract*line.dot(va2.r) + (1.0-fract)*line.dot(va3.r);
-            intersectTypeA[index++] = EDGE;
+            intersectDistA[index] = line.dot(va2.r);
+            intersectTypeA[index++] = VERTEX;
+            if (signa1 == signa3)
+            {
+              intersectVertA[index] = fa.v2;
+              intersectDistA[index] = intersectDistA[index-1];
+              intersectTypeA[index++] = VERTEX;
+            }
           }
-          if ((signa3 == 1 && signa1 == -1) || (signa3 == -1 && signa1 == 1))
+          if (signa3 == 0)
           {
             intersectVertA[index] = fa.v3;
-            double fract = dista1/(dista1-dista3);
-            intersectDistA[index] = fract*line.dot(va3.r) + (1.0-fract)*line.dot(va1.r);
-            intersectTypeA[index++] = EDGE;
+            intersectDistA[index] = line.dot(va3.r);
+            intersectTypeA[index++] = VERTEX;
+            if (signa1 == signa2)
+            {
+              intersectVertA[index] = fa.v3;
+              intersectDistA[index] = intersectDistA[index-1];
+              intersectTypeA[index++] = VERTEX;
+            }
           }
-          spanTypeA = FACE;
-        }
-
-        // Now do the same for face B.
-
-        int signb1 = (distb1 > TOL ? 1 : (distb1 < -TOL ? -1 : 0));
-        int signb2 = (distb2 > TOL ? 1 : (distb2 < -TOL ? -1 : 0));
-        int signb3 = (distb3 > TOL ? 1 : (distb3 < -TOL ? -1 : 0));
-        if (signb1 == 0 && signb2 == 0 && signb3 == 0)
-          continue;
-        index = 0;
-        if (signb1 == 0)
-        {
-          intersectVertB[index] = fb.v1;
-          intersectDistB[index] = line.dot(vb1.r);
-          index++;
-          if (signb2 == signb3)
+          if (index == 2)
           {
-            intersectVertB[index] = fb.v1;
-            intersectDistB[index] = intersectDistB[index-1];
-            index++;
-          }
-        }
-        if (signb2 == 0)
-        {
-          intersectVertB[index] = fb.v2;
-          intersectDistB[index] = line.dot(vb2.r);
-          index++;
-          if (signb1 == signb3)
-          {
-            intersectVertB[index] = fb.v2;
-            intersectDistB[index] = intersectDistB[index-1];
-            index++;
-          }
-        }
-        if (signb3 == 0)
-        {
-          intersectVertB[index] = fb.v3;
-          intersectDistB[index] = line.dot(vb3.r);
-          index++;
-          if (signb1 == signb2)
-          {
-            intersectVertB[index] = fb.v3;
-            intersectDistB[index] = intersectDistB[index-1];
-            index++;
-          }
-        }
-        if (index != 2)
-        {
-          if ((signb1 == 1 && signb2 == -1) || (signb1 == -1 && signb2 == 1))
-          {
-            intersectVertB[index] = fb.v1;
-            double fract = distb2/(distb2-distb1);
-            intersectDistB[index] = fract*line.dot(vb1.r) + (1.0-fract)*line.dot(vb2.r);
-            index++;
-          }
-          if ((signb2 == 1 && signb3 == -1) || (signb2 == -1 && signb3 == 1))
-          {
-            intersectVertB[index] = fb.v2;
-            double fract = distb3/(distb3-distb2);
-            intersectDistB[index] = fract*line.dot(vb2.r) + (1.0-fract)*line.dot(vb3.r);
-            index++;
-          }
-          if ((signb3 == 1 && signb1 == -1) || (signb3 == -1 && signb1 == 1))
-          {
-            intersectVertB[index] = fb.v3;
-            double fract = distb1/(distb1-distb3);
-            intersectDistB[index] = fract*line.dot(vb3.r) + (1.0-fract)*line.dot(vb1.r);
-          }
-        }
-
-        // Determine whether the spans overlap.
-
-        double minA = Math.min(intersectDistA[0], intersectDistA[1]);
-        double maxA = Math.max(intersectDistA[0], intersectDistA[1]);
-        double minB = Math.min(intersectDistB[0], intersectDistB[1]);
-        double maxB = Math.max(intersectDistB[0], intersectDistB[1]);
-
-        // Issues #457 and #479: now don't split if faces are far apart by TOL as least
-        if (maxA < minB-TOL || maxB < minA-TOL)
-          continue;
-
-        // Issues #457 and #479: handle special cases of single point spans resulting from touching edges
-
-        if (maxA < minB + TOL || maxB < minA + TOL)
-        {
-          if (intersectTypeA[0] == VERTEX && (intersectDistA[0] == minA && maxB < minA + TOL
-              || intersectDistA[0] == maxA && maxA < minB + TOL))
-          {
-            intersectDistA[1] = intersectDistA[0];
-            intersectVertA[1] = intersectVertA[0];
-            intersectTypeA[1] = spanTypeA = VERTEX;
-          }
-          else if (intersectTypeA[1] == VERTEX && (intersectDistA[1] == minA && maxB < minA + TOL
-              || intersectDistA[1] == maxA && maxA < minB + TOL))
-          {
-            intersectDistA[0] = intersectDistA[1];
-            intersectVertA[0] = intersectVertA[1];
-            intersectTypeA[0] = spanTypeA = VERTEX;
+            if (intersectVertA[0] == intersectVertA[1])
+              spanTypeA = VERTEX;
+            else
+              spanTypeA = EDGE;
           }
           else
           {
-            double intersectDist = (maxA < minB + TOL ? maxA : minA);
-            int intersection = (intersectDist == intersectDistA[0] ? 0 : 1);
-            int other = 1 - intersection;
-            intersectDistA[other] = intersectDist;
-            intersectVertA[other] = intersectVertA[intersection];
-            intersectTypeA[other] = intersectTypeA[intersection] = EDGE;
-            spanTypeA = POINT_ON_EDGE;
+            if ((signa1 == 1 && signa2 == -1) || (signa1 == -1 && signa2 == 1))
+            {
+              intersectVertA[index] = fa.v1;
+              double fract = dista2/(dista2-dista1);
+              intersectDistA[index] = fract*line.dot(va1.r) + (1.0-fract)*line.dot(va2.r);
+              intersectTypeA[index++] = EDGE;
+            }
+            if ((signa2 == 1 && signa3 == -1) || (signa2 == -1 && signa3 == 1))
+            {
+              intersectVertA[index] = fa.v2;
+              double fract = dista3/(dista3-dista2);
+              intersectDistA[index] = fract*line.dot(va2.r) + (1.0-fract)*line.dot(va3.r);
+              intersectTypeA[index++] = EDGE;
+            }
+            if ((signa3 == 1 && signa1 == -1) || (signa3 == -1 && signa1 == 1))
+            {
+              intersectVertA[index] = fa.v3;
+              double fract = dista1/(dista1-dista3);
+              intersectDistA[index] = fract*line.dot(va3.r) + (1.0-fract)*line.dot(va1.r);
+              intersectTypeA[index++] = EDGE;
+            }
+            spanTypeA = FACE;
           }
+
+          // Now do the same for face B.
+
+          int signb1 = (distb1 > TOL ? 1 : (distb1 < -TOL ? -1 : 0));
+          int signb2 = (distb2 > TOL ? 1 : (distb2 < -TOL ? -1 : 0));
+          int signb3 = (distb3 > TOL ? 1 : (distb3 < -TOL ? -1 : 0));
+          if (signb1 == 0 && signb2 == 0 && signb3 == 0)
+            continue;
+          index = 0;
+          if (signb1 == 0)
+          {
+            intersectVertB[index] = fb.v1;
+            intersectDistB[index] = line.dot(vb1.r);
+            index++;
+            if (signb2 == signb3)
+            {
+              intersectVertB[index] = fb.v1;
+              intersectDistB[index] = intersectDistB[index-1];
+              index++;
+            }
+          }
+          if (signb2 == 0)
+          {
+            intersectVertB[index] = fb.v2;
+            intersectDistB[index] = line.dot(vb2.r);
+            index++;
+            if (signb1 == signb3)
+            {
+              intersectVertB[index] = fb.v2;
+              intersectDistB[index] = intersectDistB[index-1];
+              index++;
+            }
+          }
+          if (signb3 == 0)
+          {
+            intersectVertB[index] = fb.v3;
+            intersectDistB[index] = line.dot(vb3.r);
+            index++;
+            if (signb1 == signb2)
+            {
+              intersectVertB[index] = fb.v3;
+              intersectDistB[index] = intersectDistB[index-1];
+              index++;
+            }
+          }
+          if (index != 2)
+          {
+            if ((signb1 == 1 && signb2 == -1) || (signb1 == -1 && signb2 == 1))
+            {
+              intersectVertB[index] = fb.v1;
+              double fract = distb2/(distb2-distb1);
+              intersectDistB[index] = fract*line.dot(vb1.r) + (1.0-fract)*line.dot(vb2.r);
+              index++;
+            }
+            if ((signb2 == 1 && signb3 == -1) || (signb2 == -1 && signb3 == 1))
+            {
+              intersectVertB[index] = fb.v2;
+              double fract = distb3/(distb3-distb2);
+              intersectDistB[index] = fract*line.dot(vb2.r) + (1.0-fract)*line.dot(vb3.r);
+              index++;
+            }
+            if ((signb3 == 1 && signb1 == -1) || (signb3 == -1 && signb1 == 1))
+            {
+              intersectVertB[index] = fb.v3;
+              double fract = distb1/(distb1-distb3);
+              intersectDistB[index] = fract*line.dot(vb3.r) + (1.0-fract)*line.dot(vb1.r);
+            }
+          }
+
+          // Determine whether the spans overlap.
+
+          double minA = Math.min(intersectDistA[0], intersectDistA[1]);
+          double maxA = Math.max(intersectDistA[0], intersectDistA[1]);
+          double minB = Math.min(intersectDistB[0], intersectDistB[1]);
+          double maxB = Math.max(intersectDistB[0], intersectDistB[1]);
+
+          // Issues #457 and #479: now don't split if faces are far apart by TOL as least
+          if (maxA < minB-TOL || maxB < minA-TOL)
+            continue;
+
+          // Issues #457 and #479: handle special cases of single point spans resulting from touching edges
+
+          if (maxA < minB + TOL || maxB < minA + TOL)
+          {
+            if (intersectTypeA[0] == VERTEX && (intersectDistA[0] == minA && maxB < minA + TOL
+                || intersectDistA[0] == maxA && maxA < minB + TOL))
+            {
+              intersectDistA[1] = intersectDistA[0];
+              intersectVertA[1] = intersectVertA[0];
+              intersectTypeA[1] = spanTypeA = VERTEX;
+            }
+            else if (intersectTypeA[1] == VERTEX && (intersectDistA[1] == minA && maxB < minA + TOL
+                || intersectDistA[1] == maxA && maxA < minB + TOL))
+            {
+              intersectDistA[0] = intersectDistA[1];
+              intersectVertA[0] = intersectVertA[1];
+              intersectTypeA[0] = spanTypeA = VERTEX;
+            }
+            else
+            {
+              double intersectDist = (maxA < minB + TOL ? maxA : minA);
+              int intersection = (intersectDist == intersectDistA[0] ? 0 : 1);
+              int other = 1 - intersection;
+              intersectDistA[other] = intersectDist;
+              intersectVertA[other] = intersectVertA[intersection];
+              intersectTypeA[other] = intersectTypeA[intersection] = EDGE;
+              spanTypeA = POINT_ON_EDGE;
+            }
+          }
+
+          // Ok!  The faces intersect, and we know the positions and types of their
+          // spans along the line of intersection.  Now we need to actually subdivide
+          // the faces.
+
+          m[0][0] = fa.norm.x;
+          m[0][1] = fa.norm.y;
+          m[0][2] = fa.norm.z;
+          m[1][0] = fb.norm.x;
+          m[1][1] = fb.norm.y;
+          m[1][2] = fb.norm.z;
+          m[2][0] = line.x;
+          m[2][1] = line.y;
+          m[2][2] = line.z;
+          b[0] = fa.distRoot;
+          b[1] = fb.distRoot;
+          b[2] = 0.0;
+          SVD.solve(m, b);
+          root.set(b[0], b[1], b[2]);
         }
-
-        // Ok!  The faces intersect, and we know the positions and types of their
-        // spans along the line of intersection.  Now we need to actually subdivide
-        // the faces.
-
-        m[0][0] = fa.norm.x;
-        m[0][1] = fa.norm.y;
-        m[0][2] = fa.norm.z;
-        m[1][0] = fb.norm.x;
-        m[1][1] = fb.norm.y;
-        m[1][2] = fb.norm.z;
-        m[2][0] = line.x;
-        m[2][1] = line.y;
-        m[2][2] = line.z;
-        b[0] = fa.distRoot;
-        b[1] = fb.distRoot;
-        b[2] = 0.0;
-        SVD.solve(m, b);
-        root.set(b[0], b[1], b[2]);
         int oldSize = f1.size();
         splitOneFace(v1, f1, i, intersectVertA, intersectDistA, intersectDistB, intersectTypeA, spanTypeA, line, root);
         if (f1.size() == oldSize)
@@ -1168,14 +1266,14 @@ public class CSGModeller
 
   /** Determine which vertices of one object are inside or outside the other object. */
 
-  private void findInsideVertices(Vector v1, Vector f1, Vector v2, Vector f2)
+  private void findInsideVertices(Vector<VertexInfo> v1, Vector<FaceInfo> f1, Vector<VertexInfo> v2, Vector<FaceInfo> f2)
   {
     // Make a list of the faces sharing each vertex.
 
     int faceCount[] = new int [v1.size()];
     for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo f = (FaceInfo) f1.elementAt(i);
+      FaceInfo f = f1.elementAt(i);
       faceCount[f.v1]++;
       faceCount[f.v2]++;
       faceCount[f.v3]++;
@@ -1188,7 +1286,7 @@ public class CSGModeller
     }
     for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo f = (FaceInfo) f1.elementAt(i);
+      FaceInfo f = f1.elementAt(i);
       vertFace[f.v1][faceCount[f.v1]++] = i;
       vertFace[f.v2][faceCount[f.v2]++] = i;
       vertFace[f.v3][faceCount[f.v3]++] = i;
@@ -1198,7 +1296,7 @@ public class CSGModeller
 
     for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo f = (FaceInfo) f1.elementAt(i);
+      FaceInfo f = f1.elementAt(i);
 
       if (f.type != UNKNOWN)
         continue;
@@ -1206,9 +1304,9 @@ public class CSGModeller
 
       // Mark the vertices of this face, and any adjacent faces.
 
-      VertexInfo vi1 = (VertexInfo) v1.elementAt(f.v1);
-      VertexInfo vi2 = (VertexInfo) v1.elementAt(f.v2);
-      VertexInfo vi3 = (VertexInfo) v1.elementAt(f.v3);
+      VertexInfo vi1 = v1.elementAt(f.v1);
+      VertexInfo vi2 = v1.elementAt(f.v2);
+      VertexInfo vi3 = v1.elementAt(f.v3);
       int type = f.type;
 //        if (type == SAME || type == OPPOSITE)
 //          continue;
@@ -1223,62 +1321,84 @@ public class CSGModeller
 
   /** Determine whether a particular face is inside or outside the other object. */
 
-  private int classifyFace(FaceInfo f, Vector v1, Vector v2, Vector f2)
+  private int classifyFace(FaceInfo f, Vector<VertexInfo> v1, Vector<VertexInfo> v2, Vector<FaceInfo> f2)
   {
-    VertexInfo vi1 = (VertexInfo) v1.elementAt(f.v1);
-    VertexInfo vi2 = (VertexInfo) v1.elementAt(f.v2);
-    VertexInfo vi3 = (VertexInfo) v1.elementAt(f.v3);
+    VertexInfo vi1 = v1.elementAt(f.v1);
+    VertexInfo vi2 = v1.elementAt(f.v2);
+    VertexInfo vi3 = v1.elementAt(f.v3);
     Vec3 orig = new Vec3(), dir = new Vec3(f.norm);
 
-    // Send a ray out from the center of this face, and see what the first thing is
-    // that it intersects.
+    // Send a ray out from the center of this face, and see what are the first
+    // and second thing that it intersects.
 
     orig.set(vi1.r.x+vi2.r.x+vi3.r.x, vi1.r.y+vi2.r.y+vi3.r.y, vi1.r.z+vi2.r.z+vi3.r.z);
     orig.scale(1.0/3.0);
-    int first;
-    double firstDist;
-    do
+    int first, second;
+    double firstDist, secondDist;
+    first = -1;
+    firstDist = Double.MAX_VALUE;
+
+    // Use a for loop to set a limit to the iterations
+    for (int n = 0; n < 10; n ++)
     {
-      first = -1;
-      firstDist = Double.MAX_VALUE;
+      first = second = -1;
+      firstDist = secondDist = Double.MAX_VALUE;
       for (int j = 0; j < f2.size(); j++)
       {
-        FaceInfo fb = (FaceInfo) f2.elementAt(j);
+        FaceInfo fb = f2.elementAt(j);
         double dist = rayBoxIntersectionDist(orig, dir, fb.bounds);
-        if (dist >= firstDist)
+        if (dist >= secondDist)
           continue;
-        VertexInfo vb1 = (VertexInfo) v2.elementAt(fb.v1);
-        VertexInfo vb2 = (VertexInfo) v2.elementAt(fb.v2);
-        VertexInfo vb3 = (VertexInfo) v2.elementAt(fb.v3);
+        VertexInfo vb1 = v2.elementAt(fb.v1);
+        VertexInfo vb2 = v2.elementAt(fb.v2);
+        VertexInfo vb3 = v2.elementAt(fb.v3);
         dist = rayFaceIntersectionDist(orig, dir, fb, vb1.r, vb2.r, vb3.r);
+
         if (dist == -Double.MAX_VALUE && fb.norm.length2() == 0.0)
           continue;
         if (dist < firstDist)
         {
+          second = first;
+          secondDist = firstDist;
           first = j;
           firstDist = dist;
+        }
+        else if (dist < secondDist)
+        {
+          second = j;
+          secondDist = dist;
         }
         if (dist == -Double.MAX_VALUE)
           break;
       }
-      if (firstDist == -Double.MAX_VALUE)
-      {
-        // Randomly perturb the ray and try again.
 
-        dir.x += 1e-5*Math.random();
-        dir.y += 1e-5*Math.random();
-        dir.z += 1e-5*Math.random();
-      }
-    } while (firstDist == -Double.MAX_VALUE);
-    if (firstDist == Double.MAX_VALUE)
+      if (firstDist == Double.MAX_VALUE || firstDist > -Double.MAX_VALUE && secondDist - firstDist > TOL)
+        // A reliable result was found. Exit from for-n loop
+        break;
+
+      // If we are here, something went wrong with the calculation of intersection, or the two
+      // closest faces are not far enough from each other to decide which is the closest.
+      // Invert and randomly perturb the ray and try again.
+
+      dir.x = -dir.x + 1e-5*Math.random();
+      dir.y = -dir.y + 1e-5*Math.random();
+      dir.z = -dir.z + 1e-5*Math.random();
+      double length = dir.length();
+      if (length > 0.0)
+        dir.scale(1.0/length);
+    }
+
+    if (firstDist == Double.MAX_VALUE || firstDist == -Double.MAX_VALUE)
       return OUTSIDE;
-    double dot = dir.dot(((FaceInfo) f2.elementAt(first)).norm);
-    if (firstDist > -TOL && firstDist < TOL)
+    if (firstDist == 0)
     {
+      // Coplanar faces
+      double dot = f.norm.dot((f2.elementAt(first)).norm);
       if (dot > 0.0)
         return SAME;
       return OPPOSITE;
     }
+    double dot = dir.dot((f2.elementAt(first)).norm);
     if (dot > 0.0)
       return INSIDE;
     return OUTSIDE;
@@ -1301,7 +1421,7 @@ public class CSGModeller
     double t1, t2, mint = -Double.MAX_VALUE, maxt = Double.MAX_VALUE;
     if (direction.x == 0.0)
     {
-      if (origin.x < bb.minx || origin.x > bb.maxx)
+      if (origin.x < bb.minx-TOL || origin.x > bb.maxx+TOL)
         return Double.MAX_VALUE;
     }
     else
@@ -1322,12 +1442,12 @@ public class CSGModeller
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < 0.0)
+      if (mint > maxt || maxt < -TOL)
         return Double.MAX_VALUE;
     }
     if (direction.y == 0.0)
     {
-      if (origin.y < bb.miny || origin.y > bb.maxy)
+      if (origin.y < bb.miny-TOL || origin.y > bb.maxy+TOL)
         return Double.MAX_VALUE;
     }
     else
@@ -1348,12 +1468,12 @@ public class CSGModeller
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < 0.0)
+      if (mint > maxt || maxt < -TOL)
         return Double.MAX_VALUE;
     }
     if (direction.z == 0.0)
     {
-      if (origin.z < bb.minz || origin.z > bb.maxz)
+      if (origin.z < bb.minz-TOL || origin.z > bb.maxz+TOL)
         return Double.MAX_VALUE;
     }
     else
@@ -1374,17 +1494,17 @@ public class CSGModeller
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < 0.0)
+      if (mint > maxt || maxt < -TOL)
         return Double.MAX_VALUE;
     }
     return mint;
   }
 
   /** Determine whether a ray intersects a triangle.  Return the distance along the
-      ray at which it enters the triangle, or Double.MAX_VALUE if it does not intersect.
-      If the ray lies in the plane of the triangle, or passes through an edge of it,
-      return -Double.MAX_VALUE. */
-  
+   ray at which it enters the triangle, or Double.MAX_VALUE if it does not intersect.
+   If the ray lies in the plane of the triangle, or passes through an edge of it,
+   return -Double.MAX_VALUE. */
+
   private double rayFaceIntersectionDist(Vec3 orig, Vec3 dir, FaceInfo f, Vec3 v1, Vec3 v2, Vec3 v3)
   {
     double vd = f.norm.dot(dir);
@@ -1392,7 +1512,7 @@ public class CSGModeller
     if (vd > -TOL && vd < TOL)
     {
       // The ray is parallel to the plane.
-      
+
       if (v0 > -TOL && v0 < TOL)
         return -Double.MAX_VALUE;
       return Double.MAX_VALUE;
@@ -1400,6 +1520,19 @@ public class CSGModeller
     double t = v0/vd;
     if (t < -TOL)
       return Double.MAX_VALUE;  // Ray points away from plane of triangle.
+    else if (t <= TOL)
+    {
+      // Perform more checks to determine whether the face is in front or behind
+      double dist1 = f.norm.dot(v1) - f.distRoot;
+      double dist2 = f.norm.dot(v2) - f.distRoot;
+      double dist3 = f.norm.dot(v2) - f.distRoot;
+      if (dist1 < -TOL || dist2 < -TOL || dist3 < -TOL)
+        return Double.MAX_VALUE;
+      else if (dist1 > TOL || dist2 > TOL || dist3 > TOL)
+        t = TOL;
+      else
+        t = 0;
+    }
 
     // Determine whether the intersection point is inside the triangle.
 
@@ -1474,10 +1607,10 @@ public class CSGModeller
       }
     }
   }
-  
+
   /* Given the three vertices of a face and a point incide that face, calculate
      the texture parameters for that point. */
-  
+
   private double [] interpTextureParams(Vec3 pos, VertexInfo v1, VertexInfo v2, VertexInfo v3, FaceInfo f)
   {
     if (v1.param == null)
@@ -1528,7 +1661,7 @@ public class CSGModeller
       return (dist < TOL);
     return (dist < TOL*norm);
   }
-  
+
   /* Inner classes for keeping track of information about vertices and faces. */
 
   private static class VertexInfo
@@ -1537,7 +1670,7 @@ public class CSGModeller
     float smoothness;
     double param[];
     int type;
-    
+
     public VertexInfo(Vec3 r, float smoothness, double param[])
     {
       this.r = r;
@@ -1563,7 +1696,7 @@ public class CSGModeller
     Vec3 norm;
     float smoothness1, smoothness2, smoothness3;
     double distRoot, min, max;
-    
+
     public FaceInfo(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3)
     {
       Vec3 vert1 = ((VertexInfo) vertices.elementAt(v1)).r;

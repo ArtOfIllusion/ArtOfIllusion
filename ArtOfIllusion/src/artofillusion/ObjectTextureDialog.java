@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2009 by Peter Eastman
+/* Copyright (C) 1999-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -688,8 +688,25 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     else
     {
       preview.cancelRendering();
-      editObj.setTexture(layeredTex, layeredMap);
+      if (layeredMap.getNumLayers() == 0)
+      {
+        // Give the layered texture a single layer identical to the current simple texture.
+
+        Texture tex = editObj.getObject().getTexture();
+        TextureMapping map = editObj.getObject().getTextureMapping();
+        layeredMap.addLayer(0, tex, map.duplicate(editObj.getObject(), tex), LayeredMapping.BLEND);
+        layerList.add(0, tex.getName());
+        layerList.setSelected(0, true);
+        ParameterValue values[] = editObj.getObject().getParameterValues();
+        editObj.setTexture(layeredTex, layeredMap);
+        TextureParameter params[] = layeredMap.getLayerParameters(0);
+        for (int i = 0; i < values.length; i++)
+          editObj.getObject().setParameterValue(params[i+1], values[i]);
+      }
+      else
+        editObj.setTexture(layeredTex, layeredMap);
       preview.setTexture(layeredTex, layeredMap);
+      updatePreviewParameterValues();
       updateComponents();
       layoutLayered();
       pack();

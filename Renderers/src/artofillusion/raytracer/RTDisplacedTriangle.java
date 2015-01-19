@@ -476,36 +476,21 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether any part of the triangle lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
-    if (!bb.intersects(bounds))
+    if (!node.intersects(bounds))
       return false;
     double dot = tri.theMesh.vert[tri.v1].dot(trueNorm);
     double mindot = dot+minheight, maxdot = dot+maxheight;
     boolean anyBelow = false, anyAbove = false;
-    dot = trueNorm.x*bb.minx + trueNorm.y*bb.miny + trueNorm.z*bb.minz;
+    dot = trueNorm.x*node.minx + trueNorm.y*node.miny + trueNorm.z*node.minz;
     if (dot < mindot)
       anyBelow = true;
     else if (dot > maxdot)
       anyAbove = true;
     else
       return true;
-    dot = trueNorm.x*bb.minx + trueNorm.y*bb.miny + trueNorm.z*bb.maxz;
-    if (dot < mindot)
-    {
-      if (anyAbove)
-        return true;
-      anyBelow = true;
-    }
-    else if (dot > maxdot)
-    {
-      if (anyBelow)
-        return true;
-      anyAbove = true;
-    }
-    else
-      return true;
-    dot = trueNorm.x*bb.minx + trueNorm.y*bb.maxy + trueNorm.z*bb.minz;
+    dot = trueNorm.x*node.minx + trueNorm.y*node.miny + trueNorm.z*node.maxz;
     if (dot < mindot)
     {
       if (anyAbove)
@@ -520,7 +505,7 @@ public class RTDisplacedTriangle extends RTObject
     }
     else
       return true;
-    dot = trueNorm.x*bb.minx + trueNorm.y*bb.maxy + trueNorm.z*bb.maxz;
+    dot = trueNorm.x*node.minx + trueNorm.y*node.maxy + trueNorm.z*node.minz;
     if (dot < mindot)
     {
       if (anyAbove)
@@ -535,7 +520,7 @@ public class RTDisplacedTriangle extends RTObject
     }
     else
       return true;
-    dot = trueNorm.x*bb.maxx + trueNorm.y*bb.miny + trueNorm.z*bb.minz;
+    dot = trueNorm.x*node.minx + trueNorm.y*node.maxy + trueNorm.z*node.maxz;
     if (dot < mindot)
     {
       if (anyAbove)
@@ -550,7 +535,7 @@ public class RTDisplacedTriangle extends RTObject
     }
     else
       return true;
-    dot = trueNorm.x*bb.maxx + trueNorm.y*bb.miny + trueNorm.z*bb.maxz;
+    dot = trueNorm.x*node.maxx + trueNorm.y*node.miny + trueNorm.z*node.minz;
     if (dot < mindot)
     {
       if (anyAbove)
@@ -565,7 +550,7 @@ public class RTDisplacedTriangle extends RTObject
     }
     else
       return true;
-    dot = trueNorm.x*bb.maxx + trueNorm.y*bb.maxy + trueNorm.z*bb.minz;
+    dot = trueNorm.x*node.maxx + trueNorm.y*node.miny + trueNorm.z*node.maxz;
     if (dot < mindot)
     {
       if (anyAbove)
@@ -580,7 +565,22 @@ public class RTDisplacedTriangle extends RTObject
     }
     else
       return true;
-    dot = trueNorm.x*bb.maxx + trueNorm.y*bb.maxy + trueNorm.z*bb.maxz;
+    dot = trueNorm.x*node.maxx + trueNorm.y*node.maxy + trueNorm.z*node.minz;
+    if (dot < mindot)
+    {
+      if (anyAbove)
+        return true;
+      anyBelow = true;
+    }
+    else if (dot > maxdot)
+    {
+      if (anyBelow)
+        return true;
+      anyAbove = true;
+    }
+    else
+      return true;
+    dot = trueNorm.x*node.maxx + trueNorm.y*node.maxy + trueNorm.z*node.maxz;
     if (dot < mindot)
     {
       if (anyAbove)

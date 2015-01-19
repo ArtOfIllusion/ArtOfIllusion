@@ -28,7 +28,7 @@ public class TestOctreeNode extends TestCase
     // Create a scene for testing.
 
     Texture tex = new UniformTexture();
-    ArrayList objectList = new ArrayList();
+    ArrayList<RTSphere> objectList = new ArrayList<RTSphere>();
     for (int i = 0; i < 100; i++)
     {
       Vec3 pos = new Vec3(Math.random()*10, Math.random()*10, 0.0);
@@ -68,7 +68,7 @@ public class TestOctreeNode extends TestCase
         if (objBounds[i].maxz > maxz)
           maxz = objBounds[i].maxz;
       }
-    rootNode = new OctreeNode(minx, maxx, miny, maxy, minz, maxz, objects, objBounds, null);
+    rootNode = new OctreeNode((float) minx, (float) maxx, (float) miny, (float) maxy, (float) minz, (float) maxz, objects, objBounds, null);
   }
 
   private RTSphere createSphere(Vec3 pos, Texture tex)
@@ -91,7 +91,7 @@ public class TestOctreeNode extends TestCase
                           Math.random()*(rootNode.maxz-rootNode.minz)+rootNode.minz);
       OctreeNode node = rootNode.findNode(pos);
       assertTrue(node.contains(pos));
-      assertNotNull(node.getObjects()); // Make tsure it's a terminal node.
+      assertNotNull(node.getObjects()); // Make sure it's a terminal node.
     }
     for (int i = 0; i < 1000; i++)
     {
@@ -120,7 +120,7 @@ public class TestOctreeNode extends TestCase
 
       // Find every leaf node that the ray passes through.
 
-      HashSet intersections = new HashSet();
+      HashSet<OctreeNode> intersections = new HashSet<OctreeNode>();
       findIntersectingNodes(rootNode, r, intersections);
 
       // Now trace the ray through the tree and see if it hits all of the correct nodes.
@@ -138,9 +138,9 @@ public class TestOctreeNode extends TestCase
     }
   }
 
-  private void findIntersectingNodes(OctreeNode node, Ray ray, Set intersections)
+  private void findIntersectingNodes(OctreeNode node, Ray ray, Set<OctreeNode> intersections)
   {
-    if (!ray.intersects(node))
+    if (!ray.intersects(node.getBounds()))
       return;
     if (node.getObjects() == null)
     {

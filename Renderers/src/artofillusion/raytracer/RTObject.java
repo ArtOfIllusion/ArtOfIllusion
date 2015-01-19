@@ -38,9 +38,9 @@ public abstract class RTObject
   
   public abstract BoundingBox getBounds();
 
-  /** Determine whether any part of the object lies within a bounding box. */
+  /** Determine whether any part of the object lies within an octree node. */
 
-  public abstract boolean intersectsBox(BoundingBox bb);
+  public abstract boolean intersectsNode(OctreeNode node);
   
   /** Get the transformation from world coordinates to the object's local coordinates. */
   

@@ -346,9 +346,9 @@ public class RTImplicitObject extends RTObject
 
   /** Determine whether any part of the surface lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
-    return bb.intersects(getBounds());
+    return node.intersects(getBounds());
   }
 
   /** Get the transformation from world coordinates to the object's local coordinates. */

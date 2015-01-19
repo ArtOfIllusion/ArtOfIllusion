@@ -196,7 +196,7 @@ public class RTTriangleLowMemory extends RTObject
 
   /** Determine whether any part of the triangle lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
     Vec3 vert1 = tri.theMesh.vert[tri.v1];
     Vec3 vert2 = tri.theMesh.vert[tri.v2];
@@ -204,12 +204,12 @@ public class RTTriangleLowMemory extends RTObject
 
     // First see if any vertex is inside the box.
 
-    if (bb.contains(vert1) || bb.contains(vert2) || bb.contains(vert3))
+    if (node.contains(vert1) || node.contains(vert2) || node.contains(vert3))
       return true;
 
     // If any edge intersects the box, return true.
 
-    if (edgeIntersectsBox(vert1, vert2, bb) || edgeIntersectsBox(vert2, vert3, bb) || edgeIntersectsBox(vert3, vert1, bb))
+    if (edgeIntersectsBox(vert1, vert2, node) || edgeIntersectsBox(vert2, vert3, node) || edgeIntersectsBox(vert3, vert1, node))
       return true;
 
     // None of the vertices is inside the box.  However, it is possible that the
@@ -220,29 +220,29 @@ public class RTTriangleLowMemory extends RTObject
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
     double len;
 
-    orig.set(bb.minx, bb.miny, bb.minz);
-    dir.set(bb.maxx-bb.minx, bb.maxy-bb.miny, bb.maxz-bb.minz);
+    orig.set(node.minx, node.miny, node.minz);
+    dir.set(node.maxx-node.minx, node.maxy-node.miny, node.maxz-node.minz);
     len = dir.length();
     dir.scale(1.0/len);
     SurfaceIntersection intersect = checkIntersection(r);
     if (intersect != SurfaceIntersection.NO_INTERSECTION && intersect.intersectionDist(0) < len)
       return true;
-    orig.set(bb.maxx, bb.miny, bb.minz);
-    dir.set(bb.minx-bb.maxx, bb.maxy-bb.miny, bb.maxz-bb.minz);
+    orig.set(node.maxx, node.miny, node.minz);
+    dir.set(node.minx-node.maxx, node.maxy-node.miny, node.maxz-node.minz);
     len = dir.length();
     dir.scale(1.0/len);
     intersect = checkIntersection(r);
     if (intersect != SurfaceIntersection.NO_INTERSECTION && intersect.intersectionDist(0) < len)
       return true;
-    orig.set(bb.minx, bb.maxy, bb.minz);
-    dir.set(bb.maxx-bb.minx, bb.miny-bb.maxy, bb.maxz-bb.minz);
+    orig.set(node.minx, node.maxy, node.minz);
+    dir.set(node.maxx-node.minx, node.miny-node.maxy, node.maxz-node.minz);
     len = dir.length();
     dir.scale(1.0/len);
     intersect = checkIntersection(r);
     if (intersect != SurfaceIntersection.NO_INTERSECTION && intersect.intersectionDist(0) < len)
       return true;
-    orig.set(bb.minx, bb.miny, bb.maxz);
-    dir.set(bb.maxx-bb.minx, bb.maxy-bb.miny, bb.minz-bb.maxz);
+    orig.set(node.minx, node.miny, node.maxz);
+    dir.set(node.maxx-node.minx, node.maxy-node.miny, node.minz-node.maxz);
     len = dir.length();
     dir.scale(1.0/len);
     intersect = checkIntersection(r);
@@ -253,20 +253,20 @@ public class RTTriangleLowMemory extends RTObject
 
   /** Determine whether a particular edge of the triangle intersects a bounding box. */
 
-  boolean edgeIntersectsBox(Vec3 p1, Vec3 p2, BoundingBox bb)
+  boolean edgeIntersectsBox(Vec3 p1, Vec3 p2, OctreeNode node)
   {
     double t1, t2, mint = -Double.MAX_VALUE, maxt = Double.MAX_VALUE;
     double dirx = p2.x-p1.x, diry = p2.y-p1.y, dirz = p2.z-p1.z;
     double len = Math.sqrt(dirx*dirx + diry*diry + dirz*dirz);
     if (dirx == 0.0)
       {
-        if (p1.x < bb.minx || p1.x > bb.maxx)
+        if (p1.x < node.minx || p1.x > node.maxx)
           return false;
       }
     else
       {
-        t1 = (bb.minx-p1.x)*len/dirx;
-        t2 = (bb.maxx-p1.x)*len/dirx;
+        t1 = (node.minx-p1.x)*len/dirx;
+        t2 = (node.maxx-p1.x)*len/dirx;
         if (t1 < t2)
           {
             if (t1 > mint)
@@ -286,13 +286,13 @@ public class RTTriangleLowMemory extends RTObject
       }
     if (diry == 0.0)
       {
-        if (p1.y < bb.miny || p1.y > bb.maxy)
+        if (p1.y < node.miny || p1.y > node.maxy)
           return false;
       }
     else
       {
-        t1 = (bb.miny-p1.y)*len/diry;
-        t2 = (bb.maxy-p1.y)*len/diry;
+        t1 = (node.miny-p1.y)*len/diry;
+        t2 = (node.maxy-p1.y)*len/diry;
         if (t1 < t2)
           {
             if (t1 > mint)
@@ -312,13 +312,13 @@ public class RTTriangleLowMemory extends RTObject
       }
     if (dirz == 0.0)
       {
-        if (p1.z < bb.minz || p1.z > bb.maxz)
+        if (p1.z < node.minz || p1.z > node.maxz)
           return false;
       }
     else
       {
-        t1 = (bb.minz-p1.z)*len/dirz;
-        t2 = (bb.maxz-p1.z)*len/dirz;
+        t1 = (node.minz-p1.z)*len/dirz;
+        t2 = (node.maxz-p1.z)*len/dirz;
         if (t1 < t2)
           {
             if (t1 > mint)

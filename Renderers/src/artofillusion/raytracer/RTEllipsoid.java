@@ -222,10 +222,11 @@ public class RTEllipsoid extends RTObject
 
   /** Determine whether any part of the surface of the ellipsoid lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
     double dx, dy, dz, centerx, centery, centerz;
 
+    BoundingBox bb = node.getBounds();
     if (transform)
       {
         bb = bb.transformAndOutset(toLocal);

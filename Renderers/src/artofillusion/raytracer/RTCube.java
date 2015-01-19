@@ -332,13 +332,14 @@ public class RTCube extends RTObject
 
   /** Determine whether any part of the surface of the cube lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
-    if (!bb.intersects(getBounds()))
+    if (!node.intersects(getBounds()))
       return false;
     
     // Check whether the box is entirely contained within this object.
-    
+
+    BoundingBox bb = node.getBounds();
     if (transform)
       bb = bb.transformAndOutset(toLocal);
     if (bb.minx > minx && bb.maxx < maxx && bb.miny > miny && bb.maxy < maxy && bb.minz > minz && bb.maxz < maxz)

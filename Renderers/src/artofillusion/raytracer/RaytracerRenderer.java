@@ -647,13 +647,13 @@ public class RaytracerRenderer implements Renderer, Runnable
     if (giMode == GI_PHOTON)
     {
       listener.statusChanged("Building Global Photon Map");
-      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, false, false, true, false, raytracer, this, raytracer.getRootNode(), 1, null);
+      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, false, false, true, false, raytracer, this, raytracer.getRootNode().getBounds(), 1, null);
       generatePhotons(globalMap);
     }
     else if (giMode == GI_HYBRID)
     {
       listener.statusChanged("Building Global Photon Map");
-      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, true, true, true, false, raytracer, this, raytracer.getRootNode(), 0, null);
+      globalMap = shared = new PhotonMap(globalPhotons, globalNeighborPhotons, true, true, true, false, raytracer, this, raytracer.getRootNode().getBounds(), 0, null);
       generatePhotons(globalMap);
     }
     if (caustics)

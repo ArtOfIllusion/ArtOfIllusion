@@ -131,24 +131,24 @@ public class RTSphere extends RTObject
 
   /** Determine whether any part of the surface of the sphere lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
     Vec3 c = new Vec3(cx, cy, cz);
 
     // Find the nearest point of the box to the sphere.
 
-    if (cx < bb.minx)
-      c.x = bb.minx;
-    else if (cx > bb.maxx)
-      c.x = bb.maxx;
-    if (cy < bb.miny)
-      c.y = bb.miny;
-    else if (cy > bb.maxy)
-      c.y = bb.maxy;
-    if (cz < bb.minz)
-      c.z = bb.minz;
-    else if (cz > bb.maxz)
-      c.z = bb.maxz;
+    if (cx < node.minx)
+      c.x = node.minx;
+    else if (cx > node.maxx)
+      c.x = node.maxx;
+    if (cy < node.miny)
+      c.y = node.miny;
+    else if (cy > node.maxy)
+      c.y = node.maxy;
+    if (cz < node.minz)
+      c.z = node.minz;
+    else if (cz > node.maxz)
+      c.z = node.maxz;
     
     // If the sphere lies entirely outside the box, return false.
     
@@ -158,28 +158,28 @@ public class RTSphere extends RTObject
 
     // If the box is completely inside the sphere, return false.  Otherwise, return true.
 
-    c.set(bb.minx-cx, bb.miny-cy, bb.minz-cz);
+    c.set(node.minx-cx, node.miny-cy, node.minz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.minx-cx, bb.miny-cy, bb.maxz-cz);
+    c.set(node.minx-cx, node.miny-cy, node.maxz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.minx-cx, bb.maxy-cy, bb.minz-cz);
+    c.set(node.minx-cx, node.maxy-cy, node.minz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.minx-cx, bb.maxy-cy, bb.maxz-cz);
+    c.set(node.minx-cx, node.maxy-cy, node.maxz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.maxx-cx, bb.miny-cy, bb.minz-cz);
+    c.set(node.maxx-cx, node.miny-cy, node.minz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.maxx-cx, bb.miny-cy, bb.maxz-cz);
+    c.set(node.maxx-cx, node.miny-cy, node.maxz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.maxx-cx, bb.maxy-cy, bb.minz-cz);
+    c.set(node.maxx-cx, node.maxy-cy, node.minz-cz);
     if (c.length2() > r2)
       return true;
-    c.set(bb.maxx-cx, bb.maxy-cy, bb.maxz-cz);
+    c.set(node.maxx-cx, node.maxy-cy, node.maxz-cz);
     if (c.length2() > r2)
       return true;
     return false;

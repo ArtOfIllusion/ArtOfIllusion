@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2007 by Peter Eastman
+/* Copyright (C) 1999-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,11 +22,12 @@ import java.util.*;
     not simply cut it in half along each axis.  Instead, it tries to determine the optimal place
     to subdivide along each axis, based on the bounding boxes of the objects within the node. */
    
-public class OctreeNode extends BoundingBox
+public class OctreeNode
 {
-  OctreeNode parent, child0, child1, child2, child3, child4, child5, child6, child7;
-  RTObject obj[];
-  double midx, midy, midz;
+  public OctreeNode parent, child0, child1, child2, child3, child4, child5, child6, child7;
+  public RTObject obj[];
+  public float minx, maxx, miny, maxy, minz, maxz;
+  public float midx, midy, midz;
   
   private static final int CELLS = 64;
   private static final RTObject EMPTY_OBJECT_LIST[] = new RTObject [0];
@@ -37,9 +38,14 @@ public class OctreeNode extends BoundingBox
       of the objects, and a reference to its parent node.  treeDepth is the depth of this node 
       in the octree, and maxDepth is the maximum allowed depth. */
   
-  public OctreeNode(double minx, double maxx, double miny, double maxy, double minz, double maxz, RTObject tri[], BoundingBox bb[], OctreeNode parentNode)
+  public OctreeNode(float minx, float maxx, float miny, float maxy, float minz, float maxz, RTObject tri[], BoundingBox bb[], OctreeNode parentNode)
   {
-    super(minx, maxx, miny, maxy, minz, maxz);
+    this.minx = minx;
+    this.maxx = maxx;
+    this.miny = miny;
+    this.maxy = maxy;
+    this.minz = minz;
+    this.maxz = maxz;
     boolean inside[] = new boolean [tri.length];
     int count, i;
 
@@ -48,8 +54,8 @@ public class OctreeNode extends BoundingBox
     // Find which objects are actually inside this node.
 
     for (i = 0, count = 0; i < tri.length; i++)
-      if (bb[i].intersects(this))
-        if (tri[i].intersectsBox(this))
+      if (intersects(bb[i]))
+        if (tri[i].intersectsNode(this))
         {
           inside[i] = true;
           count++;
@@ -91,23 +97,23 @@ public class OctreeNode extends BoundingBox
           return;
         child0 = new OctreeNode(minx, midx, miny, midy, minz, midz, obj, objBounds, this);
         if (splitz)
-          child1 = new OctreeNode(minx, midx, miny, midy, maxz, midz, obj, objBounds, this);
+          child1 = new OctreeNode(minx, midx, miny, midy, midz, maxz, obj, objBounds, this);
         if (splity)
           {
-            child2 = new OctreeNode(minx, midx, maxy, midy, minz, midz, obj, objBounds, this);
+            child2 = new OctreeNode(minx, midx, midy, maxy, minz, midz, obj, objBounds, this);
             if (splitz)
-              child3 = new OctreeNode(minx, midx, maxy, midy, maxz, midz, obj, objBounds, this);
+              child3 = new OctreeNode(minx, midx, midy, maxy, midz, maxz, obj, objBounds, this);
           }
         if (splitx)
           {
-            child4 = new OctreeNode(maxx, midx, miny, midy, minz, midz, obj, objBounds, this);
+            child4 = new OctreeNode(midx, maxx, miny, midy, minz, midz, obj, objBounds, this);
             if (splitz)
-              child5 = new OctreeNode(maxx, midx, miny, midy, maxz, midz, obj, objBounds, this);
+              child5 = new OctreeNode(midx, maxx, miny, midy, midz, maxz, obj, objBounds, this);
             if (splity)
               {
-                child6 = new OctreeNode(maxx, midx, maxy, midy, minz, midz, obj, objBounds, this);
+                child6 = new OctreeNode(midx, maxx, midy, maxy, minz, midz, obj, objBounds, this);
                 if (splitz)
-                  child7 = new OctreeNode(maxx, midx, maxy, midy, maxz, midz, obj, objBounds, this);
+                  child7 = new OctreeNode(midx, maxx, midy, maxy, midz, maxz, obj, objBounds, this);
               }
           }
         obj = null;
@@ -118,7 +124,7 @@ public class OctreeNode extends BoundingBox
 
   public OctreeNode[] findChildNodes()
   {
-    ArrayList nodes = new ArrayList();
+    ArrayList<OctreeNode> nodes = new ArrayList<OctreeNode>();
     if (child0 != null)
       nodes.add(child0);
     if (child1 != null)
@@ -135,7 +141,7 @@ public class OctreeNode extends BoundingBox
       nodes.add(child6);
     if (child7 != null)
       nodes.add(child7);
-    return (OctreeNode[]) nodes.toArray(new OctreeNode[nodes.size()]);
+    return nodes.toArray(new OctreeNode[nodes.size()]);
   }
   
   /** Get the list of objects in this node. */
@@ -417,39 +423,41 @@ public class OctreeNode extends BoundingBox
     // If the box is much shorter along one axis than the other two, we don't want to subdivide 
     // along that axis, since it would slow down many more rays than it would speed up.
 
-    Vec3 size = getSize();
-    double cutoff = (size.x > size.y ? size.x : size.y);
-    if (size.z > cutoff)
-      cutoff = size.z;
+    float xsize = maxx-minx;
+    float ysize = maxy-miny;
+    float zsize = maxz-minz;
+    double cutoff = (xsize > ysize ? xsize : ysize);
+    if (zsize > cutoff)
+      cutoff = zsize;
     cutoff *= 0.1;
     if (cutoff < 1.0e-2)
       cutoff = 1.0e-2;
-    if (size.x > cutoff)
+    if (xsize > cutoff)
       midx = findAxisMidpoint(objBounds, 0);
     else
       midx = maxx;
-    if (size.y > cutoff)
+    if (ysize > cutoff)
       midy = findAxisMidpoint(objBounds, 1);
     else
       midy = maxy;
-    if (size.z > cutoff)
+    if (zsize > cutoff)
       midz = findAxisMidpoint(objBounds, 2);
     else
       midz = maxz;
   }
 
   
-  private double findAxisMidpoint(BoundingBox objBounds[], int axis)
+  private float findAxisMidpoint(BoundingBox objBounds[], int axis)
   {
     for (int i = 0; i < CELLS+2; i++)
       leftCount[i] = rightCount[i] = 0;
-    double min = findMinimum(this, axis);
-    double max = findMaximum(this, axis);
-    double invwidth = CELLS/(max-min);
+    float min = findMinimum(this, axis);
+    float max = findMaximum(this, axis);
+    float invwidth = CELLS/(max-min);
     for (int i = 0; i < objBounds.length; i++)
     {
-      double objmin = findMinimum(objBounds[i], axis);
-      double objmax = findMaximum(objBounds[i], axis);
+      float objmin = findMinimum(objBounds[i], axis);
+      float objmax = findMaximum(objBounds[i], axis);
       if (objmin <= min)
         leftCount[0]++;
       else
@@ -477,13 +485,13 @@ public class OctreeNode extends BoundingBox
     
     // We now have a reasonable position for the splitting plane, but we may be able to improve it
     // by making it flush with an object.
-    
-    double mid = min + j/invwidth;
-    double limit = mid + 1.0/invwidth;
+
+    float mid = min + j/invwidth;
+    float limit = mid + 1.0f/invwidth;
     boolean found = false;
     for (int i = 0; i < objBounds.length; i++)
     {
-      double objmin = findMinimum(objBounds[i], axis);
+      float objmin = findMinimum(objBounds[i], axis);
       if (objmin > mid && objmin < limit)
       {
         limit = objmin;
@@ -491,12 +499,12 @@ public class OctreeNode extends BoundingBox
       }
     }
     if (found)
-      return limit-Raytracer.TOL;
-    limit = mid - 1.0/invwidth;
+      return (float) (limit-Raytracer.TOL);
+    limit = mid - 1.0f/invwidth;
     found = false;
     for (int i = 0; i < objBounds.length; i++)
     {
-      double objmax = findMaximum(objBounds[i], axis);
+      float objmax = findMaximum(objBounds[i], axis);
       if (objmax < mid && objmax > limit)
       {
         limit = objmax;
@@ -504,11 +512,36 @@ public class OctreeNode extends BoundingBox
       }
     }
     if (found)
-      return limit+Raytracer.TOL;
+      return (float) (limit+Raytracer.TOL);
     return mid;
   }
 
-  private static double findMinimum(BoundingBox box, int axis)
+  /** Get a BoundingBox for this node. */
+  
+  public BoundingBox getBounds()
+  {
+    return new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
+  }
+  
+  /** Determine whether the given point lies inside the node. */
+
+  public boolean contains(Vec3 p)
+  {
+    if (p.x < minx || p.x > maxx || p.y < miny || p.y > maxy || p.z < minz || p.z > maxz)
+      return false;
+    return true;
+  }
+
+  /** Determine whether a bounding box intersects this node. */
+
+  public boolean intersects(BoundingBox b)
+  {
+    if (minx > b.maxx || maxx < b.minx || miny > b.maxy || maxy < b.miny || minz > b.maxz || maxz < b.minz)
+      return false;
+    return true;
+  }
+
+  private static float findMinimum(OctreeNode box, int axis)
   {
     switch (axis)
     {
@@ -518,7 +551,7 @@ public class OctreeNode extends BoundingBox
     }
   }
   
-  private static double findMaximum(BoundingBox box, int axis)
+  private static float findMaximum(OctreeNode box, int axis)
   {
     switch (axis)
     {
@@ -526,5 +559,39 @@ public class OctreeNode extends BoundingBox
       case 1: return box.maxy;
       default: return box.maxz;
     }
+  }
+
+  private static float findMinimum(BoundingBox box, int axis)
+  {
+    double val;
+    switch (axis)
+    {
+      case 0:
+        val = box.minx;
+        break;
+      case 1:
+        val = box.miny;
+        break;
+      default:
+        val = box.minz;
+    }
+    return Math.nextAfter((float) val, Float.NEGATIVE_INFINITY);
+  }
+  
+  private static float findMaximum(BoundingBox box, int axis)
+  {
+    double val;
+    switch (axis)
+    {
+      case 0:
+        val = box.maxx;
+        break;
+      case 1:
+        val = box.maxy;
+        break;
+      default:
+        val = box.maxz;
+    }
+    return Math.nextAfter((float) val, Float.POSITIVE_INFINITY);
   }
 }

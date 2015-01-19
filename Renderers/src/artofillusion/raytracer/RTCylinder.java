@@ -326,10 +326,11 @@ public class RTCylinder extends RTObject
 
   /** Determine whether any part of the surface of the cylinder lies within a bounding box. */
 
-  public boolean intersectsBox(BoundingBox bb)
+  public boolean intersectsNode(OctreeNode node)
   {
     double x, z;
-    
+
+    BoundingBox bb = node.getBounds();
     if (transform)
       {
         bb = bb.transformAndOutset(toLocal);

@@ -24,7 +24,7 @@ import java.util.*;
    
 public class OctreeNode
 {
-  public OctreeNode parent, child0, child1, child2, child3, child4, child5, child6, child7;
+  public OctreeNode parent, child[];
   public RTObject obj[];
   public float minx, maxx, miny, maxy, minz, maxz;
   public float midx, midy, midz;
@@ -95,25 +95,26 @@ public class OctreeNode
         splitz = (midz != maxz);
         if (!(splitx || splity || splitz))
           return;
-        child0 = new OctreeNode(minx, midx, miny, midy, minz, midz, obj, objBounds, this);
+        child = new OctreeNode[8];
+        child[0] = new OctreeNode(minx, midx, miny, midy, minz, midz, obj, objBounds, this);
         if (splitz)
-          child1 = new OctreeNode(minx, midx, miny, midy, midz, maxz, obj, objBounds, this);
+          child[1] = new OctreeNode(minx, midx, miny, midy, midz, maxz, obj, objBounds, this);
         if (splity)
           {
-            child2 = new OctreeNode(minx, midx, midy, maxy, minz, midz, obj, objBounds, this);
+            child[2] = new OctreeNode(minx, midx, midy, maxy, minz, midz, obj, objBounds, this);
             if (splitz)
-              child3 = new OctreeNode(minx, midx, midy, maxy, midz, maxz, obj, objBounds, this);
+              child[3] = new OctreeNode(minx, midx, midy, maxy, midz, maxz, obj, objBounds, this);
           }
         if (splitx)
           {
-            child4 = new OctreeNode(midx, maxx, miny, midy, minz, midz, obj, objBounds, this);
+            child[4] = new OctreeNode(midx, maxx, miny, midy, minz, midz, obj, objBounds, this);
             if (splitz)
-              child5 = new OctreeNode(midx, maxx, miny, midy, midz, maxz, obj, objBounds, this);
+              child[5] = new OctreeNode(midx, maxx, miny, midy, midz, maxz, obj, objBounds, this);
             if (splity)
               {
-                child6 = new OctreeNode(midx, maxx, midy, maxy, minz, midz, obj, objBounds, this);
+                child[6] = new OctreeNode(midx, maxx, midy, maxy, minz, midz, obj, objBounds, this);
                 if (splitz)
-                  child7 = new OctreeNode(midx, maxx, midy, maxy, midz, maxz, obj, objBounds, this);
+                  child[7] = new OctreeNode(midx, maxx, midy, maxy, midz, maxz, obj, objBounds, this);
               }
           }
         obj = null;
@@ -125,22 +126,10 @@ public class OctreeNode
   public OctreeNode[] findChildNodes()
   {
     ArrayList<OctreeNode> nodes = new ArrayList<OctreeNode>();
-    if (child0 != null)
-      nodes.add(child0);
-    if (child1 != null)
-      nodes.add(child1);
-    if (child2 != null)
-      nodes.add(child2);
-    if (child3 != null)
-      nodes.add(child3);
-    if (child4 != null)
-      nodes.add(child4);
-    if (child5 != null)
-      nodes.add(child5);
-    if (child6 != null)
-      nodes.add(child6);
-    if (child7 != null)
-      nodes.add(child7);
+    if (child != null)
+      for (int i = 0; i < child.length; i++)
+        if (child[i]!= null)
+          nodes.add(child[i]);
     return nodes.toArray(new OctreeNode[nodes.size()]);
   }
   
@@ -168,16 +157,16 @@ public class OctreeNode
             if (pos.y > current.midy)
               {
                 if (pos.z > current.midz)
-                  current = current.child7;
+                  current = current.child[7];
                 else
-                  current = current.child6;
+                  current = current.child[6];
               }
             else
               {
                 if (pos.z > current.midz)
-                  current = current.child5;
+                  current = current.child[5];
                 else
-                  current = current.child4;
+                  current = current.child[4];
               }
           }
         else
@@ -185,16 +174,16 @@ public class OctreeNode
             if (pos.y > current.midy)
               {
                 if (pos.z > current.midz)
-                  current = current.child3;
+                  current = current.child[3];
                 else
-                  current = current.child2;
+                  current = current.child[2];
               }
             else
               {
                 if (pos.z > current.midz)
-                  current = current.child1;
+                  current = current.child[1];
                 else
-                  current = current.child0;
+                  current = current.child[0];
               }
           }
       }
@@ -280,16 +269,16 @@ public class OctreeNode
         if (nextPos.y > current.midy)
         {
           if (nextPos.z > current.midz)
-            current = current.child7;
+            current = current.child[7];
           else
-            current = current.child6;
+            current = current.child[6];
         }
         else
         {
           if (nextPos.z > current.midz)
-            current = current.child5;
+            current = current.child[5];
           else
-            current = current.child4;
+            current = current.child[4];
         }
       }
       else
@@ -297,16 +286,16 @@ public class OctreeNode
         if (nextPos.y > current.midy)
         {
           if (nextPos.z > current.midz)
-            current = current.child3;
+            current = current.child[3];
           else
-            current = current.child2;
+            current = current.child[2];
         }
         else
         {
           if (nextPos.z > current.midz)
-            current = current.child1;
+            current = current.child[1];
           else
-            current = current.child0;
+            current = current.child[0];
         }
       }
     }

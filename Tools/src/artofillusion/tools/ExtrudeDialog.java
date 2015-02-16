@@ -225,8 +225,11 @@ public class ExtrudeDialog extends BDialog
     else
       obj = extrudeMesh(profile.getObject().convertToTriangleMesh(tolField.getValue()), path, profile.getCoords(), pathCoords, angleField.getValue()*Math.PI/180.0, orientBox.getState());
     Texture tex = window.getScene().getDefaultTexture();
-    obj.setTexture(tex, tex.getDefaultMapping(obj));
-    preview.setObject(obj);
+    if (obj != null)
+    {
+      obj.setTexture(tex, tex.getDefaultMapping(obj));
+      preview.setObject(obj);
+    }
     preview.repaint();
   }
   

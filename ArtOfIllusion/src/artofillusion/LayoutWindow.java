@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2013 by Peter Eastman
+/* Copyright (C) 1999-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1784,18 +1784,35 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void duplicateCommand()
   {
     Object sel[] = itemTree.getSelectedObjects();
-    int i, which[] = new int [sel.length], num = theScene.getNumObjects();
+    int which[] = new int [sel.length], num = theScene.getNumObjects();
 
+    // Create the duplicates.
+    
+    HashMap<ObjectInfo, ObjectInfo> duplicateMap = new HashMap<ObjectInfo, ObjectInfo>();
+    for (int i = 0; i < sel.length; i++)
+    {
+      ObjectInfo original = (ObjectInfo) sel[i];
+      duplicateMap.put(original, original.duplicate());
+    }
+    
+    // Maintain relationships between parents and children.
+    
+    for (ObjectInfo original : duplicateMap.keySet())
+      if (duplicateMap.containsKey(original.getParent()))
+        duplicateMap.get(original.getParent()).addChild(duplicateMap.get(original), 0);
+    
+    // Add the new objects to the scene.
+    
     UndoRecord undo = new UndoRecord(this, false);
     int selected[] = getSelectedIndices();
-    for (i = 0; i < sel.length; i++)
-      {
-        addObject(((ObjectInfo) sel[i]).duplicate(), undo);
-        which[i] = num + i;
-      }
+    for (ObjectInfo duplicate : duplicateMap.values())
+      addObject(duplicate, undo);
+    for (int i = 0; i < sel.length; i++)
+      which[i] = num + i;
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {selected});
     setSelection(which);
     setUndoRecord(undo);
+    rebuildItemList();
     updateImage();
   }
 

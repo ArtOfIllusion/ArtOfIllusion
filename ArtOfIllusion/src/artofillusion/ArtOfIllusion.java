@@ -31,7 +31,9 @@ import java.net.*;
 import java.util.*;
 import java.util.List;
 import java.lang.reflect.*;
+import java.util.prefs.Preferences;
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /** This is the main class for Art of Illusion.  All of its methods and variables are static,
     so no instance of this class ever gets created.  It starts up the application, and
@@ -523,8 +525,16 @@ public class ArtOfIllusion
     BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("openScene"));
     if (getCurrentDirectory() != null)
       fc.setDirectory(new File(getCurrentDirectory()));
+    //fully qualified path, as otherwise conflicts with an AWT class.
+    javax.swing.filechooser.FileFilter sceneFilter = new FileNameExtensionFilter(Translate.text("fileFilter.aoi"), "aoi");
+    fc.getComponent().setAcceptAllFileFilterUsed(true);
+    fc.getComponent().addChoosableFileFilter(sceneFilter);
+    Preferences pref = Preferences.userNodeForPackage(ArtOfIllusion.class);
+    javax.swing.filechooser.FileFilter filter = pref.getBoolean("FilterSceneFiles", true)? sceneFilter : fc.getComponent().getAcceptAllFileFilter();
+    fc.getComponent().setFileFilter(filter);
     if (!fc.showDialog(fr))
       return;
+    pref.putBoolean("FilterSceneFiles", fc.getFileFilter() == sceneFilter);
     setCurrentDirectory(fc.getDirectory().getAbsolutePath());
     openScene(fc.getSelectedFile(), fr);
   }

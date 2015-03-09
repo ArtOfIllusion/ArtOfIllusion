@@ -14,8 +14,10 @@ import buoy.widget.*;
 import buoy.event.*;
 
 import javax.swing.*;
+import javax.swing.filechooser.*;
 import java.awt.*;
 import java.io.*;
+import java.util.prefs.Preferences;
 
 /**
  * This is a BFileChooser for selecting image files to load.  It displays a preview
@@ -28,6 +30,7 @@ public class ImageFileChooser extends BFileChooser
 
   private static final int PREVIEW_SIZE = 200;
   private static final int INSET = 5;
+  private static final Preferences pref = Preferences.userNodeForPackage(ImageFileChooser.class);
 
   /**
    * Create an ImageFileChooser.
@@ -42,10 +45,48 @@ public class ImageFileChooser extends BFileChooser
     preview.setPreferredSize(new Dimension(PREVIEW_SIZE+2*INSET, PREVIEW_SIZE+2*INSET));
     preview.setHorizontalAlignment(JLabel.CENTER);
     preview.setVerticalAlignment(JLabel.CENTER);
-    ((JFileChooser) getComponent()).setAccessory(preview);
+    JFileChooser jfc = getComponent();
+    jfc.setAccessory(preview);
+    
+    // Set up filename filters.
+    
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.images"),
+                     "jpg", "jpeg", "png", "tif", "tiff", "svg", "svgz", "hdr"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.jpeg"), "jpg", "jpeg"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.hdr"), "hdr"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.png"), "png"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.svg"), "svg", "svgz"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.tif"), "tif", "tiff"));
+    jfc.setAcceptAllFileFilterUsed(true);
+    
+    // Read the saved filter Preference.
+
+    String preferredType = pref.get("LastType", Translate.text("fileFilter.images"));
+    javax.swing.filechooser.FileFilter preferredFilter = null;
+    for (javax.swing.filechooser.FileFilter filter : jfc.getChoosableFileFilters())
+      if (filter.getDescription().equals(preferredType))
+        preferredFilter = filter;
+
+    // Sanity Check - if the value in preferences is not valid, just fall back to no filter.
+    
+    if (preferredFilter == null)
+      preferredFilter = jfc.getAcceptAllFileFilter();
+    setFileFilter(preferredFilter);
+
     addEventLink(SelectionChangedEvent.class, this, "selectionChanged");
     selectionChanged();
   }
+
+  public boolean showDialog(Widget parent)
+  {
+    if (super.showDialog(parent))
+    {
+      pref.put("LastType", getFileFilter().getDescription());
+      return true;
+    }
+    return false;
+  }
+
 
   private void selectionChanged()
   {

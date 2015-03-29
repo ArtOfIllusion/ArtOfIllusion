@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2011 by Peter Eastman
+/* Copyright (C) 1999-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -2982,15 +2982,19 @@ groups:     do
   
   public void makeRightSideOut()
   {
-    Vec3 norm[] = getNormals(), result = new Vec3();
-
-    for (int i = 0; i < norm.length; i++)
+    Vec3 norm[] = getNormals();
+    int maxLenVertex = 0;
+    double maxLength = 0.0;
+    for (int i = 0; i < vertex.length; i++)
+    {
+      double length = vertex[i].r.length();
+      if (length > maxLength)
       {
-        result.x += vertex[i].r.x*norm[i].x;
-        result.y += vertex[i].r.y*norm[i].y;
-        result.z += vertex[i].r.z*norm[i].z;
+        maxLenVertex = i;
+        maxLength = length;
       }
-    if (result.x + result.y + result.z < 0.0)
+    }
+    if (vertex[maxLenVertex].r.dot(norm[maxLenVertex]) < 0.0)
       reverseNormals();
   }
   

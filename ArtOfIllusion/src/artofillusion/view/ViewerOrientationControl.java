@@ -1,4 +1,4 @@
-/* Copyright (C) 2007-2012 by Peter Eastman
+/* Copyright (C) 2007-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,6 +54,7 @@ public class ViewerOrientationControl implements ViewerControl
       setSelectedIndex(0);
       view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
       addEventLink(ValueChangedEvent.class, this, "valueChanged");
+      setPreferredVisibleRows(20);
     }
 
     private void viewChanged()

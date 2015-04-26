@@ -37,11 +37,12 @@ public class RaytracerRenderer implements Renderer, Runnable
   protected ValueField extraGIField, extraGIEnvField;
   protected ValueField globalPhotonsField, globalNeighborPhotonsField, causticsPhotonsField, causticsNeighborPhotonsField, volumePhotonsField, volumeNeighborPhotonsField;
   protected int pixel[], width, height, rtWidth, rtHeight, maxRayDepth = 8, minRays = 4, maxRays = 16, diffuseRays, glossRays, shadowRays, antialiasLevel;
+  protected MemoryImageSource imageSource;
   protected Scene theScene;
   protected Camera theCamera;
   protected SceneCamera sceneCamera;
   protected RenderListener listener;
-  protected BufferedImage img;
+  protected Image img;
   protected volatile Thread renderThread;
   protected RGBColor ambColor, envColor, fogColor;
   protected double envParamValue[];
@@ -793,8 +794,10 @@ public class RaytracerRenderer implements Renderer, Runnable
       return;
     }
 
-    img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB_PRE);
-    pixel = ((DataBufferInt) ((BufferedImage) img).getRaster().getDataBuffer()).getData();
+    pixel = new int [width*height];
+    imageSource = new MemoryImageSource(width, height, pixel, 0, width);
+    imageSource.setAnimated(true);
+    img = Toolkit.getDefaultToolkit().createImage(imageSource);
     int requiredComponents = sceneCamera.getComponentsForFilters();
     floatImage = new float [4][width*height];
     if ((requiredComponents&ComplexImage.DEPTH) != 0)
@@ -874,6 +877,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       long currentTime = System.currentTimeMillis();
       if (currentTime-updateTime > 250 || currentScale[0] == 1 && currentTime-updateTime > 150)
       {
+        imageSource.newPixels();
         listener.imageUpdated(img);
         updateTime = System.currentTimeMillis();
       }
@@ -886,6 +890,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
     if (maxRaysInUse == 1)
     {
+      imageSource.newPixels();
       finish();
       return;
     }
@@ -1016,6 +1021,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       recordRow(pix, tempPixel, currentRow[0]);
       if (System.currentTimeMillis()-updateTime > 5000)
       {
+        imageSource.newPixels();
         listener.imageUpdated(img);
         updateTime = System.currentTimeMillis();
       }
@@ -1038,6 +1044,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
     // All done.  Send the final image.
 
+    imageSource.newPixels();
     threads.finish();
     finish();
   }
@@ -1181,6 +1188,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       }
     }
     img = null;
+    imageSource = null;
     pixel = null;
     floatImage = null;
     depthImage = null;

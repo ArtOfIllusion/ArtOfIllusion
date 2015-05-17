@@ -106,7 +106,7 @@ public class ComplexImage
   
   public ComplexImage duplicate()
   {
-    ComplexImage ci = new ComplexImage(img);
+    ComplexImage ci = new ComplexImage(img.getScaledInstance(img.getWidth(null), -1, Image.SCALE_REPLICATE));
     ci.intImage = intImage;
     for (int i = 0; i < pixelData.length; i++)
       if (pixelData[i] != null)

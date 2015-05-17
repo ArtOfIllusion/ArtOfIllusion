@@ -259,16 +259,13 @@ public class RenderingDialog extends BDialog implements RenderListener
 
   private void applyFilters(boolean updateLabel)
   {
-    filteredImage = null;
+    filteredImage = originalImage.duplicate();
     if (cameraForFilters.getImageFilters().length > 0)
     {
-      filteredImage = originalImage.duplicate();
       if (updateLabel)
         statusChanged(Translate.text("applyingFilters"));
       cameraForFilters.applyImageFilters(filteredImage, theScene, sceneCamera.getCoords());
     }
-    else
-      filteredImage = originalImage;
     previewImage = filteredImage.getImage();
     canvas.repaint();
   }

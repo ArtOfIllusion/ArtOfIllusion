@@ -1,4 +1,4 @@
-/* Copyright (C) 2001-2004 by Peter Eastman
+/* Copyright (C) 2001-2015 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -104,6 +104,10 @@ public class CSGDialog extends BDialog
   
       mesh1 = theObject.getObject1().getObject().convertToTriangleMesh(tol);
       mesh2 = theObject.getObject2().getObject().convertToTriangleMesh(tol);
+      if (mesh1.getSmoothingMethod() != TriangleMesh.NO_SMOOTHING)
+        mesh1.setSmoothingMethod(TriangleMesh.SMOOTH_SHADING);
+      if (mesh2.getSmoothingMethod() != TriangleMesh.NO_SMOOTHING)
+        mesh2.setSmoothingMethod(TriangleMesh.SMOOTH_SHADING);
       modeller = new CSGModeller(mesh1, mesh2, theObject.getObject1().getCoords(), theObject.getObject2().getCoords());
     }
     TriangleMesh trimesh = modeller.getMesh(operation[opChoice.getSelectedIndex()], texture);

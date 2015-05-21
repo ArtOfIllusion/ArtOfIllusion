@@ -27,6 +27,7 @@ public class SeamFinder
   {
     this.mesh = mesh;
     seamEdges = new ArrayList<Integer>();
+    ArrayList<HashSet<Integer>> surface = findSurfaces();
     computeEdgeVisibility();
     computeVertexDistortion();
     findTerminalVertices();
@@ -36,6 +37,49 @@ public class SeamFinder
   public List<Integer> getSeamEdges()
   {
     return Collections.unmodifiableList(seamEdges);
+  }
+  
+  private ArrayList<HashSet<Integer>> findSurfaces()
+  {
+    ArrayList<HashSet<Integer>> surfaces = new ArrayList<HashSet<Integer>>();
+    TriangleMesh.Edge meshEdge[] = mesh.getEdges();
+    TriangleMesh.Face meshFace[] = mesh.getFaces();
+    boolean assigned[] = new boolean[meshFace.length];
+    int boundary[] = new int[meshFace.length];
+    for (int i = 0; i < assigned.length; i++)
+    {
+      if (assigned[i])
+        continue;
+      
+      // This face is not part of any surface, so begin a new one.
+      
+      HashSet<Integer> surface = new HashSet<Integer>();
+      surfaces.add(surface);
+      int boundarySize = 0;
+      boundary[boundarySize++] = i;
+      while (boundarySize > 0)
+      {
+        // Add a boundary face to the surface.
+        
+        int faceIndex = boundary[--boundarySize];
+        surface.add(faceIndex);
+        assigned[faceIndex] = true;
+        
+        // Add all its neighbors to the boundary if they haven't already been assigned.
+        
+        TriangleMesh.Face face = meshFace[faceIndex];
+        int f1 = (meshEdge[face.e1].f1 == faceIndex ? meshEdge[face.e1].f2 : meshEdge[face.e1].f1);
+        int f2 = (meshEdge[face.e2].f1 == faceIndex ? meshEdge[face.e2].f2 : meshEdge[face.e2].f1);
+        int f3 = (meshEdge[face.e3].f1 == faceIndex ? meshEdge[face.e3].f2 : meshEdge[face.e3].f1);
+        if (f1 != -1 && !assigned[f1])
+          boundary[boundarySize++] = f1;
+        if (f2 != -1 && !assigned[f2])
+          boundary[boundarySize++] = f2;
+        if (f3 != -1 && !assigned[f3])
+          boundary[boundarySize++] = f3;
+      }
+    }
+    return surfaces;
   }
   
   private void computeEdgeVisibility()

@@ -1,0 +1,35 @@
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>aoi-windows-install.jar</jar>
+  <outfile>../InstallerBuild/AoISetup.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <icon>aoi.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.5.0</minVersion>
+    <maxVersion></maxVersion>
+    <dontUsePrivateJres>false</dontUsePrivateJres>
+    <initialHeapSize>0</initialHeapSize>
+    <maxHeapSize>0</maxHeapSize>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>3.0.w</txtFileVersion>
+    <fileDescription>Art of Illusion installer</fileDescription>
+    <copyright>2015 Peter Eastman</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>3.0.w</txtProductVersion>
+    <productName>Art of Illusion Installer</productName>
+    <companyName></companyName>
+    <internalName>AoI Installer</internalName>
+    <originalFilename>AoISetup.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>

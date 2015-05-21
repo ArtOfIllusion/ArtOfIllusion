@@ -1,0 +1,37 @@
+<launch4jConfig>
+  <dontWrapJar>true</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>ArtOfIllusion.jar</jar>
+  <outfile>../InstallerBuild/aoi.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>false</customProcName>
+  <stayAlive>false</stayAlive>
+  <icon>aoi.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0</minVersion>
+    <maxVersion></maxVersion>
+    <dontUsePrivateJres>false</dontUsePrivateJres>
+    <initialHeapSize>0</initialHeapSize>
+    <maxHeapSize>1024</maxHeapSize>
+    <opt>-Dsun.java2d.noddraw=true</opt>
+    <opt>-Djava.library.path=lib</opt>
+  </jre>
+  <versionInfo>
+    <fileVersion>3.0.2.0</fileVersion>
+    <txtFileVersion>3.0.2</txtFileVersion>
+    <fileDescription>Art of Illusion launcher</fileDescription>
+    <copyright>2015 Peter Eastman</copyright>
+    <productVersion>3.0.2.0</productVersion>
+    <txtProductVersion>3.0.2</txtProductVersion>
+    <productName>Art of Illusion</productName>
+    <companyName></companyName>
+    <internalName>AoI</internalName>
+    <originalFilename>Art of Illusion.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF8" standalone="yes" ?>
+
+<userInput>
+<panel order="0">
+  <field type="staticText" align="left" 
+       txt="Additional JMF setup (needs archive file from Sun)"
+       id="staticJMFText.text"/>
+  <field type="space" />
+  <field type="divider" />
+  <field type="space" />
+  <field type="staticText" align="left" txt="Choose Java Media Framework zip file location:"/>
+  <field type="file" align="left" variable="jmf_file">
+    <spec txt="" size="25" set=""/>
+  </field>
+<!--   <field type="search" variable="jmf_file">
+    <description align="left" 
+                 txt="Choose Java Media Framework zip file location :"
+                 id="jmf.input.location"/>
+    <spec txt="Path to zip file:" type="file" result="file" id="jmf.path.file" allowEmptyValue="true" mustExist="false" >
+      <choice value="jmf-2_1_1e-alljava.zip" />
+    </spec>
+  </field>
+ -->
+<!--
+<field type="check" variable="aoi_manual">
+       <description align="left" txt="Integrate AoI Manual in online help"
+               id="manual.check.desc"/>
+       <spec txt="Install AoI Manual" id="manual.check" true="on" false="off" 
+        set="false"/>
+  </field>
+<field type="search" variable="help_file">
+  <description align="left" 
+               txt="Choose AoI Manual zip file location :"
+               id="help.input.location"/>
+  <spec txt="Path to zip file:"
+        type="file" result="file" id="help.path.file" >
+  <choice value="manual2.3.zip" />
+  </spec>
+</field>-->
+</panel>
+</userInput>

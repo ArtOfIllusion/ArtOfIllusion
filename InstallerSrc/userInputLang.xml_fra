@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF8" standalone="yes" ?>
+
+<langpack>
+  <str id="jmf.input.location" txt="Installation du Java Media Framework (laissez vide pour ignorer l'installation)"/>
+  <str id="jmf.searchfield.description" txt="Choisissez l'emplacement de l'archive JFM"/>
+  <str id="jmf.path.file" txt="Chemin de l'archive zip:"/>
+  <str id="help.input.location" txt="Installation du Système d'Aide (laissez vide pour ignorer l'installation)"/>
+  <str id="help.searchfield.description" txt="Choisissez l'emplacement de l'archive du Manuel"/>
+  <str id="help.path.file" txt="Chemin de l'archive zip:"/>
+  <str id="staticJMFText.text" txt="Installation additionnelle de la JMF (nécessite une archive Sun)" />
+</langpack>
+

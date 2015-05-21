@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<!-- 
+Art of Illusion IzPack installer xml definition file
+--> <installation version="1.0">
+<!-- Application Information -->
+    <info>
+       <appname>ArtOfIllusion</appname>
+       <appversion>3.0.2</appversion>
+       <authors>
+           <author name="Peter Eastman" email="peastman@users.sourceforge. net"/>
+       </authors>
+       <url>http://www.artofillusion.org/</url>
+       <!-- <run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7"/> -->
+    </info>
+<!-- The gui preferences indication -->
+        <!-- Flexible and in the screen proportions -->
+    <guiprefs height="580" resizable="yes" width="640">
+        <laf name="looks">
+           <os family="unix"/>
+        </laf>
+        <!-- GUI addaption for more informations see "Modifying the GUI" in the documentation -->
+        <modifier key="layoutAnchor" value="CENTER"/>
+        <modifier key="headingPanelCounter" value="progressbar"/>
+        <modifier key="headingPanelCounterPos" value="inNavigationPanel"/>
+        <modifier key="allYGap" value="3"/>
+        <modifier key="paragraphYGap" value="10"/>
+        <modifier key="filler1YGap" value="5"/>
+        <modifier key="filler3XGap" value="10"/>
+    </guiprefs>
+
+    <!-- The locale section (english and french packages) -->
+    <locale>
+        <langpack iso3="eng"/>
+        <langpack iso3="fra"/>
+        <langpack iso3="deu"/>
+    </locale>
+    <!-- The resources section. The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.    -->
+    <resources>
+        <res id="ImagePanel.img" src="installscreen.jpg"/>
+        <res id="HTMLHelloPanel.splash" src="./InstallHTML/splash.html"/>
+        <res id="LicencePanel.licence" src="Licence.txt"/>
+        <res id="HTMLInfoPanel.info" src="./InstallHTML/WindowsInstall_eng.html"/>
+        <!-- localization of the info panel -->
+        <res id="HTMLInfoPanel.info_fra" src="./InstallHTML/WindowsInstall_fra.html"/>
+        <res id="HTMLInfoPanel.info_eng" src="./InstallHTML/WindowsInstall_eng.html"/>
+        <res id="HTMLInfoPanel.info_deu" src="./InstallHTML/WindowsInstall_deu.html"/>
+        <res id="userInputSpec.xml" src="userInputSpec.xml"/>
+        <res id="TargetPanel.dir.windows" src="TargetDir.txt" parse="yes"/>
+        <!-- localization of the info panel -->
+        <res id="userInputLang.xml_eng" src="userInputLang.xml_eng" />
+        <res id="userInputLang.xml_fra" src="userInputLang.xml_fra" />
+        <res id="userInputLang.xml_deu" src="userInputLang.xml_deu" />
+        <res src="shortcutSpec.xml" id="shortcutSpec.xml"/> 
+        <res id="ProcessPanel.Spec.xml" src="ProcessPanel.Spec.xml" />
+        <!-- localization of resource strings -->
+        <res id="packsLang.xml_fra" src="packsLang.xml_fra" />
+        <res id="packsLang.xml_eng" src="packsLang.xml_eng" />
+        <res id="packsLang.xml_deu" src="packsLang.xml_deu" />
+    </resources>
+    <!-- The panels section. We indicate here which panels we want to use. The order will be respected. -->
+    <panels>
+        <panel classname="HTMLHelloPanel" id="splash"/>
+        <!-- <panel classname="HelloPanel"/> -->
+        <panel classname="HTMLInfoPanel"/>
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel"/> 
+        <panel classname="PacksPanel"/>
+        <!-- <panel classname="UserInputPanel" >
+            <os family="unix" />
+        </panel> -->
+        <panel classname="InstallPanel" />
+        <panel classname="ShortcutPanel">
+                <os family="windows" />
+        </panel>
+        <!-- <panel classname="ProcessPanel"/> -->
+        <panel classname="FinishPanel"/>
+    </panels>
+    <!-- The packs section. -->
+    <packs>
+        <pack id="core" name="AoI Base" required="yes">
+          <description>Art of Illusion base files</description>
+            <fileset dir="../InstallerBuild/ArtOfIllusion@{AOI_VERSION}" targetdir="$INSTALL_PATH">
+                <include name="**" />
+            </fileset>
+            <file src="aoi.ico" targetdir="$INSTALL_PATH">
+                <os family="windows" />
+            </file>
+            <!-- <file src="assoc.bat" targetdir="$INSTALL_PATH">
+                <os family="windows" />
+            </file> -->
+            <file src="Art of Illusion.exe" targetdir="$INSTALL_PATH">
+                <os family="windows" />
+            </file>
+            <!-- make assoc.bat executable -->
+            <!-- <executable stage="postinstall" targetfile="$INSTALL_PATH/assoc.bat" >
+                  <os family="windows" />
+                  <args>
+                        <arg value="$INSTALL_PATH" />
+                 </args>
+            </executable> -->
+            <!-- run post intall script -->
+            <!-- <executable stage="postinstall" targetfile="$INSTALL_PATH/utils/install-script.sh">
+                <os family="unix" />                
+                <args>
+                        <arg value="$INSTALL_PATH" />
+                        <arg value="$USER_HOME" />
+                </args>
+            </executable> -->
+        </pack>
+<!--        <pack id="jogl-windows" name="JOGL 1.1.1" preselected="yes" required="no">
+            <os family="windows" />
+            <description>OpenGL support</description>
+            <fileset dir="jogl-windows-i586" targetdir="$INSTALL_PATH/lib">
+                <include name="*" />
+            </fileset>
+            <fileset dir="jogl-windows-amd64" targetdir="$INSTALL_PATH/lib64">
+                <include name="*" />
+            </fileset>
+        </pack> -->
+        <pack id="jogl-windows-i586" name="JOGL 1.1.1 (32 bit)" preselected="no" required="no">
+            <description>OpenGL support for 32 bit OS</description>
+            <fileset dir="jogl-windows-i586" targetdir="$INSTALL_PATH/lib">
+                <include name="*" />
+            </fileset>
+        </pack>
+        <pack id="jogl-windows-AMD64" name="JOGL 1.1.1 (64 bit)" preselected="no" required="no">
+            <description>OpenGL support for 64 bit OS</description>
+            <fileset dir="jogl-windows-amd64" targetdir="$INSTALL_PATH/lib">
+                <include name="*" />
+            </fileset>
+        </pack>
+        <!-- <pack id="desktopPanelTitle" name="Desktop File Handling" required="no">
+         <os family="unix" />
+          <description>File assocation and icon</description>
+            <executable stage="postinstall" os="unix" targetfile="$INSTALL_PATH/utils/freedesktop-install.sh">
+                <args>
+                        <arg value="$INSTALL_PATH" />
+                        <arg value="$USER_HOME" />
+                </args>
+            </executable>
+        </pack> -->
+    </packs>
+    <native type="izpack" name="ShellLink.dll"/>
+</installation> 

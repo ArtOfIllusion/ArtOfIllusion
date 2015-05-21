@@ -1,0 +1,15 @@
+<processing>
+  <job name="Cleanup_unix">
+        <os family="unix" /> 
+    <executefile name="$INSTALL_PATH/utils/cleanup.sh">
+      <arg>$INSTALL_PATH</arg>
+    </executefile>
+  </job>
+<!--  <job name="Cleanup_windows">
+        <os family="windows" /> 
+    <executefile name="$INSTALL_PATH/cleanup.bat">
+      <arg>$INSTALL_PATH</arg>
+    </executefile>
+  </job> -->
+
+</processing>

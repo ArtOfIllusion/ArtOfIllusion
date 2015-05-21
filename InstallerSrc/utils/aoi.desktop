@@ -1,0 +1,10 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Art of Illusion
+Type=Application
+Comment=3D Modelling and Rendering Studio
+MimeType=application/x-aoi
+Exec=aoi.sh
+Categories=Application;Graphics;3DGraphics;
+Terminal=false
+Icon=aoi.png

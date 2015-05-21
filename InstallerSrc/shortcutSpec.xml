@@ -1,0 +1,20 @@
+<shortcuts>
+  <!-- <skipIfNotSupported/> -->
+  <programGroup defaultName="Art of Illusion"
+                location="applications||startMenu"/>
+  <shortcut
+    name="Start Art of Illusion"
+    target="$INSTALL_PATH\Art of Illusion.exe"
+    commandLine=""
+    workingDirectory="$INSTALL_PATH"
+    description="Start Art of Illusion"
+    iconFile="$INSTALL_PATH\aoi.ico"
+    iconIndex="0"
+    initialState="normal"
+    programGroup="yes"
+    desktop="yes"
+    applications="yes"
+    startMenu="yes"
+    startup="no">
+  </shortcut>
+</shortcuts>

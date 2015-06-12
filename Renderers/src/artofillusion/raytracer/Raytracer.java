@@ -518,7 +518,9 @@ public class Raytracer
     
     // Create the octree.
 
-    rootNode = new OctreeNode((float) minx, (float) maxx, (float) miny, (float) maxy, (float) minz, (float) maxz, sceneObject, objBounds, null);
+    rootNode = new OctreeNode(Math.nextAfter((float) minx, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxx, Double.POSITIVE_INFINITY),
+        Math.nextAfter((float) miny, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxy, Double.POSITIVE_INFINITY),
+        Math.nextAfter((float) minz, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxz, Double.POSITIVE_INFINITY), sceneObject, objBounds, null);
 
     // Find the nodes which contain the camera and the lights.
 

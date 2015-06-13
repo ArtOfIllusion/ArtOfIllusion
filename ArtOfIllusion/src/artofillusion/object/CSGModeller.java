@@ -1525,7 +1525,7 @@ public class CSGModeller
       // Perform more checks to determine whether the face is in front or behind
       double dist1 = f.norm.dot(v1) - f.distRoot;
       double dist2 = f.norm.dot(v2) - f.distRoot;
-      double dist3 = f.norm.dot(v2) - f.distRoot;
+      double dist3 = f.norm.dot(v3) - f.distRoot;
       if (dist1 < -TOL || dist2 < -TOL || dist3 < -TOL)
         return Double.MAX_VALUE;
       else if (dist1 > TOL || dist2 > TOL || dist3 > TOL)

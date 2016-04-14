@@ -26,7 +26,7 @@ public class Timecourse
   public static final int INTERPOLATING = 2;
   public static final int APPROXIMATING = 3;
 
-  private static final int FIXED_SUBDIVISION_LEVELS = 3;
+  private static final int FIXED_SUBDIVISION_LEVELS = 7;
 
   public Timecourse(Keyframe value[], double time[], Smoothness smoothness[])
   {
@@ -53,12 +53,12 @@ public class Timecourse
 
     for (int i = 0; i < time.length; i++)
       if (Math.abs(time[i]-t) < 1e-10)
-        {
-          value[i] = v;
-          time[i] = t;
-          smoothness[i] = s;
-          return i;
-        }
+      {
+        value[i] = v;
+        time[i] = t;
+        smoothness[i] = s;
+        return i;
+      }
 
     // Add the new timepoint.
 
@@ -69,26 +69,26 @@ public class Timecourse
 
     for (i = 0; i < time.length && time[i] < t; i++);
     for (j = 0; j < newv.length; j++)
+    {
+      if (j < i)
       {
-        if (j < i)
-          {
-            newv[j] = value[j];
-            newt[j] = time[j];
-            news[j] = smoothness[j];
-          }
-        else if (j == i)
-          {
-            newv[j] = v;
-            newt[j] = t;
-            news[j] = s;
-          }
-        else
-          {
-            newv[j] = value[j-1];
-            newt[j] = time[j-1];
-            news[j] = smoothness[j-1];
-          }
+        newv[j] = value[j];
+        newt[j] = time[j];
+        news[j] = smoothness[j];
       }
+      else if (j == i)
+      {
+        newv[j] = v;
+        newt[j] = t;
+        news[j] = s;
+      }
+      else
+      {
+        newv[j] = value[j-1];
+        newt[j] = time[j-1];
+        news[j] = smoothness[j-1];
+      }
+    }
     value = newv;
     time = newt;
     smoothness = news;
@@ -115,20 +115,20 @@ public class Timecourse
     Smoothness news[] = new Smoothness [smoothness.length-1];
 
     for (int j = 0; j < newv.length; j++)
+    {
+      if (j < which)
       {
-        if (j < which)
-          {
-            newv[j] = value[j];
-            newt[j] = time[j];
-            news[j] = smoothness[j];
-          }
-        else
-          {
-            newv[j] = value[j+1];
-            newt[j] = time[j+1];
-            news[j] = smoothness[j+1];
-          }
+        newv[j] = value[j];
+        newt[j] = time[j];
+        news[j] = smoothness[j];
       }
+      else
+      {
+        newv[j] = value[j+1];
+        newt[j] = time[j+1];
+        news[j] = smoothness[j+1];
+      }
+    }
     value = newv;
     time = newt;
     smoothness = news;
@@ -155,22 +155,22 @@ public class Timecourse
     tempv = value[which];
     temps = smoothness[which];
     if (newpos > which)
+    {
+      newpos--;
+      for (int i = which; i < newpos; i++)
       {
-        newpos--;
-        for (int i = which; i < newpos; i++)
-          {
-            value[i] = value[i+1];
-            time[i] = time[i+1];
-            smoothness[i] = smoothness[i+1];
-          }
+        value[i] = value[i+1];
+        time[i] = time[i+1];
+        smoothness[i] = smoothness[i+1];
       }
+    }
     else
       for (int i = which; i > newpos; i--)
-        {
-          value[i] = value[i-1];
-          time[i] = time[i-1];
-          smoothness[i] = smoothness[i-1];
-        }
+      {
+        value[i] = value[i-1];
+        time[i] = time[i-1];
+        smoothness[i] = smoothness[i-1];
+      }
     value[newpos] = tempv;
     time[newpos] = t;
     smoothness[newpos] = temps;
@@ -227,11 +227,11 @@ public class Timecourse
     Keyframe newv[] = new Keyframe [value.length];
 
     for (int i = 0; i < newt.length; i++)
-      {
-        newt[i] = time[i];
-        news[i] = smoothness[i].duplicate();
-        newv[i] = value[i].duplicate(owner);
-      }
+    {
+      newt[i] = time[i];
+      news[i] = smoothness[i].duplicate();
+      newv[i] = value[i].duplicate(owner);
+    }
     Timecourse tc = new Timecourse(newv, newt, news);
     tc.subdivideAdaptively = subdivideAdaptively;
     return tc;
@@ -248,75 +248,75 @@ public class Timecourse
     Smoothness s[] = new Smoothness [smoothness.length*2-1];
 
     if (method == DISCONTINUOUS)
+    {
+      for (int i = 0; i < value.length; i++)
       {
-        for (int i = 0; i < value.length; i++)
-          {
-            v[i*2] = value[i];
-            t[i*2] = time[i];
-          }
-        for (int i = 0; i < value.length-1; i++)
-          {
-            v[i*2+1] = value[i].blend(value[i], 1.0, 0.0);
-            t[i*2+1] = (time[i]+time[i+1])*0.5;
-          }
+        v[i*2] = value[i];
+        t[i*2] = time[i];
       }
+      for (int i = 0; i < value.length-1; i++)
+      {
+        v[i*2+1] = value[i].blend(value[i], 1.0, 0.0);
+        t[i*2+1] = (time[i]+time[i+1])*0.5;
+      }
+    }
     else if (method == LINEAR)
+    {
+      for (int i = 0; i < value.length; i++)
       {
-        for (int i = 0; i < value.length; i++)
-          {
-            v[i*2] = value[i];
-            t[i*2] = time[i];
-          }
-        for (int i = 0; i < value.length-1; i++)
-          {
-            v[i*2+1] = value[i].blend(value[i+1], 0.5, 0.5);
-            t[i*2+1] = (time[i]+time[i+1])*0.5;
-          }
+        v[i*2] = value[i];
+        t[i*2] = time[i];
       }
+      for (int i = 0; i < value.length-1; i++)
+      {
+        v[i*2+1] = value[i].blend(value[i+1], 0.5, 0.5);
+        t[i*2+1] = (time[i]+time[i+1])*0.5;
+      }
+    }
     else if (method == INTERPOLATING)
+    {
+      for (int i = 0, j = 0; i < v.length; i++)
       {
-        for (int i = 0, j = 0; i < v.length; i++)
-          {
-            if ((i&1) == 0)
-              {
-                v[i] = value[j];
-                t[i] = time[j];
-              }
-            else
-              {
-                TimePoint p1 = getPoint(time, value, smoothness, j-1);
-                TimePoint p2 = getPoint(time, value, smoothness, j);
-                TimePoint p3 = getPoint(time, value, smoothness, j+1);
-                TimePoint p4 = getPoint(time, value, smoothness, j+2);
-                TimePoint interp = calcInterpPoint(p1, p2, p3, p4);
-                v[i] = interp.value;
-                t[i] = interp.time;
-                j++;
-              }
-          }
+        if ((i&1) == 0)
+        {
+          v[i] = value[j];
+          t[i] = time[j];
+        }
+        else
+        {
+          TimePoint p1 = getPoint(time, value, smoothness, j-1);
+          TimePoint p2 = getPoint(time, value, smoothness, j);
+          TimePoint p3 = getPoint(time, value, smoothness, j+1);
+          TimePoint p4 = getPoint(time, value, smoothness, j+2);
+          TimePoint interp = calcInterpPoint(p1, p2, p3, p4);
+          v[i] = interp.value;
+          t[i] = interp.time;
+          j++;
+        }
       }
+    }
     else
+    {
+      for (int i = 0; i < value.length; i++)
       {
-        for (int i = 0; i < value.length; i++)
-          {
-            if (i > 0)
-            {
-              v[i*2-1] = value[i].blend(value[i-1], 0.5, 0.5);
-              t[i*2-1] = (time[i]+time[i-1])*0.5;
-            }
-            TimePoint p1 = getPoint(time, value, smoothness, i-1);
-            TimePoint p2 = getPoint(time, value, smoothness, i);
-            TimePoint p3 = getPoint(time, value, smoothness, i+1);
-            TimePoint approx = calcApproxPoint(p1, p2, p3);
-            v[i*2] = approx.value;
-            t[i*2] = approx.time;
-          }
+        if (i > 0)
+        {
+          v[i*2-1] = value[i].blend(value[i-1], 0.5, 0.5);
+          t[i*2-1] = (time[i]+time[i-1])*0.5;
+        }
+        TimePoint p1 = getPoint(time, value, smoothness, i-1);
+        TimePoint p2 = getPoint(time, value, smoothness, i);
+        TimePoint p3 = getPoint(time, value, smoothness, i+1);
+        TimePoint approx = calcApproxPoint(p1, p2, p3);
+        v[i*2] = approx.value;
+        t[i*2] = approx.time;
       }
+    }
     for (int i = 0; i < smoothness.length-1; i++)
-      {
-        s[i*2] = smoothness[i].getSmoother();
-        s[i*2+1] = new Smoothness();
-      }
+    {
+      s[i*2] = smoothness[i].getSmoother();
+      s[i*2+1] = new Smoothness();
+    }
     s[(smoothness.length-1)*2] = smoothness[smoothness.length-1].getSmoother();
     Timecourse tc = new Timecourse(v, t, s);
     tc.subdivideAdaptively = subdivideAdaptively;
@@ -374,30 +374,30 @@ public class Timecourse
     if (time.length == 0)
       return null;
     if (time.length == 1)
-    return value[0];
+      return value[0];
     if (t <= time[0])
       t = time[0];
     if (t >= time[time.length-1])
       t = time[time.length-1];
     if (method == DISCONTINUOUS)
-      {
-        // Return the most recent value.
+    {
+      // Return the most recent value.
 
-        int i;
-        for (i = 1; i < time.length && t > time[i]; i++);
-        return value[i-1];
-      }
+      int i;
+      for (i = 1; i < time.length && t >= time[i]; i++);
+      return value[i-1];
+    }
     if (method == LINEAR)
-      {
-        // Simply use linear interpolation.
+    {
+      // Simply use linear interpolation.
 
-        int i;
-        for (i = 1; i < time.length && t > time[i]; i++);
-        if (time[i-1] == time[i])
-          return value[i];
-        double fract = (t-time[i-1])/(time[i]-time[i-1]);
-        return value[i-1].blend(value[i], 1.0-fract, fract);
-      }
+      int i;
+      for (i = 1; i < time.length && t > time[i]; i++);
+      if (time[i-1] == time[i])
+        return value[i];
+      double fract = (t-time[i-1])/(time[i]-time[i-1]);
+      return value[i-1].blend(value[i], 1.0-fract, fract);
+    }
     if (time.length < 7)
     {
       // Subdivide the entire timecourse until it has enough points to use the local subdivision method.
@@ -415,7 +415,7 @@ public class Timecourse
     else
       subdivideLocalApprox(t, value, time, smoothness, v1, t1, s1);
     int numSubdivisions = 1;
-    int minSubdivisions = (method == INTERPOLATING ? 1 : 3);
+    int minSubdivisions = (method == INTERPOLATING ? 5 : 9);
     if (!subdivideAdaptively)
       minSubdivisions = FIXED_SUBDIVISION_LEVELS;
     while (true)
@@ -428,12 +428,11 @@ public class Timecourse
         for (i = 1; i < t1.length && t > t1[i]; i++);
         if (t1[i-1] == t1[i])
           return v1[i];
-        double delta = t-t1[i-1];
-        if (delta < 1.0/30.0 || !subdivideAdaptively)
+        if (t1[i]-t1[i-1] < 1.0/120.0 || !subdivideAdaptively)
         {
           // Use linear interpolation to get the final value.
 
-          double fract = delta/(t1[i]-t1[i-1]);
+          double fract = (t-t1[i-1])/(t1[i]-t1[i-1]);
           return v1[i-1].blend(v1[i], 1.0-fract, fract);
         }
       }
@@ -456,7 +455,7 @@ public class Timecourse
       timepoints (v2, t2, s2) found by subdividing the initial timepoints around t. */
 
   private void subdivideLocalInterp(double t, Keyframe v1[], double t1[], Smoothness s1[],
-      Keyframe v2[], double t2[], Smoothness s2[])
+                                    Keyframe v2[], double t2[], Smoothness s2[])
   {
     int i;
     for (i = 1; i < t1.length && t > t1[i]; i++);
@@ -497,7 +496,7 @@ public class Timecourse
   }
 
   private void subdivideLocalApprox(double t, Keyframe v1[], double t1[], Smoothness s1[],
-      Keyframe v2[], double t2[], Smoothness s2[])
+                                    Keyframe v2[], double t2[], Smoothness s2[])
   {
     int i;
     for (i = 1; i < t1.length && t > t1[i]; i++);

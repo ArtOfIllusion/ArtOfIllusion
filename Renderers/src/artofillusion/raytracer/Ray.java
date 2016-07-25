@@ -11,6 +11,7 @@
 package artofillusion.raytracer;
 
 import artofillusion.math.*;
+import java.util.concurrent.atomic.*;
 
 /**
  * A Ray is defined by two vectors: an origin and a direction.  In addition, every ray has
@@ -27,7 +28,7 @@ public class Ray
   public final Vec3 tempVec1, tempVec2, tempVec3, tempVec4;
   public final RaytracerContext rt;
   private int id;
-  private static int nextid = 0;
+  private static AtomicInteger nextid = new AtomicInteger();
   
   public Ray(RaytracerContext rt)
   {
@@ -38,7 +39,7 @@ public class Ray
     tempVec2 = new Vec3();
     tempVec3 = new Vec3();
     tempVec4 = new Vec3();
-    id = nextid++;
+    id = getNextID();
   }
 
   /**
@@ -80,9 +81,9 @@ public class Ray
     rt.rtImplicitPool.reset();
   }
 
-  private synchronized static int getNextID()
+  private static int getNextID()
   {
-    return nextid++;
+    return nextid.getAndIncrement();
   }
 
   /** Determine whether this ray intersects an object.  This returns a SurfaceIntersection describing the

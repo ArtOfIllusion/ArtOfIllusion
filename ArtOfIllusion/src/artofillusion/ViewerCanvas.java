@@ -52,7 +52,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     try
     {
-      Class.forName("javax.media.opengl.GLCanvas");
+      Class.forName("com.jogamp.opengl.awt.GLCanvas");
       openGLAvailable = true;
     }
     catch (Throwable t)

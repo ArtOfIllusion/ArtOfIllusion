@@ -117,15 +117,9 @@ Art of Illusion IzPack installer xml definition file
                 <include name="*" />
             </fileset>
         </pack> -->
-        <pack id="jogl-windows-i586" name="JOGL 1.1.1 (32 bit)" preselected="no" required="no">
-            <description>OpenGL support for 32 bit OS</description>
-            <fileset dir="jogl-windows-i586" targetdir="$INSTALL_PATH/lib">
-                <include name="*" />
-            </fileset>
-        </pack>
-        <pack id="jogl-windows-AMD64" name="JOGL 1.1.1 (64 bit)" preselected="no" required="no">
-            <description>OpenGL support for 64 bit OS</description>
-            <fileset dir="jogl-windows-amd64" targetdir="$INSTALL_PATH/lib">
+        <pack id="jogl-windows" name="Jogamp JOGL 2.3.2" preselected="yes" required="no">
+            <description>OpenGL support for Windows</description>
+            <fileset dir="jogl-windows" targetdir="$INSTALL_PATH/lib">
                 <include name="*" />
             </fileset>
         </pack>

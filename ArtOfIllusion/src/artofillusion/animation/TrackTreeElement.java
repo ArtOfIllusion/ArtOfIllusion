@@ -12,7 +12,6 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import artofillusion.ui.*;
 import java.util.*;
 

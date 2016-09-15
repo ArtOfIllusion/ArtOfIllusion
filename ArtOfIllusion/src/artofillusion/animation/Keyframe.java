@@ -10,7 +10,6 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import java.io.*;
 
 /** This interface represents any object which can be used to represent a keyframe on an

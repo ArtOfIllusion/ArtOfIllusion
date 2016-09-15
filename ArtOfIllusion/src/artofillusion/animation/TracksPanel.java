@@ -15,7 +15,6 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.text.*;
 import java.util.*;
 
 /** This is the Widget which displays all of the tracks in the score. */

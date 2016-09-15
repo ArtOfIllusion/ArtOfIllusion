@@ -10,8 +10,6 @@
 
 package artofillusion.raster;
 
-import artofillusion.math.*;
-
 public class MaterialFragment extends TransparentFragment
 {
   private ObjectMaterialInfo material;

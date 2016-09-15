@@ -10,11 +10,9 @@
 
 package artofillusion.ui;
 
-import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.util.*;
 
 /** A MessageDialog is a modal dialog containing one or more lines of text, and one or more 
     buttons for the user to select from.  Clicking any of the buttons dismisses the dialog.

@@ -15,7 +15,6 @@ import artofillusion.texture.*;
 import artofillusion.material.*;
 import artofillusion.raytracer.RaytracerRenderer.*;
 
-import java.util.*;
 
 /**
  * This class holds temporary information used during {@link RaytracerRenderer} during rendering.  One instance of it is

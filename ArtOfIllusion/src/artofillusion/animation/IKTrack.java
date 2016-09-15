@@ -375,7 +375,7 @@ public class IKTrack extends Track
     {
       Skeleton skeleton = info.getSkeleton();
       constraintList.removeAll();
-      if (tempConstraints.size() == 0)
+      if (tempConstraints.isEmpty())
       {
         constraintList.add("(No Constraints)");
         constraintList.setEnabled(false);

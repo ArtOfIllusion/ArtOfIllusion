@@ -211,7 +211,7 @@ public class SeamFinder
 
         // Evaluate the new group.
 
-        if (edges.size() == 0 || faces.size() > meshFace.length/4)
+        if (edges.isEmpty() || faces.size() > meshFace.length/4)
           break;
         double distortion = computePatchDistortion(meshVertex[vertIndex].r, edges);
         if (distortion > vertexDistortion[vertIndex])
@@ -381,7 +381,7 @@ public class SeamFinder
       if (nextPatch >= patches.size())
         nextPatch = 0;
       Patch patch = patches.get(nextPatch);
-      if (patch.candidates.size() == 0)
+      if (patch.candidates.isEmpty())
       {
         // Nothing else to do with this patch, so remove it from further consideration.
 

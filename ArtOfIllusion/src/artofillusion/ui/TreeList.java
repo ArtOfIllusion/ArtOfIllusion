@@ -350,7 +350,7 @@ public class TreeList extends CustomWidget
     invalidateSize();
     if (getComponent().isDisplayable())
       getParent().layoutChildren();
-    if (selected.size() == 0)
+    if (selected.isEmpty())
       lastClickRow = -1;
     else if (selected.size() == 1)
       lastClickRow = showing.indexOf(selected.get(0));
@@ -539,7 +539,7 @@ public class TreeList extends CustomWidget
     {
       // The selected elements are being dragged.
 
-      if (selected.size() == 0)
+      if (selected.isEmpty())
         return;
       boolean above = pos.y - row*rowHeight < rowHeight/2;
       if (row >= showing.size())

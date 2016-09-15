@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-/** This class implements the dialog box in which the user can select a renderer, and 
+/** This class implements the dialog box in which the user can select a renderer, and
     specify options on how a scene should be rendered. */
 
 public class RenderSetupDialog
@@ -35,7 +35,7 @@ public class RenderSetupDialog
   private ValueField widthField, heightField, startField, endField, fpsField, subimagesField;
   private Widget configPanel;
   private BorderContainer content;
-  
+
   static Renderer currentRenderer;
   static int currentCamera = 0, width = 640, height = 480;
   static int fps = 30, subimages = 1;
@@ -49,12 +49,12 @@ public class RenderSetupDialog
     renderers = PluginRegistry.getPlugins(Renderer.class);
     if (currentRenderer == null)
       currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
-    
+
     // Find all the cameras in the scene.
-    
+
     ObjectInfo obj;
     int i, count;
-    
+
     for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
     {
       obj = theScene.getObject(i);
@@ -77,7 +77,7 @@ public class RenderSetupDialog
     }
     showDialog();
   }
-  
+
   private void showDialog()
   {
     content = new BorderContainer();
@@ -117,7 +117,7 @@ public class RenderSetupDialog
     top.add(subimagesField = new ValueField(subimages, ValueField.POSITIVE+ValueField.INTEGER), 3, 4);
     enableMovieComponents();
     content.add(top, BorderContainer.NORTH);
-    
+
     // Add the panel containing renderer-specific options.
 
     loadRenderSettings(theScene);
@@ -128,7 +128,7 @@ public class RenderSetupDialog
     if (dlg.clickedOk())
       doRender();
   }
-  
+
   private void doRender()
   {
     width = (int) widthField.getValue();
@@ -166,27 +166,27 @@ public class RenderSetupDialog
         new RenderingDialog(parent, currentRenderer, theScene, cam, cameras[currentCamera]);
     }
   }
-  
+
   /** Render a still image based on the current settings. */
-  
+
   public static void renderImmediately(BFrame parent, Scene theScene)
   {
     // Find the camera to render from.
-    
+
     ArrayList<ObjectInfo> cameras = new ArrayList<ObjectInfo>();
     for (int i = 0; i < theScene.getNumObjects(); i++)
       if (theScene.getObject(i).getObject() instanceof SceneCamera)
         cameras.add(theScene.getObject(i));
-    if (cameras.size() == 0)
+    if (cameras.isEmpty())
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
       return;
     }
     if (cameras.size() <= currentCamera)
       currentCamera = 0;
-    
+
     // Render the image.
-    
+
     if (currentRenderer == null)
       currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
     currentRenderer.getConfigPanel();
@@ -199,7 +199,7 @@ public class RenderSetupDialog
     cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
     new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo);
   }
-    
+
   private void rendererChanged()
   {
     content.remove(BorderContainer.CENTER);
@@ -208,11 +208,11 @@ public class RenderSetupDialog
     content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     UIUtilities.findWindow(content).pack();
   }
-  
+
   private void enableMovieComponents()
   {
     boolean enable = movieBox.getState();
-    
+
     startField.setEnabled(enable);
     endField.setEnabled(enable);
     fpsField.setEnabled(enable);

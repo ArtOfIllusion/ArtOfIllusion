@@ -235,7 +235,7 @@ public abstract class ObjectCollection extends Object3D
             edgeSmoothness.add(new Edge(edge.v1+start, edge.v2+start, edge.smoothness));
         start += tri.getVertices().length;
       }
-    if (allVert.size() == 0)
+    if (allVert.isEmpty())
       allVert.add(new Vec3());
 
     // Create the new mesh.

@@ -5,8 +5,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -152,7 +152,7 @@ public class PluginRegistry
   {
     try
     {
-      if (jar.imports.size() == 0 && jar.searchpath.size() == 0)
+      if (jar.imports.isEmpty() && jar.searchpath.isEmpty())
       {
         if (jar.loader == null)
           jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});

@@ -349,7 +349,7 @@ public class ArtOfIllusion
           }
         }
       }
-    if (windows.size() ==  0)
+    if (windows.isEmpty())
       quit();
   }
 

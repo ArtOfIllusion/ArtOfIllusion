@@ -121,7 +121,7 @@ public class CreateCurveTool extends EditingTool
   @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
-    if (clickPoint.size() == 0)
+    if (clickPoint.isEmpty())
       return;
     Point dragPoint = e.getPoint();
     Vec3 pos = (Vec3) clickPoint.lastElement();

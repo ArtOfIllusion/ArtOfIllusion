@@ -213,7 +213,7 @@ public class CompoundImplicitObject extends ImplicitObject
   {
     if (bounds == null)
     {
-      if (objects.size() == 0)
+      if (objects.isEmpty())
         bounds = new BoundingBox(0, 0, 0, 0, 0, 0);
       else
       {

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -21,11 +21,11 @@ import java.util.prefs.*;
     them to be opened easily. */
 
 public class RecentFiles
-{  
+{
   private static final int MAX_RECENT = 10;
-  
+
   /** Given a BMenu, fill it in with a list of items for recent files. */
-  
+
   public static void createMenu(BMenu menu)
   {
     menu.removeAll();
@@ -44,13 +44,13 @@ public class RecentFiles
       });
     }
   }
-  
+
   /** Add a File to the list of recent files. */
-  
+
   public static void addRecentFile(File file)
   {
     // Find the new list of recent files.
-    
+
     String newPath = file.getAbsolutePath();
     Preferences pref = Preferences.userNodeForPackage(RecentFiles.class);
     String recent[] = pref.get("recentFiles", "").split(File.pathSeparator);
@@ -59,7 +59,7 @@ public class RecentFiles
     for (int i = 0; i < recent.length && newFiles.size() < MAX_RECENT; i++)
       if (!newPath.equals(recent[i]))
         newFiles.add(recent[i]);
-    StringBuffer fileList = new StringBuffer();
+    StringBuilder fileList = new StringBuilder();
     for (int i = 0; i < newFiles.size(); i++)
     {
       if (i > 0)
@@ -67,9 +67,9 @@ public class RecentFiles
       fileList.append(newFiles.get(i));
     }
     pref.put("recentFiles", fileList.toString());
-    
+
     // Rebuild the menus in all open windows.
-    
+
     EditingWindow win[] = ArtOfIllusion.getWindows();
     for (int i = 0; i < win.length; i++)
       if (win[i] instanceof LayoutWindow)

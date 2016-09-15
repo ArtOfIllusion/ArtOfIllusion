@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image;
@@ -18,11 +18,11 @@ import java.util.*;
 public class HDRDecoder
 {
   /** Create an HDRImage from a file in RADIANCE .hdr format. */
-  
+
   public static HDRImage createImage(File file) throws IOException
   {
     // Make sure this is really an .hdr file.
-    
+
     byte signature[] = "#?RADIANCE".getBytes("ISO-8859-1");
     byte fileSignature[] = new byte [signature.length];
     DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
@@ -35,9 +35,9 @@ public class HDRDecoder
           throw new IOException("Not an .hdr file");
         }
     in.reset();
-    
+
     // Read the header of the file.
-    
+
     boolean xyze = false;
     String s;
     while ((s = readLine(in)).length() > 0)
@@ -45,9 +45,9 @@ public class HDRDecoder
         if (s.startsWith("FORMAT"))
           xyze = (s.contains("xyze"));
       }
-    
+
     // Parse the resolution string.
-    
+
     String resolution = readLine(in);
     StringTokenizer st = new StringTokenizer(resolution);
     String res[] = new String [4];
@@ -73,9 +73,9 @@ public class HDRDecoder
         in.close();
         throw new IOException("Error parsing image file.");
       }
-    
+
     // Read the pixel data.
-    
+
     byte map[][] = new byte [4][xres*yres];
     byte buf[] = new byte [4];
     for (int row = 0; row < yres; row++)
@@ -92,14 +92,14 @@ public class HDRDecoder
           }
         else
           step = 1;
-        
+
         // Read the data for the next row.
-        
+
         in.readFully(buf);
         if (buf[0] == 2 && buf[1] == 2 && buf[2] >= 0)
           {
             // Use the "new" RLE compression.
-            
+
             for (int component = 0; component < 4; component++)
               {
                 int col = 0, pos = start;
@@ -129,7 +129,7 @@ public class HDRDecoder
         else
           {
             // Use the "old" RLE compression.
-            
+
             int pos = start;
             for (int col = 0; col < xres; col++)
               {
@@ -164,9 +164,9 @@ public class HDRDecoder
           }
       }
     in.close();
-    
+
     // If the data is stored as XYZE components, convert it to RGBE.
-    
+
     if (xyze)
       {
         for (int i = 0; i < map[0].length; i++)
@@ -181,12 +181,12 @@ public class HDRDecoder
       }
     return new HDRImage(map[0], map[1], map[2], map[3], xres, yres);
   }
-  
+
   /** Read a line of ASCII text from the input stream. */
-  
+
   private static String readLine(InputStream in) throws IOException
   {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     int c;
     while ((c = in.read()) > -1 && c != '\n')
       {

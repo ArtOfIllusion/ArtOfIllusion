@@ -290,7 +290,7 @@ public class ExternalObject extends ObjectWrapper
     String externalPathParts[] = externalPath.split(splitExpr);
     int numCommon;
     for (numCommon = 0; numCommon < scenePathParts.length && numCommon < externalPathParts.length && scenePathParts[numCommon].equals(externalPathParts[numCommon]); numCommon++);
-    StringBuffer relPath = new StringBuffer();
+    StringBuilder relPath = new StringBuilder();
     for (int i = numCommon; i < scenePathParts.length; i++)
       relPath.append("..").append(File.separator);
     for (int i = numCommon; i < externalPathParts.length; i++)

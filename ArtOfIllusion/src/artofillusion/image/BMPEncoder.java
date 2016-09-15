@@ -153,7 +153,7 @@ public class BMPEncoder
 
   private void makeDescriptionString()
   {
-    StringBuffer sb = new StringBuffer(100);
+    StringBuilder sb = new StringBuilder(100);
     sb.append("Art of Illusion v"+ArtOfIllusion.getVersion()+"\n");
     sb.append("");
     description = new String(sb).getBytes();

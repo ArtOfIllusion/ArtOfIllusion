@@ -145,7 +145,7 @@ public class DefaultToolButton extends ToolButton
       // can default the macro from other attributes
       String macro = style.attributes.get(type + ".icon");
       if (macro == null || macro.length() == 0) {
-          StringBuffer sb = new StringBuffer(64);
+          StringBuilder sb = new StringBuilder(64);
 
           String att = style.attributes.get(type + ".background");
           if (att == null) att = style.attributes.get("background");

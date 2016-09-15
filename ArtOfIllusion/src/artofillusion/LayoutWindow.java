@@ -342,7 +342,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   private void dockableWidgetMoved()
   {
-    StringBuffer config = new StringBuffer();
+    StringBuilder config = new StringBuilder();
     for (int i = 0; i < dock.length; i++)
     {
       for (int j = 0; j < dock[i].getTabCount(); j++)

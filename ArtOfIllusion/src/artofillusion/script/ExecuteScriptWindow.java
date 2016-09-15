@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.script;
@@ -29,7 +29,7 @@ public class ExecuteScriptWindow extends BFrame
   private static File scriptDir;
   private static String lastScript;
   private static String lastScriptName = "Untitled";
-  
+
   public ExecuteScriptWindow(LayoutWindow win)
   {
     super(lastScriptName);
@@ -61,15 +61,15 @@ public class ExecuteScriptWindow extends BFrame
     scriptText.requestFocus();
     setVisible(true);
   }
-  
+
   private void closeWindow()
   {
     lastScript = scriptText.getText();
     dispose();
   }
-  
+
   /** Prompt the user to load a script. */
-  
+
   private void loadScript()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectScriptToLoad"));
@@ -83,7 +83,7 @@ public class ExecuteScriptWindow extends BFrame
     try
     {
       BufferedReader in = new BufferedReader(new FileReader(f));
-      StringBuffer buf = new StringBuffer();
+      StringBuilder buf = new StringBuilder();
       int c;
       while ((c = in.read()) != -1)
         buf.append((char) c);
@@ -108,9 +108,9 @@ public class ExecuteScriptWindow extends BFrame
     setScriptNameFromFile(filename);
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
-  
+
   /** Prompt the user to save a script. */
-  
+
   private void saveScript()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
@@ -120,9 +120,9 @@ public class ExecuteScriptWindow extends BFrame
     if (fc.getSelectedFile() == null)
       return;
     scriptDir = fc.getDirectory();
-    
+
     // Write the script to disk.
-    
+
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     File f = fc.getSelectedFile();
     try
@@ -139,7 +139,7 @@ public class ExecuteScriptWindow extends BFrame
     setScriptNameFromFile(fc.getSelectedFile().getName());
 
     // Update the Scripts menus in all windows.
-    
+
     EditingWindow allWindows[] = ArtOfIllusion.getWindows();
     for (int i = 0; i < allWindows.length; i++)
       if (allWindows[i] instanceof LayoutWindow)
@@ -158,9 +158,9 @@ public class ExecuteScriptWindow extends BFrame
     lastScriptName = scriptName;
     setTitle(scriptName);
   }
-  
+
   /** Execute the script. */
-  
+
   private void executeScript()
   {
     String language = (String) languageChoice.getSelectedValue();
@@ -175,7 +175,7 @@ public class ExecuteScriptWindow extends BFrame
       if (line > -1)
         {
           // Find the start of the line containing the error.
-          
+
           String text = scriptText.getText();
           int index = 0;
           for (int i = 0; i < line-1; i++)

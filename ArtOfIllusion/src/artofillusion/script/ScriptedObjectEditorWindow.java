@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.script;
@@ -28,9 +28,9 @@ public class ScriptedObjectEditorWindow extends BFrame
   private BComboBox languageChoice;
   private String scriptName;
   private Runnable onClose;
-  
+
   private static File scriptDir;
-  
+
   public ScriptedObjectEditorWindow(EditingWindow parent, ObjectInfo obj, Runnable onClose)
   {
     super("Script '"+ obj.getName() +"'");
@@ -64,16 +64,16 @@ public class ScriptedObjectEditorWindow extends BFrame
     scriptText.requestFocus();
     setVisible(true);
   }
-  
+
   /** Display a dialog for editing the parameters. */
-  
+
   private void editParameters()
   {
     new ParametersDialog();
   }
-  
+
   /** Prompt the user to load a script. */
-  
+
   private void loadScript()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectScriptToLoad"));
@@ -87,7 +87,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     try
       {
       BufferedReader in = new BufferedReader(new FileReader(f));
-      StringBuffer buf = new StringBuffer();
+      StringBuilder buf = new StringBuilder();
       int c;
       while ((c = in.read()) != -1)
         buf.append((char) c);
@@ -111,9 +111,9 @@ public class ScriptedObjectEditorWindow extends BFrame
     setScriptNameFromFile(filename);
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
-  
+
   /** Prompt the user to save a script. */
-  
+
   private void saveScript()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
@@ -123,9 +123,9 @@ public class ScriptedObjectEditorWindow extends BFrame
     if (fc.getSelectedFile() == null)
       return;
     scriptDir = fc.getDirectory();
-    
+
     // Write the script to disk.
-    
+
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     File f = fc.getSelectedFile();
     try
@@ -154,7 +154,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   }
 
   /** Commit changes to the scripted object. */
-  
+
   private void commitChanges()
   {
     ScriptedObject so = (ScriptedObject) info.getObject();
@@ -170,7 +170,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   }
 
   /** This is an inner class for editing the list of parameters on the object. */
-  
+
   private class ParametersDialog extends BDialog
   {
     private ScriptedObject script;
@@ -180,7 +180,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     private String name[];
     private double value[];
     private int current;
-    
+
     public ParametersDialog()
     {
       super(ScriptedObjectEditorWindow.this, Translate.text("objectParameters"), true);
@@ -217,9 +217,9 @@ public class ScriptedObjectEditorWindow extends BFrame
       UIUtilities.centerDialog(this, ScriptedObjectEditorWindow.this);
       setVisible(true);
     }
-    
+
     /** Build the list of parameters. */
-    
+
     private void buildParameterList()
     {
       paramList.removeAll();
@@ -228,9 +228,9 @@ public class ScriptedObjectEditorWindow extends BFrame
       if (name.length == 0)
         paramList.add("(no parameters)");
     }
-    
+
     /** Update the components to show the currently selected parameter. */
-    
+
     private void setSelectedParameter(int which)
     {
       if (which != paramList.getSelectedIndex())
@@ -252,9 +252,9 @@ public class ScriptedObjectEditorWindow extends BFrame
           valueField.setValue(value[which]);
         }
     }
-    
+
     /** Deal with changes to the text fields. */
-    
+
     private void textChanged(ValueChangedEvent ev)
     {
       if (current < 0 || current > name.length)
@@ -267,23 +267,23 @@ public class ScriptedObjectEditorWindow extends BFrame
       else
         value[current] = valueField.getValue();
     }
-    
+
     /** When the name field loses focus, update it in the list. */
 
     private void focusLost()
     {
       paramList.replace(current, name[current]);
     }
-    
+
     /** Deal with selection changes. */
-    
+
     private void selectionChanged()
     {
       setSelectedParameter(paramList.getSelectedIndex());
     }
-    
+
     /** Add a new parameter. */
-    
+
     private void doAdd()
     {
       String newName[] = new String [name.length+1];
@@ -298,9 +298,9 @@ public class ScriptedObjectEditorWindow extends BFrame
       setSelectedParameter(name.length-1);
       nameField.requestFocus();
     }
-    
+
     /** Remove a parameter. */
-    
+
     private void doRemove()
     {
       int which = paramList.getSelectedIndex();
@@ -319,9 +319,9 @@ public class ScriptedObjectEditorWindow extends BFrame
       buildParameterList();
       setSelectedParameter(-1);
     }
-    
+
     /** Save the changes. */
-    
+
     private void doOk()
     {
       script.setParameters(name, value);

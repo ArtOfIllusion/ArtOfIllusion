@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.translators;
@@ -37,7 +37,7 @@ public class POVExporter
     public static void exportFile(BFrame parent, Scene theScene)
     {
 	// Display a dialog box with options on how to export the scene.
-	
+
 	ValueField errorField = new ValueField(0.05, ValueField.POSITIVE);
 	BCheckBox smoothBox = new BCheckBox("Smooth Meshes", true);
 	BCheckBox includeBox = new BCheckBox("Produce Extra Includefile for Povray textures", true);
@@ -47,16 +47,16 @@ public class POVExporter
         });
 	ComponentsDialog dlg;
 	if (theScene.getSelection().length > 0)
-	    dlg = new ComponentsDialog(parent, Translate.text("exportToPOV"), 
-				       new Widget [] {exportChoice, Translate.label("maxSurfaceError"), errorField, includeBox, smoothBox}, 
+	    dlg = new ComponentsDialog(parent, Translate.text("exportToPOV"),
+				       new Widget [] {exportChoice, Translate.label("maxSurfaceError"), errorField, includeBox, smoothBox},
 				       new String [] {"", "", "", "", ""});
 	else
-	    dlg = new ComponentsDialog(parent, Translate.text("exportToPOV"), 
-				       new Widget [] {Translate.label("maxSurfaceError"), errorField, includeBox, smoothBox}, 
+	    dlg = new ComponentsDialog(parent, Translate.text("exportToPOV"),
+				       new Widget [] {Translate.label("maxSurfaceError"), errorField, includeBox, smoothBox},
 				       new String [] {"", "", "", ""});
 	if (!dlg.clickedOk())
 	    return;
-	
+
 	// Ask the user to select the output file.
 
         BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("exportToPOV"));
@@ -72,7 +72,7 @@ public class POVExporter
 	if (endpos==-1) endpos=fc.getSelectedFile().getName().length();
 	exportFileName=fc.getSelectedFile().getName().substring(0,endpos);
 	ArtOfIllusion.setCurrentDirectory(fc.getDirectory().getAbsolutePath());
-	
+
 	// Check whether file/s exist/s
 	File f=null;
 	f=new File(path, exportFileName+suffix);
@@ -118,10 +118,10 @@ public class POVExporter
               new BStandardDialog("", new String [] {Translate.text("errorExportingScene"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
 	    }
     }
-    
+
     /* Write out the scene in POV format to the specified OutputStream.  The other parameters
        correspond to the options in the dialog box displayed by exportFile(). */
-    
+
     static void writeScene(Scene theScene, OutputStream os, boolean wholeScene, double tol, boolean smooth, OutputStream os2, String includeFileName)
     {
 	PrintWriter out = new PrintWriter(os);
@@ -131,9 +131,9 @@ public class POVExporter
 	    out2=new PrintWriter(os2);
 	    bIncludeFile=true;
 	}
-	
+
 	// Write the header information.
-	
+
 	write("// POV V3.5", out, 0);
 	write("// Produced by Art of Illusion (Peter Eastman) "+ArtOfIllusion.getVersion(), out, 0);
 	write("//   and POVExporter plugin (Norbert Krieg) version 1.11", out, 0);
@@ -146,11 +146,11 @@ public class POVExporter
 	    write("//   creation date: "+new Date().toString(),out2,0);
 	    write("",out2,0);
 	}
-	
+
 	// Language spezific settings
 	write("#version 3.5;",out,0);
 	write("",out,0);
-	
+
 	// Global settings
 	// only if writeing a whole scene
 	if (wholeScene) {
@@ -158,17 +158,17 @@ public class POVExporter
 	    // Background color
 	    RGBColor color = theScene.getEnvironmentColor();
 	    write("background { color rgb <"+color.getRed()+","+color.getGreen()+","+color.getBlue()+"> }", out, 0);
-	    
+
 	    // global settings for povray
 	    write("global_settings {",out,0);
-	    
+
 	    // ambient color
 	    color=theScene.getAmbientColor();
 	    write("ambient_light <"+color.getRed()+","+color.getGreen()+","+color.getBlue()+">",out,1);
-	    
+
 	    // global settings for povray end
 	    write("}",out,0);
-	    
+
 	    // fog if present
 	    if (theScene.getFogState()) {
 		color=theScene.getFogColor();
@@ -179,7 +179,7 @@ public class POVExporter
 	    }
 	}
 	write("",out,0);
-	
+
 	// Write declarations, camera, lights and objects into file
 	int selected[] = theScene.getSelection();
 	int maxIndex=0;
@@ -206,12 +206,12 @@ public class POVExporter
 	    maxIndex=selected.length;
 	    for (int i = 0; i < maxIndex; i++) writeObjects(theScene,theScene.getObject(selected[i]),out,smooth,tol);
 	}
-	
+
 	out.flush();
     }
-    
+
     /* Write a single line to the PrintWriter, indented by the specified number of tabs. */
-    
+
     static void write(String str, PrintWriter out, int indent)
     {
 	for (int i = 0; i < indent; i++)
@@ -228,9 +228,9 @@ public class POVExporter
 	double z=Math.round(vec.z*1e6)/1e6;
 	return "<"+x+","+y+","+z+">";
     }
-    
+
     static private String cleanName (String oldName) {
-	StringBuffer workString=new StringBuffer(oldName.trim());
+	StringBuilder workString=new StringBuilder(oldName.trim());
 	for (int i=0;i<workString.length();i++) {
 	    char c=workString.charAt(i);
 	    if (! java.lang.Character.isLetterOrDigit(c)) {
@@ -239,9 +239,9 @@ public class POVExporter
 	}
 	return workString.toString();
     }
-    
+
     /* Write out a series of rotations corresponding to a coordinate system. */
-    
+
     private static void writeRotation(CoordinateSystem coords, PrintWriter out, int indent)
     {
       double [] rot=coords.getRotationAngles();
@@ -251,23 +251,23 @@ public class POVExporter
     }
 
     /* Write out an Appearance node describing a Texture. */
-    
+
     static void writeTexture(Scene theScene, ObjectInfo obj, PrintWriter out,int indent)
     {
 	// ObjectInfo obj=theScene.getObject(index);
 	Texture tex = obj.getObject().getTexture();
 	if (tex == null) return;
 	TextureSpec spec;
-	
+
 	spec = new TextureSpec();
 	tex.getAverageSpec(spec, theScene.getTime(), obj.getObject().getAverageParameterValues());
-	
+
 	String texName=cleanName(tex.getName());
 	if (tex.getID()==1) texName=cleanName(obj.getName());
 	if (DEBUG) {
 	    System.err.println("Texture "+tex.getName()+":\t"+tex.getID());
 	}
-	
+
 	write("#declare "+TEXTURE_NAME_PREFIX+texName+" = ",out,0);
 	write("texture {",out,indent);
 	write("pigment {",out,indent+1);
@@ -279,7 +279,7 @@ public class POVExporter
 	write("roughness "+spec.roughness,out,indent+2);
 	write("}",out,indent+1);
 	write("}",out,indent);
-	
+
 	/*
 	  write("emissiveColor "+spec.emissive.getRed()+" "+spec.emissive.getGreen()+" "+spec.emissive.getBlue(), out, indent+2);
 	  write("specularColor "+spec.specular.getRed()+" "+spec.specular.getGreen()+" "+spec.specular.getBlue(), out, indent+2);
@@ -290,7 +290,7 @@ public class POVExporter
 	  write("}", out, indent);
 	*/
     }
-    
+
     static void writeObjects(Scene theScene, ObjectInfo obj, PrintWriter out,boolean smooth,double tolerance) {
     // Camera setting
     // (not very good because of extra loop count - but for readability purposes of POV file better)
@@ -299,7 +299,7 @@ public class POVExporter
 	    write("// Camera settings",out,0);
 	    ObjectInfo info = (ObjectInfo)obj;
 	    CoordinateSystem coords = info.getCoords().duplicate();
-	    // nötig ???? obwohl KoSys linkshändig????
+	    // nï¿½tig ???? obwohl KoSys linkshï¿½ndig????
 	    //coords.setOrientation(coords.getZDirection().times(-1.0), coords.getUpDirection().times(1.0));
 	    Vec3 orig=coords.getOrigin();
 	    String location="location "+getVec3String(orig);
@@ -373,7 +373,7 @@ public class POVExporter
 	    float dr=light.getDecayRate();
 	    double fadeDistance=MAXIMAL_LIGHT_FADE_DISTANCE;
 	    if (dr!=0.0) fadeDistance=0.5/(new Float(dr).doubleValue());
-	    double fadePower=2.0; 
+	    double fadePower=2.0;
 	    if (fadeDistance>=5.0) fadePower=1.0;  // only linear instead of squared
 	    write("// "+ info.getName(),out,0);
 	    write("light_source {",out,0);
@@ -414,7 +414,7 @@ public class POVExporter
 	    float dr=light.getDecayRate();
 	    double fadeDistance=MAXIMAL_LIGHT_FADE_DISTANCE;
 	    if (dr!=0.0) fadeDistance=0.5/(new Float(dr).doubleValue());
-	    double fadePower=2.0;  
+	    double fadePower=2.0;
 	    if (fadeDistance>=5.0) fadePower=1.0;  // only linear instead of squared
 	    write("// "+ info.getName(),out,0);
 	    write("light_source {",out,0);
@@ -465,7 +465,7 @@ public class POVExporter
 	    if (DEBUG) {
 		System.err.println("Box:");
 		System.err.println("Mittelpunkt:"+orig.toString());
-		System.err.println("Größe:"+size.times(2.0).toString());
+		System.err.println("Grï¿½ï¿½e:"+size.times(2.0).toString());
 		System.err.println("Eckpunkte:\t(lu): "+getVec3String(orig.minus(size)));
 		System.err.println("          \t(ro): "+getVec3String(orig.plus(size)));
 		System.err.println();
@@ -495,7 +495,7 @@ public class POVExporter
                 double rot[] = coords.getRotationAngles();
 		System.err.println("Sphere:");
 		System.err.println("// Mittelpunkt:\t"+orig.toString());
-		System.err.println("// Größe:\t"+size.times(2.0).toString());
+		System.err.println("// Grï¿½ï¿½e:\t"+size.times(2.0).toString());
 		System.err.println("// Rotation (x-axis):\t"+rot[0]);
 		System.err.println("//          (y-axis):\t"+rot[1]);
 		System.err.println("//          (z-axis):\t"+rot[2]);
@@ -515,7 +515,7 @@ public class POVExporter
 	    Vec3 size=cyl.getBounds().getSize();
 	    String texName=cleanName(info.getObject().getTexture().getName());
 	    if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
-	    size.scale(0.5); 
+	    size.scale(0.5);
 	    write("// "+ info.getName(),out,0);
 	    write("cone {",out,0);
 	    write("<0,-1,0>, 1, <0,1,0>, "+ratio,out,1);  // standard sphere
@@ -529,7 +529,7 @@ public class POVExporter
                 double rot[] = coords.getRotationAngles();
 		System.err.println("Cone:");
 		System.err.println("// Mittelpunkt:\t"+orig.toString());
-		System.err.println("// Größe:\t"+size.times(2.0).toString());
+		System.err.println("// Grï¿½ï¿½e:\t"+size.times(2.0).toString());
 		System.err.println("// Rotation (x-axis):\t"+rot[0]);
 		System.err.println("//          (y-axis):\t"+rot[1]);
 		System.err.println("//          (z-axis):\t"+rot[2]);
@@ -546,10 +546,10 @@ public class POVExporter
 	    Vec3 orig=coords.getOrigin();
 	    String texName=cleanName(info.getObject().getTexture().getName());
 	    if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
-	    
+
 	    MeshVertex vert[] = trimesh.getVertices();
-	    TriangleMesh.Face face[] = (trimesh.getFaces());  
-	    
+	    TriangleMesh.Face face[] = (trimesh.getFaces());
+
 	    write("// "+ info.getName(),out,0);
 	    write("mesh2 {",out,0);
 	    write("vertex_vectors {",out,1);
@@ -568,8 +568,8 @@ public class POVExporter
 	    write(face.length+",",out,2);
 	    for (int j = 0; j < face.length; j++)
 		{
-		    if (j!=face.length-1) { 
-			write("<"+face[j].v1+","+face[j].v2+","+face[j].v3+"> ,",out,2); 
+		    if (j!=face.length-1) {
+			write("<"+face[j].v1+","+face[j].v2+","+face[j].v3+"> ,",out,2);
 		    }
 		    else {
 			write("<"+face[j].v1+","+face[j].v2+","+face[j].v3+">",out,2);
@@ -603,12 +603,12 @@ public class POVExporter
 	    if (mesh != null) {  // only if you can render the mesh
 		Vec3 vert[] = mesh.vert, norm[] = mesh.norm;
 		RenderingTriangle face[] = mesh.triangle;
-		
+
 		CoordinateSystem coords = info.getCoords();
 		Vec3 orig=coords.getOrigin();
 		String texName=cleanName(info.getObject().getTexture().getName());
 		if (info.getObject().getTexture().getID()==1) texName=cleanName(info.getName());
-		
+
 		write("mesh2 {",out,0);
 		write("vertex_vectors {",out,1);
 		write(vert.length+",",out,2);
@@ -638,8 +638,8 @@ public class POVExporter
 		write(face.length+",",out,2);
 		for (int j = 0; j < face.length; j++)
 		    {
-			if (j!=face.length-1) { 
-			    write("<"+face[j].v1+","+face[j].v2+","+face[j].v3+"> ,",out,2); 
+			if (j!=face.length-1) {
+			    write("<"+face[j].v1+","+face[j].v2+","+face[j].v3+"> ,",out,2);
 			}
 			else {
 			    write("<"+face[j].v1+","+face[j].v2+","+face[j].v3+">",out,2);
@@ -650,7 +650,7 @@ public class POVExporter
 		write(face.length+",",out,2);
 		for (int j = 0; j < face.length; j++)
 		    {
-			if (j!=face.length-1) { 
+			if (j!=face.length-1) {
 			    write("<"+face[j].n1+","+face[j].n2+","+face[j].n3+"> ,",out,2);
 			}
 			else {
@@ -658,7 +658,7 @@ public class POVExporter
 			}
 		    }
 		write("}",out,1);
-		
+
 		write("texture { "+TEXTURE_NAME_PREFIX+texName+" }",out,1);
                 writeRotation(coords,out,1);
                 write("translate "+getVec3String(orig),out,1);

@@ -20,7 +20,7 @@ import java.awt.*;
 
 /** The CurveEditorWindow class represents the window for editing Curve objects. */
 
-public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
+public class CurveEditorWindow extends MeshEditorWindow
 {
   protected BMenu editMenu, meshMenu, smoothMenu;
   protected BMenuItem editMenuItem[], meshMenuItem[];

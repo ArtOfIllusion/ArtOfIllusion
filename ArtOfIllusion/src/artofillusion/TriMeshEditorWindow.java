@@ -891,7 +891,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         score += (dot > 0.0 ? dot : -dot);
         scoreVec.addElement(new EdgeScore(i, score));
       }
-    if (scoreVec.size() == 0)
+    if (scoreVec.isEmpty())
       return;
     
     // Sort them.
@@ -2186,7 +2186,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     for (int i = 0; i < selected.length; i++)
       if (selected[i])
         faces.addElement(i);
-    if (faces.size() == 0)
+    if (faces.isEmpty())
       return;
     for (Integer face : faces)
     {
@@ -2313,7 +2313,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     for (i = 0; i < selected.length; i++)
       if (selected[i])
         edges.addElement(ed[i]);
-    if (edges.size() == 0)
+    if (edges.isEmpty())
       return;
     Edge first = edges.elementAt(0), last = first;
     Vector<Edge> ordered = new Vector<Edge>();

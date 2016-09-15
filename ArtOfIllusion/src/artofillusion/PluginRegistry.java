@@ -152,7 +152,7 @@ public class PluginRegistry
   {
     try
     {
-      if (jar.imports.size() == 0 && jar.searchpath.size() == 0)
+      if (jar.imports.isEmpty() && jar.searchpath.isEmpty())
       {
         if (jar.loader == null)
           jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});

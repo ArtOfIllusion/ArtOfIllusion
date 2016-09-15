@@ -599,7 +599,7 @@ public class Scene
     textures.removeElementAt(which);
     for (int i = 0; i < textureListeners.size(); i++)
       textureListeners.elementAt(i).itemRemoved(which, tex);
-    if (textures.size() == 0)
+    if (textures.isEmpty())
       {
         UniformTexture defTex = new UniformTexture();
         defTex.setName("Default Texture");

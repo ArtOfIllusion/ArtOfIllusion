@@ -177,7 +177,7 @@ public class RenderSetupDialog
     for (int i = 0; i < theScene.getNumObjects(); i++)
       if (theScene.getObject(i).getObject() instanceof SceneCamera)
         cameras.add(theScene.getObject(i));
-    if (cameras.size() == 0)
+    if (cameras.isEmpty())
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
       return;

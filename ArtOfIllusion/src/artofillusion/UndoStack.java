@@ -67,7 +67,7 @@ public class UndoStack
   
   public void executeUndo()
   {
-    if (undoList.size() == 0)
+    if (undoList.isEmpty())
       return;
     UndoRecord record = (UndoRecord) undoList.removeLast();
     redoList.add(record.execute());
@@ -79,7 +79,7 @@ public class UndoStack
   
   public void executeRedo()
   {
-    if (redoList.size() == 0)
+    if (redoList.isEmpty())
       return;
     UndoRecord record = (UndoRecord) redoList.removeLast();
     undoList.add(record.execute());

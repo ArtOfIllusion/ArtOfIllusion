@@ -81,6 +81,7 @@ public class ThreadManager
     for (int i = 0; i < thread.length; i++)
     {
       thread[i] = new Thread("Worker thread "+(i+1)) {
+        @Override
         public void run()
         {
           // Repeatedly perform the task until we are finished.

@@ -23,6 +23,7 @@ public class NullKeyframe implements Keyframe
 
   /* Create a duplicate of this keyframe. */
   
+  @Override
   public Keyframe duplicate()
   {
     return new NullKeyframe();
@@ -30,6 +31,7 @@ public class NullKeyframe implements Keyframe
 
   /* Create a duplicate of this keyframe for a (possibly different) object. */
   
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new NullKeyframe();
@@ -37,6 +39,7 @@ public class NullKeyframe implements Keyframe
   
   /* Get the list of graphable values for this keyframe. */
   
+  @Override
   public double [] getGraphValues()
   {
     return new double [0];
@@ -44,6 +47,7 @@ public class NullKeyframe implements Keyframe
   
   /* Set the list of graphable values for this keyframe. */
   
+  @Override
   public void setGraphValues(double values[])
   {
   }
@@ -51,16 +55,19 @@ public class NullKeyframe implements Keyframe
   /* These methods return a new Keyframe which is a weighted average of this one and one,
      two, or three others. */
   
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     return new NullKeyframe();
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     return new NullKeyframe();
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     return new NullKeyframe();
@@ -68,6 +75,7 @@ public class NullKeyframe implements Keyframe
 
   /* Determine whether this keyframe is identical to another one. */
   
+  @Override
   public boolean equals(Keyframe k)
   {
     return (k instanceof NullKeyframe);
@@ -75,6 +83,7 @@ public class NullKeyframe implements Keyframe
   
   /* Write out a representation of this keyframe to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
   }

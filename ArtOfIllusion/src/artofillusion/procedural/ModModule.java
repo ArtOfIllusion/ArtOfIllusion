@@ -30,6 +30,7 @@ public class ModModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = false;
@@ -37,6 +38,7 @@ public class ModModule extends Module
 
   /* Calculate the average value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -96,6 +98,7 @@ public class ModModule extends Module
 
   /* The error is calculate at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -105,6 +108,7 @@ public class ModModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)

@@ -43,6 +43,7 @@ public class ShatterTrack extends Track
   
   /* Modify the scale of the object. */
   
+  @Override
   public void apply(double time)
   {
     if (time <= startTime)
@@ -55,6 +56,7 @@ public class ShatterTrack extends Track
   
   /* Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     ShatterTrack t = new ShatterTrack((ObjectInfo) obj);
@@ -76,6 +78,7 @@ public class ShatterTrack extends Track
   
   /* Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     ShatterTrack t = (ShatterTrack) tr;
@@ -96,6 +99,7 @@ public class ShatterTrack extends Track
   
   /* Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return new double [0];
@@ -103,6 +107,7 @@ public class ShatterTrack extends Track
   
   /* Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return -1;
@@ -110,12 +115,14 @@ public class ShatterTrack extends Track
   
   /* Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
   }
   
   /* Shatter tracks are never null. */
   
+  @Override
   public boolean isNullTrack()
   {
     return false;
@@ -123,6 +130,7 @@ public class ShatterTrack extends Track
 
   /* Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
@@ -130,6 +138,7 @@ public class ShatterTrack extends Track
   
   /* Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -137,6 +146,7 @@ public class ShatterTrack extends Track
   
   /* Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -144,6 +154,7 @@ public class ShatterTrack extends Track
 
   /* Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(0); // Version number
@@ -161,6 +172,7 @@ public class ShatterTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -180,6 +192,7 @@ public class ShatterTrack extends Track
 
   /** This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(ShatterTrack.this.getName());

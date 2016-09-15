@@ -71,6 +71,7 @@ public class ValueSelector extends RowContainer
     add(field = new ValueField(value, ValueField.NONE));
     field.setValueChecker(new ValueChecker()
     {
+      @Override
       public boolean isValid(double val)
       {
         return (val >= minimum && val <= maximum);
@@ -134,6 +135,7 @@ public class ValueSelector extends RowContainer
     this.maximum = max;
   }
 
+  @Override
   public void setEnabled(boolean enabled)
   {
     super.setEnabled(enabled);

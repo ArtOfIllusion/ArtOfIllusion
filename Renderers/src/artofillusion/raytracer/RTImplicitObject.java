@@ -48,6 +48,7 @@ public class RTImplicitObject extends RTObject
 
   /** Get the TextureMapping for this object. */
 
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return theObject.getTextureMapping();
@@ -55,6 +56,7 @@ public class RTImplicitObject extends RTObject
 
   /** Get the MaterialMapping for this object. */
 
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return theObject.getMaterialMapping();
@@ -62,6 +64,7 @@ public class RTImplicitObject extends RTObject
 
   /** Determine whether the given ray intersects this cube. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 rorig = r.getOrigin(), rdir = r.getDirection();
@@ -337,6 +340,7 @@ public class RTImplicitObject extends RTObject
 
   /** Get a bounding box for this cube. */
 
+  @Override
   public BoundingBox getBounds()
   {
     BoundingBox bounds = new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
@@ -346,6 +350,7 @@ public class RTImplicitObject extends RTObject
 
   /** Determine whether any part of the surface lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     return node.intersects(getBounds());
@@ -353,6 +358,7 @@ public class RTImplicitObject extends RTObject
 
   /** Get the transformation from world coordinates to the object's local coordinates. */
 
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -393,11 +399,13 @@ public class RTImplicitObject extends RTObject
       maxt = maxDist;
     }
 
+    @Override
     public RTObject getObject()
     {
       return obj;
     }
 
+    @Override
     public int numIntersections()
     {
       if (numIntersections == -1)
@@ -405,16 +413,19 @@ public class RTImplicitObject extends RTObject
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       p.set(rint[n]);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       return tint[n];
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       n.set(norm);
@@ -436,6 +447,7 @@ public class RTImplicitObject extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       TextureMapping map = obj.theObject.getTextureMapping();
@@ -449,6 +461,7 @@ public class RTImplicitObject extends RTObject
       }
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       n.set(norm);

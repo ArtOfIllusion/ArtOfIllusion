@@ -222,6 +222,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the width of the image. */
 
+  @Override
   public int getWidth()
   {
     return width[0];
@@ -229,6 +230,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the height of the image. */
 
+  @Override
   public int getHeight()
   {
     return height[0];
@@ -236,6 +238,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the number of components in the image. */
 
+  @Override
   public int getComponentCount()
   {
     return components;
@@ -254,6 +257,7 @@ public class MIPMappedImage extends ImageMap
       purposes of interpolation, the image should be treated as wrapping around so that 
       opposite edges touch each other. */
 
+  @Override
   public float getComponent(int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
@@ -334,6 +338,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the average value for a particular component, over the entire image. */
 
+  @Override
   public float getAverageComponent(int component)
   {
     if (component >= components)
@@ -346,6 +351,7 @@ public class MIPMappedImage extends ImageMap
       (xsize, ysize).  wrapx and wrapy specify whether, for purposes of interpolation, the 
       image should be treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getColor(RGBColor theColor, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
@@ -451,6 +457,7 @@ public class MIPMappedImage extends ImageMap
       wrapx and wrapy specify whether, for purposes of interpolation, the image should be 
       treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getGradient(Vec2 grad, int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
@@ -545,6 +552,7 @@ public class MIPMappedImage extends ImageMap
   /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
       (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
 
+  @Override
   public Image getPreview()
   {
     return preview;
@@ -629,6 +637,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Serialize an image to an output stream. */
 
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     // Copy the image data into a BufferedImage.

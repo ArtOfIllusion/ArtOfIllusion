@@ -59,6 +59,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     content.add(tools = new ToolPalette(1, 3), 0, 0, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, null, null));
     EditingTool metaTool, altTool;
     tools.addTool(defaultTool = new SkeletonTool(this, false) {
+      @Override
       protected void adjustMesh(Mesh newMesh)
       {
         adjustMeshForSkeleton();
@@ -123,6 +124,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -134,6 +136,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   /** Get the object being edited in this window. */
   
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
@@ -147,6 +150,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     objInfo.clearCachedMeshes();
   }
   
+  @Override
   public void setMesh(Mesh mesh)
   {
     setObject((Object3D) mesh);
@@ -154,6 +158,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   /** Get the selection mode. */
   
+  @Override
   public int getSelectionMode()
   {
     return POINT_MODE;
@@ -161,12 +166,14 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   /** This is ignored, since this window only supports one selection mode. */
   
+  @Override
   public void setSelectionMode(int mode)
   {
   }
   
   /** Get an array of flags specifying which vertices are selected. */
   
+  @Override
   public boolean [] getSelection()
   {
     return selected;
@@ -174,6 +181,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   
   /** Set which vertices are selected. */
   
+  @Override
   public void setSelection(boolean selected[])
   {
     this.selected = selected;
@@ -184,6 +192,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   /** Selection distance is not used for anything in this window, so this simply returns
       0 for selected vertices and -1 for unselected vertices. */
 
+  @Override
   public int[] getSelectionDistance()
   {
     int dist[] = new int [selected.length];
@@ -194,6 +203,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   }
 
   
+  @Override
   protected void doOk()
   {
     parentWindow.setUndoRecord(new UndoRecord(parentWindow, false, UndoRecord.COPY_TRACK, new Object [] {track, track.duplicate(track.getParent())}));
@@ -206,6 +216,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
       onClose.run();
   }
   
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -252,6 +263,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     final Actor actor = Actor.getActor(info.getObject());
     final Actor.ActorKeyframe key = new Actor.ActorKeyframe();
     new ActorEditorWindow(this, info, actor, key, new Runnable() {
+      @Override
       public void run()
       {
         Skeleton newSkeleton = ((Gesture) key.createObjectKeyframe(actor)).getSkeleton();
@@ -297,12 +309,14 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
   
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
   }
 
   /** This method does nothing, since it is not permitted to modify the mesh topology. */
 
+  @Override
   public void deleteCommand()
   {
   }

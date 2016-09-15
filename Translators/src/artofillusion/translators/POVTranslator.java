@@ -17,25 +17,30 @@ import buoy.widget.*;
 
 public class POVTranslator implements Translator
 {
+  @Override
   public String getName()
   {
     return "Povray V3.5 (.pov)";
   }
 
+  @Override
   public boolean canImport()
   {
     return false;
   }
   
+  @Override
   public boolean canExport()
   {
     return true;
   }
   
+  @Override
   public void importFile(BFrame parent)
   {
   }
   
+  @Override
   public void exportFile(BFrame parent, Scene theScene)
   {
       POVExporter.exportFile(parent,theScene);

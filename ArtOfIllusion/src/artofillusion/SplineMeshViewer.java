@@ -62,6 +62,7 @@ public class SplineMeshViewer extends MeshViewer
     super.updateImage();
   }
 
+  @Override
   protected void drawObject()
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
@@ -253,6 +254,7 @@ public class SplineMeshViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
@@ -368,6 +370,7 @@ public class SplineMeshViewer extends MeshViewer
     }
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -381,6 +384,7 @@ public class SplineMeshViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();

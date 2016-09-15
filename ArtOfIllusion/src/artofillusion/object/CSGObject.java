@@ -50,6 +50,7 @@ public class CSGObject extends Object3D
   
   /** Create a new object which is an exact duplicate of this one. */
   
+  @Override
   public Object3D duplicate()
   {
     CSGObject obj = new CSGObject(obj1, obj2, operation);
@@ -60,6 +61,7 @@ public class CSGObject extends Object3D
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
   
+  @Override
   public void copyObject(Object3D obj)
   {
     CSGObject csg = (CSGObject) obj;
@@ -132,6 +134,7 @@ public class CSGObject extends Object3D
 
   /** Get a BoundingBox which just encloses the object. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (bounds == null)
@@ -180,6 +183,7 @@ public class CSGObject extends Object3D
 
   /** Resize the object. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     Vec3 size = bounds.getSize(), objSize;
@@ -214,6 +218,7 @@ public class CSGObject extends Object3D
 
   /** Tells whether the object can be converted to a TriangleMesh. */
   
+  @Override
   public int canConvertToTriangleMesh()
   {
     if (obj1.getObject().canConvertToTriangleMesh() == EXACTLY && obj2.getObject().canConvertToTriangleMesh() == EXACTLY)
@@ -223,6 +228,7 @@ public class CSGObject extends Object3D
   
   /** This object is closed if both of its component objects are closed. */
   
+  @Override
   public boolean isClosed()
   {
     return (obj1.getObject().isClosed() && obj2.getObject().isClosed());
@@ -230,6 +236,7 @@ public class CSGObject extends Object3D
   
   /** Create a triangle mesh representing this object. */
 
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     TriangleMesh mesh1, mesh2;
@@ -244,11 +251,13 @@ public class CSGObject extends Object3D
   
   /** Allow the user to edit this object. */
   
+  @Override
   public boolean isEditable()
   {
     return true;
   }
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new CSGEditorWindow(parent, info.getName(), this, cb);
@@ -256,6 +265,7 @@ public class CSGObject extends Object3D
     
   /** When setting the texture or material, also set it for each of the component objects. */
      
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
@@ -265,6 +275,7 @@ public class CSGObject extends Object3D
     obj2.getObject().setTexture(tex, mapping);
   }
 
+  @Override
   public void setMaterial(Material mat, MaterialMapping mapping)
   {
     super.setMaterial(mat, mapping);
@@ -276,6 +287,7 @@ public class CSGObject extends Object3D
 
   /** Get a RenderingMesh for this object. */
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     if (interactive)
@@ -293,6 +305,7 @@ public class CSGObject extends Object3D
   
   /** Get a WireframeMesh for this object. */
   
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     if (cachedWire != null)
@@ -326,6 +339,7 @@ public class CSGObject extends Object3D
 
   /** Save this object to an output stream. */
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -381,6 +395,7 @@ public class CSGObject extends Object3D
   
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new CSGKeyframe(obj1.getObject().getPoseKeyframe(), obj2.getObject().getPoseKeyframe(),
@@ -389,6 +404,7 @@ public class CSGObject extends Object3D
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     CSGKeyframe key = (CSGKeyframe) k;
@@ -404,11 +420,13 @@ public class CSGObject extends Object3D
   
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, final Keyframe k, final ObjectInfo info)
   {
     final CSGObject copy = (CSGObject) duplicate();
     copy.applyPoseKeyframe(k);
     Runnable onClose = new Runnable() {
+          @Override
       public void run()
       {
         CSGKeyframe original = (CSGKeyframe) k;
@@ -439,6 +457,7 @@ public class CSGObject extends Object3D
     
     /** Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate()
     {
       return new CSGKeyframe(key1.duplicate(), key2.duplicate(), coords1.duplicate(), coords2.duplicate());
@@ -446,6 +465,7 @@ public class CSGObject extends Object3D
     
     /** Create a duplicate of this keyframe for a (possibly different) object. */
   
+    @Override
     public Keyframe duplicate(Object owner)
     {
       CSGObject csg = (CSGObject) ((ObjectInfo) owner).getObject();
@@ -454,6 +474,7 @@ public class CSGObject extends Object3D
   
     /** Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -461,6 +482,7 @@ public class CSGObject extends Object3D
   
     /** Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -468,6 +490,7 @@ public class CSGObject extends Object3D
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       CSGKeyframe k2 = (CSGKeyframe) o2;
@@ -505,6 +528,7 @@ public class CSGObject extends Object3D
         key2.blend(k2.key2, weight1, weight2), c1, c2);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       CSGKeyframe k2 = (CSGKeyframe) o2, k3 = (CSGKeyframe) o3;
@@ -550,6 +574,7 @@ public class CSGObject extends Object3D
         key2.blend(k2.key2, k3.key2, weight1, weight2, weight3), c1, c2);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       CSGKeyframe k2 = (CSGKeyframe) o2, k3 = (CSGKeyframe) o3, k4 = (CSGKeyframe) o4;
@@ -604,6 +629,7 @@ public class CSGObject extends Object3D
 
     /** Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CSGKeyframe))
@@ -630,6 +656,7 @@ public class CSGObject extends Object3D
   
     /** Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0);

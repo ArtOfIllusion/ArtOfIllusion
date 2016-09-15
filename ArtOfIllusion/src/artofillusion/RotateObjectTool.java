@@ -47,27 +47,32 @@ public class RotateObjectTool extends EditingTool
     initButton("rotate");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("rotateObjectTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS+HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("rotateObjectTool.tipText");
   }
   
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     Scene theScene = theWindow.getScene();
@@ -114,6 +119,7 @@ public class RotateObjectTool extends EditingTool
     whichAxes = ALL_AXES;
   }
 
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     mousePressedOnObject(e, view, obj);
@@ -138,6 +144,7 @@ public class RotateObjectTool extends EditingTool
     rotAxis = view.getCamera().getViewToWorld().timesDirection(rotAxis);
   }
   
+  @Override
   public void mouseDragged(final WidgetMouseEvent e, final ViewerCanvas view)
   {
     Point dragPoint = e.getPoint();
@@ -189,6 +196,7 @@ public class RotateObjectTool extends EditingTool
     theWindow.setHelpText(Translate.text("rotateMeshTool.dragText", Double.toString(Math.round(angle*1e5*180.0/Math.PI)/1e5)));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     theWindow.getScene().applyTracksAfterModification(toMove);
@@ -199,6 +207,7 @@ public class RotateObjectTool extends EditingTool
     theWindow.updateImage();
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     Scene theScene = theWindow.getScene();
@@ -291,6 +300,7 @@ public class RotateObjectTool extends EditingTool
 
   /* Allow the user to set options. */
   
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);

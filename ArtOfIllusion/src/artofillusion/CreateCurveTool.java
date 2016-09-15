@@ -41,33 +41,39 @@ public class CreateCurveTool extends EditingTool
     smoothing = Mesh.APPROXIMATING;
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCurveTool.helpText"));
   }
 
+  @Override
   public void deactivate()
   {
     super.deactivate();
     addToScene();
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createCurveTool.tipText");
   }
 
+  @Override
   public boolean hilightSelection()
   {
     return (clickPoint == null);
   }
   
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -95,6 +101,7 @@ public class CreateCurveTool extends EditingTool
       }
   }
   
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (clickPoint == null)
@@ -111,6 +118,7 @@ public class CreateCurveTool extends EditingTool
     }
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (clickPoint.size() == 0)
@@ -121,6 +129,7 @@ public class CreateCurveTool extends EditingTool
     view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), dragPoint));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -184,6 +193,7 @@ public class CreateCurveTool extends EditingTool
   
   /** When the user presses Enter, add the curve to the scene. */
   
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     if (e.getKeyCode() == KeyPressedEvent.VK_ENTER && theCurve != null)
@@ -219,6 +229,7 @@ public class CreateCurveTool extends EditingTool
       theWindow.updateImage();
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     BComboBox smoothingChoice = new BComboBox(new String [] {

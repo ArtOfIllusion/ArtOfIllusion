@@ -154,6 +154,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  close the underlying stream, and complete the commit
      */
+    @Override
     public void close()
         throws IOException
     {
@@ -214,6 +215,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  write to the underlying stream
      */
+    @Override
     public void write(byte[] array)
         throws IOException
     { out.write(array, 0, array.length); }
@@ -221,6 +223,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  write to the underlying stream
      */
+    @Override
     public void write(byte[] array, int start, int length)
         throws IOException
     { out.write(array, start, length); }
@@ -228,6 +231,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  write to the underlying stream
      */
+    @Override
     public void write(int value)
         throws IOException
     { out.write(value); }

@@ -63,6 +63,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   private void initThreadLocal()
   {
     renderingProc = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         Procedure localProc = createProcedure();
@@ -77,11 +78,13 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     return "Procedural 2D";
   }
 
+  @Override
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     getTextureSpec(spec, 0.0, 0.0, 1e3, 1e3, 1.0, time, param);
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double x, double y, double xsize, double ysize, double angle, double t, double param[])
   {
     Procedure pr = (Procedure) renderingProc.get();
@@ -135,6 +138,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     spec.bumpGrad.scale(0.04);
   }
   
+  @Override
   public void getTransparency(RGBColor trans, double x, double y, double xsize, double ysize, double angle, double t, double param[])
   {
     Procedure pr = (Procedure) renderingProc.get();
@@ -168,6 +172,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
 
   /** Determine whether this Texture uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
     Module modules[] = proc.getModules();
@@ -178,6 +183,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     return false;
   }
 
+  @Override
   public double getDisplacement(double x, double y, double xsize, double ysize, double t, double param[])
   {
     Procedure pr = (Procedure) renderingProc.get();
@@ -196,6 +202,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     return output[10].getAverageValue(0, 0.0);
   }
 
+  @Override
   public Texture duplicate()
   {
     ProceduralTexture2D tex = new ProceduralTexture2D();
@@ -208,6 +215,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Get the list of parameters for this texture. */
   
+  @Override
   public TextureParameter[] getParameters()
   {
     Module module[] = proc.getModules();
@@ -231,6 +239,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
       @param component    the texture component to check for (one of the *_COMPONENT constants)
   */
   
+  @Override
   public boolean hasComponent(int component)
   {
     OutputModule output[] = proc.getOutputModules();
@@ -254,6 +263,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     return false;
   }
   
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
     new ProcedureEditor(proc, this, sc);
@@ -301,6 +311,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     initThreadLocal();
   }
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);
@@ -311,6 +322,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
 
   /** Get the title of the procedure's editing window. */
   
+  @Override
   public String getWindowTitle()
   {
     return "Procedural 2D Texture";
@@ -318,6 +330,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Create an object which displays a preview of the procedure. */
   
+  @Override
   public Object getPreview(ProcedureEditor editor)
   {
     BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
@@ -335,6 +348,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
       {
         processor.addEvent(new Runnable()
         {
+                  @Override
           public void run()
           {
             preview.getScene().setTime(value.getValue());
@@ -356,6 +370,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Update the display of the preview. */
   
+  @Override
   public void updatePreview(Object preview)
   {
     initThreadLocal();
@@ -364,6 +379,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Dispose of the preview object when the editor is closed. */
   
+  @Override
   public void disposePreview(Object preview)
   {
     UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
@@ -371,6 +387,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Determine whether the procedure may contain Parameter modules. */
   
+  @Override
   public boolean allowParameters()
   {
     return true;
@@ -378,6 +395,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Determine whether the procedure may contain View Angle modules. */
   
+  @Override
   public boolean allowViewAngle()
   {
     return true;
@@ -385,6 +403,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Determine whether the procedure may be renamed. */
   
+  @Override
   public boolean canEditName()
   {
     return true;
@@ -392,6 +411,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** This is called when the user clicks OK in the procedure editor. */
   
+  @Override
   public void acceptEdits(ProcedureEditor editor)
   {
     initThreadLocal();
@@ -402,6 +422,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   
   /** Display the Properties dialog. */
   
+  @Override
   public void editProperties(ProcedureEditor editor)
   {
     ValueField aliasField = new ValueField(antialiasing, ValueField.POSITIVE);

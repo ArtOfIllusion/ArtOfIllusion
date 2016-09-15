@@ -50,17 +50,20 @@ public class SkeletonTool extends EditingTool
     helpText = Translate.text(allowCreating ? "skeletonTool.helpText" : "skeletonTool.helpTextNoCreate");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(helpText);
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("skeletonTool.tipText");
@@ -97,6 +100,7 @@ public class SkeletonTool extends EditingTool
     }
   }
   
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     if (ik != null)
@@ -166,6 +170,7 @@ public class SkeletonTool extends EditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     MeshViewer mv = (MeshViewer) view;
@@ -287,6 +292,7 @@ public class SkeletonTool extends EditingTool
     oldMesh = (Mesh) mesh.duplicate();
   }
   
+  @Override
   public void mouseDragged(final WidgetMouseEvent e, ViewerCanvas view)
   {
     final MeshViewer mv = (MeshViewer) view;
@@ -372,6 +378,7 @@ public class SkeletonTool extends EditingTool
     } while (!converged && (process == null || (!process.hasEvent() && !process.hasBeenStopped())));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (undo == null && e.getClickCount() == 2 && !e.isShiftDown() && !e.isControlDown())
@@ -385,6 +392,7 @@ public class SkeletonTool extends EditingTool
     theWindow.setHelpText(helpText);
   }
   
+  @Override
   public void iconDoubleClicked()
   {
     BComboBox dofChoice = new BComboBox(new String [] {

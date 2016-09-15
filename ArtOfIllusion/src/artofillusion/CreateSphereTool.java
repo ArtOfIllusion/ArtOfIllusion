@@ -32,28 +32,33 @@ public class CreateSphereTool extends EditingTool
     initButton("sphere");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createSphereTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createSphereTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
     shiftDown = e.isShiftDown();
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (objInfo == null)
@@ -125,6 +130,7 @@ public class CreateSphereTool extends EditingTool
     theWindow.updateImage();
   }
   
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     objInfo = null;

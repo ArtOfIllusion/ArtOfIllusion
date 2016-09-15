@@ -39,6 +39,7 @@ public class UVWMappedTriangle extends RenderingTriangle
       @param index     the index of this triangle within the mesh
   */
   
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);
@@ -95,6 +96,7 @@ public class UVWMappedTriangle extends RenderingTriangle
     texScaleT = (float) Math.sqrt(dtdx*dtdx + dtdy*dtdy + dtdz*dtdz);
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double time)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -117,6 +119,7 @@ public class UVWMappedTriangle extends RenderingTriangle
     }
   }
 
+  @Override
   public void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double time)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -127,6 +130,7 @@ public class UVWMappedTriangle extends RenderingTriangle
     ((Texture3D) map.getTexture()).getTransparency(trans, r1*u+r2*v+r3*w, s1*u+s2*v+s3*w, t1*u+t2*v+t3*w, size*texScaleR, size*texScaleS, size*texScaleT, angle, time, getParameters(u, v, w));
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double time)
   {
     return ((Texture3D) map.getTexture()).getDisplacement(r1*u+r2*v+r3*w, s1*u+s2*v+s3*w, t1*u+t2*v+t3*w, size*texScaleR, size*texScaleS, size*texScaleT, time, getParameters(u, v, w));

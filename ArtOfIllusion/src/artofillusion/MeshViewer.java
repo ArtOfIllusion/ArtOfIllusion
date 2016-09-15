@@ -167,6 +167,7 @@ public abstract class MeshViewer extends ObjectViewer
       @return the two element array {minDepth, maxDepth}
    */
 
+  @Override
   public double[] estimateDepthRange()
   {
     // Get the depth range for the object and the rest of the scene.

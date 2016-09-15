@@ -55,6 +55,7 @@ public class NumberModule extends Module
 
   /** Allow the user to set a new value. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField field = new ValueField(value, ValueField.NONE);
@@ -77,6 +78,7 @@ public class NumberModule extends Module
 
   /** This module simply outputs the value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     return value;
@@ -89,6 +91,7 @@ public class NumberModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     NumberModule mod = new NumberModule(new Point(bounds.x, bounds.y));
@@ -100,6 +103,7 @@ public class NumberModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(value);
@@ -107,6 +111,7 @@ public class NumberModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     value = in.readDouble();

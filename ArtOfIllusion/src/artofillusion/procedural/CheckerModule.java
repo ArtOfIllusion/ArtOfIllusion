@@ -36,6 +36,7 @@ public class CheckerModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -44,6 +45,7 @@ public class CheckerModule extends Module
   
   /* Calculate the average value of the function. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -98,6 +100,7 @@ public class CheckerModule extends Module
   
   /* The error is calculated at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -107,6 +110,7 @@ public class CheckerModule extends Module
   
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)

@@ -65,12 +65,14 @@ public class Raster implements Renderer, Runnable
   public Raster()
   {
     threadRasterContext = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         return new RasterContext(theCamera, width);
       }
     };
     threadCompositingContext = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         return new CompositingContext(theCamera);
@@ -80,11 +82,13 @@ public class Raster implements Renderer, Runnable
 
   /* Methods from the Renderer interface. */
 
+  @Override
   public String getName()
   {
     return "Raster";
   }
 
+  @Override
   public synchronized void renderScene(Scene theScene, Camera camera, RenderListener rl, SceneCamera sceneCamera)
   {
     if (renderThread != null && renderThread.isAlive())
@@ -134,6 +138,7 @@ public class Raster implements Renderer, Runnable
     renderThread.start();
   }
 
+  @Override
   public synchronized void cancelRendering(Scene sc)
   {
     Thread t = renderThread;
@@ -159,6 +164,7 @@ public class Raster implements Renderer, Runnable
     rl.renderingCanceled();
   }
 
+  @Override
   public Widget getConfigPanel()
   {
     if (configPanel == null)
@@ -243,6 +249,7 @@ public class Raster implements Renderer, Runnable
     sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
   }
 
+  @Override
   public boolean recordConfiguration()
   {
     smoothing = smoothField.getValue();
@@ -266,6 +273,7 @@ public class Raster implements Renderer, Runnable
   }
 
 
+  @Override
   public Map<String, Object> getConfiguration()
   {
     HashMap<String, Object> map = new HashMap<String, Object>();
@@ -285,6 +293,7 @@ public class Raster implements Renderer, Runnable
     return map;
   }
 
+  @Override
   public void setConfiguration(String property, Object value)
   {
     needCopyToUI = true;
@@ -331,6 +340,7 @@ public class Raster implements Renderer, Runnable
     }
   }
 
+  @Override
   public void configurePreview()
   {
     if (needCopyToUI)
@@ -370,6 +380,7 @@ public class Raster implements Renderer, Runnable
 
   /** Main method in which the image is rendered. */
 
+  @Override
   public void run()
   {
     final Thread thisThread = Thread.currentThread();
@@ -415,6 +426,7 @@ public class Raster implements Renderer, Runnable
 
     final ObjectInfo sortedObjects[] = sortObjects();
     ThreadManager threads = new ThreadManager(sortedObjects.length, new ThreadManager.Task() {
+          @Override
       public void execute(int index)
       {
         RasterContext context = (RasterContext) threadRasterContext.get();
@@ -426,6 +438,7 @@ public class Raster implements Renderer, Runnable
         if (System.currentTimeMillis()-updateTime > 5000)
           updateImage();
       }
+          @Override
       public void cleanup()
       {
         ((RasterContext) threadRasterContext.get()).cleanup();
@@ -456,6 +469,7 @@ public class Raster implements Renderer, Runnable
           isTransparent = (object.getObject().getTexture().hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
       }
 
+      @Override
       public int compareTo(Object o)
       {
         SortRecord other = (SortRecord) o;
@@ -530,6 +544,7 @@ public class Raster implements Renderer, Runnable
     final int n = samplesPerPixel*samplesPerPixel;
     final float hdrImage[][] = (generateHDR ? new float[3][imageWidth*imageHeight] : null);
     ThreadManager threads = new ThreadManager(imageHeight, new ThreadManager.Task() {
+      @Override
       public void execute(int i1)
       {
         CompositingContext context = (CompositingContext) threadCompositingContext.get();
@@ -645,6 +660,7 @@ public class Raster implements Renderer, Runnable
         if (System.currentTimeMillis()-updateTime > 5000)
           updateFinalImage();
       }
+      @Override
       public void cleanup()
       {
         ((CompositingContext) threadCompositingContext.get()).cleanup();

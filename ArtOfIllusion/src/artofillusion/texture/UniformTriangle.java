@@ -32,12 +32,14 @@ public class UniformTriangle extends RenderingTriangle
       @param index     the index of this triangle within the mesh
   */
 
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);
     this.map = (UniformMapping) map;
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double t)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -53,6 +55,7 @@ public class UniformTriangle extends RenderingTriangle
     ((UniformTexture) map.getTexture()).getTextureSpec(spec);
   }
 
+  @Override
   public  void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double t)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -63,6 +66,7 @@ public class UniformTriangle extends RenderingTriangle
     ((UniformTexture) map.getTexture()).getTransparency(trans);
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double t)
   {
     return 0.0;

@@ -53,6 +53,7 @@ public class ImageMapTexture extends Texture2D
     return "Image Mapped";
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double x, double y, double xsize, double ysize, double angle, double t, double param[])
   {
     float transVal, specVal;
@@ -112,6 +113,7 @@ public class ImageMapTexture extends Texture2D
     spec.bumpGrad.set(grad.x*0.04, grad.y*0.04, 0.0);
   }
   
+  @Override
   public void getTransparency(RGBColor trans, double x, double y, double xsize, double ysize, double angle, double t, double param[])
   {
     float transVal;
@@ -152,6 +154,7 @@ public class ImageMapTexture extends Texture2D
     trans.scale(transVal);
   }
 
+  @Override
   public double getDisplacement(double x, double y, double xsize, double ysize, double t, double param[])
   {
     boolean wrapx, wrapy;
@@ -188,6 +191,7 @@ public class ImageMapTexture extends Texture2D
     return (double) displacement.getValue(wrapx, wrapy, x, y, xsize, ysize);
   }
 
+  @Override
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     float transVal = transparency.getAverageValue(), specVal = specularity.getAverageValue();
@@ -208,6 +212,7 @@ public class ImageMapTexture extends Texture2D
   
   /** Determine whether this Texture uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
     return (diffuseColor.getImage() == image || specularColor.getImage() == image || 
@@ -220,6 +225,7 @@ public class ImageMapTexture extends Texture2D
 
   /** Create a duplicate of the texture. */
   
+  @Override
   public Texture duplicate()
   {
     ImageMapTexture m = new ImageMapTexture();
@@ -247,6 +253,7 @@ public class ImageMapTexture extends Texture2D
       @param component    the texture component to check for (one of the *_COMPONENT constants)
   */
   
+  @Override
   public boolean hasComponent(int component)
   {
     switch (component)
@@ -277,6 +284,7 @@ public class ImageMapTexture extends Texture2D
   
   /** Allow the user to interactively edit the texture. */
   
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
     new Editor(fr, sc);
@@ -313,6 +321,7 @@ public class ImageMapTexture extends Texture2D
     mirrorY = in.readBoolean();
   }
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);
@@ -453,6 +462,7 @@ public class ImageMapTexture extends Texture2D
       dispose();
     }
     
+    @Override
     public void dispose()
     {
       renderProcessor.stopProcessing();
@@ -466,6 +476,7 @@ public class ImageMapTexture extends Texture2D
       newTexture.mirrorX = mirrorXBox.getState();
       newTexture.mirrorY = mirrorYBox.getState();
       renderProcessor.addEvent(new Runnable() {
+        @Override
         public void run()
         {
           preview.render();

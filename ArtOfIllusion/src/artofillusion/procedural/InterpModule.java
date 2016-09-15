@@ -36,6 +36,7 @@ public class InterpModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
@@ -43,6 +44,7 @@ public class InterpModule extends Module
 
   /* Calculate the value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -78,6 +80,7 @@ public class InterpModule extends Module
 
   /* Calculate the error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (errorOk && blur == lastBlur)
@@ -94,6 +97,7 @@ public class InterpModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)

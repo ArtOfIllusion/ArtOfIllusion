@@ -45,6 +45,7 @@ public class ObjectRefTreeElement extends TreeElement
   
   /* Get the label to display for this element. */
   
+  @Override
   public String getLabel()
   {
     Joint j = ref.getJoint();
@@ -56,6 +57,7 @@ public class ObjectRefTreeElement extends TreeElement
   /* Determine whether this element can be added as a child of another one  If el is null,
      return whether this element can be added at the root level of the tree. */
   
+  @Override
   public boolean canAcceptAsParent(TreeElement el)
   {
     return false;
@@ -63,6 +65,7 @@ public class ObjectRefTreeElement extends TreeElement
   
   /* Add another element as a child of this one. */
   
+  @Override
   public void addChild(TreeElement el, int position)
   {
     children.insertElementAt(el, position);
@@ -72,12 +75,14 @@ public class ObjectRefTreeElement extends TreeElement
   /* Remove any elements corresponding to the given object from this element's list 
      of children. */
   
+  @Override
   public void removeChild(Object object)
   {
   }
   
   /* Get the object corresponding to this element. */
   
+  @Override
   public Object getObject()
   {
     return ref;
@@ -93,6 +98,7 @@ public class ObjectRefTreeElement extends TreeElement
   
   /* Get whether this element should be drawn in gray (i.e. to indicate it is deactivated). */
   
+  @Override
   public boolean isGray()
   {
     return disabled;

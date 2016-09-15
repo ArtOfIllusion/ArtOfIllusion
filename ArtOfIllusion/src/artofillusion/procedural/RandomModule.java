@@ -74,6 +74,7 @@ public class RandomModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
@@ -135,6 +136,7 @@ public class RandomModule extends Module
 
   /* Calculate the output value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -182,6 +184,7 @@ public class RandomModule extends Module
   
   /* Calculate the error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -219,6 +222,7 @@ public class RandomModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!errorOk || blur != lastBlur)
@@ -244,6 +248,7 @@ public class RandomModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     RandomModule mod = new RandomModule(new Point(bounds.x, bounds.y));
@@ -255,6 +260,7 @@ public class RandomModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
@@ -263,6 +269,7 @@ public class RandomModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();
@@ -271,6 +278,7 @@ public class RandomModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);

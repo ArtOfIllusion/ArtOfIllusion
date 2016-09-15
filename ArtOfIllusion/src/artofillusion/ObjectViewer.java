@@ -52,6 +52,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       @return the two element array {minDepth, maxDepth}
    */
   
+  @Override
   public double[] estimateDepthRange()
   {
     Mat4 toView = theCamera.getWorldToView();
@@ -153,21 +154,25 @@ public abstract class ObjectViewer extends ViewerCanvas
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
+        @Override
         public void imageUpdated(Image image)
         {
           renderedImage = image;
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void statusChanged(String status)
         {
         }
+        @Override
         public void imageComplete(ComplexImage image)
         {
           renderedImage = image.getImage();
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void renderingCanceled()
         {
         }
@@ -176,6 +181,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     }
   }
 
+  @Override
   public synchronized void updateImage()
   {
     if (renderMode == RENDER_RENDERED)
@@ -252,6 +258,7 @@ public abstract class ObjectViewer extends ViewerCanvas
 
   /** Get the scene this object is part of, or null if there is none. */
   
+  @Override
   public Scene getScene()
   {
     return theScene;
@@ -397,6 +404,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     return false;
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     moveToGrid(e);

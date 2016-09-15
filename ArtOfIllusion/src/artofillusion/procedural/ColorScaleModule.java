@@ -34,6 +34,7 @@ public class ColorScaleModule extends Module
 
   /* New point, so the color will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     colorOk = false;
@@ -41,6 +42,7 @@ public class ColorScaleModule extends Module
 
   /* Calculate the product color. */
   
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     if (colorOk && blur == lastBlur)

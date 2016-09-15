@@ -33,17 +33,20 @@ public class MoveViewTool extends EditingTool
     initButton("moveView");
   }
   
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean hilightSelection()
   {
 /*    if (theWindow instanceof LayoutWindow)
@@ -52,11 +55,13 @@ public class MoveViewTool extends EditingTool
       return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveViewTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -69,6 +74,7 @@ public class MoveViewTool extends EditingTool
     oldScale = view.getScale();
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -117,6 +123,7 @@ public class MoveViewTool extends EditingTool
     view.repaint();
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     mouseDragged(e, view);

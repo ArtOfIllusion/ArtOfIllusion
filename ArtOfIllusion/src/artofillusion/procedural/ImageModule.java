@@ -178,6 +178,7 @@ public class ImageModule extends Module
 
   /** New point, so the color will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -229,6 +230,7 @@ public class ImageModule extends Module
 
   /** Calculate the color. */
   
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     if (colorOk && blur == lastBlur)
@@ -260,6 +262,7 @@ public class ImageModule extends Module
   
   /** Get the value of one of the components. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     int component = which-1;
@@ -298,6 +301,7 @@ public class ImageModule extends Module
 
   /** Get the gradient of one of the components. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     int component = which-1;
@@ -399,6 +403,7 @@ public class ImageModule extends Module
     gradOk[component] = true;
   }
 
+  @Override
   public void calcSize()
   {
     bounds.width = ImageMap.PREVIEW_WIDTH+IOPort.SIZE*2;
@@ -407,6 +412,7 @@ public class ImageModule extends Module
       bounds.height = output.length*IOPort.SIZE*3;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     if (map == null)
@@ -419,6 +425,7 @@ public class ImageModule extends Module
   
   /** Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     ImageModule mod = new ImageModule(new Point(bounds.x, bounds.y));
@@ -466,6 +473,7 @@ public class ImageModule extends Module
   
   /** Allow the user to set a new value. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, final Scene theScene)
   {
     ImageMap oldMap = map;
@@ -508,6 +516,7 @@ public class ImageModule extends Module
     modelChoice.addEventLink(ValueChangedEvent.class, listener);
     modelChoice.setSelectedIndex(colorModel);
     final BLabel preview = new BLabel() {
+          @Override
       public Dimension getPreferredSize()
       {
         return new Dimension(ImageMap.PREVIEW_WIDTH, ImageMap.PREVIEW_HEIGHT);
@@ -517,6 +526,7 @@ public class ImageModule extends Module
       preview.setIcon(new ImageIcon(map.getPreview()));
     preview.setAlignment(BLabel.CENTER);
     BOutline outline = new BOutline(preview, BorderFactory.createLineBorder(Color.black)) {
+          @Override
       public Dimension getMaximumSize()
       {
         return new Dimension(ImageMap.PREVIEW_WIDTH+2, ImageMap.PREVIEW_HEIGHT+2);
@@ -565,6 +575,7 @@ public class ImageModule extends Module
 
   /** Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(-2);
@@ -583,6 +594,7 @@ public class ImageModule extends Module
   
   /** Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int version = in.readInt();

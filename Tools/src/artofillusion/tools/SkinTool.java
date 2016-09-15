@@ -26,6 +26,7 @@ public class SkinTool implements ModellingTool
   
   /* Get the text that appear as the menu item.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("menu.skin");
@@ -34,6 +35,7 @@ public class SkinTool implements ModellingTool
   /* See whether an appropriate set of objects is selected and either display an error
      message, or bring up the extrude window. */
   
+  @Override
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();

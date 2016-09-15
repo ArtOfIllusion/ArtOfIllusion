@@ -34,6 +34,7 @@ public class GlowFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Glow");
@@ -46,6 +47,7 @@ public class GlowFilter extends ImageFilter
       @param cameraPos  the position of the camera in the scene
   */
   
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     String shape = (String) getPropertyValue(0);
@@ -196,6 +198,7 @@ public class GlowFilter extends ImageFilter
 
   /** Write a serialized description of this filter to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     int shape = 0;
@@ -209,6 +212,7 @@ public class GlowFilter extends ImageFilter
 
   /** Reconstruct this filter from its serialized representation. */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     setPropertyValue(0, SHAPES[in.readInt()]);

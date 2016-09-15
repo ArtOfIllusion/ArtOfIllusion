@@ -206,6 +206,7 @@ public class ProcedureEditor extends CustomWidget
     return win;
   }
   
+  @Override
   public Dimension getPreferredSize()
   {
     return size;

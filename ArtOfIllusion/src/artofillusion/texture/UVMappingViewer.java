@@ -55,6 +55,7 @@ public class UVMappingViewer extends MeshViewer
     setParameters(minu, maxu, minv, maxv, component, sampling);
     setShowTemplate(true);
     getComponent().addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentResized(ComponentEvent e)
       {
         createImage();
@@ -64,6 +65,7 @@ public class UVMappingViewer extends MeshViewer
   
   /** Get the controller for editing the UV mesh. */
   
+  @Override
   public MeshEditController getController()
   {
     return controller;
@@ -130,6 +132,7 @@ public class UVMappingViewer extends MeshViewer
       @return the two element array {minDepth, maxDepth}
    */
    
+  @Override
   public double[] estimateDepthRange()
   {
     return new double [] {-1.0, 1.0};
@@ -151,6 +154,7 @@ public class UVMappingViewer extends MeshViewer
       }
   }
 
+  @Override
   public synchronized void updateImage()
   {
     adjustCamera();
@@ -168,6 +172,7 @@ public class UVMappingViewer extends MeshViewer
   
   /** Unused method from object viewer. */
 
+  @Override
   protected void drawObject()
   {
   }
@@ -283,6 +288,7 @@ public class UVMappingViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     sentClick = true;
@@ -353,6 +359,7 @@ public class UVMappingViewer extends MeshViewer
       activeTool.mousePressedOnHandle(e, this, 0, i);
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -366,6 +373,7 @@ public class UVMappingViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     endDraggingSelection();
@@ -409,6 +417,7 @@ public class UVMappingViewer extends MeshViewer
     repaint();
   }
 
+  @Override
   protected void processMouseScrolled(MouseScrolledEvent ev)
   {
     int amount = ev.getWheelRotation();
@@ -465,6 +474,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Create a new object which is an exact duplicate of this one. */
   
+    @Override
     public Object3D duplicate()
     {
       Vec2 uv[] = new Vec2 [vert.length];
@@ -476,6 +486,7 @@ public class UVMappingViewer extends MeshViewer
     /** Copy all the properties of another object, to make this one identical to it.  If the
         two objects are of different classes, this will throw a ClassCastException. */
     
+    @Override
     public void copyObject(Object3D obj)
     {
       UVMesh mesh = (UVMesh) obj;
@@ -486,6 +497,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Get the list of vertices which define the mesh. */
   
+    @Override
     public MeshVertex[] getVertices()
     {
       return vert;
@@ -493,6 +505,7 @@ public class UVMappingViewer extends MeshViewer
   
     /** Get a list of the positions of all vertices which define the mesh. */
     
+    @Override
     public Vec3 [] getVertexPositions()
     {
       Vec3 v[] = new Vec3 [vert.length];
@@ -503,6 +516,7 @@ public class UVMappingViewer extends MeshViewer
   
     /** Set the positions for all the vertices of the mesh. */
   
+    @Override
     public void setVertexPositions(Vec3 v[])
     {
       vert = new MeshVertex [v.length];
@@ -521,6 +535,7 @@ public class UVMappingViewer extends MeshViewer
   
     /** Unused method from Object3D. */
   
+    @Override
     public BoundingBox getBounds()
     {
       return null;
@@ -528,12 +543,14 @@ public class UVMappingViewer extends MeshViewer
   
     /** Unused method from Object3D. */
   
+    @Override
     public void setSize(double xsize, double ysize, double zsize)
     {
     }
     
     /** Unused method from Object3D. */
     
+    @Override
     public WireframeMesh getWireframeMesh()
     {
       return null;
@@ -541,6 +558,7 @@ public class UVMappingViewer extends MeshViewer
   
     /** Unused method from Object3D. */
   
+    @Override
     public Keyframe getPoseKeyframe()
     {
       return null;
@@ -548,12 +566,14 @@ public class UVMappingViewer extends MeshViewer
   
     /** Unused method from Object3D. */
   
+    @Override
     public void applyPoseKeyframe(Keyframe k)
     {
     }
       
     /** Unused method from Mesh. */
       
+    @Override
     public Vec3 [] getNormals()
     {
       return null;
@@ -561,6 +581,7 @@ public class UVMappingViewer extends MeshViewer
   
     /** Unused method from Mesh. */
     
+    @Override
     public Skeleton getSkeleton()
     {
       return null;
@@ -568,12 +589,14 @@ public class UVMappingViewer extends MeshViewer
     
     /** Unused method from Mesh. */
   
+    @Override
     public void setSkeleton(Skeleton s)
     {
     }
     
     /** Unused method from Mesh. */
     
+    @Override
     public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
     {
       return null;
@@ -586,6 +609,7 @@ public class UVMappingViewer extends MeshViewer
   {
     /** Get the object being edited in this window. */
     
+    @Override
     public ObjectInfo getObject()
     {
       return meshInfo;
@@ -594,12 +618,14 @@ public class UVMappingViewer extends MeshViewer
     
     /** Set the mesh being edited. */
     
+    @Override
     public void setMesh(Mesh mesh)
     {
     }
     
     /** This should be called whenever the object has changed. */
     
+    @Override
     public void objectChanged()
     {
       UVMappingViewer.this.objectChanged();
@@ -607,6 +633,7 @@ public class UVMappingViewer extends MeshViewer
     
     /** The return value has no meaning, since there is only one selection mode in this window. */
         
+    @Override
     public int getSelectionMode()
     {
       return POINT_MODE;
@@ -614,12 +641,14 @@ public class UVMappingViewer extends MeshViewer
     
     /** This is ignored, since there is only one selection mode in this window. */
         
+    @Override
     public void setSelectionMode(int mode)
     {
     }
     
     /** Get an array of flags specifying which parts of the object are selected. */
     
+    @Override
     public boolean[] getSelection()
     {
       return selected;
@@ -628,6 +657,7 @@ public class UVMappingViewer extends MeshViewer
     /** Set an array of flags specifying which parts of the object are selected.  Depending on the selection mode
         and type of object, this may correspond to vertices, faces, edges, etc. */
     
+    @Override
     public void setSelection(boolean selected[])
     {
       UVMappingViewer.this.selected = selected;
@@ -635,6 +665,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Selection distance is simply 0 if the vertex is selected, and -1 otherwise. */
 
+    @Override
     public int[] getSelectionDistance()
     {
       int selectionDistance[] = new int [selected.length];
@@ -645,6 +676,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Get the mesh tension level. */
 
+    @Override
     public double getMeshTension()
     {
       return 1.0;
@@ -652,6 +684,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Get the distance over which mesh tension applies. */
 
+    @Override
     public int getTensionDistance()
     {
       return 0;

@@ -73,6 +73,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     setVisible(true);
   }
 
+  @Override
   protected ViewerCanvas createViewerCanvas(int index, RowContainer controls)
   {
     return new SceneViewer(theScene, controls, this);
@@ -130,6 +131,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     ViewerCanvas view = getView();
@@ -151,11 +153,13 @@ public class CSGEditorWindow extends ObjectEditorWindow
     displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
   }
 
+  @Override
   public Scene getScene()
   {
     return theScene;
   }
 
+  @Override
   protected void doOk()
   {
     updateFromScene();
@@ -168,6 +172,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     parentWindow.updateMenus();
   }
   
+  @Override
   protected void doCancel()
   {
     oldObject = theObject = null;
@@ -224,6 +229,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     {
       final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
       obj.edit(this, theScene.getObject(sel[0]), new Runnable() {
+        @Override
         public void run()
         {
           setUndoRecord(undo);

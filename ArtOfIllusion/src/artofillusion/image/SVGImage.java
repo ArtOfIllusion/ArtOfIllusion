@@ -136,6 +136,7 @@ public class SVGImage extends ImageMap
 
   /** Get the width of the image. */
 
+  @Override
   public int getWidth()
   {
     return (int) svg.getWidth();
@@ -143,6 +144,7 @@ public class SVGImage extends ImageMap
 
   /** Get the height of the image. */
 
+  @Override
   public int getHeight()
   {
     return (int) svg.getHeight();
@@ -150,6 +152,7 @@ public class SVGImage extends ImageMap
 
   /** Get the number of components in the image. */
 
+  @Override
   public int getComponentCount()
   {
     return 4;
@@ -216,6 +219,7 @@ public class SVGImage extends ImageMap
       purposes of interpolation, the image should be treated as wrapping around so that
       opposite edges touch each other. */
 
+  @Override
   public float getComponent(int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     double size = (xsize > ysize ? xsize : ysize);
@@ -255,6 +259,7 @@ public class SVGImage extends ImageMap
 
   /** Get the average value for a particular component, over the entire image. */
 
+  @Override
   public float getAverageComponent(int component)
   {
     return average[component];
@@ -265,6 +270,7 @@ public class SVGImage extends ImageMap
       (xsize, ysize).  wrapx and wrapy specify whether, for purposes of interpolation, the
       image should be treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getColor(RGBColor theColor, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     double size = (xsize > ysize ? xsize : ysize);
@@ -323,6 +329,7 @@ public class SVGImage extends ImageMap
       wrapx and wrapy specify whether, for purposes of interpolation, the image should be
       treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getGradient(Vec2 grad, int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     double size = (xsize > ysize ? xsize : ysize);
@@ -368,6 +375,7 @@ public class SVGImage extends ImageMap
   /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
       (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
 
+  @Override
   public Image getPreview()
   {
     return preview;
@@ -387,6 +395,7 @@ public class SVGImage extends ImageMap
 
   /** Serialize an image to an output stream. */
 
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeShort(0);

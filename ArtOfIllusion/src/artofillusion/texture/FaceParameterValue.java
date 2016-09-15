@@ -52,6 +52,7 @@ public class FaceParameterValue implements ParameterValue
   
   /** Get the value of the parameter at a particular point in a particular triangle. */
   
+  @Override
   public double getValue(int tri, int v1, int v2, int v3, double u, double v, double w)
   {
     return value[tri];
@@ -59,6 +60,7 @@ public class FaceParameterValue implements ParameterValue
   
   /** Get the average value of the parameter over the entire surface. */
   
+  @Override
   public double getAverageValue()
   {
     double avg = 0.0;
@@ -69,6 +71,7 @@ public class FaceParameterValue implements ParameterValue
   
   /** Create a duplicate of this object. */
   
+  @Override
   public ParameterValue duplicate()
   {
     double d[] = new double [value.length];
@@ -78,6 +81,7 @@ public class FaceParameterValue implements ParameterValue
   
   /** Determine whether this object represents the same set of values as another one. */
   
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof FaceParameterValue))
@@ -93,6 +97,7 @@ public class FaceParameterValue implements ParameterValue
   
   /** Write out a serialized representation of this object to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeInt(value.length);

@@ -155,6 +155,7 @@ class Token {
     public boolean equals (char c) { 
         return ty == c; 
     } 
+    @Override
     public String toString () { 
         return "type: " + ty + " strValue: " + strValue + " numValue: " + numValue; 
     } 
@@ -269,6 +270,7 @@ public class ExprModule extends Module
         layout ();
     } 
  
+    @Override
     public final void init(PointInfo p) { 
         point = p; 
         for (int i = myModules.length-1; i >= 0; i--) { 
@@ -279,16 +281,20 @@ public class ExprModule extends Module
         } 
     } 
     int a; 
+    @Override
     public final double getAverageValue (int which, double blur) { 
         return compiled.module.getAverageValue (compiled.oport, blur); 
     } 
+    @Override
     public final double getValueError (int which, double blur) { 
         return compiled.module.getValueError (compiled.oport, blur); 
     } 
+    @Override
     public final void getValueGradient (int which, Vec3 grad, double blur) { 
         compiled.module.getValueGradient (compiled.oport, grad, blur); 
     } 
  
+    @Override
     public void setInput(IOPort which, IOPort port) { 
         super.setInput (which, port); 
         inputs = linkFrom; 
@@ -299,6 +305,7 @@ public class ExprModule extends Module
     /* Write out the expression */ 
     /* Allow the user to set the parameters. */ 
    
+    @Override
     public boolean edit(final ProcedureEditor editor, Scene theScene)
     { 
         final BTextField exprField = new BTextField(expr, 40);
@@ -341,6 +348,7 @@ public class ExprModule extends Module
    
     /* Create a duplicate of this module. */ 
    
+    @Override
     public Module duplicate() 
     { 
         ExprModule mod = new ExprModule(new Point(bounds.x, bounds.y)); 
@@ -349,6 +357,7 @@ public class ExprModule extends Module
         return mod;
     } 
  
+    @Override
     public void writeToStream(DataOutputStream out, Scene theScene) throws IOException 
     { 
         out.writeUTF(expr); 
@@ -363,6 +372,7 @@ public class ExprModule extends Module
  
     /* Read in the expression. */ 
    
+    @Override
     public void readFromStream(DataInputStream in, Scene theScene) throws IOException 
     { 
         inputs = linkFrom;

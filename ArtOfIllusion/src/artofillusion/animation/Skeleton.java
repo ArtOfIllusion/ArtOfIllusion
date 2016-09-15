@@ -75,6 +75,7 @@ public class Skeleton
 
   /** Determine if this skeleton is identical to another one. */
   
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof Skeleton))

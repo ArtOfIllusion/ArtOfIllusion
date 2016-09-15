@@ -54,6 +54,7 @@ public class RotateMeshTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -61,11 +62,13 @@ public class RotateMeshTool extends MeshEditingTool
     checkForSelectionChanged();
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return selectionCanChange;
@@ -94,11 +97,13 @@ public class RotateMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("rotateMeshTool.tipText");
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     checkForSelectionChanged();
@@ -123,6 +128,7 @@ public class RotateMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (e.isControlDown())
@@ -142,11 +148,13 @@ public class RotateMeshTool extends MeshEditingTool
     selectionCanChange = !dragInProgress;
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);

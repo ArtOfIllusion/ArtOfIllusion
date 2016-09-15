@@ -385,6 +385,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
    * @param selectionBounds  a BoundingBox enclosing whatever is selected in the canvas
    */
 
+  @Override
   public void draw(ViewerCanvas view, BoundingBox selectionBounds)
   {
     if (selectionBounds == null)
@@ -506,6 +507,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
   }
 
+  @Override
   public boolean mousePressed(WidgetMouseEvent ev, ViewerCanvas view, BoundingBox selectionBounds)
   {
     Rectangle r = findScreenBounds(selectionBounds, view.getCamera());
@@ -590,6 +592,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent ev, ViewerCanvas view)
   {
     if (!dragging)
@@ -737,6 +740,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent ev, ViewerCanvas view)
   {
     if (!dragging)

@@ -80,6 +80,7 @@ public class UniformTexture extends Texture
     trans.setRGB(transparentColor.red*transparency, transparentColor.green*transparency, transparentColor.blue*transparency);
   }
   
+  @Override
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     getTextureSpec(spec);
@@ -87,6 +88,7 @@ public class UniformTexture extends Texture
   
   /** The only TextureMapping which can be used for a UniformTexture is a UniformMapping. */
   
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return new UniformMapping(object, this);
@@ -94,6 +96,7 @@ public class UniformTexture extends Texture
 
   /** Create a duplicate of the texture. */
   
+  @Override
   public Texture duplicate()
   {
     UniformTexture m = new UniformTexture();
@@ -115,6 +118,7 @@ public class UniformTexture extends Texture
       @param component    the texture component to check for (one of the *_COMPONENT constants)
   */
   
+  @Override
   public boolean hasComponent(int component)
   {
     switch (component)
@@ -136,6 +140,7 @@ public class UniformTexture extends Texture
   
   /** Allow the user to interactively edit the material. */
   
+  @Override
   public void edit(final BFrame fr, Scene sc)
   {
     BTextField nameField = new BTextField(name, 15);
@@ -152,6 +157,7 @@ public class UniformTexture extends Texture
     final MaterialPreviewer preview = new MaterialPreviewer(newTexture, null, 200, 160);
     final ActionProcessor process = new ActionProcessor();
     final Runnable renderCallback = new Runnable() {
+          @Override
       public void run()
       {
         preview.render();
@@ -254,6 +260,7 @@ public class UniformTexture extends Texture
       shininess = specularity;
   }
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);

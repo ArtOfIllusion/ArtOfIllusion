@@ -137,6 +137,7 @@ public class JointEditorDialog extends BDialog
       minComfortField = new ValueField(dof.minComfort, ValueField.NONE, 5);
       maxComfortField = new ValueField(dof.maxComfort == Double.MAX_VALUE ? Double.NaN : dof.maxComfort, ValueField.NONE, 5);
       valField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           double lower = (rangeBox.getState() ? minField.getValue() : DOFPanel.this.min);
@@ -145,6 +146,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       minField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!rangeBox.getState())
@@ -155,6 +157,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       maxField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!rangeBox.getState())
@@ -165,6 +168,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       minComfortField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!comfortBox.getState() || !rangeBox.getState())
@@ -175,6 +179,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       maxComfortField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!comfortBox.getState() || !rangeBox.getState())
@@ -317,6 +322,7 @@ public class JointEditorDialog extends BDialog
     
     /** Set the enabled state of every component in this panel. */
     
+    @Override
     public void setEnabled(boolean enabled)
     {
       super.setEnabled(enabled);
@@ -413,6 +419,7 @@ public class JointEditorDialog extends BDialog
     private void mouseDragged(final MouseDraggedEvent ev)
     {
       process.addEvent(new Runnable() {
+        @Override
         public void run()
         {
           dealWithDrag(ev);

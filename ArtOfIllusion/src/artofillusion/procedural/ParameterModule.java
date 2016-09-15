@@ -94,6 +94,7 @@ public class ParameterModule extends Module
 
   /* Cache the PointInfo object to have access to the coordinates later on. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -101,6 +102,7 @@ public class ParameterModule extends Module
 
   /* This module outputs the value of the parameter. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (point.param == null || point.param.length <= which)
@@ -126,6 +128,7 @@ public class ParameterModule extends Module
 
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     BTextField nameField = new BTextField(name);
@@ -164,6 +167,7 @@ public class ParameterModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     ParameterModule mod = new ParameterModule(new Point(bounds.x, bounds.y));
@@ -180,6 +184,7 @@ public class ParameterModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeUTF(name);
@@ -190,6 +195,7 @@ public class ParameterModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     name = in.readUTF();

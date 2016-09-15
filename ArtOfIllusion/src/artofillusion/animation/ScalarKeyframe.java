@@ -24,11 +24,13 @@ public class ScalarKeyframe implements Keyframe
     val = d;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     return new ScalarKeyframe(val);
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new ScalarKeyframe(val);
@@ -36,6 +38,7 @@ public class ScalarKeyframe implements Keyframe
   
   /** Get the list of graphable values for this keyframe. */
   
+  @Override
   public double [] getGraphValues()
   {
     return new double [] {val};
@@ -43,17 +46,20 @@ public class ScalarKeyframe implements Keyframe
   
   /** Set the list of graphable values for this keyframe. */
   
+  @Override
   public void setGraphValues(double values[])
   {
     if (values.length == 1)
       val = values[0];
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     return new ScalarKeyframe(weight1*val + weight2*((ScalarKeyframe) o2).val);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     return new ScalarKeyframe(weight1*val + 
@@ -61,6 +67,7 @@ public class ScalarKeyframe implements Keyframe
 	weight3*((ScalarKeyframe) o3).val);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     return new ScalarKeyframe(weight1*val + 
@@ -71,6 +78,7 @@ public class ScalarKeyframe implements Keyframe
 
   /** Determine whether this keyframe is identical to another one. */
   
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof ScalarKeyframe))
@@ -81,6 +89,7 @@ public class ScalarKeyframe implements Keyframe
   
   /** Write out a representation of this keyframe to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeDouble(val);

@@ -155,6 +155,7 @@ public class ValueSlider extends WidgetContainer
       field.setText(text);
   }
 
+  @Override
   public void setEnabled(boolean enabled)
   {
     field.setEnabled(enabled);
@@ -166,6 +167,7 @@ public class ValueSlider extends WidgetContainer
    * Get the number of children in this container.
    */
   
+  @Override
   public int getChildCount()
   {
     return 2;
@@ -175,6 +177,7 @@ public class ValueSlider extends WidgetContainer
    * Get an Iterator listing all child Widgets.
    */
   
+  @Override
   public Collection getChildren()
   {
     ArrayList children = new ArrayList(2);
@@ -190,6 +193,7 @@ public class ValueSlider extends WidgetContainer
    * called in turn.
    */
   
+  @Override
   public void layoutChildren()
   {
     Dimension size = component.getSize();
@@ -204,6 +208,7 @@ public class ValueSlider extends WidgetContainer
    * Do not allow children to be removed.
    */
   
+  @Override
   public synchronized void remove(Widget widget)
   {
   }
@@ -212,6 +217,7 @@ public class ValueSlider extends WidgetContainer
    * Do not allow children to be removed.
    */
   
+  @Override
   public synchronized void removeAll()
   {
   }
@@ -221,6 +227,7 @@ public class ValueSlider extends WidgetContainer
    * its contents, it will attempt never to make this Widget smaller than its minimum size.
    */
   
+  @Override
   public Dimension getMinimumSize()
   {
     Dimension dim1 = field.getMinimumSize();
@@ -233,6 +240,7 @@ public class ValueSlider extends WidgetContainer
    * its contents, it will attempt to make this Widget as close as possible to its preferred size.
    */
   
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension dim1 = field.getPreferredSize();

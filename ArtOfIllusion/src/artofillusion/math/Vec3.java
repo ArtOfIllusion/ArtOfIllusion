@@ -207,6 +207,7 @@ public class Vec3
       return new Vec2(x, y);
   }
     
+  @Override
   public String toString()
   {
     return "Vec3: " + x + ", " + y + ", " + z;

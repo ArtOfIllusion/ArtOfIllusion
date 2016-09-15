@@ -64,6 +64,7 @@ public class CubePhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
@@ -75,6 +76,7 @@ public class CubePhotonSource implements PhotonSource
    @param threads
   */
 
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     RenderWorkspace workspace = map.getWorkspace();

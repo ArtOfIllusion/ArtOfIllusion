@@ -77,6 +77,7 @@ public class TextDialog extends BDialog
       {
         actionProcessor.addEvent(new Runnable()
         {
+          @Override
           public void run()
           {
             createObjects();

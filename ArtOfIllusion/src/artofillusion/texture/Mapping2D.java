@@ -27,12 +27,14 @@ public abstract class Mapping2D extends TextureMapping
     texture = (Texture2D) theTexture;
   }
 
+  @Override
   public Texture getTexture()
   {
     return texture;
   }
 
 
+  @Override
   public Object3D getObject()
   {
     return object;

@@ -23,11 +23,13 @@ public class ArrayKeyframe implements Keyframe
     val = values;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     return new ArrayKeyframe(val);
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new ArrayKeyframe(val);
@@ -35,6 +37,7 @@ public class ArrayKeyframe implements Keyframe
   
   /* Get the list of graphable values for this keyframe. */
   
+  @Override
   public double [] getGraphValues()
   {
     return val;
@@ -42,12 +45,14 @@ public class ArrayKeyframe implements Keyframe
   
   /* Set the list of graphable values for this keyframe. */
   
+  @Override
   public void setGraphValues(double values[])
   {
     val = new double [values.length];
     System.arraycopy(values, 0, val, 0, values.length);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     double d[] = new double [val.length];
@@ -58,6 +63,7 @@ public class ArrayKeyframe implements Keyframe
     return new ArrayKeyframe(d);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     double d[] = new double [val.length];
@@ -69,6 +75,7 @@ public class ArrayKeyframe implements Keyframe
     return new ArrayKeyframe(d);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     double d[] = new double [val.length];
@@ -83,6 +90,7 @@ public class ArrayKeyframe implements Keyframe
 
   /* Determine whether this keyframe is identical to another one. */
   
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof ArrayKeyframe))
@@ -96,6 +104,7 @@ public class ArrayKeyframe implements Keyframe
   
   /* Write out a representation of this keyframe to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeShort(val.length);

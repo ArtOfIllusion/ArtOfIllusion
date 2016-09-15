@@ -320,6 +320,7 @@ public class UndoRecord
 
     EventQueue.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         Thread thread = new Thread() {

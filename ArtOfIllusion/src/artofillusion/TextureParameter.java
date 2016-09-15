@@ -60,6 +60,7 @@ public class TextureParameter
     return tp;
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof TextureParameter))
@@ -81,6 +82,7 @@ public class TextureParameter
   }
 
 
+  @Override
   public int hashCode()
   {
     if (identifier == -1)
@@ -119,6 +121,7 @@ public class TextureParameter
     {
       ValueField field = new ValueField(currentValue, ValueField.NONE);
       field.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= minVal && val <= maxVal);

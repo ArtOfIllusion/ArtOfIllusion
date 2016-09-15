@@ -33,6 +33,7 @@ public class CompareModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = gradOk = false;
@@ -40,6 +41,7 @@ public class CompareModule extends Module
 
   /* Compare the two inputs. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -85,6 +87,7 @@ public class CompareModule extends Module
 
   /* The error is calculated at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -94,6 +97,7 @@ public class CompareModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)

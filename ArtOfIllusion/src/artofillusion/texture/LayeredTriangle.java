@@ -46,6 +46,7 @@ public class LayeredTriangle extends RenderingTriangle
       }
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double time)
   {
     Vec3 pos = new Vec3(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w);
@@ -121,6 +122,7 @@ public class LayeredTriangle extends RenderingTriangle
     }
   }
 
+  @Override
   public void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double time)
   {
     Vec3 pos = new Vec3(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w);
@@ -174,6 +176,7 @@ public class LayeredTriangle extends RenderingTriangle
       }
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double time)
   {
     Vec3 pos = new Vec3(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w);
@@ -229,6 +232,7 @@ public class LayeredTriangle extends RenderingTriangle
       @param index     the index of this triangle within the mesh
   */
   
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);

@@ -129,6 +129,7 @@ public class SpotLight extends Light
    * Get the attenuated light at a given position relative to the light source.
    */
 
+  @Override
   public void getLight(RGBColor light, Vec3 position)
   {
     double distance = position.length();
@@ -146,11 +147,13 @@ public class SpotLight extends Light
     }
   }
 
+  @Override
   public Object3D duplicate()
   {
     return new SpotLight(color, intensity, angle, falloff, radius, type, decayRate);
   }
   
+  @Override
   public void copyObject(Object3D obj)
   {
     SpotLight lt = (SpotLight) obj;
@@ -161,6 +164,7 @@ public class SpotLight extends Light
     setFalloff(lt.falloff);
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -169,20 +173,24 @@ public class SpotLight extends Light
   /* A SpotLight is always drawn the same size, which has no connection to the properties
      of the light. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
   
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
@@ -206,6 +214,7 @@ public class SpotLight extends Light
     bounds = new BoundingBox(-0.2, 0.2, -0.2, 0.2, -0.2, 0.2);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -220,6 +229,7 @@ public class SpotLight extends Light
     out.writeDouble(falloff);
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, final Runnable cb)
   {
     final Widget patch = color.getSample(50, 30);
@@ -299,11 +309,13 @@ public class SpotLight extends Light
     dlg.setVisible(true);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -326,6 +338,7 @@ public class SpotLight extends Light
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -351,6 +364,7 @@ public class SpotLight extends Light
 
   /* Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new SpotLightKeyframe(color, intensity, decayRate, radius, angle, falloff);
@@ -358,6 +372,7 @@ public class SpotLight extends Light
   
   /* Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     SpotLightKeyframe key = (SpotLightKeyframe) k;
@@ -371,6 +386,7 @@ public class SpotLight extends Light
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Intensity", "Decay Rate", "Radius", "Cone Angle", "Falloff Rate"},
@@ -381,6 +397,7 @@ public class SpotLight extends Light
   
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final SpotLightKeyframe key = (SpotLightKeyframe) k;
@@ -475,6 +492,7 @@ public class SpotLight extends Light
     
     /* Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate()
     {
       return new SpotLightKeyframe(color, intensity, decayRate, radius, angle, falloff);
@@ -482,6 +500,7 @@ public class SpotLight extends Light
     
     /* Create a duplicate of this keyframe for a (possibly different) object. */
   
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return duplicate();
@@ -489,6 +508,7 @@ public class SpotLight extends Light
   
     /* Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {intensity, decayRate, radius, angle, falloff};
@@ -496,6 +516,7 @@ public class SpotLight extends Light
   
     /* Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
       intensity = (float) values[0];
@@ -508,6 +529,7 @@ public class SpotLight extends Light
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       SpotLightKeyframe k2 = (SpotLightKeyframe) o2;
@@ -519,6 +541,7 @@ public class SpotLight extends Light
         weight1*angle+weight2*k2.angle, weight1*falloff+weight2*k2.falloff);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       SpotLightKeyframe k2 = (SpotLightKeyframe) o2, k3 = (SpotLightKeyframe) o3;
@@ -532,6 +555,7 @@ public class SpotLight extends Light
         weight1*falloff+weight2*k2.falloff+weight3*k3.falloff);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       SpotLightKeyframe k2 = (SpotLightKeyframe) o2, k3 = (SpotLightKeyframe) o3, k4 = (SpotLightKeyframe) o4;
@@ -547,6 +571,7 @@ public class SpotLight extends Light
 
     /* Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof SpotLightKeyframe))
@@ -557,6 +582,7 @@ public class SpotLight extends Light
   
     /* Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       color.writeToFile(out);

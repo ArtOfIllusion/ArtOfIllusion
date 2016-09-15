@@ -90,6 +90,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
   
   /** Set the starting time to display. */
   
+  @Override
   public void setStartTime(double time)
   {
     hstart = time;
@@ -97,6 +98,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
   
   /** Set the number of pixels per unit time. */
   
+  @Override
   public void setScale(double s)
   {
     hscale = s;
@@ -104,6 +106,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
   
   /** Set the number of subdivisions per unit time. */
   
+  @Override
   public void setSubdivisions(int s)
   {
     subdivisions = s;
@@ -111,12 +114,14 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
   
   /** This method is required by the TrackDisplay interface.  It does nothing in this case. */
   
+  @Override
   public void setYOffset(int offset)
   {
   }
   
   /** Add a marker to the display. */
   
+  @Override
   public void addMarker(Marker m)
   {
     markers.addElement(m);
@@ -124,6 +129,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
 
   /** Set the mode (select-and-move or scroll-and-scale) for this display. */
   
+  @Override
   public void setMode(int m)
   {
     mode = m;

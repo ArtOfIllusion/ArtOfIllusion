@@ -200,6 +200,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     layerPanel.add(moveUpButton = Translate.button("moveUp", this, "doMoveLayerUp"), 0, 2);
     layerPanel.add(moveDownButton = Translate.button("moveDown", this, "doMoveLayerDown"), 0, 3);
     layerList = new BList() {
+      @Override
       public Dimension getPreferredSize()
       {
         return new Dimension(texList.getPreferredSize().width, super.getPreferredSize().height);
@@ -286,6 +287,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     preview.getObject().getObject().setParameterValues(paramValue);
   }
 
+  @Override
   public void dispose()
   {
     scene.removeTextureListener(this);
@@ -828,6 +830,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   
   /* ListChangeListener methods. */
   
+  @Override
   public void itemAdded(int index, Object obj)
   {
     if (obj instanceof Texture)
@@ -842,6 +845,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
   }
   
+  @Override
   public void itemRemoved(int index, Object obj)
   {
     if (obj instanceof Texture)
@@ -883,6 +887,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
   }
   
+  @Override
   public void itemChanged(int index, Object obj)
   {
     if (obj instanceof Texture)
@@ -905,6 +910,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   {
     renderProcessor.addEvent(new Runnable()
     {
+      @Override
       public void run()
       {
         preview.render();

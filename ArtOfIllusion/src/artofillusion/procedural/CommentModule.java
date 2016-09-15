@@ -33,6 +33,7 @@ public class CommentModule extends Module
 
   /** Allow the user to edit the comment text. */
   
+  @Override
   public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     BTextArea ta = new BTextArea(name, 10, 40);
@@ -46,6 +47,7 @@ public class CommentModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     CommentModule mod = new CommentModule(new Point(bounds.x, bounds.y), name);
@@ -54,6 +56,7 @@ public class CommentModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeUTF(name);
@@ -61,6 +64,7 @@ public class CommentModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     name = in.readUTF();
@@ -69,6 +73,7 @@ public class CommentModule extends Module
   
   /** Calculate the size on the screen of this module.  */
   
+  @Override
   public void calcSize()
   {
     String lines[] = name.split("\n");
@@ -85,6 +90,7 @@ public class CommentModule extends Module
   
   /** Draw the contents of the module. */
   
+  @Override
   protected void drawContents(Graphics2D g)
   {
     g.setColor(Color.black);

@@ -34,6 +34,7 @@ public class OutlineFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Outline");
@@ -41,6 +42,7 @@ public class OutlineFilter extends ImageFilter
   
   /** Get a list of all the image components required by this filter. */
   
+  @Override
   public int getDesiredComponents()
   {
     return ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE+ComplexImage.DEPTH;
@@ -53,6 +55,7 @@ public class OutlineFilter extends ImageFilter
       @param cameraPos  the position of the camera in the scene
   */
   
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     if (!image.hasFloatData(ComplexImage.DEPTH))
@@ -283,6 +286,7 @@ public class OutlineFilter extends ImageFilter
 
   /** Write a serialized description of this filter to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -297,6 +301,7 @@ public class OutlineFilter extends ImageFilter
 
   /** Reconstruct this filter from its serialized representation. */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int version = in.readShort();

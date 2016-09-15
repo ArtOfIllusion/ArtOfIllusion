@@ -31,6 +31,7 @@ public class LogModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
@@ -38,6 +39,7 @@ public class LogModule extends Module
 
   /* This module outputs the log of the input value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -78,6 +80,7 @@ public class LogModule extends Module
 
   /* Estimate the error from the derivative of the function. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -96,6 +99,7 @@ public class LogModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)

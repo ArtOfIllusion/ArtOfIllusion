@@ -25,27 +25,34 @@ public interface SurfaceIntersection
    */
 
   public static final SurfaceIntersection NO_INTERSECTION = new SurfaceIntersection() {
+    @Override
     public RTObject getObject()
     {
       return null;
     }
+    @Override
     public int numIntersections()
     {
       return 0;
     }
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
     }
+    @Override
     public double intersectionDist(int n)
     {
       return 0.0;
     }
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
     }
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
     }
+    @Override
     public void trueNormal(Vec3 n)
     {
     }

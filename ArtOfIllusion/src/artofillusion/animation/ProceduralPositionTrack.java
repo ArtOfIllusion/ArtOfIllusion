@@ -60,6 +60,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Modify the position of the object. */
   
+  @Override
   public void apply(double time)
   {
     PointInfo point = new PointInfo();
@@ -133,6 +134,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     ProceduralPositionTrack t = new ProceduralPositionTrack((ObjectInfo) obj);
@@ -153,6 +155,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     ProceduralPositionTrack t = (ProceduralPositionTrack) tr;
@@ -172,6 +175,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
@@ -179,6 +183,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /* Get the timecourse describing this track. */
   
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
@@ -186,6 +191,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Set a keyframe at the specified time. */
   
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
@@ -193,6 +199,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Set a keyframe at the specified time, based on the current state of the Scene. */
   
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     if (parameter.length == 0)
@@ -213,6 +220,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /* Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
@@ -220,6 +228,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
@@ -227,6 +236,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Procedural tracks are never null. */
   
+  @Override
   public boolean isNullTrack()
   {
     return false;
@@ -234,6 +244,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
     
   /* This has a single child track. */
   
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
@@ -241,6 +252,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /* Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
@@ -248,6 +260,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -255,6 +268,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -262,6 +276,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Get the smoothing method for this track. */
   
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
@@ -337,6 +352,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /* Get the names of all graphable values for this track. */
   
+  @Override
   public String [] getValueNames()
   {
     String names[] = new String [parameter.length];
@@ -347,6 +363,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /* Get the default list of graphable values (for a track which has no keyframes). */
   
+  @Override
   public double [] getDefaultGraphValues()
   {
     double val[] = new double [parameter.length];
@@ -359,6 +376,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
   
+  @Override
   public double[][] getValueRange()
   {
     double range[][] = new double [parameter.length][2];
@@ -373,6 +391,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   /* Get an array of any objects which this track depends on (and which therefore must
      be updated before this track is applied). */ 
   
+  @Override
   public ObjectInfo [] getDependencies()
   {
     if (relCoords == OBJECT)
@@ -389,12 +408,14 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   /* Delete all references to the specified object from this track.  This is used when an
      object is deleted from the scene. */
   
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
     if (relObject.getObject() == obj)
       relObject = new ObjectRef();
   }
 
+  @Override
   public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
     if (objectMap.containsKey(relObject.getObject()))
@@ -430,6 +451,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /** Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     double t[] = tc.getTimes();
@@ -458,6 +480,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -491,6 +514,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /** Present a window in which the user can edit the specified keyframe. */
   
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     ArrayKeyframe key = (ArrayKeyframe) tc.getValues()[which];
@@ -544,6 +568,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /* This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     ProcedureEditor editor = new ProcedureEditor(proc, this, win.getScene());
@@ -552,6 +577,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   /** Get the title of the procedure's editing window. */
   
+  @Override
   public String getWindowTitle()
   {
     return Translate.text("procPosTrackTitle");
@@ -559,6 +585,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** Create an object which displays a preview of the procedure. */
   
+  @Override
   public Object getPreview(ProcedureEditor editor)
   {
     return null;
@@ -566,18 +593,21 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** Update the display of the preview. */
   
+  @Override
   public void updatePreview(Object preview)
   {
   }
   
   /** Dispose of the preview object when the editor is closed. */
   
+  @Override
   public void disposePreview(Object preview)
   {
   }
   
   /** Determine whether the procedure may contain View Angle modules. */
   
+  @Override
   public boolean allowViewAngle()
   {
     return false;
@@ -585,6 +615,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** Determine whether the procedure may contain Parameter modules. */
   
+  @Override
   public boolean allowParameters()
   {
     return true;
@@ -592,6 +623,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** Determine whether the procedure may be renamed. */
   
+  @Override
   public boolean canEditName()
   {
     return true;
@@ -599,6 +631,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** This is called when the user clicks OK in the procedure editor. */
   
+  @Override
   public void acceptEdits(ProcedureEditor editor)
   {
     EditingWindow win = editor.getEditingWindow();
@@ -631,6 +664,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
   
   /** Display the Properties dialog. */
   
+  @Override
   public void editProperties(ProcedureEditor editor)
   {
     Skeleton s = info.getSkeleton();

@@ -77,12 +77,14 @@ public class TreeList extends CustomWidget
     addEventLink(RepaintEvent.class, this, "paint");
   }
 
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension superPref = super.getPreferredSize();
     return new Dimension(Math.max(superPref.width, maxRowWidth), Math.max(superPref.height, rowHeight*showing.size()));
   }
   
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(maxRowWidth, rowHeight*showing.size());
@@ -797,6 +799,7 @@ public class TreeList extends CustomWidget
       return elem;
     }
     
+    @Override
     public Widget getWidget()
     {
       return TreeList.this;

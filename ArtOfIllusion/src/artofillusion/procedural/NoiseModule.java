@@ -72,6 +72,7 @@ public class NoiseModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -80,6 +81,7 @@ public class NoiseModule extends Module
 
   /* Calculate the noise function. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -111,6 +113,7 @@ public class NoiseModule extends Module
 
   /* Estimate the error from the derivative of the function. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -155,6 +158,7 @@ public class NoiseModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)
@@ -209,6 +213,7 @@ public class NoiseModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
@@ -234,6 +239,7 @@ public class NoiseModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     NoiseModule mod = new NoiseModule(new Point(bounds.x, bounds.y));
@@ -245,6 +251,7 @@ public class NoiseModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
@@ -253,6 +260,7 @@ public class NoiseModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();

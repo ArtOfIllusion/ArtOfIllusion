@@ -34,6 +34,7 @@ public class TextTool implements ModellingTool
 
   /** Get the text that appear as the menu item.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("menu.textTool");
@@ -41,6 +42,7 @@ public class TextTool implements ModellingTool
 
   /** Display the dialog. */
 
+  @Override
   public void commandSelected(LayoutWindow window)
   {
     new TextDialog(window);

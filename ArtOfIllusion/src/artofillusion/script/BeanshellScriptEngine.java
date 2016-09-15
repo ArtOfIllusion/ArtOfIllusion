@@ -29,27 +29,32 @@ public class BeanshellScriptEngine implements ScriptEngine
     interp.setClassLoader(parent);
   }
 
+  @Override
   public String getName()
   {
     return "BeanShell";
   }
 
+  @Override
   public String getFilenameExtension()
   {
     return "bsh";
   }
 
+  @Override
   public void setOutput(PrintStream out)
   {
     interp.setOut(out);
     interp.setErr(out);
   }
 
+  @Override
   public void addImport(String packageOrClass) throws Exception
   {
     interp.eval("import "+packageOrClass);
   }
 
+  @Override
   public void executeScript(String script, Map<String, Object> variables) throws ScriptException
   {
     try
@@ -64,6 +69,7 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
   }
 
+  @Override
   public ToolScript createToolScript(String script) throws ScriptException
   {
     String prefix = "return new ToolScript() {void execute(LayoutWindow window) {\n";
@@ -78,6 +84,7 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
   }
 
+  @Override
   public ObjectScript createObjectScript(String script) throws ScriptException
   {
     String prefix = "return new ObjectScript() {void execute(ScriptedObjectController script) {\n";

@@ -1629,6 +1629,7 @@ public class Scene
     Thread.currentThread().setContextClassLoader(loader); // So that plugin classes can be saved correctly.
     ExceptionListener exceptionListener = new ExceptionListener()
       {
+        @Override
         public void exceptionThrown(Exception e)
         {
           e.printStackTrace();

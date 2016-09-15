@@ -25,11 +25,13 @@ public class UniformMaterialMapping extends MaterialMapping
     super(theObject, theMaterial);
   }
   
+  @Override
   public double getStepSize()
   {
     return material.getStepSize();
   }
 
+  @Override
   public void getMaterialSpec(Vec3 pos, MaterialSpec spec, double size, double t)
   {
     ((UniformMaterial) material).getMaterialSpec(spec);
@@ -40,21 +42,25 @@ public class UniformMaterialMapping extends MaterialMapping
     return (mat instanceof UniformMaterial);
   }
 
+  @Override
   public MaterialMapping duplicate()
   {
     return new UniformMaterialMapping(object, material);
   }
   
+  @Override
   public MaterialMapping duplicate(Object3D obj, Material mat)
   {
     return new UniformMaterialMapping(obj, mat);
   }
   
+  @Override
   public void copy(MaterialMapping map)
   {
     material = map.material;
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new CustomWidget();
@@ -71,6 +77,7 @@ public class UniformMaterialMapping extends MaterialMapping
     material = theMaterial;
   }
   
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(0);

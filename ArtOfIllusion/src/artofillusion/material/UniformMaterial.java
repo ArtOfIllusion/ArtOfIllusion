@@ -63,11 +63,13 @@ public class UniformMaterial extends Material
     return "Uniform";
   }
 
+  @Override
   public boolean isScattering()
   {
     return (density > 0.0 && scattering > 0.0);
   }
   
+  @Override
   public boolean castsShadows()
   {
     return shadows;
@@ -86,6 +88,7 @@ public class UniformMaterial extends Material
   
   /* The only MaterialMapping which can be used for a UniformMaterial is a UniformMapping. */
   
+  @Override
   public MaterialMapping getDefaultMapping(Object3D obj)
   {
     return new UniformMaterialMapping(obj, this);
@@ -93,6 +96,7 @@ public class UniformMaterial extends Material
 
   /* Create a duplicate of the material. */
   
+  @Override
   public Material duplicate()
   {
     UniformMaterial m = new UniformMaterial();
@@ -113,6 +117,7 @@ public class UniformMaterial extends Material
   
   /* Allow the user to interactively edit the material. */
   
+  @Override
   public void edit(final BFrame fr, Scene sc)
   {
     final UniformMaterial newMaterial = (UniformMaterial) duplicate();
@@ -129,6 +134,7 @@ public class UniformMaterial extends Material
     final MaterialPreviewer preview = new MaterialPreviewer(null, newMaterial, 200, 160);
     final ActionProcessor process = new ActionProcessor();
     final Runnable renderCallback = new Runnable() {
+          @Override
       public void run()
       {
         preview.render();
@@ -230,6 +236,7 @@ public class UniformMaterial extends Material
     recalcColors();
   }
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);

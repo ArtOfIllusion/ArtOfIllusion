@@ -41,6 +41,7 @@ public class ScaleTrack extends Track
   
   /* Modify the scale of the object. */
   
+  @Override
   public void apply(double time)
   {
     Vec3 scale = (VectorKeyframe) tc.evaluate(time, smoothingMethod);
@@ -55,6 +56,7 @@ public class ScaleTrack extends Track
   
   /* Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     ScaleTrack t = new ScaleTrack((ObjectInfo) obj);
@@ -71,6 +73,7 @@ public class ScaleTrack extends Track
   
   /* Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     ScaleTrack t = (ScaleTrack) tr;
@@ -86,6 +89,7 @@ public class ScaleTrack extends Track
   
   /* Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
@@ -93,6 +97,7 @@ public class ScaleTrack extends Track
 
   /* Get the timecourse describing this track. */
   
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
@@ -100,6 +105,7 @@ public class ScaleTrack extends Track
   
   /* Set a keyframe at the specified time. */
   
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
@@ -107,6 +113,7 @@ public class ScaleTrack extends Track
   
   /* Set a keyframe at the specified time, based on the current state of the Scene. */
   
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     Keyframe k = tc.evaluate(time, smoothingMethod);
@@ -120,6 +127,7 @@ public class ScaleTrack extends Track
 
   /* Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
@@ -127,6 +135,7 @@ public class ScaleTrack extends Track
   
   /* Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
@@ -134,6 +143,7 @@ public class ScaleTrack extends Track
   
   /* This track is null if it has no keyframes. */
   
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
@@ -141,6 +151,7 @@ public class ScaleTrack extends Track
   
   /* This has a single child track. */
   
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
@@ -148,6 +159,7 @@ public class ScaleTrack extends Track
 
   /* Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
@@ -155,6 +167,7 @@ public class ScaleTrack extends Track
   
   /* Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -162,6 +175,7 @@ public class ScaleTrack extends Track
   
   /* Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -169,6 +183,7 @@ public class ScaleTrack extends Track
   
   /* Get the smoothing method for this track. */
   
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
@@ -183,6 +198,7 @@ public class ScaleTrack extends Track
   
   /* Get the names of all graphable values for this track. */
   
+  @Override
   public String [] getValueNames()
   {
     return new String [] {"X Scale", "Y Scale", "Z Scale"};
@@ -190,6 +206,7 @@ public class ScaleTrack extends Track
 
   /* Get the default list of graphable values (for a track which has no keyframes). */
   
+  @Override
   public double [] getDefaultGraphValues()
   {
     return new double [] {1.0, 1.0, 1.0};
@@ -199,6 +216,7 @@ public class ScaleTrack extends Track
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
   
+  @Override
   public double[][] getValueRange()
   {
     double range[][] = new double [3][2];
@@ -213,6 +231,7 @@ public class ScaleTrack extends Track
   /* Get an array of any objects which this track depends on (and which therefore must
      be updated before this track is applied). */ 
   
+  @Override
   public ObjectInfo [] getDependencies()
   {
      return new ObjectInfo [0];
@@ -221,12 +240,14 @@ public class ScaleTrack extends Track
   /* Delete all references to the specified object from this track.  This is used when an
      object is deleted from the scene. */
   
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
   }
 
   /* Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     double t[] = tc.getTimes();
@@ -250,6 +271,7 @@ public class ScaleTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -275,6 +297,7 @@ public class ScaleTrack extends Track
 
   /* Present a window in which the user can edit the specified keyframe. */
   
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     VectorKeyframe key = (VectorKeyframe) tc.getValues()[which];
@@ -314,6 +337,7 @@ public class ScaleTrack extends Track
 
   /* This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(ScaleTrack.this.getName());

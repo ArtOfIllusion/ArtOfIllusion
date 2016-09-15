@@ -32,22 +32,26 @@ public class CreateLightTool extends EditingTool
     initButton("light");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createLightTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createLightTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
@@ -55,6 +59,7 @@ public class CreateLightTool extends EditingTool
     controlDown = e.isControlDown();
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     dragPoint = e.getPoint();
@@ -78,6 +83,7 @@ public class CreateLightTool extends EditingTool
     view.drawDraggedShape(path);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = ((LayoutWindow) theWindow).getScene();

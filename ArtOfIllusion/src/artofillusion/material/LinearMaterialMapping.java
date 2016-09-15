@@ -132,6 +132,7 @@ public class LinearMaterialMapping extends MaterialMapping
 
   /** Get the step size to use for integrating the material. */
   
+  @Override
   public double getStepSize()
   {
     if (scaleToObject)
@@ -154,6 +155,7 @@ public class LinearMaterialMapping extends MaterialMapping
 
   /* Methods from MaterialMapping. */
 
+  @Override
   public void getMaterialSpec(Vec3 pos, MaterialSpec spec, double size, double time)
   {
     double x = pos.x, y = pos.y, z = pos.z;
@@ -195,11 +197,13 @@ public class LinearMaterialMapping extends MaterialMapping
     return Math.sqrt(x*x+y*y+z*z);
   }
 
+  @Override
   public MaterialMapping duplicate()
   {
     return duplicate(object, material);
   }
   
+  @Override
   public MaterialMapping duplicate(Object3D obj, Material mat)
   {
     LinearMaterialMapping map = new LinearMaterialMapping(obj, (Material3D) mat);
@@ -216,6 +220,7 @@ public class LinearMaterialMapping extends MaterialMapping
     return map;
   }
   
+  @Override
   public void copy(MaterialMapping mapping)
   {
     LinearMaterialMapping map = (LinearMaterialMapping) mapping; 
@@ -231,6 +236,7 @@ public class LinearMaterialMapping extends MaterialMapping
     findCoefficients();
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
@@ -254,6 +260,7 @@ public class LinearMaterialMapping extends MaterialMapping
     findCoefficients();
   }
   
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(1);

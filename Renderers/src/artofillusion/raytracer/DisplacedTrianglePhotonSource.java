@@ -57,6 +57,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
@@ -68,6 +69,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
    * @param threads
   */
   
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     RaytracerRenderer renderer = map.getRenderer();

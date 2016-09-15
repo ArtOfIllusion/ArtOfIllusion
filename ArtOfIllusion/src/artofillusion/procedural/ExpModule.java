@@ -32,6 +32,7 @@ public class ExpModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
@@ -39,6 +40,7 @@ public class ExpModule extends Module
 
   /* This module outputs the exponential of the input value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -65,6 +67,7 @@ public class ExpModule extends Module
 
   /* The error is calculated at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -74,6 +77,7 @@ public class ExpModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)

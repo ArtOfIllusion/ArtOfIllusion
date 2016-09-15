@@ -52,6 +52,7 @@ public class TitleWindow extends BWindow
     setVisible(true);
     activeWindowListener = new PropertyChangeListener()
     {
+      @Override
       public void propertyChange(PropertyChangeEvent evt)
       {
         // Hide this window if a dialog is shown in front of it.
@@ -65,6 +66,7 @@ public class TitleWindow extends BWindow
     KeyboardFocusManager.getCurrentKeyboardFocusManager().addPropertyChangeListener("activeWindow", activeWindowListener);
   }
 
+  @Override
   public void dispose()
   {
     KeyboardFocusManager.getCurrentKeyboardFocusManager().removePropertyChangeListener("activeWindow", activeWindowListener);

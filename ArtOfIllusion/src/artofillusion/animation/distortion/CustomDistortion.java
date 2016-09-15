@@ -36,6 +36,7 @@ public class CustomDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
   
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof CustomDistortion))
@@ -70,6 +71,7 @@ public class CustomDistortion extends Distortion
   
   /** Create a duplicate of this object. */
   
+  @Override
   public Distortion duplicate()
   {
     CustomDistortion d = new CustomDistortion(proc, procVersion, point, weight, preTransform, postTransform);
@@ -80,6 +82,7 @@ public class CustomDistortion extends Distortion
   
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

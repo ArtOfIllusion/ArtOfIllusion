@@ -21,6 +21,7 @@ import artofillusion.ui.*;
 
 public class ViewerScaleControl implements ViewerControl
 {
+  @Override
   public Widget createWidget(final ViewerCanvas view)
   {
     final ValueField scaleField = new ValueField(100.0, ValueField.POSITIVE, 5);
@@ -49,6 +50,7 @@ public class ViewerScaleControl implements ViewerControl
   }
 
 
+  @Override
   public String getName()
   {
     return Translate.text("Magnification");

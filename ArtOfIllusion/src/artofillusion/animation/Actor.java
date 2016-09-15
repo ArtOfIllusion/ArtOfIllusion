@@ -141,6 +141,7 @@ public class Actor extends ObjectWrapper
 
   /** Create a new object which is an exact duplicate of this one. */
   
+  @Override
   public Object3D duplicate()
   {
     Actor a = new Actor(theObject.duplicate());
@@ -161,6 +162,7 @@ public class Actor extends ObjectWrapper
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
   
+  @Override
   public void copyObject(Object3D obj)
   {
     Actor a = (Actor) obj;
@@ -180,6 +182,7 @@ public class Actor extends ObjectWrapper
 
   /** The size of an Actor cannot be set directly, since that is determined by its Poses. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
@@ -187,11 +190,13 @@ public class Actor extends ObjectWrapper
   /** If the object can be edited by the user, isEditable() should be overridden to return true.
      edit() should then create a window and allow the user to edit the object. */
   
+  @Override
   public boolean isEditable()
   {
     return true;
   }
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ActorEditorWindow(parent, info, this, null, cb);
@@ -199,16 +204,19 @@ public class Actor extends ObjectWrapper
   
   /** All of the following methods call through to the corresponding methods on the object. */
   
+  @Override
   public boolean canSetTexture()
   {
     return theObject.canSetTexture();
   }
      
+  @Override
   public boolean canSetMaterial()
   {
     return theObject.canSetMaterial();
   }
      
+  @Override
   public void setTexture(Texture tex, TextureMapping map)
   {
     TextureParameter oldParam[] = getParameters();
@@ -218,6 +226,7 @@ public class Actor extends ObjectWrapper
       gesture[i].textureChanged(oldParam, newParam);
   }
   
+  @Override
   public void setMaterial(Material mat, MaterialMapping map)
   {
     theObject.setMaterial(mat, map);
@@ -225,6 +234,7 @@ public class Actor extends ObjectWrapper
   
   /** Set the list of objects defining the values of texture parameters. */
   
+  @Override
   public void setParameterValues(ParameterValue val[])
   {
     // Set them on the current pose.
@@ -241,6 +251,7 @@ public class Actor extends ObjectWrapper
   
   /** Set the values of a texture parameter in every gesture. */
   
+  @Override
   public void setParameterValue(TextureParameter param, ParameterValue value)
   {
     // Set it on the current pose.
@@ -375,6 +386,7 @@ public class Actor extends ObjectWrapper
   
   /** Write a representation of this object to a file. */
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -431,6 +443,7 @@ public class Actor extends ObjectWrapper
       }
   }
 
+  @Override
   public Property[] getProperties()
   {
     Property prop[] = new Property[currentPose.getNumGestures()];
@@ -440,11 +453,13 @@ public class Actor extends ObjectWrapper
     return prop;
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     return new Double(currentPose.getGestureWeight(index));
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     currentPose.weight[index] = ((Double) value).doubleValue();
@@ -453,6 +468,7 @@ public class Actor extends ObjectWrapper
 
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return currentPose.duplicate(this);
@@ -460,6 +476,7 @@ public class Actor extends ObjectWrapper
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     currentPose = (ActorKeyframe) k.duplicate(this);
@@ -475,6 +492,7 @@ public class Actor extends ObjectWrapper
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [0], new double [0], new double [0][2]);
@@ -506,6 +524,7 @@ public class Actor extends ObjectWrapper
   
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     new ActorEditorWindow(parent, info, this, (ActorKeyframe) k, null);
@@ -600,11 +619,13 @@ public class Actor extends ObjectWrapper
     
     /** Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return duplicate();
     }
 
+    @Override
     public Keyframe duplicate()
     {
       ActorKeyframe k = new ActorKeyframe();
@@ -627,6 +648,7 @@ public class Actor extends ObjectWrapper
   
     /** Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -634,6 +656,7 @@ public class Actor extends ObjectWrapper
   
     /** Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -687,6 +710,7 @@ public class Actor extends ObjectWrapper
     /** These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       Hashtable table = new Hashtable();
@@ -696,6 +720,7 @@ public class Actor extends ObjectWrapper
       return getKeyframeFromTable(table);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       Hashtable table = new Hashtable();
@@ -706,6 +731,7 @@ public class Actor extends ObjectWrapper
       return getKeyframeFromTable(table);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       Hashtable table = new Hashtable();
@@ -719,6 +745,7 @@ public class Actor extends ObjectWrapper
 
     /** Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof ActorKeyframe))
@@ -759,6 +786,7 @@ public class Actor extends ObjectWrapper
   
     /** Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeInt(id.length);

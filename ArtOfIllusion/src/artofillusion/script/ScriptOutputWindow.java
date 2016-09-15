@@ -24,12 +24,14 @@ public class ScriptOutputWindow extends OutputStream
   BFrame window;
   BTextArea text;
   
+  @Override
   public void write(final int b)
   {
     if (!EventQueue.isDispatchThread())
     {
       EventQueue.invokeLater(new Runnable()
       {
+              @Override
         public void run()
         {
           write(b);
@@ -44,6 +46,7 @@ public class ScriptOutputWindow extends OutputStream
     text.append(String.valueOf((char) b));
   }
   
+  @Override
   public void write(byte b[], final int off, final int len)
   {
     if (!EventQueue.isDispatchThread())
@@ -51,6 +54,7 @@ public class ScriptOutputWindow extends OutputStream
       final byte bytes[] = b.clone();
       EventQueue.invokeLater(new Runnable()
       {
+              @Override
         public void run()
         {
           write(bytes, off, len);

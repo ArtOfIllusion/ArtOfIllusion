@@ -35,46 +35,55 @@ public class TransparentFragment implements Fragment
     this.next = next;
   }
 
+  @Override
   public void getAdditiveColor(RGBColor color)
   {
     color.setERGB(additiveColor);
   }
 
+  @Override
   public void getMultiplicativeColor(RGBColor color)
   {
     color.setERGB(multiplicativeColor);
   }
 
+  @Override
   public boolean isOpaque()
   {
     return false;
   }
 
+  @Override
   public float getDepth()
   {
     return depth;
   }
 
+  @Override
   public float getOpaqueDepth()
   {
     return next.getOpaqueDepth();
   }
 
+  @Override
   public ObjectMaterialInfo getMaterialMapping()
   {
     return null;
   }
 
+  @Override
   public boolean isEntering()
   {
     return false;
   }
 
+  @Override
   public Fragment getNextFragment()
   {
     return next;
   }
 
+  @Override
   public Fragment insertNextFragment(Fragment fragment)
   {
     if (fragment.getDepth() < next.getDepth())

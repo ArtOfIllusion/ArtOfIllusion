@@ -53,12 +53,14 @@ public class Nonlinear2DTriangle extends RenderingTriangle
       @param index     the index of this triangle within the mesh
   */
 
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);
     this.map = (NonlinearMapping2D) map;
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double t)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -74,6 +76,7 @@ public class Nonlinear2DTriangle extends RenderingTriangle
     map.getSpecIntermed(spec, t1.x*u+t2.x*v+t3.x*w, t1.y*u+t2.y*v+t3.y*w, t1.z*u+t2.z*v+t3.z*w, size, angle, t, getParameters(u, v, w));
   }
 
+  @Override
   public void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double t)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -84,6 +87,7 @@ public class Nonlinear2DTriangle extends RenderingTriangle
     map.getTransIntermed(trans, t1.x*u+t2.x*v+t3.x*w, t1.y*u+t2.y*v+t3.y*w, t1.z*u+t2.z*v+t3.z*w, size, angle, t, getParameters(u, v, w));
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double t)
   {
     return map.getDisplaceIntermed(t1.x*u+t2.x*v+t3.x*w, t1.y*u+t2.y*v+t3.y*w, t1.z*u+t2.z*v+t3.z*w, size, t, getParameters(u, v, w));

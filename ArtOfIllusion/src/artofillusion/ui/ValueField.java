@@ -115,6 +115,7 @@ public class ValueField extends BTextField
     ((JTextField) getComponent()).setForeground(valid ? Color.black : Color.red);
   }
 
+  @Override
   protected void textChanged()
   {
     double val = value, oldVal = value;

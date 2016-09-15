@@ -27,6 +27,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
 {
   private boolean usingAppMenu;
 
+  @Override
   public void processMessage(int message, Object args[])
   {
     if (message == APPLICATION_STARTING)
@@ -126,6 +127,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
   
   /** Handle ApplicationListener methods. */
   
+  @Override
   public Object invoke(Object proxy, Method method, Object args[])
   {
     boolean handled = true;
@@ -214,6 +216,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       RecentFiles.createMenu(recentMenu);
       file.add(recentMenu);
       Preferences.userNodeForPackage(RecentFiles.class).addPreferenceChangeListener(new PreferenceChangeListener() {
+        @Override
         public void preferenceChange(PreferenceChangeEvent ev)
         {
           RecentFiles.createMenu(recentMenu);
@@ -224,55 +227,67 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       setVisible(true);
     }
 
+    @Override
     public ToolPalette getToolPalette()
     {
       return null;
     }
 
+    @Override
     public void setTool(EditingTool tool)
     {
     }
   
+    @Override
     public void setHelpText(String text)
     {
     }
 
+    @Override
     public BFrame getFrame()
     {
       return this;
     }
 
+    @Override
     public void updateImage()
     {
     }
 
+    @Override
     public void updateMenus()
     {
     }
 
+    @Override
     public void setUndoRecord(UndoRecord command)
     {
     }
 
+    @Override
     public void setModified()
     {
     }
 
+    @Override
     public Scene getScene()
     {
       return null;
     }
 
+    @Override
     public ViewerCanvas getView()
     {
       return null;
     }
 
+    @Override
     public ViewerCanvas[] getAllViews()
     {
       return null;
     }
 
+    @Override
     public boolean confirmClose()
     {
       dispose();

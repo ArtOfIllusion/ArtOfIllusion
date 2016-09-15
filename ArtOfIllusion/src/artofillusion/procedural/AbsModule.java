@@ -31,6 +31,7 @@ public class AbsModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     signOk = false;
@@ -38,6 +39,7 @@ public class AbsModule extends Module
 
   /* Calculate the output value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     double value = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getAverageValue(linkFromIndex[0], blur);
@@ -48,6 +50,7 @@ public class AbsModule extends Module
   }
   /* The error is unchanged by this module. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     return (linkFrom[0] == null) ? 0.0 : linkFrom[0].getValueError(linkFromIndex[0], blur);
@@ -55,6 +58,7 @@ public class AbsModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!signOk || blur != lastBlur)

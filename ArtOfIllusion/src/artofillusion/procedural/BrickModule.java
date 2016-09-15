@@ -84,6 +84,7 @@ public class BrickModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -92,6 +93,7 @@ public class BrickModule extends Module
   
   /* Calculate the average value of the function. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -160,6 +162,7 @@ public class BrickModule extends Module
   
   /* The error is calculated at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -169,6 +172,7 @@ public class BrickModule extends Module
   
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -223,6 +227,7 @@ public class BrickModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueSlider heightSlider = new ValueSlider(0.0, 1.0, 100, height);
@@ -252,6 +257,7 @@ public class BrickModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     BrickModule mod = new BrickModule(new Point(bounds.x, bounds.y));
@@ -264,6 +270,7 @@ public class BrickModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(height);
@@ -273,6 +280,7 @@ public class BrickModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     height = in.readDouble();

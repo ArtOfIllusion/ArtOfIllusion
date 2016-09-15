@@ -60,6 +60,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null);
     filtersPanel = new FiltersPanel(theCamera, new Runnable()
     {
+      @Override
       public void run()
       {
         applyFilters();
@@ -225,6 +226,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     if (filterThread != null)
       filterThread.interrupt();
     filterThread = new Thread() {
+      @Override
       public void run()
       {
         if (unfilteredImage == null)
@@ -245,6 +247,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   /** The renderer may call this method periodically during rendering, to notify the listener that more of the
       image is complete. */
 
+  @Override
   public void imageUpdated(Image image)
   {
     displayImage = image;
@@ -254,12 +257,14 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   /** The renderer may call this method periodically during rendering, to give the listener text descriptions
       of the current status of rendering. */
 
+  @Override
   public void statusChanged(String status)
   {
   }
 
   /** This method will be called when rendering is complete. */
 
+  @Override
   public void imageComplete(ComplexImage image)
   {
     unfilteredImage = image;
@@ -272,6 +277,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
 
   /** This method will be called if rendering is canceled. */
 
+  @Override
   public void renderingCanceled()
   {
   }

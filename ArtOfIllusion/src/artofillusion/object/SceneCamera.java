@@ -314,6 +314,7 @@ public class SceneCamera extends Object3D
     }
   }
 
+  @Override
   public SceneCamera duplicate()
   {
     SceneCamera sc = new SceneCamera();
@@ -328,6 +329,7 @@ public class SceneCamera extends Object3D
     return sc;
   }
   
+  @Override
   public void copyObject(Object3D obj)
   {
     SceneCamera sc = (SceneCamera) obj;
@@ -341,6 +343,7 @@ public class SceneCamera extends Object3D
       filter[i] = sc.filter[i].duplicate();
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -348,15 +351,18 @@ public class SceneCamera extends Object3D
 
   /* A SceneCamera has no size, so calls to setSize() are ignored. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
   
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
@@ -385,17 +391,21 @@ public class SceneCamera extends Object3D
     Camera cam = createCamera(width, height, cameraPos);
     final ComplexImage theImage[] = new ComplexImage [1];
     RenderListener rl = new RenderListener() {
+      @Override
       public void imageUpdated(Image image)
       {
       }
+      @Override
       public void statusChanged(String status)
       {
       }
+      @Override
       public synchronized void imageComplete(ComplexImage image)
       {
         theImage[0] = image;
         notify();
       }
+      @Override
       public void renderingCanceled()
       {
         notify();
@@ -418,11 +428,13 @@ public class SceneCamera extends Object3D
     return theImage[0];
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
 
+  @Override
   public void edit(final EditingWindow parent, final ObjectInfo info, Runnable cb)
   {
     final ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
@@ -527,6 +539,7 @@ public class SceneCamera extends Object3D
     }
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -544,11 +557,13 @@ public class SceneCamera extends Object3D
     }
   }
 
+  @Override
   public Property[] getProperties()
   {
     return PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -565,6 +580,7 @@ public class SceneCamera extends Object3D
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -579,6 +595,7 @@ public class SceneCamera extends Object3D
 
   /* Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new CameraKeyframe(fov, depthOfField, focalDist);
@@ -586,6 +603,7 @@ public class SceneCamera extends Object3D
   
   /* Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     CameraKeyframe key = (CameraKeyframe) k;
@@ -598,6 +616,7 @@ public class SceneCamera extends Object3D
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Field of View", "Depth of Field", "Focal Distance"},
@@ -611,6 +630,7 @@ public class SceneCamera extends Object3D
 
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     CameraKeyframe key = (CameraKeyframe) k;
@@ -642,6 +662,7 @@ public class SceneCamera extends Object3D
     
     /* Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate()
     {
       return new CameraKeyframe(fov, depthOfField, focalDist);
@@ -649,6 +670,7 @@ public class SceneCamera extends Object3D
     
     /* Create a duplicate of this keyframe for a (possibly different) object. */
   
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return new CameraKeyframe(fov, depthOfField, focalDist);
@@ -656,6 +678,7 @@ public class SceneCamera extends Object3D
   
     /* Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {fov, depthOfField, focalDist};
@@ -663,6 +686,7 @@ public class SceneCamera extends Object3D
   
     /* Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
       fov = values[0];
@@ -673,6 +697,7 @@ public class SceneCamera extends Object3D
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       CameraKeyframe k2 = (CameraKeyframe) o2;
@@ -681,6 +706,7 @@ public class SceneCamera extends Object3D
         weight1*focalDist+weight2*k2.focalDist);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       CameraKeyframe k2 = (CameraKeyframe) o2, k3 = (CameraKeyframe) o3;
@@ -690,6 +716,7 @@ public class SceneCamera extends Object3D
         weight1*focalDist+weight2*k2.focalDist+weight3*k3.focalDist);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       CameraKeyframe k2 = (CameraKeyframe) o2, k3 = (CameraKeyframe) o3, k4 = (CameraKeyframe) o4;
@@ -701,6 +728,7 @@ public class SceneCamera extends Object3D
 
     /* Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CameraKeyframe))
@@ -711,6 +739,7 @@ public class SceneCamera extends Object3D
   
     /* Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeDouble(fov);

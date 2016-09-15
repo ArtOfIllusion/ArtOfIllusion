@@ -48,6 +48,7 @@ public class RotationKeyframe implements Keyframe
   
   /** Get the list of graphable values for this keyframe. */
   
+  @Override
   public double [] getGraphValues()
   {
     return new double [] {x, y, z};
@@ -55,6 +56,7 @@ public class RotationKeyframe implements Keyframe
   
   /** Set the list of graphable values for this keyframe. */
   
+  @Override
   public void setGraphValues(double values[])
   {
     if (values.length == 3)
@@ -169,6 +171,7 @@ public class RotationKeyframe implements Keyframe
     return result;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     RotationKeyframe f = new RotationKeyframe(x, y, z);
@@ -176,6 +179,7 @@ public class RotationKeyframe implements Keyframe
     return f;
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     RotationKeyframe f = new RotationKeyframe(x, y, z);
@@ -183,6 +187,7 @@ public class RotationKeyframe implements Keyframe
     return f;
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     RotationKeyframe v2 = (RotationKeyframe) o2;
@@ -197,6 +202,7 @@ public class RotationKeyframe implements Keyframe
     return r;
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     RotationKeyframe v2 = (RotationKeyframe) o2, v3 = (RotationKeyframe) o3;
@@ -220,6 +226,7 @@ public class RotationKeyframe implements Keyframe
     return r;
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     RotationKeyframe v2 = (RotationKeyframe) o2, v3 = (RotationKeyframe) o3, v4 = (RotationKeyframe) o4;
@@ -264,6 +271,7 @@ public class RotationKeyframe implements Keyframe
 
   /** Determine whether this keyframe is identical to another one. */
   
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof RotationKeyframe))
@@ -280,6 +288,7 @@ public class RotationKeyframe implements Keyframe
   
   /** Write out a representation of this keyframe to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeDouble(x);

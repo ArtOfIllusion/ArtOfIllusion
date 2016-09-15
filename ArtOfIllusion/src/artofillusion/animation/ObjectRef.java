@@ -60,6 +60,7 @@ public class ObjectRef
   
   /** Two ObjectRefs are equals if they refer to the same object or joint. */
   
+  @Override
   public boolean equals(Object obj)
   {
     if (!(obj instanceof ObjectRef))
@@ -170,6 +171,7 @@ public class ObjectRef
   
   /** Get a text string describing the object and joint. */
   
+  @Override
   public String toString()
   {
     ObjectInfo info = getObject();

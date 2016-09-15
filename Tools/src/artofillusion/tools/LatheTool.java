@@ -30,6 +30,7 @@ public class LatheTool implements ModellingTool
   
   /* Get the text that appear as the menu item.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("menu.lathe");
@@ -38,6 +39,7 @@ public class LatheTool implements ModellingTool
   /* See whether an appropriate object is selected and either display an error
      message, or bring up the extrude window. */
   
+  @Override
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();

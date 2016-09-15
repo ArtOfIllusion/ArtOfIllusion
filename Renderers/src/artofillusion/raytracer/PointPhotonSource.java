@@ -53,6 +53,7 @@ public class PointPhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
@@ -66,6 +67,7 @@ public class PointPhotonSource implements PhotonSource
    * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
    */
   
+  @Override
   public void generatePhotons(final PhotonMap map, double intensity, ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
@@ -83,6 +85,7 @@ public class PointPhotonSource implements PhotonSource
         threads.setNumIndices(n*n);
         threads.setTask(new ThreadManager.Task()
         {
+              @Override
           public void execute(int index)
           {
             if (map.getRenderer().renderThread != currentThread)
@@ -104,6 +107,7 @@ public class PointPhotonSource implements PhotonSource
             r.newID();
             map.spawnPhoton(r, color, false);
           }
+              @Override
           public void cleanup()
           {
             map.getWorkspace().cleanup();

@@ -70,6 +70,7 @@ public class EnvironmentPhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
@@ -83,6 +84,7 @@ public class EnvironmentPhotonSource implements PhotonSource
    * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
    */
 
+  @Override
   public void generatePhotons(final PhotonMap map, final double intensity, final ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
@@ -94,6 +96,7 @@ public class EnvironmentPhotonSource implements PhotonSource
     threads.setNumIndices(1024);
     threads.setTask(new ThreadManager.Task()
     {
+          @Override
       public void execute(int index)
       {
         if (renderer.renderThread != currentThread)
@@ -163,6 +166,7 @@ public class EnvironmentPhotonSource implements PhotonSource
         r.newID();
         map.spawnPhoton(r, color, true);
       }
+          @Override
       public void cleanup()
       {
         map.getWorkspace().cleanup();

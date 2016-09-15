@@ -199,6 +199,7 @@ public class BoundingBox
     return new BoundingBox(newminx, newmaxx, newminy, newmaxy, newminz, newmaxz);
   }
 
+  @Override
   public String toString()
   {
     return "Box: {"+minx+", "+maxx+"}   {"+miny+", "+maxy+"}   {"+minz+", "+maxz+"}";

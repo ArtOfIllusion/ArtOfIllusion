@@ -61,6 +61,7 @@ public class FlatVertexShader implements VertexShader
       @param color    the vertex color will be returned in this object
   */
   
+  @Override
   public void getColor(int face, int vertex, RGBColor color)
   {
     color.copy(meshColor);
@@ -71,6 +72,7 @@ public class FlatVertexShader implements VertexShader
       @param face    the index of the triangle being rendered
   */
   
+  @Override
   public boolean isUniformFace(int face)
   {
     return true;
@@ -81,6 +83,7 @@ public class FlatVertexShader implements VertexShader
       may still be colored differently due to lighting).
    */
   
+  @Override
   public boolean isUniformTexture()
   {
     return true;
@@ -90,6 +93,7 @@ public class FlatVertexShader implements VertexShader
       @param spec     the surface properties will be returned in this object
    */
 
+  @Override
   public void getTextureSpec(TextureSpec spec)
   {
     spec.diffuse.copy(meshColor);

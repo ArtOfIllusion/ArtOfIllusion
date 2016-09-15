@@ -26,6 +26,7 @@ public class TubeViewer extends CurveViewer
     super(window, p);
   }
 
+  @Override
   protected void drawObject()
   {
     // First draw the surface.

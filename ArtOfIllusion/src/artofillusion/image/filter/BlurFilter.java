@@ -27,6 +27,7 @@ public class BlurFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Blur");
@@ -39,6 +40,7 @@ public class BlurFilter extends ImageFilter
       @param cameraPos  the position of the camera in the scene
   */
   
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     int radius = (int) (0.5f*(Double) getPropertyValue(0)*image.getHeight());
@@ -125,6 +127,7 @@ public class BlurFilter extends ImageFilter
 
   /** Write a serialized description of this filter to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble((Integer) getPropertyValue(0));
@@ -132,6 +135,7 @@ public class BlurFilter extends ImageFilter
 
   /** Reconstruct this filter from its serialized representation. */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     setPropertyValue(0, in.readDouble());

@@ -131,6 +131,7 @@ public class JitterModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -139,6 +140,7 @@ public class JitterModule extends Module
 
   /* Calculate the average value of an output. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -163,6 +165,7 @@ public class JitterModule extends Module
   
   /* The error is unaffected by this module. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[which] != null)
@@ -177,6 +180,7 @@ public class JitterModule extends Module
   
   /* The gradient is unaffected by this module. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[which] != null)
@@ -191,6 +195,7 @@ public class JitterModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField amp1 = new ValueField(xamp, ValueField.NONE, 4);
@@ -241,6 +246,7 @@ public class JitterModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     JitterModule mod = new JitterModule(new Point(bounds.x, bounds.y));
@@ -259,6 +265,7 @@ public class JitterModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(xamp);
@@ -271,6 +278,7 @@ public class JitterModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     xamp = in.readDouble();

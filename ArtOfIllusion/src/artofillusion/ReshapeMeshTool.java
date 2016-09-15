@@ -30,27 +30,32 @@ public class ReshapeMeshTool extends MeshEditingTool
     initButton("movePoints");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("reshapeMeshTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("reshapeMeshTool.tipText");
   }
 
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -61,6 +66,7 @@ public class ReshapeMeshTool extends MeshEditingTool
     baseVertPos = mesh.getVertexPositions();
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     MeshViewer mv = (MeshViewer) view;
@@ -92,6 +98,7 @@ public class ReshapeMeshTool extends MeshEditingTool
         Math.round(drag.x*1e5)/1e5+", "+Math.round(drag.y*1e5)/1e5+", "+Math.round(drag.z*1e5)/1e5));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -122,6 +129,7 @@ public class ReshapeMeshTool extends MeshEditingTool
     baseVertPos = null;
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();

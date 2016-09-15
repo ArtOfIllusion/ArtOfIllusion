@@ -54,6 +54,7 @@ public class ScriptedObjectEnumeration implements Enumeration<ObjectInfo>
   
   /** Determine whether there are more objects to enumerate. */
   
+  @Override
   public synchronized boolean hasMoreElements()
   {
     while (next == null && !complete)
@@ -71,6 +72,7 @@ public class ScriptedObjectEnumeration implements Enumeration<ObjectInfo>
   
   /** Get the next ObjectInfo, or null if there are no more. */
   
+  @Override
   public synchronized ObjectInfo nextElement()
   {
     while (next == null && !complete)

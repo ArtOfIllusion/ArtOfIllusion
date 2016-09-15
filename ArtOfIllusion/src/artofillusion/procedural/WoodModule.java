@@ -88,6 +88,7 @@ public class WoodModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -97,6 +98,7 @@ public class WoodModule extends Module
   /* Calculate the value, error, and gradient all at once, since calculating just the value
      is almost as much work as calculating all three. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -185,6 +187,7 @@ public class WoodModule extends Module
 
   /* The error is calculated at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -194,6 +197,7 @@ public class WoodModule extends Module
 
   /* The gradient is calculated at the same time as the value. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -203,6 +207,7 @@ public class WoodModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
@@ -233,6 +238,7 @@ public class WoodModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     WoodModule module = new WoodModule(new Point(bounds.x, bounds.y));
@@ -246,6 +252,7 @@ public class WoodModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
@@ -255,6 +262,7 @@ public class WoodModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();

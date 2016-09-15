@@ -54,6 +54,7 @@ public class IKTrack extends Track
 
   /** This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     if (info.getSkeleton() == null)
@@ -64,6 +65,7 @@ public class IKTrack extends Track
   
   /** Modify the position of the object. */
   
+  @Override
   public void apply(double time)
   {
     double weight = theWeight.getWeight(time);
@@ -100,6 +102,7 @@ public class IKTrack extends Track
   
   /** Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     IKTrack t = new IKTrack((ObjectInfo) obj);
@@ -119,6 +122,7 @@ public class IKTrack extends Track
   
   /** Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     IKTrack t = (IKTrack) tr;
@@ -137,6 +141,7 @@ public class IKTrack extends Track
   
   /** Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return new double [0];
@@ -144,6 +149,7 @@ public class IKTrack extends Track
 
   /** Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return -1;
@@ -151,12 +157,14 @@ public class IKTrack extends Track
   
   /** Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
   }
   
   /** This track is null if it has no targets. */
   
+  @Override
   public boolean isNullTrack()
   {
     for (int i = 0; i < constraints.size(); i++)
@@ -167,6 +175,7 @@ public class IKTrack extends Track
   
   /** This has a single child track. */
   
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
@@ -174,6 +183,7 @@ public class IKTrack extends Track
 
   /** Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo && ((ObjectInfo) obj).getObject() instanceof Mesh);
@@ -181,6 +191,7 @@ public class IKTrack extends Track
   
   /** Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -188,6 +199,7 @@ public class IKTrack extends Track
   
   /** Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -196,6 +208,7 @@ public class IKTrack extends Track
   /** Get an array of any objects which this track depends on (and which therefore must
       be updated before this track is applied). */ 
   
+  @Override
   public ObjectInfo [] getDependencies()
   {
     Vector v = new Vector();
@@ -213,6 +226,7 @@ public class IKTrack extends Track
   /** Delete all references to the specified object from this track.  This is used when an
       object is deleted from the scene. */
   
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
     for (int i = constraints.size()-1; i >= 0; i--)
@@ -223,6 +237,7 @@ public class IKTrack extends Track
     }
   }
 
+  @Override
   public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
     for (int i = constraints.size()-1; i >= 0; i--)
@@ -241,6 +256,7 @@ public class IKTrack extends Track
 
   /** Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(1); // Version number
@@ -261,6 +277,7 @@ public class IKTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();

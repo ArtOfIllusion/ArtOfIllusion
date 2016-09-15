@@ -39,6 +39,7 @@ public class LayeredTexture extends Texture
 
   /** Determine whether this Texture uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
     Texture tex[] = mapping.getLayers();
@@ -51,6 +52,7 @@ public class LayeredTexture extends Texture
 
   /** For the average properties, use the average properties of the bottom layer. */
   
+  @Override
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     mapping.getAverageSpec(spec, time, param);
@@ -58,6 +60,7 @@ public class LayeredTexture extends Texture
 
   /** Every LayeredTexture has a unique LayeredMapping object associated with it. */
 
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return mapping;
@@ -72,6 +75,7 @@ public class LayeredTexture extends Texture
 
   /** There shouldn't ever be a reason to call this. */
 
+  @Override
   public Texture duplicate()
   {
     return null;
@@ -81,6 +85,7 @@ public class LayeredTexture extends Texture
       @param component    the texture component to check for (one of the *_COMPONENT constants)
   */
   
+  @Override
   public boolean hasComponent(int component)
   {
     Texture tex[] = mapping.getLayers();
@@ -112,6 +117,7 @@ public class LayeredTexture extends Texture
   /** LayeredTexture does not provide its own editor, since this is done directly through the
       ObjectTextureDialog. */
   
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
   }
@@ -125,6 +131,7 @@ public class LayeredTexture extends Texture
     name = in.readUTF();
   }
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);

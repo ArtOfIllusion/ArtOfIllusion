@@ -43,6 +43,7 @@ public class ShatterDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
   
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof ShatterDistortion))
@@ -61,6 +62,7 @@ public class ShatterDistortion extends Distortion
   
   /** Create a duplicate of this object. */
   
+  @Override
   public Distortion duplicate()
   {
     ShatterDistortion d = new ShatterDistortion(time, size, speed, randomness, gravity, spin, disappear, gravityAxis, gravityDirTransform);
@@ -71,6 +73,7 @@ public class ShatterDistortion extends Distortion
   
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

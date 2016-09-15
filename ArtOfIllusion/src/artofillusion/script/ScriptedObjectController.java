@@ -41,6 +41,7 @@ public class ScriptedObjectController
     object.setUsesTime(false);
     object.setUsesCoords(false);
     new Thread() {
+      @Override
       public void run()
       {
         try

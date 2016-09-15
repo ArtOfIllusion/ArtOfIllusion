@@ -105,6 +105,7 @@ public class RTTriangle extends RTObject
 
   /** Get the TextureMapping for this object. */
   
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return tri.getTextureMapping();
@@ -112,6 +113,7 @@ public class RTTriangle extends RTObject
 
   /** Get the MaterialMapping for this object. */
   
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return tri.theMesh.matMapping;
@@ -119,6 +121,7 @@ public class RTTriangle extends RTObject
 
   /** Determine whether the given ray intersects this triangle. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     double vd, v0, vx, vy;
@@ -167,6 +170,7 @@ public class RTTriangle extends RTObject
 
   /** Get a bounding box for this triangle. */
   
+  @Override
   public BoundingBox getBounds()
   {
     double minx, maxx, miny, maxy, minz, maxz;
@@ -205,6 +209,7 @@ public class RTTriangle extends RTObject
 
   /** Determine whether any part of the triangle lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     Vec3 vert2 = tri.theMesh.vert[tri.v2];
@@ -349,6 +354,7 @@ public class RTTriangle extends RTObject
   
   /** Get the transformation from world coordinates to the object's local coordinates. */
   
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -356,6 +362,7 @@ public class RTTriangle extends RTObject
   
   /** Get the mesh this triangle is part of. */
   
+  @Override
   public Object getObject()
   {
     return tri.theMesh;
@@ -385,26 +392,31 @@ public class RTTriangle extends RTObject
       this.riz = riz;
     }
 
+    @Override
     public RTObject getObject()
     {
       return rtTri;
     }
 
+    @Override
     public int numIntersections()
     {
       return 1;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       p.set(rix, riy, riz);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       return dist;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       double w = 1.0-u-v;
@@ -431,11 +443,13 @@ public class RTTriangle extends RTObject
         }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       rtTri.tri.getTransparency(trans, angle, u, v, 1.0-u-v, size, time);
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       n.set(rtTri.trueNorm);

@@ -127,16 +127,20 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
     getComponent().addComponentListener(new ComponentListener()
     {
+      @Override
       public void componentResized(ComponentEvent componentEvent)
       {
         viewChanged(false);
       }
+      @Override
       public void componentMoved(ComponentEvent componentEvent)
       {
       }
+      @Override
       public void componentShown(ComponentEvent componentEvent)
       {
       }
+      @Override
       public void componentHidden(ComponentEvent componentEvent)
       {
       }
@@ -182,6 +186,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     if (mouseProcessor != null)
       mouseProcessor.addEvent(new Runnable() {
+        @Override
         public void run()
         {
           mouseDragged(ev);
@@ -241,16 +246,19 @@ public abstract class ViewerCanvas extends CustomWidget
   
   /** This needs to be overridden, since the component may not be a JComponent. */
   
+  @Override
   public void setPreferredSize(Dimension size)
   {
     prefSize = new Dimension(size);
   }
   
+  @Override
   public Dimension getPreferredSize()
   {
     return new Dimension(prefSize);
   }
 
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(0, 0);

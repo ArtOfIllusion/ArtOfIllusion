@@ -214,6 +214,7 @@ public class Property
     return false;
   }
 
+  @Override
   public boolean equals(Object obj)
   {
     if (!(obj instanceof Property))
@@ -233,6 +234,7 @@ public class Property
     return true;
   }
 
+  @Override
   public int hashCode()
   {
     return name.hashCode()^type.hashCode();

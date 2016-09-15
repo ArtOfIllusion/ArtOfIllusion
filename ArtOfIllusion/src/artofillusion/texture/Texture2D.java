@@ -43,6 +43,7 @@ public abstract class Texture2D extends Texture
 
   /** For the default mapping, use a basic projection. */
   
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return new ProjectionMapping(object, this);
@@ -76,6 +77,7 @@ public abstract class Texture2D extends Texture
     final double uscale = (maxu-minu)/width;
     final double vscale = (maxv-minv)/height;
     final ThreadLocal textureSpec = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         return new TextureSpec();
@@ -83,6 +85,7 @@ public abstract class Texture2D extends Texture
     };
     ThreadManager threads = new ThreadManager(width, new ThreadManager.Task()
     {
+      @Override
       public void execute(int i)
       {
         TextureSpec spec = (TextureSpec) textureSpec.get();
@@ -112,6 +115,7 @@ public abstract class Texture2D extends Texture
           }
         }
       }
+      @Override
       public void cleanup()
       {
       }

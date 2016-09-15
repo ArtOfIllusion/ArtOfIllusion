@@ -42,11 +42,13 @@ public class SkeletonShapeKeyframe implements Keyframe
     return skeleton;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     return new SkeletonShapeKeyframe(object, skeleton.duplicate());
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new SkeletonShapeKeyframe((Object3D) owner, skeleton.duplicate());
@@ -54,6 +56,7 @@ public class SkeletonShapeKeyframe implements Keyframe
   
   /** Get the list of graphable values for this keyframe. */
   
+  @Override
   public double [] getGraphValues()
   {
     return new double [0];
@@ -61,20 +64,24 @@ public class SkeletonShapeKeyframe implements Keyframe
   
   /** Set the list of graphable values for this keyframe. */
   
+  @Override
   public void setGraphValues(double values[])
   {
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     return blend(new Keyframe [] {this, o2}, new double [] {weight1, weight2});
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     return blend(new Keyframe [] {this, o2, o3}, new double [] {weight1, weight2, weight3});
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     return blend(new Keyframe [] {this, o2, o3, o4}, new double [] {weight1, weight2, weight3, weight4});
@@ -98,6 +105,7 @@ public class SkeletonShapeKeyframe implements Keyframe
 
   /** Determine whether this keyframe is identical to another one. */
   
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof SkeletonShapeKeyframe))
@@ -107,6 +115,7 @@ public class SkeletonShapeKeyframe implements Keyframe
   
   /** Write out a representation of this keyframe to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeShort(0); // version

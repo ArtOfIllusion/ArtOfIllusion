@@ -286,11 +286,13 @@ public class Mat4
 		0.0, 0.0, e33, 1.0-e33);
   }
   
+  @Override
   public String toString()
   {
     return "Mat4: {"+m11+", "+m12 +", "+m13+", "+m14+"}, {"+m21+", "+m22 +", "+m23+", "+m24+"}, {"+m31+", "+m32 +", "+m33+", "+m34+"}, {"+m41+", "+m42 +", "+m43+", "+m44+"}";
   }
   
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof Mat4))
@@ -302,6 +304,7 @@ public class Mat4
       m41 == m.m41 && m42 == m.m42 && m43 == m.m43 && m44 == m.m44);
   }
   
+  @Override
   public int hashCode()
   {
     double d = (m11+m12+m13+m14) + 2.2*(m21+m22+m23+m24) + 3.3*(m31+m32+m33+m34) + 4.4*(m41+m42+m43+m44);

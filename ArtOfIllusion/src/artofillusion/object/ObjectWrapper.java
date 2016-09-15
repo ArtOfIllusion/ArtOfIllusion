@@ -43,6 +43,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get a BoundingBox which just encloses the object. */
 
+  @Override
   public BoundingBox getBounds()
   {
     return theObject.getBounds();
@@ -51,6 +52,7 @@ public abstract class ObjectWrapper extends Object3D
   /** Tells whether the object is closed.  For curves, this means it has no endpoints.  For
       surface, it means the surface has no boundary. */
 
+  @Override
   public boolean isClosed()
   {
     return theObject.isClosed();
@@ -66,6 +68,7 @@ public abstract class ObjectWrapper extends Object3D
       
       If a class overrides this method, it must also override convertToTriangleMesh(). */
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     return theObject.canConvertToTriangleMesh();
@@ -78,6 +81,7 @@ public abstract class ObjectWrapper extends Object3D
       original surface.  If canConvertToTriangleMesh() returned EXACTLY, then tol should
       be ignored.  If canConvertToTriangleMesh() return CANT_CONVERT, this method returns null. */
 
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     return theObject.convertToTriangleMesh(tol);
@@ -88,6 +92,7 @@ public abstract class ObjectWrapper extends Object3D
       cases where an object's internal properties depend explicitly on time or on the
       object's position within the scene. */
   
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     theObject.sceneChanged(info, scene);
@@ -96,6 +101,7 @@ public abstract class ObjectWrapper extends Object3D
   /** Edit an object which represents a gesture for an Actor object.  realObject
       specifies the object in the scene which this is a gesture for. */
 
+  @Override
   public void editGesture(EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
     theObject.editGesture(parent, info, cb, realObject);
@@ -103,6 +109,7 @@ public abstract class ObjectWrapper extends Object3D
     
   /** Get this object's Texture. */
   
+  @Override
   public Texture getTexture()
   {
     return theObject.getTexture();
@@ -110,6 +117,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get this object's TextureMapping. */
   
+  @Override
   public TextureMapping getTextureMapping()
   {
     return theObject.getTextureMapping();
@@ -117,6 +125,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get this object's Material. */
   
+  @Override
   public Material getMaterial()
   {
     return theObject.getMaterial();
@@ -124,6 +133,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get this object's MaterialMapping. */
   
+  @Override
   public MaterialMapping getMaterialMapping()
   {
     return theObject.getMaterialMapping();
@@ -131,6 +141,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get the list of texture parameters for this object. */
   
+  @Override
   public TextureParameter [] getParameters()
   {
     return theObject.getParameters();
@@ -138,6 +149,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Set the list of texture parameters for this object. */
   
+  @Override
   public void setParameters(TextureParameter param[])
   {
     theObject.setParameters(param);
@@ -145,6 +157,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get the list of objects defining the values of texture parameters. */
   
+  @Override
   public ParameterValue [] getParameterValues()
   {
     return theObject.getParameterValues();
@@ -152,6 +165,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Get the average value of each texture parameter. */
   
+  @Override
   public double [] getAverageParameterValues()
   {
     return theObject.getAverageParameterValues();
@@ -159,6 +173,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Set the list of objects defining the values of texture parameters. */
   
+  @Override
   public void setParameterValues(ParameterValue val[])
   {
     theObject.setParameterValues(val);
@@ -167,6 +182,7 @@ public abstract class ObjectWrapper extends Object3D
   /** Get the object defining the value of a particular texture parameter.  If the parameter is not
       defined for this object, this returns null. */
   
+  @Override
   public ParameterValue getParameterValue(TextureParameter param)
   {
     return theObject.getParameterValue(param);
@@ -174,6 +190,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Set the object defining the value of a particular texture parameter. */
   
+  @Override
   public void setParameterValue(TextureParameter param, ParameterValue val)
   {
     theObject.setParameterValue(param, val);
@@ -181,6 +198,7 @@ public abstract class ObjectWrapper extends Object3D
 
   /** Get the skeleton for this object, or null if it does not have one. */
 
+  @Override
   public Skeleton getSkeleton()
   {
     return theObject.getSkeleton();
@@ -199,6 +217,7 @@ public abstract class ObjectWrapper extends Object3D
       Objects which cannot be rendered directly (lights, cameras, curves, etc.) do not need
       to override this method. */
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     return theObject.getRenderingMesh(tol, interactive, info);
@@ -208,11 +227,13 @@ public abstract class ObjectWrapper extends Object3D
       for drawing the object in wireframe mode, and also for drawing "nonrenderable" objects
       in other rendering modes. */
   
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return theObject.getWireframeMesh();
   }
 
+  @Override
   public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
   {
     theObject.renderObject(obj, canvas, viewDir);
@@ -220,6 +241,7 @@ public abstract class ObjectWrapper extends Object3D
 
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return theObject.getPoseKeyframe();
@@ -227,6 +249,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     theObject.applyPoseKeyframe(k);
@@ -235,6 +258,7 @@ public abstract class ObjectWrapper extends Object3D
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     theObject.configurePoseTrack(track);
@@ -242,6 +266,7 @@ public abstract class ObjectWrapper extends Object3D
   
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     theObject.editKeyframe(parent, k, info);

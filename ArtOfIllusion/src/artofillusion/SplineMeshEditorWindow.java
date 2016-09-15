@@ -166,6 +166,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   /** Get the object being edited in this window. */
   
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
@@ -181,6 +182,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   /** When the selection mode changes, do our best to convert the old selection to the new mode. */
   
+  @Override
   public void setSelectionMode(int mode)
   {
     SplineMesh mesh = (SplineMesh) getObject().getObject();
@@ -219,6 +221,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       modes.selectTool(modes.getTool(mode));
   }
   
+  @Override
   public int getSelectionMode()
   {
     return selectMode;
@@ -227,11 +230,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /** Get an array of flags telling which parts of the mesh are currently selected.  Depending
       on the current selection mode, these flags may correspond to vertices or curves. */
   
+  @Override
   public boolean[] getSelection()
   {
     return selected;
   }
   
+  @Override
   public void setSelection(boolean sel[])
   {
     selected = sel;
@@ -242,6 +247,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     repaint();
   }
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (maxDistance != getTensionDistance())
@@ -316,6 +322,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     selectionDistance = dist;
   }
   
+  @Override
   public void setMesh(Mesh mesh)
   {
     SplineMesh obj = (SplineMesh) mesh;
@@ -336,6 +343,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   /* EditingWindow methods. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     if (tool instanceof GenericTool)
@@ -355,6 +363,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     }
   }
 
+  @Override
   public void updateImage()
   {
     if (lastSelectedJoint != ((MeshViewer) theView[currentView]).getSelectedJoint())
@@ -362,6 +371,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     super.updateImage();
   }
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -479,11 +489,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /** Get the extra texture parameter which was added to the mesh to keep track of
       joint weighting. */
 
+  @Override
   public TextureParameter getJointWeightParam()
   {
     return jointWeightParam;
   }
 
+  @Override
   protected void doOk()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
@@ -509,6 +521,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       onClose.run();
   }
   
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -631,6 +644,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   /** Delete the current selection. */
   
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -1043,6 +1057,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /* Given a list of deltas which will be added to the selected vertices, calculate the
      corresponding deltas for the unselected vertices according to the mesh tension. */
   
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];

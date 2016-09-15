@@ -34,6 +34,7 @@ public class RTSphericalLight extends RTLight
     radius = (softShadows ? light.getRadius() : 0.0);
   }
 
+  @Override
   public double findRayToLight(Vec3 origin, Ray ray, RaytracerRenderer renderer, int rayNumber)
   {
     ray.getOrigin().set(origin);

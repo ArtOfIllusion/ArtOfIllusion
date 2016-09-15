@@ -41,6 +41,7 @@ public class Linear2DTriangle extends RenderingTriangle
       @param index     the index of this triangle within the mesh
   */
   
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);
@@ -48,6 +49,7 @@ public class Linear2DTriangle extends RenderingTriangle
     bumpMapped = map.getTexture().hasComponent(Texture.BUMP_COMPONENT);
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double time)
   {
     double s, t;
@@ -94,6 +96,7 @@ public class Linear2DTriangle extends RenderingTriangle
     }
   }
 
+  @Override
   public void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double time)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -127,6 +130,7 @@ public class Linear2DTriangle extends RenderingTriangle
         angle, time, getParameters(u, v, w));
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double time)
   {
     double sizex = size, sizey = size, sizez = size;

@@ -31,6 +31,7 @@ public class ScaleDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
   
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof ScaleDistortion))
@@ -50,6 +51,7 @@ public class ScaleDistortion extends Distortion
   
   /** Create a duplicate of this object. */
   
+  @Override
   public Distortion duplicate()
   {
     ScaleDistortion d = new ScaleDistortion(xscale, yscale, zscale, preTransform, postTransform);
@@ -60,6 +62,7 @@ public class ScaleDistortion extends Distortion
   
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

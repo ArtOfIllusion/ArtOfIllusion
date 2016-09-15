@@ -93,6 +93,7 @@ public class TimeAxis extends CustomWidget
     markers.addElement(m);
   }
   
+  @Override
   public Dimension getPreferredSize()
   {
     Font f = getFont();
@@ -206,6 +207,7 @@ public class TimeAxis extends CustomWidget
     // to avoid blocking the AWT even thread.
 
     Runnable c = new Runnable() {
+      @Override
       public void run()
       {
 	if (pos.x < 0)

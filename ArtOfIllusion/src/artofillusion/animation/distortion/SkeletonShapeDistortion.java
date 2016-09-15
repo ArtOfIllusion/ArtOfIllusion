@@ -31,6 +31,7 @@ public class SkeletonShapeDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
   
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof SkeletonShapeDistortion))
@@ -51,6 +52,7 @@ public class SkeletonShapeDistortion extends Distortion
   
   /** Create a duplicate of this object. */
   
+  @Override
   public Distortion duplicate()
   {
     SkeletonShapeDistortion d = new SkeletonShapeDistortion(skeleton, weight, actor);
@@ -61,6 +63,7 @@ public class SkeletonShapeDistortion extends Distortion
   
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

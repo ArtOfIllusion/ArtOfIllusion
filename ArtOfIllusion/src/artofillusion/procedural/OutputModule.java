@@ -37,6 +37,7 @@ public class OutputModule extends Module
     width = w;
   }
   
+  @Override
   public void calcSize()
   {
     super.calcSize();
@@ -46,6 +47,7 @@ public class OutputModule extends Module
   
   /* Get the output value for this module. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -55,6 +57,7 @@ public class OutputModule extends Module
 
   /* Get the gradient of the output value for this module. */
   
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)
@@ -65,6 +68,7 @@ public class OutputModule extends Module
 
   /* Get the output color for this module. */
   
+  @Override
   public void getColor(int which, RGBColor color, double blur)
   {
     if (linkFrom[0] == null)

@@ -44,6 +44,7 @@ public class FastRandom extends Random
    * Set the seed value.
    */
 
+  @Override
   public void setSeed(long seed)
   {
     super.setSeed(seed);
@@ -54,6 +55,7 @@ public class FastRandom extends Random
    * This is overridden to update the seed in a much faster (but not threadsafe) way.
    */
 
+  @Override
   protected int next(int bits)
   {
     currentSeed = (currentSeed*MULTIPLIER+ADDEND)&MASK;

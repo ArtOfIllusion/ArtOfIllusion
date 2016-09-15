@@ -34,6 +34,7 @@ public abstract class MeshGesture implements Gesture
   /** Return a new keyframe which is the weighted average of an arbitrary list of keyframes,
       averaged about this pose. */
 
+  @Override
   public Gesture blend(Gesture p[], double weight[])
   {
     MeshGesture average = (MeshGesture) duplicate();

@@ -63,6 +63,7 @@ public class ScaleShiftModule extends Module
 
   /* Calculate the output value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -72,6 +73,7 @@ public class ScaleShiftModule extends Module
 
   /* Calculate the output error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -81,6 +83,7 @@ public class ScaleShiftModule extends Module
 
   /* The gradient is the sum of the two gradients. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)
@@ -95,6 +98,7 @@ public class ScaleShiftModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField scaleField = new ValueField(scale, ValueField.NONE, 5);
@@ -126,6 +130,7 @@ public class ScaleShiftModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     ScaleShiftModule mod = new ScaleShiftModule(new Point(bounds.x, bounds.y));
@@ -138,6 +143,7 @@ public class ScaleShiftModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(scale);
@@ -146,6 +152,7 @@ public class ScaleShiftModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     scale = in.readDouble();

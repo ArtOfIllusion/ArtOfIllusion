@@ -35,27 +35,32 @@ public class GroovyScriptEngine implements ScriptEngine
     imports = new StringBuilder();
   }
 
+  @Override
   public String getName()
   {
     return "Groovy";
   }
 
+  @Override
   public String getFilenameExtension()
   {
     return "groovy";
   }
 
+  @Override
   public void setOutput(PrintStream out)
   {
     config.setOutput(new PrintWriter(out, true));
   }
 
+  @Override
   public void addImport(String packageOrClass) throws Exception
   {
     imports.append("import ").append(packageOrClass).append(";\n");
     numImports++;
   }
 
+  @Override
   public void executeScript(String script, Map<String, Object> variables) throws ScriptException
   {
     try
@@ -70,6 +75,7 @@ public class GroovyScriptEngine implements ScriptEngine
     }
   }
 
+  @Override
   public ToolScript createToolScript(String script) throws ScriptException
   {
     try
@@ -82,6 +88,7 @@ public class GroovyScriptEngine implements ScriptEngine
     }
   }
 
+  @Override
   public ObjectScript createObjectScript(String script) throws ScriptException
   {
     try
@@ -106,6 +113,7 @@ public class GroovyScriptEngine implements ScriptEngine
       script.setProperty("out", config.getOutput());
     }
 
+    @Override
     public void execute(LayoutWindow window) throws ScriptException
     {
       script.setProperty("window", window);
@@ -140,6 +148,7 @@ public class GroovyScriptEngine implements ScriptEngine
       script.setProperty("out", config.getOutput());
     }
 
+    @Override
     public void execute(ScriptedObjectController controller) throws ScriptException
     {
       script.setProperty("script", controller);

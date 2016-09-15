@@ -120,6 +120,7 @@ public class PreferencesWindow
     }
     Collections.sort(themes, new Comparator<ThemeManager.ThemeInfo>()
     {
+      @Override
       public int compare(ThemeManager.ThemeInfo o1, ThemeManager.ThemeInfo o2)
       {
         return o1.getName().compareTo(o2.getName());

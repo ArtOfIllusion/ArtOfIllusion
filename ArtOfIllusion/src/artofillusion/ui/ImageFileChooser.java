@@ -77,6 +77,7 @@ public class ImageFileChooser extends BFileChooser
     selectionChanged();
   }
 
+  @Override
   public boolean showDialog(Widget parent)
   {
     if (super.showDialog(parent))

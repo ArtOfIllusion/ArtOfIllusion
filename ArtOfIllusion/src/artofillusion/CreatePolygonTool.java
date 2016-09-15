@@ -35,6 +35,7 @@ public class CreatePolygonTool extends EditingTool
     tabulateSines();
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -53,11 +54,13 @@ public class CreatePolygonTool extends EditingTool
     theWindow.setHelpText(Translate.text("createPolygonTool.helpText", Integer.toString(sides), Translate.text("createPolygonTool."+type)));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createPolygonTool.tipText");
@@ -88,11 +91,13 @@ public class CreatePolygonTool extends EditingTool
       }
   }
   
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     findPoints(e.getPoint(), e.isShiftDown());
@@ -105,6 +110,7 @@ public class CreatePolygonTool extends EditingTool
     view.drawDraggedShape(new Polygon(x, y, x.length));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -190,6 +196,7 @@ public class CreatePolygonTool extends EditingTool
       points[i] = new Vec2(centerx+sine[i]*xscale, centery+cosine[i]*yscale);
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     int i;

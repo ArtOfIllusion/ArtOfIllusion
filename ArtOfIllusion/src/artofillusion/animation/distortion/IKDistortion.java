@@ -36,6 +36,7 @@ public class IKDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
   
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof IKDistortion))
@@ -63,6 +64,7 @@ public class IKDistortion extends Distortion
   
   /** Create a duplicate of this object. */
   
+  @Override
   public Distortion duplicate()
   {
     IKDistortion d = new IKDistortion(locked, target, weight, actor);
@@ -73,6 +75,7 @@ public class IKDistortion extends Distortion
   
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

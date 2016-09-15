@@ -34,28 +34,33 @@ public class CreateCylinderTool extends EditingTool
     initButton("cylinder");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCylinderTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createCylinderTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
     shiftDown = e.isShiftDown();
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (objInfo == null)
@@ -127,11 +132,13 @@ public class CreateCylinderTool extends EditingTool
     theWindow.updateImage();
   }
   
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     objInfo = null;
   }
   
+  @Override
   public void iconDoubleClicked()
   {
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, ratio);

@@ -26,6 +26,7 @@ public class Spacer extends CustomWidget
     vertical = copyVert;
   }
   
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension v = vertical.getPreferredSize(), h = horizontal.getPreferredSize();

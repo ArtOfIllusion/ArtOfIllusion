@@ -47,6 +47,7 @@ public class PropertyEditor
       widget = new ValueField(0.0, ValueField.INTEGER);
       final Property prop = property;
       ((ValueField) widget).setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= prop.getMinimum() && val <= prop.getMaximum());

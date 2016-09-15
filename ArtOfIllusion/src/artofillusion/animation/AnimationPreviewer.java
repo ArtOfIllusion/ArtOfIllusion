@@ -132,6 +132,7 @@ public class AnimationPreviewer implements Runnable
     canvas.setBoundCamera(sceneCamera);
     canvas.setPerspective(true);
     canvas.setTool(new EditingTool(parent) {
+      @Override
       public boolean hilightSelection()
       {
         return false;
@@ -149,6 +150,7 @@ public class AnimationPreviewer implements Runnable
   
   /** Generate and display all of the frames in a loop. */
 
+  @Override
   public void run()
   {
     int totalFrames = (int) Math.ceil((endTime-startTime)*fps);
@@ -173,6 +175,7 @@ public class AnimationPreviewer implements Runnable
         try
         {
           EventQueue.invokeAndWait(new Runnable() {
+                      @Override
             public void run()
             {
               setLabels(time, frame);
@@ -217,6 +220,7 @@ public class AnimationPreviewer implements Runnable
           try
           {
             EventQueue.invokeAndWait(new Runnable() {
+                          @Override
               public void run()
               {
                 setLabels(time, frame);

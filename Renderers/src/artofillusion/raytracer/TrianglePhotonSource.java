@@ -57,6 +57,7 @@ public class TrianglePhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
@@ -70,6 +71,7 @@ public class TrianglePhotonSource implements PhotonSource
    * @param threads      a ThreadManager which may optionally be used to parallelize photon generation
    */
   
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     RaytracerRenderer rt = map.getRenderer();

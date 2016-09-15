@@ -166,6 +166,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   {
     final CameraFilterDialog.FiltersPanel filtersPanel = new CameraFilterDialog.FiltersPanel(cameraForFilters, new Runnable()
     {
+      @Override
       public void run()
       {
       }
@@ -272,6 +273,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   /** Called when more pixels are available for the current image. */
   
+  @Override
   public void imageUpdated(Image image)
   {
     previewImage = image;
@@ -281,6 +283,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   /** Called when the status changes. */
   
+  @Override
   public void statusChanged(String status)
   {
     if (imgsaver != null)
@@ -300,6 +303,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   /** Called when rendering is finished. */
   
+  @Override
   public void imageComplete(ComplexImage image)
   {
     cameraForFilters = ((SceneCamera) sceneCamera.getObject()).duplicate();
@@ -310,6 +314,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     try
     {
       EventQueue.invokeAndWait(new Runnable() {
+              @Override
         public void run()
         {
           try
@@ -332,6 +337,7 @@ public class RenderingDialog extends BDialog implements RenderListener
           catch (final IOException ex)
           {
             EventQueue.invokeLater(new Runnable() {
+                          @Override
               public void run()
               {
                 new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
@@ -352,6 +358,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   
   /** Called when rendering is cancelled. */
   
+  @Override
   public void renderingCanceled()
   {
     dispose();

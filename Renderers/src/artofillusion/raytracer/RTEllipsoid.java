@@ -107,6 +107,7 @@ public class RTEllipsoid extends RTObject
 
   /** Get the TextureMapping for this object. */
   
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return theSphere.getTextureMapping();
@@ -114,6 +115,7 @@ public class RTEllipsoid extends RTObject
 
   /** Get the MaterialMapping for this object. */
   
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return theSphere.getMaterialMapping();
@@ -121,6 +123,7 @@ public class RTEllipsoid extends RTObject
 
   /** Determine whether the given ray intersects this sphere. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 orig = r.getOrigin(), rdir = r.getDirection();
@@ -212,6 +215,7 @@ public class RTEllipsoid extends RTObject
 
   /** Get a bounding box for this ellipsoid. */
   
+  @Override
   public BoundingBox getBounds()
   {
     if (transform)
@@ -222,6 +226,7 @@ public class RTEllipsoid extends RTObject
 
   /** Determine whether any part of the surface of the ellipsoid lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     double dx, dy, dz, centerx, centery, centerz;
@@ -296,6 +301,7 @@ public class RTEllipsoid extends RTObject
   
   /** Get the transformation from world coordinates to the object's local coordinates. */
   
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -330,16 +336,19 @@ public class RTEllipsoid extends RTObject
       pos = new Vec3();
     }
 
+    @Override
     public RTObject getObject()
     {
       return ellipse;
     }
 
+    @Override
     public int numIntersections()
     {
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       if (n == 0)
@@ -348,6 +357,7 @@ public class RTEllipsoid extends RTObject
         p.set(r2x, r2y, r2z);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       if (n == 0)
@@ -356,6 +366,7 @@ public class RTEllipsoid extends RTObject
         return dist2;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       calcTrueNorm();
@@ -379,6 +390,7 @@ public class RTEllipsoid extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       TextureMapping map = ellipse.theSphere.getTextureMapping();
@@ -395,6 +407,7 @@ public class RTEllipsoid extends RTObject
       }
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       calcTrueNorm();

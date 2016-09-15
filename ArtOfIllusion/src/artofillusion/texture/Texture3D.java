@@ -40,6 +40,7 @@ public abstract class Texture3D extends Texture
 
   /** For the default mapping, use a basic projection. */
   
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return new LinearMapping3D(object, this);

@@ -444,6 +444,7 @@ public class SeamFinder
 
     PriorityQueue<Integer> front = new PriorityQueue<Integer>(10, new Comparator<Integer>()
     {
+      @Override
       public int compare(Integer v1, Integer v2)
       {
         return Double.compare(costToVertex[v1], costToVertex[v2]);

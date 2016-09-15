@@ -176,6 +176,7 @@ public class ExternalObject extends ObjectWrapper
   
   /** Create a new object which is an exact duplicate of this one. */
   
+  @Override
   public Object3D duplicate()
   {
     ExternalObject obj = new ExternalObject();
@@ -189,6 +190,7 @@ public class ExternalObject extends ObjectWrapper
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
   
+  @Override
   public void copyObject(Object3D obj)
   {
     ExternalObject eo = (ExternalObject) obj;
@@ -200,6 +202,7 @@ public class ExternalObject extends ObjectWrapper
 
   /** ExternalObjects cannot be resized, since they are entirely defined by a separate file. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
@@ -207,11 +210,13 @@ public class ExternalObject extends ObjectWrapper
   /** If the object can be edited by the user, isEditable() should be overridden to return true.
       edit() should then create a window and allow the user to edit the object. */
   
+  @Override
   public boolean isEditable()
   {
     return true;
   }
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ExternalObjectEditingWindow(parent, this, info, cb);
@@ -221,6 +226,7 @@ public class ExternalObject extends ObjectWrapper
       it makes no sense to assign a texture (curves, lights, etc.) should override this
       method to return false. */
   
+  @Override
   public boolean canSetTexture()
   {
     return false;
@@ -230,6 +236,7 @@ public class ExternalObject extends ObjectWrapper
       implementation will give the correct result for most objects, but subclasses
       can override this if necessary. */
   
+  @Override
   public boolean canSetMaterial()
   {
     return false;
@@ -237,6 +244,7 @@ public class ExternalObject extends ObjectWrapper
   
   /** Determine whether the user should be allowed to convert this object to an Actor. */
   
+  @Override
   public boolean canConvertToActor()
   {
     return false;
@@ -244,6 +252,7 @@ public class ExternalObject extends ObjectWrapper
 
   /** The following method writes the object's data to an output stream. */
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -323,30 +332,36 @@ public class ExternalObject extends ObjectWrapper
       this.objects = objects;
     }
 
+    @Override
     protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
     {
       return Collections.enumeration(objects);
     }
 
+    @Override
     public Object3D duplicate()
     {
       return new ExternalObjectCollection(objects);
     }
 
+    @Override
     public void copyObject(Object3D obj)
     {
       objects = ((ExternalObjectCollection) obj).objects;
     }
 
+    @Override
     public void setSize(double xsize, double ysize, double zsize)
     {
     }
 
+    @Override
     public Keyframe getPoseKeyframe()
     {
       return null;
     }
 
+    @Override
     public void applyPoseKeyframe(Keyframe k)
     {
     }

@@ -56,6 +56,7 @@ public class Sphere extends Object3D
     bounds = new BoundingBox(-rx, rx, -ry, ry, -rz, rz);
   }
 
+  @Override
   public Object3D duplicate()
   {
     Sphere obj = new Sphere(rx, ry, rz);
@@ -63,6 +64,7 @@ public class Sphere extends Object3D
     return obj;
   }
   
+  @Override
   public void copyObject(Object3D obj)
   {
     Sphere s = (Sphere) obj;
@@ -73,11 +75,13 @@ public class Sphere extends Object3D
     cachedMesh = null;
   }
   
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     rx = xsize/2.0;
@@ -93,6 +97,7 @@ public class Sphere extends Object3D
     return new Vec3(rx, ry, rz);
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 vert[];
@@ -174,6 +179,7 @@ public class Sphere extends Object3D
     return mesh;
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     int k, m, size, index[][][];
@@ -412,6 +418,7 @@ public class Sphere extends Object3D
     return n;
   }
   
+  @Override
   public boolean isEditable()
   {
     return true;
@@ -419,6 +426,7 @@ public class Sphere extends Object3D
   
   /* Allow the user to edit the sphere's shape. */
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     ValueField xField = new ValueField(rx, ValueField.POSITIVE, 5);
@@ -449,6 +457,7 @@ public class Sphere extends Object3D
     bounds = new BoundingBox(-rx, rx, -ry, ry, -rz, rz);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -459,11 +468,13 @@ public class Sphere extends Object3D
     out.writeDouble(rz);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -478,6 +489,7 @@ public class Sphere extends Object3D
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     double val = ((Double) value).doubleValue();
@@ -491,6 +503,7 @@ public class Sphere extends Object3D
 
   /* Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new VectorKeyframe(rx, ry, rz);
@@ -498,6 +511,7 @@ public class Sphere extends Object3D
   
   /* Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     VectorKeyframe key = (VectorKeyframe) k;
@@ -508,6 +522,7 @@ public class Sphere extends Object3D
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Radius", "Y Radius", "Z Radius"},
@@ -517,6 +532,7 @@ public class Sphere extends Object3D
   
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     VectorKeyframe key = (VectorKeyframe) k;

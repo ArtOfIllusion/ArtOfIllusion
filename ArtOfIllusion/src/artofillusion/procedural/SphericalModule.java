@@ -43,6 +43,7 @@ public class SphericalModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -51,6 +52,7 @@ public class SphericalModule extends Module
 
   /* Calculate the output values. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk[which] && blur == lastBlur)
@@ -150,6 +152,7 @@ public class SphericalModule extends Module
 
   /* The errors are calculated at the same time as the values. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk[which] || blur != lastBlur)
@@ -159,6 +162,7 @@ public class SphericalModule extends Module
 
   /* The gradients are calculated at the same time as the values. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk[which] || blur != lastBlur)

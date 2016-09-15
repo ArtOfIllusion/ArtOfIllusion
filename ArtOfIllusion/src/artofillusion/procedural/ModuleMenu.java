@@ -364,6 +364,7 @@ public class ModuleMenu extends CustomWidget
       finalFraction[expandedCategory] = 1;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev)
     {
       fraction = Math.min(fraction+0.05, 1.0);

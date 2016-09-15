@@ -279,6 +279,7 @@ public class ArtOfIllusion
 
     numNewWindows++;
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run()
       {
         LayoutWindow fr = new LayoutWindow(theScene);

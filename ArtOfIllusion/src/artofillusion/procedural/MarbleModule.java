@@ -87,6 +87,7 @@ public class MarbleModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -96,6 +97,7 @@ public class MarbleModule extends Module
   /* Calculate the value, error, and gradient all at once, since calculating just the value
      is almost as much work as calculating all three. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -158,6 +160,7 @@ public class MarbleModule extends Module
 
   /* The error is calculated at the same time as the value. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -167,6 +170,7 @@ public class MarbleModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)
@@ -221,6 +225,7 @@ public class MarbleModule extends Module
   
   /** Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
@@ -248,6 +253,7 @@ public class MarbleModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     MarbleModule mod = new MarbleModule(new Point(bounds.x, bounds.y));
@@ -260,6 +266,7 @@ public class MarbleModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
@@ -269,6 +276,7 @@ public class MarbleModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();

@@ -10,7 +10,6 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;

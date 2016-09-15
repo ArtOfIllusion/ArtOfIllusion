@@ -13,8 +13,6 @@
 
 package artofillusion.ui;
 
-import artofillusion.*;
-import artofillusion.animation.*;
 import java.util.*;
 
 public class GenericTreeElement extends TreeElement

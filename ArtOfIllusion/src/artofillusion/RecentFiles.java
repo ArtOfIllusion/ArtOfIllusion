@@ -59,7 +59,7 @@ public class RecentFiles
     for (int i = 0; i < recent.length && newFiles.size() < MAX_RECENT; i++)
       if (!newPath.equals(recent[i]))
         newFiles.add(recent[i]);
-    StringBuffer fileList = new StringBuffer();
+    StringBuilder fileList = new StringBuilder();
     for (int i = 0; i < newFiles.size(); i++)
     {
       if (i > 0)

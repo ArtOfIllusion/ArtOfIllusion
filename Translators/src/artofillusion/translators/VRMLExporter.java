@@ -468,7 +468,7 @@ public class VRMLExporter
     write("coordIndex [", out, indent+2);
     for (int i = 0; i < mesh.getFaceCount(); i++)
     {
-      StringBuffer buf = new StringBuffer();
+      StringBuilder buf = new StringBuilder();
       for (int j = 0; j < mesh.getFaceVertexCount(i); j++)
       {
         if (j > 0)
@@ -499,7 +499,7 @@ public class VRMLExporter
         write("normalIndex [", out, indent+2);
         for (int i = 0; i < mesh.getFaceCount(); i++)
         {
-          StringBuffer buf = new StringBuffer();
+          StringBuilder buf = new StringBuilder();
           for (int j = 0; j < mesh.getFaceVertexCount(i); j++)
           {
             if (j > 0)
@@ -534,7 +534,7 @@ public class VRMLExporter
       int texVertIndex = 0;
       for (int i = 0; i < mesh.getFaceCount(); i++)
       {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int j = 0; j < mesh.getFaceVertexCount(i); j++)
         {
           if (j > 0)
@@ -566,7 +566,7 @@ public class VRMLExporter
       write("texCoordIndex [", out, indent+2);
       for (int i = 0; i < mesh.getFaceCount(); i++)
       {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         for (int j = 0; j < mesh.getFaceVertexCount(i); j++)
         {
           if (j > 0)
@@ -708,7 +708,7 @@ public class VRMLExporter
 	if (count < 0) count = str.length() - first;
 	else count = Math.min(count, str.length());
 
-	StringBuffer b = new StringBuffer(count);
+	StringBuilder b = new StringBuilder(count);
 
 	int pos = 0;
 	char c = 0;

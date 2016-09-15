@@ -610,7 +610,7 @@ public class SearchlistClassLoader extends ClassLoader
      */
     public static String translate(String str, String match, String replace)
     {
-	StringBuffer b = new StringBuffer(str.length());
+	StringBuilder b = new StringBuilder(str.length());
 
 	int pos = 0;
 	char c = 0;

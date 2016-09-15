@@ -242,7 +242,7 @@ public class ApplicationPreferences
   private Renderer getNamedRenderer(String name)
   {
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
-    if (renderers.size() == 0)
+    if (renderers.isEmpty())
       return null;
     for (Renderer r : renderers)
       if (r.getName().equals(name))

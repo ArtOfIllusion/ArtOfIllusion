@@ -500,7 +500,7 @@ public class ProcedureEditor extends CustomWidget
   
   private void undo()
   {
-    if (undoStack.size() == 0)
+    if (undoStack.isEmpty())
       return;
     saveState(true);
     ByteArrayOutputStream buffer = undoStack.get(undoStack.size()-1);
@@ -529,7 +529,7 @@ public class ProcedureEditor extends CustomWidget
 
   private void redo()
   {
-    if (redoStack.size() == 0)
+    if (redoStack.isEmpty())
       return;
     saveState(false);
     ByteArrayOutputStream buffer = redoStack.get(redoStack.size()-1);

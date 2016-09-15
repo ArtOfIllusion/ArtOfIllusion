@@ -504,7 +504,7 @@ public class TextureTrack extends Track
               el.setSelected(true);
           v.addElement(el);
         }
-        if (v.size() == 0)
+        if (v.isEmpty())
         {
           TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
           el.setSelectable(false);
@@ -527,7 +527,7 @@ public class TextureTrack extends Track
               el.setSelected(true);
           elements.add(el);
         }
-    if (elements.size() == 0)
+    if (elements.isEmpty())
       {
         TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
         el.setSelectable(false);

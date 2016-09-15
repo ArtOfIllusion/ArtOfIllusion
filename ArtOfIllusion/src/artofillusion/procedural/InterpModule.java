@@ -10,7 +10,6 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.ui.*;
 import artofillusion.math.*;
 import java.awt.*;

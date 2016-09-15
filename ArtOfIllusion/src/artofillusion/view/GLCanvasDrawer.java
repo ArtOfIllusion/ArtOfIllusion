@@ -26,7 +26,6 @@ import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.*;
 
 import buoy.event.*;
-import com.jogamp.opengl.util.*;
 
 /** This is a CanvasDrawer which uses OpenGL to render the contents of a ViewerCanvas. */
 

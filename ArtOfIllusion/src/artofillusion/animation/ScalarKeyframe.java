@@ -10,7 +10,6 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import java.io.*;
 
 /** This class is a scalar valued keyframe. */

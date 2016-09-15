@@ -474,7 +474,7 @@ public class ArtOfIllusion
   public static String loadFile(File f) throws IOException
   {
     BufferedReader in = new BufferedReader(new FileReader(f));
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     int c;
     while ((c = in.read()) != -1)
       buf.append((char) c);

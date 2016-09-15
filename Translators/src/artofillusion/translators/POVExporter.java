@@ -230,7 +230,7 @@ public class POVExporter
     }
     
     static private String cleanName (String oldName) {
-	StringBuffer workString=new StringBuffer(oldName.trim());
+	StringBuilder workString=new StringBuilder(oldName.trim());
 	for (int i=0;i<workString.length();i++) {
 	    char c=workString.charAt(i);
 	    if (! java.lang.Character.isLetterOrDigit(c)) {
@@ -299,7 +299,7 @@ public class POVExporter
 	    write("// Camera settings",out,0);
 	    ObjectInfo info = (ObjectInfo)obj;
 	    CoordinateSystem coords = info.getCoords().duplicate();
-	    // nötig ???? obwohl KoSys linkshändig????
+	    // nï¿½tig ???? obwohl KoSys linkshï¿½ndig????
 	    //coords.setOrientation(coords.getZDirection().times(-1.0), coords.getUpDirection().times(1.0));
 	    Vec3 orig=coords.getOrigin();
 	    String location="location "+getVec3String(orig);
@@ -465,7 +465,7 @@ public class POVExporter
 	    if (DEBUG) {
 		System.err.println("Box:");
 		System.err.println("Mittelpunkt:"+orig.toString());
-		System.err.println("Größe:"+size.times(2.0).toString());
+		System.err.println("Grï¿½ï¿½e:"+size.times(2.0).toString());
 		System.err.println("Eckpunkte:\t(lu): "+getVec3String(orig.minus(size)));
 		System.err.println("          \t(ro): "+getVec3String(orig.plus(size)));
 		System.err.println();
@@ -495,7 +495,7 @@ public class POVExporter
                 double rot[] = coords.getRotationAngles();
 		System.err.println("Sphere:");
 		System.err.println("// Mittelpunkt:\t"+orig.toString());
-		System.err.println("// Größe:\t"+size.times(2.0).toString());
+		System.err.println("// Grï¿½ï¿½e:\t"+size.times(2.0).toString());
 		System.err.println("// Rotation (x-axis):\t"+rot[0]);
 		System.err.println("//          (y-axis):\t"+rot[1]);
 		System.err.println("//          (z-axis):\t"+rot[2]);
@@ -529,7 +529,7 @@ public class POVExporter
                 double rot[] = coords.getRotationAngles();
 		System.err.println("Cone:");
 		System.err.println("// Mittelpunkt:\t"+orig.toString());
-		System.err.println("// Größe:\t"+size.times(2.0).toString());
+		System.err.println("// Grï¿½ï¿½e:\t"+size.times(2.0).toString());
 		System.err.println("// Rotation (x-axis):\t"+rot[0]);
 		System.err.println("//          (y-axis):\t"+rot[1]);
 		System.err.println("//          (z-axis):\t"+rot[2]);

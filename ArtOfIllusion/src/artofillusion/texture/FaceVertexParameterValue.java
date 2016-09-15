@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -26,20 +26,20 @@ public class FaceVertexParameterValue implements ParameterValue
   private FaceVertexParameterValue()
   {
   }
-  
+
   /**
    * Create a new FaceVertexParameterValue object.  val is an array containing the parameter
    * value at every vertex of every face.  Specifically, val[i][j] is the value at the j'th
    * vertex of the i'th face.
    */
-  
+
   public FaceVertexParameterValue(double val[][])
   {
     setValue(val);
   }
-  
+
   /** Create a new FaceVertexParameterValue for a mesh, and initialize it to appropriate default values. */
-  
+
   public FaceVertexParameterValue(FacetedMesh mesh, TextureParameter param)
   {
     faceStartIndex = new int[mesh.getFaceCount()+1];
@@ -124,7 +124,8 @@ public class FaceVertexParameterValue implements ParameterValue
    * This method assumes the face is triangular (which is always the case for a parameter
    * of a RenderingMesh).
    */
-  
+
+  @Override
   public double getValue(int faceIndex, int v1, int v2, int v3, double u, double v, double w)
   {
     return u*getValue(faceIndex, 0)+v*getValue(faceIndex, 1)+w*getValue(faceIndex, 2);
@@ -149,9 +150,10 @@ public class FaceVertexParameterValue implements ParameterValue
   {
     return faceStartIndex[faceIndex+1]-faceStartIndex[faceIndex];
   }
-  
+
   /** Get the average value of the parameter over the entire surface. */
-  
+
+  @Override
   public double getAverageValue()
   {
     double avg = 0.0;
@@ -160,9 +162,10 @@ public class FaceVertexParameterValue implements ParameterValue
       avg += values[i];
     return (avg/values.length);
   }
-  
+
   /** Create a duplicate of this object. */
-  
+
+  @Override
   public ParameterValue duplicate()
   {
     FaceVertexParameterValue copy = new FaceVertexParameterValue();
@@ -170,9 +173,10 @@ public class FaceVertexParameterValue implements ParameterValue
     copy.faceStartIndex = (int[]) faceStartIndex.clone();
     return copy;
   }
-  
+
   /** Determine whether this object represents the same set of values as another one. */
-  
+
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof FaceVertexParameterValue))
@@ -188,9 +192,10 @@ public class FaceVertexParameterValue implements ParameterValue
         return false;
     return true;
   }
-  
+
   /** Write out a serialized representation of this object to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeInt(-1);
@@ -201,9 +206,9 @@ public class FaceVertexParameterValue implements ParameterValue
     for (int i = 1; i < faceStartIndex.length; i++)
       out.writeInt(faceStartIndex[i]);
   }
-  
+
   /** Reconstruct a serialized object. */
-  
+
   public FaceVertexParameterValue(DataInputStream in) throws IOException
   {
     int version = in.readInt();

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -30,7 +30,7 @@ public class ScaleObjectTool extends EditingTool
 
   static final int POSITIONS_FIXED = 0;
   static final int POSITIONS_SCALE = 1;
-  
+
   static final int OPMODE_SCALE = 0;
   static final int OPMODE_MOVE = 1;
 
@@ -46,34 +46,39 @@ public class ScaleObjectTool extends EditingTool
   private int opmode;
   private int haxis[], vaxis[], haxisDir[], vaxisDir[], scaleAround = POSITIONS_FIXED;
   private boolean scaleAll, dragged, applyToChildren = true;
-  
+
   public ScaleObjectTool(EditingWindow fr)
   {
     super(fr);
     initButton("resize");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS+HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("scaleObjectTool.tipText");
   }
-  
+
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     Scene theScene = theWindow.getScene();
@@ -103,10 +108,10 @@ public class ScaleObjectTool extends EditingTool
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
         objectPos[i] = info.getCoords().getOrigin();
       }
-    
+
     // Figure out the correspondence between the object's x, y, and z axes, on the
     // horizontal and vertical axes on the screen.
-    
+
     for (i = 0; i < bounds.length; i++)
       {
         bounds[i] = ((ObjectInfo) toMove.elementAt(i)).getBounds();
@@ -148,9 +153,9 @@ public class ScaleObjectTool extends EditingTool
         haxisDir[i] = (dirs[haxis[i]].x > 0.0 ? 1 : -1);
         vaxisDir[i] = (dirs[vaxis[i]].y > 0.0 ? 1 : -1);
       }
-    
+
     // Figure out how the position of each object will scale.
-    
+
     if (e.isControlDown())
       {
         if (scaleAround == POSITIONS_FIXED)
@@ -174,13 +179,13 @@ public class ScaleObjectTool extends EditingTool
           for (i = 0; i < scaleCenter.length; i++)
             {
               ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
-              scaleCenter[i] = findBorderPos(info.getBounds(), 
+              scaleCenter[i] = findBorderPos(info.getBounds(),
                 info.getCoords().getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
             }
         else
           {
             for (i = 0; toMove.elementAt(i) != clickedObject; i++);
-            Vec3 center = findBorderPos(clickedObject.getBounds(), 
+            Vec3 center = findBorderPos(clickedObject.getBounds(),
                 clickedObject.getCoords().getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
             center = clickedObject.getCoords().fromLocal().times(center);
             for (i = 0; i < scaleCenter.length; i++)
@@ -217,7 +222,8 @@ public class ScaleObjectTool extends EditingTool
     if (handle == 2 || handle == 4 || handle == 7)
       whichSides += RIGHT;
   }
-  
+
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     Scene theScene = theWindow.getScene();
@@ -241,16 +247,16 @@ public class ScaleObjectTool extends EditingTool
     clickPoint = e.getPoint();
     dragged = false;
   }
-  
+
   /** Given a bounding box, the definitions of its horizontal and vertical axes, and
       the index of a handle, return the corresponding point on the border of the box. */
-  
+
   private Vec3 findBorderPos(BoundingBox bb, Vec3 center, int h, int v, int hdir, int vdir, int handle)
   {
     double minh, centerh, maxh, minv, centerv, maxv;
-    
+
     // Translate from x,y,z to h,v.
-    
+
     if (h == 0)
       {
         minh = bb.minx;
@@ -299,9 +305,9 @@ public class ScaleObjectTool extends EditingTool
         minv = maxv;
         maxv = swap;
       }
-    
+
     // Find the appropriate point.
-    
+
     double borderh, borderv;
     if (handle == 0 || handle == 3 || handle == 5)
       borderh = minh;
@@ -315,9 +321,9 @@ public class ScaleObjectTool extends EditingTool
       borderv = centerv;
     else
       borderv = maxv;
-    
+
     // Translate back to x,y,z.
-    
+
     Vec3 pos = new Vec3(center);
     if (h == 0)
       pos.x = borderh;
@@ -333,7 +339,7 @@ public class ScaleObjectTool extends EditingTool
       pos.z = borderv;
     return pos;
   }
-  
+
   public void mouseDraggedMoveOp(final WidgetMouseEvent e, final ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -375,16 +381,16 @@ public class ScaleObjectTool extends EditingTool
       }
     theWindow.setModified();
     theWindow.updateImage();
-    theWindow.setHelpText(Translate.text("moveObjectTool.dragText", 
+    theWindow.setHelpText(Translate.text("moveObjectTool.dragText",
       Math.round(v.x*1e5)/1e5+", "+Math.round(v.y*1e5)/1e5+", "+Math.round(v.z*1e5)/1e5));
   }
-  
+
   public void mouseDraggedScaleOp(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = theWindow.getScene();
     Point dragPoint = e.getPoint();
     double size, hscale, vscale, scale[] = new double [3];
-    
+
     if (!dragged)
     {
       oldObj = new Object3D [toMove.size()];
@@ -466,7 +472,8 @@ public class ScaleObjectTool extends EditingTool
     else
       theWindow.setHelpText(Translate.text("scaleMeshTool.dragText", Math.round(hscale*1e5)/1e5+", "+Math.round(vscale*1e5)/1e5));
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (opmode == OPMODE_SCALE)
@@ -475,6 +482,7 @@ public class ScaleObjectTool extends EditingTool
       mouseDraggedMoveOp(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     theWindow.getScene().applyTracksAfterModification(toMove);
@@ -487,7 +495,8 @@ public class ScaleObjectTool extends EditingTool
     theWindow.updateImage();
     theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
-  
+
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);
@@ -499,7 +508,7 @@ public class ScaleObjectTool extends EditingTool
     RowContainer row = new RowContainer();
     row.add(Translate.label("objectPositions"));
     row.add(centerChoice);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("resizeToolTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("resizeToolTitle"),
                 new Widget [] {childrenBox, row}, new String [] {null, null});
     if (!dlg.clickedOk())
       return;

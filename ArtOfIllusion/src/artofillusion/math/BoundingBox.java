@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
@@ -28,7 +28,7 @@ public class BoundingBox
     minz = Math.min(z1, z2);
     maxz = Math.max(z1, z2);
   }
-  
+
   /** Create a BoundingBox by specifying two opposite corners. */
 
   public BoundingBox(Vec3 p1, Vec3 p2)
@@ -52,23 +52,23 @@ public class BoundingBox
     maxy = b.maxy;
     maxz = b.maxz;
   }
-  
+
   /** Get a vector containing the dimensions of the box. */
-  
+
   public Vec3 getSize()
   {
     return new Vec3(maxx-minx, maxy-miny, maxz-minz);
   }
-  
+
   /** Get a vector to the center of the box. */
-  
+
   public Vec3 getCenter()
   {
     return new Vec3((maxx+minx)/2.0, (maxy+miny)/2.0, (maxz+minz)/2.0);
   }
-  
+
   /** Get an array containing the coordinates of the corners of the box. */
-  
+
   public Vec3 [] getCorners()
   {
     return new Vec3 [] {
@@ -82,13 +82,13 @@ public class BoundingBox
       new Vec3(maxx, maxy, maxz)
     };
   }
-  
+
   /** Return a new bounding box which contains both this box and another specified one. */
-  
+
   public BoundingBox merge(BoundingBox b)
   {
-    return new BoundingBox(Math.min(minx, b.minx), Math.max(maxx, b.maxx), 
-      Math.min(miny, b.miny), Math.max(maxy, b.maxy), Math.min(minz, b.minz), 
+    return new BoundingBox(Math.min(minx, b.minx), Math.max(maxx, b.maxx),
+      Math.min(miny, b.miny), Math.max(maxy, b.maxy), Math.min(minz, b.minz),
       Math.max(maxz, b.maxz));
   }
 
@@ -109,18 +109,18 @@ public class BoundingBox
     if (b.maxz > maxz)
       maxz = b.maxz;
   }
-  
+
   /** Determine whether the given point lies inside the box. */
-  
+
   public final boolean contains(Vec3 p)
   {
     if (p.x < minx || p.x > maxx || p.y < miny || p.y > maxy || p.z < minz || p.z > maxz)
       return false;
     return true;
   }
-  
+
   /** Determine whether two bounding boxes intersect each other. */
-  
+
   public final boolean intersects(BoundingBox b)
   {
     if (minx > b.maxx || maxx < b.minx || miny > b.maxy || maxy < b.miny || minz > b.maxz || maxz < b.minz)
@@ -129,11 +129,11 @@ public class BoundingBox
   }
 
   /** Determine the distance between a point and the closest point in the box. */
-  
+
   public final double distanceToPoint(Vec3 p)
   {
     double x, y, z;
-    
+
     if (p.x < minx)
       x = minx-p.x;
     else if (p.x > maxx)
@@ -154,9 +154,9 @@ public class BoundingBox
       z = 0.0;
     return Math.sqrt(x*x + y*y + z*z);
   }
-  
+
   /** Outset the bounding box by a fixed amount in every direction. */
-  
+
   public final void outset(double dist)
   {
     minx -= dist;
@@ -166,9 +166,9 @@ public class BoundingBox
     maxy += dist;
     maxz += dist;
   }
-  
+
   /** Return a new bounding box which is translated from this one by the specified amount. */
-  
+
   public final BoundingBox translate(double dx, double dy, double dz)
   {
     return new BoundingBox(minx+dx, maxx+dx, miny+dy, maxy+dy, minz+dz, maxz+dz);
@@ -176,7 +176,7 @@ public class BoundingBox
 
   /** This method applies a transformation matrix M to each of the eight corners of the box,
       then generates a new BoundingBox which is large enough to contain the transformed box. */
-  
+
   public final BoundingBox transformAndOutset(Mat4 m)
   {
     Vec3 p, corner[] = getCorners();
@@ -199,6 +199,7 @@ public class BoundingBox
     return new BoundingBox(newminx, newmaxx, newminy, newmaxy, newminz, newmaxz);
   }
 
+  @Override
   public String toString()
   {
     return "Box: {"+minx+", "+maxx+"}   {"+miny+", "+maxy+"}   {"+minz+", "+maxz+"}";

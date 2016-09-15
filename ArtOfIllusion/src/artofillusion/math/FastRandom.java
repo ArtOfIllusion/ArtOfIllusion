@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
@@ -44,6 +44,7 @@ public class FastRandom extends Random
    * Set the seed value.
    */
 
+  @Override
   public void setSeed(long seed)
   {
     super.setSeed(seed);
@@ -54,6 +55,7 @@ public class FastRandom extends Random
    * This is overridden to update the seed in a much faster (but not threadsafe) way.
    */
 
+  @Override
   protected int next(int bits)
   {
     currentSeed = (currentSeed*MULTIPLIER+ADDEND)&MASK;

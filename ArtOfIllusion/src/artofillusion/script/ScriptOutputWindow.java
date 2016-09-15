@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.script;
@@ -23,13 +23,15 @@ public class ScriptOutputWindow extends OutputStream
 {
   BFrame window;
   BTextArea text;
-  
+
+  @Override
   public void write(final int b)
   {
     if (!EventQueue.isDispatchThread())
     {
       EventQueue.invokeLater(new Runnable()
       {
+              @Override
         public void run()
         {
           write(b);
@@ -43,7 +45,8 @@ public class ScriptOutputWindow extends OutputStream
       window.setVisible(true);
     text.append(String.valueOf((char) b));
   }
-  
+
+  @Override
   public void write(byte b[], final int off, final int len)
   {
     if (!EventQueue.isDispatchThread())
@@ -51,6 +54,7 @@ public class ScriptOutputWindow extends OutputStream
       final byte bytes[] = b.clone();
       EventQueue.invokeLater(new Runnable()
       {
+              @Override
         public void run()
         {
           write(bytes, off, len);
@@ -66,7 +70,7 @@ public class ScriptOutputWindow extends OutputStream
   }
 
   /** Create the window. */
-  
+
   private void createWindow()
   {
     window = new BFrame("Script Output");
@@ -81,9 +85,9 @@ public class ScriptOutputWindow extends OutputStream
     window.pack();
     window.setVisible(true);
   }
-  
+
   /** Hide the window. */
-  
+
   private void closeWindow()
   {
     window.setVisible(false);

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -31,7 +31,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   int smoothingMethod, mode, relCoords, joint;
   ObjectRef relObject;
   WeightTrack theWeight;
-  
+
   public static final int ABSOLUTE = 0;
   public static final int RELATIVE = 1;
 
@@ -39,7 +39,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   public static final int PARENT = 1;
   public static final int OBJECT = 2;
   public static final int LOCAL = 3;
-  
+
   public ProceduralRotationTrack(ObjectInfo info)
   {
     super("Rotation (procedural)");
@@ -57,9 +57,10 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     theWeight = new WeightTrack(this);
     joint = -1;
   }
-  
+
   /* Modify the position of the object. */
-  
+
+  @Override
   public void apply(double time)
   {
     PointInfo point = new PointInfo();
@@ -115,13 +116,14 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
         info.getCoords().transformAxes(m);
       }
   }
-  
+
   /* Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     ProceduralRotationTrack t = new ProceduralRotationTrack((ObjectInfo) obj);
-    
+
     t.name = name;
     t.enabled = enabled;
     t.quantized = quantized;
@@ -135,13 +137,14 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     t.joint = joint;
     return t;
   }
-  
+
   /* Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     ProceduralRotationTrack t = (ProceduralRotationTrack) tr;
-    
+
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
@@ -154,30 +157,34 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     theWeight = (WeightTrack) t.theWeight.duplicate(this);
     joint = t.joint;
   }
-  
+
   /* Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
   }
 
   /* Get the timecourse describing this track. */
-  
+
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
   }
-  
+
   /* Set a keyframe at the specified time. */
-  
+
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
   }
-  
+
   /* Set a keyframe at the specified time, based on the current state of the Scene. */
-  
+
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     if (parameter.length == 0)
@@ -197,63 +204,71 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   }
 
   /* Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
   }
-  
+
   /* Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
   }
-  
+
   /* Procedural tracks are never null. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return false;
   }
-    
+
   /* This has a single child track. */
-  
+
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
   }
 
   /* Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
   }
-  
+
   /* Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return info;
   }
-  
+
   /* Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
   }
-  
+
   /* Get the smoothing method for this track. */
-  
+
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
   }
-  
+
   /* Set the smoothing method for this track. */
-  
+
   public void setSmoothingMethod(int method)
   {
     smoothingMethod = method;
@@ -303,25 +318,26 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     relObject = obj;
     relCoords = OBJECT;
   }
-  
+
   /** Get the ID of the joint this track applies to, or -1 if it applies to the
       object origin. */
-  
+
   public int getApplyToJoint()
   {
     return joint;
   }
-  
+
   /** Set the ID of the joint this track applies to.  Specify -1 if it should
       apply to the object origin. */
-  
+
   public void setApplyToJoint(int jointID)
   {
     joint = jointID;
   }
-  
+
   /* Get the names of all graphable values for this track. */
-  
+
+  @Override
   public String [] getValueNames()
   {
     String names[] = new String [parameter.length];
@@ -331,7 +347,8 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   }
 
   /* Get the default list of graphable values (for a track which has no keyframes). */
-  
+
+  @Override
   public double [] getDefaultGraphValues()
   {
     double val[] = new double [parameter.length];
@@ -339,11 +356,12 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
       val[i] = parameter[i].defaultVal;
     return val;
   }
-  
+
   /* Get the allowed range for graphable values.  This returns a 2D array, where elements
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
-  
+
+  @Override
   public double[][] getValueRange()
   {
     double range[][] = new double [parameter.length][2];
@@ -354,10 +372,11 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
       }
     return range;
   }
-  
+
   /* Get an array of any objects which this track depends on (and which therefore must
-     be updated before this track is applied). */ 
-  
+     be updated before this track is applied). */
+
+  @Override
   public ObjectInfo [] getDependencies()
   {
     if (relCoords == OBJECT)
@@ -370,16 +389,18 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
       return new ObjectInfo [] {info.getParent()};
     return new ObjectInfo [0];
   }
-  
+
   /* Delete all references to the specified object from this track.  This is used when an
      object is deleted from the scene. */
-  
+
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
     if (relObject.getObject() == obj)
       relObject = new ObjectRef();
   }
 
+  @Override
   public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
     if (objectMap.containsKey(relObject.getObject()))
@@ -398,7 +419,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   {
     Module module[] = proc.getModules();
     int count = 0;
-    
+
     for (int i = 0; i < module.length; i++)
       if (module[i] instanceof ParameterModule)
         count++;
@@ -414,7 +435,8 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   }
 
   /* Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     double t[] = tc.getTimes();
@@ -433,16 +455,17 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     for (int i = 0; i < t.length; i++)
       {
         out.writeDouble(t[i]);
-        ((ArrayKeyframe) v[i]).writeToStream(out); 
-        s[i].writeToStream(out); 
+        ((ArrayKeyframe) v[i]).writeToStream(out);
+        s[i].writeToStream(out);
       }
     if (relCoords == OBJECT)
       relObject.writeToStream(out);
     theWeight.writeToStream(out, scene);
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -475,7 +498,8 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   }
 
   /* Present a window in which the user can edit the specified keyframe. */
-  
+
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     ArrayKeyframe key = (ArrayKeyframe) tc.getValues()[which];
@@ -487,7 +511,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     final BCheckBox sameBox = new BCheckBox(Translate.text("separateSmoothness"), !s.isForceSame());
     Widget widget[] = new Widget [parameter.length+5];
     String label[] = new String [parameter.length+5];
-    
+
     for (int i = 0; i < parameter.length; i++)
     {
       widget[i] = parameter[i].getEditingWidget(key.val[i]);
@@ -528,7 +552,8 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   }
 
   /* This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     ProcedureEditor editor = new ProcedureEditor(proc, this, win.getScene());
@@ -536,54 +561,62 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   }
 
   /** Get the title of the procedure's editing window. */
-  
+
+  @Override
   public String getWindowTitle()
   {
     return Translate.text("procRotTrackTitle");
   }
-  
+
   /** Create an object which displays a preview of the procedure. */
-  
+
+  @Override
   public Object getPreview(ProcedureEditor editor)
   {
     return null;
   }
-  
+
   /** Update the display of the preview. */
-  
+
+  @Override
   public void updatePreview(Object preview)
   {
   }
-  
+
   /** Dispose of the preview object when the editor is closed. */
-  
+
+  @Override
   public void disposePreview(Object preview)
   {
   }
-  
+
   /** Determine whether the procedure may contain View Angle modules. */
-  
+
+  @Override
   public boolean allowViewAngle()
   {
     return false;
   }
-  
+
   /** Determine whether the procedure may contain Parameter modules. */
-  
+
+  @Override
   public boolean allowParameters()
   {
     return true;
   }
-  
+
   /** Determine whether the procedure may be renamed. */
-  
+
+  @Override
   public boolean canEditName()
   {
     return true;
   }
-  
+
   /** This is called when the user clicks OK in the procedure editor. */
-  
+
+  @Override
   public void acceptEdits(ProcedureEditor editor)
   {
     EditingWindow win = editor.getEditingWindow();
@@ -613,9 +646,10 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
       }
     ((LayoutWindow) win).getScore().finishEditingTrack(this);
   }
-  
+
   /** Display the Properties dialog. */
-  
+
+  @Override
   public void editProperties(ProcedureEditor editor)
   {
     Skeleton s = info.getSkeleton();

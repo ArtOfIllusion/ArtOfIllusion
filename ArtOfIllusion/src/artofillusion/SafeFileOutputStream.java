@@ -16,7 +16,7 @@ package artofillusion;
  * any later version.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
@@ -122,7 +122,7 @@ public class SafeFileOutputStream extends FilterOutputStream
             int count = 0;
             do {
                 count = in.read(array);
-                
+
                 if (count > 0) {
                     out.write(array, 0, count);
                 }
@@ -142,9 +142,9 @@ public class SafeFileOutputStream extends FilterOutputStream
         if (out != null) {
             out.close();
             out = null;
-        
+
             File temp = new File(path + ".tmp");
-        
+
             if (temp.exists()) {
                 temp.delete();
             }
@@ -154,6 +154,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  close the underlying stream, and complete the commit
      */
+    @Override
     public void close()
         throws IOException
     {
@@ -171,7 +172,7 @@ public class SafeFileOutputStream extends FilterOutputStream
             bak = new File(path + ".bak");
             if (bak.exists()) {
                 if (!bak.delete())
-                    throw new IOException("SafeFileOutputStream.close: " + 
+                    throw new IOException("SafeFileOutputStream.close: " +
                                           "could not delete backup file");
             }
 
@@ -204,7 +205,7 @@ public class SafeFileOutputStream extends FilterOutputStream
                 // tidy up
                 if ((mode & KEEP_BACKUP) == 0) {
                     if (!bak.delete())
-                        throw new IOException("SafeFileOutputStream.close: " + 
+                        throw new IOException("SafeFileOutputStream.close: " +
                                               "could not delete backup file");
                 }
             }
@@ -214,6 +215,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  write to the underlying stream
      */
+    @Override
     public void write(byte[] array)
         throws IOException
     { out.write(array, 0, array.length); }
@@ -221,6 +223,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  write to the underlying stream
      */
+    @Override
     public void write(byte[] array, int start, int length)
         throws IOException
     { out.write(array, start, length); }
@@ -228,6 +231,7 @@ public class SafeFileOutputStream extends FilterOutputStream
     /**
      *  write to the underlying stream
      */
+    @Override
     public void write(int value)
         throws IOException
     { out.write(value); }
@@ -238,7 +242,6 @@ public class SafeFileOutputStream extends FilterOutputStream
     private String path = null;
     private File file = null;
     private int mode = -1;
-    
+
     private byte[] array = null;
 }
-

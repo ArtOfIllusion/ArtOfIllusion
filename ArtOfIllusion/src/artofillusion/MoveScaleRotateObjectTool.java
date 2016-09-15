@@ -61,16 +61,19 @@ public class MoveScaleRotateObjectTool extends EditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS+ALL_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveScaleRotateObjectTool.tipText");
@@ -78,11 +81,13 @@ public class MoveScaleRotateObjectTool extends EditingTool
 
   /** Get the LayoutWindow to which this tool belongs. */
 
+  @Override
   public LayoutWindow getWindow()
   {
     return (LayoutWindow) theWindow;
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -104,6 +109,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -113,6 +119,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     draggingObjects = true;
@@ -123,6 +130,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
     clickPoint = e.getPoint();
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (draggingObjects)
@@ -150,6 +158,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
       manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (draggingObjects)
@@ -344,6 +353,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
     }
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     if (e.getKeyCode() == KeyEvent.VK_W && e.getModifiersEx() == 0)
@@ -494,6 +504,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
     return (bounds == null ? null : bounds.transformAndOutset(cam.getWorldToView()));
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);

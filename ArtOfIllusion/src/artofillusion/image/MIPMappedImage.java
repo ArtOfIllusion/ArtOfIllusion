@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image;
@@ -222,6 +222,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the width of the image. */
 
+  @Override
   public int getWidth()
   {
     return width[0];
@@ -229,6 +230,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the height of the image. */
 
+  @Override
   public int getHeight()
   {
     return height[0];
@@ -236,6 +238,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the number of components in the image. */
 
+  @Override
   public int getComponentCount()
   {
     return components;
@@ -250,10 +253,11 @@ public class MIPMappedImage extends ImageMap
       3: Alpha
 
       The location is specified by x and y, which must lie between 0 and 1.  The value is
-      averaged over a region of width (xsize, ysize).  wrapx and wrapy specify whether, for 
-      purposes of interpolation, the image should be treated as wrapping around so that 
+      averaged over a region of width (xsize, ysize).  wrapx and wrapy specify whether, for
+      purposes of interpolation, the image should be treated as wrapping around so that
       opposite edges touch each other. */
 
+  @Override
   public float getComponent(int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
@@ -334,6 +338,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Get the average value for a particular component, over the entire image. */
 
+  @Override
   public float getAverageComponent(int component)
   {
     if (component >= components)
@@ -341,11 +346,12 @@ public class MIPMappedImage extends ImageMap
     return average[component];
   }
 
-  /** Get the color at a particular location.  The location is specified by x and y, 
-      which must lie between 0 and 1.  The color is averaged over a region of width 
-      (xsize, ysize).  wrapx and wrapy specify whether, for purposes of interpolation, the 
+  /** Get the color at a particular location.  The location is specified by x and y,
+      which must lie between 0 and 1.  The color is averaged over a region of width
+      (xsize, ysize).  wrapx and wrapy specify whether, for purposes of interpolation, the
       image should be treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getColor(RGBColor theColor, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
@@ -445,12 +451,13 @@ public class MIPMappedImage extends ImageMap
     theColor.setRGB(red, green, blue);
   }
 
-  /** Get the gradient of a single component at a particular location in the image.  
+  /** Get the gradient of a single component at a particular location in the image.
       The location is specified by x and y, which must lie between 0 and 1.  The value is
-      averaged over a region of width (xsize, ysize) before the gradient is calculated.  
-      wrapx and wrapy specify whether, for purposes of interpolation, the image should be 
+      averaged over a region of width (xsize, ysize) before the gradient is calculated.
+      wrapx and wrapy specify whether, for purposes of interpolation, the image should be
       treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getGradient(Vec2 grad, int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
@@ -545,6 +552,7 @@ public class MIPMappedImage extends ImageMap
   /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
       (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
 
+  @Override
   public Image getPreview()
   {
     return preview;
@@ -629,6 +637,7 @@ public class MIPMappedImage extends ImageMap
 
   /** Serialize an image to an output stream. */
 
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     // Copy the image data into a BufferedImage.

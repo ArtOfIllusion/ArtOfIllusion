@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by François Guillet
+/* Copyright (C) 2007 by FranÔøΩois Guillet
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,10 +36,12 @@ public class ToolButtonWidget extends CustomWidget {
 		addEventLink(RepaintEvent.class, this, "paint");
 	}
 
+        @Override
 	public Dimension getMinimumSize() {
 		return button.getSize();
 	}
 
+        @Override
 	public Dimension getPreferredSize() {
 		return button.getSize();
 	}

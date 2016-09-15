@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -56,15 +56,15 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     hideBackfaces = false;
     prefSize = new Dimension(200, 200);
   }
-  
+
   /** This should be called whenever the object has changed. */
-  
+
   public void objectChanged()
   {
     getObject().clearCachedMeshes();
     getObject().getObject().sceneChanged(getObject(), scene);
   }
-  
+
   /** Get the object being previewed. */
 
   public ObjectInfo getObject()
@@ -83,18 +83,19 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     objInfo.clearCachedMeshes();
     obj.sceneChanged(objInfo, scene);
   }
-  
+
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
    */
 
+  @Override
   public double[] estimateDepthRange()
   {
     Mat4 toView = theCamera.getWorldToView();
-    
+
     // Find the depth range for the object being edited.
-    
+
     BoundingBox bounds = objInfo.getBounds();
     double dx = bounds.maxx-bounds.minx;
     double dy = bounds.maxy-bounds.miny;
@@ -105,6 +106,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     return new double [] {depth-size, depth+size};
   }
 
+  @Override
   public synchronized void updateImage()
   {
     super.updateImage();
@@ -140,7 +142,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     if (!sizeSet)
     {
       // When the canvas first comes up, calculate an initial scale that allows the entire object to be seen.
-      
+
       Rectangle dim = getBounds();
       Vec3 objSize = objInfo.getObject().getBounds().getSize();
       double scale = 0.8*Math.min(dim.width, dim.height)/Math.max(Math.max(objSize.x, objSize.y), objSize.z);
@@ -154,6 +156,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
 
   /** When the user presses the mouse, forward events to the current tool. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     requestFocus();
@@ -163,11 +166,13 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     activeTool.mousePressed(e, this);
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     activeTool.mouseDragged(e, this);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     activeTool.mouseReleased(e, this);

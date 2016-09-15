@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image.filter;
@@ -27,27 +27,29 @@ public class BrightnessFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Brightness");
   }
-  
+
   /** Apply the filter to an image.
       @param image      the image to filter
       @param scene      the Scene which was rendered to create the image
       @param camera     the camera from which the Scene was rendered
       @param cameraPos  the position of the camera in the scene
   */
-  
+
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     filterComponent(image, ComplexImage.RED);
     filterComponent(image, ComplexImage.GREEN);
     filterComponent(image, ComplexImage.BLUE);
   }
-  
+
   /** Apply the filter to one component of an image. */
-  
+
   private void filterComponent(ComplexImage image, int component)
   {
     int width = image.getWidth(), height = image.getHeight();
@@ -58,7 +60,7 @@ public class BrightnessFilter extends ImageFilter
         filtered[i+j*width] = image.getPixelComponent(i, j, component)*brightness;
     image.setComponentValues(component, filtered);
   }
-  
+
   @Override
   public Property[] getProperties()
   {
@@ -66,14 +68,16 @@ public class BrightnessFilter extends ImageFilter
   }
 
   /** Write a serialized description of this filter to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble((Double) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     setPropertyValue(0, in.readDouble());

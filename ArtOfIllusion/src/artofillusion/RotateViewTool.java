@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -27,34 +27,39 @@ public class RotateViewTool extends EditingTool
   private boolean controlDown;
   private CoordinateSystem oldCoords;
   private Vec3 rotationCenter;
-  
+
   public RotateViewTool(EditingWindow fr)
   {
     super(fr);
     initButton("rotateView");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("rotateViewTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean hilightSelection()
   {
       return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("rotateViewTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -63,7 +68,7 @@ public class RotateViewTool extends EditingTool
     clickPoint = e.getPoint();
     oldCoords = cam.getCameraCoordinates().duplicate();
     viewToWorld = cam.getViewToWorld();
-    
+
     // Find the center point to rotate around.
 
     rotationCenter = view.getRotationCenter();
@@ -71,6 +76,7 @@ public class RotateViewTool extends EditingTool
       rotationCenter = view.getDefaultRotationCenter();
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     // Compute the vertical axis to rotate around.
@@ -115,6 +121,7 @@ public class RotateViewTool extends EditingTool
       }
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     mouseDragged(e, view);
@@ -128,7 +135,7 @@ public class RotateViewTool extends EditingTool
           {
             // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
             // the camera.
-            
+
             UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
             moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
             theWindow.setUndoRecord(undo);
@@ -136,9 +143,9 @@ public class RotateViewTool extends EditingTool
         theWindow.updateImage();
       }
   }
-  
+
   /** This is called recursively to move any children of a bound camera. */
-  
+
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
   {
     for (int i = 0; i < parent.getChildren().length; i++)

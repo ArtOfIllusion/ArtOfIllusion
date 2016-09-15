@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.script;
@@ -27,7 +27,7 @@ public class ScriptedObject extends ObjectCollection
   private ObjectScript parsedScript;
   private String paramName[];
   private double paramValue[];
-  
+
   public ScriptedObject(String scriptText, String language)
   {
     script = scriptText;
@@ -42,14 +42,14 @@ public class ScriptedObject extends ObjectCollection
   }
 
   /** Get the script which defines this object. */
-  
+
   public String getScript()
   {
     return script;
   }
 
   /** Set the script which defines this object. */
-  
+
   public void setScript(String scriptText)
   {
     script = scriptText;
@@ -76,7 +76,7 @@ public class ScriptedObject extends ObjectCollection
   }
 
   /** Get the parsed form of the script. */
-  
+
   public ObjectScript getObjectScript()
   {
     if (parsedScript == null)
@@ -88,11 +88,13 @@ public class ScriptedObject extends ObjectCollection
         catch (final Exception ex)
           {
             EventQueue.invokeLater(new Runnable() {
+              @Override
               public void run() {
                 ScriptRunner.displayError(language, ex);
               }
             });
             parsedScript = new ObjectScript() {
+              @Override
               public void execute(ScriptedObjectController script)
               {
               }
@@ -101,60 +103,62 @@ public class ScriptedObject extends ObjectCollection
       }
     return parsedScript;
   }
-  
+
   /** Get the number of parameters for this object. */
-  
+
   public final int getNumParameters()
   {
     return paramName.length;
   }
-  
+
   /** Get the name of the i'th parameter. */
-  
+
   public final String getParameterName(int i)
   {
     return paramName[i];
   }
-    
+
   /** Get the value of the i'th parameter. */
-  
+
   public final double getParameterValue(int i)
   {
     return paramValue[i];
   }
-  
+
   /** Set the name of the i'th parameter. */
-  
+
   public void setParameterName(int i, String name)
   {
     paramName[i] = name;
   }
-  
+
   /** Set the value of the i'th parameter. */
-  
+
   public void setParameterValue(int i, double value)
   {
     paramValue[i] = value;
   }
-  
+
   /** Set a new list of parameters. */
-  
+
   public void setParameters(String names[], double values[])
   {
     paramName = names;
     paramValue = values;
   }
-  
+
   /** Get an enumeration of ObjectInfos listing the objects which this object
       is composed of. */
-  
+
+  @Override
   protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
   {
     return new ScriptedObjectEnumeration(info, interactive, scene);
   }
 
   /** Create a new object which is an exact duplicate of this one. */
-  
+
+  @Override
   public Object3D duplicate()
   {
     ScriptedObject so = new ScriptedObject(script, language);
@@ -165,10 +169,11 @@ public class ScriptedObject extends ObjectCollection
     so.copyTextureAndMaterial(this);
     return so;
   }
-  
+
   /** Copy all the properties of another object, to make this one identical to it.  If the
      two objects are of different classes, this will throw a ClassCastException. */
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     ScriptedObject so = (ScriptedObject) obj;
@@ -184,12 +189,14 @@ public class ScriptedObject extends ObjectCollection
 
   /** setSize() has no effect, since the geometry of the object is set by the script. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
   /** Get a list of editable properties defined by this object. */
 
+  @Override
   public Property[] getProperties()
   {
     Property prop[] = new Property[paramName.length];
@@ -202,6 +209,7 @@ public class ScriptedObject extends ObjectCollection
       @param index     the index of the property to get
    */
 
+  @Override
   public Object getPropertyValue(int index)
   {
     return paramValue[index];
@@ -212,6 +220,7 @@ public class ScriptedObject extends ObjectCollection
       @param value     the value to set for the property
    */
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     paramValue[index] = (Double) value;
@@ -220,14 +229,16 @@ public class ScriptedObject extends ObjectCollection
   }
 
   /** Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new ScriptedObjectKeyframe(this, paramName, paramValue);
   }
-  
+
   /** Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     if (paramName.length == 0)
@@ -247,22 +258,23 @@ public class ScriptedObject extends ObjectCollection
 
   /** Return an array containing the names of the graphable values for the keyframes
       returned by getPoseKeyframe(). */
-  
+
   public String [] getPoseValueNames()
   {
     return paramName;
   }
 
   /** Get the default list of graphable values for a keyframe returned by getPoseKeyframe(). */
-  
+
   public double [] getDefaultPoseValues()
   {
     return paramValue;
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     String name[] = new String [paramValue.length];
@@ -276,14 +288,15 @@ public class ScriptedObject extends ObjectCollection
     }
     track.setGraphableValues(name, value, range);
   }
-  
+
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     ScriptedObjectKeyframe key = (ScriptedObjectKeyframe) k;
     ValueField valField[] = new ValueField [paramName.length];
-    
+
     for (int i = 0; i < paramName.length; i++)
       {
         Double d = (Double) key.valueTable.get(paramName[i]);
@@ -300,13 +313,15 @@ public class ScriptedObject extends ObjectCollection
       key.valueTable.put(paramName[i], valField[i].getValue());
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
   /** Allow the user to edit the script. */
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ScriptedObjectEditorWindow(parent, info, cb);
@@ -336,6 +351,7 @@ public class ScriptedObject extends ObjectCollection
 
   /** Write a serialized representation of this object to an output stream. */
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -350,14 +366,14 @@ public class ScriptedObject extends ObjectCollection
         out.writeDouble(paramValue[i]);
       }
   }
-  
+
   /** Inner class representing a pose for a scripted object. */
-  
+
   public static class ScriptedObjectKeyframe implements Keyframe
   {
     ScriptedObject script;
     public Hashtable<String, Double> valueTable;
-    
+
     public ScriptedObjectKeyframe(ScriptedObject object, String names[], double values[])
     {
       script = object;
@@ -365,25 +381,28 @@ public class ScriptedObject extends ObjectCollection
       for (int i = 0; i < names.length; i++)
         valueTable.put(names[i], values[i]);
     }
-    
+
     /* Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(script);
     }
 
     /* Create a duplicate of this keyframe for a (possibly different) object. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       ScriptedObjectKeyframe key = new ScriptedObjectKeyframe((ScriptedObject) ((ObjectInfo) owner).getObject(), new String [0], new double [0]);
       key.valueTable = (Hashtable<String, Double>) valueTable.clone();
       return key;
     }
-  
+
     /* Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       String names[] = script.paramName;
@@ -398,9 +417,10 @@ public class ScriptedObject extends ObjectCollection
         }
       return values;
     }
-  
+
     /* Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
       String names[] = script.paramName;
@@ -410,27 +430,30 @@ public class ScriptedObject extends ObjectCollection
 
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       return blend(new Keyframe [] {this, o2},
         new double [] {weight1, weight2});
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       return blend(new Keyframe [] {this, o2, o3},
         new double [] {weight1, weight2, weight3});
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       return blend(new Keyframe [] {this, o2, o3, o4},
         new double [] {weight1, weight2, weight3, weight4});
     }
-    
+
     /* Blend an arbitrary list of keyframes. */
-    
+
     private Keyframe blend(Keyframe k[], double weight[])
     {
       String names[] = script.paramName;
@@ -451,7 +474,8 @@ public class ScriptedObject extends ObjectCollection
     }
 
     /* Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof ScriptedObjectKeyframe))
@@ -471,9 +495,10 @@ public class ScriptedObject extends ObjectCollection
         }
       return true;
     }
-  
+
     /* Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0);

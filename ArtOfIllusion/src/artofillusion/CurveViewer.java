@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -17,7 +17,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 
-/** The CurveViewer class is a component which displays a Curve object and 
+/** The CurveViewer class is a component which displays a Curve object and
     allows the user to edit it. */
 
 public class CurveViewer extends MeshViewer
@@ -30,6 +30,7 @@ public class CurveViewer extends MeshViewer
     super(window, p);
   }
 
+  @Override
   protected void drawObject()
   {
     if (!showMesh)
@@ -59,6 +60,7 @@ public class CurveViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     int i, j, x, y;
@@ -72,9 +74,9 @@ public class CurveViewer extends MeshViewer
     deselect = -1;
     dragging = false;
     clickPoint = e.getPoint();
-    
+
     // Determine which tool is active.
-    
+
     if (metaTool != null && e.isMetaDown())
       activeTool = metaTool;
     else if (altTool != null && e.isAltDown())
@@ -96,7 +98,7 @@ public class CurveViewer extends MeshViewer
       return;
 
     // See whether the click was on a currently selected vertex.
-    
+
     p = e.getPoint();
     boolean selected[] = controller.getSelection();
     for (i = 0; i < v.length; i++)
@@ -112,7 +114,7 @@ public class CurveViewer extends MeshViewer
       {
         // The click was on a selected vertex.  If it was a shift-click, the user may want
         // to deselect it, so set a flag.  Forward the event to the current tool.
-        
+
         if (e.isShiftDown() && allowSelectionChange)
           deselect = i;
         if (wantHandleClicks)
@@ -125,7 +127,7 @@ public class CurveViewer extends MeshViewer
 
     // The click was not on a selected vertex.  See whether it was on an unselected one.
     // If so, select it and send an event to the current tool.
-    
+
     j = -1;
     nearest = Double.MAX_VALUE;
     for (i = 0; i < v.length; i++)
@@ -166,7 +168,7 @@ public class CurveViewer extends MeshViewer
         }
         return;
       }
-    
+
     // The click was not on a handle.  Start dragging a selection box.
 
     if (allowSelectionChange)
@@ -176,6 +178,7 @@ public class CurveViewer extends MeshViewer
     }
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -189,6 +192,7 @@ public class CurveViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     int i, x, y;
@@ -203,9 +207,9 @@ public class CurveViewer extends MeshViewer
       for (i = 0; i < selected.length; i++)
         selected[i] = false;
 
-    // If the user was dragging a selection box, then select or deselect anything 
+    // If the user was dragging a selection box, then select or deselect anything
     // it intersects.
-    
+
     if (selectBounds != null)
       {
         boolean newsel = !e.isControlDown();

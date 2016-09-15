@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -27,9 +27,9 @@ public class FilterParameterTrack extends Track
   private ImageFilter filter;
   private Timecourse tc;
   private int smoothingMethod;
-  
+
   /** Create a new FilterParameterTrack. */
-  
+
   public FilterParameterTrack(Object parent, ImageFilter filter)
   {
     super(filter.getName());
@@ -38,16 +38,17 @@ public class FilterParameterTrack extends Track
     tc = new Timecourse(new Keyframe [0], new double [0], new Smoothness [0]);
     smoothingMethod = Timecourse.INTERPOLATING;
   }
-  
+
   /** Get the filter corresponding to this track. */
-  
+
   public ImageFilter getFilter()
   {
     return filter;
   }
-  
+
   /** Modify the pose of the object. */
-  
+
+  @Override
   public void apply(double time)
   {
     ArrayKeyframe k = (ArrayKeyframe) tc.evaluate(time, smoothingMethod);
@@ -64,9 +65,10 @@ public class FilterParameterTrack extends Track
         filter.setPropertyValue(i, new RGBColor(k.val[index++], k.val[index++], k.val[index++]));
     }
   }
-  
+
   /** Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     FilterParameterTrack t = new FilterParameterTrack(obj, filter);
@@ -77,43 +79,48 @@ public class FilterParameterTrack extends Track
     t.tc = tc.duplicate(filter);
     return t;
   }
-  
+
   /** Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     FilterParameterTrack t = (FilterParameterTrack) tr;
-    
+
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
     smoothingMethod = t.smoothingMethod;
     tc = t.tc.duplicate(filter);
   }
-  
+
   /** Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
   }
 
   /** Get the timecourse describing this track. */
-  
+
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
   }
-  
+
   /** Set a keyframe at the specified time. */
-  
+
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
   }
-  
+
   /** Set a keyframe at the specified time, based on the current state of the Scene. */
-  
+
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     double key[] = getCurrentValues();
@@ -125,7 +132,8 @@ public class FilterParameterTrack extends Track
   /** Set a keyframe at the specified time, based on the current state of the Scene,
       if and only if the Scene does not match the current state of the track.  Return
       the new Keyframe, or null if none was set. */
-  
+
+  @Override
   public Keyframe setKeyframeIfModified(double time, Scene sc)
   {
     if (tc.getTimes().length == 0)
@@ -163,70 +171,79 @@ public class FilterParameterTrack extends Track
   }
 
   /** Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
   }
-  
+
   /** Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
   }
-  
+
   /** This track is null if it has no keyframes. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
   }
-  
+
   /** This has no child tracks. */
-  
+
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [0];
   }
 
   /** Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return false;
   }
-  
+
   /** Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return parent;
   }
-  
+
   /** Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     parent = obj;
   }
-  
+
   /** Get the smoothing method for this track. */
-  
+
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
   }
-  
+
   /** Set the smoothing method for this track. */
-  
+
   public void setSmoothingMethod(int method)
   {
     smoothingMethod = method;
   }
-  
+
   /** Get the names of all graphable values for this track. */
-  
+
+  @Override
   public String [] getValueNames()
   {
     ArrayList<String> names = new ArrayList<String>();
@@ -245,16 +262,18 @@ public class FilterParameterTrack extends Track
   }
 
   /** Get the default list of graphable values (for a track which has no keyframes). */
-  
+
+  @Override
   public double [] getDefaultGraphValues()
   {
     return getCurrentValues();
   }
-  
+
   /** Get the allowed range for graphable values.  This returns a 2D array, where elements
       [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
       the nth graphable value. */
-  
+
+  @Override
   public double[][] getValueRange()
   {
     ArrayList<double[]> ranges = new ArrayList<double[]>();
@@ -273,7 +292,8 @@ public class FilterParameterTrack extends Track
   }
 
   /** Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene sc) throws IOException
   {
     double t[] = tc.getTimes();
@@ -288,17 +308,18 @@ public class FilterParameterTrack extends Track
     for (int i = 0; i < t.length; i++)
       {
         out.writeDouble(t[i]);
-        v[i].writeToStream(out); 
-        s[i].writeToStream(out); 
+        v[i].writeToStream(out);
+        s[i].writeToStream(out);
       }
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version != 0)
       throw new InvalidObjectException("");
     name = in.readUTF();
@@ -316,9 +337,10 @@ public class FilterParameterTrack extends Track
       }
     tc = new Timecourse(v, t, s);
   }
-  
+
   /** Present a window in which the user can edit the specified keyframe. */
-  
+
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     ArrayKeyframe key = (ArrayKeyframe) tc.getValues()[which];
@@ -387,7 +409,8 @@ public class FilterParameterTrack extends Track
   }
 
   /** This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(FilterParameterTrack.this.getName());

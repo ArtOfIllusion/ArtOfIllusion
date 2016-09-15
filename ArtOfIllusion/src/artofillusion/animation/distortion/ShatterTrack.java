@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -25,7 +25,7 @@ public class ShatterTrack extends Track
   double startTime, size, speed, randomness, gravity, spin, disappear;
   int gravityAxis;
   boolean worldCoords;
-  
+
   public ShatterTrack(ObjectInfo info)
   {
     super("Shatter");
@@ -40,9 +40,10 @@ public class ShatterTrack extends Track
     disappear = 0.0;
     worldCoords = true;
   }
-  
+
   /* Modify the scale of the object. */
-  
+
+  @Override
   public void apply(double time)
   {
     if (time <= startTime)
@@ -52,13 +53,14 @@ public class ShatterTrack extends Track
     else
       info.addDistortion(new ShatterDistortion(time-startTime, size, speed, randomness, gravity, spin, disappear, gravityAxis, null));
   }
-  
+
   /* Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     ShatterTrack t = new ShatterTrack((ObjectInfo) obj);
-    
+
     t.name = name;
     t.enabled = enabled;
     t.quantized = quantized;
@@ -73,13 +75,14 @@ public class ShatterTrack extends Track
     t.worldCoords = worldCoords;
     return t;
   }
-  
+
   /* Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     ShatterTrack t = (ShatterTrack) tr;
-    
+
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
@@ -93,57 +96,65 @@ public class ShatterTrack extends Track
     gravityAxis = t.gravityAxis;
     worldCoords = t.worldCoords;
   }
-  
+
   /* Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return new double [0];
   }
-  
+
   /* Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return -1;
   }
-  
+
   /* Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
   }
-  
+
   /* Shatter tracks are never null. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return false;
   }
 
   /* Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
   }
-  
+
   /* Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return info;
   }
-  
+
   /* Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
   }
 
   /* Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(0); // Version number
@@ -158,9 +169,10 @@ public class ShatterTrack extends Track
     out.writeDouble(disappear);
     out.writeInt(gravityAxis);
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -179,7 +191,8 @@ public class ShatterTrack extends Track
   }
 
   /** This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(ShatterTrack.this.getName());

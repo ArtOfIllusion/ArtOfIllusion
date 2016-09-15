@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -20,20 +20,21 @@ import artofillusion.texture.*;
 public abstract class MeshGesture implements Gesture
 {
   /** Get the Mesh this Gesture belongs to. */
-  
+
   protected abstract Mesh getMesh();
-  
+
   /** Get the positions of all vertices in this Gesture. */
-  
+
   protected abstract Vec3 [] getVertexPositions();
-  
+
   /** Set the positions of all vertices in this Gesture. */
-  
+
   protected abstract void setVertexPositions(Vec3 pos[]);
-  
+
   /** Return a new keyframe which is the weighted average of an arbitrary list of keyframes,
       averaged about this pose. */
 
+  @Override
   public Gesture blend(Gesture p[], double weight[])
   {
     MeshGesture average = (MeshGesture) duplicate();
@@ -71,7 +72,7 @@ public abstract class MeshGesture implements Gesture
       @param p         the list of Gestures to average
       @param weight    the weights for the different Gestures
   */
-  
+
   public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
   {
     Skeleton skeleton = getSkeleton();
@@ -79,7 +80,7 @@ public abstract class MeshGesture implements Gesture
     Joint jt[] = (skeleton == null ? null : average.getSkeleton().getJoints());
 
     // Initialize the vertex positions.
-    
+
     Vec3 temp = new Vec3();
     Mesh mesh = getMesh();
     MeshVertex vertex[] = mesh.getVertices();
@@ -111,7 +112,7 @@ public abstract class MeshGesture implements Gesture
     }
 
     // Now update the vertex positions and parameters.
-    
+
     Vec3 temp1 = new Vec3(), temp2 = new Vec3();
     for (int i = 0; i < weight.length; i++)
     {
@@ -124,13 +125,13 @@ public abstract class MeshGesture implements Gesture
         if (index == -1)
         {
           // This vertex is not bound to any joint.
-          
+
           avgPos[j].add(keyPos[j].minus(vertPos[j]).times(weight[i]));
         }
         else
         {
           // Add up the offsets in the coordinate systems of the joints.
-          
+
           Joint j1 = joint[index], j2 = jt[index], j3 = key.getSkeleton().getJoint(j1.id);
           double wt = (j1.parent == null ? 1.0 : v.ikWeight);
           temp1.set(keyPos[j]);

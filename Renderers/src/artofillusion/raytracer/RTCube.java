@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -25,7 +25,7 @@ public class RTCube extends RTObject
   protected double param[];
   private boolean bumpMapped, transform;
   protected Mat4 toLocal, fromLocal;
-  
+
   public static final double TOL = 1e-12;
 
   public RTCube(Cube cube, Mat4 fromLocal, Mat4 toLocal, double param[])
@@ -106,21 +106,24 @@ public class RTCube extends RTObject
   }
 
   /** Get the TextureMapping for this object. */
-  
+
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return theCube.getTextureMapping();
   }
 
   /** Get the MaterialMapping for this object. */
-  
+
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return theCube.getMaterialMapping();
-  }  
+  }
 
   /** Determine whether the given ray intersects this cube. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 rorig = r.getOrigin(), rdir = r.getDirection();
@@ -237,18 +240,18 @@ public class RTCube extends RTObject
     projectPoint(v1, trueNorm);
     return new CubeIntersection(this, numIntersections, v1, v2, mint, maxt, trueNorm);
   }
-  
+
   /** Given a point, project it onto the surface of the cube.  This is necessary to
       prevent roundoff error.  This routine can optionally set the true normal, since
       it is easy to do at the same time. */
-  
+
   private void projectPoint(Vec3 pos, Vec3 normal)
   {
     if (transform)
       toLocal.transform(pos);
-    
+
     // Determine which side it is closest to.
-    
+
     int side = 0;
     double mindist = Math.abs(pos.x-minx), dist;
     dist = Math.abs(pos.x-maxx);
@@ -281,9 +284,9 @@ public class RTCube extends RTObject
       mindist = dist;
       side = 5;
     }
-    
+
     // Project it onto the appropriate side.
-    
+
     if (side == 0)
       pos.x = minx;
     else if (side == 1)
@@ -298,9 +301,9 @@ public class RTCube extends RTObject
       pos.z = maxz;
     if (transform)
       fromLocal.transform(pos);
-    
+
     // If requested, also set the normal.
-    
+
     if (normal != null)
     {
       if (side == 0)
@@ -321,7 +324,8 @@ public class RTCube extends RTObject
   }
 
   /** Get a bounding box for this cube. */
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     BoundingBox bounds = new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
@@ -332,11 +336,12 @@ public class RTCube extends RTObject
 
   /** Determine whether any part of the surface of the cube lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     if (!node.intersects(getBounds()))
       return false;
-    
+
     // Check whether the box is entirely contained within this object.
 
     BoundingBox bb = node.getBounds();
@@ -346,9 +351,10 @@ public class RTCube extends RTObject
       return false;
     return true;
   }
-  
+
   /** Get the transformation from world coordinates to the object's local coordinates. */
-  
+
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -383,16 +389,19 @@ public class RTCube extends RTObject
       pos = new Vec3();
     }
 
+    @Override
     public RTObject getObject()
     {
       return cube;
     }
 
+    @Override
     public int numIntersections()
     {
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       if (n == 0)
@@ -401,6 +410,7 @@ public class RTCube extends RTObject
         p.set(r2x, r2y, r2z);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       if (n == 0)
@@ -409,6 +419,7 @@ public class RTCube extends RTObject
         return dist2;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       n.set(normx, normy, normz);
@@ -431,6 +442,7 @@ public class RTCube extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       TextureMapping map = cube.theCube.getTextureMapping();
@@ -447,6 +459,7 @@ public class RTCube extends RTObject
       }
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       n.set(normx, normy, normz);

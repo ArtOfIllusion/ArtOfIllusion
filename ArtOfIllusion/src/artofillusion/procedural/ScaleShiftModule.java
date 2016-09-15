@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -23,46 +23,47 @@ import java.io.*;
 public class ScaleShiftModule extends Module
 {
   private double scale, shift;
-  
+
   public ScaleShiftModule(Point position)
   {
-    super("\u00D7 1.0 + 0.0", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})}, 
+    super("\u00D7 1.0 + 0.0", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
       position);
     scale = 1.0;
     shift = 0.0;
   }
-  
+
   /** Get the scale value. */
-  
+
   public double getScale()
   {
     return scale;
   }
-  
+
   /** Set the scale value. */
-  
+
   public void setScale(double val)
   {
     scale = val;
   }
-  
+
   /** Get the shift value. */
-  
+
   public double getShift()
   {
     return shift;
   }
-  
+
   /** Set the shift value. */
-  
+
   public void setShift(double val)
   {
     shift = val;
   }
 
   /* Calculate the output value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -71,7 +72,8 @@ public class ScaleShiftModule extends Module
   }
 
   /* Calculate the output error. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -81,6 +83,7 @@ public class ScaleShiftModule extends Module
 
   /* The gradient is the sum of the two gradients. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)
@@ -92,9 +95,10 @@ public class ScaleShiftModule extends Module
       linkFrom[0].getValueGradient(linkFromIndex[0], grad, blur);
     grad.set(grad.x*scale+shift, grad.y*scale+shift, grad.z*scale+shift);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField scaleField = new ValueField(scale, ValueField.NONE, 5);
@@ -123,13 +127,14 @@ public class ScaleShiftModule extends Module
     layout();
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     ScaleShiftModule mod = new ScaleShiftModule(new Point(bounds.x, bounds.y));
-    
+
     mod.scale = scale;
     mod.shift = shift;
     mod.name = name;
@@ -138,14 +143,16 @@ public class ScaleShiftModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(scale);
     out.writeDouble(shift);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     scale = in.readDouble();

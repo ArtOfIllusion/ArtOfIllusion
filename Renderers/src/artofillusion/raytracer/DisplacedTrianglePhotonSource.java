@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -26,13 +26,13 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
       @param tri    the triangle for which to create a photon source
       @param map    the photon map for which this will generate photons
   */
-  
+
   public DisplacedTrianglePhotonSource(RTDisplacedTriangle tri, PhotonMap map)
   {
     this.tri = tri;
-    
+
     // Find the size of the triangle.
-    
+
     Vec3 vert1 = tri.tri.theMesh.vert[tri.tri.v1];
     Vec3 vert2 = tri.tri.theMesh.vert[tri.tri.v2];
     Vec3 vert3 = tri.tri.theMesh.vert[tri.tri.v3];
@@ -42,9 +42,9 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
     double dist1 = e1.length(), dist2 = e2.length(), dist3 = vert2.distance(vert3);
     double avgSize = (dist1+dist2+dist3)*(1.0/6.0);
     area += avgSize*(tri.maxheight-tri.minheight);  // VERY rough estimate (aka wild guess) of the true surface area
-    
+
     // Find the average emissive intensity.
-    
+
     TextureSpec spec = map.getWorkspace().surfSpec[0];
     double third = 1.0/3.0;
     color = new RGBColor();
@@ -57,17 +57,19 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
   }
-  
+
   /** Generate photons and add them to a map.
    @param map          the PhotonMap to add the Photons to
     * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
    * @param threads
   */
-  
+
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     RaytracerRenderer renderer = map.getRenderer();
@@ -87,7 +89,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
     double emittedIntensity = 0.0, tol = renderer.surfaceError;
 
     // Send out the photons.
-    
+
     while (emittedIntensity < intensity)
       {
         // Select an origin.
@@ -99,9 +101,9 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
             v = map.random.nextDouble();
             w = 1.0-u-v;
           } while (w < 0.0);
-        
+
         // Determine the position and normal of the surface at that point.
-        
+
         double disp = tri.tri.getDisplacement(u, v, w, tol, renderer.time);
         orig.set(vert1.x+disp*norm1.x, vert1.y+disp*norm1.y, vert1.z+disp*norm1.z);
         double dhdu = (tri.tri.getDisplacement(u+(1e-5), v, w-(1e-5), tol, renderer.time)-disp)*1e5;
@@ -123,7 +125,7 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
         normal.normalize();
 
         // Select a direction.
-        
+
         double dot, absdot;
         do
           {
@@ -133,9 +135,9 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
             dot = normal.dot(dir);
             absdot = (dot > 0.0 ? dot : -dot);
           } while (absdot < map.random.nextDouble());
-        
+
         // Evaluate the texture at the ray origin.
-        
+
         tri.tri.getTextureSpec(spec, dot, u, v, w, renderer.smoothScale, renderer.time);
         color.copy(spec.emissive);
         float sum = color.getRed()+color.getGreen()+color.getBlue();
@@ -146,14 +148,14 @@ public class DisplacedTrianglePhotonSource implements PhotonSource
         if (sum < 1.0f)
           {
             // Use Russian Roulette sampling.
-            
+
             if (sum < map.random.nextFloat())
               continue;
             color.scale(1.0f/sum);
           }
-        
+
         // Send out the photon.
-        
+
         r.newID();
         map.spawnPhoton(r, color, true);
       }

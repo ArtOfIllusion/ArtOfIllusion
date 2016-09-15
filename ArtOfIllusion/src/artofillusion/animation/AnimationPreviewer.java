@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -41,7 +41,7 @@ public class AnimationPreviewer implements Runnable
   private BDialog display;
   private byte imageData[][];
   private NumberFormat format;
-  
+
   static int currentCamera = 0, width = 320, height = 240, fps = 15, mode = 2;
   static double startTime = 0.0, endTime = 1.0;
 
@@ -51,10 +51,10 @@ public class AnimationPreviewer implements Runnable
     theScene = window.getScene();
 
     // Find all the cameras in the scene.
-    
+
     ObjectInfo obj;
     int i, count;
-    
+
     for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
     {
       obj = theScene.getObject(i);
@@ -83,9 +83,9 @@ public class AnimationPreviewer implements Runnable
       camChoice.add(cameras[i].getName());
     camChoice.setSelectedIndex(currentCamera);
     modeChoice = new BComboBox(new Object [] {
-       Translate.text("menu.wireframeDisplay"), 
-       Translate.text("menu.shadedDisplay"), 
-       Translate.text("menu.smoothDisplay"), 
+       Translate.text("menu.wireframeDisplay"),
+       Translate.text("menu.shadedDisplay"),
+       Translate.text("menu.smoothDisplay"),
        Translate.text("menu.texturedDisplay"),
         Translate.text("menu.transparentDisplay")
     });
@@ -95,12 +95,12 @@ public class AnimationPreviewer implements Runnable
     startField = new ValueField(startTime, ValueField.NONE);
     endField = new ValueField(endTime, ValueField.NONE);
     fpsField = new ValueField(fps, ValueField.POSITIVE+ValueField.INTEGER);
-    
+
     // Display a dialog with the various options.
-    
+
     ComponentsDialog dlg = new ComponentsDialog(window, Translate.text("renderPreview"),
       new Widget [] {camChoice, modeChoice, startField, endField, widthField, heightField, fpsField},
-      new String [] {Translate.text("Camera"), Translate.text("menu.displayMode"), Translate.text("StartTime"), 
+      new String [] {Translate.text("Camera"), Translate.text("menu.displayMode"), Translate.text("StartTime"),
       Translate.text("EndTime"), Translate.text("Width"), Translate.text("Height"),
       Translate.text("FramesPerSec")});
     if (!dlg.clickedOk())
@@ -114,9 +114,9 @@ public class AnimationPreviewer implements Runnable
     endTime = endField.getValue();
     fps = (int) fpsField.getValue();
     originalTime = theScene.getTime();
-    
+
     // Display a dialog to show the preview.
-    
+
     display = new BDialog(window, Translate.text("Preview"), true);
     format = NumberFormat.getNumberInstance();
     format.setMaximumFractionDigits(3);
@@ -132,6 +132,7 @@ public class AnimationPreviewer implements Runnable
     canvas.setBoundCamera(sceneCamera);
     canvas.setPerspective(true);
     canvas.setTool(new EditingTool(parent) {
+      @Override
       public boolean hilightSelection()
       {
         return false;
@@ -146,9 +147,10 @@ public class AnimationPreviewer implements Runnable
     previewThread.start();
     display.setVisible(true);
   }
-  
+
   /** Generate and display all of the frames in a loop. */
 
+  @Override
   public void run()
   {
     int totalFrames = (int) Math.ceil((endTime-startTime)*fps);
@@ -157,9 +159,9 @@ public class AnimationPreviewer implements Runnable
     imageData = new byte [totalFrames][];
     Camera cam = canvas.getCamera();
     long lastUpdate = 0L, ms, delay = 1000/fps;
-    
+
     // In the first loop, we render all of the images.
-    
+
     try
     {
       for (int i = 0; i < totalFrames; i++)
@@ -173,6 +175,7 @@ public class AnimationPreviewer implements Runnable
         try
         {
           EventQueue.invokeAndWait(new Runnable() {
+                      @Override
             public void run()
             {
               setLabels(time, frame);
@@ -204,9 +207,9 @@ public class AnimationPreviewer implements Runnable
         }
         lastUpdate = System.currentTimeMillis();
       }
-      
+
       // In later loops, we simply retrieve the data from the array.
-      
+
       while (!Thread.currentThread().isInterrupted())
       {
         for (int i = 0; i < totalFrames; i++)
@@ -217,6 +220,7 @@ public class AnimationPreviewer implements Runnable
           try
           {
             EventQueue.invokeAndWait(new Runnable() {
+                          @Override
               public void run()
               {
                 setLabels(time, frame);
@@ -251,9 +255,9 @@ public class AnimationPreviewer implements Runnable
       ex.printStackTrace();
     }
   }
-  
+
   /** Close the window. */
-  
+
   private void doClose()
   {
     previewThread.interrupt();
@@ -269,15 +273,15 @@ public class AnimationPreviewer implements Runnable
   }
 
   /** Set the labels for the current time and frame. */
-  
+
   private void setLabels(double time, int frame)
   {
     timeLabel.setText(Translate.text("Time")+": "+format.format(time));
     frameLabel.setText(Translate.text("Frame")+": "+(frame+1));
   }
-  
+
   /** Record the bitmap for an image. */
-  
+
   private byte [] recordImage(BufferedImage image)
   {
     try
@@ -293,7 +297,7 @@ public class AnimationPreviewer implements Runnable
   }
 
   /** Copy a bitmap into the image. */
-  
+
   private Image retrieveImage(byte bytes[]) throws IOException
   {
     return ImageIO.read(new ByteArrayInputStream(bytes));

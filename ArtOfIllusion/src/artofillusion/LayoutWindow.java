@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -99,10 +99,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < 4; i++)
     {
       viewPanel[i] = new BorderContainer() {
+        @Override
         public Dimension getPreferredSize()
         {
           return new Dimension(0, 0);
         }
+        @Override
         public Dimension getMinimumSize()
         {
           return new Dimension(0, 0);
@@ -205,6 +207,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     toggleViewsCommand();
     keyEventHandler = new KeyEventPostProcessor()
     {
+      @Override
       public boolean postProcessKeyEvent(KeyEvent e)
       {
         if (e.getID() != KeyEvent.KEY_PRESSED || e.isConsumed())
@@ -284,6 +287,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     itemTree.setUpdateEnabled(true);
     itemTreeScroller = new BScrollPane(itemTree) {
+      @Override
       public Dimension getMinimumSize()
       {
         return new Dimension(0, 0);
@@ -434,6 +438,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     fileMenu.add(Translate.menuItem("close", this, "actionPerformed"));
     fileMenu.addSeparator();
     Collections.sort(trans, new Comparator<Translator>() {
+      @Override
       public int compare(Translator o1, Translator o2)
       {
         return o1.getName().compareTo(o2.getName());
@@ -530,6 +535,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     modellingTools = PluginRegistry.getPlugins(ModellingTool.class);
     Collections.sort(modellingTools, new Comparator<ModellingTool>() {
+      @Override
       public int compare(ModellingTool o1, ModellingTool o2)
       {
         return (o1.getName().compareTo(o2.getName()));
@@ -711,6 +717,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Display the popup menu. */
 
+  @Override
   public void showPopupMenu(Widget w, int x, int y)
   {
     Object sel[] = itemTree.getSelectedObjects();
@@ -838,6 +845,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     setCursor(Cursor.getDefaultCursor());
   }
 
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(100, 100);
@@ -849,6 +857,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       gives the user a chance to save the Scene, or to cancel.  If the user cancels it, the
       method returns false.  Otherwise, it closes the window and returns true. */
 
+  @Override
   public boolean confirmClose()
   {
     if (modified)
@@ -875,6 +884,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Set the selected EditingTool for this window. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     for (int i = 0; i < theView.length; i++)
@@ -883,6 +893,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Set the help text displayed at the bottom of the window. */
 
+  @Override
   public void setHelpText(String text)
   {
     helpText.setText(text);
@@ -891,6 +902,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   /** Get the Frame corresponding to this window.  (Because LayoutWindow is a Frame,
       it simply returns itself.) */
 
+  @Override
   public BFrame getFrame()
   {
     return this;
@@ -898,6 +910,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Update the images displayed in all of the viewport. */
 
+  @Override
   public void updateImage()
   {
     if (numViewsShown == 1)
@@ -915,6 +928,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Update the state of all menu items. */
 
+  @Override
   public void updateMenus()
   {
     Object sel[] = itemTree.getSelectedObjects();
@@ -1017,6 +1031,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Set the UndoRecord which will be executed if the user chooses Undo from the Edit menu. */
 
+  @Override
   public void setUndoRecord(UndoRecord command)
   {
     undoStack.addRecord(command);
@@ -1033,6 +1048,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Set whether the scene has been modified since it was last saved. */
 
+  @Override
   public void setModified()
   {
     modified = true;
@@ -1057,6 +1073,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     sceneChangePending = true;
     EventQueue.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         sceneChangePending = false;
@@ -1065,7 +1082,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     });
   }
 
-  /** Add a new object to the scene.  If undo is not null, 
+  /** Add a new object to the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. */
 
   public void addObject(Object3D obj, CoordinateSystem coords, String name, UndoRecord undo)
@@ -1073,7 +1090,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     addObject(new ObjectInfo(obj, coords, name), undo);
   }
 
-  /** Add a new object to the scene.  If undo is not null, 
+  /** Add a new object to the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. */
 
   public void addObject(ObjectInfo info, UndoRecord undo)
@@ -1085,7 +1102,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScore.rebuildList();
   }
 
-  /** Add a new object to the scene.  If undo is not null, 
+  /** Add a new object to the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. */
 
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
@@ -1097,7 +1114,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScore.rebuildList();
   }
 
-  /** Remove an object from the scene.  If undo is not null, 
+  /** Remove an object from the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. */
 
   public void removeObject(int which, UndoRecord undo)
@@ -1149,6 +1166,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Get the Scene associated with this window. */
 
+  @Override
   public Scene getScene()
   {
     return theScene;
@@ -1156,13 +1174,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Get the ViewerCanvas which currently has focus. */
 
+  @Override
   public ViewerCanvas getView()
   {
     return theView[currentView];
   }
-  
+
   /** Get all ViewerCanvases contained in this window. */
 
+  @Override
   public ViewerCanvas[] getAllViews()
   {
     return (ViewerCanvas[]) theView.clone();
@@ -1203,6 +1223,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Get the ToolPalette for this window. */
 
+  @Override
   public ToolPalette getToolPalette()
   {
     return tools;
@@ -1787,22 +1808,22 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     int which[] = new int [sel.length], num = theScene.getNumObjects();
 
     // Create the duplicates.
-    
+
     HashMap<ObjectInfo, ObjectInfo> duplicateMap = new HashMap<ObjectInfo, ObjectInfo>();
     for (int i = 0; i < sel.length; i++)
     {
       ObjectInfo original = (ObjectInfo) sel[i];
       duplicateMap.put(original, original.duplicate());
     }
-    
+
     // Maintain relationships between parents and children.
-    
+
     for (ObjectInfo original : duplicateMap.keySet())
       if (duplicateMap.containsKey(original.getParent()))
         duplicateMap.get(original.getParent()).addChild(duplicateMap.get(original), 0);
-    
+
     // Add the new objects to the scene.
-    
+
     UndoRecord undo = new UndoRecord(this, false);
     int selected[] = getSelectedIndices();
     for (ObjectInfo duplicate : duplicateMap.values())
@@ -1844,6 +1865,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
         obj.edit(this, theScene.getObject(sel[0]), new Runnable() {
+          @Override
           public void run()
           {
             setUndoRecord(undo);
@@ -2776,6 +2798,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     });
     final Runnable envTextureCallback = new Runnable() {
+      @Override
       public void run()
       {
         envLabel.setText(envSphere.getTexture().getName());
@@ -2820,6 +2843,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     });
     Runnable okCallback = new Runnable() {
+      @Override
       public void run()
       {
         theScene.setFog(fogBox.getState(), fogField.getValue());
@@ -2831,6 +2855,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     };
     Runnable cancelCallback = new Runnable() {
+      @Override
       public void run()
       {
         ambColor.copy(oldAmbColor);

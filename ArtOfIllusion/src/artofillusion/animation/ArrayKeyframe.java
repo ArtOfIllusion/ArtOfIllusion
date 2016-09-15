@@ -6,8 +6,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -17,37 +17,42 @@ import java.io.*;
 public class ArrayKeyframe implements Keyframe
 {
   public double val[];
-  
+
   public ArrayKeyframe(double values[])
   {
     val = values;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     return new ArrayKeyframe(val);
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new ArrayKeyframe(val);
   }
-  
+
   /* Get the list of graphable values for this keyframe. */
-  
+
+  @Override
   public double [] getGraphValues()
   {
     return val;
   }
-  
+
   /* Set the list of graphable values for this keyframe. */
-  
+
+  @Override
   public void setGraphValues(double values[])
   {
     val = new double [values.length];
     System.arraycopy(values, 0, val, 0, values.length);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     double d[] = new double [val.length];
@@ -58,6 +63,7 @@ public class ArrayKeyframe implements Keyframe
     return new ArrayKeyframe(d);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     double d[] = new double [val.length];
@@ -69,6 +75,7 @@ public class ArrayKeyframe implements Keyframe
     return new ArrayKeyframe(d);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     double d[] = new double [val.length];
@@ -82,7 +89,8 @@ public class ArrayKeyframe implements Keyframe
   }
 
   /* Determine whether this keyframe is identical to another one. */
-  
+
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof ArrayKeyframe))
@@ -93,9 +101,10 @@ public class ArrayKeyframe implements Keyframe
         return false;
     return true;
   }
-  
+
   /* Write out a representation of this keyframe to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeShort(val.length);

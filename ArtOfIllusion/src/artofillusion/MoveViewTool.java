@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -26,24 +26,27 @@ public class MoveViewTool extends EditingTool
   private boolean controlDown;
   private CoordinateSystem oldCoords;
   private double oldScale;
-  
+
   public MoveViewTool(EditingWindow fr)
   {
     super(fr);
     initButton("moveView");
   }
-  
+
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean hilightSelection()
   {
 /*    if (theWindow instanceof LayoutWindow)
@@ -52,11 +55,13 @@ public class MoveViewTool extends EditingTool
       return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveViewTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -69,6 +74,7 @@ public class MoveViewTool extends EditingTool
     oldScale = view.getScale();
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -78,7 +84,7 @@ public class MoveViewTool extends EditingTool
     double dist;
     Vec3 move;
     Mat4 m;
-    
+
     dx = dragPoint.x-clickPoint.x;
     dy = dragPoint.y-clickPoint.y;
     cam.setCameraCoordinates(c);
@@ -117,6 +123,7 @@ public class MoveViewTool extends EditingTool
     view.repaint();
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     mouseDragged(e, view);
@@ -127,7 +134,7 @@ public class MoveViewTool extends EditingTool
           {
             // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
             // the camera.
-            
+
             UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
             moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
             theWindow.setUndoRecord(undo);
@@ -135,9 +142,9 @@ public class MoveViewTool extends EditingTool
         theWindow.updateImage();
       }
   }
-  
+
   /** This is called recursively to move any children of a bound camera. */
-  
+
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
   {
     for (int i = 0; i < parent.getChildren().length; i++)

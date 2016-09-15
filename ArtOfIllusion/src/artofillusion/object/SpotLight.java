@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -22,10 +22,10 @@ import java.io.*;
 
 /** SpotLight represents a light source which emits a cone of light in a specified direction. */
 
-public class SpotLight extends Light 
+public class SpotLight extends Light
 {
   double radius, angle, falloff, cosangle, exponent;
-  
+
   static BoundingBox bounds;
   static WireframeMesh mesh;
   static final int SEGMENTS = 8;
@@ -74,7 +74,7 @@ public class SpotLight extends Light
   {
     this(theColor, theIntensity, theAngle, falloffRate, theRadius, TYPE_NORMAL, 0.25f);
   }
-  
+
   public SpotLight(RGBColor theColor, float theIntensity, double theAngle, double falloffRate, double theRadius, int type, float decay)
   {
     setParameters(theColor.duplicate(), theIntensity, type, decay);
@@ -82,53 +82,54 @@ public class SpotLight extends Light
     setAngle(theAngle);
     setFalloff(falloffRate);
   }
-  
+
   public double getRadius()
   {
     return radius;
   }
-  
+
   public void setRadius(double r)
   {
     radius = r;
   }
-  
+
   public double getAngle()
   {
     return angle;
   }
-  
+
   public void setAngle(double a)
   {
     angle = a;
     cosangle = Math.cos(angle*Math.PI/360.0);
   }
-  
+
   public double getFalloff()
   {
     return falloff;
   }
-  
+
   public void setFalloff(double f)
   {
     falloff = f;
     exponent = f*f*128.0;
   }
-  
+
   public double getAngleCosine()
   {
     return cosangle;
   }
-  
+
   public double getExponent()
   {
     return exponent;
   }
-  
+
   /**
    * Get the attenuated light at a given position relative to the light source.
    */
 
+  @Override
   public void getLight(RGBColor light, Vec3 position)
   {
     double distance = position.length();
@@ -146,11 +147,13 @@ public class SpotLight extends Light
     }
   }
 
+  @Override
   public Object3D duplicate()
   {
     return new SpotLight(color, intensity, angle, falloff, radius, type, decayRate);
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     SpotLight lt = (SpotLight) obj;
@@ -161,6 +164,7 @@ public class SpotLight extends Light
     setFalloff(lt.falloff);
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -169,25 +173,29 @@ public class SpotLight extends Light
   /* A SpotLight is always drawn the same size, which has no connection to the properties
      of the light. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
   /* The following two methods are used for reading and writing files.  The first is a
      constructor which reads the necessary data from an input stream.  The other writes
      the object's representation to an output stream. */
@@ -206,6 +214,7 @@ public class SpotLight extends Light
     bounds = new BoundingBox(-0.2, 0.2, -0.2, 0.2, -0.2, 0.2);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -220,6 +229,7 @@ public class SpotLight extends Light
     out.writeDouble(falloff);
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, final Runnable cb)
   {
     final Widget patch = color.getSample(50, 30);
@@ -299,11 +309,13 @@ public class SpotLight extends Light
     dlg.setVisible(true);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -326,6 +338,7 @@ public class SpotLight extends Light
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -350,37 +363,41 @@ public class SpotLight extends Light
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new SpotLightKeyframe(color, intensity, decayRate, radius, angle, falloff);
   }
-  
+
   /* Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     SpotLightKeyframe key = (SpotLightKeyframe) k;
-    
+
     setParameters(key.color.duplicate(), key.intensity, type, key.decayRate);
     setRadius(key.radius);
     setAngle(key.angle);
     setFalloff(key.falloff);
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Intensity", "Decay Rate", "Radius", "Cone Angle", "Falloff Rate"},
-        new double [] {intensity, decayRate, radius, angle, falloff}, 
+        new double [] {intensity, decayRate, radius, angle, falloff},
         new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE},
         {0.0, Double.MAX_VALUE}, {0.0, 180.0}, {0.0, 1.0}});
   }
-  
+
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final SpotLightKeyframe key = (SpotLightKeyframe) k;
@@ -456,13 +473,13 @@ public class SpotLight extends Light
   }
 
   /* Inner class representing a pose for a cylinder. */
-  
+
   public static class SpotLightKeyframe implements Keyframe
   {
     public RGBColor color;
     public float intensity, decayRate;
     public double radius, angle, falloff;
-    
+
     public SpotLightKeyframe(RGBColor color, float intensity, float decayRate, double radius, double angle, double falloff)
     {
       this.color = color.duplicate();
@@ -472,30 +489,34 @@ public class SpotLight extends Light
       this.angle = angle;
       this.falloff = falloff;
     }
-    
+
     /* Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return new SpotLightKeyframe(color, intensity, decayRate, radius, angle, falloff);
     }
-    
+
     /* Create a duplicate of this keyframe for a (possibly different) object. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return duplicate();
     }
-  
+
     /* Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {intensity, decayRate, radius, angle, falloff};
     }
-  
+
     /* Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
       intensity = (float) values[0];
@@ -507,46 +528,50 @@ public class SpotLight extends Light
 
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       SpotLightKeyframe k2 = (SpotLightKeyframe) o2;
       RGBColor c = new RGBColor(weight1*color.getRed()+weight2*k2.color.getRed(),
         weight1*color.getGreen()+weight2*k2.color.getGreen(),
         weight1*color.getBlue()+weight2*k2.color.getBlue());
-      return new SpotLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity), 
-        (float) (weight1*decayRate+weight2*k2.decayRate), weight1*radius+weight2*k2.radius, 
+      return new SpotLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity),
+        (float) (weight1*decayRate+weight2*k2.decayRate), weight1*radius+weight2*k2.radius,
         weight1*angle+weight2*k2.angle, weight1*falloff+weight2*k2.falloff);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       SpotLightKeyframe k2 = (SpotLightKeyframe) o2, k3 = (SpotLightKeyframe) o3;
       RGBColor c = new RGBColor(weight1*color.getRed()+weight2*k2.color.getRed()+weight3*k3.color.getRed(),
         weight1*color.getGreen()+weight2*k2.color.getGreen()+weight3*k3.color.getGreen(),
         weight1*color.getBlue()+weight2*k2.color.getBlue()+weight3*k3.color.getBlue());
-      return new SpotLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity), 
-        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate), 
+      return new SpotLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity),
+        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate),
         weight1*radius+weight2*k2.radius+weight3*k3.radius,
         weight1*angle+weight2*k2.angle+weight3*k3.angle,
         weight1*falloff+weight2*k2.falloff+weight3*k3.falloff);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       SpotLightKeyframe k2 = (SpotLightKeyframe) o2, k3 = (SpotLightKeyframe) o3, k4 = (SpotLightKeyframe) o4;
       RGBColor c = new RGBColor(weight1*color.getRed()+weight2*k2.color.getRed()+weight3*k3.color.getRed()+weight4*k4.color.getRed(),
         weight1*color.getGreen()+weight2*k2.color.getGreen()+weight3*k3.color.getGreen()+weight4*k4.color.getGreen(),
         weight1*color.getBlue()+weight2*k2.color.getBlue()+weight3*k3.color.getBlue()+weight4*k4.color.getBlue());
-      return new SpotLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity+weight4*k4.intensity), 
-        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate+weight4*k4.decayRate), 
+      return new SpotLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity+weight4*k4.intensity),
+        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate+weight4*k4.decayRate),
         weight1*radius+weight2*k2.radius+weight3*k3.radius+weight4*k4.radius,
         weight1*angle+weight2*k2.angle+weight3*k3.angle+weight4*k4.angle,
         weight1*falloff+weight2*k2.falloff+weight3*k3.falloff+weight4*k4.falloff);
     }
 
     /* Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof SpotLightKeyframe))
@@ -554,9 +579,10 @@ public class SpotLight extends Light
       SpotLightKeyframe key = (SpotLightKeyframe) k;
       return (key.color.equals(color) && key.intensity == intensity && key.decayRate == decayRate && key.radius == radius && key.angle == angle && key.falloff == falloff);
     }
-  
+
     /* Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       color.writeToFile(out);
@@ -574,16 +600,16 @@ public class SpotLight extends Light
       this(new RGBColor(in), in.readFloat(), in.readFloat(), in.readDouble(), in.readDouble(), in.readDouble());
     }
   }
-  
+
   /* Preview is a Widget which displays a preview of the light distribution created by the
      spotlight. */
-  
+
   private class Preview extends CustomWidget
   {
     MemoryImageSource imageSource;
     int pixel[], size;
     Image img;
-    
+
     public Preview(int size)
     {
       this.size = size;
@@ -595,14 +621,14 @@ public class SpotLight extends Light
       addEventLink(RepaintEvent.class, this, "paint");
       updateImage(angle, falloff);
     }
-    
+
     public synchronized void updateImage(double ang, double fall)
     {
       int i, j, first;
       double center = size/2.0, tn = Math.tan(ang*Math.PI/360.0);
       double ex = fall*fall*128.0, cs;
       RGBColor col = new RGBColor(0.0f, 0.0f, 0.0f);
-      
+
       for (i = 0; i < size; i++)
       {
         first = (int) Math.abs((i-center)/tn);
@@ -621,7 +647,7 @@ public class SpotLight extends Light
       imageSource.newPixels();
       repaint();
     }
-    
+
     private void paint(RepaintEvent ev)
     {
       ev.getGraphics().drawImage(img, 0, 0, getComponent());

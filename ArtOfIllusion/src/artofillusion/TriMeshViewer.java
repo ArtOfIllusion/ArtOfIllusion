@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -22,7 +22,7 @@ import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
 
-/** The TriMeshViewer class is a component which displays a TriangleMesh object and 
+/** The TriMeshViewer class is a component which displays a TriangleMesh object and
     allow the user to edit it. */
 
 public class TriMeshViewer extends MeshViewer
@@ -69,6 +69,7 @@ public class TriMeshViewer extends MeshViewer
     super.updateImage();
   }
 
+  @Override
   protected void drawObject()
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
@@ -102,7 +103,7 @@ public class TriMeshViewer extends MeshViewer
   }
 
   /** Draw the surface of the object. */
-  
+
   private void drawSurface()
   {
     if (!showSurface)
@@ -165,9 +166,9 @@ public class TriMeshViewer extends MeshViewer
       renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), hide);
     }
   }
-  
+
   /** Draw the vertices of the control mesh. */
-  
+
   private void drawVertices(Color unselectedColor, Color selectedColor)
   {
     if (!showMesh)
@@ -199,9 +200,9 @@ public class TriMeshViewer extends MeshViewer
       }
     renderBoxes(boxes, depths, selectedColor);
   }
-  
+
   /** Draw the edges of the control mesh. */
-  
+
   private void drawEdges(Vec2 p[], Color unselectedColor, Color selectedColor)
   {
     if (!showMesh)
@@ -273,6 +274,7 @@ public class TriMeshViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
@@ -285,9 +287,9 @@ public class TriMeshViewer extends MeshViewer
     deselect = -1;
     dragging = false;
     clickPoint = e.getPoint();
-    
+
     // Determine which tool is active.
-    
+
     if (metaTool != null && e.isMetaDown())
       activeTool = metaTool;
     else if (altTool != null && e.isAltDown())
@@ -307,13 +309,13 @@ public class TriMeshViewer extends MeshViewer
     boolean wantHandleClicks = ((activeTool.whichClicks() & EditingTool.HANDLE_CLICKS) != 0);
     if (!allowSelectionChange && !wantHandleClicks)
       return;
-    
+
     // Determine what the click was on.
-    
+
     i = findClickTarget(e.getPoint(), null);
 
     // If the click was not on an object, start dragging a selection box.
-    
+
     if (i == -1)
     {
       if (allowSelectionChange)
@@ -323,10 +325,10 @@ public class TriMeshViewer extends MeshViewer
       }
       return;
     }
-    
-    // If we are in edge or face selection mode, find a vertex of the clicked edge or face, 
+
+    // If we are in edge or face selection mode, find a vertex of the clicked edge or face,
     // so that it can be passed to editing tools.
-    
+
     if (controller.getSelectionMode() == MeshEditController.EDGE_MODE)
       {
         if (visible[ed[i].v1])
@@ -348,7 +350,7 @@ public class TriMeshViewer extends MeshViewer
 
     // If the click was on a selected object, forward it to the current tool.  If it was a
     // shift-click, the user may want to deselect it, so set a flag.
-    
+
     boolean selected[] = controller.getSelection();
     if (selected[i])
       {
@@ -363,7 +365,7 @@ public class TriMeshViewer extends MeshViewer
       return;
 
     // The click was on an unselected object.  Select it and send an event to the current tool.
-    
+
     boolean oldSelection[] = selected.clone();
     if (!e.isShiftDown())
       for (k = 0; k < selected.length; k++)
@@ -389,6 +391,7 @@ public class TriMeshViewer extends MeshViewer
     }
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -402,6 +405,7 @@ public class TriMeshViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
@@ -416,9 +420,9 @@ public class TriMeshViewer extends MeshViewer
       for (int i = 0; i < selected.length; i++)
         selected[i] = false;
 
-    // If the user was dragging a selection box, then select or deselect anything 
+    // If the user was dragging a selection box, then select or deselect anything
     // it intersects.
-    
+
     boolean hideVert[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideVert : new boolean [mesh.getVertices().length]);
     boolean hideEdge[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideEdge : new boolean [ed.length]);
     boolean hideFace[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideFace : new boolean [fc.length]);
@@ -507,18 +511,18 @@ public class TriMeshViewer extends MeshViewer
     controller.setSelection(selected);
     currentTool.getWindow().updateMenus();
   }
-  
+
   /** Determine which vertex, edge, or face (depending on the current selection mode) the
       mouse was clicked on.  If the click was on top of multiple objects, priority is given
       to ones which are currently selected, and then to ones which are in front.  If the
       click is not over any object, -1 is returned. */
-  
+
   public int findClickTarget(Point pos, Vec3 uvw)
   {
     double u, v, w, z, closestz = Double.MAX_VALUE;
     boolean sel = false;
     int which = -1;
-    
+
     boolean selected[] = controller.getSelection();
     boolean priorityToSelected = (getRenderMode() == RENDER_WIREFRAME || getRenderMode() == RENDER_TRANSPARENT);
     if (controller.getSelectionMode() == MeshEditController.POINT_MODE)

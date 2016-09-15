@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -25,7 +25,7 @@ public class TwistDistortion extends Distortion
   public static final int X_AXIS = 0;
   public static final int Y_AXIS = 1;
   public static final int Z_AXIS = 2;
-  
+
   public TwistDistortion(int axis, double angle, boolean forward, Mat4 preTransform, Mat4 postTransform)
   {
     this.axis = axis;
@@ -36,7 +36,8 @@ public class TwistDistortion extends Distortion
   }
 
   /** Determine whether this distortion is identical to another one. */
-  
+
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof TwistDistortion))
@@ -53,9 +54,10 @@ public class TwistDistortion extends Distortion
     return (preTransform != null && preTransform.equals(s.preTransform) &&
       postTransform != null && postTransform.equals(s.postTransform));
   }
-  
+
   /** Create a duplicate of this object. */
-  
+
+  @Override
   public Distortion duplicate()
   {
     TwistDistortion d = new TwistDistortion(axis, angle, forward, preTransform, postTransform);
@@ -63,9 +65,10 @@ public class TwistDistortion extends Distortion
       d.previous = previous.duplicate();
     return d;
   }
-  
+
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)
@@ -73,14 +76,14 @@ public class TwistDistortion extends Distortion
     Mesh newmesh = (Mesh) obj.duplicate();
     MeshVertex[] vert = newmesh.getVertices();
     Vec3 newvert[] = new Vec3 [vert.length];
-    
+
     for (int i = 0; i < newvert.length; i++)
       {
         newvert[i] = vert[i].r;
         if (preTransform != null)
           preTransform.transform(newvert[i]);
       }
-    
+
     // Find the range along the appropriate axis.
 
     double min = Double.MAX_VALUE, max = Double.MIN_VALUE;

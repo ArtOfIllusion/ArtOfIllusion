@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -232,11 +232,13 @@ public class CompoundImplicitObject extends ImplicitObject
 
   /** Allow the user to edit this object. */
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new CompoundImplicitEditorWindow(parent, info.getName(), this, cb);
@@ -274,6 +276,7 @@ public class CompoundImplicitObject extends ImplicitObject
     final CompoundImplicitObject copy = (CompoundImplicitObject) duplicate();
     copy.applyPoseKeyframe(k);
     Runnable onClose = new Runnable() {
+      @Override
       public void run()
       {
         CompoundImplicitKeyframe original = (CompoundImplicitKeyframe) k;
@@ -301,6 +304,7 @@ public class CompoundImplicitObject extends ImplicitObject
 
     /** Create a duplicate of this keyframe. */
 
+    @Override
     public Keyframe duplicate()
     {
       ArrayList<Keyframe> newKey = new ArrayList<Keyframe>();
@@ -315,6 +319,7 @@ public class CompoundImplicitObject extends ImplicitObject
 
     /** Create a duplicate of this keyframe for a (possibly different) object. */
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       CompoundImplicitObject other = (CompoundImplicitObject) ((ObjectInfo) owner).getObject();
@@ -330,6 +335,7 @@ public class CompoundImplicitObject extends ImplicitObject
 
     /** Get the list of graphable values for this keyframe. */
 
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -337,6 +343,7 @@ public class CompoundImplicitObject extends ImplicitObject
 
     /** Set the list of graphable values for this keyframe. */
 
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -344,6 +351,7 @@ public class CompoundImplicitObject extends ImplicitObject
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
 
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       CompoundImplicitKeyframe k2 = (CompoundImplicitKeyframe) o2;
@@ -372,6 +380,7 @@ public class CompoundImplicitObject extends ImplicitObject
       return new CompoundImplicitKeyframe(newKey, newCoords);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       CompoundImplicitKeyframe k2 = (CompoundImplicitKeyframe) o2, k3 = (CompoundImplicitKeyframe) o3;
@@ -404,6 +413,7 @@ public class CompoundImplicitObject extends ImplicitObject
       return new CompoundImplicitKeyframe(newKey, newCoords);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       CompoundImplicitKeyframe k2 = (CompoundImplicitKeyframe) o2, k3 = (CompoundImplicitKeyframe) o3, k4 = (CompoundImplicitKeyframe) o4;
@@ -442,6 +452,7 @@ public class CompoundImplicitObject extends ImplicitObject
 
     /** Determine whether this keyframe is identical to another one. */
 
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CompoundImplicitKeyframe))
@@ -467,6 +478,7 @@ public class CompoundImplicitObject extends ImplicitObject
 
     /** Write out a representation of this keyframe to a stream. */
 
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0);

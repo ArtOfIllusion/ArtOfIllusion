@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -59,6 +59,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     content.add(tools = new ToolPalette(1, 3), 0, 0, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, null, null));
     EditingTool metaTool, altTool;
     tools.addTool(defaultTool = new SkeletonTool(this, false) {
+      @Override
       protected void adjustMesh(Mesh newMesh)
       {
         adjustMeshForSkeleton();
@@ -88,7 +89,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     objInfo.getObject().getSkeleton().copy(keyframe.getSkeleton());
     adjustMeshForSkeleton();
   }
-  
+
   private static Mesh getEditMesh(Object3D object)
   {
     while (object instanceof ObjectWrapper)
@@ -107,7 +108,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     editMenu.addSeparator();
     editMenu.add(Translate.menuItem("properties", this, "editProperties"));
   }
-  
+
   void createSkeletonMenu()
   {
     BMenuItem item;
@@ -123,6 +124,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -131,59 +133,66 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     Joint selJoint = s.getJoint(view.getSelectedJoint());
     skeletonMenuItem[0].setEnabled(selJoint != null);
   }
-  
+
   /** Get the object being edited in this window. */
-  
+
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
   }
-  
+
   /** Set the object being edited in this window. */
-  
+
   public void setObject(Object3D obj)
   {
     objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
-  
+
+  @Override
   public void setMesh(Mesh mesh)
   {
     setObject((Object3D) mesh);
   }
-  
+
   /** Get the selection mode. */
-  
+
+  @Override
   public int getSelectionMode()
   {
     return POINT_MODE;
   }
-  
+
   /** This is ignored, since this window only supports one selection mode. */
-  
+
+  @Override
   public void setSelectionMode(int mode)
   {
   }
-  
+
   /** Get an array of flags specifying which vertices are selected. */
-  
+
+  @Override
   public boolean [] getSelection()
   {
     return selected;
   }
-  
+
   /** Set which vertices are selected. */
-  
+
+  @Override
   public void setSelection(boolean selected[])
   {
     this.selected = selected;
     for (ViewerCanvas view : theView)
       view.repaint();
   }
-  
+
   /** Selection distance is not used for anything in this window, so this simply returns
       0 for selected vertices and -1 for unselected vertices. */
 
+  @Override
   public int[] getSelectionDistance()
   {
     int dist[] = new int [selected.length];
@@ -193,7 +202,8 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     return dist;
   }
 
-  
+
+  @Override
   protected void doOk()
   {
     parentWindow.setUndoRecord(new UndoRecord(parentWindow, false, UndoRecord.COPY_TRACK, new Object [] {track, track.duplicate(track.getParent())}));
@@ -205,15 +215,16 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     if (onClose != null)
       onClose.run();
   }
-  
+
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
     dispose();
   }
-  
+
   /** Adjust the mesh after the skeleton moves. */
-  
+
   private void adjustMeshForSkeleton()
   {
     Object3D obj = ((ObjectInfo) track.getParent()).getObject();
@@ -224,9 +235,9 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     else
       Skeleton.adjustMesh(oldMesh, mesh);
   }
-  
+
   /** Reset the skeleton to its default pose. */
-  
+
   protected void resetCommand()
   {
     Object3D obj = ((ObjectInfo) track.getParent()).getObject();
@@ -243,15 +254,16 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     objectChanged();
     updateImage();
   }
-  
+
   /** Create a skeleton shape by blending gestures. */
-  
+
   protected void createFromGesturesCommand()
   {
     ObjectInfo info = (ObjectInfo) track.getParent();
     final Actor actor = Actor.getActor(info.getObject());
     final Actor.ActorKeyframe key = new Actor.ActorKeyframe();
     new ActorEditorWindow(this, info, actor, key, new Runnable() {
+      @Override
       public void run()
       {
         Skeleton newSkeleton = ((Gesture) key.createObjectKeyframe(actor)).getSkeleton();
@@ -264,16 +276,16 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
       }
     });
   }
-  
+
   /** Allow the user to edit keyframe properties. */
-  
+
   protected void editProperties()
   {
     ValueField timeField = new ValueField(keyTime, ValueField.NONE, 5);
     ValueSlider s1Slider = new ValueSlider(0.0, 1.0, 100, keySmoothness.getLeftSmoothness());
     final ValueSlider s2Slider = new ValueSlider(0.0, 1.0, 100, keySmoothness.getRightSmoothness());
     final BCheckBox sameBox = new BCheckBox(Translate.text("separateSmoothness"), !keySmoothness.isForceSame());
-    
+
     sameBox.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
@@ -296,13 +308,15 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
 
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
-  
+
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
   }
 
   /** This method does nothing, since it is not permitted to modify the mesh topology. */
 
+  @Override
   public void deleteCommand()
   {
   }

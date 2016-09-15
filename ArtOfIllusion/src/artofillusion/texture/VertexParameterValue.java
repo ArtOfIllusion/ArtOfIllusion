@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -19,16 +19,16 @@ import java.io.*;
 public class VertexParameterValue implements ParameterValue
 {
   private double value[];
-  
+
   /** Create a new VertexParameterValue object. */
-  
+
   public VertexParameterValue(double val[])
   {
     value = val;
   }
-  
+
   /** Create a new VertexParameterValue for a mesh, and initialize it to appropriate default values. */
-  
+
   public VertexParameterValue(Mesh mesh, TextureParameter param)
   {
     MeshVertex vertex[] = mesh.getVertices();
@@ -48,30 +48,32 @@ public class VertexParameterValue implements ParameterValue
       for (int i = 0; i < value.length; i++)
         value[i] = vertex[i].r.z;
   }
-  
+
   /** Get the list of parameter values. */
-  
+
   public double [] getValue()
   {
     return value;
   }
-  
+
   /** Set the list of parameter values. */
-  
+
   public void setValue(double val[])
   {
     value = val;
   }
-  
+
   /** Get the value of the parameter at a particular point in a particular triangle. */
-  
+
+  @Override
   public double getValue(int tri, int v1, int v2, int v3, double u, double v, double w)
   {
     return u*value[v1]+v*value[v2]+w*value[v3];
   }
-  
+
   /** Get the average value of the parameter over the entire surface. */
-  
+
+  @Override
   public double getAverageValue()
   {
     double avg = 0.0;
@@ -79,18 +81,20 @@ public class VertexParameterValue implements ParameterValue
       avg += value[i];
     return (avg/value.length);
   }
-  
+
   /** Create a duplicate of this object. */
-  
+
+  @Override
   public ParameterValue duplicate()
   {
     double d[] = new double [value.length];
     System.arraycopy(value, 0, d, 0, value.length);
     return new VertexParameterValue(d);
   }
-  
+
   /** Determine whether this object represents the same set of values as another one. */
-  
+
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof VertexParameterValue))
@@ -103,18 +107,19 @@ public class VertexParameterValue implements ParameterValue
         return false;
     return true;
   }
-  
+
   /** Write out a serialized representation of this object to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeInt(value.length);
     for (int i = 0; i < value.length; i++)
       out.writeDouble(value[i]);
   }
-  
+
   /** Reconstruct a serialized object. */
-  
+
   public VertexParameterValue(DataInputStream in) throws IOException
   {
     value = new double [in.readInt()];

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -28,7 +28,7 @@ public class ConstraintTrack extends Track
   ObjectRef faceToward;
   Vec3 pos, orient;
   WeightTrack theWeight;
-  
+
   private static final int NONE = 0;
   private static final int LESS_THAN = 1;
   private static final int EQUAL_TO = 2;
@@ -40,7 +40,7 @@ public class ConstraintTrack extends Track
   private static final int PARALLEL = 0;
   private static final int PERPENDICULAR = 1;
   private static final int FACES_OBJECT = 2;
-  
+
   public ConstraintTrack(ObjectInfo info)
   {
     super("Constraint");
@@ -54,14 +54,16 @@ public class ConstraintTrack extends Track
   }
 
   /** This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     new Editor(win);
   }
-  
+
   /** Modify the position of the object. */
-  
+
+  @Override
   public void apply(double time)
   {
     double weight = theWeight.getWeight(time);
@@ -93,10 +95,10 @@ public class ConstraintTrack extends Track
       }
     info.getCoords().setOrigin(v);
   }
-  
+
   /** Find the new value for a particular coordinate, based on the current value and the
      constraint type. */
-  
+
   private double findCoordinate(double current, double con, int type, double weight)
   {
     if (type == NONE)
@@ -107,13 +109,13 @@ public class ConstraintTrack extends Track
       con = current;
     return (1.0-weight)*current + weight*con;
   }
-  
+
   /** Given three axes, adjust them so that the first one satisfies the specified constraint. */
-  
+
   private void adjustAxes(Vec3 xdir, Vec3 ydir, Vec3 zdir)
   {
     Vec3 v;
-    
+
     if (orientMode == FACES_OBJECT)
       {
         CoordinateSystem target = faceToward.getCoords();
@@ -140,13 +142,14 @@ public class ConstraintTrack extends Track
     zdir.normalize();
     ydir.normalize();
   }
-  
+
   /** Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     ConstraintTrack t = new ConstraintTrack((ObjectInfo) obj);
-    
+
     t.name = name;
     t.enabled = enabled;
     t.quantized = quantized;
@@ -161,13 +164,14 @@ public class ConstraintTrack extends Track
     t.theWeight = (WeightTrack) theWeight.duplicate(t);
     return t;
   }
-  
+
   /** Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     ConstraintTrack t = (ConstraintTrack) tr;
-    
+
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
@@ -181,65 +185,74 @@ public class ConstraintTrack extends Track
     faceToward.copy(t.faceToward);
     theWeight = (WeightTrack) t.theWeight.duplicate(t);
   }
-  
+
   /** Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return new double [0];
   }
 
   /** Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return -1;
   }
-  
+
   /** Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
   }
-  
+
   /** Constraint tracks are never null. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return false;
   }
-  
+
   /** This has a single child track. */
-  
+
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
   }
 
   /** Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
   }
-  
+
   /** Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return info;
   }
-  
+
   /** Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
   }
-  
+
   /** Get an array of any objects which this track depends on (and which therefore must
-     be updated before this track is applied). */ 
-  
+     be updated before this track is applied). */
+
+  @Override
   public ObjectInfo [] getDependencies()
   {
     if (orientType != NONE && orientMode == FACES_OBJECT)
@@ -250,16 +263,18 @@ public class ConstraintTrack extends Track
       }
      return new ObjectInfo [0];
   }
-  
+
   /** Delete all references to the specified object from this track.  This is used when an
      object is deleted from the scene. */
-  
+
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
     if (faceToward.getObject() == obj)
       faceToward = new ObjectRef();
   }
 
+  @Override
   public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
     if (objectMap.containsKey(faceToward.getObject()))
@@ -273,7 +288,8 @@ public class ConstraintTrack extends Track
   }
 
   /** Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(0); // Version number
@@ -290,13 +306,14 @@ public class ConstraintTrack extends Track
       faceToward.writeToStream(out);
     theWeight.writeToStream(out, scene);
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version != 0)
       throw new InvalidObjectException("");
     name = in.readUTF();
@@ -316,7 +333,7 @@ public class ConstraintTrack extends Track
   }
 
   /** Inner class for editing constraint tracks. */
-  
+
   private class Editor extends BDialog
   {
     LayoutWindow window;
@@ -325,14 +342,14 @@ public class ConstraintTrack extends Track
     OverlayContainer orientPanel;
     ObjectRefSelector objSelector;
     BTextField nameField;
-    
+
     public Editor(LayoutWindow win)
     {
       super(win, Translate.text("constraintTrackTitle"), true);
       window = win;
-      
+
       // Layout the dialog.
-      
+
       FormContainer content = new FormContainer(3, 7);
       setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
       content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
@@ -401,7 +418,7 @@ public class ConstraintTrack extends Track
       updateComponents();
       setVisible(true);
     }
-    
+
     private void doOk()
     {
       window.setUndoRecord(new UndoRecord(window, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
@@ -417,9 +434,9 @@ public class ConstraintTrack extends Track
       window.getScore().repaintAll();
       dispose();
     }
-    
+
     /** Make sure that the appropriate components are enabled. */
-    
+
     private void updateComponents()
     {
       xField.setEnabled(xChoice.getSelectedIndex() > 0);

@@ -27,6 +27,7 @@ public class RTDirectionalLight extends RTLight
     radius = (softShadows ? Math.tan(light.getRadius()*Math.PI/180.0) : 0.0);
   }
 
+  @Override
   public double findRayToLight(Vec3 origin, Ray ray, RaytracerRenderer renderer, int rayNumber)
   {
     ray.getOrigin().set(origin);

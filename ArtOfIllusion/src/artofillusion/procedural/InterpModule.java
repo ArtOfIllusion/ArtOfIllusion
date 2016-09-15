@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -22,13 +22,13 @@ public class InterpModule extends Module
   double value, error, fract, lastBlur;
   boolean valueOk, errorOk, gradOk;
   Vec3 gradient, tempVec;
-  
+
   public InterpModule(Point position)
   {
     super(Translate.text("menu.interpolateModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Value 1", "(0)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(1)"}), 
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Fraction", "(0)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Interpolate"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(1)"}),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Fraction", "(0)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Interpolate"})},
       position);
     gradient = new Vec3();
     tempVec = new Vec3();
@@ -36,13 +36,15 @@ public class InterpModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
   }
 
   /* Calculate the value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -52,7 +54,7 @@ public class InterpModule extends Module
     fract = (linkFrom[2] == null) ? 0.0 : linkFrom[2].getAverageValue(linkFromIndex[2], blur);
     double fractError = (linkFrom[2] == null) ? 0.0 : linkFrom[2].getValueError(linkFromIndex[2], blur);
     double min = fract-fractError, max = fract+fractError;
-    
+
     if (max <= 0.0)
       fract = 0.0;
     else if (min >= 1.0)
@@ -77,7 +79,8 @@ public class InterpModule extends Module
   }
 
   /* Calculate the error. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (errorOk && blur == lastBlur)
@@ -94,6 +97,7 @@ public class InterpModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)

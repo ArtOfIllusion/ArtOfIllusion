@@ -6,8 +6,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -17,37 +17,42 @@ import java.io.*;
 public class BooleanKeyframe implements Keyframe
 {
   public boolean val;
-  
+
   public BooleanKeyframe(boolean b)
   {
     val = b;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     return new BooleanKeyframe(val);
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new BooleanKeyframe(val);
   }
-  
+
   /* Get the list of graphable values for this keyframe. */
-  
+
+  @Override
   public double [] getGraphValues()
   {
     return new double [] {val ? 1.0 : 0.0};
   }
-  
+
   /* Set the list of graphable values for this keyframe. */
-  
+
+  @Override
   public void setGraphValues(double values[])
   {
     if (values.length == 1)
       val = (values[0] > 0.5);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     if (weight1 < 1e-10)
@@ -55,11 +60,13 @@ public class BooleanKeyframe implements Keyframe
     return new BooleanKeyframe(val);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     return new BooleanKeyframe(((BooleanKeyframe) o2).val);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     if (weight2 < 1e-10)
@@ -68,7 +75,8 @@ public class BooleanKeyframe implements Keyframe
   }
 
   /* Determine whether this keyframe is identical to another one. */
-  
+
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof BooleanKeyframe))
@@ -76,9 +84,10 @@ public class BooleanKeyframe implements Keyframe
     BooleanKeyframe key = (BooleanKeyframe) k;
     return (key.val == val);
   }
-  
+
   /* Write out a representation of this keyframe to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeBoolean(val);

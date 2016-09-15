@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -27,7 +27,7 @@ public class ShatterDistortion extends Distortion
   public static final int X_AXIS = 0;
   public static final int Y_AXIS = 1;
   public static final int Z_AXIS = 2;
-  
+
   public ShatterDistortion(double time, double size, double speed, double randomness, double gravity, double spin, double disappear, int gravityAxis, Mat4 gravityDirTransform)
   {
     this.time = time;
@@ -42,7 +42,8 @@ public class ShatterDistortion extends Distortion
   }
 
   /** Determine whether this distortion is identical to another one. */
-  
+
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof ShatterDistortion))
@@ -58,9 +59,10 @@ public class ShatterDistortion extends Distortion
       return true;
     return (gravityDirTransform != null && gravityDirTransform.equals(s.gravityDirTransform));
   }
-  
+
   /** Create a duplicate of this object. */
-  
+
+  @Override
   public Distortion duplicate()
   {
     ShatterDistortion d = new ShatterDistortion(time, size, speed, randomness, gravity, spin, disappear, gravityAxis, gravityDirTransform);
@@ -68,9 +70,10 @@ public class ShatterDistortion extends Distortion
       d.previous = previous.duplicate();
     return d;
   }
-  
+
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)
@@ -85,7 +88,7 @@ public class ShatterDistortion extends Distortion
     int seed[] = null;
 
     // Determine which faces are actually visible.
-    
+
     if (disappear > 0.0)
       {
         boolean visible[] = new boolean [face.length];
@@ -117,9 +120,9 @@ public class ShatterDistortion extends Distortion
       }
     TriangleMesh.Vertex newvert[] = new TriangleMesh.Vertex [face.length*3];
     int newface[][] = new int [face.length][];
-    
+
     // Find the effect of gravity.
-    
+
     if (gravityAxis == X_AXIS)
       gravityDisp = new Vec3(-0.5*gravity*time*time, 0.0, 0.0);
     else if (gravityAxis == Y_AXIS)
@@ -128,9 +131,9 @@ public class ShatterDistortion extends Distortion
       gravityDisp = new Vec3(0.0, 0.0, -0.5*gravity*time*time);
     if (gravityDirTransform != null)
       gravityDirTransform.transformDirection(gravityDisp);
-    
+
     // Loop through the faces of the subdivided mesh.
-    
+
     double third = 1.0/3.0;
     for (int i = 0; i < face.length; i++)
       {

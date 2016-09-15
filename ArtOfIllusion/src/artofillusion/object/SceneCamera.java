@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -29,7 +29,7 @@ public class SceneCamera extends Object3D
   private boolean perspective;
   private ImageFilter filter[];
   private int extraComponents;
-  
+
   private static BoundingBox bounds;
   private static WireframeMesh mesh;
   private static final int SEGMENTS = 8;
@@ -45,7 +45,7 @@ public class SceneCamera extends Object3D
     double sine[], cosine[];
     int i, t[], f[], to[], from[], index = 0;
     Vec3 vert[];
-    
+
     bounds = new BoundingBox(-0.25, 0.25, -0.15, 0.20, -0.2, 0.2);
     sine = new double [SEGMENTS];
     cosine = new double [SEGMENTS];
@@ -57,9 +57,9 @@ public class SceneCamera extends Object3D
     vert = new Vec3[24+2*SEGMENTS];
     from = new int [34+3*SEGMENTS];
     to = new int [34+3*SEGMENTS];
-    
+
     // Create the body.
-    
+
     vert[0] = new Vec3(-0.25, -0.15, -0.2);
     vert[1] = new Vec3(0.25, -0.15, -0.2);
     vert[2] = new Vec3(0.25, 0.15, -0.2);
@@ -75,9 +75,9 @@ public class SceneCamera extends Object3D
       from[index] = f[i];
       to[index] = t[i];
     }
-    
+
     // Create the shutter.
-    
+
     vert[8] = new Vec3(-0.25, 0.15, -0.15);
     vert[9] = new Vec3(-0.2, 0.15, -0.15);
     vert[10] = new Vec3(-0.2, 0.2, -0.15);
@@ -91,7 +91,7 @@ public class SceneCamera extends Object3D
       from[index] = f[i]+8;
       to[index] = t[i]+8;
     }
-    
+
     // Create the viewfinder.
 
     vert[16] = new Vec3(-0.2, 0.15, 0.0);
@@ -109,9 +109,9 @@ public class SceneCamera extends Object3D
       from[index] = f[i];
       to[index] = t[i];
     }
-    
+
     // Create the lens.
-    
+
     for (i = 0; i < SEGMENTS; i++, index++)
     {
       vert[24+i] = new Vec3(0.1*cosine[i], 0.1*sine[i], 0.0);
@@ -122,10 +122,10 @@ public class SceneCamera extends Object3D
       to[index+SEGMENTS] = 24+i+SEGMENTS;
       from[index+2*SEGMENTS] = 24+i+SEGMENTS;
       to[index+2*SEGMENTS] = 24+(i+1)%SEGMENTS+SEGMENTS;
-    }    
+    }
     mesh = new WireframeMesh(vert, from, to);
   }
-  
+
   public SceneCamera()
   {
     fov = 30.0;
@@ -134,7 +134,7 @@ public class SceneCamera extends Object3D
     perspective = true;
     filter = new ImageFilter [0];
   }
-  
+
   public double getFieldOfView()
   {
     return fov;
@@ -176,7 +176,7 @@ public class SceneCamera extends Object3D
   }
 
   /** Get the list of ImageFilters for this camera. */
-  
+
   public ImageFilter [] getImageFilters()
   {
     ImageFilter filt[] = new ImageFilter [filter.length];
@@ -186,7 +186,7 @@ public class SceneCamera extends Object3D
   }
 
   /** Set the list of ImageFilters for this camera. */
-  
+
   public void setImageFilters(ImageFilter filters[])
   {
     filter = filters;
@@ -219,7 +219,7 @@ public class SceneCamera extends Object3D
    * all those required by this camera's filters, as well as ones specified by
    * setExtraRequiredComponents().  This is a sum of the constants defined in ComplexImage.
    */
-  
+
   public int getComponentsForFilters()
   {
     int components = extraComponents;
@@ -227,13 +227,13 @@ public class SceneCamera extends Object3D
       components |= filter[i].getDesiredComponents();
     return components;
   }
-  
+
   /** Apply all of this camera's filters to an image.
       @param image      the image to filter
       @param scene      the Scene which was rendered to create the image
       @param coords     the position of this camera in the scene
   */
-  
+
   public void applyImageFilters(ComplexImage image, Scene scene, CoordinateSystem coords)
   {
     for (int i = 0; i < filter.length; i++)
@@ -314,10 +314,11 @@ public class SceneCamera extends Object3D
     }
   }
 
+  @Override
   public SceneCamera duplicate()
   {
     SceneCamera sc = new SceneCamera();
-    
+
     sc.fov = fov;
     sc.depthOfField = depthOfField;
     sc.focalDist = focalDist;
@@ -327,7 +328,8 @@ public class SceneCamera extends Object3D
       sc.filter[i] = filter[i].duplicate();
     return sc;
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     SceneCamera sc = (SceneCamera) obj;
@@ -341,6 +343,7 @@ public class SceneCamera extends Object3D
       filter[i] = sc.filter[i].duplicate();
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -348,27 +351,30 @@ public class SceneCamera extends Object3D
 
   /* A SceneCamera has no size, so calls to setSize() are ignored. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
-  
+
   /** Create a Camera object representing the view through this SceneCamera.
       @param width     the width of the image viewed through the Camera
       @param height    the height of the image viewed through the Camera
       @param coords    the CoordinateSystem of this SceneCamera
       @return an appropriately configured Camera
   */
-  
+
   public Camera createCamera(int width, int height, CoordinateSystem coords)
   {
     Camera cam = new Camera();
@@ -376,7 +382,7 @@ public class SceneCamera extends Object3D
     cam.setScreenTransform(getScreenTransform(width, height), width, height);
     return cam;
   }
-  
+
   /** This is a utility method which synchronously renders an image of the scene
       from the viewpoint of this camera. */
 
@@ -385,17 +391,21 @@ public class SceneCamera extends Object3D
     Camera cam = createCamera(width, height, cameraPos);
     final ComplexImage theImage[] = new ComplexImage [1];
     RenderListener rl = new RenderListener() {
+      @Override
       public void imageUpdated(Image image)
       {
       }
+      @Override
       public void statusChanged(String status)
       {
       }
+      @Override
       public synchronized void imageComplete(ComplexImage image)
       {
         theImage[0] = image;
         notify();
       }
+      @Override
       public void renderingCanceled()
       {
         notify();
@@ -418,11 +428,13 @@ public class SceneCamera extends Object3D
     return theImage[0];
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
 
+  @Override
   public void edit(final EditingWindow parent, final ObjectInfo info, Runnable cb)
   {
     final ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
@@ -450,22 +462,22 @@ public class SceneCamera extends Object3D
       focalDist = fdField.getValue();
       perspective = perspectiveBox.getState();
     }
-    
+
     // If there are any Pose tracks for this object, they need to have their subtracks updated
     // to reflect the current list of filters.
-    
+
     Scene sc = parent.getScene();
     for (int i = 0; i < sc.getNumObjects(); i++)
       if (sc.getObject(i).getObject() == this)
       {
         // This ObjectInfo corresponds to this SceneCamera.  Check each of its tracks.
-        
+
         ObjectInfo obj = sc.getObject(i);
         for (int j = 0; j < obj.getTracks().length; j++)
           if (obj.getTracks()[j] instanceof PoseTrack)
           {
             // This is a Pose track, so update its subtracks.
-            
+
             PoseTrack pose = (PoseTrack) obj.getTracks()[j];
             Track old[] = pose.getSubtracks();
             Track newtracks[] = new Track [filter.length];
@@ -527,6 +539,7 @@ public class SceneCamera extends Object3D
     }
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -544,11 +557,13 @@ public class SceneCamera extends Object3D
     }
   }
 
+  @Override
   public Property[] getProperties()
   {
     return PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -565,6 +580,7 @@ public class SceneCamera extends Object3D
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -578,30 +594,33 @@ public class SceneCamera extends Object3D
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new CameraKeyframe(fov, depthOfField, focalDist);
   }
-  
+
   /* Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     CameraKeyframe key = (CameraKeyframe) k;
-    
+
     fov = key.fov;
     depthOfField = key.depthOfField;
     focalDist = key.focalDist;
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Field of View", "Depth of Field", "Focal Distance"},
-        new double [] {fov, depthOfField, focalDist}, 
+        new double [] {fov, depthOfField, focalDist},
         new double [][] {{0.0, 180.0}, {0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}});
     FilterParameterTrack subtrack[] = new FilterParameterTrack [filter.length];
     for (int i = 0; i < subtrack.length; i++)
@@ -610,7 +629,8 @@ public class SceneCamera extends Object3D
   }
 
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     CameraKeyframe key = (CameraKeyframe) k;
@@ -628,41 +648,45 @@ public class SceneCamera extends Object3D
   }
 
   /* Inner class representing a pose for a cylinder. */
-  
+
   public static class CameraKeyframe implements Keyframe
   {
     public double fov, depthOfField, focalDist;
-    
+
     public CameraKeyframe(double fov, double depthOfField, double focalDist)
     {
       this.fov = fov;
       this.depthOfField = depthOfField;
       this.focalDist = focalDist;
     }
-    
+
     /* Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return new CameraKeyframe(fov, depthOfField, focalDist);
     }
-    
+
     /* Create a duplicate of this keyframe for a (possibly different) object. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return new CameraKeyframe(fov, depthOfField, focalDist);
     }
-  
+
     /* Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {fov, depthOfField, focalDist};
     }
-  
+
     /* Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
       fov = values[0];
@@ -672,35 +696,39 @@ public class SceneCamera extends Object3D
 
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       CameraKeyframe k2 = (CameraKeyframe) o2;
 
-      return new CameraKeyframe(weight1*fov+weight2*k2.fov, weight1*depthOfField+weight2*k2.depthOfField, 
+      return new CameraKeyframe(weight1*fov+weight2*k2.fov, weight1*depthOfField+weight2*k2.depthOfField,
         weight1*focalDist+weight2*k2.focalDist);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       CameraKeyframe k2 = (CameraKeyframe) o2, k3 = (CameraKeyframe) o3;
 
-      return new CameraKeyframe(weight1*fov+weight2*k2.fov+weight3*k3.fov, 
-        weight1*depthOfField+weight2*k2.depthOfField+weight3*k3.depthOfField, 
+      return new CameraKeyframe(weight1*fov+weight2*k2.fov+weight3*k3.fov,
+        weight1*depthOfField+weight2*k2.depthOfField+weight3*k3.depthOfField,
         weight1*focalDist+weight2*k2.focalDist+weight3*k3.focalDist);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       CameraKeyframe k2 = (CameraKeyframe) o2, k3 = (CameraKeyframe) o3, k4 = (CameraKeyframe) o4;
 
-      return new CameraKeyframe(weight1*fov+weight2*k2.fov+weight3*k3.fov+weight4*k4.fov, 
-        weight1*depthOfField+weight2*k2.depthOfField+weight3*k3.depthOfField+weight4*k4.depthOfField, 
+      return new CameraKeyframe(weight1*fov+weight2*k2.fov+weight3*k3.fov+weight4*k4.fov,
+        weight1*depthOfField+weight2*k2.depthOfField+weight3*k3.depthOfField+weight4*k4.depthOfField,
         weight1*focalDist+weight2*k2.focalDist+weight3*k3.focalDist+weight4*k4.focalDist);
     }
 
     /* Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CameraKeyframe))
@@ -708,9 +736,10 @@ public class SceneCamera extends Object3D
       CameraKeyframe key = (CameraKeyframe) k;
       return (key.fov == fov && key.depthOfField == depthOfField && key.focalDist == focalDist);
     }
-  
+
     /* Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeDouble(fov);

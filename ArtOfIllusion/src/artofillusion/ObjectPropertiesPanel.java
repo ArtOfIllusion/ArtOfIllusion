@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -71,14 +71,17 @@ public class ObjectPropertiesPanel extends ColumnContainer
     materialChoice.addEventLink(ValueChangedEvent.class, this, "materialChanged");
     ListChangeListener listener = new ListChangeListener()
     {
+      @Override
       public void itemAdded(int index, Object obj)
       {
         rebuildContents();
       }
+      @Override
       public void itemRemoved(int index, Object obj)
       {
         rebuildContents();
       }
+      @Override
       public void itemChanged(int index, Object obj)
       {
         rebuildContents();
@@ -558,6 +561,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
   private void parameterChanged(final ValueChangedEvent ev)
   {
     Runnable r = new Runnable() {
+      @Override
       public void run()
       {
         processParameterChange(ev);
@@ -608,6 +612,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
    * Always use a reasonable size, regardless of the current selection.
    */
 
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension pref = super.getPreferredSize();
@@ -618,6 +623,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
    * Allow the panel to be completely hidden.
    */
 
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension();

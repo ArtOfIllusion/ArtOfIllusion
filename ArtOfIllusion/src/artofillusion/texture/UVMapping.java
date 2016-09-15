@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -67,6 +67,7 @@ public class UVMapping extends Mapping2D
 
   /** Create a UV mapped triangle. */
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     return new UVMappedTriangle(v1, v2, v3, n1, n2, n3);
@@ -74,7 +75,8 @@ public class UVMapping extends Mapping2D
 
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
-  
+
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     UVMappedTriangle uv = (UVMappedTriangle) tri;
@@ -83,10 +85,11 @@ public class UVMapping extends Mapping2D
         (float) p3[numTextureParams], (float) p3[numTextureParams+1],
         mesh.vert[uv.v1], mesh.vert[uv.v2], mesh.vert[uv.v3]);
   }
-  
+
   /** This method should not generally be called.  The mapping is undefined without knowing
       the texture coordinates for a particular triangle. */
 
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -111,6 +114,7 @@ public class UVMapping extends Mapping2D
   /** This method should not generally be called.  The mapping is undefined without knowing
       the texture coordinates for a particular triangle. */
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -122,6 +126,7 @@ public class UVMapping extends Mapping2D
   /** This method should not generally be called.  The mapping is undefined without knowing
       the texture coordinates for a particular triangle. */
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double time, double param[])
   {
     return texture.getDisplacement(pos.x, pos.y, size, size, time, param);
@@ -129,7 +134,8 @@ public class UVMapping extends Mapping2D
 
   /** Given a Mesh to which this mapping has been applied, return the texture coordinates at
       each vertex. */
-  
+
+  @Override
   public Vec2 [] findTextureCoordinates(Mesh mesh)
   {
     TextureParameter param[] = mesh.getParameters();
@@ -170,7 +176,7 @@ public class UVMapping extends Mapping2D
   /** Given a FacetedMesh to which this mapping has been applied, return the texture coordinates at
       each vertex of each face.  The return value is an array of size [# faces][# vertices/face]
       containing the face-vertex texture coordinates. */
-  
+
   public Vec2 [][] findFaceTextureCoordinates(FacetedMesh mesh)
   {
     int faces = mesh.getFaceCount();
@@ -198,7 +204,7 @@ public class UVMapping extends Mapping2D
    * Given an object to which this mapping has been applied and the desired texture coordinates
    * at each vertex, set the texture parameters accordingly.
    */
-  
+
   public void setTextureCoordinates(Object3D obj, Vec2 uv[])
   {
     setTextureCoordinates(obj, uv, uparam, vparam);
@@ -231,7 +237,7 @@ public class UVMapping extends Mapping2D
    * at each vertex, set the texture parameters accordingly.  uv is an array of size [# faces][# vertices/face]
    * containing the face-vertex texture coordinates.
    */
-  
+
   public void setFaceTextureCoordinates(Object3D obj, Vec2 uv[][])
   {
     setFaceTextureCoordinates(obj, uv, uparam, vparam);
@@ -271,7 +277,7 @@ public class UVMapping extends Mapping2D
 
   /** Given a faceted mesh to which this mapping has been applied, determined whether the mapping
       is per-face-vertex. */
-  
+
   public boolean isPerFaceVertex(FacetedMesh mesh)
   {
     TextureParameter param[] = mesh.getParameters();
@@ -281,25 +287,28 @@ public class UVMapping extends Mapping2D
     return false;
   }
 
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(object, texture);
   }
 
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     UVMapping map = new UVMapping(obj, tex);
-    
+
     map.numTextureParams = numTextureParams;
     map.uparam = uparam;
     map.vparam = vparam;
     return map;
   }
-  
+
+  @Override
   public void copy(TextureMapping mapping)
   {
-    UVMapping map = (UVMapping) mapping; 
-    
+    UVMapping map = (UVMapping) mapping;
+
     numTextureParams = map.numTextureParams;
     uparam = map.uparam;
     vparam = map.vparam;
@@ -307,7 +316,8 @@ public class UVMapping extends Mapping2D
 
   /* Get the list of texture parameters associated with this mapping and its texture.
      That includes the texture's parameters, and parameters for the texture coordinates. */
-  
+
+  @Override
   public TextureParameter [] getParameters()
   {
     TextureParameter tp[] = getTexture().getParameters();
@@ -326,11 +336,12 @@ public class UVMapping extends Mapping2D
     return p;
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
   }
-  
+
   public UVMapping(DataInputStream in, Object3D theObject, Texture theTexture) throws IOException, InvalidObjectException
   {
     super(theObject, theTexture);
@@ -340,13 +351,14 @@ public class UVMapping extends Mapping2D
       throw new InvalidObjectException("");
     setAppliesTo(in.readShort());
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(0);
     out.writeShort(appliesTo());
   }
-  
+
   /* Editor is an inner class for editing the mapping. */
 
   class Editor extends FormContainer
@@ -360,9 +372,9 @@ public class UVMapping extends Mapping2D
       super(1, 2);
       theObject = obj;
       this.preview = preview;
-      
+
       // Add the various components to the Panel.
-      
+
       add(Translate.button("editUVCoords", this, "doEdit"), 0, 0);
       RowContainer applyRow = new RowContainer();
       applyRow.add(new BLabel(Translate.text("applyTo")+":"));

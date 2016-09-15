@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -27,7 +27,7 @@ public class ValueSlider extends WidgetContainer
   double value, min, max;
   int increments;
   boolean forceInt;
-  
+
   public ValueSlider(double min, double max, int increments, double value)
   {
     component = new JPanel(null);
@@ -45,7 +45,7 @@ public class ValueSlider extends WidgetContainer
     ((JPanel) component).add(slider.getComponent());
     setAsParent(field);
     setAsParent(slider);
-  } 
+  }
 
   public void setForceInteger(boolean force)
   {
@@ -66,11 +66,11 @@ public class ValueSlider extends WidgetContainer
     field.getComponent().setForeground(Color.black);
     dispatchEvent(new ValueChangedEvent(this, ev.isInProgress()));
   }
-  
+
   public void textChanged(ValueChangedEvent ev)
   {
     double val;
-    
+
     try
     {
       val = new Double(field.getText()).doubleValue();
@@ -93,12 +93,12 @@ public class ValueSlider extends WidgetContainer
       dispatchEvent(new ValueChangedEvent(this, ev.isInProgress()));
     }
   }
-  
+
   public double getValue()
   {
     return value;
   }
-  
+
   public void setValue(double val)
   {
     value = val;
@@ -135,7 +135,7 @@ public class ValueSlider extends WidgetContainer
   }
 
   /** Set the contents of the text field based on the value. */
-  
+
   private void setText()
   {
     String text;
@@ -146,7 +146,7 @@ public class ValueSlider extends WidgetContainer
     else
     {
       // Make sure at least three significant digits are visible.
-      
+
       int digits = (int) Math.floor(Math.log(Math.abs(value))/Math.log(10.0));
       double scale = Math.pow(10.0, digits < 0 ? 2-digits : 3);
       text = Double.toString(Math.round(value*scale)/scale);
@@ -155,17 +155,19 @@ public class ValueSlider extends WidgetContainer
       field.setText(text);
   }
 
+  @Override
   public void setEnabled(boolean enabled)
   {
     field.setEnabled(enabled);
     slider.setEnabled(enabled && !Double.isNaN(value));
     super.setEnabled(enabled);
   }
-    
+
   /**
    * Get the number of children in this container.
    */
-  
+
+  @Override
   public int getChildCount()
   {
     return 2;
@@ -174,7 +176,8 @@ public class ValueSlider extends WidgetContainer
   /**
    * Get an Iterator listing all child Widgets.
    */
-  
+
+  @Override
   public Collection getChildren()
   {
     ArrayList children = new ArrayList(2);
@@ -182,14 +185,15 @@ public class ValueSlider extends WidgetContainer
     children.add(slider);
     return children;
   }
-  
+
   /**
    * Layout the child Widgets.  This may be invoked whenever something has changed (the size of this
    * WidgetContainer, the preferred size of one of its children, etc.) that causes the layout to no
    * longer be correct.  If a child is itself a WidgetContainer, its layoutChildren() method will be
    * called in turn.
    */
-  
+
+  @Override
   public void layoutChildren()
   {
     Dimension size = component.getSize();
@@ -199,28 +203,31 @@ public class ValueSlider extends WidgetContainer
     int scrollx = textPref.width+5;
     slider.getComponent().setBounds(new Rectangle(scrollx, (size.height-scrollPref.height)/2, size.width-scrollx, scrollPref.height));
   }
-  
+
   /**
    * Do not allow children to be removed.
    */
-  
+
+  @Override
   public synchronized void remove(Widget widget)
   {
   }
-  
+
   /**
    * Do not allow children to be removed.
    */
-  
+
+  @Override
   public synchronized void removeAll()
   {
   }
-  
+
   /**
    * Get the smallest size at which this Widget can reasonably be drawn.  When a WidgetContainer lays out
    * its contents, it will attempt never to make this Widget smaller than its minimum size.
    */
-  
+
+  @Override
   public Dimension getMinimumSize()
   {
     Dimension dim1 = field.getMinimumSize();
@@ -232,7 +239,8 @@ public class ValueSlider extends WidgetContainer
    * Get the preferred size at which this Widget will look best.  When a WidgetContainer lays out
    * its contents, it will attempt to make this Widget as close as possible to its preferred size.
    */
-  
+
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension dim1 = field.getPreferredSize();

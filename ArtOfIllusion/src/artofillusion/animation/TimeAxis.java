@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -29,14 +29,14 @@ public class TimeAxis extends CustomWidget
   Marker draggingMarker;
   Point clickPos;
   ActionProcessor process;
-  
+
   static final int TICK_HEIGHT = 7;
   static final int MARKER_SIZE = 5;
   private static final NumberFormat nf = NumberFormat.getNumberInstance();
-  
-  /* The arguments to the constructor are the number of ticks to show within a unit 
+
+  /* The arguments to the constructor are the number of ticks to show within a unit
      interval, and the number of pixels in a unit interval. */
-  
+
   public TimeAxis(int subdivisions, double scale, Score sc)
   {
     this.subdivisions = subdivisions;
@@ -50,49 +50,50 @@ public class TimeAxis extends CustomWidget
     addEventLink(MouseDraggedEvent.class, this, "mouseDragged");
     addEventLink(RepaintEvent.class, this, "paint");
   }
-  
+
   /** Get the starting time to display. */
-  
+
   public double getStartTime()
   {
     return start;
   }
-  
+
   /** Set the starting time to display. */
-  
+
   public void setStartTime(double time)
   {
     start = time;
   }
-  
+
   /** Get the number of pixels per unit time. */
-  
+
   public double getScale()
   {
     return scale;
   }
-  
+
   /** Set the number of pixels per unit time. */
-  
+
   public void setScale(double s)
   {
     scale = s;
   }
-  
+
   /** Set the number of subdivisions per unit time. */
-  
+
   public void setSubdivisions(int s)
   {
     subdivisions = s;
   }
-  
+
   /** Add a marker to the axis. */
-  
+
   public void addMarker(Marker m)
   {
     markers.addElement(m);
   }
-  
+
+  @Override
   public Dimension getPreferredSize()
   {
     Font f = getFont();
@@ -101,7 +102,7 @@ public class TimeAxis extends CustomWidget
     FontMetrics fm = getComponent().getFontMetrics(f);
     return new Dimension(1, fm.getMaxAscent()+fm.getMaxDescent()+TICK_HEIGHT);
   }
-  
+
   private void paint(RepaintEvent ev)
   {
     Graphics2D g = ev.getGraphics();
@@ -119,9 +120,9 @@ public class TimeAxis extends CustomWidget
         inc = ((double) i)/subdivisions;
     }
     inc = ((double) i)/subdivisions;
-    
+
     // Figure out which ticks to put labels on.
-    
+
     int numLabels = subdivisions/i;
     if (numLabels == 0)
       numLabels = 1;
@@ -133,7 +134,7 @@ public class TimeAxis extends CustomWidget
         labelInterval++;
     for (int j = 0; j< label.length; j += labelInterval)
       label[j] = true;
-    
+
     // Draw the axis.
 
     double t = Math.ceil(start/inc)*inc;
@@ -158,9 +159,9 @@ public class TimeAxis extends CustomWidget
       i = (i+1)%label.length;
       x = (int) Math.round((t-start)*scale);
     }
-    
+
     // Draw any markers.
-    
+
     for (i = 0; i < markers.size(); i++)
     {
       Marker m = (Marker) markers.elementAt(i);
@@ -169,7 +170,7 @@ public class TimeAxis extends CustomWidget
       g.fillRect(x-MARKER_SIZE/2, tickPos+2, MARKER_SIZE, TICK_HEIGHT-2);
     }
   }
-  
+
   private void mousePressed(MousePressedEvent ev)
   {
     clickPos = ev.getPoint();
@@ -187,25 +188,26 @@ public class TimeAxis extends CustomWidget
     if (draggingMarker == null && markers.size() > 0)
       {
         // Snap the default marker to the click position.
-        
+
 	draggingMarker = (Marker) markers.elementAt(0);
         origMarkerPos = clickPos.x/scale+start;
         mouseDragged(ev);
       }
   }
-  
+
   private void mouseDragged(WidgetMouseEvent ev)
   {
     final Point pos = ev.getPoint();
-    
+
     if (draggingMarker == null)
       return;
-    
-    // Find the new position for the marker that is being dragged.  Since this can 
-    // be a somewhat CPU intensive operation, we perform it on a separate thread 
+
+    // Find the new position for the marker that is being dragged.  Since this can
+    // be a somewhat CPU intensive operation, we perform it on a separate thread
     // to avoid blocking the AWT even thread.
 
     Runnable c = new Runnable() {
+      @Override
       public void run()
       {
 	if (pos.x < 0)

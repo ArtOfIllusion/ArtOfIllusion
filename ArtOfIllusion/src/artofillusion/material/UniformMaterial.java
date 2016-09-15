@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.material;
@@ -63,11 +63,13 @@ public class UniformMaterial extends Material
     return "Uniform";
   }
 
+  @Override
   public boolean isScattering()
   {
     return (density > 0.0 && scattering > 0.0);
   }
-  
+
+  @Override
   public boolean castsShadows()
   {
     return shadows;
@@ -83,20 +85,22 @@ public class UniformMaterial extends Material
       spec.eccentricity = eccentricity;
     }
   }
-  
+
   /* The only MaterialMapping which can be used for a UniformMaterial is a UniformMapping. */
-  
+
+  @Override
   public MaterialMapping getDefaultMapping(Object3D obj)
   {
     return new UniformMaterialMapping(obj, this);
   }
 
   /* Create a duplicate of the material. */
-  
+
+  @Override
   public Material duplicate()
   {
     UniformMaterial m = new UniformMaterial();
-    
+
     m.name = name;
     m.transparencyColor.copy(transparencyColor);
     m.matColor.copy(matColor);
@@ -110,9 +114,10 @@ public class UniformMaterial extends Material
     m.recalcColors();
     return m;
   }
-  
+
   /* Allow the user to interactively edit the material. */
-  
+
+  @Override
   public void edit(final BFrame fr, Scene sc)
   {
     final UniformMaterial newMaterial = (UniformMaterial) duplicate();
@@ -129,6 +134,7 @@ public class UniformMaterial extends Material
     final MaterialPreviewer preview = new MaterialPreviewer(null, newMaterial, 200, 160);
     final ActionProcessor process = new ActionProcessor();
     final Runnable renderCallback = new Runnable() {
+          @Override
       public void run()
       {
         preview.render();
@@ -204,15 +210,15 @@ public class UniformMaterial extends Material
     if (index > -1)
       sc.changeMaterial(index);
   }
-  
+
   /* The following two methods are used for reading and writing files.  The first is a
      constructor which reads the necessary data from an input stream.  The other writes
      the object's representation to an output stream. */
-  
+
   public UniformMaterial(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     name = in.readUTF();
@@ -229,7 +235,8 @@ public class UniformMaterial extends Material
     trueScat = new RGBColor(0.0f, 0.0f, 0.0f);
     recalcColors();
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);

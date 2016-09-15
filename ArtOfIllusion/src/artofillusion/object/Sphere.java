@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -56,28 +56,32 @@ public class Sphere extends Object3D
     bounds = new BoundingBox(-rx, rx, -ry, ry, -rz, rz);
   }
 
+  @Override
   public Object3D duplicate()
   {
     Sphere obj = new Sphere(rx, ry, rz);
     obj.copyTextureAndMaterial(this);
     return obj;
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     Sphere s = (Sphere) obj;
     Vec3 size = s.getBounds().getSize();
-    
+
     setSize(size.x, size.y, size.z);
     copyTextureAndMaterial(obj);
     cachedMesh = null;
   }
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     rx = xsize/2.0;
@@ -93,11 +97,12 @@ public class Sphere extends Object3D
     return new Vec3(rx, ry, rz);
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 vert[];
     int i, j, from[], to[], numvert, numedge;
-    
+
     if (cachedWire != null)
       return cachedWire;
     numvert = SEGMENTS*(SEGMENTS/2-1)+2;
@@ -133,7 +138,7 @@ public class Sphere extends Object3D
   {
     return APPROXIMATELY;
   }
-  
+
   @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
@@ -174,6 +179,7 @@ public class Sphere extends Object3D
     return mesh;
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     int k, m, size, index[][][];
@@ -242,7 +248,7 @@ public class Sphere extends Object3D
     int i, j, k, size = 2;
     Vec3 vert[][], newvert[][], v[];
     double max, error;
-    
+
     vert = new Vec3 [][] {{new Vec3(rx, 0.0, 0.0)}, {new Vec3(0.0, ry, 0.0), new Vec3(0.0, 0.0, rz)}};
     do
       {
@@ -288,7 +294,7 @@ public class Sphere extends Object3D
             size = 2*size-1;
           }
       } while (max > tol);
-      
+
     // Build the complete sphere by mirroring the octant.
 
     v = new Vec3 [4*size*size-8*size+6];
@@ -299,9 +305,9 @@ public class Sphere extends Object3D
           index[i][j] = new int [j+1];
       }
     k = 0;
-    
+
     // First copy all the vertices in the interior of the octant.
-    
+
     for (i = 1; i < size-1; i++)
       for (j = 1; j < i; j++)
         {
@@ -324,7 +330,7 @@ public class Sphere extends Object3D
         }
 
     // Copy the vertices on the border between two octants.
-    
+
     for (i = 1; i < size-1; i++)
       {
         v[k] = vert[i][0];
@@ -352,9 +358,9 @@ public class Sphere extends Object3D
         v[k] = new Vec3(-vert[i][i].x, vert[i][i].y, -vert[i][i].z);
         index[5][i][i] = index[6][i][i] = k++;
       }
-    
+
     // Finally, copy the vertices at the intersection of four octants.
-    
+
     v[k] = vert[0][0];
     index[0][0][0] = index[3][0][0] = index[4][0][0] = index[7][0][0] = k++;
     v[k] = new Vec3(-vert[0][0].x, vert[0][0].y, vert[0][0].z);
@@ -369,17 +375,17 @@ public class Sphere extends Object3D
     index[4][size-1][size-1] = index[5][size-1][size-1] = index[6][size-1][size-1] = index[7][size-1][size-1] = k++;
     return v;
   }
-  
+
   double faceError(Vec3 v1, Vec3 v2, Vec3 v3)
   {
     Vec3 n, v;
     double dist1, dist2, d;
-    
+
     // Find a unit vector midway between the other three.
 
     v = new Vec3(v1.x+v2.x+v3.x, v1.y+v2.y+v3.y, v1.z+v2.z+v3.z);
     v.normalize();
-    
+
     // Find the distance at which the vector intersects the ellipse.
 
     dist1 = Math.sqrt(1.0/((v.x*v.x)/(rx*rx)+(v.y*v.y)/(ry*ry)+(v.z*v.z)/(rz*rz)));
@@ -392,7 +398,7 @@ public class Sphere extends Object3D
     dist2 = d/(v.dot(n));
     return dist1-dist2;
   }
-  
+
   Vec3 newVertex(Vec3 v)
   {
     v.normalize();
@@ -411,14 +417,16 @@ public class Sphere extends Object3D
       }
     return n;
   }
-  
+
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
   /* Allow the user to edit the sphere's shape. */
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     ValueField xField = new ValueField(rx, ValueField.POSITIVE, 5);
@@ -449,6 +457,7 @@ public class Sphere extends Object3D
     bounds = new BoundingBox(-rx, rx, -ry, ry, -rz, rz);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -459,11 +468,13 @@ public class Sphere extends Object3D
     out.writeDouble(rz);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -478,6 +489,7 @@ public class Sphere extends Object3D
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     double val = ((Double) value).doubleValue();
@@ -490,33 +502,37 @@ public class Sphere extends Object3D
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new VectorKeyframe(rx, ry, rz);
   }
-  
+
   /* Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     VectorKeyframe key = (VectorKeyframe) k;
-    
+
     setSize(2.0*key.x, 2.0*key.y, 2.0*key.z);
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Radius", "Y Radius", "Z Radius"},
-        new double [] {rx, ry, rz}, 
+        new double [] {rx, ry, rz},
         new double [][] {{0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}});
   }
-  
+
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     VectorKeyframe key = (VectorKeyframe) k;
@@ -524,7 +540,7 @@ public class Sphere extends Object3D
     ValueField yField = new ValueField(key.y, ValueField.POSITIVE, 5);
     ValueField zField = new ValueField(key.z, ValueField.POSITIVE, 5);
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editSphereTitle"),
-      new Widget [] {xField, yField, zField}, new String [] {"X", "Y", "Z"});    
+      new Widget [] {xField, yField, zField}, new String [] {"X", "Y", "Z"});
     if (!dlg.clickedOk())
       return;
     key.set(xField.getValue(), yField.getValue(), zField.getValue());

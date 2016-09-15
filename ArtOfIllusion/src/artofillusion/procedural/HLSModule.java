@@ -4,8 +4,8 @@ This program is free software; you can redistribute it and/or modify it under th
 terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -13,7 +13,7 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-/** This is a Module which takes three numbers, and uses them as the hue, saturation, and 
+/** This is a Module which takes three numbers, and uses them as the hue, saturation, and
  value components of a color. */
 
 public class HLSModule extends Module
@@ -21,26 +21,28 @@ public class HLSModule extends Module
   RGBColor color;
   boolean colorOk;
   double lastBlur;
-  
+
   public HLSModule(Point position)
   {
    super("HLS", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Hue", "(1)"}),
      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Lightness", "(1)"}),
-     new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Saturation", "(1)"})}, 
-     new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})}, 
+     new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Saturation", "(1)"})},
+     new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})},
      position);
    color = new RGBColor(0.0f, 0.0f, 0.0f);
   }
-  
+
   /** New point, so the color will need to be recalculated. */
-  
+
+  @Override
   public void init(PointInfo p)
   {
    colorOk = false;
   }
-  
+
   /** Calculate the color. */
-  
+
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
    if (colorOk && blur == lastBlur)

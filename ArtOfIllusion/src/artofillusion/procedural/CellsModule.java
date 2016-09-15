@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -31,15 +31,15 @@ public class CellsModule extends Module
   private PointInfo point;
   private Cells cells;
   private Random random;
-  
+
   public CellsModule(Point position)
   {
-    super(Translate.text("menu.cellsModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
+    super(Translate.text("menu.cellsModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
       new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Cell"}),
       new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Distance 1"}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Distance 2"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Distance 2"})},
       position);
     gradient = new Vec3 [] {new Vec3(), new Vec3()};
     gradient1 = new Vec3 [] {gradient[0]};
@@ -53,10 +53,10 @@ public class CellsModule extends Module
     cells = new Cells();
     random = new FastRandom(0);
   }
-  
+
   /** Get the metric to use for the cells function.  This is one of the constants defined in
       the Cells class. */
-  
+
   public int getMetric()
   {
     return cells.getMetric();
@@ -64,7 +64,7 @@ public class CellsModule extends Module
 
   /** Set the metric to use for the cells function.  This should be one of the constants defined in
       the Cells class. */
-  
+
   public void setMetric(int m)
   {
     cells.setMetric(m);
@@ -72,6 +72,7 @@ public class CellsModule extends Module
 
   /** New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     if (valueOk[0])
@@ -80,9 +81,9 @@ public class CellsModule extends Module
     valueOk[0] = valueOk[1] = valueOk[2] = gradOk[1] = gradOk[2] = false;
     used2ThisTime = false;
   }
-  
+
   /** Calculate the function. */
-  
+
   private void calcValues(int which, double blur)
   {
     double xsize = (linkFrom[0] == null) ? 0.5*point.xsize+blur : linkFrom[0].getValueError(linkFromIndex[0], blur);
@@ -91,11 +92,11 @@ public class CellsModule extends Module
 
     tempVec.x = (linkFrom[0] == null) ? point.x : linkFrom[0].getAverageValue(linkFromIndex[0], blur);
     tempVec.y = (linkFrom[1] == null) ? point.y : linkFrom[1].getAverageValue(linkFromIndex[1], blur);
-    tempVec.z = (linkFrom[2] == null) ? point.z : linkFrom[2].getAverageValue(linkFromIndex[2], blur);    
-    
+    tempVec.z = (linkFrom[2] == null) ? point.z : linkFrom[2].getAverageValue(linkFromIndex[2], blur);
+
     // It's faster to only calculate input 1.  If outputs 0 and 2 weren't
     // needed for the last point, guess that it won't be needed this time either.
-    
+
     if (which == 0 || which == 2 || used2LastTime)
       {
         cells.calcFunctions(tempVec, value, gradient, id);
@@ -118,9 +119,10 @@ public class CellsModule extends Module
     if (which == 0 || which == 2)
       used2ThisTime = true;
   }
-  
+
   /** Calculate the average value of an output. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (!valueOk[which] || blur != lastBlur)
@@ -136,9 +138,10 @@ public class CellsModule extends Module
     double weight = 0.5+0.5*diff/error;
     return weight*cell+(1.0-weight)*cell2;
   }
-  
+
   /** Calculate the error of an output. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk[which] || blur != lastBlur)
@@ -155,9 +158,10 @@ public class CellsModule extends Module
       }
     return error;
   }
-  
+
   /** Calculate the gradient of an output. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (which == 0)
@@ -215,9 +219,10 @@ public class CellsModule extends Module
     gradOk[which] = true;
     grad.set(g);
   }
-  
+
   /** Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final RadioButtonGroup metricGroup = new RadioButtonGroup();
@@ -252,6 +257,7 @@ public class CellsModule extends Module
 
   /** Create a duplicate of this module. */
 
+  @Override
   public Module duplicate()
   {
     CellsModule module = new CellsModule(new Point(bounds.x, bounds.y));
@@ -261,13 +267,15 @@ public class CellsModule extends Module
 
   /** Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(cells.getMetric());
   }
-  
+
   /** Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     cells.setMetric(in.readInt());

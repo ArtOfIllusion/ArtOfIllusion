@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -16,7 +16,7 @@ import artofillusion.math.*;
 import artofillusion.texture.*;
 
 /** RTTriangle represents a triangle to be raytraced.  It is defined by specifying a
-    RenderingMesh, the index of the RenderingTriangle within the mesh, and a matrix which 
+    RenderingMesh, the index of the RenderingTriangle within the mesh, and a matrix which
     gives the transformation from the mesh's local coordinates to world coordinates.  To
     save time and memory, the constructor is also passed two arrays which contain the
     vertices and normals for the mesh, transformed into world coordinates. */
@@ -30,7 +30,7 @@ public class RTTriangle extends RTObject
   double d, edge2d1x, edge2d1y, edge2d2x, edge2d2y;
 
   public static final double TOL = 1e-12;
-  
+
   private static final short BUMP_MAPPED = 1;
   private static final short INTERP_NORMALS = 2;
 
@@ -104,21 +104,24 @@ public class RTTriangle extends RTObject
   }
 
   /** Get the TextureMapping for this object. */
-  
+
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return tri.getTextureMapping();
   }
 
   /** Get the MaterialMapping for this object. */
-  
+
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return tri.theMesh.matMapping;
-  }  
+  }
 
   /** Determine whether the given ray intersects this triangle. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     double vd, v0, vx, vy;
@@ -166,13 +169,14 @@ public class RTTriangle extends RTObject
   }
 
   /** Get a bounding box for this triangle. */
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     double minx, maxx, miny, maxy, minz, maxz;
     Vec3 vert2 = tri.theMesh.vert[tri.v2];
     Vec3 vert3 = tri.theMesh.vert[tri.v3];
-    
+
     minx = maxx = vert1.x;
     miny = maxy = vert1.y;
     minz = maxz = vert1.z;
@@ -205,13 +209,14 @@ public class RTTriangle extends RTObject
 
   /** Determine whether any part of the triangle lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     Vec3 vert2 = tri.theMesh.vert[tri.v2];
     Vec3 vert3 = tri.theMesh.vert[tri.v3];
 
     // First see if any vertex is inside the box.
-    
+
     if (node.contains(vert1) || node.contains(vert2) || node.contains(vert3))
       return true;
 
@@ -220,7 +225,7 @@ public class RTTriangle extends RTObject
     if (edgeIntersectsBox(vert1, vert2, node) || edgeIntersectsBox(vert2, vert3, node) || edgeIntersectsBox(vert3, vert1, node))
       return true;
 
-    // None of the vertices is inside the box.  However, it is possible that the 
+    // None of the vertices is inside the box.  However, it is possible that the
     // triangle cuts through the entire box.  Check each of the diagonals of
     // the box to see if one intersects the triangle.
 
@@ -258,9 +263,9 @@ public class RTTriangle extends RTObject
       return true;
     return false;
   }
-  
+
   /** Determine whether a particular edge of the triangle intersects a bounding box. */
-  
+
   boolean edgeIntersectsBox(Vec3 p1, Vec3 p2, OctreeNode node)
   {
     double t1, t2, mint = -Double.MAX_VALUE, maxt = Double.MAX_VALUE;
@@ -346,16 +351,18 @@ public class RTTriangle extends RTObject
       }
     return true;
   }
-  
+
   /** Get the transformation from world coordinates to the object's local coordinates. */
-  
+
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
   }
-  
+
   /** Get the mesh this triangle is part of. */
-  
+
+  @Override
   public Object getObject()
   {
     return tri.theMesh;
@@ -385,26 +392,31 @@ public class RTTriangle extends RTObject
       this.riz = riz;
     }
 
+    @Override
     public RTObject getObject()
     {
       return rtTri;
     }
 
+    @Override
     public int numIntersections()
     {
       return 1;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       p.set(rix, riy, riz);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       return dist;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       double w = 1.0-u-v;
@@ -431,11 +443,13 @@ public class RTTriangle extends RTObject
         }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       rtTri.tri.getTransparency(trans, angle, u, v, 1.0-u-v, size, time);
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       n.set(rtTri.trueNorm);

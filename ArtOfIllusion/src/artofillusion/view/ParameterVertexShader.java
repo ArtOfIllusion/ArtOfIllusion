@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.view;
@@ -87,6 +87,7 @@ public class ParameterVertexShader implements VertexShader
       @param color    the vertex color will be returned in this object
   */
 
+  @Override
   public void getColor(int face, int vertex, RGBColor color)
   {
     int norm;
@@ -128,6 +129,7 @@ public class ParameterVertexShader implements VertexShader
       @param face    the index of the triangle being rendered
   */
 
+  @Override
   public boolean isUniformFace(int face)
   {
     if (!(param instanceof ConstantParameterValue || param instanceof FaceParameterValue))
@@ -141,6 +143,7 @@ public class ParameterVertexShader implements VertexShader
       may still be colored differently due to lighting).
    */
 
+  @Override
   public boolean isUniformTexture()
   {
     return (param instanceof ConstantParameterValue);
@@ -151,6 +154,7 @@ public class ParameterVertexShader implements VertexShader
       @param spec     the surface color will be returned in this object
    */
 
+  @Override
   public void getTextureSpec(TextureSpec spec)
   {
     double value = param.getAverageValue();

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -22,7 +22,7 @@ import java.awt.image.*;
 
 public abstract class Texture2D extends Texture
 {
-  /** Get the surface properties at point in the texture.  The properties should be averaged over a region 
+  /** Get the surface properties at point in the texture.  The properties should be averaged over a region
       around the point.
       @param spec     the surface properties will be stored in this
       @param x        the x coordinate at which to evaluate the texture
@@ -42,12 +42,13 @@ public abstract class Texture2D extends Texture
   public abstract void getTransparency(RGBColor trans, double x, double y, double xsize, double ysize, double angle, double t, double param[]);
 
   /** For the default mapping, use a basic projection. */
-  
+
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return new ProjectionMapping(object, this);
   }
-  
+
   /** Textures which use displacement mapping should override this method to return the
       displacement at the given point. */
 
@@ -63,12 +64,12 @@ public abstract class Texture2D extends Texture
   {
     return !Double.isNaN(getDisplacement(0.0, 0.0, 0.0, 0.0, 0.0, null));
   }
-  
+
   /** Create an Image which represents a particular component of this texture.
       The arguments specify the region of the texture to represent (U and V ranges),
       the image size, the component to represent (one of the constants defined
       in the Texture class), and the time and texture parameters. */
-  
+
   public Image createComponentImage(final double minu, double maxu, double minv, final double maxv,
       final int width, final int height, final int component, final double time, final double param[])
   {
@@ -76,6 +77,7 @@ public abstract class Texture2D extends Texture
     final double uscale = (maxu-minu)/width;
     final double vscale = (maxv-minv)/height;
     final ThreadLocal textureSpec = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         return new TextureSpec();
@@ -83,6 +85,7 @@ public abstract class Texture2D extends Texture
     };
     ThreadManager threads = new ThreadManager(width, new ThreadManager.Task()
     {
+      @Override
       public void execute(int i)
       {
         TextureSpec spec = (TextureSpec) textureSpec.get();
@@ -112,6 +115,7 @@ public abstract class Texture2D extends Texture
           }
         }
       }
+      @Override
       public void cleanup()
       {
       }

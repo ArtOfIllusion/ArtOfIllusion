@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -64,7 +64,7 @@ public class Raytracer
   {
     private SurfaceIntersection first, second;
     private double distance;
-    
+
     public RayIntersection()
     {
     }
@@ -110,6 +110,7 @@ public class Raytracer
     objectList = Collections.synchronizedList(new ArrayList<RTObject>());
     lightList = Collections.synchronizedList(new ArrayList<RTLight>());
     threadContext = new ThreadLocal<RaytracerContext>() {
+      @Override
       protected RaytracerContext initialValue()
       {
         return new RaytracerContext(Raytracer.this);
@@ -488,7 +489,7 @@ public class Raytracer
     BoundingBox objBounds[] = new BoundingBox [sceneObject.length];
     double minx, maxx, miny, maxy, minz, maxz;
     int i;
-    
+
     // Find the bounding boxes for each object, and for the entire scene.
 
     minx = miny = minz = Double.MAX_VALUE;
@@ -515,7 +516,7 @@ public class Raytracer
     maxx += TOL;
     maxy += TOL;
     maxz += TOL;
-    
+
     // Create the octree.
 
     rootNode = new OctreeNode(Math.nextAfter((float) minx, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxx, Double.POSITIVE_INFINITY),
@@ -534,7 +535,7 @@ public class Raytracer
         lightNode[i] = rootNode.findNode(light[i].getCoords().getOrigin());
     }
   }
-  
+
   /**
    * Set fields to null.  This may be called when you are done with the Raytracer and will not use it any more.
    * This is not required, but may help the garbage collector to work more efficiently.
@@ -598,7 +599,7 @@ public class Raytracer
     double dist, firstDist = Double.MAX_VALUE, secondDist = Double.MAX_VALUE;
     Vec3 intersectionPoint = r.rt.tempVec;
     int i;
-    
+
     while (first == null)
     {
       obj = node.getObjects();

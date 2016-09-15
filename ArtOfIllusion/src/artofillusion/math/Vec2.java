@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
@@ -31,7 +31,7 @@ public class Vec2
     x = xval;
     y = yval;
   }
-  
+
   /** Create a new Vec2 identical to another one. */
 
   public Vec2(Vec2 v)
@@ -39,7 +39,7 @@ public class Vec2
     x = v.x;
     y = v.y;
   }
-  
+
   /** Set the x and y components of this Vec2. */
 
   public final void set(double xval, double yval)
@@ -47,14 +47,14 @@ public class Vec2
     x = xval;
     y = yval;
   }
-  
+
   /** Calculate the dot product of this vector with another one. */
 
   public final double dot(Vec2 v)
   {
     return x*v.x + y*v.y;
   }
-  
+
   /** Calculate the cross product of this vector with another one.  Because the cross product of a
       pair of Vec2's always points along the Z axis, this returns only its Z component. */
 
@@ -62,28 +62,28 @@ public class Vec2
   {
     return x*v.y-y*v.x;
   }
-  
+
   /** Calculate the sum of this vector and another one. */
 
   public final Vec2 plus(Vec2 v)
   {
     return new Vec2(x+v.x, y+v.y);
   }
-  
+
   /** Calculate the difference between this vector and another one. */
 
   public final Vec2 minus(Vec2 v)
   {
     return new Vec2(x-v.x, y-v.y);
   }
-  
+
   /** Create a new Vec2 by multiplying each component of this one by a constant. */
-  
+
   public final Vec2 times(double d)
   {
     return new Vec2(x*d, y*d);
   }
-  
+
   /** Determine whether two vectors are identical. */
 
   @Override
@@ -103,21 +103,21 @@ public class Vec2
   }
 
   /** Calculate the length of this vector. */
-  
+
   public final double length()
   {
     return Math.sqrt(x*x+y*y);
   }
-  
+
   /** Calculate the square of the length of this vector. */
 
   public final double length2()
   {
     return x*x+y*y;
   }
-  
+
   /** Add another Vec2 to this one. */
-  
+
   public final void add(Vec2 v)
   {
     x += v.x;
@@ -125,7 +125,7 @@ public class Vec2
   }
 
   /** Subtract another Vec2 from this one. */
-  
+
   public final void subtract(Vec2 v)
   {
     x -= v.x;
@@ -133,7 +133,7 @@ public class Vec2
   }
 
   /** Multiply each component of this vector by a constant. */
-  
+
   public final void scale(double d)
   {
     x *= d;
@@ -141,14 +141,14 @@ public class Vec2
   }
 
   /** Calculate the Euclidean distance between this vector and another one. */
-  
+
   public final double distance(Vec2 v)
   {
     return Math.sqrt((v.x-x)*(v.x-x)+(v.y-y)*(v.y-y));
   }
 
   /** Calculate the square of the Euclidean distance between this vector and another one. */
-  
+
   public final double distance2(Vec2 v)
   {
     return (v.x-x)*(v.x-x)+(v.y-y)*(v.y-y);
@@ -160,41 +160,42 @@ public class Vec2
   public final void normalize()
   {
     double len = Math.sqrt(x*x+y*y);
-    
+
     if (len > 0.0)
       {
         x /= len;
         y /= len;
       }
   }
-  
+
+  @Override
   public String toString()
   {
     return "Vec2: " + x + ", " + y;
   }
-  
+
   /** Create a unit vector which points in the X direction. */
-  
+
   public static Vec2 vx()
   {
     return new Vec2(1.0, 0.0);
   }
 
   /** Create a unit vector which points in the Y direction. */
-  
+
   public static Vec2 vy()
   {
     return new Vec2(0.0, 1.0);
   }
-  
+
   /** Create a Vec2 by reading in information that was written by writeToFile(). */
-  
+
   public Vec2(DataInputStream in) throws IOException
   {
     x = in.readDouble();
     y = in.readDouble();
   }
-  
+
   /** Write out a serialized representation of this object. */
 
   public void writeToFile(DataOutputStream out) throws IOException

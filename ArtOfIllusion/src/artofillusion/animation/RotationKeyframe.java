@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -32,12 +32,12 @@ public class RotationKeyframe implements Keyframe
   public RotationKeyframe(CoordinateSystem coords)
   {
     double angle[] = coords.getRotationAngles();
-    
+
     set(angle[0], angle[1], angle[2]);
   }
 
   /** Set the rotation angles. */
-  
+
   public void set(double xrot, double yrot, double zrot)
   {
     x = xrot;
@@ -45,16 +45,18 @@ public class RotationKeyframe implements Keyframe
     z = zrot;
     q = null;
   }
-  
+
   /** Get the list of graphable values for this keyframe. */
-  
+
+  @Override
   public double [] getGraphValues()
   {
     return new double [] {x, y, z};
   }
-  
+
   /** Set the list of graphable values for this keyframe. */
-  
+
+  @Override
   public void setGraphValues(double values[])
   {
     if (values.length == 3)
@@ -62,31 +64,31 @@ public class RotationKeyframe implements Keyframe
   }
 
   /** Get which method will be used for interpolating. */
-  
+
   public boolean getUseQuaternion()
   {
     return useQuaternion;
   }
 
   /** Set which method will be used for interpolating. */
-  
+
   public void setUseQuaternion(boolean use)
   {
     useQuaternion = use;
     q = null;
   }
-  
+
   /** Get the quaternion representation of this keyframe. */
-  
+
   public double [] getQuaternion()
   {
     makeQuaternion();
     return new double [] {q[0], q[1], q[2], q[3]};
   }
-  
+
   /** Apply this rotation to a coordinate system. */
 
-  public void applyToCoordinates(CoordinateSystem coords, double weight, Mat4 preTransform, 
+  public void applyToCoordinates(CoordinateSystem coords, double weight, Mat4 preTransform,
         Mat4 postTransform, boolean relative, boolean enablex, boolean enabley, boolean enablez)
   {
     if (preTransform != null)
@@ -157,7 +159,7 @@ public class RotationKeyframe implements Keyframe
   }
 
   /** Multiply two quaternions together. */
-  
+
   private double [] multiply(double q1[], double q2[])
   {
     double result[] = new double [4];
@@ -169,6 +171,7 @@ public class RotationKeyframe implements Keyframe
     return result;
   }
 
+  @Override
   public Keyframe duplicate()
   {
     RotationKeyframe f = new RotationKeyframe(x, y, z);
@@ -176,6 +179,7 @@ public class RotationKeyframe implements Keyframe
     return f;
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     RotationKeyframe f = new RotationKeyframe(x, y, z);
@@ -183,6 +187,7 @@ public class RotationKeyframe implements Keyframe
     return f;
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     RotationKeyframe v2 = (RotationKeyframe) o2;
@@ -197,10 +202,11 @@ public class RotationKeyframe implements Keyframe
     return r;
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     RotationKeyframe v2 = (RotationKeyframe) o2, v3 = (RotationKeyframe) o3;
-    RotationKeyframe r = new RotationKeyframe(weight1*x+weight2*v2.x+weight3*v3.x, 
+    RotationKeyframe r = new RotationKeyframe(weight1*x+weight2*v2.x+weight3*v3.x,
         weight1*y+weight2*v2.y+weight3*v3.y, weight1*z+weight2*v2.z+weight3*v3.z);
 
     if (!useQuaternion)
@@ -220,10 +226,11 @@ public class RotationKeyframe implements Keyframe
     return r;
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     RotationKeyframe v2 = (RotationKeyframe) o2, v3 = (RotationKeyframe) o3, v4 = (RotationKeyframe) o4;
-    RotationKeyframe r = new RotationKeyframe(weight1*x+weight2*v2.x+weight3*v3.x+weight4*v4.x, 
+    RotationKeyframe r = new RotationKeyframe(weight1*x+weight2*v2.x+weight3*v3.x+weight4*v4.x,
         weight1*y+weight2*v2.y+weight3*v3.y+weight4*v4.y,
         weight1*z+weight2*v2.z+weight3*v3.z+weight4*v4.z);
 
@@ -239,9 +246,9 @@ public class RotationKeyframe implements Keyframe
     r.useQuaternion = true;
     return r;
   }
-  
+
   /** This performs spherical linear interpolation (slerp) between two quaternions. */
-  
+
   private static final double [] slerp(double q1[], double q2[], double t)
   {
     double dot = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3], sign;
@@ -257,13 +264,14 @@ public class RotationKeyframe implements Keyframe
       return new double [] {q1[0], q1[1], q1[2], q1[3]};
     double denom = Math.sin(angle);
     double weight1 = Math.sin((1.0-t)*angle)/denom, weight2 = sign*Math.sin(t*angle)/denom;
-    
-    return new double [] {weight1*q1[0] + weight2*q2[0], weight1*q1[1] + weight2*q2[1], 
+
+    return new double [] {weight1*q1[0] + weight2*q2[0], weight1*q1[1] + weight2*q2[1],
         weight1*q1[2] + weight2*q2[2], weight1*q1[3] + weight2*q2[3]};
   }
 
   /** Determine whether this keyframe is identical to another one. */
-  
+
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof RotationKeyframe))
@@ -277,9 +285,10 @@ public class RotationKeyframe implements Keyframe
       }
     return (key.x == x && key.y == y && key.z == z);
   }
-  
+
   /** Write out a representation of this keyframe to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeDouble(x);

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -30,37 +30,43 @@ public class ReshapeMeshTool extends MeshEditingTool
     initButton("movePoints");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("reshapeMeshTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("reshapeMeshTool.tipText");
   }
 
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
     MeshVertex v[] = mesh.getVertices();
-    
+
     clickPoint = e.getPoint();
     clickPos = v[handle].r;
     baseVertPos = mesh.getVertexPositions();
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     MeshViewer mv = (MeshViewer) view;
@@ -92,6 +98,7 @@ public class ReshapeMeshTool extends MeshEditingTool
         Math.round(drag.x*1e5)/1e5+", "+Math.round(drag.y*1e5)/1e5+", "+Math.round(drag.z*1e5)/1e5));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -122,6 +129,7 @@ public class ReshapeMeshTool extends MeshEditingTool
     baseVertPos = null;
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -130,9 +138,9 @@ public class ReshapeMeshTool extends MeshEditingTool
     int key = e.getKeyCode();
     double dx, dy;
     Vec3 v[];
-    
+
     // Pressing an arrow key is equivalent to dragging the first selected point by one pixel.
- 
+
     if (key == KeyPressedEvent.VK_UP)
     {
       dx = 0;
@@ -178,13 +186,13 @@ public class ReshapeMeshTool extends MeshEditingTool
     controller.objectChanged();
     theWindow.updateImage();
   }
-  
+
   private Vec3 [] findDraggedPositions(Vec3 pos, Vec3 vert[], double dx, double dy, MeshViewer view, boolean controlDown, int selectDist[])
   {
     int maxDistance = view.getController().getTensionDistance();
     double tension = view.getController().getMeshTension();
     Vec3 drag[] = new Vec3 [maxDistance+1], v[] = new Vec3 [vert.length];
-    
+
     if (controlDown)
       drag[0] = view.getCamera().getCameraCoordinates().getZDirection().times(-dy*0.01);
     else

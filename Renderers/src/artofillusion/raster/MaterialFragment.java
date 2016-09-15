@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raster;
@@ -39,6 +39,7 @@ public class MaterialFragment extends TransparentFragment
    * Get the material.
    */
 
+  @Override
   public ObjectMaterialInfo getMaterialMapping()
   {
     return material;
@@ -48,11 +49,13 @@ public class MaterialFragment extends TransparentFragment
    * Get whether the object is being entered or exited.
    */
 
+  @Override
   public boolean isEntering()
   {
     return isEntering;
   }
 
+  @Override
   public Fragment insertNextFragment(Fragment fragment)
   {
     if (fragment.getDepth() == getDepth() && fragment.getMaterialMapping() == material && !isEntering && fragment.isEntering())

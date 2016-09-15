@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -26,104 +26,104 @@ public class JitterModule extends Module
   Vec3 v, tempVec;
   double xamp, yamp, zamp, xscale, yscale, zscale, invxscale, invyscale, invzscale, lastBlur;
   PointInfo point;
-  
+
   public JitterModule(Point position)
   {
-    super(Translate.text("menu.jitterModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
+    super(Translate.text("menu.jitterModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
       new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"X"}),
       new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Y"}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Z"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Z"})},
       position);
     xamp = yamp = zamp = 0.1;
     xscale = yscale = zscale = invxscale = invyscale = invzscale = 1.0;
     v = new Vec3();
     tempVec = new Vec3();
   }
-  
+
   /** Get the X scale. */
-  
+
   public double getXScale()
   {
     return xscale;
   }
-  
+
   /** Set the X scale. */
-  
+
   public void setXScale(double scale)
   {
     xscale = scale;
     invxscale = 1.0/scale;
   }
-  
+
   /** Get the Y scale. */
-  
+
   public double getYScale()
   {
     return yscale;
   }
-  
+
   /** Set the Y scale. */
-  
+
   public void setYScale(double scale)
   {
     yscale = scale;
     invyscale = 1.0/scale;
   }
-  
+
   /** Get the Z scale. */
-  
+
   public double getZScale()
   {
     return zscale;
   }
-  
+
   /** Set the Z scale. */
-  
+
   public void setZScale(double scale)
   {
     zscale = scale;
     invzscale = 1.0/scale;
   }
-  
+
   /** Get the X amplitude. */
-  
+
   public double getXAmplitude()
   {
     return xamp;
   }
-  
+
   /** Set the X amplitude. */
-  
+
   public void setXAmplitude(double amp)
   {
     xamp = amp;
   }
-  
+
   /** Get the Y amplitude. */
-  
+
   public double getYAmplitude()
   {
     return yamp;
   }
-  
+
   /** Set the Y amplitude. */
-  
+
   public void setYAmplitude(double amp)
   {
     yamp = amp;
   }
-  
+
   /** Get the Z amplitude. */
-  
+
   public double getZAmplitude()
   {
     return zamp;
   }
-  
+
   /** Set the Z amplitude. */
-  
+
   public void setZAmplitude(double amp)
   {
     zamp = amp;
@@ -131,6 +131,7 @@ public class JitterModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -139,6 +140,7 @@ public class JitterModule extends Module
 
   /* Calculate the average value of an output. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -160,9 +162,10 @@ public class JitterModule extends Module
     else
       return v.z;
   }
-  
+
   /* The error is unaffected by this module. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[which] != null)
@@ -174,9 +177,10 @@ public class JitterModule extends Module
     else
       return point.zsize*0.5+blur;
   }
-  
+
   /* The gradient is unaffected by this module. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[which] != null)
@@ -188,9 +192,10 @@ public class JitterModule extends Module
     else
       grad.set(0.0, 0.0, 1.0);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField amp1 = new ValueField(xamp, ValueField.NONE, 4);
@@ -238,13 +243,14 @@ public class JitterModule extends Module
       return false;
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     JitterModule mod = new JitterModule(new Point(bounds.x, bounds.y));
-    
+
     mod.xamp = xamp;
     mod.yamp = yamp;
     mod.zamp = zamp;
@@ -259,6 +265,7 @@ public class JitterModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(xamp);
@@ -268,9 +275,10 @@ public class JitterModule extends Module
     out.writeDouble(yscale);
     out.writeDouble(zscale);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     xamp = in.readDouble();

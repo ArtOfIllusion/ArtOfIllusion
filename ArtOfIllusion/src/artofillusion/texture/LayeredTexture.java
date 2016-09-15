@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -23,13 +23,13 @@ import java.io.*;
 public class LayeredTexture extends Texture
 {
   LayeredMapping mapping;
-  
+
   public LayeredTexture(Object3D obj)
   {
     mapping = new LayeredMapping(obj, this);
     name = "";
   }
-    
+
   public LayeredTexture(LayeredMapping map)
   {
     mapping = map;
@@ -39,6 +39,7 @@ public class LayeredTexture extends Texture
 
   /** Determine whether this Texture uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
     Texture tex[] = mapping.getLayers();
@@ -50,7 +51,8 @@ public class LayeredTexture extends Texture
   }
 
   /** For the average properties, use the average properties of the bottom layer. */
-  
+
+  @Override
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     mapping.getAverageSpec(spec, time, param);
@@ -58,13 +60,14 @@ public class LayeredTexture extends Texture
 
   /** Every LayeredTexture has a unique LayeredMapping object associated with it. */
 
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return mapping;
   }
-  
+
   /** Set the mapping for this texture. */
-  
+
   public void setMapping(LayeredMapping map)
   {
     mapping = map;
@@ -72,15 +75,17 @@ public class LayeredTexture extends Texture
 
   /** There shouldn't ever be a reason to call this. */
 
+  @Override
   public Texture duplicate()
   {
     return null;
   }
-  
+
   /** Determine whether this texture has a non-zero value anywhere for a particular component.
       @param component    the texture component to check for (one of the *_COMPONENT constants)
   */
-  
+
+  @Override
   public boolean hasComponent(int component)
   {
     Texture tex[] = mapping.getLayers();
@@ -108,10 +113,11 @@ public class LayeredTexture extends Texture
         return true;
     return false;
   }
-  
+
   /** LayeredTexture does not provide its own editor, since this is done directly through the
       ObjectTextureDialog. */
-  
+
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
   }
@@ -119,12 +125,13 @@ public class LayeredTexture extends Texture
   public LayeredTexture(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version != 0)
       throw new InvalidObjectException("");
     name = in.readUTF();
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);

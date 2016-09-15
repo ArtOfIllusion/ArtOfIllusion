@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -32,7 +32,7 @@ public abstract class ObjectCollection extends Object3D
   protected ObjectInfo lastInfo;
   protected boolean usesTime, usesCoords;
   protected Distortion previousDistortion;
-  
+
   public ObjectCollection()
   {
     super();
@@ -42,12 +42,12 @@ public abstract class ObjectCollection extends Object3D
   {
     super(in, theScene);
   }
-  
+
   /** Get an enumeration of ObjectInfos listing the objects which this object
       is composed of.  This calls the protected method enumerateObjects()
       (which must be provided by subclasses), while applying Distortions and
       caching objects for interactive previews. */
-  
+
   public synchronized Enumeration<ObjectInfo> getObjects(ObjectInfo info, boolean interactive, Scene scene)
   {
     if (interactive && cachedObjects != null && info.getDistortion() == previousDistortion)
@@ -69,7 +69,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** Get an enumeration of ObjectInfos listing the objects which this object
       is composed of. */
-  
+
   protected abstract Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene);
 
   /** If this object has a distortion applied to it, then apply it to one of its component objects. */
@@ -91,6 +91,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** Get a BoundingBox which just encloses the object. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (cachedBounds == null)
@@ -101,7 +102,7 @@ public abstract class ObjectCollection extends Object3D
     }
     return cachedBounds;
   }
-  
+
   /** Since object collections are generally procedurally generated, they may
       depend explicitly on time.  If so, this should be called with the value true. */
 
@@ -109,7 +110,7 @@ public abstract class ObjectCollection extends Object3D
   {
     usesTime = b;
   }
-  
+
   /** Since object collections are generally procedurally generated, they may
       depend explicitly on position.  If so, this should be called with the value true. */
 
@@ -120,6 +121,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** Determine whether the object is closed. */
 
+  @Override
   public boolean isClosed()
   {
     for (int i = 0; i < cachedObjects.size(); i++)
@@ -134,13 +136,15 @@ public abstract class ObjectCollection extends Object3D
   /** Assume that a material can be set for the	object collection (though actually
       setting one may or may not have any effect). */
 
+  @Override
   public boolean canSetMaterial()
   {
     return true;
   }
 
   /** Get a mesh representing the union of all objects in the collection. */
-  
+
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     return convertToTriangleMesh(tol).getRenderingMesh(tol, interactive, info);
@@ -148,7 +152,8 @@ public abstract class ObjectCollection extends Object3D
 
   /** An object collection is never drawn directly.  Instead, its component objects
       are enumerated and drawn individually. */
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return new WireframeMesh(new Vec3 [0], new int [0], new int [0]);
@@ -158,6 +163,7 @@ public abstract class ObjectCollection extends Object3D
    * RenderObject is overridden to render each component object individually.
    */
 
+  @Override
   public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
   {
     Camera theCamera = canvas.getCamera();
@@ -174,14 +180,16 @@ public abstract class ObjectCollection extends Object3D
   }
 
   /** For simplicity, just assume that the object can be converted approximately. */
-  
+
+  @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
   }
-  
+
   /** Create a triangle mesh which is the union of all the objects in this collection. */
 
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     ArrayList<Vec3> allVert = new ArrayList<Vec3>();
@@ -257,10 +265,11 @@ public abstract class ObjectCollection extends Object3D
     }
     return mesh;
   }
-  
+
   /** If this object explicitly references time or position, the cached objects and
       bounding box may need to be reevaluated. */
 
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     if (cachedBounds == null || (usesTime && lastTime != scene.getTime()) ||

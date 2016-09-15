@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -60,7 +60,7 @@ public class TriMeshSimplifier implements Runnable
     Constraint con[];
     Zone next;
   }
-    
+
   private class MeshEdge
   {
     int v1, v2;
@@ -112,6 +112,7 @@ public class TriMeshSimplifier implements Runnable
       createDialog(fr);
       new Thread(this).start();
       Thread update = new Thread() {
+        @Override
         public void run()
         {
           try
@@ -131,7 +132,8 @@ public class TriMeshSimplifier implements Runnable
       dial.setVisible(true);
     }
   }
-  
+
+  @Override
   public void run()
   {
     doSimplification();
@@ -148,7 +150,7 @@ public class TriMeshSimplifier implements Runnable
   }
 
   /* Put up a status dialog. */
-  
+
   private void createDialog(BFrame fr)
   {
     dial = new BDialog(fr, true);
@@ -174,7 +176,7 @@ public class TriMeshSimplifier implements Runnable
   }
 
   /* Build the new TriangleMesh. */
-  
+
   private void buildMesh()
   {
     int index[] = new int [vertex.length], f[][] = new int [faces][];
@@ -197,7 +199,7 @@ public class TriMeshSimplifier implements Runnable
     }
 
     // Update the mesh shape.
-    
+
     vert = new Vertex [k];
     for (int i = 0; i < vertex.length; i++)
     {
@@ -210,9 +212,9 @@ public class TriMeshSimplifier implements Runnable
     for (int i = 0; i < faces; i++)
       f[i] = new int [] {index[face[i].v1], index[face[i].v2], index[face[i].v3]};
     mesh.setShape(vert, f);
-    
+
     // Set the smoothness values for edges.
-    
+
     ed = mesh.getEdges();
     for (int i = 0; i < ed.length; i++)
       for (int j = 0; j < edge.length; j++)
@@ -317,9 +319,9 @@ public class TriMeshSimplifier implements Runnable
       else
         vertex[i].zone.con = new Constraint [faceCount[i]+2];
     }
-    
+
     // Build the list of edges.
-    
+
     for (i = 0; i < e.length; i++)
     {
       edge[i] = new MeshEdge();
@@ -332,9 +334,9 @@ public class TriMeshSimplifier implements Runnable
       v2.star[v2.edges++] = edge[i];
       edge[i].selected = selection[i];
     }
-    
+
     // Build the list of faces, and record the constraint associated with each one.
-    
+
     for (i = 0; i < f.length; i++)
     {
       face[i] = new MeshFace();
@@ -383,7 +385,7 @@ public class TriMeshSimplifier implements Runnable
     }
 
     // Record additional constraints for boundary edges.
-    
+
     for (i = 0; i < e.length; i++)
       if (edge[i].f2 == null)
       {
@@ -401,7 +403,7 @@ public class TriMeshSimplifier implements Runnable
 
     // Record the initial cost associated with each edge, and bring the lowest cost edge
     // to the front of the list.
-    
+
     for (i = 0; i < e.length; i++)
       updateCost(edge[i]);
     j = 0;
@@ -435,12 +437,12 @@ public class TriMeshSimplifier implements Runnable
       boundary = (e.f2 == null);
 
       // Move v1 to v2.
-      
+
       v2.pos = v1.pos;
 
       // Flag all the edges whose costs must be updated.  This includes all edges in v1's
       // star or v2's star, and all edges which share a vertex with an edge in v1's star.
-      
+
       star = v1.star;
       for (j = 0; j < v1.edges; j++)
       {
@@ -456,7 +458,7 @@ public class TriMeshSimplifier implements Runnable
         star[j].cost = -1.0;
 
       // Find the two extra edges to remove, and the ones to replace them with.
-      
+
       if (e.f1.e1 == e)
       {
         if (vertex[e.f1.e2.v1] == v2 || vertex[e.f1.e2.v2] == v2)
@@ -542,7 +544,7 @@ public class TriMeshSimplifier implements Runnable
       }
 
       // Identify the other two points whose stars and crowns must be modified.
-      
+
       if (vertex[rep1.v1] == v1)
         v3 = vertex[rep1.v2];
       else
@@ -556,9 +558,9 @@ public class TriMeshSimplifier implements Runnable
         else
           v4 = vertex[rep2.v1];
       }
-      
+
       // Update v1's crown.
-      
+
       if (boundary && v1.faces+v2.faces-2 > v1.crown.length)
         tempCrown = new MeshFace [v1.faces+v2.faces-2];
       else if (v1.faces+v2.faces-4 > v1.crown.length)
@@ -593,7 +595,7 @@ public class TriMeshSimplifier implements Runnable
       v1.edges = v1.edges+v2.edges-2;
 
       // Update v3 and v4's crowns.
-      
+
       for (j = 0, k = 0; k < v3.faces; k++)
         if (v3.crown[k] != e.f1)
           v3.crown[j++] = v3.crown[k];
@@ -621,7 +623,7 @@ public class TriMeshSimplifier implements Runnable
       }
 
       // Eliminate the faces which share this edge.
-      
+
       if (boundary)
       {
         j = e.f1.index;
@@ -649,10 +651,10 @@ public class TriMeshSimplifier implements Runnable
         face[k].index = k;
         faces -= 2;
       }
-      
+
       // Add the constraints from v2 to v1.  We do this by removing any duplicate
       // constraints, then appending v2's zone to v1's zone.
-      
+
       zone2 = v2.zone;
       while (zone2 != null)
       {
@@ -667,9 +669,9 @@ public class TriMeshSimplifier implements Runnable
         }
         zone2 = zone2.next;
       }
-      
+
       // Eliminate any zones which are completely free of constraints.
-      
+
       zone2 = v2.zone;
       while (zone2.next != null)
       {
@@ -678,9 +680,9 @@ public class TriMeshSimplifier implements Runnable
         else
           zone2 = zone2.next;
       }
-      
+
       // Add v2's zone to v1's zone.
-      
+
       zone2 = v2.zone;
       zone1 = v1.zone;
       while (zone1.next != null)
@@ -689,10 +691,10 @@ public class TriMeshSimplifier implements Runnable
         zone1.next = zone2.next;
       else
         zone1.next = zone2;
-      
+
       // Go through the faces in v2's crown, and replace references to rem1 and rem2
       // by rep1 and rep2.
-      
+
       for (j = 0; j < v2.faces; j++)
       {
         if (v2.crown[j].e1 == rem1)
@@ -712,10 +714,10 @@ public class TriMeshSimplifier implements Runnable
           else if (v2.crown[j].e3 == rem2)
             v2.crown[j].e3 = rep2;
         }
-      
+
       // Similarly, go through the edges adjacent to the faces being removed, and
       // replace references.
-      
+
       if (rem1.f1 == e.f1)
       {
         if (rep1.f1 == e.f1)
@@ -759,20 +761,20 @@ public class TriMeshSimplifier implements Runnable
       }
 
       // Replace all references to v2 by v1.
-      
+
       for (j = 0; j < vertex.length; j++)
         if (vertex[j] == v2)
           vertex[j] = v1;
 
       // Update smoothness values for vertices and edges.
-      
+
       v1.smoothness = Math.min(v1.smoothness, v2.smoothness);
       rep1.smoothness = Math.min(rep1.smoothness, rem1.smoothness);
       if (!boundary)
         rep2.smoothness = Math.min(rep2.smoothness, rem2.smoothness);
 
       // Remove rem1 and rem2 from the list by shifting forward other edges.
-      
+
       for (j = edge.length-1, k = edge.length-1; j > i; j--)
         if (edge[j] != rem1 && edge[j] != rem2)
           edge[k--] = edge[j];
@@ -805,7 +807,7 @@ public class TriMeshSimplifier implements Runnable
   }
 
   /* Update the cost for an edge.  Try both directions to see which gives a lower cost. */
-  
+
   private void updateCost(MeshEdge ed)
   {
     double cost = findCost(ed);
@@ -866,9 +868,9 @@ public class TriMeshSimplifier implements Runnable
     }
   }
 
-  /* Find the cost associated with contracting a given edge.  If the cost is determined 
+  /* Find the cost associated with contracting a given edge.  If the cost is determined
      to be greater than tol, the method simply returns tol.  This allows findCost() to
-     return as soon as it determines the edge will never be contracted, and also speeds 
+     return as soon as it determines the edge will never be contracted, and also speeds
      up the sorting of edges (since many edges will have identical costs). */
 
   private double findCost(MeshEdge ed)
@@ -878,7 +880,7 @@ public class TriMeshSimplifier implements Runnable
     Zone zone = v2.zone;
     double cost, max = 0.0;
     int i;
-    
+
     if (!ed.selected)
       return tol;
 
@@ -902,7 +904,7 @@ public class TriMeshSimplifier implements Runnable
       }
 
     // Now calculate the local geometric error.
-      
+
     while (zone != null)
     {
       for (i = 0; i < zone.constraints; i++)

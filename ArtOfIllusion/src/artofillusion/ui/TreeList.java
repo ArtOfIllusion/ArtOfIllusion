@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -31,7 +31,7 @@ public class TreeList extends CustomWidget
   private boolean updateDisabled, moving, origSelected[], insertAbove, okToInsert, allowMultiple;
   private PopupMenuManager popupManager;
   protected UndoRecord undo;
-  
+
   private static final Polygon openHandle, closedHandle, insertHandle;
   private static final int INDENT_WIDTH = 10;
   private static final int HANDLE_WIDTH = 4;
@@ -77,19 +77,21 @@ public class TreeList extends CustomWidget
     addEventLink(RepaintEvent.class, this, "paint");
   }
 
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension superPref = super.getPreferredSize();
     return new Dimension(Math.max(superPref.width, maxRowWidth), Math.max(superPref.height, rowHeight*showing.size()));
   }
-  
+
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(maxRowWidth, rowHeight*showing.size());
   }
 
   /** Set whether this tree allows multiple selections (default is true). */
-  
+
   public void setAllowMultiple(boolean allow)
   {
     allowMultiple = allow;
@@ -97,7 +99,7 @@ public class TreeList extends CustomWidget
 
   /** Temporarily disable updating of the tree.  This is useful when several elements are
       going to be added or removed at once. */
-  
+
   public void setUpdateEnabled(boolean enabled)
   {
     updateDisabled = !enabled;
@@ -109,7 +111,7 @@ public class TreeList extends CustomWidget
   }
 
   /** Add an element to the tree. */
-  
+
   public void addElement(TreeElement el)
   {
     elements.addElement(el);
@@ -119,7 +121,7 @@ public class TreeList extends CustomWidget
   }
 
   /** Add an element to the tree. */
-  
+
   public void addElement(TreeElement el, int position)
   {
     elements.insertElementAt(el, position);
@@ -129,9 +131,9 @@ public class TreeList extends CustomWidget
       repaint();
     }
   }
-  
+
   /** Find the TreeElement corresponding to an object, or null if there is none. */
-  
+
   public TreeElement findElement(Object obj)
   {
     for (int i = 0; i < elements.size(); i++)
@@ -145,7 +147,7 @@ public class TreeList extends CustomWidget
     }
     return null;
   }
-  
+
   private TreeElement findElement(Object obj, TreeElement parent)
   {
     for (int i = 0; i < parent.getNumChildren(); i++)
@@ -159,9 +161,9 @@ public class TreeList extends CustomWidget
     }
     return null;
   }
-  
+
   /** Remove the element from the tree which corresponds to the specified object. */
-  
+
   public void removeObject(Object obj)
   {
     for (int i = elements.size()-1; i >= 0; i--)
@@ -178,9 +180,9 @@ public class TreeList extends CustomWidget
       repaint();
     }
   }
-  
+
   /** Remove all elements from the tree. */
-  
+
   public void removeAllElements()
   {
     elements.removeAllElements();
@@ -190,9 +192,9 @@ public class TreeList extends CustomWidget
       repaint();
     }
   }
-  
+
   /** Get an array of all the TreeElements in the tree. */
-  
+
   public TreeElement [] getElements()
   {
     Vector<TreeElement> v = new Vector<TreeElement>();
@@ -209,7 +211,7 @@ public class TreeList extends CustomWidget
       allEl[i] = (TreeElement) v.elementAt(i);
     return allEl;
   }
-  
+
   private void addChildrenToVector(TreeElement el, Vector<TreeElement> v)
   {
     for (int i = 0; i < el.getNumChildren(); i++)
@@ -219,9 +221,9 @@ public class TreeList extends CustomWidget
       addChildrenToVector(child, v);
     }
   }
-  
+
   /** Get an array of the objects corresponding to selected TreeElements. */
-  
+
   public Object [] getSelectedObjects()
   {
     Object sel[] = new Object [selected.size()];
@@ -229,9 +231,9 @@ public class TreeList extends CustomWidget
       sel[i] = ((TreeElement) selected.elementAt(i)).getObject();
     return sel;
   }
-  
+
   /** Deselect all elements in the tree. */
-  
+
   public void deselectAll()
   {
     for (int i = 0; i < elements.size(); i++)
@@ -242,17 +244,17 @@ public class TreeList extends CustomWidget
       repaint();
     }
   }
-  
+
   private void deselectRecursively(TreeElement el)
   {
     el.setSelected(false);
     for (int i = 0; i < el.getNumChildren(); i++)
       deselectRecursively(el.getChild(i));
   }
-  
+
   /** Get an array of the objects corresponding to visible TreeElements, in the order that
       they appear. */
-  
+
   public Object [] getVisibleObjects()
   {
     Object vis[] = new Object [showing.size()];
@@ -260,16 +262,16 @@ public class TreeList extends CustomWidget
       vis[i] = ((TreeElement) showing.elementAt(i)).getObject();
     return vis;
   }
-  
+
   /** Get the height (in pixels) of each row in the list. */
-  
+
   public int getRowHeight()
   {
     return rowHeight;
   }
-  
+
   /** Select or deselect the element corresponding to a particular object. */
-  
+
   public void setSelected(Object obj, boolean selected)
   {
     TreeElement el = (obj instanceof TreeElement ? (TreeElement) obj : findElement(obj));
@@ -292,9 +294,9 @@ public class TreeList extends CustomWidget
       repaint();
     }
   }
-  
+
   /** Expand all parents of the specified object to make it visible. */
-  
+
   public void expandToShowObject(Object obj)
   {
     TreeElement el = (obj instanceof TreeElement ? (TreeElement) obj : findElement(obj));
@@ -308,16 +310,16 @@ public class TreeList extends CustomWidget
       repaint();
     }
   }
-  
+
   /** Start recording an undo record to reverse subsequent actions taken by the TreeList. */
-  
+
   private void recordUndo()
   {
     undo = new UndoRecord(window, false);
   }
-  
+
   /** Finish recording the undo record, and return the completed record. */
-  
+
   private UndoRecord finishRecording()
   {
     UndoRecord rec = undo;
@@ -326,7 +328,7 @@ public class TreeList extends CustomWidget
   }
 
   /** Build the arrays representing the current state of the tree. */
-  
+
   private void buildState()
   {
     if (updateDisabled)
@@ -353,7 +355,7 @@ public class TreeList extends CustomWidget
     else if (selected.size() == 1)
       lastClickRow = showing.indexOf(selected.get(0));
   }
-  
+
   private void addChildrenToState(TreeElement el, int currentIndent, boolean expanded)
   {
     for (int i = 0; i < el.getNumChildren(); i++)
@@ -369,23 +371,23 @@ public class TreeList extends CustomWidget
       addChildrenToState(child, currentIndent+1, expanded & child.isExpanded());
     }
   }
-  
+
   /** Set the y offset (for vertically scrolling the panel). */
-  
+
   public void setYOffset(int offset)
   {
     yoffset = offset;
   }
-  
+
   /** Paint the tree. */
-  
+
   private void paint(RepaintEvent ev)
   {
     Graphics2D g = ev.getGraphics();
     FontMetrics fm = g.getFontMetrics();
     Rectangle dim = getBounds();
     int y = yoffset;
-    
+
     rowHeight = Math.max(fm.getMaxAscent()+fm.getMaxDescent(), HANDLE_HEIGHT)+3;
     maxRowWidth = 0;
     for (int i = 0; i < showing.size(); i++)
@@ -395,7 +397,7 @@ public class TreeList extends CustomWidget
       if (el.getNumChildren() > 0)
       {
         // Draw the handle to collapse or expand the hierarchy.
-        
+
         g.setColor(Color.black);
         if (el.isExpanded())
         {
@@ -410,9 +412,9 @@ public class TreeList extends CustomWidget
           closedHandle.translate(-x-INDENT_WIDTH/2, -y-rowHeight/2);
         }
       }
-      
+
       // Draw the label.
-      
+
       x += INDENT_WIDTH;
       Icon icon = el.getIcon();
       if (icon != null)
@@ -436,18 +438,18 @@ public class TreeList extends CustomWidget
       maxRowWidth = Math.max(maxRowWidth, fm.stringWidth(el.getLabel())+x+1);
     }
   }
-  
+
   private void mousePressed(MousePressedEvent ev)
   {
     Point pos = ev.getPoint();
     pos.y -= yoffset;
     int row = pos.y/rowHeight;
-    
+
     moving = false;
     if (row >= showing.size())
     {
       // The click was below the last item in the list.
-      
+
       deselectAll();
       Arrays.fill(origSelected, false);
       buildState();
@@ -461,7 +463,7 @@ public class TreeList extends CustomWidget
     if (i == ind && el.getNumChildren() > 0)
     {
       // Expand or collapse this item.
-      
+
       el.setExpanded(!el.isExpanded());
       buildState();
       repaint();
@@ -526,7 +528,7 @@ public class TreeList extends CustomWidget
     repaint();
     showPopupIfNeeded(ev);
   }
-  
+
   private void mouseDragged(MouseDraggedEvent ev)
   {
     Point pos = ev.getPoint();
@@ -536,7 +538,7 @@ public class TreeList extends CustomWidget
     if (moving)
     {
       // The selected elements are being dragged.
-      
+
       if (selected.size() == 0)
         return;
       boolean above = pos.y - row*rowHeight < rowHeight/2;
@@ -556,11 +558,11 @@ public class TreeList extends CustomWidget
       if (okToInsert)
       {
         // Erase the old insertion marker.
-    
+
         g.setColor(getBackground());
         drawInsertionPoint(g, insertAbove ? lastDrag : lastDrag+1, lastIndent);
       }
-      
+
       // Determine whether the selected objects can be inserted here.
 
       TreeElement parent = null;
@@ -598,7 +600,7 @@ public class TreeList extends CustomWidget
       }
       if (okToInsert)
       {
-    
+
         // Draw the new insertion point.
 
         g.setColor(Color.black);
@@ -609,7 +611,7 @@ public class TreeList extends CustomWidget
       insertAbove = above;
       return;
     }
-    
+
     if (row == lastDrag || !allowMultiple)
       return;
     lastDrag = row;
@@ -619,7 +621,7 @@ public class TreeList extends CustomWidget
     for (i = 0; i < showing.size(); i++)
     {
       TreeElement el = (TreeElement) showing.elementAt(i);
-      boolean sel = (origSelected[i] || (i >= min && i <= max) || 
+      boolean sel = (origSelected[i] || (i >= min && i <= max) ||
           (el.getParent() != null && el.getParent().isSelected()));
       if (el.isSelected() != sel)
         setSelected(el, sel);
@@ -636,14 +638,14 @@ public class TreeList extends CustomWidget
       if (okToInsert)
       {
         // Move the selected elements to the specified location.
-        
+
         recordUndo();
         updateDisabled = true;
         TreeElement el = null, parent;
         int position = 0;
-        
+
         // First figure out where to insert them.
-        
+
         if (lastDrag < showing.size())
         {
           el = (TreeElement) showing.elementAt(lastDrag);
@@ -666,9 +668,9 @@ public class TreeList extends CustomWidget
           parent = null;
           position = elements.size();
         }
-        
+
         // Now remove them from the tree, and insert them at the correct place.
-        
+
         for (int i = 0; i < selected.size(); i++)
         {
           el = (TreeElement) selected.elementAt(i);
@@ -712,15 +714,15 @@ public class TreeList extends CustomWidget
     else
     {
       // They were selecting a range of objects.
-      
+
       if (lastDrag != dragStart)
         dispatchEvent(new SelectionChangedEvent(this));
     }
     showPopupIfNeeded(ev);
   }
-  
+
   /** Determine whether the selected elements can be added to a particular parent. */
-  
+
   private boolean dragTargetOk(TreeElement parent)
   {
     for (int i = 0; i < selected.size(); i++)
@@ -733,7 +735,7 @@ public class TreeList extends CustomWidget
     }
     return true;
   }
-  
+
   private void mouseClicked(MouseClickedEvent ev)
   {
     if (ev.getClickCount() != 2)
@@ -751,7 +753,7 @@ public class TreeList extends CustomWidget
   }
 
   /** Draw the insertion point to show where dragged items will be moved to. */
-  
+
   private void drawInsertionPoint(Graphics g, int pos, int indent)
   {
     int x = (indent+1)*INDENT_WIDTH, y = pos*rowHeight-2+yoffset;
@@ -762,16 +764,16 @@ public class TreeList extends CustomWidget
     insertHandle.translate(-x, -y);
     g.drawLine(x-2, y, dim.width, y);
   }
-  
+
   /** Set the PopupMenuManager for this list. */
-  
+
   public void setPopupMenuManager(PopupMenuManager manager)
   {
     popupManager = manager;
   }
-  
+
   /** Display the popup menu when an appropriate event occurs. */
-  
+
   private void showPopupIfNeeded(WidgetMouseEvent ev)
   {
     if (!ev.isPopupTrigger() || popupManager == null)
@@ -780,31 +782,32 @@ public class TreeList extends CustomWidget
     Point pos = ev.getPoint();
     popupManager.showPopupMenu(this, pos.x, pos.y);
   }
-  
+
   /** Inner class which is the superclass of various events generated by tree. */
-  
+
   public class TreeElementEvent implements WidgetEvent
   {
     TreeElement elem;
-    
+
     private TreeElementEvent(TreeElement el)
     {
       elem = el;
     }
-    
+
     public TreeElement getElement()
     {
       return elem;
     }
-    
+
+    @Override
     public Widget getWidget()
     {
       return TreeList.this;
     }
   }
-  
+
   /** Inner class representing an event when one or more elements are moved in the tree. */
-  
+
   public class ElementMovedEvent extends TreeElementEvent
   {
     private ElementMovedEvent(TreeElement el)
@@ -812,9 +815,9 @@ public class TreeList extends CustomWidget
       super(el);
     }
   }
-  
+
   /** Inner class representing an event when an element is expanded or collapsed. */
-  
+
   public class ElementExpandedEvent extends TreeElementEvent
   {
     private ElementExpandedEvent(TreeElement el)
@@ -822,9 +825,9 @@ public class TreeList extends CustomWidget
       super(el);
     }
   }
-  
+
   /** Inner class representing an event when an element is double-clicked. */
-  
+
   public class ElementDoubleClickedEvent extends TreeElementEvent
   {
     private ElementDoubleClickedEvent(TreeElement el)

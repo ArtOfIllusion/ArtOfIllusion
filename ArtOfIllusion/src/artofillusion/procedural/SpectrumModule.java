@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -26,54 +26,54 @@ public class SpectrumModule extends Module
   float a1[][], b1[][], c1[][];
   double index[], lastBlur;
   boolean repeat, colorOk;
-  
+
   public SpectrumModule(Point position)
   {
-    super("Spectrum", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Index", "(0)"})}, 
-      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})}, 
+    super("Spectrum", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Index", "(0)"})},
+      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})},
       position);
     color = new RGBColor [] {new RGBColor(0.0f, 0.0f, 0.0f), new RGBColor(1.0f, 1.0f, 1.0f)};
     index = new double [] {0.0, 1.0};
     outputColor = new RGBColor(0.0f, 0.0f, 0.0f);
     calcCoefficients();
   }
-  
+
   /** Get the list of colors in the table. */
-  
+
   public RGBColor [] getColors()
   {
     return color;
   }
-  
+
   /** Get the list of input values corresponding to the colors in the table. */
-  
+
   public double [] getColorPositions()
   {
     return index;
   }
-  
+
   /** Set the color table
       @param color     the list of colors
       @param position  the list of input values corresponding to the colors.  These must be between
                        0 and 1, and be in increasing order
   */
-  
+
   public void setColors(RGBColor color[], double position[])
   {
     this.color = color;
     index = position;
     calcCoefficients();
   }
-  
+
   /** Get whether the colors should repeat outside the range [0,1]. */
-  
+
   public boolean getRepeat()
   {
     return repeat;
   }
-  
+
   /** Set whether the colors should repeat outside the range [0,1]. */
-  
+
   public void setRepeat(boolean repeat)
   {
     this.repeat = repeat;
@@ -81,21 +81,22 @@ public class SpectrumModule extends Module
 
   /* New point, so the color will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     colorOk = false;
   }
 
   /* Calculate coefficients which will be needed for integrating the color table. */
-  
+
   private void calcCoefficients()
   {
     int i;
-    
+
     a1 = new float [color.length][3];
     b1 = new float [color.length][3];
     c1 = new float [color.length][3];
-    
+
     for (i = 0; i < color.length-1; i++)
       {
         float d = (float) (index[i+1]-index[i]);
@@ -129,7 +130,7 @@ public class SpectrumModule extends Module
    }
 
   /* Calculate the color corresponding to a given input value. */
-  
+
   private void calcColor(double value, RGBColor c)
   {
     if (value <= 0.0 || value >= 1.0)
@@ -154,18 +155,18 @@ public class SpectrumModule extends Module
       float d = (float) (index[i2]-index[i1]);
       float fract = d > 0.0f ? (float) (value-index[i1])/d : 0.0f;
       float fract2 = 1.0f-fract;
-      c.setRGB(fract*color[i2].getRed() + fract2*color[i1].getRed(), 
-          fract*color[i2].getGreen() + fract2*color[i1].getGreen(), 
+      c.setRGB(fract*color[i2].getRed() + fract2*color[i1].getRed(),
+          fract*color[i2].getGreen() + fract2*color[i1].getGreen(),
           fract*color[i2].getBlue() + fract2*color[i1].getBlue());
   }
-  
+
   /* Calculate the integral of the color at a point. */
-  
+
   private void integrateColor(double value, RGBColor c)
   {
     float vi, vf;
     int i;
-    
+
     if (!repeat)
       {
         if (value <= 0.0)
@@ -196,7 +197,8 @@ public class SpectrumModule extends Module
   }
 
   /* Calculate the output color. */
-  
+
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     if (colorOk && blur == lastBlur)
@@ -219,13 +221,14 @@ public class SpectrumModule extends Module
         outputColor.copy(c);
       }
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     SpectrumModule mod = new SpectrumModule(new Point(bounds.x, bounds.y));
-    
+
     mod.repeat = repeat;
     mod.color = new RGBColor [color.length];
     mod.index = new double [index.length];
@@ -240,6 +243,7 @@ public class SpectrumModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(color.length);
@@ -250,9 +254,10 @@ public class SpectrumModule extends Module
       }
     out.writeBoolean(repeat);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int num = in.readInt();
@@ -266,15 +271,17 @@ public class SpectrumModule extends Module
     repeat = in.readBoolean();
     calcCoefficients();
   }
-  
+
   /* Calculate the size of the module. */
-  
+
+  @Override
   public void calcSize()
   {
     bounds.width = 40+IOPort.SIZE*2;
     bounds.height = 20+IOPort.SIZE*2;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     int x1 = bounds.x+IOPort.SIZE, y1 = bounds.y+IOPort.SIZE;
@@ -287,18 +294,19 @@ public class SpectrumModule extends Module
         g.drawLine(x1+i, y1, x1+i, y1+20);
       }
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     EditingDialog dlg = new EditingDialog(editor);
     calcCoefficients();
     return dlg.clickedOk;
   }
-  
+
   /** Inner class used for editing the list of colors. */
-  
+
   private class EditingDialog extends BDialog
   {
     ProcedureEditor editor;
@@ -310,10 +318,10 @@ public class SpectrumModule extends Module
     Point clickPoint, handlePos[];
     int selected, rows = 1;
     boolean clickedOk;
-    
+
     static final int HANDLE_SIZE = 5;
     static final int INSET = 3;
-    
+
     public EditingDialog(ProcedureEditor editor)
     {
       super(editor.getParentFrame(), "Function", true);
@@ -333,6 +341,7 @@ public class SpectrumModule extends Module
       row.add(new BLabel(Translate.text("Value")+":"));
       row.add(indexField = new ValueField(Double.NaN, ValueField.NONE));
       indexField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= 0.0 && val <= 1.0);
@@ -358,9 +367,9 @@ public class SpectrumModule extends Module
       UIUtilities.centerDialog(this, editor.getParentFrame());
       setVisible(true);
     }
-    
+
     /* Adjust the various components in the window based on the currently selected point. */
-    
+
     private void adjustComponents()
     {
       indexField.setText(Double.toString(index[selected]));
@@ -370,9 +379,9 @@ public class SpectrumModule extends Module
       indexField.setEnabled(movable);
       deleteButton.setEnabled(movable);
     }
-    
+
     /* Calculate the heights of all the handles. */
-    
+
     private void positionHandles()
     {
       Rectangle bounds = canvas.getBounds();
@@ -407,9 +416,9 @@ public class SpectrumModule extends Module
       if (oldrows != rows)
         pack();
     }
-    
+
     /* Draw the canvas. */
-    
+
     private void paintCanvas(RepaintEvent ev)
     {
       Graphics2D g = ev.getGraphics();
@@ -417,7 +426,7 @@ public class SpectrumModule extends Module
       bounds.x += INSET;
       bounds.width -= 2*INSET;
       RGBColor temp = new RGBColor(0.0f, 0.0f, 0.0f);
-      double scale = 1.0/(bounds.width);      
+      double scale = 1.0/(bounds.width);
       for (int i = 0; i < bounds.width; i++)
       {
         calcColor(i*scale, temp);
@@ -438,9 +447,9 @@ public class SpectrumModule extends Module
         g.drawLine(x, y, x, 30);
       }
     }
-    
+
     /* Add a new handle at the specified position. */
-    
+
     private void addHandle(double where)
     {
       double newindex[] = new double [index.length+1];
@@ -471,7 +480,7 @@ public class SpectrumModule extends Module
       canvas.repaint();
       editor.updatePreview();
     }
-    
+
     /* Delete the currently selected handle. */
 
     private void doDelete()
@@ -481,7 +490,7 @@ public class SpectrumModule extends Module
       double newindex[] = new double [index.length-1];
       RGBColor newcolor[] = new RGBColor [color.length-1];
       int i;
-          
+
       for (i = 0; i < index.length-1; i++)
         {
           if (i < selected)
@@ -506,25 +515,25 @@ public class SpectrumModule extends Module
       canvas.repaint();
       editor.updatePreview();
     }
-    
+
     private void doAdd()
     {
       addHandle(0.5);
     }
-    
+
     private void doOk()
     {
       clickedOk = true;
       dispose();
     }
-    
+
     private void doCancel()
     {
       dispose();
     }
-    
+
     /* Respond to keypresses. */
-    
+
     private void keyPressed(KeyPressedEvent ev)
     {
       if (ev.getKeyCode() == KeyPressedEvent.VK_ENTER)
@@ -536,9 +545,9 @@ public class SpectrumModule extends Module
       if (ev.getKeyCode() == KeyPressedEvent.VK_BACK_SPACE || ev.getKeyCode() == KeyPressedEvent.VK_DELETE)
         doDelete();
     }
-    
+
     /** Allow the user to set the color for the selected handle. */
-    
+
     private void selectColor()
     {
       new ColorChooser((BFrame) this.getParent(), Translate.text("selectColor"), color[selected]);
@@ -547,9 +556,9 @@ public class SpectrumModule extends Module
       preview.repaint();
       editor.updatePreview();
     }
-    
+
     /** Respond to mouse presses on the canvas. */
-    
+
     private void mousePressed(MousePressedEvent ev)
     {
       clickPoint = ev.getPoint();
@@ -564,7 +573,7 @@ public class SpectrumModule extends Module
       for (int i = 0; i < handlePos.length; i++)
       {
         int x = handlePos[i].x, y = 30+handlePos[i].y*HANDLE_SIZE;
-        if (clickPoint.x >= x-HANDLE_SIZE && clickPoint.x <= x+HANDLE_SIZE && 
+        if (clickPoint.x >= x-HANDLE_SIZE && clickPoint.x <= x+HANDLE_SIZE &&
             clickPoint.y >= y && clickPoint.y <= y+HANDLE_SIZE)
         {
           selected = i;
@@ -575,16 +584,16 @@ public class SpectrumModule extends Module
       }
       clickPoint = null;
     }
-    
+
     /* Move the current selected handle. */
-    
+
     private void mouseDragged(MouseDraggedEvent ev)
     {
       if (clickPoint == null || selected == 0 || selected == index.length-1)
         return;
       Rectangle bounds = canvas.getBounds();
       Point pos = ev.getPoint();
-      
+
       handlePos[selected].x = pos.x;
       double ind = ((double) pos.x)/(bounds.width-1.0);
       if (ind < 0.0)
@@ -621,9 +630,9 @@ public class SpectrumModule extends Module
       adjustComponents();
       canvas.repaint();
     }
-    
+
     /* Reposition the handles when the user finished dragging one. */
-    
+
     private void mouseReleased(MouseReleasedEvent ev)
     {
       clickPoint = null;

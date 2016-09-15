@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -66,11 +66,13 @@ public class ReferenceImage extends Object3D
   }
 
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
 
+  @Override
   public Object3D duplicate()
   {
     ReferenceImage ri = new ReferenceImage();
@@ -80,6 +82,7 @@ public class ReferenceImage extends Object3D
     return ri;
   }
 
+  @Override
   public void copyObject(Object3D obj)
   {
     ReferenceImage ri = (ReferenceImage) obj;
@@ -88,17 +91,20 @@ public class ReferenceImage extends Object3D
     height = ri.height;
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return new BoundingBox(-0.5*width, 0.5*width, -0.5*height, 0.5*height, 0.0, 0.0);
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     width = xsize;
     height = ysize;
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 vert[] = new Vec3[] {new Vec3(-0.5*width, 0.5*height, 0.0), new Vec3(0.5*width, 0.5*height, 0.0),
@@ -108,11 +114,13 @@ public class ReferenceImage extends Object3D
     return new WireframeMesh(vert, from, to);
   }
 
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new NullKeyframe();
   }
 
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
   }
@@ -121,6 +129,7 @@ public class ReferenceImage extends Object3D
    * This method is overridden to render the reference image into the ViewerCanvas.
    */
 
+  @Override
   public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
   {
     if (image == null)
@@ -147,6 +156,7 @@ public class ReferenceImage extends Object3D
     image = ImageIO.read(new ByteArrayInputStream(imageData));
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);

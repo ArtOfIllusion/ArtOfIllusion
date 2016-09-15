@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -27,34 +27,39 @@ public class MoveObjectTool extends EditingTool
   Vector<ObjectInfo> toMove;
   ObjectInfo clickedObject;
   boolean dragged, applyToChildren = true;
-  
+
   public MoveObjectTool(EditingWindow fr)
   {
     super(fr);
     initButton("move");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("moveObjectTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveObjectTool.tipText");
   }
 
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     Scene theScene = theWindow.getScene();
@@ -78,6 +83,7 @@ public class MoveObjectTool extends EditingTool
     dragged = false;
   }
 
+  @Override
   public void mouseDragged(final WidgetMouseEvent e, final ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -119,10 +125,11 @@ public class MoveObjectTool extends EditingTool
       }
     theWindow.setModified();
     theWindow.updateImage();
-    theWindow.setHelpText(Translate.text("moveObjectTool.dragText", 
+    theWindow.setHelpText(Translate.text("moveObjectTool.dragText",
       Math.round(v.x*1e5)/1e5+", "+Math.round(v.y*1e5)/1e5+", "+Math.round(v.z*1e5)/1e5));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     theWindow.getScene().applyTracksAfterModification(toMove);
@@ -132,6 +139,7 @@ public class MoveObjectTool extends EditingTool
     theWindow.updateImage();
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     Scene theScene = theWindow.getScene();
@@ -144,7 +152,7 @@ public class MoveObjectTool extends EditingTool
     int key = e.getKeyCode();
 
     // Pressing an arrow key is equivalent to dragging the first selected object by one pixel.
- 
+
     if (key == KeyPressedEvent.VK_UP)
     {
       dx = 0;
@@ -215,13 +223,14 @@ public class MoveObjectTool extends EditingTool
     theWindow.getScene().applyTracksAfterModification(toMove);
     theWindow.updateImage();
   }
-  
+
   /* Allow the user to set options. */
-  
+
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("moveToolTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("moveToolTitle"),
 		new Widget [] {childrenBox}, new String [] {null});
     if (!dlg.clickedOk())
       return;

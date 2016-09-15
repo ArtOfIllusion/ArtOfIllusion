@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -31,7 +31,7 @@ public class SceneViewer extends ViewerCanvas
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
   int deselect;
-  
+
   public SceneViewer(Scene s, RowContainer p, EditingWindow fr)
   {
     this(s, p, fr, false);
@@ -61,13 +61,14 @@ public class SceneViewer extends ViewerCanvas
    * Get the Scene displayed in this canvas.
    */
 
+  @Override
   public Scene getScene()
   {
     return theScene;
   }
 
   /** Add all SceneCameras in the scene to list of available views. */
-  
+
   public void rebuildCameraList()
   {
     cameras.removeAllElements();
@@ -99,7 +100,8 @@ public class SceneViewer extends ViewerCanvas
   }
 
   /** Deal with selecting a SceneCamera from the choice menu. */
-  
+
+  @Override
   public void setOrientation(int which)
   {
     super.setOrientation(which);
@@ -118,12 +120,13 @@ public class SceneViewer extends ViewerCanvas
       viewChanged(false);
     }
   }
-  
+
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
    */
-  
+
+  @Override
   public double[] estimateDepthRange()
   {
     double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
@@ -182,21 +185,25 @@ public class SceneViewer extends ViewerCanvas
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
+        @Override
         public void imageUpdated(Image image)
         {
           renderedImage = image;
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void statusChanged(String status)
         {
         }
+        @Override
         public void imageComplete(ComplexImage image)
         {
           renderedImage = image.getImage();
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void renderingCanceled()
         {
         }
@@ -205,6 +212,7 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
+  @Override
   public synchronized void updateImage()
   {
     if (renderMode == RENDER_RENDERED)
@@ -273,9 +281,9 @@ public class SceneViewer extends ViewerCanvas
       drawBoxes(selectedBoxes, handleColor);
       drawBoxes(parentSelectedBoxes, highlightColor);
     }
-    
+
     // Finish up.
-    
+
     drawBorder();
     if (showAxes)
       drawCoordinateAxes();
@@ -283,7 +291,7 @@ public class SceneViewer extends ViewerCanvas
 
   /** Begin dragging a box.  The variable square determines whether the box should be
       constrained to be square. */
-  
+
   public void beginDraggingBox(Point p, boolean square)
   {
     draggingBox = true;
@@ -295,6 +303,7 @@ public class SceneViewer extends ViewerCanvas
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is an object based tool, allow them to select or deselect objects. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     int i, j, k, sel[], minarea;
@@ -308,9 +317,9 @@ public class SceneViewer extends ViewerCanvas
     dragging = true;
     clickPoint = e.getPoint();
     clickedObject = null;
-    
+
     // Determine which tool is active.
-    
+
     if (metaTool != null && e.isMetaDown())
       activeTool = metaTool;
     else if (altTool != null && e.isAltDown())
@@ -332,7 +341,7 @@ public class SceneViewer extends ViewerCanvas
       return;
 
     // See whether the click was on a currently selected object.
-    
+
     p = e.getPoint();
     sel = theScene.getSelection();
     for (i = 0; i < sel.length; i++)
@@ -350,18 +359,18 @@ public class SceneViewer extends ViewerCanvas
     {
       // The click was on a selected object.  If it was a shift-click, the user may want
       // to deselect it, so set a flag.
-      
+
       if (e.isShiftDown() && allowSelectionChange)
         deselect = sel[i];
-      
+
       // If the current tool wants handle clicks, then check to see whether the click
       // was on a handle.
-      
+
       if ((activeTool.whichClicks() & EditingTool.HANDLE_CLICKS) != 0)
       {
         if (p.x <= bounds.x+Scene.HANDLE_SIZE)
           j = 0;
-        else if (p.x >= bounds.x+(bounds.width-Scene.HANDLE_SIZE)/2 && 
+        else if (p.x >= bounds.x+(bounds.width-Scene.HANDLE_SIZE)/2 &&
             p.x <= bounds.x+(bounds.width-Scene.HANDLE_SIZE)/2+Scene.HANDLE_SIZE)
           j = 1;
         else if (p.x >= bounds.x+bounds.width-Scene.HANDLE_SIZE)
@@ -369,7 +378,7 @@ public class SceneViewer extends ViewerCanvas
         else j = -1;
         if (p.y <= bounds.y+Scene.HANDLE_SIZE)
           k = 0;
-        else if (p.y >= bounds.y+(bounds.height-Scene.HANDLE_SIZE)/2 && 
+        else if (p.y >= bounds.y+(bounds.height-Scene.HANDLE_SIZE)/2 &&
             p.y <= bounds.y+(bounds.height-Scene.HANDLE_SIZE)/2+Scene.HANDLE_SIZE)
           k = 1;
         else if (p.y >= bounds.y+bounds.height-Scene.HANDLE_SIZE)
@@ -418,12 +427,12 @@ public class SceneViewer extends ViewerCanvas
 
     // The click was not on a selected object.  See whether it was on an unselected object.
     // If so, select it.  If appropriate, send an event to the current tool.
-    
+
     // If the click was on top of multiple objects, the conventional thing to do is to select
     // the closest one.  I'm trying something different: select the smallest one.  This
     // should make it easier to select small objects which are surrounded by larger objects.
     // I may decide to change this, but it seemed like a good idea at the time...
-    
+
     j = -1;
     minarea = Integer.MAX_VALUE;
     for (i = 0; i < theScene.getNumObjects(); i++)
@@ -469,7 +478,7 @@ public class SceneViewer extends ViewerCanvas
       clickedObject = info;
       return;
     }
-    
+
     // The click was not on any object.  Start dragging a selection box.
 
     if (allowSelectionChange)
@@ -491,6 +500,7 @@ public class SceneViewer extends ViewerCanvas
     return (r.x-1 <= p.x && r.y-1 <= p.y && r.x+r.width+1 >= p.x && r.y+r.height+1 >= p.y);
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     moveToGrid(e);
@@ -500,14 +510,14 @@ public class SceneViewer extends ViewerCanvas
       if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
         return;
     }
-    dragging = true;    
+    dragging = true;
     deselect = -1;
     if (draggingBox)
     {
       // We are dragging a box, so erase and redraw it.
 
       if (dragPoint != null)
-        drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y), 
+        drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
             Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y)));
       dragPoint = e.getPoint();
       if (squareBox)
@@ -527,7 +537,7 @@ public class SceneViewer extends ViewerCanvas
             dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
         }
       }
-      drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y), 
+      drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
               Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y)));
     }
 
@@ -537,6 +547,7 @@ public class SceneViewer extends ViewerCanvas
       activeTool.mouseDragged(e, this);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     Rectangle r, b;
@@ -558,12 +569,12 @@ public class SceneViewer extends ViewerCanvas
     }
 
     // If the user was dragging a selection box, then select anything it intersects.
-    
+
     int oldSelection[] = theScene.getSelection();
     if (draggingSelectionBox)
     {
       dragPoint = e.getPoint();
-      r = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y), 
+      r = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
               Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
       if (!e.isShiftDown())
       {
@@ -622,9 +633,9 @@ public class SceneViewer extends ViewerCanvas
       parentFrame.updateMenus();
       parentFrame.updateImage();
     }
-    
+
     // If the selection changed, set an undo record.
-    
+
     int newSelection[] = theScene.getSelection();
     boolean changed = (oldSelection.length != newSelection.length);
     for (int i = 0; i < newSelection.length && !changed; i++)
@@ -632,9 +643,9 @@ public class SceneViewer extends ViewerCanvas
     if (changed)
      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
   }
-  
+
   /** Double-clicking on object should bring up its editor. */
-  
+
   public void mouseClicked(MouseClickedEvent e)
   {
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
@@ -642,6 +653,7 @@ public class SceneViewer extends ViewerCanvas
       final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
+          @Override
 	  public void run()
 	  {
 	    theScene.objectModified(obj);
@@ -652,6 +664,7 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
+  @Override
   protected void processMouseScrolled(MouseScrolledEvent ev)
   {
     if (isPerspective() && boundCamera != null)

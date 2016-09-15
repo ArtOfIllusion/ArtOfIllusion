@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -385,6 +385,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
    * @param selectionBounds  a BoundingBox enclosing whatever is selected in the canvas
    */
 
+  @Override
   public void draw(ViewerCanvas view, BoundingBox selectionBounds)
   {
     if (selectionBounds == null)
@@ -506,6 +507,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
   }
 
+  @Override
   public boolean mousePressed(WidgetMouseEvent ev, ViewerCanvas view, BoundingBox selectionBounds)
   {
     Rectangle r = findScreenBounds(selectionBounds, view.getCamera());
@@ -590,6 +592,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent ev, ViewerCanvas view)
   {
     if (!dragging)
@@ -737,6 +740,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent ev, ViewerCanvas view)
   {
     if (!dragging)

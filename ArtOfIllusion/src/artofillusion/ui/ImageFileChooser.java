@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -47,9 +47,9 @@ public class ImageFileChooser extends BFileChooser
     preview.setVerticalAlignment(JLabel.CENTER);
     JFileChooser jfc = getComponent();
     jfc.setAccessory(preview);
-    
+
     // Set up filename filters.
-    
+
     jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.images"),
                      "jpg", "jpeg", "png", "tif", "tiff", "svg", "svgz", "hdr"));
     jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.jpeg"), "jpg", "jpeg"));
@@ -58,7 +58,7 @@ public class ImageFileChooser extends BFileChooser
     jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.svg"), "svg", "svgz"));
     jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.tif"), "tif", "tiff"));
     jfc.setAcceptAllFileFilterUsed(true);
-    
+
     // Read the saved filter Preference.
 
     String preferredType = pref.get("LastType", Translate.text("fileFilter.images"));
@@ -68,7 +68,7 @@ public class ImageFileChooser extends BFileChooser
         preferredFilter = filter;
 
     // Sanity Check - if the value in preferences is not valid, just fall back to no filter.
-    
+
     if (preferredFilter == null)
       preferredFilter = jfc.getAcceptAllFileFilter();
     setFileFilter(preferredFilter);
@@ -77,6 +77,7 @@ public class ImageFileChooser extends BFileChooser
     selectionChanged();
   }
 
+  @Override
   public boolean showDialog(Widget parent)
   {
     if (super.showDialog(parent))

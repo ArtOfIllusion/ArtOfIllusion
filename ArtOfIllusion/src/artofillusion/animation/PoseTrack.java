@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -30,7 +30,7 @@ public class PoseTrack extends Track
   private WeightTrack theWeight;
   private String valueName[];
   private double defaultValue[], valueRange[][];
-  
+
   public PoseTrack(ObjectInfo info)
   {
     super("Pose");
@@ -41,9 +41,10 @@ public class PoseTrack extends Track
     subtracks = new Track [] {theWeight};
     info.getObject().configurePoseTrack(this);
   }
-  
+
   /** Modify the pose of the object. */
-  
+
+  @Override
   public void apply(double time)
   {
     Keyframe pose = tc.evaluate(time, smoothingMethod);
@@ -69,13 +70,14 @@ public class PoseTrack extends Track
     for (int i = 0; i < subtracks.length; i++)
       subtracks[i].apply(time);
   }
-  
+
   /** Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     PoseTrack t = new PoseTrack((ObjectInfo) obj);
-    
+
     t.name = name;
     t.enabled = enabled;
     t.quantized = quantized;
@@ -86,13 +88,14 @@ public class PoseTrack extends Track
     t.subtracks = new Track [] {theWeight};
     return t;
   }
-  
+
   /** Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     PoseTrack t = (PoseTrack) tr;
-    
+
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
@@ -102,34 +105,38 @@ public class PoseTrack extends Track
     theWeight = (WeightTrack) t.theWeight.duplicate(this);
     subtracks = new Track [] {theWeight};
   }
-  
+
   /** Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
   }
 
   /** Get the timecourse describing this track. */
-  
+
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
   }
-  
+
   /** Set a keyframe at the specified time. */
-  
+
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
   }
-  
+
   /** Set a keyframe at the specified time, based on the current state of the Scene. */
-  
+
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     Keyframe pose = info.getObject().getPoseKeyframe();
-    
+
     tc.addTimepoint(pose, time, new Smoothness());
     return pose;
   }
@@ -137,7 +144,8 @@ public class PoseTrack extends Track
   /** Set a keyframe at the specified time, based on the current state of the Scene,
       if and only if the Scene does not match the current state of the track.  Return
       the new Keyframe, or null if none was set. */
-  
+
+  @Override
   public Keyframe setKeyframeIfModified(double time, Scene sc)
   {
     for (int i = 0; i < subtracks.length; i++)
@@ -152,105 +160,116 @@ public class PoseTrack extends Track
   }
 
   /** Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
   }
-  
+
   /** Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
   }
-  
+
   /** This track is null if it has no keyframes. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
   }
-  
+
   /** This has a single child track. */
-  
+
+  @Override
   public Track [] getSubtracks()
   {
     return subtracks;
   }
 
   /** Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo && ((ObjectInfo) obj).getObject() == info.getObject());
   }
-  
+
   /** Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return info;
   }
-  
+
   /** Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
   }
-  
+
   /** Get the smoothing method for this track. */
-  
+
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
   }
-  
+
   /** Set the smoothing method for this track. */
-  
+
   public void setSmoothingMethod(int method)
   {
     smoothingMethod = method;
   }
-  
+
   /** Determine whether this track is in absolute or relative mode. */
-  
+
   public boolean isRelative()
   {
     return relative;
   }
-  
+
   /** Set whether this track is in absolute or relative mode. */
-  
+
   public void setRelative(boolean rel)
   {
     relative = rel;
   }
-  
+
   /** Get the names of all graphable values for this track. */
-  
+
+  @Override
   public String [] getValueNames()
   {
     return valueName;
   }
 
   /** Get the default list of graphable values (for a track which has no keyframes). */
-  
+
+  @Override
   public double [] getDefaultGraphValues()
   {
     return defaultValue;
   }
-  
+
   /** Get the allowed range for graphable values.  This returns a 2D array, where elements
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
-  
+
+  @Override
   public double[][] getValueRange()
   {
     return valueRange;
   }
-  
+
   /** Set the list of graphable values for this track.  Usually, this will only be called
       by its parent object.
       @param names     the names of the graphable values
@@ -259,17 +278,17 @@ public class PoseTrack extends Track
                        and [n][1] are the minimum and maximum allowed values, respectively, for
                        the nth graphable value.
   */
-  
+
   public void setGraphableValues(String names[], double defaults[], double ranges[][])
   {
     valueName = names;
     defaultValue = defaults;
     valueRange = ranges;
   }
-  
+
   /** Set the list of subtracks (other than the weight track) for this track.  Usually, this will only
       be called by its parent object. */
-  
+
   public void setSubtracks(Track extraSubtracks[])
   {
     subtracks = new Track [extraSubtracks.length+1];
@@ -278,7 +297,8 @@ public class PoseTrack extends Track
   }
 
   /** Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene sc) throws IOException
   {
     double t[] = tc.getTimes();
@@ -296,15 +316,16 @@ public class PoseTrack extends Track
     for (int i = 0; i < t.length; i++)
       {
         out.writeDouble(t[i]);
-        v[i].writeToStream(out); 
-        s[i].writeToStream(out); 
+        v[i].writeToStream(out);
+        s[i].writeToStream(out);
       }
     for (int i = 0; i < subtracks.length; i++)
       subtracks[i].writeToStream(out, sc);
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -347,14 +368,16 @@ public class PoseTrack extends Track
   }
 
   /** Present a window in which the user can edit the specified keyframe. */
-  
+
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     info.getObject().editKeyframe(win, tc.getValues()[which], info);
   }
 
   /** This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(PoseTrack.this.getName());

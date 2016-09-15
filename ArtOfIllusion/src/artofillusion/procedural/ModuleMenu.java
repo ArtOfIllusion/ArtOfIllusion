@@ -68,7 +68,7 @@ public class ModuleMenu extends CustomWidget
     category.add(new Entry(Translate.text("menu.greaterThanModule"), CompareModule.class));
     category.add(new Entry(Translate.text("menu.minModule"), MinModule.class));
     category.add(new Entry(Translate.text("menu.maxModule"), MaxModule.class));
-    
+
     categories.add(category = new Category(Translate.text("menu.functions")));
     category.add(new Entry(Translate.text("menu.expressionModule"), ExprModule.class));
     category.add(new Entry(Translate.text("menu.customFunctionModule"), FunctionModule.class));
@@ -85,7 +85,7 @@ public class ModuleMenu extends CustomWidget
     category.add(new Entry(Translate.text("menu.biasModule"), BiasModule.class));
     category.add(new Entry(Translate.text("menu.gainModule"), GainModule.class));
     category.add(new Entry(Translate.text("menu.randomModule"), RandomModule.class));
-    
+
     categories.add(category = new Category(Translate.text("menu.colorFunctions")));
     category.add(new Entry(Translate.text("menu.customColorFunctionModule"), SpectrumModule.class));
     category.add(new Entry(Translate.text("menu.blendModule"), BlendModule.class));
@@ -364,6 +364,7 @@ public class ModuleMenu extends CustomWidget
       finalFraction[expandedCategory] = 1;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev)
     {
       fraction = Math.min(fraction+0.05, 1.0);

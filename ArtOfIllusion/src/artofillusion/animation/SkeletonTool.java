@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -25,7 +25,7 @@ public class SkeletonTool extends EditingTool
 {
   private static final int CLICK_TOL = 6;
   private static final int HANDLE_SIZE = 4;
-  
+
   private static final int NO_HANDLES = 0;
   private static final int UNLOCKED_HANDLES = 1;
   private static final int ALL_HANDLES = 2;
@@ -40,7 +40,7 @@ public class SkeletonTool extends EditingTool
   private UndoRecord undo;
   private boolean allowCreating;
   private String helpText;
-    
+
   public SkeletonTool(MeshEditorWindow fr, boolean allowCreating)
   {
     super(fr);
@@ -50,24 +50,27 @@ public class SkeletonTool extends EditingTool
     helpText = Translate.text(allowCreating ? "skeletonTool.helpText" : "skeletonTool.helpTextNoCreate");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(helpText);
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("skeletonTool.tipText");
   }
 
   /** Find the positions of all the degree-of-freedom handles. */
-  
+
   private void findHandlePositions(Mat4 objToScreen, Joint j, ViewerCanvas view)
   {
     if (j.parent == null || whichHandles == NO_HANDLES)
@@ -96,7 +99,8 @@ public class SkeletonTool extends EditingTool
         hideHandle[i] = true;
     }
   }
-  
+
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     if (ik != null)
@@ -111,11 +115,11 @@ public class SkeletonTool extends EditingTool
     Camera cam = mv.getCamera();
     CoordinateSystem objCoords = mv.getDisplayCoordinates();
     Mat4 objToScreen = cam.getWorldToScreen().times(objCoords.fromLocal());
-    
+
     if (clickedHandle == -1)
     {
       // Draw the handles for each degree of freedom.
-      
+
       findHandlePositions(objToScreen, j, view);
       Vec3 jointPos = new Vec3(j.coords.getOrigin());
       objToScreen.transform(jointPos);
@@ -134,7 +138,7 @@ public class SkeletonTool extends EditingTool
     else if (clickedHandle < 2)
     {
       // Draw a circle to show the DOF being moved.
-      
+
       double len = j.length.pos;
       Mat4 m1, m2;
       if (clickedHandle == 0)
@@ -166,6 +170,7 @@ public class SkeletonTool extends EditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     MeshViewer mv = (MeshViewer) view;
@@ -176,12 +181,12 @@ public class SkeletonTool extends EditingTool
     Camera cam = mv.getCamera();
     CoordinateSystem objCoords = mv.getDisplayCoordinates();
     Mat4 objToScreen = cam.getWorldToScreen().times(objCoords.fromLocal());
-    
+
     clickPoint = e.getPoint();
     if (e.isControlDown() && allowCreating)
       {
         // Create a new joint.
-        
+
         undo = new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()});
         Joint j, parent = s.getJoint(mv.getSelectedJoint());
         if (parent == null)
@@ -201,7 +206,7 @@ public class SkeletonTool extends EditingTool
             Vec3 zdir = clickPos.minus(parent.coords.getOrigin());
             zdir.normalize();
             Vec3 ydir = cam.getCameraCoordinates().getZDirection().cross(zdir);
-            ydir.normalize(); 
+            ydir.normalize();
             j = new Joint(new CoordinateSystem(clickPos, zdir, ydir), parent, "Bone "+s.getNextJointID());
             s.addJoint(j, parent.id);
           }
@@ -215,9 +220,9 @@ public class SkeletonTool extends EditingTool
         oldMesh = (Mesh) mesh.duplicate();
         return;
       }
-    
+
     // See whether a handle was clicked.
-    
+
     if (selectedJoint != null)
     {
       findHandlePositions(objToScreen, selectedJoint, view);
@@ -234,24 +239,24 @@ public class SkeletonTool extends EditingTool
         }
       }
     }
-    
+
     // Determine which joint was clicked on.
-    
+
     Joint joint[] = s.getJoints();
     int i;
     for (i = 0; i < joint.length; i++)
       {
         Vec2 pos = objToScreen.timesXY(joint[i].coords.getOrigin());
-        if ((clickPoint.x > pos.x-CLICK_TOL) && 
+        if ((clickPoint.x > pos.x-CLICK_TOL) &&
             (clickPoint.x < pos.x+CLICK_TOL) &&
-            (clickPoint.y > pos.y-CLICK_TOL) && 
+            (clickPoint.y > pos.y-CLICK_TOL) &&
             (clickPoint.y < pos.y+CLICK_TOL))
           break;
       }
     if (i == joint.length)
       {
         // No joint was clicked on, so deselect the selected joint.
-        
+
         for (int j = 0; j < allViews.length; j++)
           ((MeshViewer) allViews[j]).setSelectedJoint(-1);
         theWindow.updateImage();
@@ -261,7 +266,7 @@ public class SkeletonTool extends EditingTool
     if (e.isShiftDown())
       {
         // Toggle whether this joint is locked.
-        
+
         for (int j = 0; j < allViews.length; j++)
         {
           MeshViewer v = (MeshViewer) allViews[j];
@@ -273,9 +278,9 @@ public class SkeletonTool extends EditingTool
         theWindow.updateImage();
         return;
       }
-    
+
     // Make it the selected joint, and prepare to drag it.
-    
+
     for (int j = 0; j < allViews.length; j++)
       ((MeshViewer) allViews[j]).setSelectedJoint(joint[i].id);
     clickPos = joint[i].coords.getOrigin();
@@ -286,7 +291,8 @@ public class SkeletonTool extends EditingTool
     ik = new IKSolver(s, mv.getLockedJoints(), moving);
     oldMesh = (Mesh) mesh.duplicate();
   }
-  
+
+  @Override
   public void mouseDragged(final WidgetMouseEvent e, ViewerCanvas view)
   {
     final MeshViewer mv = (MeshViewer) view;
@@ -299,7 +305,7 @@ public class SkeletonTool extends EditingTool
     if (clickedHandle > -1)
     {
       // Adjust a single degree of freedom.
-      
+
       if (undo == null)
         undo = new UndoRecord(getWindow(), false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()});
       double dist = clickPoint.x-e.getPoint().x;
@@ -372,6 +378,7 @@ public class SkeletonTool extends EditingTool
     } while (!converged && (process == null || (!process.hasEvent() && !process.hasBeenStopped())));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (undo == null && e.getClickCount() == 2 && !e.isShiftDown() && !e.isControlDown())
@@ -384,7 +391,8 @@ public class SkeletonTool extends EditingTool
     undo = null;
     theWindow.setHelpText(helpText);
   }
-  
+
+  @Override
   public void iconDoubleClicked()
   {
     BComboBox dofChoice = new BComboBox(new String [] {
@@ -393,16 +401,16 @@ public class SkeletonTool extends EditingTool
       Translate.text("allDOF"),
     });
     dofChoice.setSelectedIndex(whichHandles);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("skeletonToolTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("skeletonToolTitle"),
                 new Widget [] {dofChoice}, new String [] {null});
     if (!dlg.clickedOk())
       return;
     whichHandles = dofChoice.getSelectedIndex();
     theWindow.updateImage();
   }
-  
+
   /** Adjust the mesh after the skeleton has changed. */
-  
+
   protected void adjustMesh(Mesh newMesh)
   {
     Skeleton.adjustMesh(oldMesh, newMesh);

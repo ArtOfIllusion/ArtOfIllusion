@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -22,15 +22,15 @@ public class SphericalModule extends Module
   boolean valueOk[], rOk;
   Vec3 gradient[], tempVec1, tempVec2, tempVec3;
   PointInfo point;
-  
+
   public SphericalModule(Point position)
   {
     super(Translate.text("menu.sphericalModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}), 
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
       new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"R"}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Theta"}), 
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Phi"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Theta"}),
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Phi"})},
       position);
     value = new double [3];
     error = new double [3];
@@ -43,6 +43,7 @@ public class SphericalModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -50,16 +51,17 @@ public class SphericalModule extends Module
   }
 
   /* Calculate the output values. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk[which] && blur == lastBlur)
       return value[which];
     lastBlur = blur;
     double x, y, z, xerror, yerror, zerror;
-    
+
     // Determine the input values.
-    
+
     if (linkFrom[0] == null)
       {
         x = point.x;
@@ -149,7 +151,8 @@ public class SphericalModule extends Module
   }
 
   /* The errors are calculated at the same time as the values. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk[which] || blur != lastBlur)
@@ -159,6 +162,7 @@ public class SphericalModule extends Module
 
   /* The gradients are calculated at the same time as the values. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk[which] || blur != lastBlur)

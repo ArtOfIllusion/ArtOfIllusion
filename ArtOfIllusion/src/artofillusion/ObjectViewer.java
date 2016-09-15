@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -20,7 +20,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.util.*;
 
-/** The ObjectViewer class is the abstract superclass of components which display 
+/** The ObjectViewer class is the abstract superclass of components which display
    a single object and allow the user to edit it. */
 
 public abstract class ObjectViewer extends ViewerCanvas
@@ -32,32 +32,33 @@ public abstract class ObjectViewer extends ViewerCanvas
   protected Shape selectBounds;
   protected ObjectInfo thisObjectInScene;
   protected Scene theScene;
-  
+
   public ObjectViewer(MeshEditController controller, RowContainer p)
   {
     super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
     this.controller = controller;
     buildChoices(p);
   }
-  
+
   /** Get the controller which maintains the state for this viewer. */
-  
+
   public MeshEditController getController()
   {
     return controller;
   }
-  
+
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
    */
-  
+
+  @Override
   public double[] estimateDepthRange()
   {
     Mat4 toView = theCamera.getWorldToView();
-    
+
     // Find the depth range for the object being edited.
-    
+
     ObjectInfo info = getController().getObject();
     BoundingBox bounds = info.getBounds();
     double dx = bounds.maxx-bounds.minx;
@@ -69,7 +70,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     double min = depth-size, max = depth+size;
 
     // Now check the rest of the scene.
-    
+
     if (showScene)
     {
       for (int i = 0; i < theScene.getNumObjects(); i++)
@@ -153,21 +154,25 @@ public abstract class ObjectViewer extends ViewerCanvas
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
+        @Override
         public void imageUpdated(Image image)
         {
           renderedImage = image;
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void statusChanged(String status)
         {
         }
+        @Override
         public void imageComplete(ComplexImage image)
         {
           renderedImage = image.getImage();
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void renderingCanceled()
         {
         }
@@ -176,6 +181,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     }
   }
 
+  @Override
   public synchronized void updateImage()
   {
     if (renderMode == RENDER_RENDERED)
@@ -192,9 +198,9 @@ public abstract class ObjectViewer extends ViewerCanvas
     super.updateImage();
     if (controller.getObject() == null)
       return;
-    
+
     // Draw the rest of the objects in the scene.
-    
+
     if (showScene && theScene != null)
     {
       Vec3 viewdir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
@@ -222,12 +228,12 @@ public abstract class ObjectViewer extends ViewerCanvas
     if (showAxes)
       drawCoordinateAxes();
   }
-  
+
   protected abstract void drawObject();
 
   /** Get the coordinate system in which the object is displayed.  This will
       vary depending on whether the user has selected Local or Scene coordinates. */
-  
+
   public CoordinateSystem getDisplayCoordinates()
   {
     if (useWorldCoords && thisObjectInScene != null)
@@ -235,30 +241,31 @@ public abstract class ObjectViewer extends ViewerCanvas
     else
       return controller.getObject().getCoords();
   }
-  
+
   /** Get whether freehand selection mode is currently in use. */
-  
+
   public boolean getFreehandSelection()
   {
     return freehandSelection;
   }
 
   /** Set whether to use freehand selection mode. */
-  
+
   public void setFreehandSelection(boolean freehand)
   {
     freehandSelection = freehand;
   }
 
   /** Get the scene this object is part of, or null if there is none. */
-  
+
+  @Override
   public Scene getScene()
   {
     return theScene;
   }
-  
+
   /** Set the scene this object is part of. */
-  
+
   public void setScene(Scene sc, ObjectInfo thisObject)
   {
     theScene = sc;
@@ -266,14 +273,14 @@ public abstract class ObjectViewer extends ViewerCanvas
   }
 
   /** Get whether the entire scene is visible. */
-  
+
   public boolean getSceneVisible()
   {
     return showScene;
   }
 
   /** Set whether the entire scene is visible. */
-  
+
   public void setSceneVisible(boolean visible)
   {
     showScene = visible;
@@ -281,23 +288,23 @@ public abstract class ObjectViewer extends ViewerCanvas
   }
 
   /** Get whether to use world coordinates. */
-  
+
   public boolean getUseWorldCoords()
   {
     return useWorldCoords;
   }
 
   /** Set whether to use world coordinates. */
-  
+
   public void setUseWorldCoords(boolean use)
   {
     useWorldCoords = use;
     viewChanged(false);
   }
-  
+
   /** Begin dragging a selection region.  The variable square determines whether
       the region should be constrained to be square. */
-  
+
   public void beginDraggingSelection(Point p, boolean square)
   {
     draggingBox = true;
@@ -307,9 +314,9 @@ public abstract class ObjectViewer extends ViewerCanvas
     if (freehandSelection)
       selectBoundsPoints = new Vector<Point>();
   }
-  
+
   /** Finish dragging a selection region. */
-  
+
   public void endDraggingSelection()
   {
     if (!draggingBox || dragPoint == null)
@@ -318,18 +325,18 @@ public abstract class ObjectViewer extends ViewerCanvas
       return;
     }
     repaint();
-  
+
     // Construct the selection region.
-    
+
     if (freehandSelection)
       selectBounds = createPolygonFromSelection();
     else
-      selectBounds = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y), 
+      selectBounds = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
 		Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
   }
-  
+
   /** Create a Polygon from the selection bounds. */
-  
+
   private Polygon createPolygonFromSelection()
   {
     int n = selectBoundsPoints.size(), x[] = new int [n], y[] = new int [n];
@@ -343,7 +350,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   }
 
   /** Determine whether the selection region contains the specified point. */
-  
+
   public boolean selectionRegionContains(Point p)
   {
     if (selectBounds instanceof Rectangle)
@@ -397,13 +404,14 @@ public abstract class ObjectViewer extends ViewerCanvas
     return false;
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     moveToGrid(e);
     if (draggingBox && freehandSelection)
     {
       // Add this point to the region boundary and draw a line.
-      
+
       dragPoint = e.getPoint();
       selectBoundsPoints.addElement(dragPoint);
       drawDraggedShape(createPolygonFromSelection());
@@ -413,7 +421,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       // We are dragging a box, so erase and redraw it.
 
       if (dragPoint != null)
-        drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y), 
+        drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
               Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y)));
       dragPoint = e.getPoint();
       if (squareBox)
@@ -433,7 +441,7 @@ public abstract class ObjectViewer extends ViewerCanvas
             dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
         }
       }
-      drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y), 
+      drawDraggedShape(new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
               Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y)));
     }
 
@@ -442,7 +450,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     if (sentClick)
       activeTool.mouseDragged(e, this);
   }
-  
+
   public void previewObject()
   {
     Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();

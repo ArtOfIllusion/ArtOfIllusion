@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -54,6 +54,7 @@ public class RotateMeshTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -61,11 +62,13 @@ public class RotateMeshTool extends MeshEditingTool
     checkForSelectionChanged();
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return selectionCanChange;
@@ -94,11 +97,13 @@ public class RotateMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("rotateMeshTool.tipText");
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     checkForSelectionChanged();
@@ -123,6 +128,7 @@ public class RotateMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (e.isControlDown())
@@ -142,11 +148,13 @@ public class RotateMeshTool extends MeshEditingTool
     selectionCanChange = !dragInProgress;
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);
@@ -183,7 +191,7 @@ public class RotateMeshTool extends MeshEditingTool
       }
     baseVertPos = mesh.getVertexPositions();
   }
-  
+
   protected void handleDragged(HandleDraggedEvent ev)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -227,17 +235,17 @@ public class RotateMeshTool extends MeshEditingTool
     CoordinateSystem coords = view.getDisplayCoordinates();
     Mat4 m;
     int i;
-    
+
     // Determine whether the coordinate system is right or left handed.
-    
+
     Vec3 xdir = cam.getWorldToView().timesDirection(Vec3.vx());
     Vec3 ydir = cam.getWorldToView().timesDirection(Vec3.vy());
     Vec3 zdir = cam.getWorldToView().timesDirection(Vec3.vz());
     if (xdir.cross(ydir).dot(zdir) < 0.0)
       angle = -angle;
-    
+
     // Find the transformation matrix.
-    
+
     m = coords.fromLocal();
     m = Mat4.translation(-rotCenter.x, -rotCenter.y, -rotCenter.z).times(m);
     if (whichAxis == XAXIS)
@@ -249,9 +257,9 @@ public class RotateMeshTool extends MeshEditingTool
     m = Mat4.axisRotation(axis, angle).times(m);
     m = Mat4.translation(rotCenter.x, rotCenter.y, rotCenter.z).times(m);
     m = coords.toLocal().times(m);
-    
+
     // Determine the deltas.
-    
+
     for (i = 0; i < vert.length; i++)
       {
          if (selected[i] == 0)

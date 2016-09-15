@@ -13,7 +13,7 @@ package artofillusion.util;
  * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See version 2 of the
  * GNU General Public License for more details.
  *
@@ -369,6 +369,7 @@ public class SearchlistClassLoader extends ClassLoader
      *
      *  @throws ClassNotFoundException if the class could not be loaded.
      */
+    @Override
     public Class findClass(String name)
 	throws ClassNotFoundException
     {
@@ -431,6 +432,7 @@ public class SearchlistClassLoader extends ClassLoader
      *  @param path the fully-qualified name of the resource to retrieve
      *  @return the URL if the resource is found, and <i>null</i> otherwise.
      */
+    @Override
     public URL findResource(String path)
     {
 	System.out.println("findResource: looking in " + this + " for " +
@@ -463,6 +465,7 @@ public class SearchlistClassLoader extends ClassLoader
      *  @param libname - the String name of the library to find
      *  @return the full path to the found library file, or <i>null</i>.
      */
+    @Override
     public String findLibrary(String libname)
     {
 	String fileName = System.mapLibraryName(libname);
@@ -485,7 +488,7 @@ public class SearchlistClassLoader extends ClassLoader
 		for (j = 0; j < url.length; j++) {
 		    if (!url[j].getProtocol().equalsIgnoreCase("file"))
 			continue;
-		    
+
 		    try {
 			dir = new File(url[j].toURI()).getParentFile();
 			file = new File(dir, fileName);
@@ -572,7 +575,7 @@ public class SearchlistClassLoader extends ClassLoader
 	if (in == null) return null;
 
 	try {
-	    
+
 	    barray = new ByteArrayOutputStream(1024*16);
 	    buff = new byte[1024];
 
@@ -635,7 +638,7 @@ public class SearchlistClassLoader extends ClassLoader
 
 	    // otherwise, effectively, delete...
 	}
-	
+
 	return b.toString();
     }
 

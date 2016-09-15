@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -27,14 +27,14 @@ public class MarbleModule extends Module
   double value, error, amplitude, spacing, lastBlur;
   Vec3 gradient, tempVec;
   PointInfo point;
-  
+
   public MarbleModule(Point position)
   {
-    super(Translate.text("menu.marbleModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
+    super(Translate.text("menu.marbleModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
       position);
     octaves = 4;
     amplitude = 5.0;
@@ -42,44 +42,44 @@ public class MarbleModule extends Module
     gradient = new Vec3();
     tempVec = new Vec3();
   }
-  
+
   /** Get the number of octaves. */
-  
+
   public int getOctaves()
   {
     return octaves;
   }
-  
+
   /** Set the number of octaves. */
-  
+
   public void setOctaves(int o)
   {
     octaves = o;
   }
-  
+
   /** Get the amplitude. */
-  
+
   public double getAmplitude()
   {
     return amplitude;
   }
-  
+
   /** Set the amplitude. */
-  
+
   public void setAmplitude(double a)
   {
     amplitude = a;
   }
-  
+
   /** Get the spacing. */
-  
+
   public double getSpacing()
   {
     return spacing;
   }
-  
+
   /** Set the spacing. */
-  
+
   public void setSpacing(double s)
   {
     spacing = s;
@@ -87,6 +87,7 @@ public class MarbleModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -95,7 +96,8 @@ public class MarbleModule extends Module
 
   /* Calculate the value, error, and gradient all at once, since calculating just the value
      is almost as much work as calculating all three. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -111,7 +113,7 @@ public class MarbleModule extends Module
     double cutoff = 0.5/Math.max(Math.max(xsize, ysize), zsize);
 
     // First calculate the turbulence function.
-    
+
     value = 0.0;
     error = 0.0;
     gradient.set(0.0, 0.0, 0.0);
@@ -134,9 +136,9 @@ public class MarbleModule extends Module
         amp *= persistence;
         scale *= 2.0;
       }
-    
+
     // Now use that to calculate the marble function.
-    
+
     scale = 2.0*Math.PI/spacing;
     if (linkFrom[0] == null)
       tempVec.set(1.0, 0.0, 0.0);
@@ -157,7 +159,8 @@ public class MarbleModule extends Module
   }
 
   /* The error is calculated at the same time as the value. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -167,6 +170,7 @@ public class MarbleModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)
@@ -218,9 +222,10 @@ public class MarbleModule extends Module
     gradOk = true;
     grad.set(gradient);
   }
-  
+
   /** Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
@@ -245,13 +250,14 @@ public class MarbleModule extends Module
       return false;
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     MarbleModule mod = new MarbleModule(new Point(bounds.x, bounds.y));
-    
+
     mod.octaves = octaves;
     mod.amplitude = amplitude;
     mod.spacing = spacing;
@@ -260,15 +266,17 @@ public class MarbleModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
     out.writeDouble(amplitude);
     out.writeDouble(spacing);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();

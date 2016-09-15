@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -22,7 +22,7 @@ import java.io.*;
 public class ColorModule extends Module
 {
   RGBColor color;
-  
+
   public ColorModule(Point position)
   {
     this(position, new RGBColor(1.0f, 1.0f, 1.0f));
@@ -37,21 +37,22 @@ public class ColorModule extends Module
   }
 
   /** Get the color. */
-  
+
   public RGBColor getColor()
   {
     return color;
   }
-  
+
   /** Set the color. */
-  
+
   public void setColor(RGBColor c)
   {
     color = c;
   }
-  
+
   /* Allow the user to set a new value. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ColorChooser cc = new ColorChooser(editor.getParentFrame(), "Select Color", color, false);
@@ -67,42 +68,48 @@ public class ColorModule extends Module
   }
 
   /* This module simply outputs the color. */
-  
+
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     c.copy(color);
   }
-  
+
+  @Override
   public void calcSize()
   {
     bounds.width = bounds.height = 20+IOPort.SIZE*2;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     g.setColor(color.getColor());
     g.fillRect(bounds.x+IOPort.SIZE, bounds.y+IOPort.SIZE, 20, 20);
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     ColorModule mod = new ColorModule(new Point(bounds.x, bounds.y));
-    
+
     mod.color.copy(color);
     return mod;
   }
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     color.writeToFile(out);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     color = new RGBColor(in);

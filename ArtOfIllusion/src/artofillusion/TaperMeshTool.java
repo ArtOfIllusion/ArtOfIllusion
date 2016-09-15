@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -44,21 +44,25 @@ public class TaperMeshTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("taperMeshTool.tipText");
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -72,6 +76,7 @@ public class TaperMeshTool extends MeshEditingTool
       theWindow.setHelpText(Translate.text("taperMeshTool.errorText"));
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -80,11 +85,13 @@ public class TaperMeshTool extends MeshEditingTool
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);
@@ -102,7 +109,7 @@ public class TaperMeshTool extends MeshEditingTool
     boundsWidth = (double) r.width;
     baseVertPos = mesh.getVertexPositions();
   }
-  
+
   protected void handleDragged(HandleDraggedEvent ev)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -141,14 +148,14 @@ public class TaperMeshTool extends MeshEditingTool
     Vec3 center;
     Mat4 m1, m2;
     int i, direction;
-    
+
     clickX = (double) clickPoint.x;
     clickY = (double) clickPoint.y;
     posX = (double) pos.x;
     posY = (double) pos.y;
-    
+
     // Figure out which way to taper the mesh, and toward which point.
-    
+
     direction = (Math.abs(posX-clickX) > Math.abs(posY-clickY)) ? 0 : 1;
     center = new Vec3(0.0, 0.0, (bounds.minz+bounds.maxz)/2.0);
     if (bounds.minx == bounds.maxx || bounds.miny == bounds.maxy)
@@ -197,7 +204,7 @@ public class TaperMeshTool extends MeshEditingTool
       }
 
     // If the points are not being tapered, just copy them over.
-    
+
     if (taper == 0.0)
       {
         for (i = 0; i < vert.length; i++)
@@ -206,15 +213,15 @@ public class TaperMeshTool extends MeshEditingTool
       }
 
     // Find the transformation matrix.
-    
+
     m1 = cam.getObjectToView();
     m1 = Mat4.translation(-center.x, -center.y, -center.z).times(m1);
     m2 = Mat4.translation(center.x, center.y, center.z);
     m2 = cam.getViewToWorld().times(m2);
     m2 = view.getDisplayCoordinates().toLocal().times(m2);
-    
+
     // Determine the deltas.
-    
+
     for (i = 0; i < vert.length; i++)
       {
         if (selected[i] == 0)

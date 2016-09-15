@@ -6,8 +6,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -16,8 +16,8 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 
 public abstract class Texture3D extends Texture
-{  
-  /** Get the surface properties at point in the texture.  The properties should be averaged over a region 
+{
+  /** Get the surface properties at point in the texture.  The properties should be averaged over a region
       around the point.
       @param spec     the surface properties will be stored in this
       @param x        the x coordinate at which to evaluate the texture
@@ -39,12 +39,13 @@ public abstract class Texture3D extends Texture
   public abstract void getTransparency(RGBColor trans, double x, double y, double z, double xsize, double ysize, double zsize, double angle, double t, double param[]);
 
   /** For the default mapping, use a basic projection. */
-  
+
+  @Override
   public TextureMapping getDefaultMapping(Object3D object)
   {
     return new LinearMapping3D(object, this);
   }
-  
+
   /** Textures which use displacement mapping should override this method to return the
       displacement at the given point. */
 

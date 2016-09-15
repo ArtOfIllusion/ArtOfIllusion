@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -24,14 +24,14 @@ public class TextureParameter
   public final String name;
   public final double minVal, maxVal, defaultVal;
   public int identifier, type;
-  
+
   public static final int NORMAL_PARAMETER = 0;
   public static final int X_COORDINATE = 1;
   public static final int Y_COORDINATE = 2;
   public static final int Z_COORDINATE = 3;
-  
+
   private static int nextID = 0;
-  
+
   public TextureParameter(Object owner, String name, double minVal, double maxVal, double defaultVal)
   {
     this.owner = owner;
@@ -42,7 +42,7 @@ public class TextureParameter
     identifier = -1;
     type = NORMAL_PARAMETER;
   }
-  
+
   public TextureParameter duplicate()
   {
     return duplicate(owner);
@@ -60,6 +60,7 @@ public class TextureParameter
     return tp;
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof TextureParameter))
@@ -81,6 +82,7 @@ public class TextureParameter
   }
 
 
+  @Override
   public int hashCode()
   {
     if (identifier == -1)
@@ -89,36 +91,37 @@ public class TextureParameter
   }
 
   /** Assign a new ID number to this parameter. */
-  
+
   public void assignNewID()
   {
     identifier = getUniqueID();
   }
-  
+
   /** Get a unique ID number which can be assigned to a parameter. */
-  
+
   public static synchronized int getUniqueID()
   {
     return (nextID++);
   }
 
   /** Set the ID number for this parameter.  (Use with extreme caution!) */
-  
+
   public void setID(int newid)
   {
     identifier = newid;
   }
-  
+
   /** Get a Widget which can be used to select a value for this parameter.  This means
       either a ValueSlider (if the parameter has a finite range), or a ValueField with
       appropriate constraints set (if the range is unbounded on either end). */
-  
+
   public Widget getEditingWidget(double currentValue)
   {
     if (minVal == -Double.MAX_VALUE || maxVal == Double.MAX_VALUE)
     {
       ValueField field = new ValueField(currentValue, ValueField.NONE);
       field.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= minVal && val <= maxVal);

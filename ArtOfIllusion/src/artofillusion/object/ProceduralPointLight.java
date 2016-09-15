@@ -63,6 +63,7 @@ public class ProceduralPointLight extends PointLight
   private void initThreadLocal()
   {
     renderingProc = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         Procedure localProc = createProcedure();
@@ -104,6 +105,7 @@ public class ProceduralPointLight extends PointLight
   }
 
 
+  @Override
   public Object3D duplicate()
   {
     ProceduralPointLight light = new ProceduralPointLight(getRadius());
@@ -111,6 +113,7 @@ public class ProceduralPointLight extends PointLight
     return light;
   }
 
+  @Override
   public void copyObject(Object3D obj)
   {
     ProceduralPointLight lt = (ProceduralPointLight) obj;
@@ -118,6 +121,7 @@ public class ProceduralPointLight extends PointLight
     procedure.copy(lt.procedure);
   }
 
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     currentTime = scene.getTime();
@@ -127,6 +131,7 @@ public class ProceduralPointLight extends PointLight
    * Evaluate the Procedure to determine the light color at a point.
    */
 
+  @Override
   public void getLight(RGBColor light, Vec3 position)
   {
     PointInfo point = new PointInfo();
@@ -164,6 +169,7 @@ public class ProceduralPointLight extends PointLight
     initThreadLocal();
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -171,12 +177,14 @@ public class ProceduralPointLight extends PointLight
     procedure.writeToStream(out, theScene);
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     ProcedureEditor editor = new ProcedureEditor(procedure, new LightProcedureOwner(info, cb), parent.getScene());
     editor.setEditingWindow(parent);
   }
 
+  @Override
   public Property[] getProperties()
   {
     Property properties[] = new Property[parameters.length+2];
@@ -187,6 +195,7 @@ public class ProceduralPointLight extends PointLight
     return properties;
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     if (index < parameterValues.length)
@@ -201,6 +210,7 @@ public class ProceduralPointLight extends PointLight
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index < parameterValues.length)
@@ -218,6 +228,7 @@ public class ProceduralPointLight extends PointLight
 
   /* Return a Keyframe which describes the current pose of this object. */
 
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new ProceduralLightKeyframe(this);
@@ -225,6 +236,7 @@ public class ProceduralPointLight extends PointLight
 
   /* Modify this object based on a pose keyframe. */
 
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     ProceduralLightKeyframe key = (ProceduralLightKeyframe) k;
@@ -241,6 +253,7 @@ public class ProceduralPointLight extends PointLight
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
 
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     String names[] = new String[parameters.length+1];
@@ -261,6 +274,7 @@ public class ProceduralPointLight extends PointLight
 
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
 
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final ProceduralLightKeyframe key = (ProceduralLightKeyframe) k;
@@ -304,6 +318,7 @@ public class ProceduralPointLight extends PointLight
 
     /* Create a duplicate of this keyframe.. */
 
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(light);
@@ -311,6 +326,7 @@ public class ProceduralPointLight extends PointLight
 
     /* Create a duplicate of this keyframe for a (possibly different) object. */
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       ProceduralLightKeyframe key = new ProceduralLightKeyframe((ProceduralPointLight) ((ObjectInfo) owner).getObject());
@@ -323,6 +339,7 @@ public class ProceduralPointLight extends PointLight
 
     /* Get the list of graphable values for this keyframe. */
 
+    @Override
     public double [] getGraphValues()
     {
       double values[] = new double[light.parameters.length+1];
@@ -336,6 +353,7 @@ public class ProceduralPointLight extends PointLight
 
     /* Set the list of graphable values for this keyframe. */
 
+    @Override
     public void setGraphValues(double values[])
     {
       paramValues.clear();
@@ -347,6 +365,7 @@ public class ProceduralPointLight extends PointLight
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
 
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       ProceduralLightKeyframe k2 = (ProceduralLightKeyframe) o2;
@@ -361,6 +380,7 @@ public class ProceduralPointLight extends PointLight
       return key;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       ProceduralLightKeyframe k2 = (ProceduralLightKeyframe) o2, k3 = (ProceduralLightKeyframe) o3;
@@ -376,6 +396,7 @@ public class ProceduralPointLight extends PointLight
       return key;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       ProceduralLightKeyframe k2 = (ProceduralLightKeyframe) o2, k3 = (ProceduralLightKeyframe) o3, k4 = (ProceduralLightKeyframe) o4;
@@ -394,6 +415,7 @@ public class ProceduralPointLight extends PointLight
 
     /* Determine whether this keyframe is identical to another one. */
 
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof ProceduralLightKeyframe))
@@ -413,6 +435,7 @@ public class ProceduralPointLight extends PointLight
 
     /* Write out a representation of this keyframe to a stream. */
 
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeDouble(radius);
@@ -445,11 +468,13 @@ public class ProceduralPointLight extends PointLight
       this.callback = callback;
     }
 
+    @Override
     public String getWindowTitle()
     {
       return Translate.text("editProceduralPointLightTitle");
     }
 
+    @Override
     public Object getPreview(ProcedureEditor editor)
     {
       BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
@@ -477,6 +502,7 @@ public class ProceduralPointLight extends PointLight
         {
           processor.addEvent(new Runnable()
           {
+                    @Override
             public void run()
             {
               preview.getScene().setTime(value.getValue());
@@ -496,6 +522,7 @@ public class ProceduralPointLight extends PointLight
       return preview;
     }
 
+    @Override
     public void updatePreview(Object preview)
     {
       findParameters();
@@ -503,35 +530,42 @@ public class ProceduralPointLight extends PointLight
       ((MaterialPreviewer) preview).render();
     }
 
+    @Override
     public void disposePreview(Object preview)
     {
       UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
     }
 
+    @Override
     public boolean allowParameters()
     {
       return true;
     }
 
+    @Override
     public boolean allowViewAngle()
     {
       return false;
     }
 
+    @Override
     public boolean canEditName()
     {
       return false;
     }
 
+    @Override
     public String getName()
     {
       return info.getName();
     }
 
+    @Override
     public void setName(String name)
     {
     }
 
+    @Override
     public void acceptEdits(ProcedureEditor editor)
     {
       findParameters();
@@ -539,6 +573,7 @@ public class ProceduralPointLight extends PointLight
       callback.run();
     }
 
+    @Override
     public void editProperties(ProcedureEditor editor)
     {
       ValueSelector radiusField = new ValueSelector(getRadius(), 0.0, 45.0, 0.1);

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -23,39 +23,44 @@ public class CreateCameraTool extends EditingTool
 {
   static int counter = 2;
   Point clickPoint;
-  
+
   public CreateCameraTool(LayoutWindow fr)
   {
     super(fr);
     initButton("camera");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCameraTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createCameraTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
   }
-  
+
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = ((LayoutWindow) theWindow).getScene();
     Camera cam = view.getCamera();
     Vec3 orig, ydir, zdir;
-    
+
     orig = cam.convertScreenToWorld(e.getPoint(), Camera.DEFAULT_DISTANCE_TO_SCREEN);
     ydir = new Vec3(0.0, 1.0, 0.0);
     zdir = new Vec3(0.0, 0.0, 1.0);

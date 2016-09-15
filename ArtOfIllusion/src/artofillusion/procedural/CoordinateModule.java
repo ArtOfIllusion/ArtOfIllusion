@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -22,7 +22,7 @@ public class CoordinateModule extends Module
 {
   int coordinate;
   PointInfo point;
-  
+
   public static final int X = 0;
   public static final int Y = 1;
   public static final int Z = 2;
@@ -36,14 +36,14 @@ public class CoordinateModule extends Module
 
   public CoordinateModule(Point position, int coordinate)
   {
-    super(COORD_NAME[coordinate], new IOPort [] {}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {COORD_NAME[coordinate]})}, 
+    super(COORD_NAME[coordinate], new IOPort [] {},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {COORD_NAME[coordinate]})},
       position);
     this.coordinate = coordinate;
   }
 
   /* Set the coordinate which this module outputs. */
-  
+
   public void setCoordinate(int coordinate)
   {
     this.coordinate = coordinate;
@@ -54,13 +54,15 @@ public class CoordinateModule extends Module
 
   /* Cache the PointInfo object to have access to the coordinates later on. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
   }
 
   /* This module outputs the value of the specified coordinate. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     switch (coordinate)
@@ -78,6 +80,7 @@ public class CoordinateModule extends Module
 
   /* Return the error in the specified coordinate. */
 
+  @Override
   public double getValueError(int which, double blur)
   {
     switch (coordinate)
@@ -95,6 +98,7 @@ public class CoordinateModule extends Module
 
   /* The gradient is simply linear in the appropriate coordinate. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     switch (coordinate)
@@ -112,26 +116,29 @@ public class CoordinateModule extends Module
 	grad.set(0.0, 0.0, 0.0);
     }
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     CoordinateModule mod = new CoordinateModule(new Point(bounds.x, bounds.y), coordinate);
-    
+
     mod.layout();
     return mod;
   }
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(coordinate);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     coordinate = in.readInt();

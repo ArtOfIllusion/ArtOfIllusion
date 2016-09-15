@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -36,23 +36,27 @@ public class CompoundPhotonSource implements PhotonSource
     }
   }
 
+  @Override
   public double getTotalIntensity()
   {
     return totalSourceIntensity;
   }
 
+  @Override
   public void generatePhotons(final PhotonMap map, final double intensity, ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
     threads.setNumIndices(source.length);
     threads.setTask(new ThreadManager.Task()
     {
+          @Override
       public void execute(int index)
       {
         if (map.getRenderer().renderThread != currentThread)
           return;
         source[index].generatePhotons(map, intensity*sourceIntensity[index]/totalSourceIntensity, null);
       }
+          @Override
       public void cleanup()
       {
         map.getWorkspace().cleanup();

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -42,21 +42,25 @@ public class SkewMeshTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("skewMeshTool.tipText");
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -69,7 +73,8 @@ public class SkewMeshTool extends MeshEditingTool
     else
       theWindow.setHelpText(Translate.text("skewMeshTool.errorText"));
   }
-  
+
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -78,11 +83,13 @@ public class SkewMeshTool extends MeshEditingTool
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);
@@ -142,13 +149,13 @@ public class SkewMeshTool extends MeshEditingTool
     skewAll = skewX && skewY && ev.getMouseEvent().isShiftDown();
     baseVertPos = mesh.getVertexPositions();
   }
-  
+
   protected void handleDragged(HandleDraggedEvent ev)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
     double max, xskew, yskew;
-    
+
     if (undo == null)
       undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
     xskew = yskew = 0.0;
@@ -211,9 +218,9 @@ public class SkewMeshTool extends MeshEditingTool
     Camera cam = view.getCamera();
     Mat4 m, s;
     int i;
-    
+
     // Find the transformation matrix.
-    
+
     m = cam.getObjectToView();
     m = Mat4.translation(-skewCenter.x, -skewCenter.y, -skewCenter.z).times(m);
     s = new Mat4(1.0, xskew, 0.0, 0.0,
@@ -224,9 +231,9 @@ public class SkewMeshTool extends MeshEditingTool
     m = Mat4.translation(skewCenter.x, skewCenter.y, skewCenter.z).times(m);
     m = cam.getViewToWorld().times(m);
     m = view.getDisplayCoordinates().toLocal().times(m);
-    
+
     // Determine the deltas.
-    
+
     for (i = 0; i < vert.length; i++)
       {
         if (selected[i] == 0)

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.keystroke;
@@ -164,6 +164,7 @@ public class KeystrokePreferencesPanel extends FormContainer
     final Comparator stringComparator = Collator.getInstance(Translate.getLocale());
     Collections.sort(records, new Comparator<KeystrokeRecord>()
     {
+      @Override
       public int compare(KeystrokeRecord r1, KeystrokeRecord r2)
       {
         String s1, s2;
@@ -203,16 +204,19 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private class KeystrokeTableModel extends AbstractTableModel
   {
+    @Override
     public int getRowCount()
     {
       return records.size();
     }
 
+    @Override
     public int getColumnCount()
     {
       return 2;
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex)
     {
       KeystrokeRecord record = (KeystrokeRecord) records.get(rowIndex);
@@ -221,6 +225,7 @@ public class KeystrokePreferencesPanel extends FormContainer
       return getKeyDescription(record.getKeyCode(), record.getModifiers());
     }
 
+    @Override
     public String getColumnName(int column)
     {
       return (column == 1 ? Translate.text("Name") : Translate.text("Key"));

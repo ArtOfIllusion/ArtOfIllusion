@@ -6,8 +6,8 @@ package artofillusion.script;
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 
@@ -29,27 +29,32 @@ public class BeanshellScriptEngine implements ScriptEngine
     interp.setClassLoader(parent);
   }
 
+  @Override
   public String getName()
   {
     return "BeanShell";
   }
 
+  @Override
   public String getFilenameExtension()
   {
     return "bsh";
   }
 
+  @Override
   public void setOutput(PrintStream out)
   {
     interp.setOut(out);
     interp.setErr(out);
   }
 
+  @Override
   public void addImport(String packageOrClass) throws Exception
   {
     interp.eval("import "+packageOrClass);
   }
 
+  @Override
   public void executeScript(String script, Map<String, Object> variables) throws ScriptException
   {
     try
@@ -64,6 +69,7 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
   }
 
+  @Override
   public ToolScript createToolScript(String script) throws ScriptException
   {
     String prefix = "return new ToolScript() {void execute(LayoutWindow window) {\n";
@@ -78,6 +84,7 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
   }
 
+  @Override
   public ObjectScript createObjectScript(String script) throws ScriptException
   {
     String prefix = "return new ObjectScript() {void execute(ScriptedObjectController script) {\n";

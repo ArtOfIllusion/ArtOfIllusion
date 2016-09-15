@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -30,12 +30,12 @@ public class RandomModule extends Module
   Random random;
   Vec3 gradient;
   PointInfo point;
-  
+
   public RandomModule(Point position)
   {
-    super(Translate.text("menu.randomModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(time)"}), 
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})}, 
+    super(Translate.text("menu.randomModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(time)"}),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
       position);
     octaves = 3;
     amplitude = 1.0;
@@ -43,30 +43,30 @@ public class RandomModule extends Module
     gradient = new Vec3();
     random = new FastRandom(0);
   }
-  
+
   /** Get the number of octaves. */
-  
+
   public int getOctaves()
   {
     return octaves;
   }
-  
+
   /** Set the number of octaves. */
-  
+
   public void setOctaves(int o)
   {
     octaves = o;
   }
-  
+
   /** Get the amplitude. */
-  
+
   public double getAmplitude()
   {
     return amplitude;
   }
-  
+
   /** Set the amplitude. */
-  
+
   public void setAmplitude(double a)
   {
     amplitude = a;
@@ -74,14 +74,15 @@ public class RandomModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
     point = p;
   }
-  
+
   /** Find the polynomial coefficients from a specified base. */
-  
+
   private void calcCoefficients(int base)
   {
     if (base == lastBase)
@@ -96,11 +97,11 @@ public class RandomModule extends Module
     a2 = -2.0*a1-m2;
     a3 = a1+m2;
   }
-    
-  /** Calculate the noise function corresponding to a given input value, where 
+
+  /** Calculate the noise function corresponding to a given input value, where
       fract is the fractional part of the input, and calcCoefficients() has
       already been called with the integer part. */
-  
+
   private double calcNoise(double fract)
   {
     return fract*(a1 + fract*(a2 + fract*a3));
@@ -109,16 +110,16 @@ public class RandomModule extends Module
   /** Calculate the derivative of the noise function corresponding to a given
       input value, where fract is the fractional part of the input, and
       calcCoefficients() has already been called with the integer part. */
-  
+
   private double calcNoiseDeriv(double fract)
   {
     return (a1 + fract*(2.0*a2 + fract*3.0*a3));
   }
-  
+
   /** Calculate the integral of the noise function from the start of the
       current unit interval, where fract is the fractional part of the input,
       and calcCoefficients() has already been called with the integer part. */
-  
+
   private double calcNoiseIntegral(double fract)
   {
     return fract*fract*(0.5*a1 + fract*((1.0/3.0)*a2 + fract*0.25*a3));
@@ -127,14 +128,15 @@ public class RandomModule extends Module
   /** Calculate the integral of the noise function over a unit interval,
       where calcCoefficients() has already been called with the starting
       point. */
-  
+
   private double calcNoiseUnitIntegral()
   {
     return (0.5*a1 + ((1.0/3.0)*a2 + 0.25*a3));
   }
 
   /* Calculate the output value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -144,7 +146,7 @@ public class RandomModule extends Module
     double xsize = (linkFrom[0] == null) ? blur : linkFrom[0].getValueError(linkFromIndex[0], blur);
     double amp = amplitude, scale = 1.0;
     double cutoff = 0.5/xsize;
-    
+
     value = 0.0;
     for (int i = 0; i < octaves && cutoff > scale; i++)
       {
@@ -179,9 +181,10 @@ public class RandomModule extends Module
     lastBlur = blur;
     return value;
   }
-  
+
   /* Calculate the error. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -194,7 +197,7 @@ public class RandomModule extends Module
     double amp = amplitude, scale = 1.0;
     double cutoff = 0.5/xsize;
     int i;
-    
+
     deriv = 0.0;
     error = 0.0;
     for (i = 0; i < octaves && cutoff > scale; i++)
@@ -219,6 +222,7 @@ public class RandomModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!errorOk || blur != lastBlur)
@@ -241,13 +245,14 @@ public class RandomModule extends Module
     gradient.scale(deriv);
     grad.set(gradient);
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     RandomModule mod = new RandomModule(new Point(bounds.x, bounds.y));
-    
+
     mod.octaves = octaves;
     mod.amplitude = amplitude;
     return mod;
@@ -255,22 +260,25 @@ public class RandomModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
     out.writeDouble(amplitude);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();
     amplitude = in.readDouble();
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);

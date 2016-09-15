@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -27,41 +27,46 @@ public class CreateCylinderTool extends EditingTool
   private Point clickPoint;
   private double ratio = 1.0;
   private ObjectInfo objInfo;
-  
+
   public CreateCylinderTool(LayoutWindow fr)
   {
     super(fr);
     initButton("cylinder");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCylinderTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createCylinderTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
     shiftDown = e.isShiftDown();
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (objInfo == null)
     {
       // Create the cylinder.
-      
+
       Scene theScene = ((LayoutWindow) theWindow).getScene();
       objInfo = new ObjectInfo(new Cylinder(1.0, 1.0, 1.0, ratio), new CoordinateSystem(), "Cylinder "+(counter++));
       objInfo.addTrack(new PositionTrack(objInfo), 0);
@@ -73,14 +78,14 @@ public class CreateCylinderTool extends EditingTool
       theWindow.setUndoRecord(undo);
       ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
     }
-    
+
     // Determine the size and position for the cylinder.
-    
+
     Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     Vec3 v1, v2, v3, orig, xdir, ydir, zdir;
     double xsize, ysize, zsize;
-    
+
     if (shiftDown)
     {
       if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
@@ -118,7 +123,7 @@ public class CreateCylinderTool extends EditingTool
     zsize = Math.min(xsize, ysize);
 
     // Update the size and position, and redraw the display.
-    
+
     ((Cylinder) objInfo.getObject()).setSize(xsize, ysize, zsize);
     objInfo.getCoords().setOrigin(orig);
     objInfo.getCoords().setOrientation(zdir, ydir);
@@ -126,16 +131,18 @@ public class CreateCylinderTool extends EditingTool
     theWindow.setModified();
     theWindow.updateImage();
   }
-  
+
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     objInfo = null;
   }
-  
+
+  @Override
   public void iconDoubleClicked()
   {
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, ratio);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("editCylinderTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("editCylinderTitle"),
 		new Widget [] {ratioSlider}, new String [] {Translate.text("radiusRatio")});
     if (dlg.clickedOk())
       ratio = ratioSlider.getValue();

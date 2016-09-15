@@ -4,7 +4,7 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
@@ -341,6 +341,7 @@ public class CSGModeller
     for (int i = 0; i < faceIndex.length; i++)
       faceIndex[i] = i;
     Arrays.sort(faceIndex, new Comparator<Integer>() {
+      @Override
       public int compare(Integer index1, Integer index2)
       {
         double max1 = f2.get(index1).max;

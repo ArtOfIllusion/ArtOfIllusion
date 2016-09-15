@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -142,7 +142,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   }
 
   /** Create the popup menu. */
-  
+
   private void createPopupMenu()
   {
     popupMenu = new BPopupMenu();
@@ -153,9 +153,10 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     popupMenu.add(popupMenuItem[3] = Translate.menuItem("enableTracks", window, "actionPerformed", null));
     popupMenu.add(popupMenuItem[4] = Translate.menuItem("disableTracks", window, "actionPerformed", null));
   }
-  
+
   /** Display the popup menu. */
 
+  @Override
   public void showPopupMenu(Widget w, int x, int y)
   {
     Track selTrack[] = getSelectedTracks();
@@ -175,42 +176,43 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     popupMenuItem[4].setEnabled(disable); // Disable Tracks
     popupMenu.show(w, x, y);
   }
-  
+
   /** Get the popup menu for the score. */
-  
+
   public BPopupMenu getPopupMenu()
   {
     return popupMenu;
   }
-  
+
   /** Allow the score to be fully hidden. */
-  
+
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(0, 0);
   }
 
   /** Get the currently selected tracks. */
-  
+
   public Track [] getSelectedTracks()
   {
     Object obj[] = theList.getSelectedObjects();
     Track tr[] = new Track [obj.length];
-    
+
     for (int i = 0; i < tr.length; i++)
       tr[i] = (Track) obj[i];
     return tr;
   }
-  
+
   /** Get the currently selected keyframes. */
-  
+
   public SelectionInfo [] getSelectedKeyframes()
   {
     return selection;
   }
-  
+
   /** Set the currently selected keyframes. */
-  
+
   public void setSelectedKeyframes(SelectionInfo sel[])
   {
     selection = sel;
@@ -218,14 +220,14 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       ((Widget) graphs.elementAt(i)).repaint();
     window.updateMenus();
   }
-  
+
   /** Add a set of keyframes to the selection. */
-  
+
   public void addSelectedKeyframes(SelectionInfo newsel[])
   {
     Vector v = new Vector();
     int i, j;
-    
+
     for (i = 0; i < selection.length; i++)
       v.addElement(selection[i]);
     for (i = 0; i < newsel.length; i++)
@@ -245,13 +247,13 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       selection[i] = (SelectionInfo) v.elementAt(i);
     window.updateMenus();
   }
-  
+
   /** Remove a keyframe from the selection. */
-  
+
   public void removeSelectedKeyframe(Keyframe key)
   {
     Vector v = new Vector();
-    
+
     for (int i = 0; i < selection.length; i++)
       if (selection[i].key != key)
         v.addElement(selection[i]);
@@ -260,9 +262,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       selection[i] = (SelectionInfo) v.elementAt(i);
     window.updateMenus();
   }
-  
+
   /** Determine whether a particular keyframe is selected. */
-  
+
   public boolean isKeyframeSelected(Keyframe k)
   {
     for (int i = 0; i < selection.length; i++)
@@ -272,7 +274,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   }
 
   /** Determine whether the handle for a particular value of a keyframe is selected. */
-  
+
   public boolean isKeyframeSelected(Keyframe k, int value)
   {
     for (int i = 0; i < selection.length; i++)
@@ -282,7 +284,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   }
 
   /** Rebuild the TreeList, attempting as much as possible to preserve its current state. */
-  
+
   public void rebuildList()
   {
     Scene theScene = window.getScene();
@@ -325,7 +327,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     repaintGraphs();
     setScrollPosition(scrollPos);
   }
-  
+
   /** Layout the display in the right side of the Score, based on the current view mode
       and selected tracks. */
 
@@ -398,16 +400,16 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     div.layoutChildren();
     repaintAll();
   }
-  
+
   /** Get the starting time to display. */
-  
+
   public double getStartTime()
   {
     return startTime;
   }
-  
+
   /** Set the starting time to display. */
-  
+
   public void setStartTime(double time)
   {
     theAxis.setStartTime(time);
@@ -416,16 +418,16 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     startTime = time;
     repaintGraphs();
   }
-  
+
   /** Get the number of pixels per unit time. */
-  
+
   public double getScale()
   {
     return timeScale;
   }
-  
+
   /** Set the number of pixels per unit time. */
-  
+
   public void setScale(double s)
   {
     theAxis.setScale(s);
@@ -434,9 +436,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     timeScale = s;
     repaintGraphs();
   }
-  
+
   /** Set the current time. */
-  
+
   public void setTime(double time)
   {
     if (hasRepaintedView != null)
@@ -541,25 +543,25 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     animateStartSceneTime = window.getScene().getTime();
     animateStartClockTime = System.currentTimeMillis();
   }
-  
+
   /** Respond to the scroll wheel. */
-  
+
   private void mouseScrolled(MouseScrolledEvent ev)
   {
     setStartTime(startTime+ev.getUnitsToScroll()/(double) window.getScene().getFramesPerSecond());
   }
-  
+
   /** Update the menus when the selection changes. */
-  
+
   private void treeSelectionChanged()
   {
     selectedTracksChanged();
     window.updateMenus();
   }
-  
+
   /** This is called whenever there is a change to which tracks are selected.  It updates
       the list of selected keyframes, removing any which are no longer appropriate. */
-  
+
   private void selectedTracksChanged()
   {
     Vector v = new Vector();
@@ -584,10 +586,10 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       layoutGraphs();
   }
 
-  /** This is called whenever a track is modified.  It causes all graphs to be 
+  /** This is called whenever a track is modified.  It causes all graphs to be
       properly updated and, optionally, updates the Scene to reflect any changes
       to selected keyframes. */
-  
+
   public void tracksModified(boolean updateScene)
   {
     for (int i = 0; i < graphs.size(); i++)
@@ -599,7 +601,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
     if (!updateScene)
       return;
-    
+
     // Find the list of tracks with selected keyframes.
 
     Vector v = new Vector();
@@ -620,9 +622,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
     window.updateImage();
   }
-  
+
   /** Repaint all of the graphs. */
-  
+
   public void repaintGraphs()
   {
     for (int i = 0; i < graphs.size(); i++)
@@ -634,15 +636,15 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
     theAxis.repaint();
   }
-  
+
   /** Repaint all of the child Widgets. */
-  
+
   public void repaintAll()
   {
     repaintGraphs();
     theList.repaint();
   }
-  
+
   private void elementsMoved()
   {
     repaintGraphs();
@@ -653,7 +655,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     repaintGraphs();
     updateScrollbar();
   }
-  
+
   private void elementDoubleClicked(TreeList.ElementDoubleClickedEvent ev)
   {
     TreeElement el = ev.getElement();
@@ -671,9 +673,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       repaintAll();
     }
   }
-  
+
   /** Scroll the list and the tracks together. */
-  
+
   public void setScrollPosition(int pos)
   {
     Rectangle size = theList.getBounds();
@@ -694,16 +696,16 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     scrollPos = pos;
     updateScrollbar();
   }
-  
+
   /** Respond to changes on the scrollbar. */
-  
+
   private void scrollbarChanged(ValueChangedEvent ev)
   {
     setScrollPosition(scroll.getValue());
   }
-  
+
   /** Update the bounds of the scrollbar. */
-  
+
   private void updateScrollbar()
   {
     int height = theList.getPreferredSize().height, showing = theList.getBounds().height;
@@ -713,10 +715,10 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     scroll.setUnitIncrement(Math.max(theList.getRowHeight(), 1));
     scroll.setBlockIncrement(Math.max(showing-theList.getRowHeight(), 1));
   }
-  
-  /** This is called when a time marker has been moved.  If this is an intermediate 
+
+  /** This is called when a time marker has been moved.  If this is an intermediate
       position in the middle of a drag, then intermediate will be true. */
-  
+
   public void markerMoved(Marker m, boolean intermediate)
   {
     if (/*!intermediate && */m == timeMarker && m.position != window.getScene().getTime())
@@ -724,18 +726,19 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     else
       repaintGraphs();
   }
-  
+
   /** Make sure the scrollbar gets adjusted when the score is resized. */
 
+  @Override
   public void layoutChildren()
   {
 //    theAxis.setSize(theAxis.getSize().width, theAxis.getPreferredSize().height); // Workaround for layout manager bug.
     super.layoutChildren();
     updateScrollbar();
   }
-  
+
   /** Allow the user to edit the currently selected track. */
-  
+
   public void editSelectedTrack()
   {
     Object sel[] = theList.getSelectedObjects();
@@ -746,9 +749,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
         finishEditingTrack(tr);
       }
   }
-  
+
   /** This method should be called when a track is done being edited. */
-  
+
   public void finishEditingTrack(Track tr)
   {
     Object parent = tr.getParent();
@@ -761,9 +764,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     selectedTracksChanged();
     repaintAll();
   }
-  
+
   /** Enable or disable all selected tracks. */
-  
+
   public void setTracksEnabled(boolean enable)
   {
     Object sel[] = theList.getSelectedObjects();
@@ -793,7 +796,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   }
 
   /** Add a keyframe to each selected track, based on the current state of the scene. */
-  
+
   public void keyframeSelectedTracks()
   {
     Scene theScene = window.getScene();
@@ -801,7 +804,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     double time = theScene.getTime();
     UndoRecord undo = new UndoRecord(window, false);
     Vector newkeys = new Vector();
-    
+
     for (int i = 0; i < sel.length; i++)
       if (sel[i] instanceof Track)
         {
@@ -828,9 +831,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     repaintGraphs();
     window.updateMenus();
   }
-  
+
   /** Add a keyframe to the tracks of selected objects which have been modified. */
-  
+
   public void keyframeModifiedTracks()
   {
     Scene theScene = window.getScene();
@@ -838,7 +841,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     double time = theScene.getTime();
     UndoRecord undo = new UndoRecord(window, false);
     Vector newkeys = new Vector();
-    
+
     for (int i = 0; i < sel.length; i++)
       {
         ObjectInfo info = theScene.getObject(sel[i]);
@@ -886,15 +889,15 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     repaintGraphs();
     window.updateMenus();
   }
-  
+
   /** Duplicate the selected tracks. */
-  
+
   public void duplicateSelectedTracks()
   {
     Object sel[] = theList.getSelectedObjects();
     UndoRecord undo = new UndoRecord(window, false);
     Vector modifiedObj = new Vector(), addedTrack = new Vector();
-    
+
     for (int i = 0; i < sel.length; i++)
       if (sel[i] instanceof Track)
         {
@@ -927,15 +930,15 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
     repaintGraphs();
   }
-  
+
   /** Delete the selected tracks. */
-  
+
   public void deleteSelectedTracks()
   {
     Object sel[] = theList.getSelectedObjects();
     UndoRecord undo = new UndoRecord(window, false);
     Vector modifiedObj = new Vector();
-    
+
     for (int i = 0; i < sel.length; i++)
       if (sel[i] instanceof Track)
         {
@@ -954,14 +957,14 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     rebuildList();
     repaintGraphs();
   }
-  
+
   /** Select all tracks of selected objects. */
-  
+
   public void selectAllTracks()
   {
     Scene theScene = window.getScene();
     int sel[] = window.getSelectedIndices();
-    
+
     theList.setUpdateEnabled(false);
     for (int i = 0; i < sel.length; i++)
       {
@@ -975,9 +978,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     selectedTracksChanged();
     window.updateMenus();
   }
-  
+
   /** Add a track to the specified objects. */
-  
+
   public void addTrack(Object obj[], Class trackClass, Object extraArgs[], boolean deselectOthers)
   {
     Scene theScene = window.getScene();
@@ -1036,9 +1039,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     selectedTracksChanged();
     window.updateMenus();
   }
-  
+
   /** Edit the selected keyframe. */
-  
+
   public void editSelectedKeyframe()
   {
     if (selection.length != 1)
@@ -1048,7 +1051,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   }
 
   /** Delete all selected keyframes. */
-  
+
   public void deleteSelectedKeyframes()
   {
     Hashtable changedTracks = new Hashtable();
@@ -1132,19 +1135,22 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     setPlaybackSeed(SPEEDS[speedSlider.getValue()]);
   }
 
-  /** EditingWindow methods.  Most of these either do nothing, or simply call through to 
+  /** EditingWindow methods.  Most of these either do nothing, or simply call through to
       the corresponding methods of the LayoutWindow the Score is in. */
 
+  @Override
   public boolean confirmClose()
   {
     return true;
   }
 
+  @Override
   public ToolPalette getToolPalette()
   {
     return modeTools;
   }
 
+  @Override
   public void setTool(EditingTool tool)
   {
     if (view != viewTools.getSelection())
@@ -1160,45 +1166,54 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
         setHelpText(MODE_HELP_TEXT[mode]);
       }
   }
-  
+
+  @Override
   public void setHelpText(String text)
   {
     helpText.setText(text);
   }
-  
+
+  @Override
   public BFrame getFrame()
   {
     return window;
   }
 
+  @Override
   public void updateImage()
   {
   }
 
+  @Override
   public void updateMenus()
   {
   }
-  
+
+  @Override
   public void setUndoRecord(UndoRecord command)
   {
     window.setUndoRecord(command);
   }
 
+  @Override
   public void setModified()
   {
     window.setModified();
   }
 
+  @Override
   public Scene getScene()
   {
     return window.getScene();
   }
-  
+
+  @Override
   public ViewerCanvas getView()
   {
     return null;
   }
 
+  @Override
   public ViewerCanvas[] getAllViews()
   {
     return null;

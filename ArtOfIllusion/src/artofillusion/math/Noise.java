@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
@@ -28,25 +28,28 @@ public class Noise
 {
   private static NoiseGenerator generator = new NoiseGenerator()
   {
+    @Override
     public double getValue(double x, double y, double z)
     {
       return SimplexNoise.noise(x, y, z);
     }
 
+    @Override
     public void getGradient(Vec3 gradient, double x, double y, double z)
     {
       SimplexNoise.noiseGradient(gradient, x, y, z);
     }
 
+    @Override
     public void getVector(Vec3 v, double x, double y, double z)
     {
       SimplexNoise.noiseVector(v, x, y, z);
     }
   };
 
-  /** Given a point in 3D space, return the value of the scalar noise 
+  /** Given a point in 3D space, return the value of the scalar noise
       function at that point. */
-  
+
   public static double value(double x, double y, double z)
   {
     return generator.getValue(x, y, z);

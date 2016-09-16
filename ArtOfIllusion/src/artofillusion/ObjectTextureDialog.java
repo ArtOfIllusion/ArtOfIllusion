@@ -717,7 +717,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       pack();
       UIUtilities.centerDialog(this, window);
       resetParameters();
-      return;
+
     }
   }
   

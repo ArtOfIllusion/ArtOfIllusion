@@ -387,7 +387,7 @@ public class RGBColor
       setRGB(value(m1, m2, h+120.0f), value(m1, m2, h), value(m1, m2, h-120.0f));
   }
 
-  private static final float value(float n1, float n2, float hue)
+  private static float value(float n1, float n2, float hue)
   {
     if (hue > 360.0f)
       hue -= 360.0f;

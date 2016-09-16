@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -22,15 +22,15 @@ public class PixelInfo
   public int raysSent;
   public boolean needsMore, converged;
   public float object;
-  
+
   public PixelInfo()
   {
     needsMore = true;
     depth = Float.MAX_VALUE;
   }
-  
+
   /** Reinitialize all of the fields for the PixelInfo. */
-  
+
   public final void clear()
   {
     red = green = blue = redSquare = greenSquare = blueSquare = transparency = 0.0f;
@@ -39,9 +39,9 @@ public class PixelInfo
     raysSent = 0;
     needsMore = true;
   }
-  
+
   /** Make this PixelInfo identical to another one. */
-  
+
   public final void copy(PixelInfo info)
   {
     red = info.red;
@@ -57,9 +57,9 @@ public class PixelInfo
     needsMore = info.needsMore;
     converged = info.converged;
   }
-  
+
   /** Add another ray to this pixel. */
-  
+
   public final void add(RGBColor col, float t)
   {
     red += col.getRed();
@@ -90,10 +90,10 @@ public class PixelInfo
     }
     raysSent += info.raysSent;
   }
-  
+
   /** Decide whether the color of this pixel is identical to another one, within either of the specified
       tolerances (relative and absolute differences) */
-  
+
   public final boolean matches(PixelInfo info, float maxAbsDiff, float maxRelDiff)
   {
     float scale1 = 1.0f/raysSent;
@@ -108,10 +108,10 @@ public class PixelInfo
       return false;
     return true;
   }
-  
+
   /** Decide whether particular values are different. */
-  
-  private final boolean valuesDifferent(float val1, float val2, float maxAbsDiff, float maxRelDiff)
+
+  private boolean valuesDifferent(float val1, float val2, float maxAbsDiff, float maxRelDiff)
   {
     float diff = val1-val2;
     if (diff < 0.0f)
@@ -121,7 +121,7 @@ public class PixelInfo
     float sum = val1+val2;
     return (diff >= maxRelDiff*sum);
   }
-  
+
   /** Calculate the ARGB value for this pixel. */
 
   public final int calcARGB()
@@ -144,28 +144,28 @@ public class PixelInfo
     if (b > 255) b = 255;
     return (a<<24) + (r<<16) + (g<<8) + b;
   }
-  
+
   /** Get the variance of the red component for this pixel. */
-  
+
   public final float getRedVariance()
   {
     float ninv = 1.0f/raysSent;
-    	return (redSquare-red*red*ninv)*ninv;
+	return (redSquare-red*red*ninv)*ninv;
   }
-  
+
   /** Get the variance of the green component for this pixel. */
-  
+
   public final float getGreenVariance()
   {
     float ninv = 1.0f/raysSent;
-    	return (greenSquare-green*green*ninv)*ninv;
+	return (greenSquare-green*green*ninv)*ninv;
   }
-  
+
   /** Get the variance of the blue component for this pixel. */
-  
+
   public final float getBlueVariance()
   {
     float ninv = 1.0f/raysSent;
-    	return (blueSquare-blue*blue*ninv)*ninv;
+	return (blueSquare-blue*blue*ninv)*ninv;
   }
 }

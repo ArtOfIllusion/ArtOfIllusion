@@ -249,7 +249,7 @@ public class RotationKeyframe implements Keyframe
 
   /** This performs spherical linear interpolation (slerp) between two quaternions. */
 
-  private static final double [] slerp(double q1[], double q2[], double t)
+  private static double [] slerp(double q1[], double q2[], double t)
   {
     double dot = q1[0]*q2[0] + q1[1]*q2[1] + q1[2]*q2[2] + q1[3]*q2[3], sign;
     if (dot < 0.0)

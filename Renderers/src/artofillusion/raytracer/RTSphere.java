@@ -305,7 +305,7 @@ public class RTSphere extends RTObject
 
     /** Calculate the true normal of the point of intersection. */
 
-    private final void calcTrueNorm()
+    private void calcTrueNorm()
     {
       if (trueNormValid)
         return;

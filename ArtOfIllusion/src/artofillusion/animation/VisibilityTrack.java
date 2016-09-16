@@ -35,7 +35,7 @@ public class VisibilityTrack extends Track
   @Override
   public void apply(double time)
   {
-    BooleanKeyframe v = (BooleanKeyframe) tc.evaluate(time, tc.LINEAR);
+    BooleanKeyframe v = (BooleanKeyframe) tc.evaluate(time, Timecourse.LINEAR);
 
     if (v == null)
       return;
@@ -112,7 +112,7 @@ public class VisibilityTrack extends Track
   {
     if (tc.getTimes().length == 0)
       return setKeyframe(time, sc);
-    BooleanKeyframe v = (BooleanKeyframe) tc.evaluate(time, tc.LINEAR);
+    BooleanKeyframe v = (BooleanKeyframe) tc.evaluate(time, Timecourse.LINEAR);
     if (v.val == info.isVisible())
       return null;
     return setKeyframe(time, sc);

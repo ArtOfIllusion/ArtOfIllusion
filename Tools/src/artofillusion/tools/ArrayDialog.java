@@ -4,9 +4,9 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
-   PARTICULAR PURPOSE.  See the GNU General Public License for more details. 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+   PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 */
 
 
@@ -42,7 +42,7 @@ public class ArrayDialog extends BDialog
   private ValueField curveCopiesField, curveStepField;
   private RadioButtonGroup methodGroup;
   private RadioButtonGroup modeGroup;
-  
+
   public ArrayDialog(LayoutWindow window)
   {
     super(window, "Array", true);
@@ -59,7 +59,7 @@ public class ArrayDialog extends BDialog
         if (info.getObject() instanceof Curve)
                 curvesVector.addElement(info);
     }
- 
+
     // layout dialog
     methodGroup = new RadioButtonGroup();
     modeGroup = new RadioButtonGroup();
@@ -72,7 +72,7 @@ public class ArrayDialog extends BDialog
     content.add(createOptionsPanel());
     content.add(createFinishPanel());
 
-   // don't allow user to use nil curve 
+   // don't allow user to use nil curve
    if (curvesVector.size() <= 0)
         curveBox.setEnabled(false);
 
@@ -119,21 +119,21 @@ public class ArrayDialog extends BDialog
     curveBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(curveChoice = new BComboBox(), 1, 0);
     // put names of possible curves in choice
-    
+
     for (int k=0; k<curvesVector.size(); k++)
     {
         ObjectInfo info = (ObjectInfo)(curvesVector.elementAt(k));
         curveChoice.add(info.getName());
     }
-    
+
     if (spec.curve != null)
         curveChoice.setSelectedValue(spec.curve.getName());
     curveChoice.addEventLink(ValueChangedEvent.class, this, "updateSpec");
-    panel.add(curveCopiesBox = new BRadioButton("Number Of Copies", spec.curveMode == spec.MODE_COPIES, modeGroup), 1, 1);
+    panel.add(curveCopiesBox = new BRadioButton("Number Of Copies", spec.curveMode == ArraySpec.MODE_COPIES, modeGroup), 1, 1);
     curveCopiesBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(curveCopiesField = new ValueField(spec.curveCopies, ValueField.POSITIVE+ValueField.INTEGER,4), 2, 1);
     curveCopiesField.addEventLink(ValueChangedEvent.class, this, "updateSpec");
-    panel.add(curveStepBox = new BRadioButton("Step Size:", spec.curveMode == spec.MODE_STEP, modeGroup), 1, 2);
+    panel.add(curveStepBox = new BRadioButton("Step Size:", spec.curveMode == ArraySpec.MODE_STEP, modeGroup), 1, 2);
     curveStepBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(curveStepField = new ValueField(spec.curveStep, ValueField.POSITIVE,4), 2, 2);
     curveStepField.addEventLink(ValueChangedEvent.class, this, "updateSpec");
@@ -184,9 +184,9 @@ public class ArrayDialog extends BDialog
         // get values
 
         if (linearBox.getState() == true)
-                spec.method = spec.METHOD_LINEAR;
+                spec.method = ArraySpec.METHOD_LINEAR;
         if (curveBox.getState() == true)
-                spec.method = spec.METHOD_CURVE;
+                spec.method = ArraySpec.METHOD_CURVE;
         spec.linearCopies = (int)linearCopiesField.getValue();
         spec.stepX = stepXField.getValue();
         spec.stepY = stepYField.getValue();
@@ -198,9 +198,9 @@ public class ArrayDialog extends BDialog
                 spec.curve = (ObjectInfo)(curvesVector.elementAt(curveChoice.getSelectedIndex()));
 
         if (curveCopiesBox.getState() == true)
-                spec.curveMode = spec.MODE_COPIES;
+                spec.curveMode = ArraySpec.MODE_COPIES;
         if (curveStepBox.getState() == true)
-                spec.curveMode = spec.MODE_STEP;
+                spec.curveMode = ArraySpec.MODE_STEP;
         spec.curveStep = curveStepField.getValue();
         spec.curveCopies = (int)curveCopiesField.getValue();
         spec.orientation = orientationBox.getState();
@@ -213,26 +213,26 @@ public class ArrayDialog extends BDialog
 
 
         // update enabled/disabled status
-        linearCopiesField.setEnabled(spec.method == spec.METHOD_LINEAR);
-        stepXField.setEnabled(spec.method == spec.METHOD_LINEAR);
-        stepYField.setEnabled(spec.method == spec.METHOD_LINEAR);
-        stepZField.setEnabled(spec.method == spec.METHOD_LINEAR);
-        linearCopiesLabel.setEnabled(spec.method == spec.METHOD_LINEAR);
-        stepXLabel.setEnabled(spec.method == spec.METHOD_LINEAR);
-        stepYLabel.setEnabled(spec.method == spec.METHOD_LINEAR);
-        stepZLabel.setEnabled(spec.method == spec.METHOD_LINEAR);
-        intervalXBox.setEnabled(spec.method == spec.METHOD_LINEAR);
-        intervalYBox.setEnabled(spec.method == spec.METHOD_LINEAR);
-        intervalZBox.setEnabled(spec.method == spec.METHOD_LINEAR);
+        linearCopiesField.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        stepXField.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        stepYField.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        stepZField.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        linearCopiesLabel.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        stepXLabel.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        stepYLabel.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        stepZLabel.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        intervalXBox.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        intervalYBox.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
+        intervalZBox.setEnabled(spec.method == ArraySpec.METHOD_LINEAR);
 
-        curveChoice.setEnabled(spec.method == spec.METHOD_CURVE);
-        curveCopiesField.setEnabled(spec.method == spec.METHOD_CURVE & spec.curveMode == spec.MODE_COPIES);
-        curveCopiesBox.setEnabled(spec.method == spec.METHOD_CURVE);
-        curveStepField.setEnabled(spec.method == spec.METHOD_CURVE & spec.curveMode == spec.MODE_STEP);
-        curveStepBox.setEnabled(spec.method == spec.METHOD_CURVE);
-        orientationBox.setEnabled(spec.method == spec.METHOD_CURVE);
-        useOriginBox.setEnabled(spec.method == spec.METHOD_CURVE);
-        useOrientationBox.setEnabled(spec.method == spec.METHOD_CURVE);
+        curveChoice.setEnabled(spec.method == ArraySpec.METHOD_CURVE);
+        curveCopiesField.setEnabled(spec.method == ArraySpec.METHOD_CURVE & spec.curveMode == ArraySpec.MODE_COPIES);
+        curveCopiesBox.setEnabled(spec.method == ArraySpec.METHOD_CURVE);
+        curveStepField.setEnabled(spec.method == ArraySpec.METHOD_CURVE & spec.curveMode == ArraySpec.MODE_STEP);
+        curveStepBox.setEnabled(spec.method == ArraySpec.METHOD_CURVE);
+        orientationBox.setEnabled(spec.method == ArraySpec.METHOD_CURVE);
+        useOriginBox.setEnabled(spec.method == ArraySpec.METHOD_CURVE);
+        useOrientationBox.setEnabled(spec.method == ArraySpec.METHOD_CURVE);
 
         // duplicateBox.setEnabled(true);
         // groupBox.setEnabled(true);

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -20,11 +20,15 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** Object3D is the abstract superclass of any object which can be placed into a Scene. */
 
 public abstract class Object3D
 {
+    private static final Logger logger = Logger.getLogger(Object3D.class.getName());
+
   protected Texture theTexture;
   protected Material theMaterial;
   protected TextureMapping texMapping;
@@ -40,14 +44,14 @@ public abstract class Object3D
   public Object3D()
   {
   }
-  
+
   /** Create a new object which is an exact duplicate of this one. */
-  
+
   public abstract Object3D duplicate();
-  
+
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
-  
+
   public abstract void copyObject(Object3D obj);
 
   /** Get a BoundingBox which just encloses the object. */
@@ -67,22 +71,22 @@ public abstract class Object3D
   {
     return true;
   }
-  
+
   /** Tells whether the object can be converted to a TriangleMesh.  It should return one
       of the following values:
-      
+
       CANT_CONVERT: The object cannot be converted to a TriangleMesh.
       EXACTLY: The object can be represented exactly by a TriangleMesh.
       APPROXIMATELY: The object can be converted to a TriangleMesh.  However, the resulting
       mesh will not be exactly the same shape as the original object.
-      
+
       If a class overrides this method, it must also override convertToTriangleMesh(). */
 
   public int canConvertToTriangleMesh()
   {
     return CANT_CONVERT;
   }
-  
+
   /** Return a TriangleMesh which reproduces the shape of this object.  If
       canConvertToTriangleMesh() returned APPROXIMATELY, this method should return a
       TriangleMesh which reproduces the object to within the specified tolerance.  That is,
@@ -94,35 +98,35 @@ public abstract class Object3D
   {
     return null;
   }
-  
+
   /** This will be called whenever this object is moved, or the time changes.  Most objects
       will do nothing here, and do not need to override this.  It is available for those
       cases where an object's internal properties depend explicitly on time or on the
       object's position within the scene. */
-  
+
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
   }
-  
+
   /** If the object can be edited by the user, isEditable() should be overridden to return true.
       edit() should then create a window and allow the user to edit the object. */
-  
+
   public boolean isEditable()
   {
     return false;
   }
-  
+
   /** Display a window in which the user can edit this object.
       @param parent   the window from which this command is being invoked
       @param info     the ObjectInfo corresponding to this object
       @param cb       a callback which will be executed when editing is complete.  If the user
                       cancels the operation, it will not be called.
   */
-  
+
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
   }
-  
+
   /** Edit an object which represents a gesture for an Actor object.  realObject
       specifies the object in the scene which this is a gesture for. */
 
@@ -134,21 +138,21 @@ public abstract class Object3D
   /** This method tells whether textures can be assigned to the object.  Objects for which
       it makes no sense to assign a texture (curves, lights, etc.) should override this
       method to return false. */
-  
+
   public boolean canSetTexture()
   {
     return true;
   }
-  
+
   /** This method tells whether materials can be assigned to the object.  The default
       implementation will give the correct result for most objects, but subclasses
       can override this if necessary. */
-  
+
   public boolean canSetMaterial()
   {
     return (canSetTexture() && isClosed());
   }
-  
+
   /** Set the Texture and TextureMapping for this object. */
 
   public void setTexture(Texture tex, TextureMapping map)
@@ -157,9 +161,9 @@ public abstract class Object3D
     texMapping = map;
     if (map instanceof LayeredMapping)
       theTexture = ((LayeredMapping) map).getTexture();
-    
+
     // Update the texture parameters.
-    
+
     if (map == null)
       {
         setParameters(new TextureParameter [0]);
@@ -192,67 +196,67 @@ public abstract class Object3D
         setParameterValues(newVal);
       }
   }
-  
+
   /** Get this object's Texture. */
-  
+
   public Texture getTexture()
   {
     return theTexture;
   }
-  
+
   /** Get this object's TextureMapping. */
-  
+
   public TextureMapping getTextureMapping()
   {
     return texMapping;
   }
-  
+
   /** Set the Material and MaterialMapping for this object.  Pass null for both arguments to
       specify that the object does not have a Material. */
-  
+
   public void setMaterial(Material mat, MaterialMapping map)
   {
     theMaterial = mat;
     matMapping = map;
   }
-  
+
   /** Get this object's Material. */
-  
+
   public Material getMaterial()
   {
     return theMaterial;
   }
-  
+
   /** Get this object's MaterialMapping. */
-  
+
   public MaterialMapping getMaterialMapping()
   {
     return matMapping;
   }
-  
+
   /** Get the list of texture parameters for this object. */
-  
+
   public TextureParameter [] getParameters()
   {
     return texParam;
   }
-  
+
   /** Set the list of texture parameters for this object. */
-  
+
   public void setParameters(TextureParameter param[])
   {
     texParam = param;
   }
-  
+
   /** Get the list of objects defining the values of texture parameters. */
-  
+
   public ParameterValue [] getParameterValues()
   {
     return paramValue;
   }
-  
+
   /** Get the average value of each texture parameter. */
-  
+
   public double [] getAverageParameterValues()
   {
     if (paramValue == null)
@@ -262,18 +266,18 @@ public abstract class Object3D
       d[i] = paramValue[i].getAverageValue();
     return d;
   }
-  
+
   /** Set the list of objects defining the values of texture parameters. */
-  
+
   public void setParameterValues(ParameterValue val[])
   {
     paramValue = val;
     parametersChanged = true;
   }
-  
+
   /** Get the object defining the value of a particular texture parameter.  If the parameter is not
       defined for this object, this returns null. */
-  
+
   public ParameterValue getParameterValue(TextureParameter param)
   {
     for (int i = 0; i < texParam.length; i++)
@@ -281,9 +285,9 @@ public abstract class Object3D
         return paramValue[i];
     return null;
   }
-  
+
   /** Set the object defining the value of a particular texture parameter. */
-  
+
   public void setParameterValue(TextureParameter param, ParameterValue val)
   {
     for (int i = 0; i < texParam.length; i++)
@@ -321,16 +325,16 @@ public abstract class Object3D
       setParameterValues(thisValue);
     }
   }
-  
+
   /** Get the skeleton for this object, or null if it does not have one. */
-  
+
   public Skeleton getSkeleton()
   {
     return null;
   }
 
   /** Objects which can be rendered as part of a scene should override this method to return
-      a RenderingMesh which describes the appearance of the object.  All points on the 
+      a RenderingMesh which describes the appearance of the object.  All points on the
       RenderingMesh should be within a distance tol of the true surface.  The interactive flag
       tells whether the resulting Mesh will be rendered in interactive mode.  When interactive
       is set to true, the RenderingMesh should be cached for future use, so that it may be
@@ -346,11 +350,11 @@ public abstract class Object3D
   {
     return null;
   }
-  
+
   /** Every object should override this method to return a WireframeMesh.  This will be used
       for drawing the object in wireframe mode, and also for drawing "nonrenderable" objects
       in other rendering modes. */
-  
+
   public abstract WireframeMesh getWireframeMesh();
 
   /**
@@ -409,15 +413,15 @@ public abstract class Object3D
 
   /** The following method writes the object's data to an output stream.  Subclasses should
       override this method, but also call super.writeToFile() to save information about
-      materials, etc.  In addition to this method, every Object3D must include a constructor 
+      materials, etc.  In addition to this method, every Object3D must include a constructor
       with the signature
 
       public Classname(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
-      
-      which reconstructs the object by reading its data from an input stream.  This 
+
+      which reconstructs the object by reading its data from an input stream.  This
       constructor, similarly, should call the overridden constructor to read information
       about materials, etc. */
-  
+
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);
@@ -449,7 +453,7 @@ public abstract class Object3D
         }
       }
   }
-  
+
   public Object3D(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -486,14 +490,14 @@ public abstract class Object3D
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new IOException(ex.getMessage());
           }
       }
     else
       {
         // This is a layered texture.
-        
+
         LayeredTexture tex = new LayeredTexture(this);
         LayeredMapping map = (LayeredMapping) tex.getDefaultMapping(this);
         map.readFromFile(in, theScene);
@@ -505,9 +509,9 @@ public abstract class Object3D
         paramValue[i] = readParameterValue(in);
     setParameterValues(paramValue);
   }
-  
+
   /** Read in the value of a texture parameter from a stream. */
-  
+
   public static ParameterValue readParameterValue(DataInputStream in) throws IOException
   {
     try
@@ -518,7 +522,7 @@ public abstract class Object3D
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
       throw new IOException(ex.getMessage());
     }
   }
@@ -547,41 +551,41 @@ public abstract class Object3D
   public void setPropertyValue(int index, Object value)
   {
   }
-  
+
   /** Return a Keyframe which describes the current pose of this object. */
-  
+
   public abstract Keyframe getPoseKeyframe();
-  
+
   /** Modify this object based on a pose keyframe. */
-  
+
   public abstract void applyPoseKeyframe(Keyframe k);
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [0], new double [0], new double [0][2]);
   }
-  
+
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     new BStandardDialog("", Translate.text("noParamsForKeyframe"), BStandardDialog.INFORMATION).showMessageDialog((Widget) parent);
   }
-  
+
   /** Determine whether the user should be allowed to convert this object to an Actor. */
-  
+
   public boolean canConvertToActor()
   {
     return false;
   }
-  
+
   /** Get a version of this object to which a pose track can be attached.  For most objects,
       this simply returns itself.  Some objects, however, need to be converted to Actors
       to have pose tracks.  If this method returns null, no pose track will be attached. */
-  
+
   public Object3D getPosableObject()
   {
     return this;

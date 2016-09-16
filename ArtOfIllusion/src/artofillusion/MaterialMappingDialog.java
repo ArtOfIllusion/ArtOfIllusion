@@ -18,6 +18,8 @@ import buoy.widget.*;
 import java.awt.Insets;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class implements the dialog box which is used to choose material mappings for objects. 
     It presents a list of all mappings which can be used with the current object and material,
@@ -25,6 +27,8 @@ import java.util.*;
 
 public class MaterialMappingDialog extends BDialog
 {
+    private static final Logger logger = Logger.getLogger(MaterialMappingDialog.class.getName());
+
   private BFrame fr;
   private Object3D obj;
   private Vector mappings;
@@ -84,7 +88,7 @@ public class MaterialMappingDialog extends BDialog
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     mapChoice.addEventLink(ValueChangedEvent.class, this, "mappingChanged");
@@ -128,7 +132,7 @@ public class MaterialMappingDialog extends BDialog
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
   

@@ -17,6 +17,8 @@ import java.io.*;
 
 import artofillusion.math.*;
 import artofillusion.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.*;
 
@@ -29,6 +31,8 @@ import javax.imageio.*;
 
 public class NinePointManipulator extends EventSource implements Manipulator
 {
+    private static final Logger logger = Logger.getLogger(NinePointManipulator.class.getName());
+
   private final Image images[];
   private Rectangle screenBounds;
   private BoundingBox selectionBounds;
@@ -75,7 +79,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
     return null;
   }

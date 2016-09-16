@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.script;
@@ -16,11 +16,14 @@ import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class is used for executing scripts. */
 
 public class ScriptRunner
 {
+    private static final Logger logger = Logger.getLogger(ScriptRunner.class.getName());
   public static final String LANGUAGES[] = {"Groovy", "BeanShell"};
   private static SearchlistClassLoader parentLoader;
   private static PrintStream output;
@@ -30,7 +33,7 @@ public class ScriptRunner
       "artofillusion.ui.*", "buoy.event.*", "buoy.widget.*"};
 
   /** Get the ScriptEngine for running scripts written in a particular language. */
-  
+
   public static ScriptEngine getScriptEngine(String language)
   {
     if (!engines.containsKey(language))
@@ -54,18 +57,18 @@ public class ScriptRunner
             for (String packageName : IMPORTS)
               engine.addImport(packageName);
           }
-        catch (Exception e)
+        catch (Exception ex)
           {
-            e.printStackTrace();
+              logger.log(Level.INFO, "Exception", ex);
           }
         output = new PrintStream(new ScriptOutputWindow());
         engine.setOutput(output);
       }
     return engines.get(language);
   }
-  
+
   /** Execute a script. */
-  
+
   public static void executeScript(String language, String script, Map<String, Object> variables)
   {
     try
@@ -77,16 +80,16 @@ public class ScriptRunner
         System.out.println("Error in line "+e.getLineNumber()+": "+e.getMessage());
       }
   }
-  
+
   /** Parse a Tool script. */
-  
+
   public static ToolScript parseToolScript(String language, String script) throws Exception
   {
     return getScriptEngine(language).createToolScript(script);
   }
-  
+
   /** Parse an Object script. */
-  
+
   public static ObjectScript parseObjectScript(String language, String script) throws Exception
   {
     return getScriptEngine(language).createObjectScript(script);
@@ -122,7 +125,7 @@ public class ScriptRunner
     }
     catch (Exception ex2)
     {
-      ex2.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex2);
     }
     ArrayList<String> v = new ArrayList<String>();
     v.add(head);

@@ -19,12 +19,16 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** SceneCamera is a type of Object3D.  It represents a camera which the user can position
     within a scene.  It should not be confused with the Camera class. */
 
 public class SceneCamera extends Object3D
 {
+    private static final Logger logger = Logger.getLogger(SceneCamera.class.getName());
+
   private double fov, depthOfField, focalDist;
   private boolean perspective;
   private ImageFilter filter[];
@@ -533,7 +537,7 @@ public class SceneCamera extends Object3D
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
     }

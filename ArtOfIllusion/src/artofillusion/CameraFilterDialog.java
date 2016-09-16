@@ -20,11 +20,14 @@ import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is dialog in which the user can edit the list of filters attached to a camera. */
 
 public class CameraFilterDialog extends BDialog implements RenderListener
 {
+    private static final Logger logger = Logger.getLogger(CameraFilterDialog.class.getName());
   private SceneCamera theCamera;
   private Scene theScene;
   private CoordinateSystem cameraCoords;
@@ -343,7 +346,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
       rebuildFilterList();
@@ -400,7 +403,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
       updateComponents();
       filterChangedCallback.run();

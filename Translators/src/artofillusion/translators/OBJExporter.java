@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.translators;
@@ -20,17 +20,21 @@ import buoy.widget.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** OBJExporter contains the actual routines for exporting OBJ files. */
 
 public class OBJExporter
 {
+    private static final Logger logger = Logger.getLogger(OBJExporter.class.getName());
+
   /** Display a dialog which allows the user to export a scene to an OBJ file. */
-  
+
   public static void exportFile(BFrame parent, Scene theScene)
   {
     // Display a dialog box with options on how to export the scene.
-    
+
     ValueField errorField = new ValueField(0.05, ValueField.POSITIVE);
     final ValueField widthField = new ValueField(200.0, ValueField.INTEGER+ValueField.POSITIVE);
     final ValueField heightField = new ValueField(200.0, ValueField.INTEGER+ValueField.POSITIVE);
@@ -53,11 +57,11 @@ public class OBJExporter
     mtlBox.dispatchEvent(new ValueChangedEvent(mtlBox));
     ComponentsDialog dlg;
     if (theScene.getSelection().length > 0)
-      dlg = new ComponentsDialog(parent, Translate.text("exportToOBJ"), 
+      dlg = new ComponentsDialog(parent, Translate.text("exportToOBJ"),
 	  new Widget [] {exportChoice, errorField, smoothBox, normalsBox, mtlBox, Translate.label("imageSizeForTextures"), widthField, heightField, qualitySlider},
 	  new String [] {null, Translate.text("maxSurfaceError"), null, null, null, null, Translate.text("Width"), Translate.text("Height"), Translate.text("imageQuality")});
     else
-      dlg = new ComponentsDialog(parent, Translate.text("exportToOBJ"), 
+      dlg = new ComponentsDialog(parent, Translate.text("exportToOBJ"),
 	  new Widget [] {errorField, smoothBox, normalsBox, mtlBox, Translate.label("imageSizeForTextures"), widthField, heightField, qualitySlider},
 	  new String [] {Translate.text("maxSurfaceError"), null, null, null, null, Translate.text("Width"), Translate.text("Height"), Translate.text("imageQuality")});
     if (!dlg.clickedOk())
@@ -76,7 +80,7 @@ public class OBJExporter
     String name = f.getName();
     String baseName = (name.endsWith(".obj") ? name.substring(0, name.length()-4) : name);
     ArtOfIllusion.setCurrentDirectory(dir.getAbsolutePath());
-    
+
     // Create the output files.
 
     try
@@ -100,7 +104,7 @@ public class OBJExporter
     }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         new BStandardDialog("", new String [] {Translate.text("errorExportingScene"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
       }
   }
@@ -126,7 +130,7 @@ public class OBJExporter
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         // Get a rendering mesh for the object.
-        
+
         ObjectInfo info = theScene.getObject(i);
         if (!wholeScene && !info.selected)
           continue;
@@ -198,18 +202,18 @@ public class OBJExporter
               out.println("s 1"); // The mesh is fully smoothed, so we can simply use a smoothing group
           }
         }
-        
+
         // Select a name for the group.
-        
+
         String baseName = info.getName().replace(' ', '_');
         String name = baseName;
         int append = 1;
         while (groupNames.get(name) != null)
           name = baseName+"_"+(append++);
         groupNames.put(name, "");
-        
+
         // Write out the object.
-        
+
         out.println("g "+name);
         TextureImageInfo ti = null;
         if (textureExporter != null)
@@ -238,7 +242,7 @@ public class OBJExporter
         if (ti != null && ((Object3D) mesh).getTextureMapping() instanceof UVMapping && ((UVMapping) ((Object3D) mesh).getTextureMapping()).isPerFaceVertex(mesh))
         {
           // A per-face-vertex texture mapping.
-          
+
           Vec2 coords[][] = ((UVMapping) ((Object3D) mesh).getTextureMapping()).findFaceTextureCoordinates(mesh);
           double uscale = (ti.maxu == ti.minu ? 1.0 : 1.0/(ti.maxu-ti.minu));
           double vscale = (ti.maxv == ti.minv ? 1.0 : 1.0/(ti.maxv-ti.minv));
@@ -273,7 +277,7 @@ public class OBJExporter
         else if (ti != null && ((Object3D) mesh).getTextureMapping() instanceof Mapping2D)
         {
           // A per-vertex texture mapping.
-          
+
           Vec2 coords[] = ((Mapping2D) ((Object3D) mesh).getTextureMapping()).findTextureCoordinates(mesh);
           double uscale = (ti.maxu == ti.minu ? 1.0 : 1.0/(ti.maxu-ti.minu));
           double vscale = (ti.maxv == ti.minv ? 1.0 : 1.0/(ti.maxv-ti.minv));
@@ -307,7 +311,7 @@ public class OBJExporter
         else
         {
           // No texture coordinates.
-          
+
           for (int j = 0; j < mesh.getFaceCount(); j++)
           {
             out.print("f ");
@@ -331,13 +335,13 @@ public class OBJExporter
           numNorm += norm.length;
       }
   }
-  
+
   /** Write out the .mtl file describing the textures. */
-  
+
   private static void writeTextures(Scene theScene, PrintWriter out, boolean wholeScene, TextureImageExporter textureExporter)
   {
     // Find all the textures.
-    
+
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
@@ -345,9 +349,9 @@ public class OBJExporter
           continue;
         textureExporter.addObject(info);
       }
-    
+
     // Write out the .mtl file.
-    
+
     out.println("#Produced by Art of Illusion "+ArtOfIllusion.getVersion()+", "+(new Date()).toString());
     Enumeration textures = textureExporter.getTextures();
     Hashtable<String, TextureImageInfo> names = new Hashtable<String, TextureImageInfo>();
@@ -357,9 +361,9 @@ public class OBJExporter
     while (textures.hasMoreElements())
       {
         TextureImageInfo info = (TextureImageInfo) textures.nextElement();
-        
+
         // Select a name for the texture.
-        
+
         String baseName = info.texture.getName().replace(' ', '_');
         if (names.get(baseName) == null)
           info.name = baseName;
@@ -371,9 +375,9 @@ public class OBJExporter
             info.name = baseName+i;
           }
         names.put(info.name, info);
-        
+
         // Write the texture.
-        
+
         out.println("newmtl "+info.name);
         info.texture.getAverageSpec(spec, 0.0, info.paramValue);
         if (info.diffuseFilename == null)

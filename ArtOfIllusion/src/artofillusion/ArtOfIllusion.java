@@ -31,6 +31,8 @@ import java.net.*;
 import java.util.*;
 import java.util.List;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,6 +43,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ArtOfIllusion
 {
+    private static final Logger logger = Logger.getLogger(ArtOfIllusion.class.getName());
+
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
   public static final ImageIcon APP_ICON;
@@ -210,7 +214,7 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
-        tx.printStackTrace();
+        logger.log(Level.INFO, "Exception", tx);
         String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -224,7 +228,7 @@ public class ArtOfIllusion
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     runStartupScripts();
@@ -293,7 +297,7 @@ public class ArtOfIllusion
           }
           catch (Throwable tx)
           {
-            tx.printStackTrace();
+            logger.log(Level.INFO, "Exception", tx);
             String name = plugins.get(i).getClass().getName();
             name = name.substring(name.lastIndexOf('.')+1);
             new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -341,7 +345,7 @@ public class ArtOfIllusion
             }
             catch (Throwable tx)
             {
-              tx.printStackTrace();
+              logger.log(Level.INFO, "Exception", tx);
               String name = plugins.get(i).getClass().getName();
               name = name.substring(name.lastIndexOf('.')+1);
               new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -380,7 +384,7 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
-        tx.printStackTrace();
+        logger.log(Level.INFO, "Exception", tx);
         String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -408,7 +412,7 @@ public class ArtOfIllusion
           }
           catch (IOException ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
           }
         }
         catch (IllegalArgumentException ex)
@@ -502,7 +506,7 @@ public class ArtOfIllusion
         }
         catch (Throwable tx)
         {
-          tx.printStackTrace();
+          logger.log(Level.INFO, "Exception", tx);
           String name = plugins.get(i).getClass().getName();
           name = name.substring(name.lastIndexOf('.')+1);
           new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);

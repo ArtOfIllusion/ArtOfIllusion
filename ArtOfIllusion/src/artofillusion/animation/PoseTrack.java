@@ -17,11 +17,15 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is a Track which controls the pose of an object. */
 
 public class PoseTrack extends Track
 {
+    private static final Logger logger = Logger.getLogger(PoseTrack.class.getName());
+
   private ObjectInfo info;
   private Timecourse tc;
   private int smoothingMethod;
@@ -354,7 +358,7 @@ public class PoseTrack extends Track
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new InvalidObjectException("");
           }
       }

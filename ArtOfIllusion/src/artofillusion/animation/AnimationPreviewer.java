@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -29,6 +31,8 @@ import javax.imageio.ImageIO;
 
 public class AnimationPreviewer implements Runnable
 {
+    private static final Logger logger = Logger.getLogger(AnimationPreviewer.class.getName());
+
   private LayoutWindow window;
   private double originalTime;
   private ValueField widthField, heightField, startField, endField, fpsField;
@@ -252,7 +256,7 @@ public class AnimationPreviewer implements Runnable
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 

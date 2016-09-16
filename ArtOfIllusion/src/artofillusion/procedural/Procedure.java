@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -15,39 +15,42 @@ import artofillusion.math.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This represents a procedure for calculating a set of values (typically, the parameters
     for a texture or material). */
 
 public class Procedure
 {
+    private static final Logger logger = Logger.getLogger(Procedure.class.getName());
   OutputModule output[];
   Module module[];
   Link link[];
-  
+
   public Procedure(OutputModule output[])
   {
     this.output = output;
     module = new Module [0];
     link = new Link [0];
   }
-  
+
   /** Get the list of output modules. */
-  
+
   public OutputModule [] getOutputModules()
   {
     return output;
   }
-  
+
   /** Get the list of all other modules. */
-  
+
   public Module [] getModules()
   {
     return module;
   }
-  
+
   /** Get the index of a particular module. */
-  
+
   public int getModuleIndex(Module mod)
   {
     for (int i = 0; i < module.length; i++)
@@ -55,9 +58,9 @@ public class Procedure
         return i;
     return -1;
   }
-  
+
   /** Get the index of a particular output module. */
-  
+
   public int getOutputIndex(Module mod)
   {
     for (int i = 0; i < output.length; i++)
@@ -67,7 +70,7 @@ public class Procedure
   }
 
   /** Add a module to the procedure. */
-  
+
   public void addModule(Module mod)
   {
     Module newmod[] = new Module [module.length+1];
@@ -76,7 +79,7 @@ public class Procedure
     newmod[module.length] = mod;
     module = newmod;
   }
-  
+
   /** Delete a module from the procedure.  Any links involving this module should be deleted
       *before* calling this method. */
 
@@ -91,14 +94,14 @@ public class Procedure
   }
 
   /** Get the list of links between modules. */
-  
+
   public Link [] getLinks()
   {
     return link;
   }
-  
+
   /** Add a link to the procedure. */
-  
+
   public void addLink(Link ln)
   {
     Link newlink[] = new Link [link.length+1];
@@ -108,9 +111,9 @@ public class Procedure
     link = newlink;
     ln.to.getModule().setInput(ln.to, ln.from);
   }
-  
+
   /** Delete a link from the procedure. */
-  
+
   public void deleteLink(int which)
   {
     Link newlink[] = new Link [link.length-1];
@@ -125,9 +128,9 @@ public class Procedure
         newlink[j++] = link[i];
     link = newlink;
   }
-  
+
   /** Check for feedback loops in this procedure. */
-  
+
   public boolean checkFeedback()
   {
     for (int i = 0; i < output.length; i++)
@@ -141,43 +144,43 @@ public class Procedure
       }
     return false;
   }
-  
-  /** This routine is called before the procedure is evaluated.  The PointInfo object 
+
+  /** This routine is called before the procedure is evaluated.  The PointInfo object
       describes the point for which it is to be evaluated. */
-  
+
   public void initForPoint(PointInfo p)
   {
     for (int i = 0; i < module.length; i++)
       module[i].init(p);
   }
-  
+
   /** This routine returns the value of the specified output module.  If that output does
       not have value type NUMBER, the results are undefined. */
-  
+
   public double getOutputValue(int which)
   {
     return output[which].getAverageValue(0, 0.0);
   }
-  
+
   /** This routine returns the gradient of the specified output module.  If that output does
       not have value type NUMBER, the results are undefined. */
-  
+
   public void getOutputGradient(int which, Vec3 grad)
   {
     output[which].getValueGradient(0, grad, 0.0);
   }
-  
+
   /** This routine returns the color of the specified output module.  If that output does
       not have value type COLOR, the results are undefined. */
-  
+
   public void getOutputColor(int which, RGBColor color)
   {
     output[which].getColor(0, color, 0.0);
   }
-  
+
   /** Make this procedure identical to another one.  The output modules must already
       be set up before calling this method. */
-  
+
   public void copy(Procedure proc)
   {
     module = new Module [proc.module.length];
@@ -191,16 +194,16 @@ public class Procedure
         int fromIndex = proc.getModuleIndex(fromModule);
         int toIndex = toModule instanceof OutputModule ? proc.getOutputIndex(toModule) : proc.getModuleIndex(toModule);
         IOPort from = module[fromIndex].getOutputPorts()[proc.module[fromIndex].getOutputIndex(proc.link[i].from)];
-        IOPort to = toModule instanceof OutputModule ? 
+        IOPort to = toModule instanceof OutputModule ?
                 output[toIndex].getInputPorts()[proc.output[toIndex].getInputIndex(proc.link[i].to)] :
                 module[toIndex].getInputPorts()[proc.module[toIndex].getInputIndex(proc.link[i].to)];
         link[i] = new Link(from, to);
         to.getModule().setInput(to, from);
       }
   }
-  
+
   /** Write this procedure to an output stream. */
-  
+
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -226,14 +229,14 @@ public class Procedure
           }
       }
   }
-  
+
   /** Reconstruct this procedure from an input stream.  The output modules must already
       be set up before calling this method. */
 
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version != 0)
       throw new InvalidObjectException("");
     for (int i = 0; i < output.length; i++)
@@ -253,12 +256,12 @@ public class Procedure
       }
     catch (InvocationTargetException ex)
       {
-        ex.getTargetException().printStackTrace();
-        throw new IOException();
+          logger.log(Level.INFO, "Exception", ex.getTargetException());
+            throw new IOException();
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
     link = new Link [in.readInt()];

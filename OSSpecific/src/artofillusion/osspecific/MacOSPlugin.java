@@ -17,6 +17,8 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.*;
 import javax.swing.*;
 
@@ -25,6 +27,8 @@ import javax.swing.*;
 
 public class MacOSPlugin implements Plugin, InvocationHandler
 {
+    private static final Logger logger = Logger.getLogger(MacOSPlugin.class.getName());
+
   private boolean usingAppMenu;
 
   @Override
@@ -55,7 +59,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
         // An error occured trying to set up the application menu, so just stick with the standard
         // Quit and Preferences menu items in the File and Edit menus.
 
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
       usingAppMenu = true;
     }
@@ -174,7 +178,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       {
         // Nothing we can really do about it...
 
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     else
@@ -191,7 +195,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     {
       // Nothing we can really do about it...
 
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
     return null;
   }

@@ -24,117 +24,120 @@ import java.io.*;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+ 
+ 
+class debug { 
+    static final boolean debugging = false; 
+    public static void print (String str) { 
+        if (debugging) { 
+            System.err.println (str); 
+        } 
+    } 
+} 
+ 
+class Portref { 
+    public String module; 
+    public int port; 
+ 
+    Portref (String m, int o, int p) { 
+        module = m; 
+        port = p; 
+    } 
+} 
+ 
+class OPort { 
+    public Module module; 
+    public int oport = 0; 
+    public Arg [] args = {new Arg ("Arg1", 0)}; 
+ 
+    OPort (Module m, int p, Arg [] i) { 
+        module = m; 
+        oport = p; 
+        args = i; 
+    } 
+ 
+    OPort (Module m, int p) { 
+        module = m; 
+        oport = p; 
+    } 
+ 
+    OPort (Module m) { 
+        module = m; 
+        oport = 0; 
+    } 
+    IOPort getOPort () { 
+        if (module == null) { 
+            debug.print ("Can't get an IOPort when there's no module."); 
+            return null; 
+        } 
+        return module.getOutputPorts () [oport]; 
+    } 
+} 
+ 
+class Arg { 
+ 
+    public String name; 
+    public int iport; 
+     
+    Arg (String s, int i) { 
+        name = s; 
+        iport = i; 
+    } 
+} 
+ 
+class Token { 
+ 
+    public static final char FUNCTION = '&'; 
+    public static final char VARIABLE = '$'; 
+    public static final char NUMBER = '#'; 
+    public static final char END = '@'; 
+    public static final char PLUS = '+'; 
+    public static final char MINUS = '-'; 
+    public static final char MUL = '*'; 
+    public static final char EXP = '^'; 
+    public static final char DIV = '/'; 
+    public static final char MOD = '%'; 
+    public static final char RET = ';'; 
+    public static final char ASSIGN = '='; 
+    public static final char LP = '('; 
+    public static final char RP = ')'; 
+    public static final char COMMA = ','; 
+ 
+    public String strValue; 
+    public double numValue; 
+    public char ty; 
+ 
+    static Hashtable funMap = createFunMap (); 
+    //    static Hashtable portMap = createPortMap (); 
+ 
+ 
+    static Hashtable createFunMap () { 
+        Hashtable fm = new Hashtable (); 
+        //For version two, pull these out of a config file 
+        fm.put ("sin",  new OPort (new SineModule (new Point ()), 0)); 
+        fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0)); 
+        fm.put ("sqrt", new OPort (new SqrtModule (new Point ()), 0)); 
+        fm.put ("pow",  new OPort (new PowerModule (new Point ()), 0, new Arg [] { 
+            new Arg ("Base", 1), 
+            new Arg ("Exponent", 0) 
+                })); 
+        fm.put ("log",  new OPort (new LogModule (new Point ()), 0)); 
+        fm.put ("angle", new OPort (new PolarModule (new Point ()), 1, 
+                new Arg [] { 
+            new Arg ("X", 0),  
+            new Arg ("Y", 1) 
+                })); 
+        fm.put ("min",  new OPort (new MinModule (new Point ()), 0, new Arg [] { 
+            new Arg ("Value 1", 1), 
+            new Arg ("Value 2", 0) 
+                })); 
+        fm.put ("max",  new OPort (new MaxModule (new Point ()), 0, new Arg [] { 
+            new Arg ("Value 1", 1), 
+            new Arg ("Value 2", 0) 
+                })); 
 
-
-class debug {
-    static final boolean debugging = false;
-    public static void print (String str) {
-        if (debugging) {
-            System.err.println (str);
-        }
-    }
-}
-
-class Portref {
-    public String module;
-    public int port;
-
-    Portref (String m, int o, int p) {
-        module = m;
-        port = p;
-    }
-}
-
-class OPort {
-    public Module module;
-    public int oport = 0;
-    public Arg [] args = {new Arg ("Arg1", 0)};
-
-    OPort (Module m, int p, Arg [] i) {
-        module = m;
-        oport = p;
-        args = i;
-    }
-
-    OPort (Module m, int p) {
-        module = m;
-        oport = p;
-    }
-
-    OPort (Module m) {
-        module = m;
-        oport = 0;
-    }
-    IOPort getOPort () {
-        if (module == null) {
-            debug.print ("Can't get an IOPort when there's no module.");
-            return null;
-        }
-        return module.getOutputPorts () [oport];
-    }
-}
-
-class Arg {
-
-    public String name;
-    public int iport;
-
-    Arg (String s, int i) {
-        name = s;
-        iport = i;
-    }
-}
-
-class Token {
-
-    public static final char FUNCTION = '&';
-    public static final char VARIABLE = '$';
-    public static final char NUMBER = '#';
-    public static final char END = '@';
-    public static final char PLUS = '+';
-    public static final char MINUS = '-';
-    public static final char MUL = '*';
-    public static final char EXP = '^';
-    public static final char DIV = '/';
-    public static final char MOD = '%';
-    public static final char RET = ';';
-    public static final char ASSIGN = '=';
-    public static final char LP = '(';
-    public static final char RP = ')';
-    public static final char COMMA = ',';
-
-    public String strValue;
-    public double numValue;
-    public char ty;
-
-    static Hashtable funMap = createFunMap ();
-    //    static Hashtable portMap = createPortMap ();
-
-
-    static Hashtable createFunMap () {
-        Hashtable fm = new Hashtable ();
-        //For version two, pull these out of a config file
-        fm.put ("sin",  new OPort (new SineModule (new Point ()), 0));
-        fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0));
-        fm.put ("sqrt", new OPort (new SqrtModule (new Point ()), 0));
-        fm.put ("pow",  new OPort (new PowerModule (new Point ()), 0, new Arg [] {
-            new Arg ("Base", 1),
-            new Arg ("Exponent", 0)
-                }));
-        fm.put ("log",  new OPort (new LogModule (new Point ()), 0));
-        fm.put ("angle", new OPort (new PolarModule (new Point ()), 1,
-                new Arg [] {
-            new Arg ("X", 0),
-            new Arg ("Y", 1)
-                }));
-        fm.put ("min",  new OPort (new MinModule (new Point ()), 0, new Arg [] {
-            new Arg ("Value 1", 1),
-            new Arg ("Value 2", 0)
-                }));
-        fm.put ("max",  new OPort (new MaxModule (new Point ()), 0, new Arg [] {
-            new Arg ("Value 1", 1),
-            new Arg ("Value 2", 0)
-                }));
         fm.put ("abs",  new OPort (new AbsModule (new Point ()), 0));
         fm.put ("exp",  new OPort (new ExpModule (new Point ()), 0));
         fm.put ("bias",  new OPort (new BiasModule (new Point ()), 0, new Arg [] {
@@ -231,6 +234,8 @@ class ModuleLoader {
 
 public class ExprModule extends Module
 {
+
+    private static final Logger logger = Logger.getLogger(ExprModule.class.getName());
 
     Hashtable varTable;
     Module [] inputs;
@@ -516,9 +521,9 @@ public class ExprModule extends Module
         if (m == null) {
             debug.print ("I don't want to add a null module to the module list at position " + moduleVec.size());
             try {
-                m.init (null); //error!
-            } catch (Exception e) {
-                e.printStackTrace ();
+               m.init (null); //error!
+            } catch (Exception ex) {
+               logger.log(Level.INFO, "Exception", ex);
             }
 
         } else if (!moduleVec.contains(m)) {
@@ -727,5 +732,5 @@ public class ExprModule extends Module
         msg[i+1] = (String) errors.elementAt(i);
       new BStandardDialog("", msg, BStandardDialog.INFORMATION).showMessageDialog(fr);
     }
-}
+} 
  

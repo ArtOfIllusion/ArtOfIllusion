@@ -420,7 +420,7 @@ public class ExprModule extends Module
                 case '0': case '1': case '2': case '3': case '4':  
                 case '5': case '6': case '7': case '8': case '9':  
                     addToken (new Token (Token.NUMBER)); 
-                    currTok.numValue = new Double (tok).doubleValue (); 
+                    currTok.numValue = new Double (tok); 
                     break; 
                 default: 
                     addToken (new Token (Token.VARIABLE)); 

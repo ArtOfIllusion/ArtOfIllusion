@@ -131,11 +131,11 @@ public class PropertyEditor
   public void setValue(Object value)
   {
     if (widget instanceof ValueSelector)
-      ((ValueSelector) widget).setValue(value == null ? Double.NaN : ((Double) value).doubleValue());
+      ((ValueSelector) widget).setValue(value == null ? Double.NaN : ((Double) value));
     else if (widget instanceof ValueField)
-      ((ValueField) widget).setValue(value == null ? Double.NaN : ((Integer) value).intValue());
+      ((ValueField) widget).setValue(value == null ? Double.NaN : ((Integer) value));
     else if (widget instanceof BCheckBox)
-      ((BCheckBox) widget).setState(value == null ? false : ((Boolean) value).booleanValue());
+      ((BCheckBox) widget).setState(value == null ? false : ((Boolean) value));
     else if (widget instanceof BTextField)
       ((BTextField) widget).setText((String) value);
     else if (widget instanceof ColorSelector)

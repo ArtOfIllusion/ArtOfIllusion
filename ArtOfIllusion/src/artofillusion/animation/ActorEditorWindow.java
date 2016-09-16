@@ -424,7 +424,7 @@ public class ActorEditorWindow extends BDialog
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
     {
-      selector.setValue(((Double) value).doubleValue());
+      selector.setValue(((Double) value));
       selector.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
       return this;
     }
@@ -483,7 +483,7 @@ public class ActorEditorWindow extends BDialog
     @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
     {
-      selector.setValue(((Double) value).doubleValue());
+      selector.setValue(((Double) value));
       currentRow = row;
       return component;
     }

@@ -717,7 +717,7 @@ public class Curve extends Object3D implements Mesh
     }
     else
     {
-      setClosed(((Boolean) value).booleanValue());
+      setClosed(((Boolean) value));
     }
   }
 

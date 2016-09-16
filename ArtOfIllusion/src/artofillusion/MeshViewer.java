@@ -58,7 +58,7 @@ public abstract class MeshViewer extends ObjectViewer
     boolean b[] = new boolean [s.getNumJoints()];
     for (int i = 0; i < lockedJoints.size(); i++)
     {
-      int index = s.findJointIndex(lockedJoints.elementAt(i).intValue());
+      int index = s.findJointIndex(lockedJoints.elementAt(i));
       if (index > -1 && index < b.length)
         b[index] = true;
     }
@@ -70,7 +70,7 @@ public abstract class MeshViewer extends ObjectViewer
   public boolean isJointLocked(int id)
   {
     for (int i = 0; i < lockedJoints.size(); i++)
-      if (lockedJoints.elementAt(i).intValue() == id)
+      if (lockedJoints.elementAt(i) == id)
         return true;
     return false;
   }

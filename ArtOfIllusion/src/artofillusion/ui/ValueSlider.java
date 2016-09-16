@@ -73,7 +73,7 @@ public class ValueSlider extends WidgetContainer
     
     try
     {
-      val = new Double(field.getText()).doubleValue();
+      val = new Double(field.getText());
     }
     catch (NumberFormatException ex)
     {

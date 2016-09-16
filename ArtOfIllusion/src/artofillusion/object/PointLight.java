@@ -262,7 +262,7 @@ public class PointLight extends Light
     else if (index == 2)
       decayRate = ((Double) value).floatValue();
     else if (index == 3)
-      radius = ((Double) value).doubleValue();
+      radius = ((Double) value);
     else if (index == 4)
     {
       Object values[] = PROPERTIES[index].getAllowedValues();

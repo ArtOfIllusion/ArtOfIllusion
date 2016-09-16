@@ -55,7 +55,7 @@ public class MaterialMappingDialog extends BDialog
         Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Material.class);
         Material mat = obj.getMaterial();
         Boolean result = (Boolean) mtd.invoke(null, obj, mat);
-        if (result.booleanValue())
+        if (result)
           mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)

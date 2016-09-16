@@ -187,7 +187,7 @@ public class Property
     {
       if (value instanceof Double)
       {
-        double val = ((Double) value).doubleValue();
+        double val = ((Double) value);
         return (val >= min && val <= max);
       }
     }
@@ -195,7 +195,7 @@ public class Property
     {
       if (value instanceof Integer)
       {
-        int val = ((Integer) value).intValue();
+        int val = ((Integer) value);
         return (val >= min && val <= max);
       }
     }

@@ -234,7 +234,7 @@ public class TriMeshSelectionUtilities
       Iterator n2iter = v2neighbors.iterator();
       while (n2iter.hasNext())
       {
-        int neighbor = ((Integer) n2iter.next()).intValue();
+        int neighbor = ((Integer) n2iter.next());
         int neighborEdges[] = v[neighbor].getEdges();
         for (int i = 0; i < neighborEdges.length; i++)
         {

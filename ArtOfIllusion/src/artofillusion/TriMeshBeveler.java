@@ -132,7 +132,7 @@ public class TriMeshBeveler
     
     newSelection = new boolean [mesh.getFaces().length];
     for (i = 0; i < newIndex.size(); i++)
-      newSelection[((Integer) newIndex.elementAt(i)).intValue()] = true;
+      newSelection[((Integer) newIndex.elementAt(i))] = true;
     return mesh;
   }
 
@@ -509,7 +509,7 @@ public class TriMeshBeveler
     
     newSelection = new boolean [mesh.getFaces().length];
     for (i = 0; i < newIndex.size(); i++)
-      newSelection[((Integer) newIndex.elementAt(i)).intValue()] = true;
+      newSelection[((Integer) newIndex.elementAt(i))] = true;
     return mesh;
   }
 

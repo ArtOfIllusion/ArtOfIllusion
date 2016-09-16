@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -19,7 +19,7 @@ import java.awt.Insets;
 import java.lang.reflect.*;
 import java.util.*;
 
-/** This class implements the dialog box which is used to choose material mappings for objects. 
+/** This class implements the dialog box which is used to choose material mappings for objects.
     It presents a list of all mappings which can be used with the current object and material,
     and allows the user to select one. */
 
@@ -38,14 +38,14 @@ public class MaterialMappingDialog extends BDialog
   public MaterialMappingDialog(BFrame parent, Object3D obj)
   {
     super(parent, "Material Mapping", true);
-    
+
     fr = parent;
     this.obj = obj;
     map = obj.getMaterialMapping();
     oldMapping = map.duplicate();
-    
+
     // Make a list of all material mappings which can be used for this object and material.
-    
+
     mappings = new Vector();
     List<MaterialMapping> allMappings = PluginRegistry.getPlugins(MaterialMapping.class);
     for (int i = 0; i < allMappings.size(); i++)
@@ -55,7 +55,7 @@ public class MaterialMappingDialog extends BDialog
         Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Material.class);
         Material mat = obj.getMaterial();
         Boolean result = (Boolean) mtd.invoke(null, obj, mat);
-        if (result.booleanValue())
+        if (result)
           mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)
@@ -64,7 +64,7 @@ public class MaterialMappingDialog extends BDialog
     }
 
     // Add the various components to the dialog.
-    
+
     FormContainer content = new FormContainer(new double [] {1}, new double [] {1, 0, 0, 0});
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.add(preview = new MaterialPreviewer(obj.getTexture(), obj.getMaterial(), obj.duplicate(), 160, 160), 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(0, 50, 0, 50), null));
@@ -103,7 +103,7 @@ public class MaterialMappingDialog extends BDialog
     UIUtilities.centerDialog(this, parent);
     setVisible(true);
   }
-  
+
   private void doCancel()
   {
     setMapping(oldMapping);
@@ -131,9 +131,9 @@ public class MaterialMappingDialog extends BDialog
       ex.printStackTrace();
     }
   }
-  
+
   /** Set the mapping for the object being edited. */
-  
+
   private void setMapping(MaterialMapping newmap)
   {
     map = newmap;

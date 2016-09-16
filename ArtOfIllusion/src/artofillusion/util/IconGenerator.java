@@ -15,7 +15,7 @@ package artofillusion.util;
  * published by the Free Software Foundation.
  *
  * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See version 2 of the
  * GNU General Public License for more details.
  *
@@ -58,9 +58,9 @@ import javax.swing.ImageIcon;
  *  Each instruction can perform a single <i>operation</i> which can be modified in various ways.
  *  Each operation and each of the modifiers are specified by an <i>operator</i>
  *  each of which is specified by some token in the macro "language".
- *  
- *  All other words are either the pathname of an image or an object in the execution namespace. 
- *  
+ *
+ *  All other words are either the pathname of an image or an object in the execution namespace.
+ *
  *  The operators and the tokens that specify them in the default language binding are:
  *<ul>
  *<li>COMPOSIT semicolon (;) - at the end of each <i>instruction</i>, the result of the instruction is
@@ -94,18 +94,18 @@ import javax.swing.ImageIcon;
  *<pre>
  *Examples (using default language):
  *  "BackgroundIcon; {icon}"
- *  an image file called BackgroundIcon, overlaid with an image resolved from the namespace 
+ *  an image file called BackgroundIcon, overlaid with an image resolved from the namespace
  *  with the name "{icon}".
- *    
+ *
  *  "SelectedBackgroundIcon; {icon} + 0x200000 @(x+1,y+1) [-1,-1]"
  *  an image file called SelectedBackgroundIcon overlaid with an image resolved from the namespace with the name "{icon}"
  *  which has had 0x200000 added to each pixel (red increased) and has been offset by x+1, y+1
  *  and has been reduced in size by 1 pixel on x and y axes.
- *  
+ *
  *  "0x121212 [32,32]; {icon}; @(z+3)"
  *  the colour 0x121212 sized to a 32x32 image overlaid with the {icon} image
  *  with the result of that offset on the z-axis by +3 (this results in a 3D "popped out" effect)
- *   
+ *
  *  "0x080808 [32,32]; {icon} * #(r=0.6,g=0.6,b=0.6) @(x+1,y+1); @(z-3)"
  *  the colour 0x080808 sized to a 32x32 image, overlaid with the {icon} image
  *  which has been multiplied by 0.6 on red, green and blue (made darker)
@@ -121,30 +121,30 @@ import javax.swing.ImageIcon;
  *  The image named BackgroundIcom overlaid with the {icon} image in the
  *  namespace which has had antialiasing applied using alpha=50% for dark AA
  *  pixels, and light AA pixels having a alpha calculated from the dark pixels.
- *  
+ *
  *  "BackgroundIcon; {icon} ~(0.5, 0.66)"
  *  The image named BackgroundIcom overlaid with the {icon} image in the
  *  namespace which has had antialiasing applied using alpha=50% for the
  *  darkest AA pixels, with successively lighter pixels being 66% as dark.
- *  
+ *
  *  "BackgroundIcon; {icon} ~[3,3]"
  *  The image named BackgroundIcon overlaid with the {icon} image in the
  *  namespace which has had it edges feathered to transparent over an area
  *  3 pixels wide on each side (x-axis) and 3 pixels wide on top and bottom
  *  (y-axis).
- *  
+ *
  *  "BackgroundIcon; {icon}; 0xa0804040 ~[-6,-6]"
  *  The image named BackgroundIcom overlaid with the {icon} image in the
  *  namespace which has then been overlaid with a region of the specified
  *  colour (translucent red) which has had its centre feathered to transparent
  *  from the 6th pixel from the edge into the centre.
- *  
+ *
  *  "BackgroundIcon; {icon}; 0xa0804040 [-4, -4, ~3]"
  *  The image named BackgroundIcom overlaid with the {icon} image in the
  *  namespace, overlaid with a a region of the specified colour
  *  (translucent red) which is 4 pixels smaller than the current image in both
  *  X and Y axes, and which has had the outer 3 pixels feathered to trasnparent.
- *  
+ *
  *</pre>
  */
 
@@ -157,7 +157,7 @@ public class IconGenerator
     protected int imageWidth, imageHeight;
     protected String[] delims;
 
-    // the meaning of the chars in delims[ARG_DELIMS]    
+    // the meaning of the chars in delims[ARG_DELIMS]
     protected static final byte ARG_LIST	= 0x0;
     protected static final byte ARG_RESOLVE	= 0x1;
     protected static final byte ARG_NUMBER	= 0x2;
@@ -193,7 +193,7 @@ public class IconGenerator
     protected static final int OPS = 0;
     protected static final int ARG_DELIMS = 1;
     protected static final int OPEN_CLOSE = 2;
-    
+
     protected static final String[] DEFAULT_DELIMS = { ";|+-*=%~@[.#", ",{0", "()[]{}" };
 
     protected static final String QUOTES = "\"'";
@@ -201,21 +201,21 @@ public class IconGenerator
     protected static final String DEFAULT_TARGET = "{}";
 
     protected static final float SCALE_DOWN = 1.0f/0xff;
-    
+
     protected static final Class[] NULL_SIG = new Class[0];
     protected static final Object[] NULL_ARGS = new Object[0];
-    
+
     private static final String dots =
 	"................................................................................";
-    
+
     /**
      * create a new IconGenerator for the specified macro using the <i>default</i> delims.
-     * 
+     *
      * @param macro
      * @throws Exception
      */
     public IconGenerator(String macro)
-    	throws Exception
+	throws Exception
     {
 	delims = DEFAULT_DELIMS;
 	compile(macro);
@@ -223,7 +223,7 @@ public class IconGenerator
 
     /**
      * create a new IconGenerator for the specified macro and delims.
-     * 
+     *
      * @param macro
      * @param delims
      * @throws Exception
@@ -237,12 +237,12 @@ public class IconGenerator
 
     /**
      * compile the specified macro using the <i>delims</i> defined for this IconGenerator.
-     * 
+     *
      * @param macro
      * @throws Exception
      */
     public void compile(String macro)
-    	throws Exception
+	throws Exception
     {
 	int len = macro.length();
 	program = new Instruction(imageWidth, imageHeight);
@@ -256,7 +256,7 @@ public class IconGenerator
 
     /**
      * set the default size for this IconGenerator.
-     * 
+     *
      * @param width
      * @param height
      */
@@ -264,13 +264,13 @@ public class IconGenerator
     {
 	imageWidth = width;
 	imageHeight = height;
-	
+
 	if (program != null) program.setSize(width, height);
     }
 
     /**
      * execute a compiled IconGenerator.
-     * 
+     *
      * @param namespace
      * @param loader
      * @return
@@ -286,14 +286,14 @@ public class IconGenerator
 
     /**
      * apply (compile and execute) the specified macro.
-     * 
+     *
      * @param macro the macro to apply
      * @param delims an array of 3 string, defining the operator and delimiter chars to use
-     * @param namespace a Map containing the named objects that can be resolved 
+     * @param namespace a Map containing the named objects that can be resolved
      * @param loader the ClassLoader to use for loading external image files.
      * @param width the (initial) width of the icon
      * @param height the (initial) height of the icon
-     * 
+     *
      * @return the resulting Image
      * @throws Exception
      */
@@ -303,7 +303,7 @@ public class IconGenerator
 	int len = macro.length();
 	Instruction instr = new Instruction(width, height);
 	BufferedImage result = null;
-	
+
 	for (int pos = 0; pos < len; pos = instr.end+1) {
 	    instr.compile(macro, pos, delims);
 	    result = instr.execute(result, namespace, loader);
@@ -317,11 +317,11 @@ public class IconGenerator
      * @see #apply(String, String[], Map, ClassLoader, int, int)
      */
     public static Image apply(String macro, String[] delims, Map<String, Object> namespace, ClassLoader loader)
-    	throws Exception
+	throws Exception
     { return apply(macro, delims, namespace, loader, -1, -1); }
 
     /**
-     * apply (compile and execute) the specified macro. 
+     * apply (compile and execute) the specified macro.
      * @see #apply(String, String[], Map, ClassLoader, int, int)
      */
     public static Image apply(String macro, Map<String, Object> namespace, ClassLoader loader)
@@ -353,7 +353,7 @@ public class IconGenerator
      *
      *  @return a newly allocated image of the specified ize containing the
      *                content of <i>orig</i> centered within it.
-     */    
+     */
     public static BufferedImage copy(Image orig, int width, int height, float scale)
     {
         int w = orig.getWidth(null);
@@ -386,7 +386,7 @@ public class IconGenerator
 
     /**
      * draw a 3d bevelled edge on a rectangular image
-     * 
+     *
      * @param image the image to modify
      * @param depth the "size" and "direction" of the bevel, which results in
      *                the specified apparent "depth" or "height".
@@ -409,7 +409,7 @@ public class IconGenerator
      *                depth or height of the 3d effect by determining the width in
      *                pixels of the bevelled edge. So 1 creates an edge 1 pixel wide,
      *                and 3 creates an edge 3 pixels wide.
-     */    
+     */
     public static void bevel3D(BufferedImage image, int depth, Rectangle clip)
     {
         Graphics2D graphics = (Graphics2D) image.getGraphics();
@@ -749,7 +749,7 @@ public class IconGenerator
 
     /**
      * overlay one image over another.
-     * 
+     *
      * @param image the image to modify
      * @param overlay the image to overlay onto <i>image</i>
      * @param clip the region of <i>image</i> to modify. If this is <i>null</i>,
@@ -988,7 +988,7 @@ public class IconGenerator
      *
      *                This is useful if the feathered image is going to be overlaid
      *                on some other image using an identical clip region.
-     */    
+     */
     public static void feather(BufferedImage image, int xsize, int ysize, byte dir, Rectangle clip)
     {
         int x = (clip != null ? clip.x : 0);
@@ -1146,7 +1146,7 @@ public class IconGenerator
 
     /**
      * nested class for the compiled instructions
-     *  
+     *
      * @author nik
      *
      */
@@ -1423,11 +1423,11 @@ public class IconGenerator
                         color = null;
                         arglen = arg.length();
                         if (arglen == 4)
-                            alpha = SCALE_DOWN * Integer.decode(arg).intValue();
+                            alpha = SCALE_DOWN * Integer.decode(arg);
                         else if (arg.length() == 8)
                             color = Color.decode(arg);
                         else if (arglen == 10) {
-                            alpha = SCALE_DOWN * Integer.decode(arg.substring(0, 4)).intValue();
+                            alpha = SCALE_DOWN * Integer.decode(arg.substring(0, 4));
                             color = Color.decode("0x" + arg.substring(4));
                         }
 

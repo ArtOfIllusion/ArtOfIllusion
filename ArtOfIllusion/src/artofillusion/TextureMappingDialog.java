@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -21,7 +21,7 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
 
-/** This class implements the dialog box which is used to choose texture mappings for objects. 
+/** This class implements the dialog box which is used to choose texture mappings for objects.
     It presents a list of all mappings which can be used with the current object and material,
     and allows the user to select one. */
 
@@ -45,7 +45,7 @@ public class TextureMappingDialog extends BDialog
   public TextureMappingDialog(BFrame parent, Object3D obj, int layer)
   {
     super(parent, "Texture Mapping", true);
-    
+
     fr = parent;
     editObj = obj.duplicate();
     origObj = obj;
@@ -55,9 +55,9 @@ public class TextureMappingDialog extends BDialog
     if (layered)
       map = ((LayeredMapping) map).getLayerMapping(layer);
     oldMapping = map.duplicate();
-    
+
     // Make a list of all texture mappings which can be used for this object and texture.
-    
+
     mappings = new Vector();
     List<TextureMapping> allMappings = PluginRegistry.getPlugins(TextureMapping.class);
     for (int i = 0; i < allMappings.size(); i++)
@@ -65,10 +65,10 @@ public class TextureMappingDialog extends BDialog
       try
       {
         Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Texture.class);
-        Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) 
+        Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer)
             : editObj.getTexture();
         Boolean result = (Boolean) mtd.invoke(null, editObj, tex);
-        if (result.booleanValue())
+        if (result)
           mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)
@@ -77,7 +77,7 @@ public class TextureMappingDialog extends BDialog
     }
 
     // Add the various components to the dialog.
-    
+
     content = new FormContainer(new double [] {1}, new double [] {1, 0, 0, 0});
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     Object3D previewObj = editObj;
@@ -121,7 +121,7 @@ public class TextureMappingDialog extends BDialog
     UIUtilities.centerDialog(this, parent);
     setVisible(true);
   }
-  
+
   private void doOk()
   {
     editObj.setTexture(editObj.getTexture(), editObj.getTextureMapping());
@@ -137,7 +137,7 @@ public class TextureMappingDialog extends BDialog
       if (cls == map.getClass())
         return;
       Constructor con = cls.getConstructor(new Class [] {Object3D.class, Texture.class});
-      Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) 
+      Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer)
           : editObj.getTexture();
       setMapping((TextureMapping) con.newInstance(new Object [] {editObj, tex}));
       content.remove(editingPanel);
@@ -150,9 +150,9 @@ public class TextureMappingDialog extends BDialog
       ex.printStackTrace();
     }
   }
-  
+
   /** Set the mapping for the object being edited. */
-  
+
   private void setMapping(TextureMapping newmap)
   {
     map = newmap;
@@ -160,7 +160,7 @@ public class TextureMappingDialog extends BDialog
     if (newmap instanceof UVMapping)
     {
       // Record the current texture coordinates of each vertex.
-      
+
       Mapping2D oldmap;
       if (layered)
         oldmap = (Mapping2D) ((LayeredMapping) editObj.getTextureMapping()).getLayerMapping(layer);
@@ -189,23 +189,23 @@ public class TextureMappingDialog extends BDialog
     if (uv != null)
     {
       // Set the texture coordinates at each vertex.
-      
+
       ((UVMapping) newmap).setTextureCoordinates(editObj, uv);
       setPreviewMapping(newmap);
     }
     if (uvf != null)
     {
       // Set the texture coordinates at each face-vertex.
-      
+
       ((UVMapping) newmap).setFaceTextureCoordinates(editObj, uvf);
       setPreviewMapping(newmap);
     }
     preview.render();
   }
-  
+
   /** Set the texture mapping for the preview and, if necessary, copy over
       texture coordinates. */
-  
+
   public void setPreviewMapping(TextureMapping newmap)
   {
     Texture tex = (layered ? map.getTexture() : editObj.getTexture());

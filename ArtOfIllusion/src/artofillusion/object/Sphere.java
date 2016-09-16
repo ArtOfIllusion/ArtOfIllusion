@@ -492,7 +492,7 @@ public class Sphere extends Object3D
   @Override
   public void setPropertyValue(int index, Object value)
   {
-    double val = ((Double) value).doubleValue();
+    double val = ((Double) value);
     if (index == 0)
       setSize(2.0*val, 2.0*ry, 2.0*rz);
     else if (index == 1)

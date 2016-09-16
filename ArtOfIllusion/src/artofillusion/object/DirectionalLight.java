@@ -245,7 +245,7 @@ public class DirectionalLight extends Light
     else if (index == 1)
       intensity = ((Double) value).floatValue();
     else if (index == 2)
-      radius = ((Double) value).doubleValue();
+      radius = ((Double) value);
     else if (index == 3)
     {
       Object values[] = PROPERTIES[index].getAllowedValues();

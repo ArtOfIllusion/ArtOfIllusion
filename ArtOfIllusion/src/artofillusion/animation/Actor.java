@@ -19,12 +19,15 @@ import artofillusion.ui.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** An Actor is an object with a set of predefined gestures.  Gestures can be blended in arbitrary
     combinations to form poses. */
 
 public class Actor extends ObjectWrapper
 {
+    private static final Logger logger = Logger.getLogger(Actor.class.getName());
   Gesture gesture[];
   String gestureName[];
   int gestureID[], nextPoseID;
@@ -433,12 +436,12 @@ public class Actor extends ObjectWrapper
       }
     catch (InvocationTargetException ex)
       {
-        ex.getTargetException().printStackTrace();
+        logger.log(Level.INFO, "Exception", ex.getTargetException());
         throw new IOException();
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
   }

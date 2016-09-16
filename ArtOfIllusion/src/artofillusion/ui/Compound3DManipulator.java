@@ -18,6 +18,8 @@ import javax.imageio.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class displays a set of curves and handles around a selection in a ViewerCanvas.  It processes
@@ -28,6 +30,8 @@ import java.io.*;
 
 public class Compound3DManipulator extends EventSource implements Manipulator
 {
+    private static final Logger logger = Logger.getLogger(Compound3DManipulator.class.getName());
+    
   private Rectangle bounds;
   private Rectangle[] boxes;
   private Rectangle extraUVBox;
@@ -122,7 +126,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
     return null;
   }

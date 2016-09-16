@@ -15,12 +15,15 @@ import artofillusion.math.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This represents a procedure for calculating a set of values (typically, the parameters
     for a texture or material). */
 
 public class Procedure
 {
+    private static final Logger logger = Logger.getLogger(Procedure.class.getName());
   OutputModule output[];
   Module module[];
   Link link[];
@@ -253,12 +256,12 @@ public class Procedure
       }
     catch (InvocationTargetException ex)
       {
-        ex.getTargetException().printStackTrace();
-        throw new IOException();
+          logger.log(Level.INFO, "Exception", ex.getTargetException());
+            throw new IOException();
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
     link = new Link [in.readInt()];

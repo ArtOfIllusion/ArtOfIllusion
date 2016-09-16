@@ -20,11 +20,15 @@ import buoy.widget.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** OBJExporter contains the actual routines for exporting OBJ files. */
 
 public class OBJExporter
 {
+    private static final Logger logger = Logger.getLogger(OBJExporter.class.getName());
+    
   /** Display a dialog which allows the user to export a scene to an OBJ file. */
   
   public static void exportFile(BFrame parent, Scene theScene)
@@ -100,7 +104,7 @@ public class OBJExporter
     }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         new BStandardDialog("", new String [] {Translate.text("errorExportingScene"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
       }
   }

@@ -19,12 +19,16 @@ import artofillusion.ui.*;
 import java.io.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** A CSGObject is an Object3D that represents the union, intersection, or difference of 
     two component objects. */
 
 public class CSGObject extends Object3D
 {
+    private static final Logger logger = Logger.getLogger(CSGObject.class.getName());
+    
   ObjectInfo obj1, obj2;
   int operation;
   SoftReference<RenderingMesh> cachedMesh;
@@ -376,12 +380,12 @@ public class CSGObject extends Object3D
       }
     catch (InvocationTargetException ex)
       {
-        ex.getTargetException().printStackTrace();
+          logger.log(Level.INFO, "Exception", ex.getTargetException());
         throw new IOException();
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
     obj1.getObject().setTexture(getTexture(), getTextureMapping());
@@ -689,7 +693,7 @@ public class CSGObject extends Object3D
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new InvalidObjectException("");
       }
     }

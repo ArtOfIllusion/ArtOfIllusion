@@ -27,9 +27,13 @@ import java.lang.ref.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TexturesAndMaterialsDialog extends BDialog
 {
+    private static final Logger logger = Logger.getLogger(TexturesAndMaterialsDialog.class.getName());
+    
   Scene theScene;
   EditingWindow parentFrame;
   BTree libraryList;
@@ -605,7 +609,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     ((SceneTreeModel) libraryList.getModel()).rebuildScenes(saveFile);
@@ -646,7 +650,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -664,7 +668,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         catch (IOException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
         ((SceneTreeModel) libraryList.getModel()).rebuildLibrary();
       }
@@ -797,7 +801,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         catch (IOException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
     }
@@ -1050,7 +1054,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         catch (IOException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
           return false;
         }
         if (insertLocation == -1 || insertLocation == current)
@@ -1097,7 +1101,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
       return true;
     }

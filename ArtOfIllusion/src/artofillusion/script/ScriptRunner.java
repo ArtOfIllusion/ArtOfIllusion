@@ -16,11 +16,14 @@ import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class is used for executing scripts. */
 
 public class ScriptRunner
 {
+    private static final Logger logger = Logger.getLogger(ScriptRunner.class.getName());
   public static final String LANGUAGES[] = {"Groovy", "BeanShell"};
   private static SearchlistClassLoader parentLoader;
   private static PrintStream output;
@@ -54,9 +57,9 @@ public class ScriptRunner
             for (String packageName : IMPORTS)
               engine.addImport(packageName);
           }
-        catch (Exception e)
+        catch (Exception ex)
           {
-            e.printStackTrace();
+              logger.log(Level.INFO, "Exception", ex);
           }
         output = new PrintStream(new ScriptOutputWindow());
         engine.setOutput(output);
@@ -122,7 +125,7 @@ public class ScriptRunner
     }
     catch (Exception ex2)
     {
-      ex2.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex2);
     }
     ArrayList<String> v = new ArrayList<String>();
     v.add(head);

@@ -18,12 +18,13 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*; 
 import java.util.*; 
-import java.lang.*; 
 import java.lang.reflect.*; 
 import java.io.*; 
 import artofillusion.*; 
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
  
  
 class debug { 
@@ -232,6 +233,8 @@ class ModuleLoader {
 public class ExprModule extends Module 
 { 
  
+    private static final Logger logger = Logger.getLogger(ExprModule.class.getName());
+    
     Hashtable varTable; 
     Module [] inputs; 
     Module [] myModules; 
@@ -517,8 +520,8 @@ public class ExprModule extends Module
             debug.print ("I don't want to add a null module to the module list at position " + moduleVec.size()); 
             try { 
                 m.init (null); //error! 
-            } catch (Exception e) { 
-                e.printStackTrace (); 
+            } catch (Exception ex) { 
+                logger.log(Level.INFO, "Exception", ex);
             } 
  
         } else if (!moduleVec.contains(m)) { 

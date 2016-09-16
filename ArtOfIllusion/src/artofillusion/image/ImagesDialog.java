@@ -16,11 +16,15 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** ImagesDialog is a dialog box for editing the list of ImageMaps used in a scene. */
 
 public class ImagesDialog extends BDialog
 {
+    private static final Logger logger = Logger.getLogger(ImagesDialog.class.getName());
+    
   private Scene theScene;
   private BFrame parent;
   private int selection;
@@ -89,7 +93,7 @@ public class ImagesDialog extends BDialog
       catch (Exception ex)
       {
         new BStandardDialog("", Translate.text("errorLoadingImage", files[i].getName()), BStandardDialog.ERROR).showMessageDialog(this);
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         setCursor(Cursor.getDefaultCursor());
         return;
       }

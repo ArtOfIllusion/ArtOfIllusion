@@ -19,11 +19,15 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 import java.lang.ref.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is a CanvasDrawer which implements a software renderer for generating the contents of a ViewerCanvas. */
 
 public class SoftwareCanvasDrawer implements CanvasDrawer
 {
+    private static final Logger logger = Logger.getLogger(SoftwareCanvasDrawer.class.getName());
+    
   protected ViewerCanvas view;
   protected BufferedImage theImage;
   protected Graphics2D imageGraphics;
@@ -66,7 +70,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     }
     catch (InterruptedException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -1762,7 +1766,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       }
       catch (InterruptedException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         return null;
       }
     }
@@ -1787,7 +1791,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       }
       catch (InterruptedException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
   }

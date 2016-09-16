@@ -21,12 +21,16 @@ import java.lang.ref.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** The UndoRecord class records a series of commands, allowing the user to undo a previous
     action. */
 
 public class UndoRecord
 {
+    private static final Logger logger = Logger.getLogger(UndoRecord.class.getName());
+    
   private ArrayList<Integer> command;
   private ArrayList<Object[]> data;
   private ArrayList<SoftReference[]> dataRef;
@@ -139,7 +143,7 @@ public class UndoRecord
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
       return redoRecord;
     }
     for (int i = 0; i < command.size(); i++)

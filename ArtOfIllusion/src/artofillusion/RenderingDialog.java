@@ -18,11 +18,15 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class implements the dialog box in which the user can watch a scene being rendered. */
 
 public class RenderingDialog extends BDialog implements RenderListener
 {
+    private static final Logger logger = Logger.getLogger(RenderingDialog.class.getName());
+    
   private CustomWidget canvas;
   private Image previewImage;
   private ComplexImage originalImage, filteredImage;
@@ -352,7 +356,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     {
       // This generally means the thread has been interrupted, which we can just ignore.
 
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
   

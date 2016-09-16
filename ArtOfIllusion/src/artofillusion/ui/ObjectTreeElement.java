@@ -134,7 +134,7 @@ public class ObjectTreeElement extends TreeElement
     info.removeChild((ObjectInfo) object);
     if (tree.undo != null)
       tree.undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object []
-          {info, object, new Integer(pos)});
+          {info, object, pos});
   }
   
   /* Get the object corresponding to this element. */

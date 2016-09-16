@@ -1128,7 +1128,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           childIndex = i;
     itemTree.removeObject(info);
     if (childIndex > -1 && info.getParent() == null)
-      undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {parent, info, new Integer(childIndex)});
+      undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {parent, info, childIndex});
     theScene.removeObject(which, undo);
     for (int i = 0; i < theView.length ; i++)
     {
@@ -2249,7 +2249,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     String val = dlg.showInputDialog(this, null, info.getName());
     if (val == null)
       return;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {new Integer(sel[0]), info.getName()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {sel[0], info.getName()}));
     setObjectName(sel[0], val);
   }
 

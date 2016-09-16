@@ -480,11 +480,11 @@ public class Sphere extends Object3D
     switch (index)
     {
       case 0:
-        return new Double(rx);
+        return rx;
       case 1:
-        return new Double(ry);
+        return ry;
       case 2:
-        return new Double(rz);
+        return rz;
     }
     return null;
   }

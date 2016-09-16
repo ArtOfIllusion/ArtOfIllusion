@@ -443,13 +443,13 @@ public class Cylinder extends Object3D
     switch (index)
     {
       case 0:
-        return new Double(rx);
+        return rx;
       case 1:
-        return new Double(rz);
+        return rz;
       case 2:
-        return new Double(ratio);
+        return ratio;
       case 3:
-        return new Double(height);
+        return height;
     }
     return null;
   }

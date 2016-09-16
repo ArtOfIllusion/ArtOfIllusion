@@ -370,7 +370,7 @@ public class Actor extends ObjectWrapper
       if (weight[i] > 0.0)
       {
         gestureList.addElement(gesture[i+1]);
-        weightList.addElement(new Double(weight[i]));
+        weightList.addElement(weight[i]);
       }
     MeshGesture poseGesture[] = new MeshGesture [gestureList.size()];
     double poseWeight[] = new double [weightList.size()];
@@ -456,7 +456,7 @@ public class Actor extends ObjectWrapper
   @Override
   public Object getPropertyValue(int index)
   {
-    return new Double(currentPose.getGestureWeight(index));
+    return currentPose.getGestureWeight(index);
   }
 
   @Override
@@ -667,12 +667,12 @@ public class Actor extends ObjectWrapper
     {
       for (int i = 0; i < k.id.length; i++)
         {
-          Object key = new Integer(k.id[i]);
+          Object key = k.id[i];
           Double weight = (Double) table.get(key);
           if (weight == null)
-            weight = new Double(k.weight[i]*scale);
+            weight = k.weight[i]*scale;
           else
-            weight = new Double(k.weight[i]*scale+weight.doubleValue());
+            weight = k.weight[i]*scale+weight.doubleValue();
           table.put(key, weight);
         }
     }
@@ -771,7 +771,7 @@ public class Actor extends ObjectWrapper
         if (which > -1)
         {
           poseVec.addElement(actor.gesture[which]);
-          weightVec.addElement(new Double(weight[i]));
+          weightVec.addElement(weight[i]);
         }
       }
       Gesture blendPose[] = new Gesture [poseVec.size()];

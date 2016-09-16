@@ -251,7 +251,7 @@ public class Cube extends Object3D
   @Override
   public void setPropertyValue(int index, Object value)
   {
-    double val = ((Double) value).doubleValue();
+    double val = ((Double) value);
     if (index == 0)
       setSize(val, 2.0*halfy, 2.0*halfz);
     else if (index == 1)

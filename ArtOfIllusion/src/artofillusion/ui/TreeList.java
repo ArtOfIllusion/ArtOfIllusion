@@ -393,7 +393,7 @@ public class TreeList extends CustomWidget
     for (int i = 0; i < showing.size(); i++)
     {
       TreeElement el = (TreeElement) showing.elementAt(i);
-      int x = ((Integer) indent.elementAt(i)).intValue()*INDENT_WIDTH;
+      int x = ((Integer) indent.elementAt(i))*INDENT_WIDTH;
       if (el.getNumChildren() > 0)
       {
         // Draw the handle to collapse or expand the hierarchy.
@@ -459,7 +459,7 @@ public class TreeList extends CustomWidget
     dragStart = lastDrag = row;
     TreeElement el = (TreeElement) showing.elementAt(row);
     int i = pos.x/INDENT_WIDTH;
-    int ind = ((Integer) indent.elementAt(row)).intValue();
+    int ind = ((Integer) indent.elementAt(row));
     if (i == ind && el.getNumChildren() > 0)
     {
       // Expand or collapse this item.
@@ -570,7 +570,7 @@ public class TreeList extends CustomWidget
       {
         TreeElement el = (TreeElement) showing.elementAt(row);
         parent = el;
-        lastIndent = ((Integer) indent.elementAt(row)).intValue();
+        lastIndent = ((Integer) indent.elementAt(row));
         if (above)
         {
           parent = el.getParent();
@@ -745,7 +745,7 @@ public class TreeList extends CustomWidget
     int row = pos.y/rowHeight, i = pos.x/INDENT_WIDTH;
     if (row >= showing.size())
       return;
-    int ind = ((Integer) indent.elementAt(row)).intValue();
+    int ind = ((Integer) indent.elementAt(row));
     TreeElement el = (TreeElement) showing.elementAt(row);
     if (i < ind)
       return;

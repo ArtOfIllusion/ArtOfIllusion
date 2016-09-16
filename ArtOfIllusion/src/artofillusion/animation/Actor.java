@@ -377,7 +377,7 @@ public class Actor extends ObjectWrapper
     for (int i = 0; i < poseGesture.length; i++)
     {
       poseGesture[i] = (MeshGesture) gestureList.elementAt(i);
-      poseWeight[i] = ((Double) weightList.elementAt(i)).doubleValue();
+      poseWeight[i] = ((Double) weightList.elementAt(i));
     }
     MeshGesture average = (MeshGesture) obj.getPoseKeyframe();
     ((MeshGesture) gesture[0]).blendSurface(average, poseGesture, poseWeight);
@@ -462,7 +462,7 @@ public class Actor extends ObjectWrapper
   @Override
   public void setPropertyValue(int index, Object value)
   {
-    currentPose.weight[index] = ((Double) value).doubleValue();
+    currentPose.weight[index] = ((Double) value);
     applyPoseKeyframe(currentPose);
   }
 
@@ -672,7 +672,7 @@ public class Actor extends ObjectWrapper
           if (weight == null)
             weight = k.weight[i]*scale;
           else
-            weight = k.weight[i]*scale+weight.doubleValue();
+            weight = k.weight[i]*scale+weight;
           table.put(key, weight);
         }
     }
@@ -690,8 +690,8 @@ public class Actor extends ObjectWrapper
         {
           Integer key = (Integer) keys.nextElement();
           Double weight = (Double) table.get(key);
-          k.id[j] = key.intValue();
-          k.weight[j] = weight.doubleValue();
+          k.id[j] = key;
+          k.weight[j] = weight;
           if (k.weight[j] != 0.0)
             j++;
         }
@@ -779,7 +779,7 @@ public class Actor extends ObjectWrapper
       for (int i = 0; i < blendPose.length; i++)
       {
         blendPose[i] = (Gesture) poseVec.elementAt(i);
-        blendWeight[i] = ((Double) weightVec.elementAt(i)).doubleValue();
+        blendWeight[i] = ((Double) weightVec.elementAt(i));
       }
       return actor.gesture[0].blend(blendPose, blendWeight);
     }

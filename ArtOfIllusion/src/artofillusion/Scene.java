@@ -1673,7 +1673,7 @@ public class Scene
         table.put(info.getObject(), key);
       }
     else
-      out.writeInt(key.intValue());
+      out.writeInt(key);
     
     // Write the tracks for this object.
     

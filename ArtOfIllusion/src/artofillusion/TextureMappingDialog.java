@@ -68,7 +68,7 @@ public class TextureMappingDialog extends BDialog
         Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) 
             : editObj.getTexture();
         Boolean result = (Boolean) mtd.invoke(null, editObj, tex);
-        if (result.booleanValue())
+        if (result)
           mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)

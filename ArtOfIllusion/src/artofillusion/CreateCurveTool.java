@@ -152,7 +152,7 @@ public class CreateCurveTool extends EditingTool
         for (int i = 0; i < vertex.length; i++)
           {
             vertex[i] = (Vec3) clickPoint.elementAt(i);
-            s[i] = ((Float) smoothness.elementAt(i)).floatValue();
+            s[i] = ((Float) smoothness.elementAt(i));
             orig = orig.plus(vertex[i]);
           }
         orig = orig.times(1.0/vertex.length);

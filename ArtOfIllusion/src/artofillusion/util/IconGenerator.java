@@ -1423,11 +1423,11 @@ public class IconGenerator
                         color = null;
                         arglen = arg.length();
                         if (arglen == 4)
-                            alpha = SCALE_DOWN * Integer.decode(arg).intValue();
+                            alpha = SCALE_DOWN * Integer.decode(arg);
                         else if (arg.length() == 8)
                             color = Color.decode(arg);
                         else if (arglen == 10) {
-                            alpha = SCALE_DOWN * Integer.decode(arg.substring(0, 4)).intValue();
+                            alpha = SCALE_DOWN * Integer.decode(arg.substring(0, 4));
                             color = Color.decode("0x" + arg.substring(4));
                         }
 

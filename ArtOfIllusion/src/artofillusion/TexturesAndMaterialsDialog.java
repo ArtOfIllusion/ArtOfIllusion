@@ -942,7 +942,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         return texIndex;
       int matIndex = node.materials.indexOf(o1);
       if (matIndex > -1)
-        return matIndex+(showTextures ? node.textures.size() : 0);;
+        return matIndex + (showTextures ? node.textures.size() : 0);
       return -1;
     }
 

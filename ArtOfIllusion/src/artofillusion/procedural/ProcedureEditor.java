@@ -18,6 +18,8 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is the editor for editing procedures.  It subclasses CustomWidget, but you should never
     add it to any Container.  Instead, it will automatically create a BFrame and add itself
@@ -25,6 +27,7 @@ import java.util.*;
 
 public class ProcedureEditor extends CustomWidget
 {
+    private static final Logger logger = Logger.getLogger(ProcedureEditor.class.getName());
   private BFrame parent;
   private Procedure proc;
   private ProcedureOwner owner;
@@ -91,7 +94,7 @@ public class ProcedureEditor extends CustomWidget
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
 
     // Create the buttons at the top of the window.
@@ -492,7 +495,7 @@ public class ProcedureEditor extends CustomWidget
       }
     catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
   }
   
@@ -513,7 +516,7 @@ public class ProcedureEditor extends CustomWidget
       }
     catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     if (redoStack.size() == ArtOfIllusion.getPreferences().getUndoLevels())
       redoStack.remove(0);
@@ -542,7 +545,7 @@ public class ProcedureEditor extends CustomWidget
       }
     catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     if (undoStack.size() == ArtOfIllusion.getPreferences().getUndoLevels())
       undoStack.remove(0);

@@ -21,12 +21,16 @@ import java.awt.*;
 import java.lang.reflect.*;
 import java.text.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is a Widget which displays all the tracks for objects in a scene, and shows
     where their keyframes are. */
 
 public class Score extends BorderContainer implements EditingWindow, PopupMenuManager
 {
+    
+    private static final Logger logger = Logger.getLogger(Score.class.getName());
   LayoutWindow window;
   TreeList theList;
   TimeAxis theAxis;
@@ -1028,7 +1032,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     window.setUndoRecord(undo);
     if (deselectOthers)

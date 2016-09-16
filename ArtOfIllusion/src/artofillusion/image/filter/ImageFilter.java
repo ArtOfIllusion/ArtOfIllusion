@@ -21,6 +21,8 @@ import buoy.widget.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class defines an object which can filter rendered images.  It is an abstract class, whose subclasses implement
     specific types of filters.  An ImageFilter may present a user interface for configuring filtering options,
@@ -28,6 +30,7 @@ import java.io.*;
 
 public abstract class ImageFilter
 {
+    private static final Logger logger = Logger.getLogger(ImageFilter.class.getName());
   @Deprecated
   protected double paramValue[];
   private Object propertyValue[];
@@ -88,7 +91,7 @@ public abstract class ImageFilter
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     return null;
   }

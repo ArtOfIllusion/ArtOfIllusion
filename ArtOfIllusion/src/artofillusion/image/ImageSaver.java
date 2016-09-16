@@ -20,6 +20,8 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.text.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.*;
 import javax.imageio.stream.*;
 
@@ -27,6 +29,8 @@ import javax.imageio.stream.*;
 
 public class ImageSaver
 {
+    private static final Logger logger = Logger.getLogger(ImageSaver.class.getName());
+    
   private int format, index;
   private String name, directory;
   private boolean ok, premultiply;
@@ -219,7 +223,7 @@ public class ImageSaver
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
       new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
     }
     return false;

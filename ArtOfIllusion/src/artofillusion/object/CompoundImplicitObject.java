@@ -18,9 +18,13 @@ import artofillusion.ui.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CompoundImplicitObject extends ImplicitObject
 {
+    private static final Logger logger = Logger.getLogger(CompoundImplicitObject.class.getName());
+    
   private ArrayList<ImplicitObject> objects;
   private ArrayList<CoordinateSystem> objectCoords;
   private BoundingBox bounds;
@@ -515,7 +519,7 @@ public class CompoundImplicitObject extends ImplicitObject
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new InvalidObjectException(ex.getMessage());
       }
     }

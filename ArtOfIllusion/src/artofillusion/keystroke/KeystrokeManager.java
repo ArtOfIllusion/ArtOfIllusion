@@ -17,6 +17,8 @@ import artofillusion.*;
 import java.util.*;
 import java.awt.event.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -32,6 +34,7 @@ import org.w3c.dom.Node;
 
 public class KeystrokeManager
 {
+    private static final Logger logger = Logger.getLogger(KeystrokeManager.class.getName());
   private static ArrayList<KeystrokeRecord> records = new ArrayList<KeystrokeRecord>();
   private static HashMap<Integer, ArrayList<KeystrokeRecord>> keyIndex = new HashMap<Integer, ArrayList<KeystrokeRecord>>();
 
@@ -151,7 +154,7 @@ public class KeystrokeManager
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
     }
   }
 

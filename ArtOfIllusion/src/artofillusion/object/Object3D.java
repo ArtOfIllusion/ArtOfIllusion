@@ -20,11 +20,15 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** Object3D is the abstract superclass of any object which can be placed into a Scene. */
 
 public abstract class Object3D
 {
+    private static final Logger logger = Logger.getLogger(Object3D.class.getName());
+    
   protected Texture theTexture;
   protected Material theMaterial;
   protected TextureMapping texMapping;
@@ -486,7 +490,7 @@ public abstract class Object3D
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new IOException(ex.getMessage());
           }
       }
@@ -518,7 +522,7 @@ public abstract class Object3D
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
       throw new IOException(ex.getMessage());
     }
   }

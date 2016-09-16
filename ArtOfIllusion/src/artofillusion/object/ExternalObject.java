@@ -16,11 +16,15 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** ExternalObject is an Object3D that is stored in a separate file. */
 
 public class ExternalObject extends ObjectWrapper
 {
+    private static final Logger logger = Logger.getLogger(ExternalObject.class.getName());
+    
   private File externalFile;
   private int objectId;
   private String objectName;
@@ -159,8 +163,8 @@ public class ExternalObject extends ObjectWrapper
     {
       // If anything goes wrong, use a null object and return an error message.
       
-      ex.printStackTrace();
-      loadingError = ex.getMessage();
+        logger.log(Level.INFO, "Exception", ex);
+        loadingError = ex.getMessage();
     }
   }
 

@@ -24,6 +24,8 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is a panel which displays information about the currently selected objects, and allows them
@@ -32,6 +34,8 @@ import java.util.List;
 
 public class ObjectPropertiesPanel extends ColumnContainer
 {
+    private static final Logger logger = Logger.getLogger(ObjectPropertiesPanel.class.getName());
+    
   private LayoutWindow window;
   private BTextField nameField;
   private ValueField xPosField, yPosField, zPosField, xRotField, yRotField, zRotField;
@@ -208,7 +212,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
         }
       }
       textureChoice.setModel(new DefaultComboBoxModel(names));
@@ -255,7 +259,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
       materialChoice.setModel(new DefaultComboBoxModel(names));
@@ -484,7 +488,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
     }
@@ -536,7 +540,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     if (noMaterial || mat != null)

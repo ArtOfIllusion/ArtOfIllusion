@@ -58,7 +58,7 @@ public class Property
     this.name = name;
     this.min = min;
     this.max = max;
-    this.defaultValue = new Double(defaultValue);
+    this.defaultValue = defaultValue;
     type = DOUBLE;
   }
 
@@ -66,12 +66,12 @@ public class Property
    * Create an Integer valued property.
    */
 
-  public Property(String name, int min, int max, int defaultValue)
+  public Property(String name, int min, int max, int value)
   {
     this.name = name;
     this.min = min;
     this.max = max;
-    this.defaultValue = new Integer(defaultValue);
+    this.defaultValue = value;
     type = INTEGER;
   }
 
@@ -79,10 +79,10 @@ public class Property
    * Create a Boolean valued property.
    */
 
-  public Property(String name, boolean defaultValue)
+  public Property(String name, boolean value)
   {
     this.name = name;
-    this.defaultValue = Boolean.valueOf(defaultValue);
+    this.defaultValue = value;
     type = BOOLEAN;
   }
 

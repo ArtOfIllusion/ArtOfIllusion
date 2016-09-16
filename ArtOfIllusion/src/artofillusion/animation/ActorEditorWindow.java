@@ -391,7 +391,7 @@ public class ActorEditorWindow extends BDialog
     {
       if (columnIndex == 0)
         return theObject.gestureName[theObject.findPoseIndex(currentPose.getGestureID(rowIndex))];
-      return new Double(currentPose.getGestureWeight(rowIndex));
+      return currentPose.getGestureWeight(rowIndex);
     }
 
     @Override
@@ -477,7 +477,7 @@ public class ActorEditorWindow extends BDialog
     @Override
     public Object getCellEditorValue()
     {
-      return new Double(selector.getValue());
+      return selector.getValue();
     }
 
     @Override

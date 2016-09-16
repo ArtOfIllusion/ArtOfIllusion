@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.tools;
@@ -31,7 +31,7 @@ public class TubeDialog extends BDialog
   ValueField thicknessField;
   BComboBox endsChoice;
   ObjectPreviewCanvas preview;
-  
+
   private static int counter = 1;
 
   public TubeDialog(LayoutWindow window, ObjectInfo curve)
@@ -41,9 +41,9 @@ public class TubeDialog extends BDialog
     curveInfo = curve;
     theCurve = (Curve) curve.getObject();
     Scene scene = window.getScene();
-    
+
     // Layout the window.
-    
+
     FormContainer content = new FormContainer(4, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
@@ -65,18 +65,18 @@ public class TubeDialog extends BDialog
     UIUtilities.centerDialog(this, window);
     setVisible(true);
   }
-  
+
   private void doOk()
   {
     window.addObject(theTube, curveInfo.getCoords().duplicate(), "Tube "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {window.getScene().getNumObjects()-1}));
     window.updateImage();
     dispose();
   }
-  
+
   // Create the Tube.
-  
+
   private void makeObject()
   {
     MeshVertex vert[] = theCurve.getVertices();

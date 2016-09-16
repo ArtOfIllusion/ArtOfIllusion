@@ -79,7 +79,7 @@ public abstract class MeshViewer extends ObjectViewer
 
   public void lockJoint(int id)
   {
-    Integer i = Integer.valueOf(id);
+    Integer i = id;
     if (lockedJoints.indexOf(i) == -1)
       lockedJoints.addElement(i);
   }
@@ -88,7 +88,7 @@ public abstract class MeshViewer extends ObjectViewer
 
   public void unlockJoint(int id)
   {
-    lockedJoints.removeElement(Integer.valueOf(id));
+    lockedJoints.removeElement(id);
   }
 
   /** Get whether the control mesh is visible. */

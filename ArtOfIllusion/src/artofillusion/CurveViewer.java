@@ -155,7 +155,7 @@ public class CurveViewer extends MeshViewer
               selected[i] = false;
           selected[j] = true;
           ((CurveEditorWindow) controller).findSelectionDistance();
-          currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, new Integer(controller.getSelectionMode()), oldSelection}));
+          currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
           controller.setSelection(selected);
           activeTool.getWindow().updateMenus();
         }
@@ -245,7 +245,7 @@ public class CurveViewer extends MeshViewer
     for (int k = 0; k < selected.length; k++)
       if (selected[k] != oldSelection[k])
       {
-        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, new Integer(controller.getSelectionMode()), oldSelection}));
+        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
         break;
       }
     controller.setSelection(selected);

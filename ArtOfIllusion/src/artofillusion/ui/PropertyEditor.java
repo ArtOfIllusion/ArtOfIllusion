@@ -110,11 +110,11 @@ public class PropertyEditor
   public Object getValue()
   {
     if (widget instanceof ValueSelector)
-      return Double.valueOf(((ValueSelector) widget).getValue());
+      return ((ValueSelector) widget).getValue();
     else if (widget instanceof ValueField)
-      return Integer.valueOf((int) ((ValueField) widget).getValue());
+      return (int) ((ValueField) widget).getValue();
     else if (widget instanceof BCheckBox)
-      return Boolean.valueOf(((BCheckBox) widget).getState());
+      return ((BCheckBox) widget).getState();
     else if (widget instanceof BTextField)
       return ((BTextField) widget).getText();
     else if (widget instanceof ColorSelector)

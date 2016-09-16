@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.tools;
@@ -43,7 +43,7 @@ public class ExtrudeDialog extends BDialog
     this.window = window;
     Scene scene = window.getScene();
     int selection[] = window.getSelectedIndices();
-    
+
     // Identify the objects that can be extruded, and the paths along which they can be
     // extruded.
 
@@ -66,7 +66,7 @@ public class ExtrudeDialog extends BDialog
       paths.removeAllElements();
 
     // Layout the window.
-    
+
     FormContainer content = new FormContainer(4, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
@@ -135,17 +135,17 @@ public class ExtrudeDialog extends BDialog
     updateComponents();
     setVisible(true);
   }
-  
+
   /** Deal with changes to the checkboxes and choices. */
-  
+
   private void stateChanged()
   {
     makeObject();
     updateComponents();
   }
-  
+
   /** Enable or disable components, based on the current selections. */
-  
+
   private void updateComponents()
   {
     distField.setEnabled(xBox.getState() || yBox.getState() || zBox.getState());
@@ -162,7 +162,7 @@ public class ExtrudeDialog extends BDialog
     else
       okButton.setEnabled(true);
   }
-  
+
   private void doOk()
   {
     ObjectInfo profile = (ObjectInfo) objects.elementAt(objChoice.getSelectedIndex());
@@ -174,19 +174,19 @@ public class ExtrudeDialog extends BDialog
     }
     window.addObject(preview.getObject().getObject(), coords, "Extruded Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {window.getScene().getNumObjects()-1}));
     window.updateImage();
     dispose();
   }
-  
+
   // Create the extruded object.
-  
+
   private void makeObject()
   {
     ObjectInfo profile = (ObjectInfo) objects.elementAt(objChoice.getSelectedIndex());
     Curve path;
     CoordinateSystem pathCoords;
-    
+
     if (pathBox.getState())
       {
         ObjectInfo info = (ObjectInfo) paths.elementAt(pathChoice.getSelectedIndex());
@@ -232,9 +232,9 @@ public class ExtrudeDialog extends BDialog
     }
     preview.repaint();
   }
-  
+
   /** Extrude a curve into a spline mesh.
-      
+
       @param profile     the curve to extrude
       @param profCoords  the coordinate system of the profile
       @param dir         the direction and distance along which to extrude it
@@ -243,7 +243,7 @@ public class ExtrudeDialog extends BDialog
       @param orient      if true, the orientation of the profile will follow the curve
       @return the extruded object
   */
-  
+
   public static Object3D extrudeCurve(Curve profile, CoordinateSystem profCoords, Vec3 dir, int segments, double angle, boolean orient)
   {
     Vec3 v[] = new Vec3 [segments+1];
@@ -257,9 +257,9 @@ public class ExtrudeDialog extends BDialog
     Curve path = new Curve(v, smooth, Mesh.INTERPOLATING, false);
     return extrudeCurve(profile, path, profCoords, new CoordinateSystem(), angle, orient);
   }
-  
+
   /** Extrude a curve into a spline mesh.
-      
+
       @param profile     the curve to extrude
       @param path        the path along which to extrude it
       @param profCoords  the coordinate system of the profile
@@ -268,7 +268,7 @@ public class ExtrudeDialog extends BDialog
       @param orient      if true, the orientation of the profile will follow the curve
       @return the extruded object
   */
-  
+
   public static Object3D extrudeCurve(Curve profile, Curve path, CoordinateSystem profCoords, CoordinateSystem pathCoords, double angle, boolean orient)
   {
     MeshVertex profVert[] = profile.getVertices(), pathVert[] = path.getVertices();
@@ -279,15 +279,15 @@ public class ExtrudeDialog extends BDialog
     CoordinateSystem localCoords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
     Mat4 rotate;
     int i, j;
-    
+
     for (i = 0; i < profVert.length; i++)
       profv[i] = profCoords.fromLocal().timesDirection(profVert[i].r);
     for (i = 0; i < pathVert.length; i++)
       pathv[i] = pathCoords.fromLocal().timesDirection(pathVert[i].r);
 
-    // Construct the Minimally Rotating Frame at every point along the path.  First, 
+    // Construct the Minimally Rotating Frame at every point along the path.  First,
     // subdivide the path and determine its direction at the starting point.
-    
+
     subdiv = new Curve(pathv, pathSmooth, path.getSmoothingMethod(), path.isClosed()).subdivideCurve().getVertexPositions();
     t = new Vec3 [subdiv.length];
     zdir = new Vec3 [subdiv.length];
@@ -296,10 +296,10 @@ public class ExtrudeDialog extends BDialog
     t[0].normalize();
     zdir[0] = Vec3.vz();
     updir[0] = Vec3.vy();
-    
+
     // Now find two vectors perpendicular to the path, and determine how much they
     // contribute to the z and up directions.
-    
+
     Vec3 dir1, dir2;
     double zfrac1, zfrac2, upfrac1, upfrac2;
     zfrac1 = t[0].dot(zdir[0]);
@@ -310,9 +310,9 @@ public class ExtrudeDialog extends BDialog
     upfrac2 = Math.sqrt(1.0-upfrac1*upfrac1);
     dir2 = updir[0].minus(t[0].times(upfrac1));
     dir2.normalize();
-    
+
     // Propagate the vectors along the path.
-    
+
     for (i = 1; i < subdiv.length; i++)
       {
         if (i == subdiv.length-1)
@@ -340,9 +340,9 @@ public class ExtrudeDialog extends BDialog
             updir[i] = updir[i-1];
           }
       }
-    
+
     // Set the smoothness values.
-    
+
     if (path.getSmoothingMethod() != Mesh.NO_SMOOTHING)
       for (i = 0; i < usmooth.length; i++)
         usmooth[i] = pathSmooth[i];
@@ -353,7 +353,7 @@ public class ExtrudeDialog extends BDialog
     // If one curve is interpolating and the other is approximating, use a subdivided
     // version of the interpolating one to more accurately get its shape (since the final
     // mesh will be approximating).
-    
+
     if (profile.getSmoothingMethod() == Mesh.APPROXIMATING && path.getSmoothingMethod() == Mesh.INTERPOLATING)
       {
         pathv = subdiv;
@@ -378,9 +378,9 @@ public class ExtrudeDialog extends BDialog
               vsmooth[i] = 1.0f;
           }
       }
-    
+
     // Create the extruded surface.
-    
+
     v = new Vec3 [pathv.length][profv.length];
     for (i = 0; i < pathv.length; i++)
       {
@@ -398,21 +398,21 @@ public class ExtrudeDialog extends BDialog
             center.add(v[i][j]);
           }
       }
-    
+
     // Center it.
-    
+
     center.scale(1.0/(profv.length*pathv.length));
     for (i = 0; i < pathv.length; i++)
       for (j = 0; j < profv.length; j++)
         v[i][j].subtract(center);
-    SplineMesh mesh = new SplineMesh(v, usmooth, vsmooth, Math.max(profile.getSmoothingMethod(), 
+    SplineMesh mesh = new SplineMesh(v, usmooth, vsmooth, Math.max(profile.getSmoothingMethod(),
         path.getSmoothingMethod()), path.isClosed(), profile.isClosed());
     mesh.makeRightSideOut();
     return mesh;
   }
 
   /** Extrude a triangle mesh into a solid object.
-      
+
       @param profile     the TriangleMesh to extrude
       @param profCoords  the coordinate system of the profile
       @param dir         the direction and distance along which to extrude it
@@ -421,7 +421,7 @@ public class ExtrudeDialog extends BDialog
       @param orient      if true, the orientation of the profile will follow the curve
       @return the extruded object
   */
-  
+
   public static Object3D extrudeMesh(TriangleMesh profile, CoordinateSystem profCoords, Vec3 dir, int segments, double angle, boolean orient)
   {
     Vec3 v[] = new Vec3 [segments+1];
@@ -435,9 +435,9 @@ public class ExtrudeDialog extends BDialog
     Curve path = new Curve(v, smooth, Mesh.INTERPOLATING, false);
     return extrudeMesh(profile, path, profCoords, new CoordinateSystem(), angle, orient);
   }
-  
+
   /** Extrude a triangle mesh into a solid object.
-      
+
       @param profile     the TriangleMesh to extrude
       @param path        the path along which to extrude it
       @param profCoords  the coordinate system of the profile
@@ -446,7 +446,7 @@ public class ExtrudeDialog extends BDialog
       @param orient      if true, the orientation of the profile will follow the curve
       @return the extruded object
   */
-  
+
   public static Object3D extrudeMesh(TriangleMesh profile, Curve path, CoordinateSystem profCoords, CoordinateSystem pathCoords, double angle, boolean orient)
   {
     Vertex profVert[] = (Vertex [] ) profile.getVertices();
@@ -460,7 +460,7 @@ public class ExtrudeDialog extends BDialog
     Mat4 rotate;
     int numBoundaryEdges = 0, numBoundaryPoints = 0, i, j, k;
     int boundaryEdge[], boundaryPoint[];
-    
+
     for (i = 0; i < profVert.length; i++)
       profv[i] = profCoords.fromLocal().timesDirection(profVert[i].r);
     for (i = 0; i < pathVert.length; i++)
@@ -468,9 +468,9 @@ public class ExtrudeDialog extends BDialog
     if (path.getSmoothingMethod() == Mesh.NO_SMOOTHING)
       for (i = 0; i < pathSmooth.length; i++)
         pathSmooth[i] = 0.0f;
-    
+
     // Make a list of the edges and vertices which are on the boundary of the mesh.
-    
+
     boolean onBound[] = new boolean [profv.length];
     for (i = 0; i < profEdge.length; i++)
       if (profEdge[i].f2 == -1)
@@ -491,14 +491,14 @@ public class ExtrudeDialog extends BDialog
         boundaryPoint[j++] = i;
 
     // Find which direction each boundary edge points in.
-    
+
     boolean forward[] = new boolean [boundaryEdge.length];
     int edgeVertIndex[][] = new int [boundaryEdge.length][2];
     for (i = 0; i < boundaryEdge.length; i++)
       {
         Edge ed = profEdge[boundaryEdge[i]];
         Face fc = profFace[ed.f1];
-        forward[i] = ((fc.v1 == ed.v1 && fc.v2 == ed.v2) || 
+        forward[i] = ((fc.v1 == ed.v1 && fc.v2 == ed.v2) ||
             (fc.v2 == ed.v1 && fc.v3 == ed.v2) || (fc.v3 == ed.v1 && fc.v1 == ed.v2));
         for (j = 0; j < boundaryPoint.length; j++)
           {
@@ -510,7 +510,7 @@ public class ExtrudeDialog extends BDialog
       }
 
     // Make up a list of the indices for every point on the side of the extruded object.
-    
+
     int index[][];
     if (path.isClosed())
       {
@@ -534,9 +534,9 @@ public class ExtrudeDialog extends BDialog
           }
       }
 
-    // Construct the Minimally Rotating Frame at every point along the path.  First, 
+    // Construct the Minimally Rotating Frame at every point along the path.  First,
     // subdivide the path and determine its direction at the starting point.
-    
+
     subdiv = new Curve(pathv, pathSmooth, path.getSmoothingMethod(), path.isClosed()).subdivideCurve().getVertexPositions();
     t = new Vec3 [subdiv.length];
     zdir = new Vec3 [subdiv.length];
@@ -545,10 +545,10 @@ public class ExtrudeDialog extends BDialog
     t[0].normalize();
     zdir[0] = Vec3.vz();
     updir[0] = Vec3.vy();
-    
+
     // Now find two vectors perpendicular to the path, and determine how much they
     // contribute to the z and up directions.
-    
+
     Vec3 dir1, dir2;
     double zfrac1, zfrac2, upfrac1, upfrac2;
     zfrac1 = t[0].dot(zdir[0]);
@@ -559,9 +559,9 @@ public class ExtrudeDialog extends BDialog
     upfrac2 = Math.sqrt(1.0-upfrac1*upfrac1);
     dir2 = updir[0].minus(t[0].times(upfrac1));
     dir2.normalize();
-    
+
     // Propagate the vectors along the path.
-    
+
     for (i = 1; i < subdiv.length; i++)
       {
         if (i == subdiv.length-1)
@@ -589,9 +589,9 @@ public class ExtrudeDialog extends BDialog
             updir[i] = updir[i-1];
           }
       }
-    
+
     // Create the extruded surface.
-    
+
     if (path.isClosed())
       v = new Vec3 [numBoundaryPoints*pathv.length];
     else
@@ -601,7 +601,7 @@ public class ExtrudeDialog extends BDialog
     if (!path.isClosed())
       {
         // Add two copies of the profile mesh, to serve as the ends.
-        
+
         localCoords.setOrigin(pathv[0]);
         localCoords.setOrientation(zdir[0], updir[0]);
         for (i = 0; i < profv.length; i++)
@@ -616,9 +616,9 @@ public class ExtrudeDialog extends BDialog
           }
         for (i = 0; i < profv.length; i++)
           v[i+profv.length] = localCoords.fromLocal().times(profv[i]);
-        
+
         // Add the edges and faces.
-        
+
         for (i = 0; i < profEdge.length; i++)
           {
             float smoothness = profEdge[i].smoothness;
@@ -638,9 +638,9 @@ public class ExtrudeDialog extends BDialog
       {
         if (!path.isClosed() && i == pathv.length-1)
           break;
-        
+
         // Add each row of triangles and edges around the side.
-        
+
         for (j = 0; j < boundaryEdge.length; j++)
           {
             int v1, v2;
@@ -668,9 +668,9 @@ public class ExtrudeDialog extends BDialog
                 newEdge.addElement(ed1);
               }
           }
-        
+
         // Add each row of points around the side.
-        
+
         localCoords.setOrigin(pathv[i]);
         k = (pathv.length == subdiv.length ? i : 2*i);
         localCoords.setOrientation(zdir[k], updir[k]);
@@ -682,18 +682,18 @@ public class ExtrudeDialog extends BDialog
         for (j = 0; j < boundaryPoint.length; j++)
           v[index[i][j]] = localCoords.fromLocal().times(profv[boundaryPoint[j]]);
       }
-    
+
     // Center it.
-    
+
     center = new Vec3();
     for (i = 0; i < v.length; i++)
       center.add(v[i]);
     center.scale(1.0/v.length);
     for (i = 0; i < v.length; i++)
       v[i].subtract(center);
-    
+
     // Build the final object.
-    
+
     int faces[][] = new int [newFace.size()][];
     for (i = 0; i < faces.length; i++)
       faces[i] = (int []) newFace.elementAt(i);
@@ -705,7 +705,7 @@ public class ExtrudeDialog extends BDialog
         if (info.smoothness == 1.0f)
           continue;
         for (j = 0; j < meshEdge.length; j++)
-          if ((meshEdge[j].v1 == info.v1 && meshEdge[j].v2 == info.v2) || 
+          if ((meshEdge[j].v1 == info.v1 && meshEdge[j].v2 == info.v2) ||
               (meshEdge[j].v1 == info.v2 && meshEdge[j].v2 == info.v1))
             meshEdge[j].smoothness = info.smoothness;
       }
@@ -713,14 +713,14 @@ public class ExtrudeDialog extends BDialog
     mesh.makeRightSideOut();
     return mesh;
   }
-  
+
   // Inner class used for storing information about new edges being created.
-  
+
   private static class EdgeInfo
   {
     int v1, v2;
     float smoothness;
-    
+
     public EdgeInfo(int vert1, int vert2, float smooth)
     {
       v1 = vert1;

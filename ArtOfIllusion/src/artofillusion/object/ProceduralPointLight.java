@@ -203,7 +203,7 @@ public class ProceduralPointLight extends PointLight
     switch (index-parameterValues.length)
     {
       case 0:
-        return new Double(getRadius());
+        return getRadius();
       case 1:
         return PROPERTIES[1].getAllowedValues()[type];
     }

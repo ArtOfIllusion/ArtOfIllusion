@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.tools;
@@ -43,7 +43,7 @@ public class SkinDialog extends BDialog
     reverse = new boolean [curves.size()];
 
     // Layout the window.
-    
+
     FormContainer content = new FormContainer(3, 2);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
@@ -77,7 +77,7 @@ public class SkinDialog extends BDialog
     updateComponents();
     setVisible(true);
   }
-  
+
   private void selectionChanged(WidgetEvent e)
   {
     if (e.getWidget() == reverseBox)
@@ -85,29 +85,29 @@ public class SkinDialog extends BDialog
     makeObject();
     updateComponents();
   }
-  
+
   // Enable or disable components, based on the current selections.
-  
+
   private void updateComponents()
   {
     int which = curveList.getSelectedIndex();
-    
+
     upButton.setEnabled(which > 0);
     downButton.setEnabled(which < curve.length-1);
     reverseBox.setState(which > -1 && reverse[which]);
   }
-  
+
   private void doOk()
   {
     CoordinateSystem coords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
     coords.setOrigin(coords.getOrigin().plus(centerOffset));
     window.addObject(preview.getObject().getObject(), coords, "Skinned Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {window.getScene().getNumObjects()-1}));
     window.updateImage();
     dispose();
   }
-  
+
   private void doMoveUp()
   {
     int which = curveList.getSelectedIndex();
@@ -124,7 +124,7 @@ public class SkinDialog extends BDialog
     makeObject();
     updateComponents();
   }
-  
+
   private void doMoveDown()
   {
     int which = curveList.getSelectedIndex();
@@ -141,16 +141,16 @@ public class SkinDialog extends BDialog
     makeObject();
     updateComponents();
   }
-  
+
   // Create the skinned object.
-  
+
   private void makeObject()
   {
     Vec3 v[][] = new Vec3 [curve.length][], center = new Vec3();
     float us[] = new float [curve.length], vs[] = new float [((Curve) curve[0].getObject()).getVertices().length];
     int smoothMethod = Mesh.INTERPOLATING;
     boolean closed = false;
-    
+
     for (int i = 0; i < curve.length; i++)
       {
         Curve cv = (Curve) curve[i].getObject();
@@ -172,9 +172,9 @@ public class SkinDialog extends BDialog
       }
     for (int i = 0; i < vs.length; i++)
       vs[i] /= curve.length;
-    
+
     // Center it.
-    
+
     center.scale(1.0/(v.length*v[0].length));
     for (int i = 0; i < v.length; i++)
       for (int j = 0; j < v[i].length; j++)

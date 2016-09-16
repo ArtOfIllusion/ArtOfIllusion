@@ -230,7 +230,7 @@ public class DirectionalLight extends Light
       case 1:
         return new Double(intensity);
       case 2:
-        return new Double(radius);
+        return radius;
       case 3:
         return PROPERTIES[index].getAllowedValues()[type];
     }

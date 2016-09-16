@@ -814,7 +814,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               ObjectInfo info = (ObjectInfo) tr.getParent();
               for (int j = 0; j < info.getTracks().length; j++)
                 if (info.getTracks()[j] == tr)
-                  undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, new Integer(j), tr.duplicate(info)});
+                  undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, j, tr.duplicate(info)});
             }
           Keyframe k = tr.setKeyframe(time, theScene);
           if (k != null)
@@ -856,7 +856,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               continue;
             if (tr instanceof RotationTrack && rotx && roty && rotz)
               continue;
-            undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, new Integer(j), tr.duplicate(info)});
+            undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, j, tr.duplicate(info)});
             Keyframe k = tr.setKeyframeIfModified(time, theScene);
             if (k != null)
               {

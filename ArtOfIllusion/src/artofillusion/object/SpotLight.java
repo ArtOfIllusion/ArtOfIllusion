@@ -325,13 +325,13 @@ public class SpotLight extends Light
       case 1:
         return new Double(intensity);
       case 2:
-        return new Double(angle);
+        return angle;
       case 3:
-        return new Double(falloff);
+        return falloff;
       case 4:
         return new Double(decayRate);
       case 5:
-        return new Double(radius);
+        return radius;
       case 6:
         return PROPERTIES[index].getAllowedValues()[type];
     }

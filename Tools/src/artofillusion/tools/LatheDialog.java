@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.tools;
@@ -32,7 +32,7 @@ public class LatheDialog extends BDialog
   ValueSlider angleSlider;
   BButton okButton, cancelButton;
   ObjectPreviewCanvas preview;
-  
+
   private static int counter = 1;
 
   public LatheDialog(LayoutWindow window, ObjectInfo curve)
@@ -43,7 +43,7 @@ public class LatheDialog extends BDialog
     curveInfo = curve;
 
     // Layout the window.
-    
+
     FormContainer content = new FormContainer(3, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
@@ -65,12 +65,12 @@ public class LatheDialog extends BDialog
     segmentsField.addEventLink(ValueChangedEvent.class, this, "makeObject");
 
     // Add the preview canvas.
-    
+
     content.add(preview = new ObjectPreviewCanvas(null), 2, 0, 1, 9);
     preview.setPreferredSize(new Dimension(150, 150));
-    
+
     // Add the buttons at the bottom.
-    
+
     RowContainer buttons = new RowContainer();
     buttons.add(okButton = Translate.button("ok", this, "doOk"));
     buttons.add(cancelButton = Translate.button("cancel", this, "dispose"));
@@ -81,7 +81,7 @@ public class LatheDialog extends BDialog
     UIUtilities.centerDialog(this, window);
     setVisible(true);
   }
-  
+
   private void doOk()
   {
     CoordinateSystem coords = curveInfo.getCoords().duplicate();
@@ -89,13 +89,13 @@ public class LatheDialog extends BDialog
     coords.setOrigin(coords.getOrigin().plus(offset));
     window.addObject(preview.getObject().getObject(), coords, "Lathed Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {window.getScene().getNumObjects()-1}));
     window.updateImage();
     dispose();
   }
 
   // Select default values for the various options.
-  
+
   private void selectDefaults()
   {
     MeshVertex vert[] = theCurve.getVertices();
@@ -113,9 +113,9 @@ public class LatheDialog extends BDialog
     minx = Math.max(-minx, 0.0);
     radiusField.setValue(Math.ceil(minx));
   }
-  
+
   // Create the extruded object.
-  
+
   private void makeObject()
   {
     int segments = (int) segmentsField.getValue();

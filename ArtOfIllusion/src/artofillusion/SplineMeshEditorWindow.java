@@ -351,7 +351,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       if (selectMode == modes.getSelection())
         return;
       if (undoItem != null)
-        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected}));
+        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
       setSelectionMode(modes.getSelection());
       theView[currentView].getCurrentTool().activate();
     }
@@ -589,7 +589,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   public void selectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
     setSelection(selected);
@@ -600,7 +600,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   public void extendSelectionCommand()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
     if (selectMode == POINT_MODE)
     {
       int oldDist = tensionDistance;
@@ -638,7 +638,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     boolean newSel[] = new boolean [selected.length];
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = !selected[i];
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
     setSelection(newSel);
   }
 

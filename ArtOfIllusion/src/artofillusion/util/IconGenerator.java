@@ -1357,7 +1357,7 @@ public class IconGenerator
                     //if (target == null || target.length() == 0) target = DEFAULT_TARGET;
 
                     // a list of values in parens
-                    if (pos < len && macro.charAt(pos+1) == '(') {;
+                    if (pos < len && macro.charAt(pos+1) == '(') {
                         end = find(macro, pos+1, len, close);
                         antialias = parseArgs(antialias, 2, pos+2, end);
                     }

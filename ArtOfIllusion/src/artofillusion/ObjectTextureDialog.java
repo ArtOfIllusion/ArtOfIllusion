@@ -89,7 +89,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     if (oldTexture instanceof LayeredTexture)
     {
       layeredMap = (LayeredMapping) oldTexMapping;
-      layeredTex = (LayeredTexture) oldTexture;;
+      layeredTex = (LayeredTexture) oldTexture;
     }
     else
     {

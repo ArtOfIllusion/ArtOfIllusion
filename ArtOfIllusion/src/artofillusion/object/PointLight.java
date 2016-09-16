@@ -245,7 +245,7 @@ public class PointLight extends Light
       case 2:
         return new Double(decayRate);
       case 3:
-        return new Double(radius);
+        return radius;
       case 4:
         return PROPERTIES[index].getAllowedValues()[type];
     }

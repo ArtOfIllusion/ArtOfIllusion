@@ -364,7 +364,7 @@ public class TreeList extends CustomWidget
       if (expanded)
       {
         showing.addElement(child);
-        indent.addElement(new Integer(currentIndent));
+        indent.addElement(currentIndent);
       }
       if (child.isSelected())
         selected.addElement(child);

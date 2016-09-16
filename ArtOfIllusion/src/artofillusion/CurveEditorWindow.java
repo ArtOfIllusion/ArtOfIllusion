@@ -303,7 +303,7 @@ public class CurveEditorWindow extends MeshEditorWindow
   
   public void selectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected.clone()}));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
     setSelection(selected);
@@ -319,7 +319,7 @@ public class CurveEditorWindow extends MeshEditorWindow
     boolean newSel[] = new boolean [dist.length];
     tensionDistance = oldDist;
     
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected.clone()}));
     for (int i = 0; i < dist.length; i++)
       newSel[i] = (dist[i] == 0 || dist[i] == 1);
     setSelection(newSel);
@@ -332,7 +332,7 @@ public class CurveEditorWindow extends MeshEditorWindow
     boolean newSel[] = new boolean [selected.length];
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = !selected[i];
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected}));
     setSelection(newSel);
   }
 

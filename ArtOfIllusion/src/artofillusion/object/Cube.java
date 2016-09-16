@@ -239,11 +239,11 @@ public class Cube extends Object3D
     switch (index)
     {
       case 0:
-        return new Double(2.0*halfx);
+        return 2.0*halfx;
       case 1:
-        return new Double(2.0*halfy);
+        return 2.0*halfy;
       case 2:
-        return new Double(2.0*halfz);
+        return 2.0*halfz;
     }
     return null;
   }

@@ -702,7 +702,7 @@ public class Curve extends Object3D implements Mesh
       else
         return PROPERTIES[0].getAllowedValues()[smoothingMethod-1];
     }
-    return Boolean.valueOf(closed);
+    return closed;
   }
 
   @Override

@@ -904,7 +904,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       {
         // Determine whether non-power-of-2 textures are supported.
 
-        if (gl.glGetString(GL.GL_EXTENSIONS).indexOf("GL_EXT_texture_rectangle") > -1)
+        if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_rectangle"))
         {
           imageRenderMode = GL2.GL_TEXTURE_RECTANGLE_ARB;
           useTextureRectangle = true;

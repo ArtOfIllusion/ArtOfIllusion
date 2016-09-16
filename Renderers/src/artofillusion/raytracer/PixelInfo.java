@@ -111,7 +111,7 @@ public class PixelInfo
   
   /** Decide whether particular values are different. */
   
-  private final boolean valuesDifferent(float val1, float val2, float maxAbsDiff, float maxRelDiff)
+  private boolean valuesDifferent(float val1, float val2, float maxAbsDiff, float maxRelDiff)
   {
     float diff = val1-val2;
     if (diff < 0.0f)

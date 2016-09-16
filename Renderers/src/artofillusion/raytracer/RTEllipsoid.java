@@ -416,7 +416,7 @@ public class RTEllipsoid extends RTObject
 
     /** Calculate the true normal of the point of intersection. */
 
-    private final void calcTrueNorm()
+    private void calcTrueNorm()
     {
       if (trueNormValid)
         return;

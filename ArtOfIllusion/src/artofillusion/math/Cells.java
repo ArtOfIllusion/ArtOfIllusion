@@ -179,14 +179,14 @@ public class Cells
 
   /** Calculate the random number seed to use for cell (i, j, k). */
 
-  private static final int randSeed(int i, int j, int k)
+  private static int randSeed(int i, int j, int k)
   {
     return i*10 + j*1000 + k*100000;
   }
 
   /** Given the squared distance to a feature point, sort that point into the list. */
 
-  private final void sortIntoList(double dist2, int newid, double value[], Vec3 grad[], int id[])
+  private void sortIntoList(double dist2, int newid, double value[], Vec3 grad[], int id[])
   {
     for (int i = 0; i < value.length; i++)
       if (dist2 < value[i])
@@ -234,7 +234,7 @@ public class Cells
   /** Given the vector between two points, calculate the distance measure for the 
       desired metric. */
   
-  private final double distance(Vec3 diff)
+  private double distance(Vec3 diff)
   {
     if (metric == EUCLIDEAN)
       return diff.length2();

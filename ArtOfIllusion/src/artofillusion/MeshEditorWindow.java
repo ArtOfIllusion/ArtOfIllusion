@@ -1471,7 +1471,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       {
         return false;
       }
-    };
+    }
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);

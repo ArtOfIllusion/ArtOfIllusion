@@ -289,7 +289,7 @@ public class ProceduralPointLight extends PointLight
       fields[i] = new ValueSelector(value, param.minVal, param.maxVal, range*0.01);
       names[i] = param.name;
     }
-    fields[fields.length-1] = new ValueSelector(key.radius, 0.0, 45.0, 0.1);;
+    fields[fields.length-1] = new ValueSelector(key.radius, 0.0, 45.0, 0.1);
     names[names.length-1] = Translate.text("Radius");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editPointLightTitle"), fields, names);
     if (!dlg.clickedOk())

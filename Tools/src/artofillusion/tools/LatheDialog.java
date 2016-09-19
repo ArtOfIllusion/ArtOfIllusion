@@ -202,8 +202,7 @@ public class LatheDialog extends BDialog
     float s[] = theCurve.getSmoothness();
     for (int i = 0; i < segments; i++)
       usmooth[i] = 1.0f;
-    for (int i = 0; i < s.length; i++)
-      vsmooth[i] = s[i];
+      System.arraycopy(s, 0, vsmooth, 0, s.length);
     int smoothMethod = theCurve.getSmoothingMethod();
     if (smoothMethod == Mesh.NO_SMOOTHING)
       {
@@ -212,8 +211,7 @@ public class LatheDialog extends BDialog
         smoothMethod = Mesh.APPROXIMATING;
       }
     else
-      for (int i = 0; i < s.length; i++)
-        vsmooth[i] = s[i];
+      System.arraycopy(s, 0, vsmooth, 0, s.length);
 
     // Center it.
 

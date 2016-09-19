@@ -222,8 +222,7 @@ public class Skeleton
   public Joint [] getJoints()
   {
     Joint j[] = new Joint [joint.length];
-    for (int i = 0; i < j.length; i++)
-      j[i] = joint[i];
+      System.arraycopy(joint, 0, j, 0, j.length);
     return j;
   }
   

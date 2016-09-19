@@ -74,8 +74,7 @@ public class Procedure
   public void addModule(Module mod)
   {
     Module newmod[] = new Module [module.length+1];
-    for (int i = 0; i < module.length; i++)
-      newmod[i] = module[i];
+        System.arraycopy(module, 0, newmod, 0, module.length);
     newmod[module.length] = mod;
     module = newmod;
   }
@@ -105,8 +104,7 @@ public class Procedure
   public void addLink(Link ln)
   {
     Link newlink[] = new Link [link.length+1];
-    for (int i = 0; i < link.length; i++)
-      newlink[i] = link[i];
+        System.arraycopy(link, 0, newlink, 0, link.length);
     newlink[link.length] = ln;
     link = newlink;
     ln.to.getModule().setInput(ln.to, ln.from);

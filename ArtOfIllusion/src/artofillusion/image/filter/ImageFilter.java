@@ -103,11 +103,9 @@ public abstract class ImageFilter
     // Subclasses should override this if necessary to copy any additional information.
     
     paramValue = new double [f.paramValue.length];
-    for (int i = 0; i < paramValue.length; i++)
-      paramValue[i] = f.paramValue[i];
+        System.arraycopy(f.paramValue, 0, paramValue, 0, paramValue.length);
     propertyValue = new Object [f.propertyValue.length];
-    for (int i = 0; i < propertyValue.length; i++)
-      propertyValue[i] = f.propertyValue[i];
+        System.arraycopy(f.propertyValue, 0, propertyValue, 0, propertyValue.length);
 
   }
   

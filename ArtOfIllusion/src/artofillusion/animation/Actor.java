@@ -333,8 +333,7 @@ public class Actor extends ObjectWrapper
         return;
       }
       double rhs[] = new double [Math.max(numDof, numGesture)];
-      for (int i = 0; i < numDof; i++)
-        rhs[i] = goal[i];
+        System.arraycopy(goal, 0, rhs, 0, numDof);
       double matrix[][] = new double [numDof][numGesture];
       for (int i = 0, j = 0; i < negative.length; i++)
         if (!negative[i])

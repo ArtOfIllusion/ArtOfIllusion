@@ -299,7 +299,7 @@ public class ScriptedObject extends ObjectCollection
     
     for (int i = 0; i < paramName.length; i++)
       {
-        Double d = (Double) key.valueTable.get(paramName[i]);
+        Double d = key.valueTable.get(paramName[i]);
         if (d == null)
           valField[i] = new ValueField(0.0, ValueField.NONE, 5);
         else
@@ -409,7 +409,7 @@ public class ScriptedObject extends ObjectCollection
       double values[] = new double [names.length];
       for (int i = 0; i < names.length; i++)
         {
-          Double d = (Double) valueTable.get(names[i]);
+          Double d = valueTable.get(names[i]);
           if (d == null)
             values[i] = script.paramValue[i];
           else
@@ -464,7 +464,7 @@ public class ScriptedObject extends ObjectCollection
           for (int j = 0; j < k.length; j++)
             {
               ScriptedObjectKeyframe key = (ScriptedObjectKeyframe) k[j];
-              Double v = (Double) key.valueTable.get(names[i]);
+              Double v = key.valueTable.get(names[i]);
               if (v != null)
                 d += weight[j]*v;
             }
@@ -483,8 +483,8 @@ public class ScriptedObject extends ObjectCollection
       ScriptedObjectKeyframe key = (ScriptedObjectKeyframe) k;
       for (String name : script.paramName)
         {
-          Double d1 = (Double) valueTable.get(name);
-          Double d2 = (Double) key.valueTable.get(name);
+          Double d1 = valueTable.get(name);
+          Double d2 = key.valueTable.get(name);
           if (d1 == null && d2 == null)
             continue;
           if (d1 == null || d2 == null)

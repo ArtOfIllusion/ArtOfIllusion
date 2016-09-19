@@ -302,8 +302,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       this.filterChangedCallback = filterChangedCallback;
       filters = new ArrayList<ImageFilter>();
       ImageFilter oldFilters[] = camera.getImageFilters();
-      for (int i = 0; i < oldFilters.length; i++)
-        filters.add(oldFilters[i]);
+      filters.addAll(Arrays.asList(oldFilters));
 
       // Layout the major sections of the window.
 

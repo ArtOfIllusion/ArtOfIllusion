@@ -772,8 +772,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     param = new double [usize+usplitcount][vsize][numParam];
     for (i = 0; i < param.length; i++)
       for (j = 0; j < param[i].length; j++)
-        for (int k = 0; k < param[i][j].length; k++)
-          param[i][j][k] = newparam[j][i][k];
+        System.arraycopy(newparam[j][i], 0, param[i][j], 0, param[i][j].length);
     newparam = new double [usize+usplitcount][vsize+vsplitcount][numParam];
     splitOneAxis(v, newv, vs, newvs, splitv, param, newparam, theMesh.isVClosed());
 
@@ -843,15 +842,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         for (k = 0; k < v.length; k++)
         {
           newv[k][j] = SplineMesh.calcApproxPoint(v[k], s, param[k], paramTemp, p1, i, p3);
-          for (int m = 0; m < numParam; m++)
-            newparam[k][j][m] = paramTemp[m];
+          System.arraycopy(paramTemp, 0, newparam[k][j], 0, numParam);
         }
       else
         for (k = 0; k < v.length; k++)
         {
           newv[k][j] = v[k][i];
-          for (int m = 0; m < numParam; m++)
-            newparam[k][j][m] = param[k][i][m];
+          System.arraycopy(param[k][i], 0, newparam[k][j], 0, numParam);
         }
       if (split[i] || split[p1])
         news[j] = Math.min(s[i]*2.0f, 1.0f);
@@ -883,8 +880,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         for (k = 0; k < v.length; k++)
         {
           newv[k][j+1] = SplineMesh.calcInterpPoint(v[k], s, param[k], paramTemp, p1, i, p3, p4);
-          for (int m = 0; m < numParam; m++)
-            newparam[k][j+1][m] = paramTemp[m];
+            System.arraycopy(paramTemp, 0, newparam[k][j+1], 0, numParam);
         }
       }
       else

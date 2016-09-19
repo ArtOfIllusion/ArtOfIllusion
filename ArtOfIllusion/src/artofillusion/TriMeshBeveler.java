@@ -1226,8 +1226,7 @@ public class TriMeshBeveler
           for (int j = 0; j < vertIndex.length; j++)
             newval[vertIndex[j]] = oldval[j];
         else
-          for (int j = 0; j < oldval.length; j++)
-            newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         newParam[i] = new VertexParameterValue(newval);
       }
       else if (oldParam[i] instanceof FaceParameterValue)

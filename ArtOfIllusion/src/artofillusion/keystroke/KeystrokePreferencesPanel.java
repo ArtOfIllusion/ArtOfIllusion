@@ -39,8 +39,7 @@ public class KeystrokePreferencesPanel extends FormContainer
     super(new double [] {1}, new double [] {1, 0});
     KeystrokeRecord allRecords[] = KeystrokeManager.getAllRecords();
     records = new ArrayList<KeystrokeRecord>(allRecords.length);
-    for (int i = 0; i < allRecords.length; i++)
-      records.add(allRecords[i]);
+    records.addAll(Arrays.asList(allRecords));
     table = new BTable(new KeystrokeTableModel());
     table.setColumnWidth(0, 100);
     table.setColumnWidth(1, 250);

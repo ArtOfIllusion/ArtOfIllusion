@@ -388,9 +388,7 @@ public class ExprModule extends Module
         if (tokIdx >= tokens.length) {
             Token [] oldtokens = tokens;
             tokens = new Token [tokens.length * 2];
-            for (int i = 0; i < tokens.length; i++) {
-                tokens [i] = oldtokens [i];
-            }
+            System.arraycopy(oldtokens, 0, tokens, 0, tokens.length);
         }
         tokens [tokIdx++] = tok;
         currTok = tok;

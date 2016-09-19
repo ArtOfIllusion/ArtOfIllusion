@@ -307,8 +307,7 @@ public class TubeEditorWindow extends CurveEditorWindow
       {
         newpos[j] = SplineMesh.calcApproxPoint(vt, s, param, paramTemp, p1, i, p3);
         newt[j] = Tube.calcApproxThickness(t, s, p1, i, p3);
-        for (int k = 0; k < numParam; k++)
-          newparam[j][k] = paramTemp[k];
+          System.arraycopy(paramTemp, 0, newparam[j], 0, numParam);
       }
       else
       {
@@ -344,8 +343,7 @@ public class TubeEditorWindow extends CurveEditorWindow
         }
         newpos[j+1] = SplineMesh.calcInterpPoint(vt, s, param, paramTemp, p1, i, p3, p4);
         newt[j+1] = Tube.calcInterpThickness(t, s, p1, i, p3, p4);
-        for (int k = 0; k < numParam; k++)
-          newparam[j+1][k] = paramTemp[k];
+          System.arraycopy(paramTemp, 0, newparam[j+1], 0, numParam);
       }
       else
       {

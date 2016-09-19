@@ -61,8 +61,7 @@ public class ResourcePool
     if (next == pool.length)
     {
       Object newPool[] = new Object [pool.length*2+1];
-      for (int i = 0; i < pool.length; i++)
-        newPool[i] = pool[i];
+        System.arraycopy(pool, 0, newPool, 0, pool.length);
       for (int i = pool.length; i < newPool.length; i++)
         newPool[i] = createObject();
       pool = newPool;

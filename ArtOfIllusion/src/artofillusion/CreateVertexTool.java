@@ -236,8 +236,7 @@ public class CreateVertexTool extends MeshEditingTool
     
     TriangleMesh.Vertex newvert[] = new TriangleMesh.Vertex [vert.length+1];
     int newface[][] = new int [face.length+2][];
-    for (int i = 0; i < vert.length; i++)
-      newvert[i] = vert[i];
+      System.arraycopy(vert, 0, newvert, 0, vert.length);
     newvert[vert.length] = mesh.new Vertex(v);
     for (int i = 0; i < face.length; i++)
       newface[i] = new int [] {face[i].v1, face[i].v2, face[i].v3};

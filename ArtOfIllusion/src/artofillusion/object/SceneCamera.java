@@ -184,8 +184,7 @@ public class SceneCamera extends Object3D
   public ImageFilter [] getImageFilters()
   {
     ImageFilter filt[] = new ImageFilter [filter.length];
-    for (int i = 0; i < filter.length; i++)
-      filt[i] = filter[i];
+        System.arraycopy(filter, 0, filt, 0, filter.length);
     return filt;
   }
 

@@ -295,8 +295,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       Vec2 faceCoord[][] = map.findFaceTextureCoordinates(mesh);
       ArrayList<Vec2> coordList = new ArrayList<Vec2>();
       for (int i = 0; i < faceCoord.length; i++)
-        for (int j = 0; j < faceCoord[i].length; j++)
-          coordList.add(faceCoord[i][j]);
+          coordList.addAll(Arrays.asList(faceCoord[i]));
       coord = coordList.toArray(new Vec2[coordList.size()]);
     }
     else
@@ -320,8 +319,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     else
     {
       newSelection = new boolean [selected.length];
-      for (int i = 0; i < selected.length; i++)
-        newSelection[i] = selected[i];
+        System.arraycopy(selected, 0, newSelection, 0, selected.length);
     }
     boolean changed = (selectedVertices.length != newSelection.length);
     for (int i = 0; i < newSelection.length && !changed; i++)

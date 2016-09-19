@@ -163,7 +163,7 @@ class Token {
     {
       if (ty == END)
         return "end of expression";
-      return new Character(ty).toString();
+      return String.valueOf(ty);
     }
 }
 
@@ -353,7 +353,7 @@ public class ExprModule extends Module
     {
         ExprModule mod = new ExprModule(new Point(bounds.x, bounds.y));
 
-        mod.setExpr (new String (expr));
+        mod.setExpr(expr);
         return mod;
     }
 

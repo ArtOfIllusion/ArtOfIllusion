@@ -1907,7 +1907,7 @@ public class IconGenerator
 
             // resolve reference
             if (obj != null && obj.getClass() == String.class
-                && delims[ARG_DELIMS].indexOf(target.toString().charAt(0)) == ARG_RESOLVE) {
+                && delims[ARG_DELIMS].indexOf(target.charAt(0)) == ARG_RESOLVE) {
                 target = obj.toString();
                 obj = namespace.get(target);
             }

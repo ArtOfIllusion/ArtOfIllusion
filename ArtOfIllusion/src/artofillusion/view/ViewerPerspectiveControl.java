@@ -22,6 +22,7 @@ import artofillusion.ui.*;
 
 public class ViewerPerspectiveControl implements ViewerControl
 {
+  @Override
   public Widget createWidget(final ViewerCanvas view)
   {
     final BComboBox perspectiveChoice = new BComboBox(new String [] {
@@ -54,6 +55,7 @@ public class ViewerPerspectiveControl implements ViewerControl
     return perspectiveChoice;
   }
 
+  @Override
   public String getName()
   {
     return Translate.text("Perspective");

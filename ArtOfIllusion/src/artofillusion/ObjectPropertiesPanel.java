@@ -24,6 +24,8 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is a panel which displays information about the currently selected objects, and allows them
@@ -32,6 +34,8 @@ import java.util.List;
 
 public class ObjectPropertiesPanel extends ColumnContainer
 {
+    private static final Logger logger = Logger.getLogger(ObjectPropertiesPanel.class.getName());
+    
   private LayoutWindow window;
   private BTextField nameField;
   private ValueField xPosField, yPosField, zPosField, xRotField, yRotField, zRotField;
@@ -71,14 +75,17 @@ public class ObjectPropertiesPanel extends ColumnContainer
     materialChoice.addEventLink(ValueChangedEvent.class, this, "materialChanged");
     ListChangeListener listener = new ListChangeListener()
     {
+      @Override
       public void itemAdded(int index, Object obj)
       {
         rebuildContents();
       }
+      @Override
       public void itemRemoved(int index, Object obj)
       {
         rebuildContents();
       }
+      @Override
       public void itemChanged(int index, Object obj)
       {
         rebuildContents();
@@ -205,7 +212,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
         }
       }
       textureChoice.setModel(new DefaultComboBoxModel(names));
@@ -252,7 +259,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
       materialChoice.setModel(new DefaultComboBoxModel(names));
@@ -443,7 +450,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     if (objects.length == 0 || objects[0].getName().equals(nameField.getText()))
       return;
     int which = window.getScene().indexOf(objects[0]);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.RENAME_OBJECT, new Object [] {new Integer(which), objects[0].getName()}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.RENAME_OBJECT, new Object [] {which, objects[0].getName()}));
     window.setObjectName(which, nameField.getText());
     if (ev instanceof KeyPressedEvent)
       window.getView().requestFocus(); // This is where they'll probably expect it to go
@@ -481,7 +488,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
     }
@@ -533,7 +540,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     if (noMaterial || mat != null)
@@ -558,6 +565,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
   private void parameterChanged(final ValueChangedEvent ev)
   {
     Runnable r = new Runnable() {
+      @Override
       public void run()
       {
         processParameterChange(ev);
@@ -608,6 +616,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
    * Always use a reasonable size, regardless of the current selection.
    */
 
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension pref = super.getPreferredSize();
@@ -618,6 +627,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
    * Allow the panel to be completely hidden.
    */
 
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension();

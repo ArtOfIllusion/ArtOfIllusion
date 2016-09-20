@@ -88,6 +88,7 @@ public class CoordinateSystem
   
   /** Determine whether this coordinate system is identical to another one. */
   
+  @Override
   public final boolean equals(Object coords)
   {
     CoordinateSystem c = (CoordinateSystem) coords;

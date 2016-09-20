@@ -23,6 +23,7 @@ public class TestOctreeNode extends TestCase
 {
   private OctreeNode rootNode;
 
+  @Override
   protected void setUp() throws Exception
   {
     // Create a scene for testing.

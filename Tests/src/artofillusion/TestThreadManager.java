@@ -26,12 +26,14 @@ public class TestThreadManager extends TestCase
     final AtomicBoolean error = new AtomicBoolean();
     ThreadManager tm = new ThreadManager(flags.length, new artofillusion.util.ThreadManager.Task()
     {
+      @Override
       public void execute(int index)
       {
         if (flags[index].get())
           error.set(true);
         flags[index].set(true);
       }
+      @Override
       public void cleanup()
       {
       }
@@ -56,6 +58,7 @@ public class TestThreadManager extends TestCase
     tm.setNumIndices(1000);
     tm.setTask(new ThreadManager.Task()
     {
+      @Override
       public void execute(int index)
       {
         if (canceled.get())
@@ -66,6 +69,7 @@ public class TestThreadManager extends TestCase
           canceled.set(true);
         }
       }
+      @Override
       public void cleanup()
       {
       }

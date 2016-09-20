@@ -14,7 +14,6 @@ package artofillusion.tools;
 import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import java.util.*;
 
 /**
 The array tool creates an array of copies of an object.
@@ -30,6 +29,7 @@ public class ArrayTool implements ModellingTool
   }
   
   /** Get the text that appear as the menu item.*/
+  @Override
   public String getName()
   {
         return Translate.text("menu.array");
@@ -37,6 +37,7 @@ public class ArrayTool implements ModellingTool
 
   /** See whether an appropriate object is selected and either display an error
      message, or bring up the array tool window. */
+  @Override
   public void commandSelected(LayoutWindow window)
   {
         if (window.getSelectedIndices().length < 1)

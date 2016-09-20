@@ -63,6 +63,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
   private void initThreadLocal()
   {
     renderingProc = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         Procedure localProc = createProcedure();
@@ -104,6 +105,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
   }
 
 
+  @Override
   public Object3D duplicate()
   {
     ProceduralDirectionalLight light = new ProceduralDirectionalLight(getRadius());
@@ -111,6 +113,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     return light;
   }
 
+  @Override
   public void copyObject(Object3D obj)
   {
     ProceduralDirectionalLight lt = (ProceduralDirectionalLight) obj;
@@ -118,6 +121,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     procedure.copy(lt.procedure);
   }
 
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     currentTime = scene.getTime();
@@ -127,6 +131,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
    * Evaluate the Procedure to determine the light color at a point.
    */
 
+  @Override
   public void getLight(RGBColor light, Vec3 position)
   {
     PointInfo point = new PointInfo();
@@ -159,6 +164,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     initThreadLocal();
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -166,12 +172,14 @@ public class ProceduralDirectionalLight extends DirectionalLight
     procedure.writeToStream(out, theScene);
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     ProcedureEditor editor = new ProcedureEditor(procedure, new LightProcedureOwner(info, cb), parent.getScene());
     editor.setEditingWindow(parent);
   }
 
+  @Override
   public Property[] getProperties()
   {
     Property properties[] = new Property[parameters.length+2];
@@ -182,6 +190,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     return properties;
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     if (index < parameterValues.length)
@@ -189,13 +198,14 @@ public class ProceduralDirectionalLight extends DirectionalLight
     switch (index-parameterValues.length)
     {
       case 0:
-        return new Double(getRadius());
+        return getRadius();
       case 1:
         return PROPERTIES[1].getAllowedValues()[type];
     }
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index < parameterValues.length)
@@ -213,6 +223,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   /* Return a Keyframe which describes the current pose of this object. */
 
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new ProceduralLightKeyframe(this);
@@ -220,6 +231,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   /* Modify this object based on a pose keyframe. */
 
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     ProceduralLightKeyframe key = (ProceduralLightKeyframe) k;
@@ -236,6 +248,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
 
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     String names[] = new String[parameters.length+1];
@@ -256,6 +269,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
 
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final ProceduralLightKeyframe key = (ProceduralLightKeyframe) k;
@@ -270,7 +284,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       fields[i] = new ValueSelector(value, param.minVal, param.maxVal, range*0.01);
       names[i] = param.name;
     }
-    fields[fields.length-1] = new ValueSelector(key.radius, 0.0, 45.0, 0.1);;
+    fields[fields.length-1] = new ValueSelector(key.radius, 0.0, 45.0, 0.1);
     names[names.length-1] = Translate.text("AngularRadius");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editDirectionalLightTitle"), fields, names);
     if (!dlg.clickedOk())
@@ -299,6 +313,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     /* Create a duplicate of this keyframe.. */
 
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(light);
@@ -306,6 +321,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     /* Create a duplicate of this keyframe for a (possibly different) object. */
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       ProceduralLightKeyframe key = new ProceduralLightKeyframe((ProceduralDirectionalLight) ((ObjectInfo) owner).getObject());
@@ -318,6 +334,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     /* Get the list of graphable values for this keyframe. */
 
+    @Override
     public double [] getGraphValues()
     {
       double values[] = new double[light.parameters.length+1];
@@ -331,6 +348,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     /* Set the list of graphable values for this keyframe. */
 
+    @Override
     public void setGraphValues(double values[])
     {
       paramValues.clear();
@@ -342,6 +360,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
 
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       ProceduralLightKeyframe k2 = (ProceduralLightKeyframe) o2;
@@ -356,6 +375,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       return key;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       ProceduralLightKeyframe k2 = (ProceduralLightKeyframe) o2, k3 = (ProceduralLightKeyframe) o3;
@@ -371,6 +391,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       return key;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       ProceduralLightKeyframe k2 = (ProceduralLightKeyframe) o2, k3 = (ProceduralLightKeyframe) o3, k4 = (ProceduralLightKeyframe) o4;
@@ -389,6 +410,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     /* Determine whether this keyframe is identical to another one. */
 
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof ProceduralLightKeyframe))
@@ -408,6 +430,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
     /* Write out a representation of this keyframe to a stream. */
 
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeDouble(radius);
@@ -440,11 +463,13 @@ public class ProceduralDirectionalLight extends DirectionalLight
       this.callback = callback;
     }
 
+    @Override
     public String getWindowTitle()
     {
       return Translate.text("editProceduralDirectionalLightTitle");
     }
 
+    @Override
     public Object getPreview(ProcedureEditor editor)
     {
       BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
@@ -469,6 +494,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
         {
           processor.addEvent(new Runnable()
           {
+                    @Override
             public void run()
             {
               preview.getScene().setTime(value.getValue());
@@ -488,6 +514,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       return preview;
     }
 
+    @Override
     public void updatePreview(Object preview)
     {
       findParameters();
@@ -495,35 +522,42 @@ public class ProceduralDirectionalLight extends DirectionalLight
       ((MaterialPreviewer) preview).render();
     }
 
+    @Override
     public void disposePreview(Object preview)
     {
       UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
     }
 
+    @Override
     public boolean allowParameters()
     {
       return true;
     }
 
+    @Override
     public boolean allowViewAngle()
     {
       return false;
     }
 
+    @Override
     public boolean canEditName()
     {
       return false;
     }
 
+    @Override
     public String getName()
     {
       return info.getName();
     }
 
+    @Override
     public void setName(String name)
     {
     }
 
+    @Override
     public void acceptEdits(ProcedureEditor editor)
     {
       findParameters();
@@ -531,6 +565,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
       callback.run();
     }
 
+    @Override
     public void editProperties(ProcedureEditor editor)
     {
       ValueSelector radiusField = new ValueSelector(getRadius(), 0.0, 45.0, 0.1);

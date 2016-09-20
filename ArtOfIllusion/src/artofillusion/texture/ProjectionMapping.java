@@ -161,6 +161,7 @@ public class ProjectionMapping extends Mapping2D
 
   /** Create a rendering triangle with this mapping. */
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     Vec3 c1 = vert[v1], c2 = vert[v2], c3 = vert[v3];
@@ -209,6 +210,7 @@ public class ProjectionMapping extends Mapping2D
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
   
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     if (!(tri instanceof UVMappedTriangle))
@@ -254,6 +256,7 @@ public class ProjectionMapping extends Mapping2D
         mesh.vert[uv.v1], mesh.vert[uv.v2], mesh.vert[uv.v3]);
   }
 
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -314,6 +317,7 @@ public class ProjectionMapping extends Mapping2D
       }
   }
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -363,6 +367,7 @@ public class ProjectionMapping extends Mapping2D
         angle, time, param);
   }
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double time, double param[])
   {
     double x, y, z;
@@ -419,6 +424,7 @@ public class ProjectionMapping extends Mapping2D
   /** Given a Mesh to which this mapping has been applied, return the texture coordinates at
       each vertex. */
   
+  @Override
   public Vec2 [] findTextureCoordinates(Mesh mesh)
   {
     TextureParameter param[] = mesh.getParameters();
@@ -457,11 +463,13 @@ public class ProjectionMapping extends Mapping2D
     return uv;
   }
 
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(object, texture);
   }
 
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     ProjectionMapping map = new ProjectionMapping(obj, tex);
@@ -482,6 +490,7 @@ public class ProjectionMapping extends Mapping2D
     return map;
   }
   
+  @Override
   public void copy(TextureMapping mapping)
   {
     ProjectionMapping map = (ProjectionMapping) mapping; 
@@ -505,6 +514,7 @@ public class ProjectionMapping extends Mapping2D
       That includes the texture's parameters, and possibly parameters for the texture
       coordinates. */
   
+  @Override
   public TextureParameter [] getParameters()
   {
     if (!coordsFromParams)
@@ -531,6 +541,7 @@ public class ProjectionMapping extends Mapping2D
     return p;
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
@@ -555,6 +566,7 @@ public class ProjectionMapping extends Mapping2D
     scaleToObject = (version > 1 ? in.readBoolean() : false);
   }
   
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(2);

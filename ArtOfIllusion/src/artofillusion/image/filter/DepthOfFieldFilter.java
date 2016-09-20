@@ -31,6 +31,7 @@ public class DepthOfFieldFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("depthOfField");
@@ -49,6 +50,7 @@ public class DepthOfFieldFilter extends ImageFilter
    *  @param cameraPos  the position of the camera in the scene
    */
 
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     if (!image.hasFloatData(ComplexImage.DEPTH) || camera.getDepthOfField() == 0.0)
@@ -151,6 +153,7 @@ public class DepthOfFieldFilter extends ImageFilter
         cb = (BCheckBox) w;
     final BCheckBox checkbox = cb;
     Runnable listener = new Runnable() {
+      @Override
       public void run()
       {
 
@@ -167,6 +170,7 @@ public class DepthOfFieldFilter extends ImageFilter
 
   /** Write a serialized description of this filter to a stream. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -177,6 +181,7 @@ public class DepthOfFieldFilter extends ImageFilter
 
   /** Reconstruct this filter from its serialized representation. */
 
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int version = in.readShort();

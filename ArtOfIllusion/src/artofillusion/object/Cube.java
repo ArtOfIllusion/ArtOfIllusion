@@ -43,6 +43,7 @@ public class Cube extends Object3D
     bounds = new BoundingBox(-halfx, halfx, -halfy, halfy, -halfz, halfz);
   }
 
+  @Override
   public Object3D duplicate()
   {
     Cube obj = new Cube(halfx*2.0, halfy*2.0, halfz*2.0);
@@ -50,6 +51,7 @@ public class Cube extends Object3D
     return obj;
   }
   
+  @Override
   public void copyObject(Object3D obj)
   {
     Cube c = (Cube) obj;
@@ -61,11 +63,13 @@ public class Cube extends Object3D
     cachedWire = null;
   }
   
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     halfx = xsize/2.0;
@@ -108,6 +112,7 @@ public class Cube extends Object3D
     return mesh;
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 vert[];
@@ -211,6 +216,7 @@ public class Cube extends Object3D
     bounds = new BoundingBox(-halfx, halfx, -halfy, halfy, -halfz, halfz);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -221,28 +227,31 @@ public class Cube extends Object3D
     out.writeDouble(halfz);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
     {
       case 0:
-        return new Double(2.0*halfx);
+        return 2.0*halfx;
       case 1:
-        return new Double(2.0*halfy);
+        return 2.0*halfy;
       case 2:
-        return new Double(2.0*halfz);
+        return 2.0*halfz;
     }
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
-    double val = ((Double) value).doubleValue();
+    double val = ((Double) value);
     if (index == 0)
       setSize(val, 2.0*halfy, 2.0*halfz);
     else if (index == 1)
@@ -253,6 +262,7 @@ public class Cube extends Object3D
 
   /* Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new VectorKeyframe(2.0*halfx, 2.0*halfy, 2.0*halfz);
@@ -260,6 +270,7 @@ public class Cube extends Object3D
   
   /* Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     VectorKeyframe key = (VectorKeyframe) k;
@@ -270,6 +281,7 @@ public class Cube extends Object3D
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Size", "Y Size", "Z Size"},
@@ -279,6 +291,7 @@ public class Cube extends Object3D
   
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     VectorKeyframe key = (VectorKeyframe) k;

@@ -109,7 +109,7 @@ public class PerlinNoise
 
   /** Evaluate the wavelet at node (i, j, k) for the point (u, v, w). */
 
-  private static final double getWavelet(int i, int j, int k, double u, double v, double w)
+  private static double getWavelet(int i, int j, int k, double u, double v, double w)
   {
     double u2 = u*u, v2 = v*v, w2 = w*w, drop;
 
@@ -171,7 +171,8 @@ public class PerlinNoise
 
   /** Add the gradient of the wavelet at node (i, j, k) for the point (u, v, w). */
 
-  private static final void addWaveletGradient(Vec3 gradient, int i, int j, int k, double u, double v, double w)
+  @SuppressWarnings("UnnecessaryReturnStatement")
+  private static void addWaveletGradient(Vec3 gradient, int i, int j, int k, double u, double v, double w)
   {
     double dropu, dropv, dropw, product, dot;
     double u2 = u*u, v2 = v*v, w2 = w*w;
@@ -282,7 +283,7 @@ public class PerlinNoise
 
   /** Evaluate the vector wavelet at node (i, j, k) for the point (u, v, w). */
 
-  private static final void addVectorWavelet(Vec3 vec, int i, int j, int k, double u, double v, double w)
+  private static void addVectorWavelet(Vec3 vec, int i, int j, int k, double u, double v, double w)
   {
     Vec3 g = vect[permute[permute[permute[i]+j]+k]];
     double u2 = u*u, v2 = v*v, w2 = w*w, drop;

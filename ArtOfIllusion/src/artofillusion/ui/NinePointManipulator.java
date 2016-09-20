@@ -17,6 +17,8 @@ import java.io.*;
 
 import artofillusion.math.*;
 import artofillusion.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.*;
 
@@ -29,6 +31,8 @@ import javax.imageio.*;
 
 public class NinePointManipulator extends EventSource implements Manipulator
 {
+    private static final Logger logger = Logger.getLogger(NinePointManipulator.class.getName());
+    
   private final Image images[];
   private Rectangle screenBounds;
   private BoundingBox selectionBounds;
@@ -75,7 +79,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
     return null;
   }
@@ -107,6 +111,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
    * @param selectionBounds  a BoundingBox enclosing whatever is selected in the canvas
    */
 
+  @Override
   public void draw(ViewerCanvas view, BoundingBox selectionBounds)
   {
     Rectangle r = findScreenBounds(selectionBounds, view.getCamera());
@@ -133,6 +138,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
    * @return true if the mouse was pressed on a handle, false otherwise
    */
 
+  @Override
   public boolean mousePressed(WidgetMouseEvent ev, ViewerCanvas view, BoundingBox selectionBounds)
   {
     handle = null;
@@ -170,6 +176,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
    * @param view    the ViewerCanvas in which the event occurred
    */
 
+  @Override
   public void mouseDragged(WidgetMouseEvent ev, ViewerCanvas view)
   {
     if (handle != null)
@@ -184,6 +191,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
    * @param view    the ViewerCanvas in which the event occurred
    */
 
+  @Override
   public void mouseReleased(WidgetMouseEvent ev, ViewerCanvas view)
   {
     if (handle != null)

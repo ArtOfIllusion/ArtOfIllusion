@@ -203,6 +203,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Get the object being edited in this window. */
 
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
@@ -210,6 +211,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Set the mesh being edited. */
 
+  @Override
   public void setMesh(Mesh mesh)
   {
     objInfo.setObject((Object3D) mesh);
@@ -218,6 +220,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Get the current selection mode.  */
 
+  @Override
   public int getSelectionMode()
   {
     return selectMode;
@@ -225,6 +228,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Set the current selection mode.  */
 
+  @Override
   public void setSelectionMode(int mode)
   {
     selectMode = mode;
@@ -232,6 +236,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Get an array of flags specifying which parts of the object are selected. */
 
+  @Override
   public boolean[] getSelection()
   {
     return selected;
@@ -239,6 +244,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Set an array of flags specifying which parts of the object are selected. */
 
+  @Override
   public void setSelection(boolean selected[])
   {
     this.selected = selected;
@@ -247,6 +253,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Selection distance is simply 0 if the vertex is selected, and -1 otherwise. */
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (selectionDistance == null)
@@ -263,11 +270,13 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       selectionDistance[i] = (selected[i] ? 0 : -1);
   }
 
+  @Override
   public double getMeshTension()
   {
     return 1.0;
   }
 
+  @Override
   public int getTensionDistance()
   {
     return 0;
@@ -286,8 +295,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       Vec2 faceCoord[][] = map.findFaceTextureCoordinates(mesh);
       ArrayList<Vec2> coordList = new ArrayList<Vec2>();
       for (int i = 0; i < faceCoord.length; i++)
-        for (int j = 0; j < faceCoord[i].length; j++)
-          coordList.add(faceCoord[i][j]);
+          coordList.addAll(Arrays.asList(faceCoord[i]));
       coord = coordList.toArray(new Vec2[coordList.size()]);
     }
     else
@@ -311,8 +319,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     else
     {
       newSelection = new boolean [selected.length];
-      for (int i = 0; i < selected.length; i++)
-        newSelection[i] = selected[i];
+        System.arraycopy(selected, 0, newSelection, 0, selected.length);
     }
     boolean changed = (selectedVertices.length != newSelection.length);
     for (int i = 0; i < newSelection.length && !changed; i++)
@@ -324,6 +331,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** This is called whenever the mesh has changed. */
 
+  @Override
   public void objectChanged()
   {
     mapView.objectChanged();
@@ -477,6 +485,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     }
   }
 
+  @Override
   public ToolPalette getToolPalette()
   {
     return tools;
@@ -484,6 +493,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Set the currently selected EditingTool. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     mapView.setTool(tool);
@@ -491,6 +501,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Set the text to display at the bottom of the window. */
 
+  @Override
   public void setHelpText(String text)
   {
   }
@@ -498,6 +509,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
   /** Get the Frame for this EditingWindow: either the EditingWindow itself if it is a
       Frame, or its parent if it is a Dialog. */
 
+  @Override
   public BFrame getFrame()
   {
     return UIUtilities.findFrame(this);
@@ -505,6 +517,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Update the image displayed in this window. */
 
+  @Override
   public void updateImage()
   {
     mapView.repaint();
@@ -513,6 +526,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
   /** This will be called whenever the selection changes, so rebuild the mesh
       and update the text fields. */
 
+  @Override
   public void updateMenus()
   {
     boolean selChanged = findSelectedVertices();
@@ -553,10 +567,12 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Set the current UndoRecord for this EditingWindow. */
 
+  @Override
   public void setUndoRecord(UndoRecord command)
   {
   }
 
+  @Override
   public void setModified()
   {
   }
@@ -564,6 +580,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
   /** Get the Scene which is being edited in this window.  If it is not a window for
       editing a scene, this should return null. */
 
+  @Override
   public Scene getScene()
   {
     return null;
@@ -571,11 +588,13 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
 
   /** Get the ViewerCanvas in which the UV coordinates are being edited. */
 
+  @Override
   public ViewerCanvas getView()
   {
     return mapView;
   }
 
+  @Override
   public ViewerCanvas[] getAllViews()
   {
     return new ViewerCanvas[] {mapView};
@@ -584,6 +603,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
   /** Confirm whether this window should be closed (possibly by displaying a message to the
       user), and then close it.  If the closing is canceled, this should return false. */
 
+  @Override
   public boolean confirmClose()
   {
     return true;

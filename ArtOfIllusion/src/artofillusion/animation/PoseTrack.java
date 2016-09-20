@@ -17,11 +17,15 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is a Track which controls the pose of an object. */
 
 public class PoseTrack extends Track
 {
+    private static final Logger logger = Logger.getLogger(PoseTrack.class.getName());
+    
   private ObjectInfo info;
   private Timecourse tc;
   private int smoothingMethod;
@@ -44,6 +48,7 @@ public class PoseTrack extends Track
   
   /** Modify the pose of the object. */
   
+  @Override
   public void apply(double time)
   {
     Keyframe pose = tc.evaluate(time, smoothingMethod);
@@ -72,6 +77,7 @@ public class PoseTrack extends Track
   
   /** Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     PoseTrack t = new PoseTrack((ObjectInfo) obj);
@@ -89,6 +95,7 @@ public class PoseTrack extends Track
   
   /** Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     PoseTrack t = (PoseTrack) tr;
@@ -105,6 +112,7 @@ public class PoseTrack extends Track
   
   /** Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
@@ -112,6 +120,7 @@ public class PoseTrack extends Track
 
   /** Get the timecourse describing this track. */
   
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
@@ -119,6 +128,7 @@ public class PoseTrack extends Track
   
   /** Set a keyframe at the specified time. */
   
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
@@ -126,6 +136,7 @@ public class PoseTrack extends Track
   
   /** Set a keyframe at the specified time, based on the current state of the Scene. */
   
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     Keyframe pose = info.getObject().getPoseKeyframe();
@@ -138,6 +149,7 @@ public class PoseTrack extends Track
       if and only if the Scene does not match the current state of the track.  Return
       the new Keyframe, or null if none was set. */
   
+  @Override
   public Keyframe setKeyframeIfModified(double time, Scene sc)
   {
     for (int i = 0; i < subtracks.length; i++)
@@ -153,6 +165,7 @@ public class PoseTrack extends Track
 
   /** Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
@@ -160,6 +173,7 @@ public class PoseTrack extends Track
   
   /** Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
@@ -167,6 +181,7 @@ public class PoseTrack extends Track
   
   /** This track is null if it has no keyframes. */
   
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
@@ -174,6 +189,7 @@ public class PoseTrack extends Track
   
   /** This has a single child track. */
   
+  @Override
   public Track [] getSubtracks()
   {
     return subtracks;
@@ -181,6 +197,7 @@ public class PoseTrack extends Track
 
   /** Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo && ((ObjectInfo) obj).getObject() == info.getObject());
@@ -188,6 +205,7 @@ public class PoseTrack extends Track
   
   /** Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -195,6 +213,7 @@ public class PoseTrack extends Track
   
   /** Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -202,6 +221,7 @@ public class PoseTrack extends Track
   
   /** Get the smoothing method for this track. */
   
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
@@ -230,6 +250,7 @@ public class PoseTrack extends Track
   
   /** Get the names of all graphable values for this track. */
   
+  @Override
   public String [] getValueNames()
   {
     return valueName;
@@ -237,6 +258,7 @@ public class PoseTrack extends Track
 
   /** Get the default list of graphable values (for a track which has no keyframes). */
   
+  @Override
   public double [] getDefaultGraphValues()
   {
     return defaultValue;
@@ -246,6 +268,7 @@ public class PoseTrack extends Track
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
   
+  @Override
   public double[][] getValueRange()
   {
     return valueRange;
@@ -279,6 +302,7 @@ public class PoseTrack extends Track
 
   /** Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene sc) throws IOException
   {
     double t[] = tc.getTimes();
@@ -305,6 +329,7 @@ public class PoseTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -333,7 +358,7 @@ public class PoseTrack extends Track
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new InvalidObjectException("");
           }
       }
@@ -348,6 +373,7 @@ public class PoseTrack extends Track
 
   /** Present a window in which the user can edit the specified keyframe. */
   
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     info.getObject().editKeyframe(win, tc.getValues()[which], info);
@@ -355,6 +381,7 @@ public class PoseTrack extends Track
 
   /** This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(PoseTrack.this.getName());

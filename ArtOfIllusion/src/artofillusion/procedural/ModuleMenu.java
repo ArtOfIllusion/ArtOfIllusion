@@ -21,6 +21,8 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is the menu that appears in the procedure editor window.  It displays modules organized into categories,
@@ -29,6 +31,8 @@ import java.util.List;
 
 public class ModuleMenu extends CustomWidget
 {
+    private static final Logger logger = Logger.getLogger(ModuleMenu.class.getName());
+    
   private final ProcedureEditor editor;
   private final ArrayList<Category> categories;
   private final double expandedFraction[];
@@ -129,7 +133,7 @@ public class ModuleMenu extends CustomWidget
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
     }
@@ -237,7 +241,7 @@ public class ModuleMenu extends CustomWidget
           }
           catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
           }
           return;
         }
@@ -364,6 +368,7 @@ public class ModuleMenu extends CustomWidget
       finalFraction[expandedCategory] = 1;
     }
 
+    @Override
     public void actionPerformed(ActionEvent ev)
     {
       fraction = Math.min(fraction+0.05, 1.0);

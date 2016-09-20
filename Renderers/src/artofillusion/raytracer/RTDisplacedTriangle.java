@@ -228,6 +228,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Get the TextureMapping for this object. */
   
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return tri.getTextureMapping();
@@ -235,6 +236,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Get the MaterialMapping for this object. */
   
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return tri.theMesh.matMapping;
@@ -242,6 +244,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether the given ray intersects this triangle. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     DisplacedTriangleIntersection dti = (DisplacedTriangleIntersection) r.rt.rtDispTriPool.getObject();
@@ -469,6 +472,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Get a bounding box for this triangle. */
   
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -476,6 +480,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether any part of the triangle lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     if (!node.intersects(bounds))
@@ -689,6 +694,7 @@ public class RTDisplacedTriangle extends RTObject
   
   /** Get the transformation from world coordinates to the object's local coordinates. */
   
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -696,6 +702,7 @@ public class RTDisplacedTriangle extends RTObject
   
   /** Get the mesh this triangle is part of. */
   
+  @Override
   public Object getObject()
   {
     return tri.theMesh;
@@ -714,6 +721,7 @@ public class RTDisplacedTriangle extends RTObject
     public short numIntersections;
     public Ray ray;
 
+    @Override
     public RTObject getObject()
     {
       return rtTri;
@@ -738,6 +746,7 @@ public class RTDisplacedTriangle extends RTObject
       dir.set(r.direction);
     }
 
+    @Override
     public int numIntersections()
     {
       if (numIntersections == -1)
@@ -745,16 +754,19 @@ public class RTDisplacedTriangle extends RTObject
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       p.set(rint[n]);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       return tint[n];
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       n.set(interp);
@@ -768,11 +780,13 @@ public class RTDisplacedTriangle extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       rtTri.tri.getTransparency(trans, angle, uint[n], vint[n], 1.0-uint[0]-vint[0], size, time);
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       n.set(interp);

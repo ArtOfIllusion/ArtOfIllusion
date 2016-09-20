@@ -369,6 +369,7 @@ public class SearchlistClassLoader extends ClassLoader
      *
      *  @throws ClassNotFoundException if the class could not be loaded.
      */
+    @Override
     public Class findClass(String name)
 	throws ClassNotFoundException
     {
@@ -431,6 +432,7 @@ public class SearchlistClassLoader extends ClassLoader
      *  @param path the fully-qualified name of the resource to retrieve
      *  @return the URL if the resource is found, and <i>null</i> otherwise.
      */
+    @Override
     public URL findResource(String path)
     {
 	System.out.println("findResource: looking in " + this + " for " +
@@ -463,6 +465,7 @@ public class SearchlistClassLoader extends ClassLoader
      *  @param libname - the String name of the library to find
      *  @return the full path to the found library file, or <i>null</i>.
      */
+    @Override
     public String findLibrary(String libname)
     {
 	String fileName = System.mapLibraryName(libname);
@@ -607,7 +610,7 @@ public class SearchlistClassLoader extends ClassLoader
      */
     public static String translate(String str, String match, String replace)
     {
-	StringBuffer b = new StringBuffer(str.length());
+	StringBuilder b = new StringBuilder(str.length());
 
 	int pos = 0;
 	char c = 0;

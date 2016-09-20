@@ -10,7 +10,6 @@
 
 package artofillusion.ui;
 
-import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -165,12 +164,14 @@ public class ToolPalette extends CustomWidget
     }
   }
 
+  @Override
   public Dimension getPreferredSize()
   {
     int paletteMargin = ThemeManager.getPaletteMargin();
     return new Dimension(width*maxsize.width+2*paletteMargin, height*maxsize.height+2*paletteMargin);
   }
 
+  @Override
   public Dimension getMinimumSize()
   {
     return getPreferredSize();

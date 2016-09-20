@@ -67,6 +67,7 @@ public class UVMapping extends Mapping2D
 
   /** Create a UV mapped triangle. */
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     return new UVMappedTriangle(v1, v2, v3, n1, n2, n3);
@@ -75,6 +76,7 @@ public class UVMapping extends Mapping2D
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
   
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     UVMappedTriangle uv = (UVMappedTriangle) tri;
@@ -87,6 +89,7 @@ public class UVMapping extends Mapping2D
   /** This method should not generally be called.  The mapping is undefined without knowing
       the texture coordinates for a particular triangle. */
 
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -111,6 +114,7 @@ public class UVMapping extends Mapping2D
   /** This method should not generally be called.  The mapping is undefined without knowing
       the texture coordinates for a particular triangle. */
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -122,6 +126,7 @@ public class UVMapping extends Mapping2D
   /** This method should not generally be called.  The mapping is undefined without knowing
       the texture coordinates for a particular triangle. */
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double time, double param[])
   {
     return texture.getDisplacement(pos.x, pos.y, size, size, time, param);
@@ -130,6 +135,7 @@ public class UVMapping extends Mapping2D
   /** Given a Mesh to which this mapping has been applied, return the texture coordinates at
       each vertex. */
   
+  @Override
   public Vec2 [] findTextureCoordinates(Mesh mesh)
   {
     TextureParameter param[] = mesh.getParameters();
@@ -281,11 +287,13 @@ public class UVMapping extends Mapping2D
     return false;
   }
 
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(object, texture);
   }
 
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     UVMapping map = new UVMapping(obj, tex);
@@ -296,6 +304,7 @@ public class UVMapping extends Mapping2D
     return map;
   }
   
+  @Override
   public void copy(TextureMapping mapping)
   {
     UVMapping map = (UVMapping) mapping; 
@@ -308,6 +317,7 @@ public class UVMapping extends Mapping2D
   /* Get the list of texture parameters associated with this mapping and its texture.
      That includes the texture's parameters, and parameters for the texture coordinates. */
   
+  @Override
   public TextureParameter [] getParameters()
   {
     TextureParameter tp[] = getTexture().getParameters();
@@ -326,6 +336,7 @@ public class UVMapping extends Mapping2D
     return p;
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
@@ -341,6 +352,7 @@ public class UVMapping extends Mapping2D
     setAppliesTo(in.readShort());
   }
   
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(0);

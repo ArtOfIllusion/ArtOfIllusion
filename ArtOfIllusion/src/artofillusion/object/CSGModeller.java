@@ -190,7 +190,7 @@ public class CSGModeller
 
     // If the entire object is eliminated by a difference operation, just return a null mesh.
 
-    if (allVert.size() == 0 || faceIndex.size() == 0)
+    if (allVert.isEmpty() || faceIndex.isEmpty())
       return new TriangleMesh(new Vec3 [] {new Vec3()}, new int [0][0]);
 
     // Create the triangle mesh.
@@ -341,6 +341,7 @@ public class CSGModeller
     for (int i = 0; i < faceIndex.length; i++)
       faceIndex[i] = i;
     Arrays.sort(faceIndex, new Comparator<Integer>() {
+      @Override
       public int compare(Integer index1, Integer index2)
       {
         double max1 = f2.get(index1).max;

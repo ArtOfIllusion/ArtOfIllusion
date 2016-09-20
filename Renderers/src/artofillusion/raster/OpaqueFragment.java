@@ -34,46 +34,55 @@ public class OpaqueFragment implements Fragment
     this.depth = depth;
   }
 
+  @Override
   public void getAdditiveColor(RGBColor color)
   {
     color.setERGB(additiveColor);
   }
 
+  @Override
   public void getMultiplicativeColor(RGBColor color)
   {
     color.setRGB(0.0f, 0.0f, 0.0f);
   }
 
+  @Override
   public boolean isOpaque()
   {
     return true;
   }
 
+  @Override
   public float getDepth()
   {
     return depth;
   }
 
+  @Override
   public float getOpaqueDepth()
   {
     return depth;
   }
 
+  @Override
   public ObjectMaterialInfo getMaterialMapping()
   {
     return null;
   }
 
+  @Override
   public boolean isEntering()
   {
     return false;
   }
 
+  @Override
   public Fragment getNextFragment()
   {
     return Raster.BACKGROUND_FRAGMENT;
   }
 
+  @Override
   public Fragment insertNextFragment(Fragment fragment)
   {
     return this;

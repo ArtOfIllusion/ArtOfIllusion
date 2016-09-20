@@ -32,6 +32,7 @@ public class CreateVertexTool extends MeshEditingTool
     initButton("createVertex");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -53,16 +54,19 @@ public class CreateVertexTool extends MeshEditingTool
       theWindow.setHelpText(Translate.text("createVertexTool.helpText.face"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createVertexTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     TriMeshViewer tmv = (TriMeshViewer) view;
@@ -136,6 +140,7 @@ public class CreateVertexTool extends MeshEditingTool
     }
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (target == -1)
@@ -155,6 +160,7 @@ public class CreateVertexTool extends MeshEditingTool
     theWindow.updateImage();
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (target == -1)
@@ -230,8 +236,7 @@ public class CreateVertexTool extends MeshEditingTool
     
     TriangleMesh.Vertex newvert[] = new TriangleMesh.Vertex [vert.length+1];
     int newface[][] = new int [face.length+2][];
-    for (int i = 0; i < vert.length; i++)
-      newvert[i] = vert[i];
+      System.arraycopy(vert, 0, newvert, 0, vert.length);
     newvert[vert.length] = mesh.new Vertex(v);
     for (int i = 0; i < face.length; i++)
       newface[i] = new int [] {face[i].v1, face[i].v2, face[i].v3};

@@ -12,6 +12,8 @@ package artofillusion.image;
 
 import java.awt.*;
 import java.awt.image.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class stores an image, with optional additional floating point values for each pixel.
     It is intended to be extensible, so that as features are added to the renderers, the amount
@@ -19,6 +21,8 @@ import java.awt.image.*;
 
 public class ComplexImage
 {
+    private static final Logger logger = Logger.getLogger(ComplexImage.class.getName());
+    
   private Image img;
   private float pixelData[][];
   private int intImage[];
@@ -95,7 +99,7 @@ public class ComplexImage
       }
       catch (InterruptedException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     return ((intImage[x+y*width]>>(index*8))&0xFF)*(1.0f/255.0f);

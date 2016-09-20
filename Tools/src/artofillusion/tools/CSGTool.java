@@ -30,6 +30,7 @@ public class CSGTool implements ModellingTool
   
   /* Get the text that appear as the menu item.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("menu.boolean");
@@ -38,6 +39,7 @@ public class CSGTool implements ModellingTool
   /* See whether an appropriate set of objects is selected and either display an error
      message, or bring up the extrude window. */
   
+  @Override
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
@@ -70,7 +72,7 @@ public class CSGTool implements ModellingTool
     info.addTrack(new RotationTrack(info), 1);
     window.addObject(info, null);
     window.setSelection(scene.getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(scene.getNumObjects()-1)}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {scene.getNumObjects()-1}));
     window.updateImage();
   }
 }

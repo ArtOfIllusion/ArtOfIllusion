@@ -64,6 +64,7 @@ public class RotationTrack extends Track
   
   /** Modify the rotation of the object. */
   
+  @Override
   public void apply(double time)
   {
     RotationKeyframe rot = (RotationKeyframe) tc.evaluate(time, smoothingMethod);
@@ -107,6 +108,7 @@ public class RotationTrack extends Track
   
   /** Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     RotationTrack t = new RotationTrack((ObjectInfo) obj);
@@ -130,6 +132,7 @@ public class RotationTrack extends Track
   
   /** Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     RotationTrack t = (RotationTrack) tr;
@@ -152,6 +155,7 @@ public class RotationTrack extends Track
   
   /** Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
@@ -159,6 +163,7 @@ public class RotationTrack extends Track
   
   /** Get the timecourse describing this track. */
   
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
@@ -166,6 +171,7 @@ public class RotationTrack extends Track
   
   /** Set a keyframe at the specified time. */
   
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     ((RotationKeyframe) k).setUseQuaternion(quaternion);
@@ -174,6 +180,7 @@ public class RotationTrack extends Track
   
   /** Set a keyframe at the specified time, based on the current state of the Scene. */
   
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     RotationKeyframe r = null;
@@ -212,6 +219,7 @@ public class RotationTrack extends Track
       if and only if the Scene does not match the current state of the track.  Return
       the new Keyframe, or null if none was set. */
   
+  @Override
   public Keyframe setKeyframeIfModified(double time, Scene sc)
   {
     if (tc.getTimes().length == 0)
@@ -252,6 +260,7 @@ public class RotationTrack extends Track
 
   /** Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
@@ -259,6 +268,7 @@ public class RotationTrack extends Track
   
   /** Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
@@ -266,6 +276,7 @@ public class RotationTrack extends Track
 
   /** This track is null if it has no keyframes. */
   
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
@@ -294,6 +305,7 @@ public class RotationTrack extends Track
   
   /** This has a single child track. */
   
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
@@ -301,6 +313,7 @@ public class RotationTrack extends Track
 
   /** Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
@@ -308,6 +321,7 @@ public class RotationTrack extends Track
   
   /** Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -315,6 +329,7 @@ public class RotationTrack extends Track
   
   /** Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -322,6 +337,7 @@ public class RotationTrack extends Track
   
   /** Get the smoothing method for this track. */
   
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
@@ -419,6 +435,7 @@ public class RotationTrack extends Track
   
   /** Get the names of all graphable values for this track. */
   
+  @Override
   public String [] getValueNames()
   {
     return new String [] {"X Angle", "Y Angle", "Z Angle"};
@@ -426,6 +443,7 @@ public class RotationTrack extends Track
 
   /** Get the default list of graphable values (for a track which has no keyframes). */
   
+  @Override
   public double [] getDefaultGraphValues()
   {
     return info.getCoords().getRotationAngles();
@@ -435,6 +453,7 @@ public class RotationTrack extends Track
       [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
       the nth graphable value. */
   
+  @Override
   public double[][] getValueRange()
   {
     double range[][] = new double [3][2];
@@ -449,6 +468,7 @@ public class RotationTrack extends Track
   /** Get an array of any objects which this track depends on (and which therefore must
       be updated before this track is applied). */ 
   
+  @Override
   public ObjectInfo [] getDependencies()
   {
     if (relCoords == OBJECT)
@@ -465,12 +485,14 @@ public class RotationTrack extends Track
   /** Delete all references to the specified object from this track.  This is used when an
       object is deleted from the scene. */
   
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
     if (relObject.getObject() == obj)
       relObject = new ObjectRef();
   }
 
+  @Override
   public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
     if (objectMap.containsKey(relObject.getObject()))
@@ -485,6 +507,7 @@ public class RotationTrack extends Track
 
   /** Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     double t[] = tc.getTimes();
@@ -517,6 +540,7 @@ public class RotationTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -555,6 +579,7 @@ public class RotationTrack extends Track
   
   /** Present a window in which the user can edit the specified keyframe. */
   
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     RotationKeyframe key = (RotationKeyframe) tc.getValues()[which];
@@ -591,6 +616,7 @@ public class RotationTrack extends Track
 
   /** This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     Skeleton s = info.getSkeleton();

@@ -34,6 +34,7 @@ public class ViewAngleModule extends Module
 
   /* Cache the PointInfo object to have access to the angle later on. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -41,6 +42,7 @@ public class ViewAngleModule extends Module
 
   /* This module outputs the value of the view angle. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (abs && point.viewangle < 0.0)
@@ -50,6 +52,7 @@ public class ViewAngleModule extends Module
 
   /* The angle is always considered to be exact. */
 
+  @Override
   public double getValueError(int which, double blur)
   {
     return 0.0;
@@ -57,6 +60,7 @@ public class ViewAngleModule extends Module
 
   /* We always return no gradient, since there is not enough information to actually calculate it. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     grad.set(0.0, 0.0, 0.0);
@@ -64,6 +68,7 @@ public class ViewAngleModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     ViewAngleModule mod = new ViewAngleModule(new Point(bounds.x, bounds.y));
@@ -74,6 +79,7 @@ public class ViewAngleModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final BCheckBox absBox = new BCheckBox(Translate.text("outputAbsValue"), abs);
@@ -93,6 +99,7 @@ public class ViewAngleModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeBoolean(abs);
@@ -100,6 +107,7 @@ public class ViewAngleModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     abs = in.readBoolean();

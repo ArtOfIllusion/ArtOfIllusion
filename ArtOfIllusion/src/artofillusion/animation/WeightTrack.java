@@ -50,12 +50,14 @@ public class WeightTrack extends Track
 
   /* Weight tracks do not directly modify the scene. */
   
+  @Override
   public void apply(double time)
   {
   }
   
   /* Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object parent)
   {
     WeightTrack t = new WeightTrack((Track) parent);
@@ -70,6 +72,7 @@ public class WeightTrack extends Track
   
   /* Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     WeightTrack t = (WeightTrack) tr;
@@ -83,6 +86,7 @@ public class WeightTrack extends Track
   
   /* Get the timecourse for this track. */
   
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
@@ -97,6 +101,7 @@ public class WeightTrack extends Track
   
   /* Get the smoothing method for this track. */
   
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
@@ -111,6 +116,7 @@ public class WeightTrack extends Track
   
   /* Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
@@ -118,6 +124,7 @@ public class WeightTrack extends Track
 
   /* Set a keyframe at the specified time. */
   
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
@@ -125,6 +132,7 @@ public class WeightTrack extends Track
   
   /* Set a keyframe at the specified time, based on the current state of the Scene. */
   
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     Keyframe k = new ScalarKeyframe(1.0);
@@ -134,6 +142,7 @@ public class WeightTrack extends Track
 
   /* Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
@@ -141,6 +150,7 @@ public class WeightTrack extends Track
   
   /* Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
@@ -148,6 +158,7 @@ public class WeightTrack extends Track
 
   /* Weight tracks never directly affect the scene. */
   
+  @Override
   public boolean isNullTrack()
   {
     return true;
@@ -155,6 +166,7 @@ public class WeightTrack extends Track
   
   /* Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return parent;
@@ -162,6 +174,7 @@ public class WeightTrack extends Track
   
   /* Get the names of all graphable values for this track. */
   
+  @Override
   public String [] getValueNames()
   {
     return new String [] {"Weight"};
@@ -169,6 +182,7 @@ public class WeightTrack extends Track
 
   /* Get the default list of graphable values (for a track which has no keyframes). */
   
+  @Override
   public double [] getDefaultGraphValues()
   {
     return new double [] {1.0};
@@ -178,6 +192,7 @@ public class WeightTrack extends Track
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
   
+  @Override
   public double[][] getValueRange()
   {
     return new double [][] {{0.0, 1.0}};
@@ -185,6 +200,7 @@ public class WeightTrack extends Track
 
   /* Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     double t[] = tc.getTimes();
@@ -206,6 +222,7 @@ public class WeightTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -229,6 +246,7 @@ public class WeightTrack extends Track
 
   /* Present a window in which the user can edit the specified keyframe. */
   
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     ScalarKeyframe key = (ScalarKeyframe) tc.getValues()[which];
@@ -263,6 +281,7 @@ public class WeightTrack extends Track
 
   /* This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(getName());

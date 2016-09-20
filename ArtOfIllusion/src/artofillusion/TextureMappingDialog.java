@@ -20,6 +20,8 @@ import java.awt.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class implements the dialog box which is used to choose texture mappings for objects. 
     It presents a list of all mappings which can be used with the current object and material,
@@ -27,6 +29,7 @@ import java.util.List;
 
 public class TextureMappingDialog extends BDialog
 {
+    private static final Logger logger = Logger.getLogger(TextureMappingDialog.class.getName());
   private BFrame fr;
   private FormContainer content;
   private Object3D origObj, editObj;
@@ -68,7 +71,7 @@ public class TextureMappingDialog extends BDialog
         Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) 
             : editObj.getTexture();
         Boolean result = (Boolean) mtd.invoke(null, editObj, tex);
-        if (result.booleanValue())
+        if (result)
           mappings.addElement(allMappings.get(i).getClass());
       }
       catch (Exception ex)
@@ -102,7 +105,7 @@ public class TextureMappingDialog extends BDialog
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     mapChoice.addEventLink(ValueChangedEvent.class, this, "mappingChanged");
@@ -147,7 +150,7 @@ public class TextureMappingDialog extends BDialog
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
   

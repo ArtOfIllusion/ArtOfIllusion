@@ -24,6 +24,7 @@ public class TestImageModule extends TestCase
 {
   private static final int SIZE = 100;
 
+  @Override
   protected void setUp() throws Exception
   {
     Translate.setLocale(Locale.US);

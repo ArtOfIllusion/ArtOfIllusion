@@ -67,6 +67,7 @@ public class SplineMesh extends Object3D implements Mesh
   {
   }
 
+  @Override
   public Object3D duplicate()
   {
     SplineMesh mesh = new SplineMesh();
@@ -74,6 +75,7 @@ public class SplineMesh extends Object3D implements Mesh
     return mesh;
   }
 
+  @Override
   public void copyObject(Object3D obj)
   {
     SplineMesh mesh = (SplineMesh) obj;
@@ -83,11 +85,9 @@ public class SplineMesh extends Object3D implements Mesh
     for (int i = 0; i < mesh.vertex.length; i++)
       vertex[i] = new MeshVertex(mesh.vertex[i]);
     usmoothness = new float [mesh.usize];
-    for (int i = 0; i < mesh.usize; i++)
-      usmoothness[i] = mesh.usmoothness[i];
+      System.arraycopy(mesh.usmoothness, 0, usmoothness, 0, mesh.usize);
     vsmoothness = new float [mesh.vsize];
-    for (int i = 0; i < mesh.vsize; i++)
-      vsmoothness[i] = mesh.vsmoothness[i];
+      System.arraycopy(mesh.vsmoothness, 0, vsmoothness, 0, mesh.vsize);
     setSmoothingMethod(mesh.getSmoothingMethod());
     if (skeleton == null)
       skeleton = mesh.skeleton.duplicate();
@@ -144,6 +144,7 @@ public class SplineMesh extends Object3D implements Mesh
      actually touch the sides of this box.  If the smoothing method is set to interpolating,
      the final surface may actually extend outside this box. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (bounds == null)
@@ -153,6 +154,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** Return the list of vertices for the mesh. */
 
+  @Override
   public MeshVertex[] getVertices()
   {
     return vertex;
@@ -202,6 +204,7 @@ public class SplineMesh extends Object3D implements Mesh
   
   /** Get a list of the positions of all vertices which define the mesh. */
   
+  @Override
   public Vec3 [] getVertexPositions()
   {
     Vec3 v[] = new Vec3 [vertex.length];
@@ -212,6 +215,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** Set the positions for all the vertices of the mesh. */
 
+  @Override
   public void setVertexPositions(Vec3 v[])
   {
     for (int i = 0; i < v.length; i++)
@@ -277,6 +281,7 @@ public class SplineMesh extends Object3D implements Mesh
   
   /** Determine whether this mesh is completely closed. */
   
+  @Override
   public boolean isClosed()
   {
     if (!vclosed)
@@ -309,6 +314,7 @@ public class SplineMesh extends Object3D implements Mesh
   
   /** Set the size of the mesh. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     Vec3 size = getBounds().getSize();
@@ -338,17 +344,20 @@ public class SplineMesh extends Object3D implements Mesh
     bounds = null;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     SplineMeshEditorWindow ed = new SplineMeshEditorWindow(parent, "Spline Mesh '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
+  @Override
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
     SplineMeshEditorWindow ed = new SplineMeshEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
@@ -360,6 +369,7 @@ public class SplineMesh extends Object3D implements Mesh
   
   /** Get a MeshViewer which can be used for viewing this mesh. */
   
+  @Override
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
   {
     return new SplineMeshViewer(controller, options);
@@ -410,8 +420,7 @@ public class SplineMesh extends Object3D implements Mesh
     param = new double [newparam[0].length][newparam.length][newparam[0][0].length];
     for (int i = 0; i < newparam.length; i++)
       for (int j = 0; j < newparam[0].length; j++)
-        for (int k = 0; k < newparam[0][0].length; k++)
-          param[j][i][k] = newparam[i][j][k];
+        System.arraycopy(newparam[i][j], 0, param[j][i], 0, newparam[0][0].length);
     if (vsize == 2)
       output = new Object [] {v, mesh.vsmoothness, param};
     else if (mesh.smoothingMethod == INTERPOLATING)
@@ -520,8 +529,7 @@ public class SplineMesh extends Object3D implements Mesh
               for (j = 0; j < v.length; j++)
                 {
                   newv[j][k] = calcInterpPoint(v[j], s, param[j], paramTemp, p1, i, p3, p4);
-                  for (int m = 0; m < numParam; m++)
-                    newparam[j][k][m] = paramTemp[m];
+                  System.arraycopy(paramTemp, 0, newparam[j][k], 0, numParam);
                   if (v[j][i].r.distance2(newv[j][k].r) > tol2 && v[j][p3].r.distance2(newv[j][k].r) > tol2)
                     {
                       temp = v[j][i].r.plus(v[j][p3].r).times(0.5);
@@ -616,8 +624,7 @@ public class SplineMesh extends Object3D implements Mesh
             for (j = 0; j < v.length; j++)
               {
                 newv[j][k] = calcApproxPoint(v[j], s, param[j], paramTemp, p1, i, p3);
-                for (int m = 0; m < numParam; m++)
-                  newparam[j][k][m] = paramTemp[m];
+              System.arraycopy(paramTemp, 0, newparam[j][k], 0, numParam);
                 temp = newv[j][k].r.minus(v[j][i].r);
                 if (temp.length2() > tol*tol)
                   newrefine[k] = newrefine[(k-1+newrefine.length)%newrefine.length] = newrefine[(k+1)%newrefine.length] = true;
@@ -710,6 +717,7 @@ public class SplineMesh extends Object3D implements Mesh
     return vt;
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 point[];
@@ -790,6 +798,7 @@ public class SplineMesh extends Object3D implements Mesh
     return wire;
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     float us[], vs[];
@@ -1115,6 +1124,7 @@ public class SplineMesh extends Object3D implements Mesh
   
   /** Set the skeleton for the object. */
 
+  @Override
   public void setSkeleton(Skeleton s)
   {
     skeleton = s;
@@ -1160,6 +1170,7 @@ public class SplineMesh extends Object3D implements Mesh
     findBounds();
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -1230,6 +1241,7 @@ public class SplineMesh extends Object3D implements Mesh
   /** Get an array of normal vectors.  This calculates a single normal for each vertex,
      ignoring smoothness values. */
      
+  @Override
   public Vec3 [] getNormals()
   {
     Vec3 point[] = new Vec3 [vertex.length], norm[] = new Vec3 [vertex.length];
@@ -1277,11 +1289,13 @@ public class SplineMesh extends Object3D implements Mesh
     return norm;
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     if (index == 0)
@@ -1296,6 +1310,7 @@ public class SplineMesh extends Object3D implements Mesh
     return values[3];
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -1316,6 +1331,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new SplineMeshKeyframe(this);
@@ -1323,6 +1339,7 @@ public class SplineMesh extends Object3D implements Mesh
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     SplineMeshKeyframe key = (SplineMeshKeyframe) k;
@@ -1342,6 +1359,7 @@ public class SplineMesh extends Object3D implements Mesh
 
   /** Allow SplineMeshes to be converted to Actors. */
   
+  @Override
   public boolean canConvertToActor()
   {
     return true;
@@ -1350,6 +1368,7 @@ public class SplineMesh extends Object3D implements Mesh
   /** SplineMeshes cannot be keyframed directly, since any change to mesh topology would
       cause all keyframes to become invalid.  Return an actor for this mesh. */
   
+  @Override
   public Object3D getPosableObject()
   {
     SplineMesh m = (SplineMesh) duplicate();
@@ -1388,6 +1407,7 @@ public class SplineMesh extends Object3D implements Mesh
 
     /** Get the Mesh this Gesture belongs to. */
     
+    @Override
     protected Mesh getMesh()
     {
       return mesh;
@@ -1395,6 +1415,7 @@ public class SplineMesh extends Object3D implements Mesh
     
     /** Get the positions of all vertices in this Gesture. */
     
+    @Override
     protected Vec3 [] getVertexPositions()
     {
       return vertPos;
@@ -1402,6 +1423,7 @@ public class SplineMesh extends Object3D implements Mesh
     
     /** Set the positions of all vertices in this Gesture. */
     
+    @Override
     protected void setVertexPositions(Vec3 pos[])
     {
       vertPos = pos;
@@ -1409,6 +1431,7 @@ public class SplineMesh extends Object3D implements Mesh
 
     /** Get the skeleton for this pose (or null if it doesn't have one). */
   
+    @Override
     public Skeleton getSkeleton()
     {
       return skeleton;
@@ -1416,6 +1439,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Set the skeleton for this pose. */
   
+    @Override
     public void setSkeleton(Skeleton s)
     {
       skeleton = s;
@@ -1423,11 +1447,13 @@ public class SplineMesh extends Object3D implements Mesh
     
     /** Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(mesh);
     }
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       SplineMeshKeyframe k = new SplineMeshKeyframe();
@@ -1451,6 +1477,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -1458,6 +1485,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -1466,16 +1494,19 @@ public class SplineMesh extends Object3D implements Mesh
        two, or three others.  These methods should never be called, since SplineMeshes
        can only be keyframed by converting them to Actors. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       return null;
@@ -1490,6 +1521,7 @@ public class SplineMesh extends Object3D implements Mesh
         @param weight    the weights for the different Gestures
     */
     
+    @Override
     public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
     {
       super.blendSurface(average, p, weight);
@@ -1523,6 +1555,7 @@ public class SplineMesh extends Object3D implements Mesh
 
     /** Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof SplineMeshKeyframe))
@@ -1547,6 +1580,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Update the texture parameter values when the texture is changed. */
   
+    @Override
     public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
     {
       ParameterValue newval[] = new ParameterValue [newParams.length];
@@ -1578,6 +1612,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Get the value of a per-vertex texture parameter. */
     
+    @Override
     public ParameterValue getTextureParameter(TextureParameter p)
     {
       // Determine which parameter to get.
@@ -1590,6 +1625,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Set the value of a per-vertex texture parameter. */
     
+    @Override
     public void setTextureParameter(TextureParameter p, ParameterValue value)
     {
       // Determine which parameter to set.
@@ -1603,6 +1639,7 @@ public class SplineMesh extends Object3D implements Mesh
   
     /** Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(1); // version

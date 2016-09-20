@@ -63,6 +63,7 @@ public class ClipModule extends Module
 
   /* Clip the input value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -77,6 +78,7 @@ public class ClipModule extends Module
 
   /* Calculate the error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -89,6 +91,7 @@ public class ClipModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)
@@ -105,6 +108,7 @@ public class ClipModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField minField = new ValueField(min, ValueField.NONE);
@@ -139,6 +143,7 @@ public class ClipModule extends Module
 
     /* Create a duplicate of this module. */
 
+  @Override
   public Module duplicate()
   {
     ClipModule mod = new ClipModule(new Point(bounds.x, bounds.y));
@@ -149,6 +154,7 @@ public class ClipModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(min);
@@ -157,6 +163,7 @@ public class ClipModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     min = in.readDouble();

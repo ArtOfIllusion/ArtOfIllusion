@@ -89,6 +89,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
       @return the two element array {minDepth, maxDepth}
    */
 
+  @Override
   public double[] estimateDepthRange()
   {
     Mat4 toView = theCamera.getWorldToView();
@@ -105,6 +106,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     return new double [] {depth-size, depth+size};
   }
 
+  @Override
   public synchronized void updateImage()
   {
     super.updateImage();
@@ -154,6 +156,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
 
   /** When the user presses the mouse, forward events to the current tool. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     requestFocus();
@@ -163,11 +166,13 @@ public class ObjectPreviewCanvas extends ViewerCanvas
     activeTool.mousePressed(e, this);
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     activeTool.mouseDragged(e, this);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     activeTool.mouseReleased(e, this);

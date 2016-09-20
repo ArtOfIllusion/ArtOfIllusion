@@ -28,16 +28,19 @@ public class Noise
 {
   private static NoiseGenerator generator = new NoiseGenerator()
   {
+    @Override
     public double getValue(double x, double y, double z)
     {
       return SimplexNoise.noise(x, y, z);
     }
 
+    @Override
     public void getGradient(Vec3 gradient, double x, double y, double z)
     {
       SimplexNoise.noiseGradient(gradient, x, y, z);
     }
 
+    @Override
     public void getVector(Vec3 v, double x, double y, double z)
     {
       SimplexNoise.noiseVector(v, x, y, z);

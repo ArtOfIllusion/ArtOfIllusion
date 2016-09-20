@@ -10,7 +10,6 @@
 
 package artofillusion.animation;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.util.*;
 

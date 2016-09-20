@@ -57,6 +57,7 @@ public class NoiseReductionFilter extends ImageFilter
     for (int i = 0; i < iterations; i++)
     {
       ConductivityFunction fn = new ConductivityFunction() {
+        @Override
         public float evaluate(int x1, int y1, int x2, int y2)
         {
           float object1 = image.getPixelComponent(x1, y1, ComplexImage.OBJECT);

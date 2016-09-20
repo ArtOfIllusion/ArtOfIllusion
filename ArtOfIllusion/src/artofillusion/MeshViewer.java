@@ -58,7 +58,7 @@ public abstract class MeshViewer extends ObjectViewer
     boolean b[] = new boolean [s.getNumJoints()];
     for (int i = 0; i < lockedJoints.size(); i++)
     {
-      int index = s.findJointIndex(lockedJoints.elementAt(i).intValue());
+      int index = s.findJointIndex(lockedJoints.elementAt(i));
       if (index > -1 && index < b.length)
         b[index] = true;
     }
@@ -70,7 +70,7 @@ public abstract class MeshViewer extends ObjectViewer
   public boolean isJointLocked(int id)
   {
     for (int i = 0; i < lockedJoints.size(); i++)
-      if (lockedJoints.elementAt(i).intValue() == id)
+      if (lockedJoints.elementAt(i) == id)
         return true;
     return false;
   }
@@ -79,7 +79,7 @@ public abstract class MeshViewer extends ObjectViewer
   
   public void lockJoint(int id)
   {
-    Integer i = Integer.valueOf(id);
+    Integer i = id;
     if (lockedJoints.indexOf(i) == -1)
       lockedJoints.addElement(i);
   }
@@ -88,7 +88,7 @@ public abstract class MeshViewer extends ObjectViewer
   
   public void unlockJoint(int id)
   {
-    lockedJoints.removeElement(Integer.valueOf(id));
+    lockedJoints.removeElement(id);
   }
 
   /** Get whether the control mesh is visible. */
@@ -167,6 +167,7 @@ public abstract class MeshViewer extends ObjectViewer
       @return the two element array {minDepth, maxDepth}
    */
 
+  @Override
   public double[] estimateDepthRange()
   {
     // Get the depth range for the object and the rest of the scene.

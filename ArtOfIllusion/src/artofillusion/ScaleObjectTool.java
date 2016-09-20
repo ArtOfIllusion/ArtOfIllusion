@@ -53,27 +53,32 @@ public class ScaleObjectTool extends EditingTool
     initButton("resize");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS+HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("scaleObjectTool.tipText");
   }
   
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     Scene theScene = theWindow.getScene();
@@ -218,6 +223,7 @@ public class ScaleObjectTool extends EditingTool
       whichSides += RIGHT;
   }
   
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     Scene theScene = theWindow.getScene();
@@ -467,6 +473,7 @@ public class ScaleObjectTool extends EditingTool
       theWindow.setHelpText(Translate.text("scaleMeshTool.dragText", Math.round(hscale*1e5)/1e5+", "+Math.round(vscale*1e5)/1e5));
   }
   
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (opmode == OPMODE_SCALE)
@@ -475,6 +482,7 @@ public class ScaleObjectTool extends EditingTool
       mouseDraggedMoveOp(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     theWindow.getScene().applyTracksAfterModification(toMove);
@@ -488,6 +496,7 @@ public class ScaleObjectTool extends EditingTool
     theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
   
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);

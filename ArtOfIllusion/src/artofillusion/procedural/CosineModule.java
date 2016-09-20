@@ -12,7 +12,6 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.awt.*;
 
@@ -32,6 +31,7 @@ public class CosineModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
@@ -39,6 +39,7 @@ public class CosineModule extends Module
 
   /* This module outputs the sine of the input value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -67,6 +68,7 @@ public class CosineModule extends Module
 
   /* Estimate the error from the derivative of the function. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -87,6 +89,7 @@ public class CosineModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)

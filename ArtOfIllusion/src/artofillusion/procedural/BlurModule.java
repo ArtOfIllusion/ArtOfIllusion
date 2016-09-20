@@ -12,7 +12,6 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.ui.*;
 import artofillusion.math.*;
 import java.awt.*;
@@ -32,6 +31,7 @@ public class BlurModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = false;
@@ -39,6 +39,7 @@ public class BlurModule extends Module
 
   /* Get the output value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (linkFrom[1] == null)
@@ -52,6 +53,7 @@ public class BlurModule extends Module
 
   /* Get the output error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[1] == null)
@@ -65,6 +67,7 @@ public class BlurModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[1] == null)

@@ -79,7 +79,7 @@ public class ValueField extends BTextField
         if ((constraints & INTEGER) != 0)
           val = (double) Integer.parseInt(getText());
         else
-          val = new Double(getText()).doubleValue();
+          val = new Double(getText());
       }
     catch (NumberFormatException ex)
       {
@@ -115,6 +115,7 @@ public class ValueField extends BTextField
     ((JTextField) getComponent()).setForeground(valid ? Color.black : Color.red);
   }
 
+  @Override
   protected void textChanged()
   {
     double val = value, oldVal = value;
@@ -124,7 +125,7 @@ public class ValueField extends BTextField
       if ((constraints & INTEGER) != 0)
         val = (double) Integer.parseInt(getText());
       else
-        val = new Double(getText()).doubleValue();
+        val = new Double(getText());
     }
     catch (NumberFormatException ex)
     {

@@ -30,27 +30,32 @@ public class MoveUVViewTool extends EditingTool
     initButton("moveView");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean hilightSelection()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveViewTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     UVMappingViewer uvview = (UVMappingViewer) view;
@@ -68,6 +73,7 @@ public class MoveUVViewTool extends EditingTool
     vheight = d.height;
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     Point dragPoint = e.getPoint();
@@ -104,6 +110,7 @@ public class MoveUVViewTool extends EditingTool
     }
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     mouseDragged(e, view);

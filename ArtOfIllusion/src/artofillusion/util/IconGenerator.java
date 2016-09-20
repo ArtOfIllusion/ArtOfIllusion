@@ -1357,7 +1357,7 @@ public class IconGenerator
                     //if (target == null || target.length() == 0) target = DEFAULT_TARGET;
 
                     // a list of values in parens
-                    if (pos < len && macro.charAt(pos+1) == '(') {;
+                    if (pos < len && macro.charAt(pos+1) == '(') {
                         end = find(macro, pos+1, len, close);
                         antialias = parseArgs(antialias, 2, pos+2, end);
                     }
@@ -1423,11 +1423,11 @@ public class IconGenerator
                         color = null;
                         arglen = arg.length();
                         if (arglen == 4)
-                            alpha = SCALE_DOWN * Integer.decode(arg).intValue();
+                            alpha = SCALE_DOWN * Integer.decode(arg);
                         else if (arg.length() == 8)
                             color = Color.decode(arg);
                         else if (arglen == 10) {
-                            alpha = SCALE_DOWN * Integer.decode(arg.substring(0, 4)).intValue();
+                            alpha = SCALE_DOWN * Integer.decode(arg.substring(0, 4));
                             color = Color.decode("0x" + arg.substring(4));
                         }
 
@@ -1907,7 +1907,7 @@ public class IconGenerator
 
             // resolve reference
             if (obj != null && obj.getClass() == String.class
-                && delims[ARG_DELIMS].indexOf(target.toString().charAt(0)) == ARG_RESOLVE) {
+                && delims[ARG_DELIMS].indexOf(target.charAt(0)) == ARG_RESOLVE) {
                 target = obj.toString();
                 obj = namespace.get(target);
             }

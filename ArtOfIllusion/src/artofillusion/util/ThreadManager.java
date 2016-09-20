@@ -12,6 +12,8 @@ package artofillusion.util;
 
 import java.util.concurrent.atomic.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class coordinates threads for multi-threaded operations.  The execution model
@@ -29,6 +31,8 @@ import java.util.*;
 
 public class ThreadManager
 {
+    private static final Logger logger = Logger.getLogger(ThreadManager.class.getName());
+    
   private int numIndices;
   private AtomicInteger nextIndex;
   private Thread thread[];
@@ -81,6 +85,7 @@ public class ThreadManager
     for (int i = 0; i < thread.length; i++)
     {
       thread[i] = new Thread("Worker thread "+(i+1)) {
+        @Override
         public void run()
         {
           // Repeatedly perform the task until we are finished.
@@ -100,7 +105,7 @@ public class ThreadManager
             catch (Exception ex)
             {
               cancel();
-              ex.printStackTrace();
+              logger.log(Level.INFO, "Exception", ex);
             }
           }
         }

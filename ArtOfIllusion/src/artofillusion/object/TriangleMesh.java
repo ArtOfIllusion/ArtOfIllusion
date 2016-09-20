@@ -282,6 +282,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** Create a duplicate of this object. */
 
+  @Override
   public Object3D duplicate()
   {
     TriangleMesh mesh = new TriangleMesh();
@@ -291,6 +292,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** Make this object exactly like another one. */
 
+  @Override
   public void copyObject(Object3D obj)
   {
     TriangleMesh mesh = (TriangleMesh) obj;
@@ -451,6 +453,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       actually touch the sides of this box.  If the smoothing method is set to interpolating,
       the final surface may actually extend outside this box. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (bounds == null)
@@ -460,6 +463,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** These methods return the lists of vertices, edges, and faces for the mesh. */
 
+  @Override
   public MeshVertex[] getVertices()
   {
     return vertex;
@@ -489,6 +493,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   
   /** Get a list of the positions of all vertices which define the mesh. */
   
+  @Override
   public Vec3 [] getVertexPositions()
   {
     Vec3 v[] = new Vec3 [vertex.length];
@@ -499,6 +504,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** Set the positions for all the vertices of the mesh. */
 
+  @Override
   public void setVertexPositions(Vec3 v[])
   {
     for (int i = 0; i < v.length; i++)
@@ -566,11 +572,13 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       }
   }
   
+  @Override
   public boolean isClosed()
   {
     return closed;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     Vec3 size = getBounds().getSize();
@@ -659,17 +667,20 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     return index;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
   
+  @Override
   public void edit(final EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Triangle Mesh '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
+  @Override
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
     TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
@@ -681,11 +692,13 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   
   /** Get a MeshViewer which can be used for viewing this mesh. */
   
+  @Override
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
   {
     return new TriMeshViewer(controller, options);
   }
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     if (smoothingMethod == NO_SMOOTHING || smoothingMethod == SMOOTH_SHADING)
@@ -695,6 +708,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** Get a more finely subdivided version of this mesh. */
   
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     boolean split[];
@@ -711,6 +725,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     return (TriangleMesh) duplicate();
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     TriangleMesh mesh = this;
@@ -761,6 +776,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     return wire;
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     TriangleMesh mesh = this;
@@ -1087,6 +1103,7 @@ groups:     do
   
   /** Set the skeleton for this object. */
 
+  @Override
   public void setSkeleton(Skeleton s)
   {
     skeleton = s;
@@ -3019,6 +3036,7 @@ groups:     do
   /** Get an array of normal vectors.  This calculates a single normal for each vertex,
       ignoring smoothness values. */
      
+  @Override
   public Vec3 [] getNormals()
   {
     Vec3 faceNorm, norm[] = new Vec3 [vertex.length];
@@ -3064,16 +3082,19 @@ groups:     do
     return norm;
   }
 
+  @Override
   public int getFaceCount()
   {
     return face.length;
   }
 
+  @Override
   public int getFaceVertexCount(int faceIndex)
   {
     return 3;
   }
 
+  @Override
   public int getFaceVertexIndex(int faceIndex, int vertexIndex)
   {
     Face f = face[faceIndex];
@@ -3440,6 +3461,7 @@ groups:     do
     skeleton = new Skeleton(in);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -3477,16 +3499,19 @@ groups:     do
     skeleton.writeToStream(out);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     return PROPERTIES[0].getAllowedValues()[smoothingMethod];
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     Object values[] = PROPERTIES[0].getAllowedValues();
@@ -3497,6 +3522,7 @@ groups:     do
 
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new TriangleMeshKeyframe(this);
@@ -3504,6 +3530,7 @@ groups:     do
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     TriangleMeshKeyframe key = (TriangleMeshKeyframe) k;
@@ -3527,6 +3554,7 @@ groups:     do
 
   /** Allow TriangleMeshes to be converted to Actors. */
   
+  @Override
   public boolean canConvertToActor()
   {
     return true;
@@ -3535,6 +3563,7 @@ groups:     do
   /** TriangleMeshes cannot be keyframed directly, since any change to mesh topology would
       cause all keyframes to become invalid.  Return an actor for this mesh. */
   
+  @Override
   public Object3D getPosableObject()
   {
     TriangleMesh m = (TriangleMesh) duplicate();
@@ -3577,6 +3606,7 @@ groups:     do
 
     /** Get the Mesh this Gesture belongs to. */
     
+    @Override
     protected Mesh getMesh()
     {
       return mesh;
@@ -3584,6 +3614,7 @@ groups:     do
     
     /** Get the positions of all vertices in this Gesture. */
     
+    @Override
     protected Vec3 [] getVertexPositions()
     {
       return vertPos;
@@ -3591,6 +3622,7 @@ groups:     do
     
     /** Set the positions of all vertices in this Gesture. */
     
+    @Override
     protected void setVertexPositions(Vec3 pos[])
     {
       vertPos = pos;
@@ -3598,6 +3630,7 @@ groups:     do
 
     /** Get the skeleton for this pose (or null if it doesn't have one). */
   
+    @Override
     public Skeleton getSkeleton()
     {
       return skeleton;
@@ -3605,6 +3638,7 @@ groups:     do
   
     /** Set the skeleton for this pose. */
   
+    @Override
     public void setSkeleton(Skeleton s)
     {
       skeleton = s;
@@ -3612,11 +3646,13 @@ groups:     do
     
     /** Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(mesh);
     }
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       TriangleMeshKeyframe k = new TriangleMeshKeyframe();
@@ -3633,8 +3669,7 @@ groups:     do
           k.vertPos[i] = new Vec3(vertPos[i]);
           k.vertSmoothness[i] = vertSmoothness[i];
         }
-      for (int i = 0; i < edgeSmoothness.length; i++)
-        k.edgeSmoothness[i] = edgeSmoothness[i];
+        System.arraycopy(edgeSmoothness, 0, k.edgeSmoothness, 0, edgeSmoothness.length);
       k.paramValue = new ParameterValue [paramValue.length];
       for (int i = 0; i < paramValue.length; i++)
         k.paramValue[i] = paramValue[i].duplicate();
@@ -3643,6 +3678,7 @@ groups:     do
   
     /** Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -3650,6 +3686,7 @@ groups:     do
   
     /** Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -3658,16 +3695,19 @@ groups:     do
        two, or three others.  These methods should never be called, since TriangleMeshes
        can only be keyframed by converting them to Actors. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       return null;
@@ -3682,6 +3722,7 @@ groups:     do
         @param weight    the weights for the different Gestures
     */
     
+    @Override
     public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
     {
       super.blendSurface(average, p, weight);
@@ -3715,6 +3756,7 @@ groups:     do
 
     /** Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof TriangleMeshKeyframe))
@@ -3740,6 +3782,7 @@ groups:     do
   
     /** Update the texture parameter values when the texture is changed. */
   
+    @Override
     public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
     {
       ParameterValue newval[] = new ParameterValue [newParams.length];
@@ -3771,6 +3814,7 @@ groups:     do
   
     /** Get the value of a per-vertex texture parameter. */
     
+    @Override
     public ParameterValue getTextureParameter(TextureParameter p)
     {
       // Determine which parameter to get.
@@ -3783,6 +3827,7 @@ groups:     do
   
     /** Set the value of a per-vertex texture parameter. */
     
+    @Override
     public void setTextureParameter(TextureParameter p, ParameterValue value)
     {
       // Determine which parameter to set.
@@ -3796,6 +3841,7 @@ groups:     do
   
     /** Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(1); // version

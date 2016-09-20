@@ -20,6 +20,8 @@ import buoy.widget.*;
 import java.awt.*;
 import java.lang.reflect.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class implements the dialog box which is used to choose textures for objects. 
     It presents a list of all available textures from which the user can select one.
@@ -28,6 +30,7 @@ import java.util.List;
 
 public class ObjectTextureDialog extends BDialog implements ListChangeListener
 {
+    private static final Logger logger = Logger.getLogger(ObjectTextureDialog.class.getName());
   private LayoutWindow window;
   private Scene scene;
   private ObjectInfo obj[], editObj;
@@ -86,7 +89,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     if (oldTexture instanceof LayeredTexture)
     {
       layeredMap = (LayeredMapping) oldTexMapping;
-      layeredTex = (LayeredTexture) oldTexture;;
+      layeredTex = (LayeredTexture) oldTexture;
     }
     else
     {
@@ -151,7 +154,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     newTextureChoice.addEventLink(ValueChangedEvent.class, this, "doNewTexture");
@@ -184,7 +187,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     newMaterialChoice.addEventLink(ValueChangedEvent.class, this, "doNewMaterial");
@@ -200,6 +203,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     layerPanel.add(moveUpButton = Translate.button("moveUp", this, "doMoveLayerUp"), 0, 2);
     layerPanel.add(moveDownButton = Translate.button("moveDown", this, "doMoveLayerDown"), 0, 3);
     layerList = new BList() {
+      @Override
       public Dimension getPreferredSize()
       {
         return new Dimension(texList.getPreferredSize().width, super.getPreferredSize().height);
@@ -286,6 +290,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     preview.getObject().getObject().setParameterValues(paramValue);
   }
 
+  @Override
   public void dispose()
   {
     scene.removeTextureListener(this);
@@ -516,7 +521,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
   
@@ -545,7 +550,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -712,7 +717,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       pack();
       UIUtilities.centerDialog(this, window);
       resetParameters();
-      return;
+
     }
   }
   
@@ -828,6 +833,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   
   /* ListChangeListener methods. */
   
+  @Override
   public void itemAdded(int index, Object obj)
   {
     if (obj instanceof Texture)
@@ -842,6 +848,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
   }
   
+  @Override
   public void itemRemoved(int index, Object obj)
   {
     if (obj instanceof Texture)
@@ -883,6 +890,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
   }
   
+  @Override
   public void itemChanged(int index, Object obj)
   {
     if (obj instanceof Texture)
@@ -905,6 +913,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   {
     renderProcessor.addEvent(new Runnable()
     {
+      @Override
       public void run()
       {
         preview.render();

@@ -102,7 +102,7 @@ public class TriMeshBeveler
 	    vert.addElement(offsetVertex(mesh, v[f[i].v1], faceInsets[i][0]));
 	    vert.addElement(offsetVertex(mesh, v[f[i].v2], faceInsets[i][1]));
 	    vert.addElement(offsetVertex(mesh, v[f[i].v3], faceInsets[i][2]));
-	    newIndex.addElement(new Integer(face.size()));
+	    newIndex.addElement(face.size());
 	    face.addElement(new int [] {j, j+1, j+2, i});
 	    face.addElement(new int [] {f[i].v1, f[i].v2, j, i});
 	    face.addElement(new int [] {j, f[i].v2, j+1, i});
@@ -132,7 +132,7 @@ public class TriMeshBeveler
     
     newSelection = new boolean [mesh.getFaces().length];
     for (i = 0; i < newIndex.size(); i++)
-      newSelection[((Integer) newIndex.elementAt(i)).intValue()] = true;
+      newSelection[((Integer) newIndex.elementAt(i))] = true;
     return mesh;
   }
 
@@ -278,7 +278,7 @@ public class TriMeshBeveler
 		rhs[0] += height*faceNormal[vertFace[i][j]].x;
 		rhs[1] += height*faceNormal[vertFace[i][j]].y;
 		rhs[2] += height*faceNormal[vertFace[i][j]].z;
-		newIndex.addElement(new Integer(vertFace[i][j]));
+		newIndex.addElement(vertFace[i][j]);
 	      }
 	    coeff[1][0] = coeff[0][1];
 	    coeff[2][0] = coeff[0][2];
@@ -447,7 +447,7 @@ public class TriMeshBeveler
 		      tempFace[1] = k;
 		    else
 		      tempFace[2] = k;
-		    newIndex.addElement(new Integer(vertFace[i][group[j]]));
+		    newIndex.addElement(vertFace[i][group[j]]);
 		  }
 	      }
 	  }
@@ -509,7 +509,7 @@ public class TriMeshBeveler
     
     newSelection = new boolean [mesh.getFaces().length];
     for (i = 0; i < newIndex.size(); i++)
-      newSelection[((Integer) newIndex.elementAt(i)).intValue()] = true;
+      newSelection[((Integer) newIndex.elementAt(i))] = true;
     return mesh;
   }
 
@@ -1226,8 +1226,7 @@ public class TriMeshBeveler
           for (int j = 0; j < vertIndex.length; j++)
             newval[vertIndex[j]] = oldval[j];
         else
-          for (int j = 0; j < oldval.length; j++)
-            newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         newParam[i] = new VertexParameterValue(newval);
       }
       else if (oldParam[i] instanceof FaceParameterValue)

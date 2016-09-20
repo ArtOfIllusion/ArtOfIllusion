@@ -142,7 +142,7 @@ public class PhotonMap
           }
         if (photonList.size() >= numWanted*0.9)
           break;
-        if (photonList.size() == 0 && currentIntensity > 5.0 && iteration > 2)
+        if (photonList.isEmpty() && currentIntensity > 5.0 && iteration > 2)
           break; // Insignificant numbers of photons will be stored no matter how many we send out.
         totalIntensity += currentIntensity;
         if (photonList.size() < 10)

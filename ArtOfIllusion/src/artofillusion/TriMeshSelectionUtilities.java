@@ -217,7 +217,7 @@ public class TriMeshSelectionUtilities
       {
         Edge ed = e[v1edges[i]];
         if (ed != ce)
-          v1neighbors.add(new Integer(ed.v1 == ce.v1 ? ed.v2 : ed.v1));
+          v1neighbors.add(ed.v1 == ce.v1 ? ed.v2 : ed.v1);
       }
       HashSet v2neighbors = new HashSet();
       int v2edges[] = v[ce.v2].getEdges();
@@ -225,7 +225,7 @@ public class TriMeshSelectionUtilities
       {
         Edge ed = e[v2edges[i]];
         if (ed != ce)
-          v2neighbors.add(new Integer(ed.v1 == ce.v2 ? ed.v2 : ed.v1));
+          v2neighbors.add(ed.v1 == ce.v2 ? ed.v2 : ed.v1);
       }
       
       // Look for candidates to be the next edge in the strip.  A candidate is an edge which connects
@@ -234,14 +234,14 @@ public class TriMeshSelectionUtilities
       Iterator n2iter = v2neighbors.iterator();
       while (n2iter.hasNext())
       {
-        int neighbor = ((Integer) n2iter.next()).intValue();
+        int neighbor = ((Integer) n2iter.next());
         int neighborEdges[] = v[neighbor].getEdges();
         for (int i = 0; i < neighborEdges.length; i++)
         {
           if (neighborEdges[i] == prevEdge)
             continue;
           Edge ed = e[neighborEdges[i]];
-          if (v1neighbors.contains(new Integer(ed.v1)) || v1neighbors.contains(new Integer(ed.v2)))
+          if (v1neighbors.contains(ed.v1) || v1neighbors.contains(ed.v2))
           {
             // This edge is a candidate.  See how close it is to being parallel to the current edge.
             

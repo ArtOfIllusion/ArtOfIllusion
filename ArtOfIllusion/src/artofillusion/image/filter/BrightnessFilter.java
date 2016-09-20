@@ -27,6 +27,7 @@ public class BrightnessFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Brightness");
@@ -39,6 +40,7 @@ public class BrightnessFilter extends ImageFilter
       @param cameraPos  the position of the camera in the scene
   */
   
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     filterComponent(image, ComplexImage.RED);
@@ -67,6 +69,7 @@ public class BrightnessFilter extends ImageFilter
 
   /** Write a serialized description of this filter to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble((Double) getPropertyValue(0));
@@ -74,6 +77,7 @@ public class BrightnessFilter extends ImageFilter
 
   /** Reconstruct this filter from its serialized representation. */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     setPropertyValue(0, in.readDouble());

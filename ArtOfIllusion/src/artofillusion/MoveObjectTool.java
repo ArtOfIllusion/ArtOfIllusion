@@ -34,27 +34,32 @@ public class MoveObjectTool extends EditingTool
     initButton("move");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("moveObjectTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveObjectTool.tipText");
   }
 
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     Scene theScene = theWindow.getScene();
@@ -78,6 +83,7 @@ public class MoveObjectTool extends EditingTool
     dragged = false;
   }
 
+  @Override
   public void mouseDragged(final WidgetMouseEvent e, final ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -123,6 +129,7 @@ public class MoveObjectTool extends EditingTool
       Math.round(v.x*1e5)/1e5+", "+Math.round(v.y*1e5)/1e5+", "+Math.round(v.z*1e5)/1e5));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     theWindow.getScene().applyTracksAfterModification(toMove);
@@ -132,6 +139,7 @@ public class MoveObjectTool extends EditingTool
     theWindow.updateImage();
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     Scene theScene = theWindow.getScene();
@@ -218,6 +226,7 @@ public class MoveObjectTool extends EditingTool
   
   /* Allow the user to set options. */
   
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);

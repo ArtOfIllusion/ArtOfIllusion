@@ -17,6 +17,8 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.*;
 import javax.swing.*;
 
@@ -25,8 +27,11 @@ import javax.swing.*;
 
 public class MacOSPlugin implements Plugin, InvocationHandler
 {
+    private static final Logger logger = Logger.getLogger(MacOSPlugin.class.getName());
+    
   private boolean usingAppMenu;
 
+  @Override
   public void processMessage(int message, Object args[])
   {
     if (message == APPLICATION_STARTING)
@@ -54,7 +59,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
         // An error occured trying to set up the application menu, so just stick with the standard
         // Quit and Preferences menu items in the File and Edit menus.
         
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
       usingAppMenu = true;
     }
@@ -126,6 +131,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
   
   /** Handle ApplicationListener methods. */
   
+  @Override
   public Object invoke(Object proxy, Method method, Object args[])
   {
     boolean handled = true;
@@ -172,7 +178,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       {
         // Nothing we can really do about it...
         
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     else
@@ -189,7 +195,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     {
       // Nothing we can really do about it...
       
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
     return null;
   }
@@ -214,6 +220,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       RecentFiles.createMenu(recentMenu);
       file.add(recentMenu);
       Preferences.userNodeForPackage(RecentFiles.class).addPreferenceChangeListener(new PreferenceChangeListener() {
+        @Override
         public void preferenceChange(PreferenceChangeEvent ev)
         {
           RecentFiles.createMenu(recentMenu);
@@ -224,55 +231,67 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       setVisible(true);
     }
 
+    @Override
     public ToolPalette getToolPalette()
     {
       return null;
     }
 
+    @Override
     public void setTool(EditingTool tool)
     {
     }
   
+    @Override
     public void setHelpText(String text)
     {
     }
 
+    @Override
     public BFrame getFrame()
     {
       return this;
     }
 
+    @Override
     public void updateImage()
     {
     }
 
+    @Override
     public void updateMenus()
     {
     }
 
+    @Override
     public void setUndoRecord(UndoRecord command)
     {
     }
 
+    @Override
     public void setModified()
     {
     }
 
+    @Override
     public Scene getScene()
     {
       return null;
     }
 
+    @Override
     public ViewerCanvas getView()
     {
       return null;
     }
 
+    @Override
     public ViewerCanvas[] getAllViews()
     {
       return null;
     }
 
+    @Override
     public boolean confirmClose()
     {
       dispose();

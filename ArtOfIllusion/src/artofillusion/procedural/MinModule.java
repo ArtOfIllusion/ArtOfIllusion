@@ -31,6 +31,7 @@ public class MinModule extends Module
 
   /* New point, so the inputs will need to be compared again. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = false;
@@ -38,6 +39,7 @@ public class MinModule extends Module
 
   /* Compare the two inputs. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -82,6 +84,7 @@ public class MinModule extends Module
 
   /* Determine which input to use, and get its error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -91,6 +94,7 @@ public class MinModule extends Module
 
   /* Determine which input to use, and get its gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)

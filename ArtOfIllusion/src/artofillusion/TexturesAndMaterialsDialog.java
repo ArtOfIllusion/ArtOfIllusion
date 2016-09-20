@@ -27,9 +27,13 @@ import java.lang.ref.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TexturesAndMaterialsDialog extends BDialog
 {
+    private static final Logger logger = Logger.getLogger(TexturesAndMaterialsDialog.class.getName());
+    
   Scene theScene;
   EditingWindow parentFrame;
   BTree libraryList;
@@ -56,16 +60,19 @@ public class TexturesAndMaterialsDialog extends BDialog
 
   ListChangeListener listListener = new ListChangeListener()
   {
+    @Override
     public void itemAdded(int index, java.lang.Object obj)
     {
       ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
     }
 
+    @Override
     public void itemChanged(int index, java.lang.Object obj)
     {
       ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
     }
 
+    @Override
     public void itemRemoved(int index, java.lang.Object obj)
     {
       ((SceneTreeModel) libraryList.getModel()).rebuildScenes(null);
@@ -602,7 +609,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     ((SceneTreeModel) libraryList.getModel()).rebuildScenes(saveFile);
@@ -643,7 +650,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -661,7 +668,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         catch (IOException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
         ((SceneTreeModel) libraryList.getModel()).rebuildLibrary();
       }
@@ -686,6 +693,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     }
   }
 
+  @Override
   public void dispose()
   {
     theScene.removeMaterialListener(listListener);
@@ -793,7 +801,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         catch (IOException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
     }
@@ -858,21 +866,25 @@ public class TexturesAndMaterialsDialog extends BDialog
     private ArrayList<TreeModelListener> listeners = new ArrayList<TreeModelListener>();
     private DefaultMutableTreeNode root = new DefaultMutableTreeNode();
 
+    @Override
     public void addTreeModelListener(TreeModelListener listener)
     {
       listeners.add(listener);
     }
 
+    @Override
     public void removeTreeModelListener(TreeModelListener listener)
     {
       listeners.remove(listener);
     }
 
+    @Override
     public Object getRoot()
     {
       return root;
     }
 
+    @Override
     public Object getChild(Object o, int i)
     {
       if (o == root)
@@ -890,6 +902,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       return node.materials.get(i);
     }
 
+    @Override
     public int getChildCount(Object o)
     {
       if (o == root)
@@ -908,15 +921,18 @@ public class TexturesAndMaterialsDialog extends BDialog
       return count;
     }
 
+    @Override
     public boolean isLeaf(Object o)
     {
       return !(o == root || o instanceof FolderTreeNode || o instanceof SceneTreeNode);
     }
 
+    @Override
     public void valueForPathChanged(TreePath treePath, Object o)
     {
     }
 
+    @Override
     public int getIndexOfChild(Object o, Object o1)
     {
       if (o == root)
@@ -930,7 +946,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         return texIndex;
       int matIndex = node.materials.indexOf(o1);
       if (matIndex > -1)
-        return matIndex+(showTextures ? node.textures.size() : 0);;
+        return matIndex + (showTextures ? node.textures.size() : 0);
       return -1;
     }
 
@@ -959,6 +975,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       updateTree(new Runnable()
       {
+        @Override
         public void run()
         {
           rebuildNode(root, file);
@@ -970,6 +987,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       updateTree(new Runnable()
       {
+        @Override
         public void run()
         {
           ((FolderTreeNode) rootNodes.get(1)).children = null;
@@ -986,6 +1004,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       updateTree(new Runnable()
       {
+        @Override
         public void run()
         {
           rootNodes.add(new SceneTreeNode(file));
@@ -1035,7 +1054,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         }
         catch (IOException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
           return false;
         }
         if (insertLocation == -1 || insertLocation == current)
@@ -1082,7 +1101,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
       return true;
     }
@@ -1115,6 +1134,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       flavors = new DataFlavor[] {DataFlavor.stringFlavor, data instanceof Texture ? TextureFlavor : MaterialFlavor};
     }
 
+    @Override
     public Object getTransferData(DataFlavor dataFlavor) throws UnsupportedFlavorException, IOException
     {
       if (dataFlavor == DataFlavor.stringFlavor)
@@ -1122,11 +1142,13 @@ public class TexturesAndMaterialsDialog extends BDialog
       return data;
     }
 
+    @Override
     public DataFlavor[] getTransferDataFlavors()
     {
       return flavors;
     }
 
+    @Override
     public boolean isDataFlavorSupported(DataFlavor dataFlavor)
     {
       for (DataFlavor flavor : flavors)

@@ -125,6 +125,7 @@ public class FaceVertexParameterValue implements ParameterValue
    * of a RenderingMesh).
    */
   
+  @Override
   public double getValue(int faceIndex, int v1, int v2, int v3, double u, double v, double w)
   {
     return u*getValue(faceIndex, 0)+v*getValue(faceIndex, 1)+w*getValue(faceIndex, 2);
@@ -152,6 +153,7 @@ public class FaceVertexParameterValue implements ParameterValue
   
   /** Get the average value of the parameter over the entire surface. */
   
+  @Override
   public double getAverageValue()
   {
     double avg = 0.0;
@@ -163,6 +165,7 @@ public class FaceVertexParameterValue implements ParameterValue
   
   /** Create a duplicate of this object. */
   
+  @Override
   public ParameterValue duplicate()
   {
     FaceVertexParameterValue copy = new FaceVertexParameterValue();
@@ -173,6 +176,7 @@ public class FaceVertexParameterValue implements ParameterValue
   
   /** Determine whether this object represents the same set of values as another one. */
   
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof FaceVertexParameterValue))
@@ -191,6 +195,7 @@ public class FaceVertexParameterValue implements ParameterValue
   
   /** Write out a serialized representation of this object to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeInt(-1);

@@ -16,11 +16,15 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** ExternalObject is an Object3D that is stored in a separate file. */
 
 public class ExternalObject extends ObjectWrapper
 {
+    private static final Logger logger = Logger.getLogger(ExternalObject.class.getName());
+    
   private File externalFile;
   private int objectId;
   private String objectName;
@@ -159,8 +163,8 @@ public class ExternalObject extends ObjectWrapper
     {
       // If anything goes wrong, use a null object and return an error message.
       
-      ex.printStackTrace();
-      loadingError = ex.getMessage();
+        logger.log(Level.INFO, "Exception", ex);
+        loadingError = ex.getMessage();
     }
   }
 
@@ -176,6 +180,7 @@ public class ExternalObject extends ObjectWrapper
   
   /** Create a new object which is an exact duplicate of this one. */
   
+  @Override
   public Object3D duplicate()
   {
     ExternalObject obj = new ExternalObject();
@@ -189,6 +194,7 @@ public class ExternalObject extends ObjectWrapper
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
   
+  @Override
   public void copyObject(Object3D obj)
   {
     ExternalObject eo = (ExternalObject) obj;
@@ -200,6 +206,7 @@ public class ExternalObject extends ObjectWrapper
 
   /** ExternalObjects cannot be resized, since they are entirely defined by a separate file. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
@@ -207,11 +214,13 @@ public class ExternalObject extends ObjectWrapper
   /** If the object can be edited by the user, isEditable() should be overridden to return true.
       edit() should then create a window and allow the user to edit the object. */
   
+  @Override
   public boolean isEditable()
   {
     return true;
   }
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ExternalObjectEditingWindow(parent, this, info, cb);
@@ -221,6 +230,7 @@ public class ExternalObject extends ObjectWrapper
       it makes no sense to assign a texture (curves, lights, etc.) should override this
       method to return false. */
   
+  @Override
   public boolean canSetTexture()
   {
     return false;
@@ -230,6 +240,7 @@ public class ExternalObject extends ObjectWrapper
       implementation will give the correct result for most objects, but subclasses
       can override this if necessary. */
   
+  @Override
   public boolean canSetMaterial()
   {
     return false;
@@ -237,6 +248,7 @@ public class ExternalObject extends ObjectWrapper
   
   /** Determine whether the user should be allowed to convert this object to an Actor. */
   
+  @Override
   public boolean canConvertToActor()
   {
     return false;
@@ -244,6 +256,7 @@ public class ExternalObject extends ObjectWrapper
 
   /** The following method writes the object's data to an output stream. */
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -281,7 +294,7 @@ public class ExternalObject extends ObjectWrapper
     String externalPathParts[] = externalPath.split(splitExpr);
     int numCommon;
     for (numCommon = 0; numCommon < scenePathParts.length && numCommon < externalPathParts.length && scenePathParts[numCommon].equals(externalPathParts[numCommon]); numCommon++);
-    StringBuffer relPath = new StringBuffer();
+    StringBuilder relPath = new StringBuilder();
     for (int i = numCommon; i < scenePathParts.length; i++)
       relPath.append("..").append(File.separator);
     for (int i = numCommon; i < externalPathParts.length; i++)
@@ -323,30 +336,36 @@ public class ExternalObject extends ObjectWrapper
       this.objects = objects;
     }
 
+    @Override
     protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
     {
       return Collections.enumeration(objects);
     }
 
+    @Override
     public Object3D duplicate()
     {
       return new ExternalObjectCollection(objects);
     }
 
+    @Override
     public void copyObject(Object3D obj)
     {
       objects = ((ExternalObjectCollection) obj).objects;
     }
 
+    @Override
     public void setSize(double xsize, double ysize, double zsize)
     {
     }
 
+    @Override
     public Keyframe getPoseKeyframe()
     {
       return null;
     }
 
+    @Override
     public void applyPoseKeyframe(Keyframe k)
     {
     }

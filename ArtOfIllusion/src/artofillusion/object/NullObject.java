@@ -51,15 +51,18 @@ public class NullObject extends Object3D
   {
   }
   
+  @Override
   public Object3D duplicate()
   {
     return new NullObject();
   }
   
+  @Override
   public void copyObject(Object3D obj)
   {
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -67,20 +70,24 @@ public class NullObject extends Object3D
 
   /* A NullObject is always drawn the same size. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
   
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
 
+  @Override
   public boolean isEditable()
   {
     return false;
@@ -99,6 +106,7 @@ public class NullObject extends Object3D
       throw new InvalidObjectException("");
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -108,6 +116,7 @@ public class NullObject extends Object3D
   
   /* Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new NullKeyframe();
@@ -115,6 +124,7 @@ public class NullObject extends Object3D
   
   /* Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
   }

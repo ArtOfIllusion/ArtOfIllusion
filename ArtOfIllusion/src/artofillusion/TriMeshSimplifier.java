@@ -112,6 +112,7 @@ public class TriMeshSimplifier implements Runnable
       createDialog(fr);
       new Thread(this).start();
       Thread update = new Thread() {
+        @Override
         public void run()
         {
           try
@@ -132,6 +133,7 @@ public class TriMeshSimplifier implements Runnable
     }
   }
   
+  @Override
   public void run()
   {
     doSimplification();

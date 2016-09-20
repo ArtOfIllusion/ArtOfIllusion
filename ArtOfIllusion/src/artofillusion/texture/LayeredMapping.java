@@ -103,6 +103,7 @@ public class LayeredMapping extends TextureMapping
     
   /** Get the list of texture parameters. */
   
+  @Override
   public TextureParameter[] getParameters()
   {
     Vector<TextureParameter> param = new Vector<TextureParameter>();
@@ -364,6 +365,7 @@ public class LayeredMapping extends TextureMapping
 
   /** This form of writeToFile() is never used, and should never be called. */
 
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     throw new IllegalStateException();
@@ -374,6 +376,7 @@ public class LayeredMapping extends TextureMapping
     return "Layered";
   }
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     return new LayeredTriangle(v1, v2, v3, n1, n2, n3, vert[v1].x, vert[v1].y, vert[v1].z, 
@@ -383,6 +386,7 @@ public class LayeredMapping extends TextureMapping
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
   
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     LayeredTriangle lt = (LayeredTriangle) tri;
@@ -405,6 +409,7 @@ public class LayeredMapping extends TextureMapping
   
   /** Determine the surface properties by adding up the properties of all of the layers. */
   
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double t, double param[])
   {
     float rt = 1.0f, gt = 1.0f, bt = 1.0f;
@@ -525,6 +530,7 @@ public class LayeredMapping extends TextureMapping
 
   /** Determine the transparency by adding up all of the layers. */
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double t, double param[])
   {
     float rt = 1.0f, gt = 1.0f, bt = 1.0f;
@@ -563,6 +569,7 @@ public class LayeredMapping extends TextureMapping
   
   /** Determine the displacement height by adding up all of the layers. */
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double t, double param[])
   {
     double ft = 1.0, height = 0.0, temp;
@@ -597,11 +604,13 @@ public class LayeredMapping extends TextureMapping
 
   /** Get the LayeredTexture object this mapping is associated with */
   
+  @Override
   public Texture getTexture()
   {
     return theTexture;
   }
 
+  @Override
   public Object3D getObject()
   {
     return theObject;
@@ -609,6 +618,7 @@ public class LayeredMapping extends TextureMapping
 
   /** Create a new TextureMapping which is identical to this one. */
   
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(theObject, theTexture);
@@ -617,6 +627,7 @@ public class LayeredMapping extends TextureMapping
   /** Create a new TextureMapping which is identical to this one, but for a
      different Texture. */
   
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     LayeredMapping map = new LayeredMapping(obj, null);
@@ -640,6 +651,7 @@ public class LayeredMapping extends TextureMapping
   
   /** Make this mapping identical to another one. */
   
+  @Override
   public void copy(TextureMapping theMap)
   {
     LayeredMapping map = (LayeredMapping) theMap;
@@ -662,6 +674,7 @@ public class LayeredMapping extends TextureMapping
   /** There is no editing panel for layered mappings, since this is handled directly by the
       object texture dialog. */
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return null;

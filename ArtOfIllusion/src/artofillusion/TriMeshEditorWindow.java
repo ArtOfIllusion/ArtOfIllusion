@@ -24,7 +24,7 @@ import java.util.*;
 
 /** The TriMeshEditorWindow class represents the window for editing TriangleMesh objects. */
 
-public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWindow
+public class TriMeshEditorWindow extends MeshEditorWindow
 {
   private ToolPalette modes;
   private BMenuItem editMenuItem[], selectMenuItem[], meshMenuItem[], skeletonMenuItem[];
@@ -212,6 +212,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   /** Load all the preferences into memory. */
 
+  @Override
   protected void loadPreferences()
   {
     super.loadPreferences();
@@ -222,6 +223,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   /** Save user settings that should be persistent between sessions. */
 
+  @Override
   protected void savePreferences()
   {
     super.savePreferences();
@@ -232,6 +234,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   /** Get the object being edited in this window. */
   
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
@@ -245,6 +248,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     objInfo.clearCachedMeshes();
   }
   
+  @Override
   public void setMesh(Mesh mesh)
   {
     TriangleMesh obj = (TriangleMesh) mesh;
@@ -291,6 +295,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   /** When the object changes, we need to rebuild the quad display. */
   
+  @Override
   public void objectChanged()
   {
     super.objectChanged();
@@ -299,6 +304,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   /* EditingWindow methods. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     if (tool instanceof GenericTool)
@@ -318,6 +324,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     }
   }
 
+  @Override
   public void updateImage()
   {
     if (lastSelectedJoint != ((MeshViewer) theView[currentView]).getSelectedJoint())
@@ -325,6 +332,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     super.updateImage();
   }
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -518,6 +526,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   /** Get the extra texture parameter which was added to the mesh to keep track of
       face indices in the editor. */
 
+  @Override
   public TextureParameter getFaceIndexParameter()
   {
     return faceIndexParam;
@@ -526,6 +535,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   /** Get the extra texture parameter which was added to the mesh to keep track of
       joint weighting. */
 
+  @Override
   public TextureParameter getJointWeightParam()
   {
     return jointWeightParam;
@@ -707,6 +717,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     return divMesh;
   }
 
+  @Override
   protected void doOk()
   {
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
@@ -821,6 +832,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
           this.score = score;
         }
         
+        @Override
         public int compareTo(Object o)
         {
           double diff = score-((EdgeScore) o).score;
@@ -879,7 +891,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         score += (dot > 0.0 ? dot : -dot);
         scoreVec.addElement(new EdgeScore(i, score));
       }
-    if (scoreVec.size() == 0)
+    if (scoreVec.isEmpty())
       return;
     
     // Sort them.
@@ -904,6 +916,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   /** When the selection mode changes, do our best to convert the old selection to the 
       new mode. */
   
+  @Override
   public void setSelectionMode(int mode)
   {
     TriangleMesh mesh = (TriangleMesh) getObject().getObject();
@@ -974,11 +987,13 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       modes.selectTool(modes.getTool(mode));
   }
   
+  @Override
   public int getSelectionMode()
   {
     return selectMode;
   }
   
+  @Override
   public void setSelection(boolean sel[])
   {
     selected = sel;
@@ -991,11 +1006,13 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   /** Get an array of flags telling which parts of the mesh are currently selected.  Depending
       on the current selection mode, these flags may correspond to vertices, edges, or faces. */
   
+  @Override
   public boolean[] getSelection()
   {
     return selected;
   }
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (maxDistance != getTensionDistance())
@@ -1053,6 +1070,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     selectionDistance = dist;
   }
   
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -1117,6 +1135,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   /** This is overridden to update jointWeightParam after weights are changed. */
 
+  @Override
   public void setPointsCommand()
   {
     super.setPointsCommand();
@@ -1273,6 +1292,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   
   /** Delete the selected points, edges, or faces from the mesh. */
   
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -1288,8 +1308,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     
     if (selectMode == POINT_MODE)
     {
-      for (int i = 0; i < deleteVert.length; i++)
-        deleteVert[i] = selected[i];
+        System.arraycopy(selected, 0, deleteVert, 0, deleteVert.length);
       for (int i = 0; i < deleteFace.length; i++)
         deleteFace[i] = (deleteVert[face[i].v1] || deleteVert[face[i].v2] || deleteVert[face[i].v3]);
     }
@@ -1305,8 +1324,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     }
     else
     {
-      for (int i = 0; i < deleteFace.length; i++)
-        deleteFace[i] = selected[i];
+        System.arraycopy(selected, 0, deleteFace, 0, deleteFace.length);
       for (int i = 0; i < deleteVert.length; i++)
         deleteVert[i] = true;
       for (int i = 0; i < deleteFace.length; i++)
@@ -1802,8 +1820,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       {
         double oldval[] = ((VertexParameterValue) oldParamVal[i]).getValue();
         double newval[] = new double [newvert.length];
-        for (int j = 0; j < oldval.length; j++)
-          newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         for (int j = oldval.length; j < newval.length; j++)
           newval[j] = param[i].defaultVal;
         newParamVal[i] = new VertexParameterValue(newval);
@@ -1812,8 +1829,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       {
         double oldval[] = ((FaceParameterValue) oldParamVal[i]).getValue();
         double newval[] = new double [newface.length];
-        for (int j = 0; j < oldval.length; j++)
-          newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         for (int j = oldval.length; j < newval.length; j++)
           newval[j] = param[i].defaultVal;
         newParamVal[i] = new FaceParameterValue(newval);
@@ -2107,8 +2123,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       {
         double oldval[] = ((FaceParameterValue) oldParamVal[i]).getValue();
         double newval[] = new double [newface.length];
-        for (int j = 0; j < oldval.length; j++)
-          newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         if (param[i] == getFaceIndexParameter()) // The parameter added by the editor window to record face indices
           for (int j = oldval.length; j < newval.length; j++)
             newval[j] = j;
@@ -2166,7 +2181,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     for (int i = 0; i < selected.length; i++)
       if (selected[i])
         faces.addElement(i);
-    if (faces.size() == 0)
+    if (faces.isEmpty())
       return;
     for (Integer face : faces)
     {
@@ -2293,7 +2308,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     for (i = 0; i < selected.length; i++)
       if (selected[i])
         edges.addElement(ed[i]);
-    if (edges.size() == 0)
+    if (edges.isEmpty())
       return;
     Edge first = edges.elementAt(0), last = first;
     Vector<Edge> ordered = new Vector<Edge>();
@@ -2391,6 +2406,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       void processEvent()
       {
         processor.addEvent(new Runnable() {
+          @Override
           public void run()
           {
             float s = (float) smoothness.getValue();
@@ -2449,6 +2465,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
   
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];

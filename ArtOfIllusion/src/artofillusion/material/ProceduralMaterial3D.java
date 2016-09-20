@@ -62,6 +62,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   private void initThreadLocal()
   {
     renderingProc = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         Procedure localProc = createProcedure();
@@ -76,6 +77,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     return "Procedural";
   }
   
+  @Override
   public double getStepSize()
   {
     return stepSize;
@@ -86,6 +88,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     stepSize = step;
   }
 
+  @Override
   public void getMaterialSpec(MaterialSpec spec, double x, double y, double z, double xsize, double ysize, double zsize, double t)
   {
     Procedure pr = (Procedure) renderingProc.get();
@@ -139,6 +142,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
 
   /** Determine whether this Material uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
     Module modules[] = proc.getModules();
@@ -151,17 +155,20 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** The material scatters light if there is anything connected to the scattering output. */
 
+  @Override
   public boolean isScattering()
   {
     OutputModule output[] = proc.getOutputModules();
     return output[4].inputConnected(0);
   }
 
+  @Override
   public boolean castsShadows()
   {
     return shadows;
   }
 
+  @Override
   public Material duplicate()
   {
     ProceduralMaterial3D mat = new ProceduralMaterial3D();
@@ -175,6 +182,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     return mat;
   }
   
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
     new ProcedureEditor(proc, this, sc);
@@ -245,6 +253,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     proc.addLink(new Link(module.getOutputPorts()[0], output.getInputPorts()[0]));
   }
   
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);
@@ -258,6 +267,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
 
   /** Get the title of the procedure's editing window. */
   
+  @Override
   public String getWindowTitle()
   {
     return "Procedural Material";
@@ -265,6 +275,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Create an object which displays a preview of the procedure. */
   
+  @Override
   public Object getPreview(ProcedureEditor editor)
   {
     BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
@@ -282,6 +293,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
       {
         processor.addEvent(new Runnable()
         {
+                  @Override
           public void run()
           {
             preview.getScene().setTime(value.getValue());
@@ -303,6 +315,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Update the display of the preview. */
   
+  @Override
   public void updatePreview(Object preview)
   {
     initThreadLocal();
@@ -311,6 +324,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Dispose of the preview object when the editor is closed. */
   
+  @Override
   public void disposePreview(Object preview)
   {
     UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
@@ -318,6 +332,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Determine whether the procedure may contain View Angle modules. */
   
+  @Override
   public boolean allowViewAngle()
   {
     return false;
@@ -325,6 +340,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Determine whether the procedure may contain Parameter modules. */
   
+  @Override
   public boolean allowParameters()
   {
     return false;
@@ -332,6 +348,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Determine whether the procedure may be renamed. */
   
+  @Override
   public boolean canEditName()
   {
     return true;
@@ -339,6 +356,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** This is called when the user clicks OK in the procedure editor. */
   
+  @Override
   public void acceptEdits(ProcedureEditor editor)
   {
     initThreadLocal();
@@ -349,6 +367,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   
   /** Display the Properties dialog. */
   
+  @Override
   public void editProperties(ProcedureEditor editor)
   {
     ValueField refractField = new ValueField(indexOfRefraction(), ValueField.POSITIVE);

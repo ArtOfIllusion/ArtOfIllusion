@@ -15,12 +15,15 @@ import artofillusion.math.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This represents a procedure for calculating a set of values (typically, the parameters
     for a texture or material). */
 
 public class Procedure
 {
+    private static final Logger logger = Logger.getLogger(Procedure.class.getName());
   OutputModule output[];
   Module module[];
   Link link[];
@@ -71,8 +74,7 @@ public class Procedure
   public void addModule(Module mod)
   {
     Module newmod[] = new Module [module.length+1];
-    for (int i = 0; i < module.length; i++)
-      newmod[i] = module[i];
+        System.arraycopy(module, 0, newmod, 0, module.length);
     newmod[module.length] = mod;
     module = newmod;
   }
@@ -102,8 +104,7 @@ public class Procedure
   public void addLink(Link ln)
   {
     Link newlink[] = new Link [link.length+1];
-    for (int i = 0; i < link.length; i++)
-      newlink[i] = link[i];
+        System.arraycopy(link, 0, newlink, 0, link.length);
     newlink[link.length] = ln;
     link = newlink;
     ln.to.getModule().setInput(ln.to, ln.from);
@@ -253,12 +254,12 @@ public class Procedure
       }
     catch (InvocationTargetException ex)
       {
-        ex.getTargetException().printStackTrace();
-        throw new IOException();
+          logger.log(Level.INFO, "Exception", ex.getTargetException());
+            throw new IOException();
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
     link = new Link [in.readInt()];

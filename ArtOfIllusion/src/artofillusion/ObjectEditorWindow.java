@@ -99,10 +99,12 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     for (int i = 0; i < theView.length; i++)
     {
       viewPanel[i] = new BorderContainer() {
+        @Override
         public Dimension getPreferredSize()
         {
           return new Dimension(0, 0);
         }
+        @Override
         public Dimension getMinimumSize()
         {
           return new Dimension(0, 0);
@@ -200,6 +202,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
 
   /* EditingWindow methods. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     for (int i = 0; i < theView.length; i++)
@@ -207,27 +210,32 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     currentTool = tool;
   }
 
+  @Override
   public boolean confirmClose()
   {
     return true;
   }
 
+  @Override
   public void setHelpText(String text)
   {
     helpText.setText(text);
   }
 
+  @Override
   public BFrame getFrame()
   {
     return this;
   }
 
+  @Override
   public void updateImage()
   {
     for (ViewerCanvas view : theView)
       view.repaint();
   }
 
+  @Override
   public void setUndoRecord(UndoRecord command)
   {
     undoStack.addRecord(command);
@@ -235,6 +243,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     updateMenus();
   }
 
+  @Override
   public void setModified()
   {
     dispatchSceneChangedEvent();
@@ -249,6 +258,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     sceneChangePending = true;
     EventQueue.invokeLater(new Runnable()
     {
+      @Override
       public void run()
       {
         sceneChangePending = false;
@@ -269,6 +279,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
 
   /** Get the currently selected ViewerCanvas for this window. */
 
+  @Override
   public ViewerCanvas getView()
   {
     return theView[currentView];
@@ -296,6 +307,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
 
   /** Get the ToolPalette for this window. */
 
+  @Override
   public ToolPalette getToolPalette()
   {
     return tools;
@@ -303,6 +315,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
 
   /** Get all ViewerCanvases in this window. */
 
+  @Override
   public ViewerCanvas[] getAllViews()
   {
     return new ViewerCanvas [] {theView[0], theView[1], theView[2], theView[3]};
@@ -433,6 +446,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
    * This is overridden to notify all plugins when the window is shown for the first time.
    */
 
+  @Override
   public void setVisible(boolean visible)
   {
     if (visible && !hasNotifiedPlugins)
@@ -449,6 +463,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
    * This is overridden to notify all plugins when the window is closed.
    */
 
+  @Override
   public void dispose()
   {
     super.dispose();

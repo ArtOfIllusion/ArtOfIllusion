@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by François Guillet
+/* Copyright (C) 2007 by FranÔøΩois Guillet
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -103,6 +103,7 @@ public class DefaultToolButton extends ToolButton
         width = icon.getIconWidth();
     }
 
+    @Override
     public void paint(Graphics2D g) {
         switch(state) {
         case NORMAL_STATE:
@@ -144,7 +145,7 @@ public class DefaultToolButton extends ToolButton
       // can default the macro from other attributes
       String macro = style.attributes.get(type + ".icon");
       if (macro == null || macro.length() == 0) {
-          StringBuffer sb = new StringBuffer(64);
+          StringBuilder sb = new StringBuilder(64);
 
           String att = style.attributes.get(type + ".background");
           if (att == null) att = style.attributes.get("background");

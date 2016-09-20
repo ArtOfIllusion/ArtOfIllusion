@@ -15,7 +15,6 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.text.*;
 import java.util.*;
 
 /** This is the Widget which displays all of the tracks in the score. */
@@ -61,6 +60,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   
   /** Set the starting time to display. */
   
+  @Override
   public void setStartTime(double time)
   {
     start = time;
@@ -68,6 +68,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   
   /** Set the number of pixels per unit time. */
   
+  @Override
   public void setScale(double s)
   {
     scale = s;
@@ -75,6 +76,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   
   /** Set the number of subdivisions per unit time. */
   
+  @Override
   public void setSubdivisions(int s)
   {
     subdivisions = s;
@@ -82,6 +84,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   
   /*8 Set the y offset (for vertically scrolling the panel). */
   
+  @Override
   public void setYOffset(int offset)
   {
     yoffset = offset;
@@ -89,6 +92,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   
   /*8 Add a marker to the display. */
   
+  @Override
   public void addMarker(Marker m)
   {
     markers.addElement(m);
@@ -96,6 +100,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
 
   /*8 Set the mode (select-and-move or scroll-and-scale) for this display. */
   
+  @Override
   public void setMode(int m)
   {
     mode = m;

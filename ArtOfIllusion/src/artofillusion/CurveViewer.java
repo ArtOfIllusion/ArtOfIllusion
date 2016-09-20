@@ -30,6 +30,7 @@ public class CurveViewer extends MeshViewer
     super(window, p);
   }
 
+  @Override
   protected void drawObject()
   {
     if (!showMesh)
@@ -59,6 +60,7 @@ public class CurveViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     int i, j, x, y;
@@ -153,7 +155,7 @@ public class CurveViewer extends MeshViewer
               selected[i] = false;
           selected[j] = true;
           ((CurveEditorWindow) controller).findSelectionDistance();
-          currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, new Integer(controller.getSelectionMode()), oldSelection}));
+          currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
           controller.setSelection(selected);
           activeTool.getWindow().updateMenus();
         }
@@ -176,6 +178,7 @@ public class CurveViewer extends MeshViewer
     }
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -189,6 +192,7 @@ public class CurveViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     int i, x, y;
@@ -241,7 +245,7 @@ public class CurveViewer extends MeshViewer
     for (int k = 0; k < selected.length; k++)
       if (selected[k] != oldSelection[k])
       {
-        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, new Integer(controller.getSelectionMode()), oldSelection}));
+        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
         break;
       }
     controller.setSelection(selected);

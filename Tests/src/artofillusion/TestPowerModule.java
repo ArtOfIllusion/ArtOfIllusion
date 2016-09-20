@@ -20,6 +20,7 @@ import java.util.*;
 
 public class TestPowerModule extends TestCase
 {
+  @Override
   protected void setUp() throws Exception
   {
     Translate.setLocale(Locale.US);

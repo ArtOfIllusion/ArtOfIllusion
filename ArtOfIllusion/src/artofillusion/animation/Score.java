@@ -21,12 +21,16 @@ import java.awt.*;
 import java.lang.reflect.*;
 import java.text.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is a Widget which displays all the tracks for objects in a scene, and shows
     where their keyframes are. */
 
 public class Score extends BorderContainer implements EditingWindow, PopupMenuManager
 {
+    
+    private static final Logger logger = Logger.getLogger(Score.class.getName());
   LayoutWindow window;
   TreeList theList;
   TimeAxis theAxis;
@@ -156,6 +160,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   
   /** Display the popup menu. */
 
+  @Override
   public void showPopupMenu(Widget w, int x, int y)
   {
     Track selTrack[] = getSelectedTracks();
@@ -185,6 +190,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   
   /** Allow the score to be fully hidden. */
   
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(0, 0);
@@ -727,6 +733,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   
   /** Make sure the scrollbar gets adjusted when the score is resized. */
 
+  @Override
   public void layoutChildren()
   {
 //    theAxis.setSize(theAxis.getSize().width, theAxis.getPreferredSize().height); // Workaround for layout manager bug.
@@ -811,7 +818,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               ObjectInfo info = (ObjectInfo) tr.getParent();
               for (int j = 0; j < info.getTracks().length; j++)
                 if (info.getTracks()[j] == tr)
-                  undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, new Integer(j), tr.duplicate(info)});
+                  undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, j, tr.duplicate(info)});
             }
           Keyframe k = tr.setKeyframe(time, theScene);
           if (k != null)
@@ -853,7 +860,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               continue;
             if (tr instanceof RotationTrack && rotx && roty && rotz)
               continue;
-            undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, new Integer(j), tr.duplicate(info)});
+            undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, j, tr.duplicate(info)});
             Keyframe k = tr.setKeyframeIfModified(time, theScene);
             if (k != null)
               {
@@ -989,8 +996,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     else
       {
         args = new Object [extraArgs.length+1];
-        for (int i = 0; i < extraArgs.length; i++)
-          args[i+1] = extraArgs[i];
+        System.arraycopy(extraArgs, 0, args, 1, extraArgs.length);
       }
     Constructor con[] = trackClass.getConstructors();
     int which;
@@ -1025,7 +1031,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     window.setUndoRecord(undo);
     if (deselectOthers)
@@ -1135,16 +1141,19 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   /** EditingWindow methods.  Most of these either do nothing, or simply call through to 
       the corresponding methods of the LayoutWindow the Score is in. */
 
+  @Override
   public boolean confirmClose()
   {
     return true;
   }
 
+  @Override
   public ToolPalette getToolPalette()
   {
     return modeTools;
   }
 
+  @Override
   public void setTool(EditingTool tool)
   {
     if (view != viewTools.getSelection())
@@ -1161,44 +1170,53 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       }
   }
   
+  @Override
   public void setHelpText(String text)
   {
     helpText.setText(text);
   }
   
+  @Override
   public BFrame getFrame()
   {
     return window;
   }
 
+  @Override
   public void updateImage()
   {
   }
 
+  @Override
   public void updateMenus()
   {
   }
   
+  @Override
   public void setUndoRecord(UndoRecord command)
   {
     window.setUndoRecord(command);
   }
 
+  @Override
   public void setModified()
   {
     window.setModified();
   }
 
+  @Override
   public Scene getScene()
   {
     return window.getScene();
   }
   
+  @Override
   public ViewerCanvas getView()
   {
     return null;
   }
 
+  @Override
   public ViewerCanvas[] getAllViews()
   {
     return null;

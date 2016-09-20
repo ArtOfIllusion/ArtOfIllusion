@@ -13,6 +13,8 @@ package artofillusion.image;
 import artofillusion.math.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** ImageMap represents an image which can be used for texturing an object.  The number of
 components can range from one (monochrome) to four (ARGB).  It also provides a scaled down
@@ -22,6 +24,8 @@ This is an abstract class.  Subclasses implement specific ways of storing images
 
 public abstract class ImageMap
 {
+    private static final Logger logger = Logger.getLogger(ImageMap.class.getName());
+    
   private int id;
   
   public static final int PREVIEW_WIDTH = 50;
@@ -47,7 +51,7 @@ public abstract class ImageMap
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
           }
       }
     if (name.endsWith(".svg"))

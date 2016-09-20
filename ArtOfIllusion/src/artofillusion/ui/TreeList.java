@@ -77,12 +77,14 @@ public class TreeList extends CustomWidget
     addEventLink(RepaintEvent.class, this, "paint");
   }
 
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension superPref = super.getPreferredSize();
     return new Dimension(Math.max(superPref.width, maxRowWidth), Math.max(superPref.height, rowHeight*showing.size()));
   }
   
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(maxRowWidth, rowHeight*showing.size());
@@ -348,7 +350,7 @@ public class TreeList extends CustomWidget
     invalidateSize();
     if (getComponent().isDisplayable())
       getParent().layoutChildren();
-    if (selected.size() == 0)
+    if (selected.isEmpty())
       lastClickRow = -1;
     else if (selected.size() == 1)
       lastClickRow = showing.indexOf(selected.get(0));
@@ -362,7 +364,7 @@ public class TreeList extends CustomWidget
       if (expanded)
       {
         showing.addElement(child);
-        indent.addElement(new Integer(currentIndent));
+        indent.addElement(currentIndent);
       }
       if (child.isSelected())
         selected.addElement(child);
@@ -391,7 +393,7 @@ public class TreeList extends CustomWidget
     for (int i = 0; i < showing.size(); i++)
     {
       TreeElement el = (TreeElement) showing.elementAt(i);
-      int x = ((Integer) indent.elementAt(i)).intValue()*INDENT_WIDTH;
+      int x = indent.elementAt(i)*INDENT_WIDTH;
       if (el.getNumChildren() > 0)
       {
         // Draw the handle to collapse or expand the hierarchy.
@@ -457,7 +459,7 @@ public class TreeList extends CustomWidget
     dragStart = lastDrag = row;
     TreeElement el = (TreeElement) showing.elementAt(row);
     int i = pos.x/INDENT_WIDTH;
-    int ind = ((Integer) indent.elementAt(row)).intValue();
+    int ind = indent.elementAt(row);
     if (i == ind && el.getNumChildren() > 0)
     {
       // Expand or collapse this item.
@@ -537,7 +539,7 @@ public class TreeList extends CustomWidget
     {
       // The selected elements are being dragged.
       
-      if (selected.size() == 0)
+      if (selected.isEmpty())
         return;
       boolean above = pos.y - row*rowHeight < rowHeight/2;
       if (row >= showing.size())
@@ -568,7 +570,7 @@ public class TreeList extends CustomWidget
       {
         TreeElement el = (TreeElement) showing.elementAt(row);
         parent = el;
-        lastIndent = ((Integer) indent.elementAt(row)).intValue();
+        lastIndent = indent.elementAt(row);
         if (above)
         {
           parent = el.getParent();
@@ -743,7 +745,7 @@ public class TreeList extends CustomWidget
     int row = pos.y/rowHeight, i = pos.x/INDENT_WIDTH;
     if (row >= showing.size())
       return;
-    int ind = ((Integer) indent.elementAt(row)).intValue();
+    int ind = indent.elementAt(row);
     TreeElement el = (TreeElement) showing.elementAt(row);
     if (i < ind)
       return;
@@ -797,6 +799,7 @@ public class TreeList extends CustomWidget
       return elem;
     }
     
+    @Override
     public Widget getWidget()
     {
       return TreeList.this;

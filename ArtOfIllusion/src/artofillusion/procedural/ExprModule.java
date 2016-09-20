@@ -18,12 +18,13 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*; 
 import java.util.*; 
-import java.lang.*; 
 import java.lang.reflect.*; 
 import java.io.*; 
 import artofillusion.*; 
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
  
  
 class debug { 
@@ -155,6 +156,7 @@ class Token {
     public boolean equals (char c) { 
         return ty == c; 
     } 
+    @Override
     public String toString () { 
         return "type: " + ty + " strValue: " + strValue + " numValue: " + numValue; 
     } 
@@ -162,7 +164,7 @@ class Token {
     {
       if (ty == END)
         return "end of expression";
-      return new Character(ty).toString();
+      return String.valueOf(ty);
     }
 } 
  
@@ -231,6 +233,8 @@ class ModuleLoader {
 public class ExprModule extends Module 
 { 
  
+    private static final Logger logger = Logger.getLogger(ExprModule.class.getName());
+    
     Hashtable varTable; 
     Module [] inputs; 
     Module [] myModules; 
@@ -269,6 +273,7 @@ public class ExprModule extends Module
         layout ();
     } 
  
+    @Override
     public final void init(PointInfo p) { 
         point = p; 
         for (int i = myModules.length-1; i >= 0; i--) { 
@@ -279,16 +284,20 @@ public class ExprModule extends Module
         } 
     } 
     int a; 
+    @Override
     public final double getAverageValue (int which, double blur) { 
         return compiled.module.getAverageValue (compiled.oport, blur); 
     } 
+    @Override
     public final double getValueError (int which, double blur) { 
         return compiled.module.getValueError (compiled.oport, blur); 
     } 
+    @Override
     public final void getValueGradient (int which, Vec3 grad, double blur) { 
         compiled.module.getValueGradient (compiled.oport, grad, blur); 
     } 
  
+    @Override
     public void setInput(IOPort which, IOPort port) { 
         super.setInput (which, port); 
         inputs = linkFrom; 
@@ -299,6 +308,7 @@ public class ExprModule extends Module
     /* Write out the expression */ 
     /* Allow the user to set the parameters. */ 
    
+    @Override
     public boolean edit(final ProcedureEditor editor, Scene theScene)
     { 
         final BTextField exprField = new BTextField(expr, 40);
@@ -341,14 +351,16 @@ public class ExprModule extends Module
    
     /* Create a duplicate of this module. */ 
    
+    @Override
     public Module duplicate() 
     { 
         ExprModule mod = new ExprModule(new Point(bounds.x, bounds.y)); 
      
-        mod.setExpr (new String (expr));
+        mod.setExpr(expr);
         return mod;
     } 
  
+    @Override
     public void writeToStream(DataOutputStream out, Scene theScene) throws IOException 
     { 
         out.writeUTF(expr); 
@@ -363,6 +375,7 @@ public class ExprModule extends Module
  
     /* Read in the expression. */ 
    
+    @Override
     public void readFromStream(DataInputStream in, Scene theScene) throws IOException 
     { 
         inputs = linkFrom;
@@ -378,9 +391,7 @@ public class ExprModule extends Module
         if (tokIdx >= tokens.length) { 
             Token [] oldtokens = tokens; 
             tokens = new Token [tokens.length * 2]; 
-            for (int i = 0; i < tokens.length; i++) { 
-                tokens [i] = oldtokens [i]; 
-            }        
+            System.arraycopy(oldtokens, 0, tokens, 0, tokens.length);        
         } 
         tokens [tokIdx++] = tok; 
         currTok = tok; 
@@ -410,7 +421,7 @@ public class ExprModule extends Module
                 case '0': case '1': case '2': case '3': case '4':  
                 case '5': case '6': case '7': case '8': case '9':  
                     addToken (new Token (Token.NUMBER)); 
-                    currTok.numValue = new Double (tok).doubleValue (); 
+                    currTok.numValue = new Double (tok); 
                     break; 
                 default: 
                     addToken (new Token (Token.VARIABLE)); 
@@ -507,8 +518,8 @@ public class ExprModule extends Module
             debug.print ("I don't want to add a null module to the module list at position " + moduleVec.size()); 
             try { 
                 m.init (null); //error! 
-            } catch (Exception e) { 
-                e.printStackTrace (); 
+            } catch (Exception ex) { 
+                logger.log(Level.INFO, "Exception", ex);
             } 
  
         } else if (!moduleVec.contains(m)) { 

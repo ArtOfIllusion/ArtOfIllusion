@@ -103,6 +103,7 @@ public class FunctionModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
@@ -229,6 +230,7 @@ public class FunctionModule extends Module
 
   /* Calculate the output value. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -250,6 +252,7 @@ public class FunctionModule extends Module
   
   /* Calculate the error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (errorOk && blur == lastBlur)
@@ -289,6 +292,7 @@ public class FunctionModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!errorOk || blur != lastBlur)
@@ -314,12 +318,14 @@ public class FunctionModule extends Module
   
   /* Calculate the size of the module. */
   
+  @Override
   public void calcSize()
   {
     bounds.width = 40+IOPort.SIZE*2;
     bounds.height = 25+IOPort.SIZE*2;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     Rectangle r = new Rectangle(bounds.x+IOPort.SIZE, bounds.y+IOPort.SIZE, bounds.width-2*IOPort.SIZE, bounds.height-2*IOPort.SIZE);
@@ -376,6 +382,7 @@ public class FunctionModule extends Module
 
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     FunctionModule mod = new FunctionModule(new Point(bounds.x, bounds.y));
@@ -395,6 +402,7 @@ public class FunctionModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(x.length);
@@ -409,6 +417,7 @@ public class FunctionModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int num = in.readInt();
@@ -426,6 +435,7 @@ public class FunctionModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     EditingDialog dlg = new EditingDialog(editor);
@@ -472,6 +482,7 @@ public class FunctionModule extends Module
       row.add(new BLabel("X:"));
       row.add(xField = new ValueField(Double.NaN, ValueField.NONE));
       xField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= 0.0 && val <= 1.0);

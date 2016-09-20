@@ -34,27 +34,32 @@ public class RotateViewTool extends EditingTool
     initButton("rotateView");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("rotateViewTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean hilightSelection()
   {
       return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("rotateViewTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -71,6 +76,7 @@ public class RotateViewTool extends EditingTool
       rotationCenter = view.getDefaultRotationCenter();
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     // Compute the vertical axis to rotate around.
@@ -115,6 +121,7 @@ public class RotateViewTool extends EditingTool
       }
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     mouseDragged(e, view);

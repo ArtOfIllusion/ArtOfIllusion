@@ -104,6 +104,7 @@ public class SphericalMapping extends NonlinearMapping2D
 
   /* Methods from TextureMapping. */
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     Vec3 c1 = toLocal.timesDirection(vert[v1]), c2 = toLocal.timesDirection(vert[v2]), c3 = toLocal.timesDirection(vert[v3]);
@@ -114,11 +115,13 @@ public class SphericalMapping extends NonlinearMapping2D
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
 
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     ((Nonlinear2DTriangle) tri).setParameters(p1, p2, p3, mesh);
   }
   
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double time, double param[])
   {
     double px, py, pz, x, y, z, theta, phi, r1, r2, s, t;
@@ -166,6 +169,7 @@ public class SphericalMapping extends NonlinearMapping2D
       }
   }
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double time, double param[])
   {
     double px, py, pz, x, y, z, theta, phi, r1, r2;
@@ -195,6 +199,7 @@ public class SphericalMapping extends NonlinearMapping2D
     return texture.getDisplacement(theta*ax, phi*ay+dy, Math.abs(size*ax/r1), Math.abs(size*ay/r2), time, param);
   }
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double time, double param[])
   {
     double px, py, pz, x, y, z, theta, phi, r1, r2;
@@ -229,11 +234,13 @@ public class SphericalMapping extends NonlinearMapping2D
     texture.getTransparency(trans, theta*ax, phi*ay+dy, Math.abs(size*ax/r1), Math.abs(size*ay/r2), angle, time, param);
   }
 
+  @Override
   public Mat4 getPreTransform()
   {
     return toLocal;
   }
 
+  @Override
   public void getSpecIntermed(TextureSpec spec, double x, double y, double z, double size, double angle, double time, double param[])
   {
     double theta, phi, r1, r2, s, t;
@@ -258,6 +265,7 @@ public class SphericalMapping extends NonlinearMapping2D
       }
   }
 
+  @Override
   public void getTransIntermed(RGBColor trans, double x, double y, double z, double size, double angle, double time, double param[])
   {
     double theta, phi, r1, r2;
@@ -274,6 +282,7 @@ public class SphericalMapping extends NonlinearMapping2D
     texture.getTransparency(trans, theta*ax, phi*ay+dy, Math.abs(size*ax/r1), Math.abs(size*ay/r2), angle, time, param);
   }
 
+  @Override
   public double getDisplaceIntermed(double x, double y, double z, double size, double time, double param[])
   {
     double theta, phi, r1, r2;
@@ -293,6 +302,7 @@ public class SphericalMapping extends NonlinearMapping2D
   /** Given a Mesh to which this mapping has been applied, return the texture coordinates at
       each vertex. */
   
+  @Override
   public Vec2 [] findTextureCoordinates(Mesh mesh)
   {
     ParameterValue paramValue[] = mesh.getParameterValues();
@@ -339,11 +349,13 @@ public class SphericalMapping extends NonlinearMapping2D
     return uv;
   }
 
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(object, texture);
   }
 
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     SphericalMapping map = new SphericalMapping(obj, tex);
@@ -362,6 +374,7 @@ public class SphericalMapping extends NonlinearMapping2D
     return map;
   }
   
+  @Override
   public void copy(TextureMapping mapping)
   {
     SphericalMapping map = (SphericalMapping) mapping; 
@@ -383,6 +396,7 @@ public class SphericalMapping extends NonlinearMapping2D
      That includes the texture's parameters, and possibly parameters for the texture
      coordinates. */
   
+  @Override
   public TextureParameter [] getParameters()
   {
     if (!coordsFromParams)
@@ -409,6 +423,7 @@ public class SphericalMapping extends NonlinearMapping2D
     return p;
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
@@ -431,6 +446,7 @@ public class SphericalMapping extends NonlinearMapping2D
       setAppliesTo(in.readShort());
   }
   
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(1);

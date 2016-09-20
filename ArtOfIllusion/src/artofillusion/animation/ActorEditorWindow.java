@@ -338,6 +338,7 @@ public class ActorEditorWindow extends BDialog
       editID = id;
     }
 
+    @Override
     public void run()
     {
       int which = theObject.findPoseIndex(editID);
@@ -373,28 +374,33 @@ public class ActorEditorWindow extends BDialog
 
   private class CurrentPoseTableModel extends AbstractTableModel
   {
+    @Override
     public int getRowCount()
     {
       return currentPose.getNumGestures();
     }
 
+    @Override
     public int getColumnCount()
     {
       return 2;
     }
 
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex)
     {
       if (columnIndex == 0)
         return theObject.gestureName[theObject.findPoseIndex(currentPose.getGestureID(rowIndex))];
-      return new Double(currentPose.getGestureWeight(rowIndex));
+      return currentPose.getGestureWeight(rowIndex);
     }
 
+    @Override
     public String getColumnName(int column)
     {
       return (Translate.text(column == 0 ? "Gesture" : "Weight"));
     }
 
+    @Override
     public boolean isCellEditable(int rowIndex, int columnIndex)
     {
       return (columnIndex == 1);
@@ -415,13 +421,15 @@ public class ActorEditorWindow extends BDialog
       selector = (ValueSelector) getWidget();
     }
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
     {
-      selector.setValue(((Double) value).doubleValue());
+      selector.setValue(((Double) value));
       selector.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
       return this;
     }
 
+    @Override
     public void validate()
     {
       super.validate();
@@ -443,6 +451,7 @@ public class ActorEditorWindow extends BDialog
     {
       selector = new ValueSelector(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 0.005);
       component = new BuoyComponent(selector) {
+        @Override
         public void validate()
         {
           super.validate();
@@ -454,6 +463,7 @@ public class ActorEditorWindow extends BDialog
         void processEvent()
         {
           processor.addEvent(new Runnable() {
+            @Override
             public void run()
             {
               currentPose.weight[currentRow] = selector.getValue();
@@ -464,14 +474,16 @@ public class ActorEditorWindow extends BDialog
       });
     }
 
+    @Override
     public Object getCellEditorValue()
     {
-      return new Double(selector.getValue());
+      return selector.getValue();
     }
 
+    @Override
     public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
     {
-      selector.setValue(((Double) value).doubleValue());
+      selector.setValue(((Double) value));
       currentRow = row;
       return component;
     }

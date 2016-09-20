@@ -10,8 +10,6 @@
 
 package artofillusion.raster;
 
-import artofillusion.math.*;
-
 public class MaterialFragment extends TransparentFragment
 {
   private ObjectMaterialInfo material;
@@ -39,6 +37,7 @@ public class MaterialFragment extends TransparentFragment
    * Get the material.
    */
 
+  @Override
   public ObjectMaterialInfo getMaterialMapping()
   {
     return material;
@@ -48,11 +47,13 @@ public class MaterialFragment extends TransparentFragment
    * Get whether the object is being entered or exited.
    */
 
+  @Override
   public boolean isEntering()
   {
     return isEntering;
   }
 
+  @Override
   public Fragment insertNextFragment(Fragment fragment)
   {
     if (fragment.getDepth() == getDepth() && fragment.getMaterialMapping() == material && !isEntering && fragment.isEntering())

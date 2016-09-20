@@ -25,16 +25,19 @@ public class GenericTool extends EditingTool
     this.tipText = tipText;
   }
 
+  @Override
   public void activate()
   {
     super.activate();
   }
 
+  @Override
   public int whichClicks()
   {
     return HANDLE_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return tipText;

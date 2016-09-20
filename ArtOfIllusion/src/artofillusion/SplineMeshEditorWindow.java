@@ -22,7 +22,7 @@ import java.awt.*;
 
 /** The SplineMeshEditorWindow class represents the window for editing SplineMesh objects. */
 
-public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingWindow
+public class SplineMeshEditorWindow extends MeshEditorWindow
 {
   private ToolPalette modes;
   private BMenu editMenu, meshMenu, skeletonMenu;
@@ -166,6 +166,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   /** Get the object being edited in this window. */
   
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
@@ -181,6 +182,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   /** When the selection mode changes, do our best to convert the old selection to the new mode. */
   
+  @Override
   public void setSelectionMode(int mode)
   {
     SplineMesh mesh = (SplineMesh) getObject().getObject();
@@ -219,6 +221,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       modes.selectTool(modes.getTool(mode));
   }
   
+  @Override
   public int getSelectionMode()
   {
     return selectMode;
@@ -227,11 +230,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /** Get an array of flags telling which parts of the mesh are currently selected.  Depending
       on the current selection mode, these flags may correspond to vertices or curves. */
   
+  @Override
   public boolean[] getSelection()
   {
     return selected;
   }
   
+  @Override
   public void setSelection(boolean sel[])
   {
     selected = sel;
@@ -242,6 +247,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     repaint();
   }
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (maxDistance != getTensionDistance())
@@ -316,6 +322,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     selectionDistance = dist;
   }
   
+  @Override
   public void setMesh(Mesh mesh)
   {
     SplineMesh obj = (SplineMesh) mesh;
@@ -336,6 +343,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   /* EditingWindow methods. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     if (tool instanceof GenericTool)
@@ -343,7 +351,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       if (selectMode == modes.getSelection())
         return;
       if (undoItem != null)
-        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected}));
+        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
       setSelectionMode(modes.getSelection());
       theView[currentView].getCurrentTool().activate();
     }
@@ -355,6 +363,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     }
   }
 
+  @Override
   public void updateImage()
   {
     if (lastSelectedJoint != ((MeshViewer) theView[currentView]).getSelectedJoint())
@@ -362,6 +371,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     super.updateImage();
   }
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -479,11 +489,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /** Get the extra texture parameter which was added to the mesh to keep track of
       joint weighting. */
 
+  @Override
   public TextureParameter getJointWeightParam()
   {
     return jointWeightParam;
   }
 
+  @Override
   protected void doOk()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
@@ -509,6 +521,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       onClose.run();
   }
   
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -576,7 +589,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   
   public void selectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
     setSelection(selected);
@@ -587,7 +600,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   public void extendSelectionCommand()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
     if (selectMode == POINT_MODE)
     {
       int oldDist = tensionDistance;
@@ -625,12 +638,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     boolean newSel[] = new boolean [selected.length];
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = !selected[i];
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
     setSelection(newSel);
   }
 
   /** Delete the current selection. */
   
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -758,8 +772,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     param = new double [usize+usplitcount][vsize][numParam];
     for (i = 0; i < param.length; i++)
       for (j = 0; j < param[i].length; j++)
-        for (int k = 0; k < param[i][j].length; k++)
-          param[i][j][k] = newparam[j][i][k];
+        System.arraycopy(newparam[j][i], 0, param[i][j], 0, param[i][j].length);
     newparam = new double [usize+usplitcount][vsize+vsplitcount][numParam];
     splitOneAxis(v, newv, vs, newvs, splitv, param, newparam, theMesh.isVClosed());
     
@@ -829,15 +842,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         for (k = 0; k < v.length; k++)
         {
           newv[k][j] = SplineMesh.calcApproxPoint(v[k], s, param[k], paramTemp, p1, i, p3);
-          for (int m = 0; m < numParam; m++)
-            newparam[k][j][m] = paramTemp[m];
+          System.arraycopy(paramTemp, 0, newparam[k][j], 0, numParam);
         }
       else
         for (k = 0; k < v.length; k++)
         {
           newv[k][j] = v[k][i];
-          for (int m = 0; m < numParam; m++)
-            newparam[k][j][m] = param[k][i][m];
+          System.arraycopy(param[k][i], 0, newparam[k][j], 0, numParam);
         }
       if (split[i] || split[p1])
         news[j] = Math.min(s[i]*2.0f, 1.0f);
@@ -869,8 +880,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         for (k = 0; k < v.length; k++)
         {
           newv[k][j+1] = SplineMesh.calcInterpPoint(v[k], s, param[k], paramTemp, p1, i, p3, p4);
-          for (int m = 0; m < numParam; m++)
-            newparam[k][j+1][m] = paramTemp[m];
+            System.arraycopy(paramTemp, 0, newparam[k][j+1], 0, numParam);
         }
       }
       else
@@ -1043,6 +1053,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /* Given a list of deltas which will be added to the selected vertices, calculate the
      corresponding deltas for the unselected vertices according to the mesh tension. */
   
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];

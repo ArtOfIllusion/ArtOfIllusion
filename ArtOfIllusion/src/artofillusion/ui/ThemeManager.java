@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by François Guillet
+/* Copyright (C) 2007 by FranÔøΩois Guillet
    Some parts copyright 2007 by Peter Eastman
 
  This program is free software; you can redistribute it and/or modify it under the
@@ -35,17 +35,20 @@ import org.xml.sax.SAXException;
 
 import artofillusion.*;
 import artofillusion.math.RGBColor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class holds GUI customization information. Customization consists of
  * various colors used in AoI GUI as well as the look and feel of some GUI
  * elements (eg buttons). In this respect, the theme manager is thus a factory of GUI elements.
  *
- * @author François Guillet
+ * @author FranÔøΩois Guillet
  *
  */
 public class ThemeManager {
 
+    private static final Logger logger = Logger.getLogger(ThemeManager.class.getName());
 
     /**
      * This class hold all the colors used by a theme. A theme can propose several color sets.
@@ -184,7 +187,7 @@ public class ThemeManager {
         node = getNodeFromNodeList(themeNodeList, "description");
         description = (node != null ? node.getFirstChild().getNodeValue() : "");
         node = getNodeFromNodeList(themeNodeList, "selectable");
-        selectable = (node != null ? Boolean.valueOf(node.getFirstChild().getNodeValue()).booleanValue() : true);
+        selectable = (node != null ? Boolean.valueOf(node.getFirstChild().getNodeValue()) : true);
         node = getNodeFromNodeList(themeNodeList, "button");
         if (node != null) {
             String className = getAttribute(node, "class");
@@ -195,8 +198,8 @@ public class ThemeManager {
               Method m = cls.getMethod("readPropertiesFromXMLNode", Node.class);
                 properties = m.invoke(className, node);
             } catch (NoSuchMethodException ex) {
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                logger.log(Level.INFO, "Exception", ex);
             }
 
             // parse the button styles for this theme
@@ -215,7 +218,7 @@ public class ThemeManager {
             buttonProperties = properties;
             buttonStyles = bstyle;
             s = getAttribute(node, "useintoolbars");
-            classicToolBarButtons = (s != null ? !Boolean.valueOf(s).booleanValue() : false);
+            classicToolBarButtons = (s != null ? !Boolean.valueOf(s) : false);
         }
         else
         {
@@ -730,7 +733,7 @@ public class ThemeManager {
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
       themeList = list.toArray(new ThemeInfo[list.size()]);
@@ -757,17 +760,17 @@ public class ThemeManager {
         String s = getAttribute(node, "R");
         int r = 0;
         if (s != null) {
-            r = Integer.valueOf(s).intValue();
+            r = Integer.valueOf(s);
         }
         int g = 0;
         s = getAttribute(node, "G");
         if (s != null) {
-            g = Integer.valueOf(s).intValue();
+            g = Integer.valueOf(s);
         }
         int b = 0;
         s = getAttribute(node, "B");
         if (s != null) {
-            b = Integer.valueOf(s).intValue();
+            b = Integer.valueOf(s);
         }
         return new Color(r, g, b);
     }

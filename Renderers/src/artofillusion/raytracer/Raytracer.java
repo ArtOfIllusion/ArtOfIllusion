@@ -110,6 +110,7 @@ public class Raytracer
     objectList = Collections.synchronizedList(new ArrayList<RTObject>());
     lightList = Collections.synchronizedList(new ArrayList<RTLight>());
     threadContext = new ThreadLocal<RaytracerContext>() {
+      @Override
       protected RaytracerContext initialValue()
       {
         return new RaytracerContext(Raytracer.this);

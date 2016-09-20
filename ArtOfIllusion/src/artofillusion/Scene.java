@@ -25,12 +25,17 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.*;
 import java.beans.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** The Scene class describes a collection of objects, arranged relative to each other to
     form a scene, as well as the available textures and materials, environment options, etc. */
 
 public class Scene
 {
+    
+    private static final Logger logger = Logger.getLogger(Scene.class.getName());
+    
   private Vector<ObjectInfo> objects;
   private Vector<Material> materials;
   private Vector<Texture> textures;
@@ -599,7 +604,7 @@ public class Scene
     textures.removeElementAt(which);
     for (int i = 0; i < textureListeners.size(); i++)
       textureListeners.elementAt(i).itemRemoved(which, tex);
-    if (textures.size() == 0)
+    if (textures.isEmpty())
       {
         UniformTexture defTex = new UniformTexture();
         defTex.setName("Default Texture");
@@ -1255,7 +1260,7 @@ public class Scene
               }
             catch (Exception ex)
               {
-                ex.printStackTrace();
+                  logger.log(Level.INFO, "Exception", ex);
                 if (ex instanceof ClassNotFoundException)
                   loadingErrors.append(Translate.text("errorFindingClass", classname)).append('\n');
                 else
@@ -1268,7 +1273,7 @@ public class Scene
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new IOException();
           }
       }
@@ -1295,7 +1300,7 @@ public class Scene
               }
             catch (Exception ex)
               {
-                ex.printStackTrace();
+                logger.log(Level.INFO, "Exception", ex);
                 if (ex instanceof ClassNotFoundException)
                   loadingErrors.append(Translate.text("errorFindingClass", classname)).append('\n');
                 else
@@ -1308,7 +1313,7 @@ public class Scene
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new IOException();
           }
       }
@@ -1403,7 +1408,7 @@ public class Scene
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
           // Nothing more we can do about it.
         }
       }
@@ -1443,9 +1448,9 @@ public class Scene
             catch (Exception ex)
               {
                 if (ex instanceof InvocationTargetException)
-                  ((InvocationTargetException) ex).getTargetException().printStackTrace();
+                    logger.log(Level.INFO, "Exception", ((InvocationTargetException)ex).getTargetException());
                 else
-                  ex.printStackTrace();
+                    logger.log(Level.INFO, "Exception", ex);
                 if (ex instanceof ClassNotFoundException)
                   loadingErrors.append(info.getName()).append(": ").append(Translate.text("errorFindingClass", classname)).append('\n');
                 else
@@ -1458,7 +1463,7 @@ public class Scene
           }
         catch (Exception ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
             throw new IOException();
           }
       }
@@ -1505,7 +1510,7 @@ public class Scene
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         throw new IOException();
       }
     return info;
@@ -1629,9 +1634,10 @@ public class Scene
     Thread.currentThread().setContextClassLoader(loader); // So that plugin classes can be saved correctly.
     ExceptionListener exceptionListener = new ExceptionListener()
       {
-        public void exceptionThrown(Exception e)
+        @Override
+        public void exceptionThrown(Exception ex)
         {
-          e.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       };
     for (Map.Entry<String, Object> entry : metadataMap.entrySet())
@@ -1672,7 +1678,7 @@ public class Scene
         table.put(info.getObject(), key);
       }
     else
-      out.writeInt(key.intValue());
+      out.writeInt(key);
     
     // Write the tracks for this object.
     

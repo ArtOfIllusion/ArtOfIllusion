@@ -47,21 +47,25 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS+HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("moveScaleRotateMeshTool.tipText");
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -97,6 +101,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -105,6 +110,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -117,11 +123,13 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);
@@ -191,6 +199,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     controller.objectChanged();
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     if (e.getKeyCode() == KeyEvent.VK_W)

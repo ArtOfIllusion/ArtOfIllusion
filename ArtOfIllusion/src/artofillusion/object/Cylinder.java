@@ -58,6 +58,7 @@ public class Cylinder extends Object3D
     bounds = new BoundingBox(-rx, rx, -height/2.0, height/2.0, -rz, rz);
   }
 
+  @Override
   public Object3D duplicate()
   {
     Cylinder obj = new Cylinder(height, rx, rz, ratio);
@@ -65,6 +66,7 @@ public class Cylinder extends Object3D
     return obj;
   }
   
+  @Override
   public void copyObject(Object3D obj)
   {
     Cylinder c = (Cylinder) obj;
@@ -93,11 +95,13 @@ public class Cylinder extends Object3D
     cachedWire = null;
   }
   
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     rx = xsize/2.0;
@@ -108,6 +112,7 @@ public class Cylinder extends Object3D
     cachedWire = null;
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 vert[];
@@ -162,11 +167,13 @@ public class Cylinder extends Object3D
     return (cachedWire = new WireframeMesh(vert, from, to));
   }
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
   }
   
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     Vec3 vertices[];
@@ -412,6 +419,7 @@ public class Cylinder extends Object3D
     bounds = new BoundingBox(-rx, rx, -height/2.0, height/2.0, -rz, rz);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -423,30 +431,33 @@ public class Cylinder extends Object3D
     out.writeDouble(ratio);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
     {
       case 0:
-        return new Double(rx);
+        return rx;
       case 1:
-        return new Double(rz);
+        return rz;
       case 2:
-        return new Double(ratio);
+        return ratio;
       case 3:
-        return new Double(height);
+        return height;
     }
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
-    double val = ((Double) value).doubleValue();
+    double val = ((Double) value);
     if (index == 0)
       setSize(2.0*val, height, 2.0*rz);
     else if (index == 1)
@@ -459,6 +470,7 @@ public class Cylinder extends Object3D
 
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new CylinderKeyframe(rx, rz, height, ratio);
@@ -466,6 +478,7 @@ public class Cylinder extends Object3D
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     CylinderKeyframe key = (CylinderKeyframe) k;
@@ -477,6 +490,7 @@ public class Cylinder extends Object3D
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
   
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Radius", "Z Radius", "Height", "Ratio"},
@@ -512,6 +526,7 @@ public class Cylinder extends Object3D
   
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
   
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     CylinderKeyframe key = (CylinderKeyframe) k;
@@ -546,6 +561,7 @@ public class Cylinder extends Object3D
     
     /** Create a duplicate of this keyframe. */
   
+    @Override
     public Keyframe duplicate()
     {
       return new CylinderKeyframe(rx, ry, height, ratio);
@@ -553,6 +569,7 @@ public class Cylinder extends Object3D
 
     /** Create a duplicate of this keyframe for a (possibly different) object. */
   
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return new CylinderKeyframe(rx, ry, height, ratio);
@@ -560,6 +577,7 @@ public class Cylinder extends Object3D
   
     /** Get the list of graphable values for this keyframe. */
   
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {rx, ry, height, ratio};
@@ -567,6 +585,7 @@ public class Cylinder extends Object3D
   
     /** Set the list of graphable values for this keyframe. */
   
+    @Override
     public void setGraphValues(double values[])
     {
       rx = values[0];
@@ -578,6 +597,7 @@ public class Cylinder extends Object3D
     /** These methods return a new Keyframe which is a weighted average of this one and one,
         two, or three others. */
   
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       CylinderKeyframe k2 = (CylinderKeyframe) o2;
@@ -586,6 +606,7 @@ public class Cylinder extends Object3D
         weight1*height+weight2*k2.height, weight1*ratio+weight2*k2.ratio);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       CylinderKeyframe k2 = (CylinderKeyframe) o2, k3 = (CylinderKeyframe) o3;
@@ -596,6 +617,7 @@ public class Cylinder extends Object3D
         weight1*ratio+weight2*k2.ratio+weight3*k3.ratio);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       CylinderKeyframe k2 = (CylinderKeyframe) o2, k3 = (CylinderKeyframe) o3, k4 = (CylinderKeyframe) o4;
@@ -608,6 +630,7 @@ public class Cylinder extends Object3D
 
     /** Determine whether this keyframe is identical to another one. */
   
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CylinderKeyframe))
@@ -618,6 +641,7 @@ public class Cylinder extends Object3D
   
     /** Write out a representation of this keyframe to a stream. */
   
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeDouble(rx);

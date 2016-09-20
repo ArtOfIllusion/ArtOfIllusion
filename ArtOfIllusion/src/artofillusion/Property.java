@@ -58,7 +58,7 @@ public class Property
     this.name = name;
     this.min = min;
     this.max = max;
-    this.defaultValue = new Double(defaultValue);
+    this.defaultValue = defaultValue;
     type = DOUBLE;
   }
 
@@ -66,12 +66,12 @@ public class Property
    * Create an Integer valued property.
    */
 
-  public Property(String name, int min, int max, int defaultValue)
+  public Property(String name, int min, int max, int value)
   {
     this.name = name;
     this.min = min;
     this.max = max;
-    this.defaultValue = new Integer(defaultValue);
+    this.defaultValue = value;
     type = INTEGER;
   }
 
@@ -79,10 +79,10 @@ public class Property
    * Create a Boolean valued property.
    */
 
-  public Property(String name, boolean defaultValue)
+  public Property(String name, boolean value)
   {
     this.name = name;
-    this.defaultValue = Boolean.valueOf(defaultValue);
+    this.defaultValue = value;
     type = BOOLEAN;
   }
 
@@ -187,7 +187,7 @@ public class Property
     {
       if (value instanceof Double)
       {
-        double val = ((Double) value).doubleValue();
+        double val = ((Double) value);
         return (val >= min && val <= max);
       }
     }
@@ -195,7 +195,7 @@ public class Property
     {
       if (value instanceof Integer)
       {
-        int val = ((Integer) value).intValue();
+        int val = ((Integer) value);
         return (val >= min && val <= max);
       }
     }
@@ -214,6 +214,7 @@ public class Property
     return false;
   }
 
+  @Override
   public boolean equals(Object obj)
   {
     if (!(obj instanceof Property))
@@ -233,6 +234,7 @@ public class Property
     return true;
   }
 
+  @Override
   public int hashCode()
   {
     return name.hashCode()^type.hashCode();

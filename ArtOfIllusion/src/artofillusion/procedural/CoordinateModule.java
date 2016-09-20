@@ -54,6 +54,7 @@ public class CoordinateModule extends Module
 
   /* Cache the PointInfo object to have access to the coordinates later on. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -61,6 +62,7 @@ public class CoordinateModule extends Module
 
   /* This module outputs the value of the specified coordinate. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     switch (coordinate)
@@ -78,6 +80,7 @@ public class CoordinateModule extends Module
 
   /* Return the error in the specified coordinate. */
 
+  @Override
   public double getValueError(int which, double blur)
   {
     switch (coordinate)
@@ -95,6 +98,7 @@ public class CoordinateModule extends Module
 
   /* The gradient is simply linear in the appropriate coordinate. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     switch (coordinate)
@@ -115,6 +119,7 @@ public class CoordinateModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     CoordinateModule mod = new CoordinateModule(new Point(bounds.x, bounds.y), coordinate);
@@ -125,6 +130,7 @@ public class CoordinateModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(coordinate);
@@ -132,6 +138,7 @@ public class CoordinateModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     coordinate = in.readInt();

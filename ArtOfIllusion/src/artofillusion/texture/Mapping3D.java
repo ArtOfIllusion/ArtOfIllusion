@@ -26,11 +26,13 @@ public abstract class Mapping3D extends TextureMapping
     texture = (Texture3D) theTexture;
   }
 
+  @Override
   public Texture getTexture()
   {
     return texture;
   }
 
+  @Override
   public Object3D getObject()
   {
     return object;

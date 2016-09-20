@@ -36,23 +36,27 @@ public class CompoundPhotonSource implements PhotonSource
     }
   }
 
+  @Override
   public double getTotalIntensity()
   {
     return totalSourceIntensity;
   }
 
+  @Override
   public void generatePhotons(final PhotonMap map, final double intensity, ThreadManager threads)
   {
     final Thread currentThread = Thread.currentThread();
     threads.setNumIndices(source.length);
     threads.setTask(new ThreadManager.Task()
     {
+          @Override
       public void execute(int index)
       {
         if (map.getRenderer().renderThread != currentThread)
           return;
         source[index].generatePhotons(map, intensity*sourceIntensity[index]/totalSourceIntensity, null);
       }
+          @Override
       public void cleanup()
       {
         map.getWorkspace().cleanup();

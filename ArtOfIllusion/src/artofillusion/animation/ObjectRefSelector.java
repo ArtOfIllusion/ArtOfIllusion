@@ -41,6 +41,7 @@ public class ObjectRefSelector extends RowContainer
     
     add(setButton = Translate.button("set", this, "buttonPressed"));
     add(nameLabel = new BLabel(obj.toString()) {
+      @Override
       public Dimension getPreferredSize()
       {
         Dimension dim = super.getPreferredSize();
@@ -60,6 +61,7 @@ public class ObjectRefSelector extends RowContainer
   
   /** Set whether this component is enabled. */
   
+  @Override
   public void setEnabled(boolean enable)
   {
     super.setEnabled(enable);
@@ -88,6 +90,7 @@ public class ObjectRefSelector extends RowContainer
     tree.setSelected(ref, true);
     tree.expandToShowObject(ref);
     BScrollPane p = new BScrollPane(tree) {
+      @Override
       public Dimension getPreferredSize()
       {
         return new Dimension(150, 200);

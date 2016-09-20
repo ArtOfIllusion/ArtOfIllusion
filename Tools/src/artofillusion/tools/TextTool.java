@@ -20,12 +20,16 @@ import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TextTool creates meshes or curves that represent text.
  */
 public class TextTool implements ModellingTool
 {
+    private static final Logger logger = Logger.getLogger(TextTool.class.getName());
+    
   public static enum TextType {Outline, Tube, Surface, Solid}
 
   public TextTool()
@@ -34,6 +38,7 @@ public class TextTool implements ModellingTool
 
   /** Get the text that appear as the menu item.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("menu.textTool");
@@ -41,6 +46,7 @@ public class TextTool implements ModellingTool
 
   /** Display the dialog. */
 
+  @Override
   public void commandSelected(LayoutWindow window)
   {
     new TextDialog(window);
@@ -211,9 +217,9 @@ public class TextTool implements ModellingTool
                     fullLetterOI.object = TriangleMesh.optimizeMesh((TriangleMesh) fullLetterOI.object);
                     fullLetterOI.clearCachedMeshes();
                   }
-                  catch (Exception e)
+                  catch (Exception ex)
                   {
-                    e.printStackTrace();
+                    logger.log(Level.INFO, "Exception", ex);
                   }
                 }
                 firstCurveOfGlyph = false;
@@ -255,9 +261,9 @@ public class TextTool implements ModellingTool
               fullLetterOI.object = TriangleMesh.optimizeMesh(mesh);
               fullLetterOI.clearCachedMeshes();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-              e.printStackTrace();
+              logger.log(Level.INFO, "Exception", ex);
             }
           }
           if (type == TextType.Solid)
@@ -284,7 +290,7 @@ public class TextTool implements ModellingTool
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
     return objects;
   }

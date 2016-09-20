@@ -19,11 +19,15 @@ import java.awt.*;
 import java.awt.image.*;
 import java.util.*;
 import java.lang.ref.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is a CanvasDrawer which implements a software renderer for generating the contents of a ViewerCanvas. */
 
 public class SoftwareCanvasDrawer implements CanvasDrawer
 {
+    private static final Logger logger = Logger.getLogger(SoftwareCanvasDrawer.class.getName());
+    
   protected ViewerCanvas view;
   protected BufferedImage theImage;
   protected Graphics2D imageGraphics;
@@ -55,6 +59,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Set the template image. */
 
+  @Override
   public void setTemplateImage(Image im)
   {
     try
@@ -65,7 +70,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     }
     catch (InterruptedException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -74,6 +79,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       (though always from the event dispatch thread), not during the process of rendering
       the image. */
 
+  @Override
   public void drawDraggedShape(Shape shape)
   {
     Graphics2D g = (Graphics2D) view.getComponent().getGraphics();
@@ -140,6 +146,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw a border around the rendered image. */
 
+  @Override
   public void drawBorder()
   {
     boolean drawFocus = view.getDrawFocus();
@@ -167,6 +174,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   /** Draw a horizontal line across the rendered image.  The parameters are the y coordinate
       of the line and the line color. */
 
+  @Override
   public void drawHRule(int y, Color color)
   {
     int index = y*bounds.width;
@@ -178,6 +186,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   /** Draw a vertical line across the rendered image.  The parameters are the x coordinate
       of the line and the line color. */
 
+  @Override
   public void drawVRule(int x, Color color)
   {
     int index = x;
@@ -188,6 +197,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw a filled box in the rendered image. */
 
+  @Override
   public void drawBox(int x, int y, int width, int height, Color color)
   {
     int col = color.getRGB();
@@ -205,6 +215,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw a set of filled boxes in the rendered image. */
 
+  @Override
   public void drawBoxes(java.util.List<Rectangle> box, Color color)
   {
     for (int i = 0; i < box.size(); i++)
@@ -216,6 +227,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Render a filled box at a specified depth in the rendered image. */
 
+  @Override
   public void renderBox(int x, int y, int width, int height, double depth, Color color)
   {
     int i, j, index, maxx, maxy, col, z;
@@ -240,6 +252,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Render a set of filled boxes at specified depths in the rendered image. */
 
+  @Override
   public void renderBoxes(java.util.List<Rectangle> box, java.util.List<Double>depth, Color color)
   {
     for (int i = 0; i < box.size(); i++)
@@ -251,6 +264,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw a line into the rendered image. */
 
+  @Override
   public void drawLine(Point p1, Point p2, Color color)
   {
     int x1, y1, x2, y2, col;
@@ -352,6 +366,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       @param color  the line color
   */
 
+  @Override
   public void renderLine(Vec3 p1, Vec3 p2, Camera cam, Color color)
   {
     if (cam.isPerspective())
@@ -386,6 +401,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       @param color  the line color
   */
 
+  @Override
   public void renderLine(Vec2 p1, double zf1, Vec2 p2, double zf2, Camera cam, Color color)
   {
     int x1, y1, z1, x2, y2, z2;
@@ -616,6 +632,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Render a wireframe object. */
 
+  @Override
   public void renderWireframe(WireframeMesh mesh, Camera cam, Color color)
   {
     Vec3 vert[] = mesh.vert;
@@ -627,6 +644,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Render an object with flat shading in subtractive (transparent) mode. */
 
+  @Override
   public void renderMeshTransparent(RenderingMesh mesh, VertexShader shader, Camera cam, Vec3 viewDir, boolean hideFace[])
   {
     Vec3 vert[] = mesh.vert;
@@ -687,6 +705,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Render a mesh to the canvas. */
 
+  @Override
   public void renderMesh(RenderingMesh mesh, VertexShader shader, Camera cam, boolean closed, boolean hideFace[])
   {
     Vec3 vert[] = mesh.vert;
@@ -1574,6 +1593,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw a piece of text onto the canvas. */
 
+  @Override
   public void drawString(String text, int x, int y, Color color)
   {
     imageGraphics.setColor(color);
@@ -1582,6 +1602,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw the outline of a Shape into the canvas. */
 
+  @Override
   public void drawShape(Shape shape, Color color)
   {
     imageGraphics.setColor(color);
@@ -1590,6 +1611,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw a filled Shape onto the canvas. */
 
+  @Override
   public void fillShape(Shape shape, Color color)
   {
     imageGraphics.setColor(color);
@@ -1598,6 +1620,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
 
   /** Draw an image onto the canvas. */
 
+  @Override
   public void drawImage(Image image, int x, int y)
   {
     ImageRecord record = getCachedImage(image);
@@ -1641,6 +1664,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
    * @param camera the camera from which to draw the image
    */
 
+  @Override
   public void renderImage(Image image, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, Camera camera)
   {
     // Get a cached ImageRecord for this image.
@@ -1695,24 +1719,29 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     // Render the image.
 
     renderMesh(mesh, new VertexShader() {
+          @Override
       public void getColor(int face, int vertex, RGBColor color)
       {
         color.setARGB(record.pixel[face/2]);
       }
+          @Override
       public boolean isUniformFace(int face)
       {
         return true;
       }
+          @Override
       public boolean isUniformTexture()
       {
         return false;
       }
+          @Override
       public void getTextureSpec(TextureSpec spec)
       {
       }
     }, camera, false, null);
   }
 
+  @Override
   public void imageChanged(Image image)
   {
     imageMap.remove(image);
@@ -1737,7 +1766,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       }
       catch (InterruptedException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         return null;
       }
     }
@@ -1762,7 +1791,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       }
       catch (InterruptedException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
   }

@@ -91,6 +91,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** Get a BoundingBox which just encloses the object. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (cachedBounds == null)
@@ -120,6 +121,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** Determine whether the object is closed. */
 
+  @Override
   public boolean isClosed()
   {
     for (int i = 0; i < cachedObjects.size(); i++)
@@ -134,6 +136,7 @@ public abstract class ObjectCollection extends Object3D
   /** Assume that a material can be set for the	object collection (though actually
       setting one may or may not have any effect). */
 
+  @Override
   public boolean canSetMaterial()
   {
     return true;
@@ -141,6 +144,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** Get a mesh representing the union of all objects in the collection. */
   
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     return convertToTriangleMesh(tol).getRenderingMesh(tol, interactive, info);
@@ -149,6 +153,7 @@ public abstract class ObjectCollection extends Object3D
   /** An object collection is never drawn directly.  Instead, its component objects
       are enumerated and drawn individually. */
   
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return new WireframeMesh(new Vec3 [0], new int [0], new int [0]);
@@ -158,6 +163,7 @@ public abstract class ObjectCollection extends Object3D
    * RenderObject is overridden to render each component object individually.
    */
 
+  @Override
   public void renderObject(ObjectInfo obj, ViewerCanvas canvas, Vec3 viewDir)
   {
     Camera theCamera = canvas.getCamera();
@@ -175,6 +181,7 @@ public abstract class ObjectCollection extends Object3D
 
   /** For simplicity, just assume that the object can be converted approximately. */
   
+  @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
@@ -182,6 +189,7 @@ public abstract class ObjectCollection extends Object3D
   
   /** Create a triangle mesh which is the union of all the objects in this collection. */
 
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     ArrayList<Vec3> allVert = new ArrayList<Vec3>();
@@ -227,7 +235,7 @@ public abstract class ObjectCollection extends Object3D
             edgeSmoothness.add(new Edge(edge.v1+start, edge.v2+start, edge.smoothness));
         start += tri.getVertices().length;
       }
-    if (allVert.size() == 0)
+    if (allVert.isEmpty())
       allVert.add(new Vec3());
 
     // Create the new mesh.
@@ -261,6 +269,7 @@ public abstract class ObjectCollection extends Object3D
   /** If this object explicitly references time or position, the cached objects and
       bounding box may need to be reevaluated. */
 
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     if (cachedBounds == null || (usesTime && lastTime != scene.getTime()) ||

@@ -10,7 +10,6 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.awt.*;
 
@@ -33,6 +32,7 @@ public class RatioModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = false;
@@ -40,6 +40,7 @@ public class RatioModule extends Module
 
   /* This module outputs the ratio of the two values. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -64,6 +65,7 @@ public class RatioModule extends Module
 
   /* Calculate the error. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -79,6 +81,7 @@ public class RatioModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)

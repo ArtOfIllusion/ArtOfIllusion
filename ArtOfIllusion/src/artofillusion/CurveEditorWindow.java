@@ -20,7 +20,7 @@ import java.awt.*;
 
 /** The CurveEditorWindow class represents the window for editing Curve objects. */
 
-public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
+public class CurveEditorWindow extends MeshEditorWindow
 {
   protected BMenu editMenu, meshMenu, smoothMenu;
   protected BMenuItem editMenuItem[], meshMenuItem[];
@@ -130,6 +130,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
       meshMenuItem[6].setText(Translate.text("menu.openEnds"));
   }
 
+  @Override
   protected BMenu createShowMenu()
   {
     BMenu menu = Translate.menu("show");
@@ -141,6 +142,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   /** Get the object being edited in this window. */
   
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
@@ -154,6 +156,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     objInfo.clearCachedMeshes();
   }
   
+  @Override
   public void setMesh(Mesh mesh)
   {
     Curve obj = (Curve) mesh;
@@ -166,11 +169,13 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   /** Get an array of flags telling which vertices are currently selected. */
   
+  @Override
   public boolean[] getSelection()
   {
     return selected;
   }
   
+  @Override
   public void setSelection(boolean sel[])
   {
     selected = sel;
@@ -179,6 +184,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     updateImage();
   }
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (maxDistance != getTensionDistance())
@@ -188,6 +194,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   /** The return value has no meaning, since there is only one selection mode in this window. */
   
+  @Override
   public int getSelectionMode()
   {
     return 0;
@@ -195,6 +202,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   /** This is ignored, since there is only one selection mode in this window. */
   
+  @Override
   public void setSelectionMode(int mode)
   {
   }
@@ -237,6 +245,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -256,6 +265,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     }
   }
   
+  @Override
   protected void doOk()
   {
     Curve theMesh = (Curve) objInfo.getObject();
@@ -265,6 +275,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     onClose.run();
   }
   
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -292,7 +303,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   
   public void selectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected.clone()}));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
     setSelection(selected);
@@ -308,7 +319,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     boolean newSel[] = new boolean [dist.length];
     tensionDistance = oldDist;
     
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected.clone()}));
     for (int i = 0; i < dist.length; i++)
       newSel[i] = (dist[i] == 0 || dist[i] == 1);
     setSelection(newSel);
@@ -321,10 +332,11 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     boolean newSel[] = new boolean [selected.length];
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = !selected[i];
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected}));
     setSelection(newSel);
   }
 
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -548,6 +560,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
   
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];

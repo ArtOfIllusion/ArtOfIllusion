@@ -93,6 +93,7 @@ public class RaytracerRenderer implements Renderer, Runnable
   public RaytracerRenderer()
   {
     threadWorkspace = new ThreadLocal<RenderWorkspace>() {
+      @Override
       protected RenderWorkspace initialValue()
       {
         return new RenderWorkspace(RaytracerRenderer.this, raytracer.getContext());
@@ -109,11 +110,13 @@ public class RaytracerRenderer implements Renderer, Runnable
 
   /** Methods from the Renderer interface. */
 
+  @Override
   public String getName()
   {
     return "Raytracer";
   }
 
+  @Override
   public synchronized void renderScene(Scene theScene, Camera theCamera, RenderListener rl, SceneCamera sceneCamera)
   {
     if (renderThread != null && renderThread.isAlive())
@@ -160,6 +163,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     renderThread.start();
   }
 
+  @Override
   public synchronized void cancelRendering(Scene sc)
   {
     Thread t = renderThread;
@@ -187,6 +191,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     finish();
   }
 
+  @Override
   public Widget getConfigPanel()
   {
     if (configPanel == null)
@@ -433,6 +438,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     aliasChoice.dispatchEvent(new ValueChangedEvent(aliasChoice));
   }
 
+  @Override
   public boolean recordConfiguration()
   {
     maxRayDepth = (int) rayDepthField.getValue();
@@ -468,6 +474,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     return true;
   }
 
+  @Override
   public Map<String, Object> getConfiguration()
   {
     HashMap<String, Object> map = new HashMap<String, Object>();
@@ -503,6 +510,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     return map;
   }
 
+  @Override
   public void setConfiguration(String property, Object value)
   {
     needCopyToUI = true;
@@ -567,6 +575,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       volumeNeighborPhotons = (Integer) value;
   }
 
+  @Override
   public void configurePreview()
   {
     if (needCopyToUI)
@@ -600,6 +609,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
     ThreadManager threads = new ThreadManager(theScene.getNumObjects(), new ThreadManager.Task()
     {
+      @Override
       public void execute(int index)
       {
         if (renderThread != mainThread)
@@ -608,6 +618,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         if (info.isVisible())
           raytracer.addObject(info);
       }
+      @Override
       public void cleanup()
       {
       }
@@ -782,6 +793,7 @@ public class RaytracerRenderer implements Renderer, Runnable
 
   /** Main method in which the image is rendered. */
 
+  @Override
   public void run()
   {
     long updateTime = System.currentTimeMillis();
@@ -840,6 +852,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     final int currentWidth[] = new int [1];
     final boolean isFirstPass[] = new boolean[] {true};
     ThreadManager threads = new ThreadManager(width, new ThreadManager.Task() {
+          @Override
       public void execute(int index)
       {
         if (renderThread != thisThread)
@@ -857,6 +870,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         pixel.add(workspace.color[0], (float) workspace.transparency[0]);
         recordPixel(col*currentScale[0], row*currentScale[0], currentScale[0], pixel);
       }
+          @Override
       public void cleanup()
       {
         getWorkspace().cleanup();
@@ -914,6 +928,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];
     threads = new ThreadManager(rtWidth, new ThreadManager.Task() {
+          @Override
       public void execute(int index)
       {
         RenderWorkspace workspace = getWorkspace();
@@ -955,6 +970,7 @@ public class RaytracerRenderer implements Renderer, Runnable
           }
         }
       }
+          @Override
       public void cleanup()
       {
         getWorkspace().cleanup();

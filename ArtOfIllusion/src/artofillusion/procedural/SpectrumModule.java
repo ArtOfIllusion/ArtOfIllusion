@@ -81,6 +81,7 @@ public class SpectrumModule extends Module
 
   /* New point, so the color will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     colorOk = false;
@@ -197,6 +198,7 @@ public class SpectrumModule extends Module
 
   /* Calculate the output color. */
   
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     if (colorOk && blur == lastBlur)
@@ -222,6 +224,7 @@ public class SpectrumModule extends Module
   
   /* Create a duplicate of this module. */
   
+  @Override
   public Module duplicate()
   {
     SpectrumModule mod = new SpectrumModule(new Point(bounds.x, bounds.y));
@@ -240,6 +243,7 @@ public class SpectrumModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(color.length);
@@ -253,6 +257,7 @@ public class SpectrumModule extends Module
   
   /* Read in the parameters. */
   
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int num = in.readInt();
@@ -269,12 +274,14 @@ public class SpectrumModule extends Module
   
   /* Calculate the size of the module. */
   
+  @Override
   public void calcSize()
   {
     bounds.width = 40+IOPort.SIZE*2;
     bounds.height = 20+IOPort.SIZE*2;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     int x1 = bounds.x+IOPort.SIZE, y1 = bounds.y+IOPort.SIZE;
@@ -290,6 +297,7 @@ public class SpectrumModule extends Module
   
   /* Allow the user to set the parameters. */
   
+  @Override
   public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     EditingDialog dlg = new EditingDialog(editor);
@@ -333,6 +341,7 @@ public class SpectrumModule extends Module
       row.add(new BLabel(Translate.text("Value")+":"));
       row.add(indexField = new ValueField(Double.NaN, ValueField.NONE));
       indexField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= 0.0 && val <= 1.0);

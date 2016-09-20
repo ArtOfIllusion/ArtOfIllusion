@@ -109,6 +109,7 @@ public class EllipsoidPhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
@@ -121,6 +122,7 @@ public class EllipsoidPhotonSource implements PhotonSource
    * @param threads
    */
   
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     Ray r = new Ray(map.getWorkspace().context);

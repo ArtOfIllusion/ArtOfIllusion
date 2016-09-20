@@ -30,6 +30,7 @@ public class DefaultDockableWidget extends DockableWidget
     super(content, label);
   }
 
+  @Override
   protected void paintBorder(Graphics2D g)
   {
     Rectangle bounds = getBounds();

@@ -12,7 +12,6 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import java.awt.*;
 
@@ -31,6 +30,7 @@ public class DifferenceModule extends Module
 
   /* This module outputs the difference of the two values. */
   
+  @Override
   public double getAverageValue(int which, double blur)
   {
     double value1 = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getAverageValue(linkFromIndex[0], blur);
@@ -42,6 +42,7 @@ public class DifferenceModule extends Module
   /* The errors add in quadrature, which involves a square root.  This is a faster
      approximation to it. */
   
+  @Override
   public double getValueError(int which, double blur)
   {
     double value1 = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getValueError(linkFromIndex[0], blur);
@@ -66,6 +67,7 @@ public class DifferenceModule extends Module
 
   /* The gradient is the difference of the two gradients. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)

@@ -50,6 +50,7 @@ public class Curve extends Object3D implements Mesh
     closed = isClosed;
   }
 
+  @Override
   public Object3D duplicate()
   {
     Vec3 v[] = new Vec3 [vertex.length];
@@ -63,6 +64,7 @@ public class Curve extends Object3D implements Mesh
     return new Curve(v, s, smoothingMethod, closed);
   }
 
+  @Override
   public void copyObject(Object3D obj)
   {
     Curve cv = (Curve) obj;
@@ -104,6 +106,7 @@ public class Curve extends Object3D implements Mesh
     bounds = new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     if (bounds == null)
@@ -111,6 +114,7 @@ public class Curve extends Object3D implements Mesh
     return bounds;
   }
 
+  @Override
   public MeshVertex[] getVertices()
   {
     return vertex;
@@ -139,6 +143,7 @@ public class Curve extends Object3D implements Mesh
   
   /** Get a list of the positions of all vertices which define the mesh. */
   
+  @Override
   public Vec3 [] getVertexPositions()
   {
     Vec3 v[] = new Vec3 [vertex.length];
@@ -149,6 +154,7 @@ public class Curve extends Object3D implements Mesh
   
   /** Set new positions for all vertices. */
   
+  @Override
   public void setVertexPositions(Vec3 v[])
   {
     for (int i = 0; i < v.length; i++)
@@ -168,8 +174,7 @@ public class Curve extends Object3D implements Mesh
   
   public void setSmoothness(float s[])
   {
-    for (int i = 0; i < s.length; i++)
-      smoothness[i] = s[i];
+      System.arraycopy(s, 0, smoothness, 0, s.length);
     clearCachedMesh();
   }
   
@@ -191,11 +196,13 @@ public class Curve extends Object3D implements Mesh
     clearCachedMesh();
   }
 
+  @Override
   public boolean isClosed()
   {
     return closed;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     Vec3 size = getBounds().getSize();
@@ -230,6 +237,7 @@ public class Curve extends Object3D implements Mesh
     bounds = null;
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     int i, from[], to[];
@@ -401,11 +409,13 @@ public class Curve extends Object3D implements Mesh
                             w1*v[i].z + w2*v[j].z + w1*v[k].z);
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
   
+  @Override
   public int canConvertToTriangleMesh()
   {
     if (closed)
@@ -413,6 +423,7 @@ public class Curve extends Object3D implements Mesh
     return CANT_CONVERT;
   }
   
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     TriangleMesh mesh = triangulateCurve();
@@ -577,6 +588,7 @@ public class Curve extends Object3D implements Mesh
 
   /** Normal vectors do not make sense for a curve, since it does not define a surface. */
      
+  @Override
   public Vec3 [] getNormals()
   {
     Vec3 norm[] = new Vec3[vertex.length];
@@ -585,6 +597,7 @@ public class Curve extends Object3D implements Mesh
     return norm;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
@@ -592,6 +605,7 @@ public class Curve extends Object3D implements Mesh
 
   /** Get the skeleton.  This returns null, since Curves cannot have skeletons. */
   
+  @Override
   public Skeleton getSkeleton()
   {
     return null;
@@ -599,16 +613,19 @@ public class Curve extends Object3D implements Mesh
   
   /** Set the skeleton.  This does nothing, since Curves cannot have skeletons. */
 
+  @Override
   public void setSkeleton(Skeleton s)
   {
   }
   
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     CurveEditorWindow ed = new CurveEditorWindow(parent, "Curve object '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
+  @Override
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
     CurveEditorWindow ed = new CurveEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
@@ -620,6 +637,7 @@ public class Curve extends Object3D implements Mesh
 
   /** Get a MeshViewer which can be used for viewing this mesh. */
   
+  @Override
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
   {
     return new CurveViewer(controller, options);
@@ -649,6 +667,7 @@ public class Curve extends Object3D implements Mesh
     smoothingMethod = in.readInt();
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -666,11 +685,13 @@ public class Curve extends Object3D implements Mesh
     out.writeInt(smoothingMethod);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     if (index == 0)
@@ -680,9 +701,10 @@ public class Curve extends Object3D implements Mesh
       else
         return PROPERTIES[0].getAllowedValues()[smoothingMethod-1];
     }
-    return Boolean.valueOf(closed);
+    return closed;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -694,12 +716,13 @@ public class Curve extends Object3D implements Mesh
     }
     else
     {
-      setClosed(((Boolean) value).booleanValue());
+      setClosed(((Boolean) value));
     }
   }
 
   /** Return a Keyframe which describes the current pose of this object. */
   
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new CurveKeyframe(this);
@@ -707,6 +730,7 @@ public class Curve extends Object3D implements Mesh
   
   /** Modify this object based on a pose keyframe. */
   
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     CurveKeyframe key = (CurveKeyframe) k;
@@ -720,6 +744,7 @@ public class Curve extends Object3D implements Mesh
     bounds = null;
   }
 
+  @Override
   public boolean canConvertToActor()
   {
     return true;
@@ -728,6 +753,7 @@ public class Curve extends Object3D implements Mesh
   /** Curves cannot be keyframed directly, since any change to mesh topology would
       cause all keyframes to become invalid.  Return an actor for this mesh. */
 
+  @Override
   public Object3D getPosableObject()
   {
     Curve m = (Curve) duplicate();
@@ -760,6 +786,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Get the Mesh this Gesture belongs to. */
 
+    @Override
     protected Mesh getMesh()
     {
       return curve;
@@ -767,6 +794,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Get the positions of all vertices in this Gesture. */
 
+    @Override
     protected Vec3 [] getVertexPositions()
     {
       return vertPos;
@@ -774,6 +802,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Set the positions of all vertices in this Gesture. */
 
+    @Override
     protected void setVertexPositions(Vec3 pos[])
     {
       vertPos = pos;
@@ -781,6 +810,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Get the skeleton for this pose (or null if it doesn't have one). */
 
+    @Override
     public Skeleton getSkeleton()
     {
       return null;
@@ -788,17 +818,20 @@ public class Curve extends Object3D implements Mesh
 
     /** Set the skeleton for this pose. */
 
+    @Override
     public void setSkeleton(Skeleton s)
     {
     }
 
     /** Create a duplicate of this keyframe. */
 
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(curve);
     }
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       CurveKeyframe k = new CurveKeyframe();
@@ -818,6 +851,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Get the list of graphable values for this keyframe. */
 
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -825,6 +859,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Set the list of graphable values for this keyframe. */
 
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -833,16 +868,19 @@ public class Curve extends Object3D implements Mesh
        two, or three others.  These methods should never be called, since Curves
        can only be keyframed by converting them to Actors. */
 
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       return null;
@@ -857,6 +895,7 @@ public class Curve extends Object3D implements Mesh
         @param weight    the weights for the different Gestures
     */
 
+    @Override
     public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
     {
       super.blendSurface(average, p, weight);
@@ -881,6 +920,7 @@ public class Curve extends Object3D implements Mesh
 
     /** Determine whether this keyframe is identical to another one. */
 
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CurveKeyframe))
@@ -898,12 +938,14 @@ public class Curve extends Object3D implements Mesh
 
     /** Update the texture parameter values when the texture is changed. */
 
+    @Override
     public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
     {
     }
 
     /** Get the value of a per-vertex texture parameter. */
 
+    @Override
     public ParameterValue getTextureParameter(TextureParameter p)
     {
       return null;
@@ -911,12 +953,14 @@ public class Curve extends Object3D implements Mesh
 
     /** Set the value of a per-vertex texture parameter. */
 
+    @Override
     public void setTextureParameter(TextureParameter p, ParameterValue value)
     {
     }
 
     /** Write out a representation of this keyframe to a stream. */
 
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0); // version

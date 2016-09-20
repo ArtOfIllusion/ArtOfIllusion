@@ -22,6 +22,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 
@@ -29,6 +31,8 @@ import javax.imageio.ImageIO;
 
 public class AnimationPreviewer implements Runnable
 {
+    private static final Logger logger = Logger.getLogger(AnimationPreviewer.class.getName());
+    
   private LayoutWindow window;
   private double originalTime;
   private ValueField widthField, heightField, startField, endField, fpsField;
@@ -132,6 +136,7 @@ public class AnimationPreviewer implements Runnable
     canvas.setBoundCamera(sceneCamera);
     canvas.setPerspective(true);
     canvas.setTool(new EditingTool(parent) {
+      @Override
       public boolean hilightSelection()
       {
         return false;
@@ -149,6 +154,7 @@ public class AnimationPreviewer implements Runnable
   
   /** Generate and display all of the frames in a loop. */
 
+  @Override
   public void run()
   {
     int totalFrames = (int) Math.ceil((endTime-startTime)*fps);
@@ -173,6 +179,7 @@ public class AnimationPreviewer implements Runnable
         try
         {
           EventQueue.invokeAndWait(new Runnable() {
+                      @Override
             public void run()
             {
               setLabels(time, frame);
@@ -217,6 +224,7 @@ public class AnimationPreviewer implements Runnable
           try
           {
             EventQueue.invokeAndWait(new Runnable() {
+                          @Override
               public void run()
               {
                 setLabels(time, frame);
@@ -248,7 +256,7 @@ public class AnimationPreviewer implements Runnable
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
   

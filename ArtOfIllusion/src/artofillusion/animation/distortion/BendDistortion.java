@@ -45,6 +45,7 @@ public class BendDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
   
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof BendDistortion))
@@ -64,6 +65,7 @@ public class BendDistortion extends Distortion
   
   /** Create a duplicate of this object. */
   
+  @Override
   public Distortion duplicate()
   {
     BendDistortion d = new BendDistortion(axis, direction, angle, forward, preTransform, postTransform);
@@ -74,6 +76,7 @@ public class BendDistortion extends Distortion
   
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

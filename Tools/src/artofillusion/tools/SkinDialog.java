@@ -103,7 +103,7 @@ public class SkinDialog extends BDialog
     coords.setOrigin(coords.getOrigin().plus(centerOffset));
     window.addObject(preview.getObject().getObject(), coords, "Skinned Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {new Integer(window.getScene().getNumObjects()-1)}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {window.getScene().getNumObjects()-1}));
     window.updateImage();
     dispose();
   }

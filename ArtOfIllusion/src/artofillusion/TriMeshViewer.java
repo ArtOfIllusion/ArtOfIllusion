@@ -69,6 +69,7 @@ public class TriMeshViewer extends MeshViewer
     super.updateImage();
   }
 
+  @Override
   protected void drawObject()
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
@@ -273,6 +274,7 @@ public class TriMeshViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();
@@ -389,6 +391,7 @@ public class TriMeshViewer extends MeshViewer
     }
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -402,6 +405,7 @@ public class TriMeshViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     TriangleMesh mesh = (TriangleMesh) getController().getObject().getObject();

@@ -73,6 +73,7 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
     setVisible(true);
   }
 
+  @Override
   protected ViewerCanvas createViewerCanvas(int index, RowContainer controls)
   {
     return new SceneViewer(theScene, controls, this);
@@ -129,6 +130,7 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     ViewerCanvas view = getView();
@@ -150,11 +152,13 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
     displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
   }
 
+  @Override
   public Scene getScene()
   {
     return theScene;
   }
 
+  @Override
   protected void doOk()
   {
     updateFromScene();
@@ -167,6 +171,7 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
     parentWindow.updateMenus();
   }
 
+  @Override
   protected void doCancel()
   {
     oldObject = theObject = null;
@@ -221,6 +226,7 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
     {
       final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
       obj.edit(this, theScene.getObject(sel[0]), new Runnable() {
+        @Override
         public void run()
         {
           setUndoRecord(undo);

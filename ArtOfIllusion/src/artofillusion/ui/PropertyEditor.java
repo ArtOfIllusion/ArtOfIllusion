@@ -47,6 +47,7 @@ public class PropertyEditor
       widget = new ValueField(0.0, ValueField.INTEGER);
       final Property prop = property;
       ((ValueField) widget).setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= prop.getMinimum() && val <= prop.getMaximum());
@@ -109,11 +110,11 @@ public class PropertyEditor
   public Object getValue()
   {
     if (widget instanceof ValueSelector)
-      return Double.valueOf(((ValueSelector) widget).getValue());
+      return ((ValueSelector) widget).getValue();
     else if (widget instanceof ValueField)
-      return Integer.valueOf((int) ((ValueField) widget).getValue());
+      return (int) ((ValueField) widget).getValue();
     else if (widget instanceof BCheckBox)
-      return Boolean.valueOf(((BCheckBox) widget).getState());
+      return ((BCheckBox) widget).getState();
     else if (widget instanceof BTextField)
       return ((BTextField) widget).getText();
     else if (widget instanceof ColorSelector)
@@ -130,11 +131,11 @@ public class PropertyEditor
   public void setValue(Object value)
   {
     if (widget instanceof ValueSelector)
-      ((ValueSelector) widget).setValue(value == null ? Double.NaN : ((Double) value).doubleValue());
+      ((ValueSelector) widget).setValue(value == null ? Double.NaN : ((Double) value));
     else if (widget instanceof ValueField)
-      ((ValueField) widget).setValue(value == null ? Double.NaN : ((Integer) value).intValue());
+      ((ValueField) widget).setValue(value == null ? Double.NaN : ((Integer) value));
     else if (widget instanceof BCheckBox)
-      ((BCheckBox) widget).setState(value == null ? false : ((Boolean) value).booleanValue());
+      ((BCheckBox) widget).setState(value == null ? false : ((Boolean) value));
     else if (widget instanceof BTextField)
       ((BTextField) widget).setText((String) value);
     else if (widget instanceof ColorSelector)

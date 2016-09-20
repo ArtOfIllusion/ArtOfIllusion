@@ -24,6 +24,7 @@ public abstract class Material3D extends Material
 
   /** The default mapping is a LinearMaterialMapping. */
   
+  @Override
   public MaterialMapping getDefaultMapping(Object3D obj)
   {
     return new LinearMaterialMapping(obj, this);

@@ -99,6 +99,7 @@ public class RGBColor
   
   /** Determine whether two colors are identical. */
   
+  @Override
   public boolean equals(Object c)
   {
     if (c instanceof RGBColor)
@@ -109,6 +110,7 @@ public class RGBColor
     return false;
   }
 
+  @Override
   public int hashCode()
   {
     return Float.floatToIntBits(red+10*green+100*blue);
@@ -151,6 +153,7 @@ public class RGBColor
     w.setMaximumSize(new Dimension(width, height));
     w.setBackground(getColor());
     BOutline outline = new BOutline(w, BorderFactory.createLoweredBevelBorder()) {
+      @Override
       public void setBackground(Color c)
       {
         w.setBackground(c);
@@ -384,7 +387,7 @@ public class RGBColor
       setRGB(value(m1, m2, h+120.0f), value(m1, m2, h), value(m1, m2, h-120.0f));
   }
 
-  private static final float value(float n1, float n2, float hue)
+  private static float value(float n1, float n2, float hue)
   {
     if (hue > 360.0f)
       hue -= 360.0f;
@@ -516,6 +519,7 @@ public class RGBColor
 
   /** Create a string describing the color. */
 
+  @Override
   public String toString()
   {
     return "RGBColor: " + red + ", " + green + ", " + blue;

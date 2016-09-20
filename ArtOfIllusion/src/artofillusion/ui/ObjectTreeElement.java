@@ -41,11 +41,13 @@ public class ObjectTreeElement extends TreeElement
   
   /* Get the label to display for this element. */
   
+  @Override
   public String getLabel()
   {
     return info.getName();
   }
 
+  @Override
   public Icon getIcon()
   {
     return (info.isLocked() ? lockIcon : null);
@@ -54,6 +56,7 @@ public class ObjectTreeElement extends TreeElement
   /* Determine whether this element can be added as a child of another one  If el is null,
      return whether this element can be added at the root level of the tree. */
   
+  @Override
   public boolean canAcceptAsParent(TreeElement el)
   {
     if (el == null)
@@ -80,6 +83,7 @@ public class ObjectTreeElement extends TreeElement
   
   /* Add another element as a child of this one. */
   
+  @Override
   public void addChild(TreeElement el, int position)
   {
     children.insertElementAt(el, position);
@@ -102,6 +106,7 @@ public class ObjectTreeElement extends TreeElement
   /* Remove any elements corresponding to the given object from this element's list 
      of children. */
   
+  @Override
   public void removeChild(Object object)
   {
     TreeElement el = null;
@@ -129,11 +134,12 @@ public class ObjectTreeElement extends TreeElement
     info.removeChild((ObjectInfo) object);
     if (tree.undo != null)
       tree.undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object []
-          {info, object, new Integer(pos)});
+          {info, object, pos});
   }
   
   /* Get the object corresponding to this element. */
   
+  @Override
   public Object getObject()
   {
     return info;
@@ -141,6 +147,7 @@ public class ObjectTreeElement extends TreeElement
   
   /* Get whether this element should be drawn in gray (i.e. to indicate it is deactivated). */
   
+  @Override
   public boolean isGray()
   {
     return !info.isVisible();

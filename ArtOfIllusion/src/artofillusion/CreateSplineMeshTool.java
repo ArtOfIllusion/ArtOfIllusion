@@ -38,6 +38,7 @@ public class CreateSplineMeshTool extends EditingTool
     initButton("splineMesh");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -62,16 +63,19 @@ public class CreateSplineMeshTool extends EditingTool
       Translate.text("createSplineMeshTool."+shapeDesc).toLowerCase(), Translate.text("menu."+smoothingDesc).toLowerCase()}));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createSplineMeshTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
@@ -79,6 +83,7 @@ public class CreateSplineMeshTool extends EditingTool
     ((SceneViewer) view).beginDraggingBox(clickPoint, shiftDown);
   }
   
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = ((LayoutWindow) theWindow).getScene();
@@ -187,6 +192,7 @@ public class CreateSplineMeshTool extends EditingTool
     return v;
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     final ValueSlider thicknessSlider = new ValueSlider(0.0, 1.0, 100, thickness);

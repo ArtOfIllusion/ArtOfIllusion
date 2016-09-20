@@ -31,6 +31,8 @@ import java.net.*;
 import java.util.*;
 import java.util.List;
 import java.lang.reflect.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -41,6 +43,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ArtOfIllusion
 {
+    private static final Logger logger = Logger.getLogger(ArtOfIllusion.class.getName());
+    
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
   public static final ImageIcon APP_ICON;
@@ -210,7 +214,7 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
-        tx.printStackTrace();
+        logger.log(Level.INFO, "Exception", tx);
         String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -224,7 +228,7 @@ public class ArtOfIllusion
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     runStartupScripts();
@@ -279,6 +283,7 @@ public class ArtOfIllusion
 
     numNewWindows++;
     SwingUtilities.invokeLater(new Runnable() {
+      @Override
       public void run()
       {
         LayoutWindow fr = new LayoutWindow(theScene);
@@ -292,7 +297,7 @@ public class ArtOfIllusion
           }
           catch (Throwable tx)
           {
-            tx.printStackTrace();
+            logger.log(Level.INFO, "Exception", tx);
             String name = plugins.get(i).getClass().getName();
             name = name.substring(name.lastIndexOf('.')+1);
             new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -340,7 +345,7 @@ public class ArtOfIllusion
             }
             catch (Throwable tx)
             {
-              tx.printStackTrace();
+              logger.log(Level.INFO, "Exception", tx);
               String name = plugins.get(i).getClass().getName();
               name = name.substring(name.lastIndexOf('.')+1);
               new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -348,7 +353,7 @@ public class ArtOfIllusion
           }
         }
       }
-    if (windows.size() ==  0)
+    if (windows.isEmpty())
       quit();
   }
 
@@ -379,7 +384,7 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
-        tx.printStackTrace();
+        logger.log(Level.INFO, "Exception", tx);
         String name = plugins.get(i).getClass().getName();
         name = name.substring(name.lastIndexOf('.')+1);
         new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
@@ -407,7 +412,7 @@ public class ArtOfIllusion
           }
           catch (IOException ex)
           {
-            ex.printStackTrace();
+            logger.log(Level.INFO, "Exception", ex);
           }
         }
         catch (IllegalArgumentException ex)
@@ -473,7 +478,7 @@ public class ArtOfIllusion
   public static String loadFile(File f) throws IOException
   {
     BufferedReader in = new BufferedReader(new FileReader(f));
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     int c;
     while ((c = in.read()) != -1)
       buf.append((char) c);
@@ -501,7 +506,7 @@ public class ArtOfIllusion
         }
         catch (Throwable tx)
         {
-          tx.printStackTrace();
+          logger.log(Level.INFO, "Exception", tx);
           String name = plugins.get(i).getClass().getName();
           name = name.substring(name.lastIndexOf('.')+1);
           new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);

@@ -30,26 +30,31 @@ public class CreateCameraTool extends EditingTool
     initButton("camera");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCameraTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createCameraTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
   }
   
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = ((LayoutWindow) theWindow).getScene();

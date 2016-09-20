@@ -124,8 +124,7 @@ public class ExternalObjectEditingWindow extends BDialog
       new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
     setCursor(Cursor.getDefaultCursor());
-    if (scene == null)
-      return;
+
   }
 
   /** Build the list of objects for the user to select from. */

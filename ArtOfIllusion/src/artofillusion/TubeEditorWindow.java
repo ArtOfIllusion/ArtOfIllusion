@@ -107,6 +107,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     endsMenu.add(endsItem[2] = Translate.checkboxMenuItem("flatEnds", this, "endsStyleChanged", obj.getEndsStyle() == Tube.FLAT_ENDS));
   }
   
+  @Override
   protected BMenu createShowMenu()
   {
     BMenu menu = Translate.menu("show");
@@ -118,6 +119,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     return menu;
   }
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -152,6 +154,7 @@ public class TubeEditorWindow extends CurveEditorWindow
       }
   }
 
+  @Override
   protected void doOk()
   {
     Tube theMesh = (Tube) objInfo.getObject();
@@ -175,6 +178,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     onClose.run();
   }
   
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -183,6 +187,7 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   /** Delete the selected vertices. */
 
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -232,6 +237,7 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   /** Subdivide the tube between the selected vertices. */
 
+  @Override
   public void subdivideCommand()
   {
     Tube theTube = (Tube) objInfo.getObject();
@@ -301,8 +307,7 @@ public class TubeEditorWindow extends CurveEditorWindow
       {
         newpos[j] = SplineMesh.calcApproxPoint(vt, s, param, paramTemp, p1, i, p3);
         newt[j] = Tube.calcApproxThickness(t, s, p1, i, p3);
-        for (int k = 0; k < numParam; k++)
-          newparam[j][k] = paramTemp[k];
+          System.arraycopy(paramTemp, 0, newparam[j], 0, numParam);
       }
       else
       {
@@ -338,8 +343,7 @@ public class TubeEditorWindow extends CurveEditorWindow
         }
         newpos[j+1] = SplineMesh.calcInterpPoint(vt, s, param, paramTemp, p1, i, p3, p4);
         newt[j+1] = Tube.calcInterpThickness(t, s, p1, i, p3, p4);
-        for (int k = 0; k < numParam; k++)
-          newparam[j+1][k] = paramTemp[k];
+          System.arraycopy(paramTemp, 0, newparam[j+1], 0, numParam);
       }
       else
       {

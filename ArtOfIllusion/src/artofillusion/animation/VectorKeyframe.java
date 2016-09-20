@@ -32,11 +32,13 @@ public class VectorKeyframe extends Vec3 implements Keyframe
     super(v);
   }
 
+  @Override
   public Keyframe duplicate(Object owner)
   {
     return new VectorKeyframe(this);
   }
   
+  @Override
   public Keyframe duplicate()
   {
     return new VectorKeyframe(this);
@@ -44,6 +46,7 @@ public class VectorKeyframe extends Vec3 implements Keyframe
   
   /* Get the list of graphable values for this keyframe. */
   
+  @Override
   public double [] getGraphValues()
   {
     return new double [] {x, y, z};
@@ -51,12 +54,14 @@ public class VectorKeyframe extends Vec3 implements Keyframe
   
   /* Set the list of graphable values for this keyframe. */
   
+  @Override
   public void setGraphValues(double values[])
   {
     if (values.length == 3)
       set(values[0], values[1], values[2]);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, double weight1, double weight2)
   {
     VectorKeyframe v2 = (VectorKeyframe) o2;
@@ -64,6 +69,7 @@ public class VectorKeyframe extends Vec3 implements Keyframe
     return new VectorKeyframe(weight1*x+weight2*v2.x, weight1*y+weight2*v2.y, weight1*z+weight2*v2.z);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
   {
     VectorKeyframe v2 = (VectorKeyframe) o2, v3 = (VectorKeyframe) o3;
@@ -73,6 +79,7 @@ public class VectorKeyframe extends Vec3 implements Keyframe
 	weight1*z+weight2*v2.z+weight3*v3.z);
   }
 
+  @Override
   public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
   {
     VectorKeyframe v2 = (VectorKeyframe) o2, v3 = (VectorKeyframe) o3, v4 = (VectorKeyframe) o4;
@@ -84,6 +91,7 @@ public class VectorKeyframe extends Vec3 implements Keyframe
 
   /* Determine whether this keyframe is identical to another one. */
   
+  @Override
   public boolean equals(Keyframe k)
   {
     if (!(k instanceof VectorKeyframe))
@@ -94,6 +102,7 @@ public class VectorKeyframe extends Vec3 implements Keyframe
   
   /* Write out a representation of this keyframe to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     super.writeToFile(out);

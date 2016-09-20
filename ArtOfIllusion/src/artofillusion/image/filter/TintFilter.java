@@ -27,6 +27,7 @@ public class TintFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Tint");
@@ -39,6 +40,7 @@ public class TintFilter extends ImageFilter
       @param cameraPos  the position of the camera in the scene
   */
   
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     RGBColor color = (RGBColor) getPropertyValue(0);
@@ -67,6 +69,7 @@ public class TintFilter extends ImageFilter
 
   /** Write a serialized description of this filter to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     RGBColor color = (RGBColor) getPropertyValue(0);
@@ -77,6 +80,7 @@ public class TintFilter extends ImageFilter
 
   /** Reconstruct this filter from its serialized representation. */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     setPropertyValue(0, new RGBColor(in.readDouble(), in.readDouble(), in.readDouble()));

@@ -12,7 +12,6 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.awt.*;
@@ -34,6 +33,7 @@ public class ColorSumModule extends Module
 
   /* New point, so the color will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     colorOk = false;
@@ -41,6 +41,7 @@ public class ColorSumModule extends Module
 
   /* Calculate the summed color. */
   
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     if (colorOk && blur == lastBlur)

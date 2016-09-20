@@ -58,11 +58,13 @@ public class AutoScroller implements Runnable
     y = ev.getY();
   }
 
+  @Override
   public void run()
   {
     while (true)
       {
         SwingUtilities.invokeLater(new Runnable() {
+              @Override
           public void run()
           {
             Dimension scrollSize = sp.getViewSize();

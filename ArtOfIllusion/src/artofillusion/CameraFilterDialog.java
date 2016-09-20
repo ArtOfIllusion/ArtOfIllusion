@@ -20,11 +20,14 @@ import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This is dialog in which the user can edit the list of filters attached to a camera. */
 
 public class CameraFilterDialog extends BDialog implements RenderListener
 {
+    private static final Logger logger = Logger.getLogger(CameraFilterDialog.class.getName());
   private SceneCamera theCamera;
   private Scene theScene;
   private CoordinateSystem cameraCoords;
@@ -60,6 +63,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null);
     filtersPanel = new FiltersPanel(theCamera, new Runnable()
     {
+      @Override
       public void run()
       {
         applyFilters();
@@ -225,6 +229,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     if (filterThread != null)
       filterThread.interrupt();
     filterThread = new Thread() {
+      @Override
       public void run()
       {
         if (unfilteredImage == null)
@@ -245,6 +250,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   /** The renderer may call this method periodically during rendering, to notify the listener that more of the
       image is complete. */
 
+  @Override
   public void imageUpdated(Image image)
   {
     displayImage = image;
@@ -254,12 +260,14 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   /** The renderer may call this method periodically during rendering, to give the listener text descriptions
       of the current status of rendering. */
 
+  @Override
   public void statusChanged(String status)
   {
   }
 
   /** This method will be called when rendering is complete. */
 
+  @Override
   public void imageComplete(ComplexImage image)
   {
     unfilteredImage = image;
@@ -272,6 +280,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
 
   /** This method will be called if rendering is canceled. */
 
+  @Override
   public void renderingCanceled()
   {
   }
@@ -296,8 +305,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       this.filterChangedCallback = filterChangedCallback;
       filters = new ArrayList<ImageFilter>();
       ImageFilter oldFilters[] = camera.getImageFilters();
-      for (int i = 0; i < oldFilters.length; i++)
-        filters.add(oldFilters[i]);
+      filters.addAll(Arrays.asList(oldFilters));
 
       // Layout the major sections of the window.
 
@@ -337,7 +345,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
       rebuildFilterList();
@@ -394,7 +402,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
       updateComponents();
       filterChangedCallback.run();

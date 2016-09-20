@@ -61,6 +61,7 @@ public class SceneViewer extends ViewerCanvas
    * Get the Scene displayed in this canvas.
    */
 
+  @Override
   public Scene getScene()
   {
     return theScene;
@@ -100,6 +101,7 @@ public class SceneViewer extends ViewerCanvas
 
   /** Deal with selecting a SceneCamera from the choice menu. */
   
+  @Override
   public void setOrientation(int which)
   {
     super.setOrientation(which);
@@ -124,6 +126,7 @@ public class SceneViewer extends ViewerCanvas
       @return the two element array {minDepth, maxDepth}
    */
   
+  @Override
   public double[] estimateDepthRange()
   {
     double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
@@ -182,21 +185,25 @@ public class SceneViewer extends ViewerCanvas
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
+        @Override
         public void imageUpdated(Image image)
         {
           renderedImage = image;
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void statusChanged(String status)
         {
         }
+        @Override
         public void imageComplete(ComplexImage image)
         {
           renderedImage = image.getImage();
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
         }
+        @Override
         public void renderingCanceled()
         {
         }
@@ -205,6 +212,7 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
+  @Override
   public synchronized void updateImage()
   {
     if (renderMode == RENDER_RENDERED)
@@ -295,6 +303,7 @@ public class SceneViewer extends ViewerCanvas
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is an object based tool, allow them to select or deselect objects. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     int i, j, k, sel[], minarea;
@@ -491,6 +500,7 @@ public class SceneViewer extends ViewerCanvas
     return (r.x-1 <= p.x && r.y-1 <= p.y && r.x+r.width+1 >= p.x && r.y+r.height+1 >= p.y);
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     moveToGrid(e);
@@ -537,6 +547,7 @@ public class SceneViewer extends ViewerCanvas
       activeTool.mouseDragged(e, this);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     Rectangle r, b;
@@ -642,6 +653,7 @@ public class SceneViewer extends ViewerCanvas
       final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
+          @Override
 	  public void run()
 	  {
 	    theScene.objectModified(obj);
@@ -652,6 +664,7 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
+  @Override
   protected void processMouseScrolled(MouseScrolledEvent ev)
   {
     if (isPerspective() && boundCamera != null)

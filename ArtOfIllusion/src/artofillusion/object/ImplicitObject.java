@@ -134,6 +134,7 @@ public abstract class ImplicitObject extends Object3D
    * Subclasses should invoke this method in their own writeToFile() methods.
    */
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -229,6 +230,7 @@ public abstract class ImplicitObject extends Object3D
     cachedWireframe = null;
   }
 
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     if (lastTime != scene.getTime())

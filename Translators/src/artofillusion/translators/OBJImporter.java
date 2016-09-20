@@ -243,7 +243,7 @@ public class OBJImporter
       // If no mtl file was specified, but there is one with the same name is the obj file,
       // go ahead and load it.
   
-      if (textureTable.size() == 0)
+      if (textureTable.isEmpty())
       {
         File defaultMtl = new File(directory, objName+".mtl");
         if (defaultMtl.isFile())
@@ -266,7 +266,7 @@ public class OBJImporter
       {
         String group = keys.nextElement();
         Vector<FaceInfo> groupFaces = groupTable.get(group);
-        if (groupFaces.size() == 0)
+        if (groupFaces.isEmpty())
           continue;
   
         // Find which vertices are used by faces in this group.

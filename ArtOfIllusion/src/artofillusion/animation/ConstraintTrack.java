@@ -55,6 +55,7 @@ public class ConstraintTrack extends Track
 
   /** This method presents a window in which the user can edit the track. */
   
+  @Override
   public void edit(LayoutWindow win)
   {
     new Editor(win);
@@ -62,6 +63,7 @@ public class ConstraintTrack extends Track
   
   /** Modify the position of the object. */
   
+  @Override
   public void apply(double time)
   {
     double weight = theWeight.getWeight(time);
@@ -143,6 +145,7 @@ public class ConstraintTrack extends Track
   
   /** Create a duplicate of this track. */
   
+  @Override
   public Track duplicate(Object obj)
   {
     ConstraintTrack t = new ConstraintTrack((ObjectInfo) obj);
@@ -164,6 +167,7 @@ public class ConstraintTrack extends Track
   
   /** Make this track identical to another one. */
   
+  @Override
   public void copy(Track tr)
   {
     ConstraintTrack t = (ConstraintTrack) tr;
@@ -184,6 +188,7 @@ public class ConstraintTrack extends Track
   
   /** Get a list of all keyframe times for this track. */
   
+  @Override
   public double [] getKeyTimes()
   {
     return new double [0];
@@ -191,6 +196,7 @@ public class ConstraintTrack extends Track
 
   /** Move a keyframe to a new time, and return its new position in the list. */
   
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return -1;
@@ -198,12 +204,14 @@ public class ConstraintTrack extends Track
   
   /** Delete the specified keyframe. */
   
+  @Override
   public void deleteKeyframe(int which)
   {
   }
   
   /** Constraint tracks are never null. */
   
+  @Override
   public boolean isNullTrack()
   {
     return false;
@@ -211,6 +219,7 @@ public class ConstraintTrack extends Track
   
   /** This has a single child track. */
   
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
@@ -218,6 +227,7 @@ public class ConstraintTrack extends Track
 
   /** Determine whether this track can be added as a child of an object. */
   
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
@@ -225,6 +235,7 @@ public class ConstraintTrack extends Track
   
   /** Get the parent object of this track. */
   
+  @Override
   public Object getParent()
   {
     return info;
@@ -232,6 +243,7 @@ public class ConstraintTrack extends Track
   
   /** Set the parent object of this track. */
   
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
@@ -240,6 +252,7 @@ public class ConstraintTrack extends Track
   /** Get an array of any objects which this track depends on (and which therefore must
      be updated before this track is applied). */ 
   
+  @Override
   public ObjectInfo [] getDependencies()
   {
     if (orientType != NONE && orientMode == FACES_OBJECT)
@@ -254,12 +267,14 @@ public class ConstraintTrack extends Track
   /** Delete all references to the specified object from this track.  This is used when an
      object is deleted from the scene. */
   
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
     if (faceToward.getObject() == obj)
       faceToward = new ObjectRef();
   }
 
+  @Override
   public void updateObjectReferences(Map<ObjectInfo, ObjectInfo> objectMap)
   {
     if (objectMap.containsKey(faceToward.getObject()))
@@ -274,6 +289,7 @@ public class ConstraintTrack extends Track
 
   /** Write a serialized representation of this track to a stream. */
   
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(0); // Version number
@@ -293,6 +309,7 @@ public class ConstraintTrack extends Track
   
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
   
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();

@@ -43,7 +43,7 @@ public class HDRDecoder
     while ((s = readLine(in)).length() > 0)
       {
         if (s.startsWith("FORMAT"))
-          xyze = (s.indexOf("xyze") > -1);
+          xyze = (s.contains("xyze"));
       }
     
     // Parse the resolution string.
@@ -186,7 +186,7 @@ public class HDRDecoder
   
   private static String readLine(InputStream in) throws IOException
   {
-    StringBuffer buf = new StringBuffer();
+    StringBuilder buf = new StringBuilder();
     int c;
     while ((c = in.read()) > -1 && c != '\n')
       {

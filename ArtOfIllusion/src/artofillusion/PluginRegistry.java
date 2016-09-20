@@ -21,6 +21,8 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.*;
 
@@ -28,6 +30,8 @@ import org.w3c.dom.*;
 
 public class PluginRegistry
 {
+    private static final Logger logger = Logger.getLogger(PluginRegistry.class.getName());
+    
   private static final ArrayList<ClassLoader> pluginLoaders = new ArrayList<ClassLoader>();
   private static final HashSet<Class> categories = new HashSet<Class>();
   private static final HashMap<Class, List<Object>> categoryClasses = new HashMap<Class, List<Object>>();
@@ -152,7 +156,7 @@ public class PluginRegistry
   {
     try
     {
-      if (jar.imports.size() == 0 && jar.searchpath.size() == 0)
+      if (jar.imports.isEmpty() && jar.searchpath.isEmpty())
       {
         if (jar.loader == null)
           jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});
@@ -206,8 +210,7 @@ public class PluginRegistry
     catch (Exception ex)
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception while initializing plugin " + jar.file.getName() + ": ", ex);
     }
   }
 
@@ -587,8 +590,7 @@ public class PluginRegistry
       }
       catch (Exception ex)
       {
-        System.err.println("*** Exception while parsing extensions.xml for plugin "+file.getName()+":");
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception while parsing extensions.xml for plugin " + file.getName() + ": ", ex);
         throw new IOException();
       }
     }

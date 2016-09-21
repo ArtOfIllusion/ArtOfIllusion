@@ -1,0 +1,6 @@
+*.java text=auto
+*.properties text=auto
+*.xml text=auto
+*.html text=auto
+*.txt text=auto
+*.md text=auto

@@ -11,7 +11,6 @@
 package artofillusion.animation.distortion;
 
 import artofillusion.animation.*;
-import artofillusion.math.*;
 import artofillusion.object.*;
 
 /** This is a distortion which applies a pose to an object. */

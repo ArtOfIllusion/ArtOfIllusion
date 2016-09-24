@@ -12,7 +12,6 @@ package artofillusion.raster;
 
 import artofillusion.math.*;
 import artofillusion.texture.*;
-import artofillusion.material.*;
 import artofillusion.*;
 
 /**

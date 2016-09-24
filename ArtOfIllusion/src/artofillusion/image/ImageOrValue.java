@@ -17,7 +17,6 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import java.util.Vector;
 
 /** ImageOrValue represents a float value between 0 and 1, which can potentially vary with
     position.  It provides a Widget with which the user can edit it.  They can choose either

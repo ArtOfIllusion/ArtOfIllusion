@@ -10,7 +10,6 @@
 
 package artofillusion.ui;
 
-import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;

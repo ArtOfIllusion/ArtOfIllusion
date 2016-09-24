@@ -14,7 +14,6 @@ package artofillusion.tools;
 import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import java.util.*;
 
 /**
 The array tool creates an array of copies of an object.

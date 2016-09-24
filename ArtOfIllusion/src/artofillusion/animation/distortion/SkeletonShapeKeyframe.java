@@ -10,7 +10,6 @@
 
 package artofillusion.animation.distortion;
 
-import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.object.*;
 import java.io.*;

@@ -11,7 +11,6 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
-import artofillusion.math.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
 import java.awt.*;

@@ -27,10 +27,16 @@ import com.jogamp.opengl.awt.*;
 
 import buoy.event.*;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
 /** This is a CanvasDrawer which uses OpenGL to render the contents of a ViewerCanvas. */
 
 public class GLCanvasDrawer implements CanvasDrawer
 {
+    private static final Logger logger = Logger.getLogger(GLCanvasDrawer.class.getName());
+
   private ViewerCanvas view;
   private GLCanvas canvas;
   private GL2 gl;
@@ -84,7 +90,7 @@ public class GLCanvasDrawer implements CanvasDrawer
     }
     catch (InterruptedException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -692,7 +698,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       }
       catch (InterruptedException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         return;
       }
       textImageMap.put(text, new SoftReference<GLImage>(image));
@@ -711,7 +717,7 @@ public class GLCanvasDrawer implements CanvasDrawer
     }
     catch (InterruptedException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -736,7 +742,7 @@ public class GLCanvasDrawer implements CanvasDrawer
     }
     catch (InterruptedException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
       return;
     }
     prepareView3D(camera);

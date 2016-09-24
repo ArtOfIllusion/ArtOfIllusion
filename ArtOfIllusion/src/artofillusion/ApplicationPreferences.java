@@ -16,11 +16,15 @@ import artofillusion.ui.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class keeps track of program-wide user preferences. */
 
 public class ApplicationPreferences
 {
+    private static final Logger logger = Logger.getLogger(ApplicationPreferences.class.getName());
+
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol;
@@ -58,7 +62,7 @@ public class ApplicationPreferences
       }
     catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
   }
 
@@ -76,7 +80,7 @@ public class ApplicationPreferences
     }
     catch (IOException ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -112,7 +116,7 @@ public class ApplicationPreferences
       }
     catch (IOException ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
   }
 

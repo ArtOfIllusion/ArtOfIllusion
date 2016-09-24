@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image;
@@ -16,11 +16,15 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** ImagesDialog is a dialog box for editing the list of ImageMaps used in a scene. */
 
 public class ImagesDialog extends BDialog
 {
+    private static final Logger logger = Logger.getLogger(ImagesDialog.class.getName());
+
   private Scene theScene;
   private BFrame parent;
   private int selection;
@@ -71,7 +75,7 @@ public class ImagesDialog extends BDialog
     b[1].setEnabled(selection >= 0);
     b[2].setEnabled(selection >= 0);
   }
-  
+
   private void doLoad()
   {
     BFileChooser fc = new ImageFileChooser(Translate.text("selectImagesToLoad"));
@@ -89,7 +93,7 @@ public class ImagesDialog extends BDialog
       catch (Exception ex)
       {
         new BStandardDialog("", Translate.text("errorLoadingImage", files[i].getName()), BStandardDialog.ERROR).showMessageDialog(this);
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
         setCursor(Cursor.getDefaultCursor());
         return;
       }
@@ -100,7 +104,7 @@ public class ImagesDialog extends BDialog
     ic.scrollToSelection();
     hilightButtons();
   }
-  
+
   private void doDelete()
   {
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
@@ -117,7 +121,7 @@ public class ImagesDialog extends BDialog
     ic.imagesChanged();
     hilightButtons();
   }
-  
+
   private void doSelectNone()
   {
     selection = -1;
@@ -127,7 +131,7 @@ public class ImagesDialog extends BDialog
 
   /** ImagesCanvas is an inner class which displays the loaded images and allows the user
       to select one by clicking on it. */
-  
+
   private class ImagesCanvas extends CustomWidget
   {
     private int w, h, gridw, gridh;
@@ -154,19 +158,19 @@ public class ImagesDialog extends BDialog
     {
       return gridw;
     }
-    
+
     public int getGridHeight()
     {
       return gridh;
     }
-    
+
     public void scrollToSelection()
     {
       if (selection < 0)
         return;
       sp.getVerticalScrollBar().setValue((selection/w)*gridh);
     }
-    
+
     private void paint(RepaintEvent ev)
     {
       Graphics2D g = ev.getGraphics();
@@ -196,4 +200,3 @@ public class ImagesDialog extends BDialog
     }
   }
 }
-

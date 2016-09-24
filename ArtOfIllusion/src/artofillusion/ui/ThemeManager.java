@@ -35,6 +35,8 @@ import org.xml.sax.SAXException;
 
 import artofillusion.*;
 import artofillusion.math.RGBColor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class holds GUI customization information. Customization consists of
@@ -46,6 +48,7 @@ import artofillusion.math.RGBColor;
  */
 public class ThemeManager {
 
+    private static final Logger logger = Logger.getLogger(ThemeManager.class.getName());
 
     /**
      * This class hold all the colors used by a theme. A theme can propose several color sets.
@@ -195,8 +198,8 @@ public class ThemeManager {
               Method m = cls.getMethod("readPropertiesFromXMLNode", Node.class);
                 properties = m.invoke(className, node);
             } catch (NoSuchMethodException ex) {
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (Exception ex) {
+                logger.log(Level.INFO, "Exception", ex);
             }
 
             // parse the button styles for this theme
@@ -730,7 +733,7 @@ public class ThemeManager {
         }
         catch (Exception ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
         }
       }
       themeList = list.toArray(new ThemeInfo[list.size()]);

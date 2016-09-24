@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image;
@@ -20,6 +20,8 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.text.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.*;
 import javax.imageio.stream.*;
 
@@ -27,6 +29,8 @@ import javax.imageio.stream.*;
 
 public class ImageSaver
 {
+    private static final Logger logger = Logger.getLogger(ImageSaver.class.getName());
+
   private int format, index;
   private String name, directory;
   private boolean ok, premultiply;
@@ -40,19 +44,19 @@ public class ImageSaver
   public static final int FORMAT_BMP = 3;
   public static final int FORMAT_HDR = 4;
   public static final int FORMAT_QUICKTIME = 5;
-  
+
   private static final String FORMAT_NAME[] = new String [] {
     "JPEG", "TIFF", "PNG", "BMP", "HDR", "Quicktime"
   };
   private static final String FORMAT_EXTENSION[] = new String [] {
     "jpg", "tif", "png", "bmp", "hdr", "mov"
   };
-  
+
   private static boolean premultiplyDefault = true;
   private static double qualityDefault = 90.0;
   private static int lastImageFormat = FORMAT_JPEG;
   private static int lastMovieFormat = FORMAT_QUICKTIME;
-  
+
   /** Create an ImageSaver object which will be used for saving a single images.
       The constructor displays a dialog in which the user can select the name, location,
       and format.  The saveImage() method can then be used to save individual frames of the
@@ -171,21 +175,21 @@ public class ImageSaver
   }
 
   /** Determine whether the user canceled saving the image. */
-  
+
   public boolean clickedOk()
   {
     return ok;
   }
-  
+
   /** Save the next image to disk.  Returns false if an error occurs.*/
-  
+
   public boolean saveImage(Image im) throws IOException
   {
     return saveImage(new ComplexImage(im));
   }
-  
+
   /** Save the next image to disk.  Returns false if an error occurs.*/
-  
+
   public boolean saveImage(ComplexImage img) throws IOException
   {
     String filename = name;
@@ -201,7 +205,7 @@ public class ImageSaver
     if (index != Integer.MIN_VALUE)
     {
       // Insert the image number into the filename.
-      
+
       NumberFormat nf = NumberFormat.getNumberInstance();
       nf.setMinimumIntegerDigits(4);
       nf.setGroupingUsed(false);
@@ -219,25 +223,25 @@ public class ImageSaver
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
       new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
     }
     return false;
   }
-  
+
   /** Save an image to disk in the specified format.  Returns true if the image was
       successfully saved, false if an error occurred.  For JPEG, quality should be
       between 0 and 100.  For other formats, it is ignored. */
-  
+
   public static boolean saveImage(Image im, File f, int format, int quality) throws IOException, InterruptedException
   {
     return saveImage(new ComplexImage(im), f, format, quality);
   }
-  
+
   /** Save an image to disk in the specified format.  Returns true if the image was
       successfully saved, false if an error occurred.  For JPEG, quality should be
       between 0 and 100.  For other formats, it is ignored. */
-  
+
   public static boolean saveImage(ComplexImage img, File f, int format, int quality) throws IOException, InterruptedException
   {
     BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
@@ -305,14 +309,14 @@ public class ImageSaver
     if (qt != null)
       qt.close();
   }
-  
+
   /** Determine whether this image is partially transparent, and if so, create a new image
       in which the color components are premultiplied by the transparency. */
-  
+
   private static Image premultiplyTransparency(Image im)
   {
     int i, data[];
-    
+
     try
     {
       PixelGrabber pg = new PixelGrabber(im, 0, 0, -1, -1, true);
@@ -326,9 +330,9 @@ public class ImageSaver
     for (i = 0; i < data.length && (data[i] & 0xFF000000) == 0xFF000000; i++);
     if (i == data.length)
       return im;
-    
+
     // The image is partially transparent.  Premultiply by the transparency.
-    
+
     for (i = 0; i < data.length; i++)
     {
       int alpha = (data[i]>>24) & 0xFF;
@@ -340,17 +344,17 @@ public class ImageSaver
       blue = (blue*(alpha+1))>>8;
       data[i] = (alpha<<24) + (red<<16) + (green<<8) + blue;
     }
-    
+
     // Create the new image.
-    
-    MemoryImageSource source = new MemoryImageSource(im.getWidth(null), im.getHeight(null), 
+
+    MemoryImageSource source = new MemoryImageSource(im.getWidth(null), im.getHeight(null),
       data, 0, im.getWidth(null));
     return Toolkit.getDefaultToolkit().createImage(source);
   }
-  
+
   /** Get a BufferedImage containing the image from a ComplexImage.  This is necessary
       for using the ImageIO classes, which only work on BufferedImages. */
-  
+
   private static BufferedImage getBufferedImage(Image im, boolean hasAlpha)
   {
     if (im instanceof BufferedImage)

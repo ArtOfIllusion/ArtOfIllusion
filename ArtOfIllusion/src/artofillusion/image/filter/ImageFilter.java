@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image.filter;
@@ -21,6 +21,8 @@ import buoy.widget.*;
 import javax.swing.border.*;
 import java.awt.*;
 import java.io.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class defines an object which can filter rendered images.  It is an abstract class, whose subclasses implement
     specific types of filters.  An ImageFilter may present a user interface for configuring filtering options,
@@ -28,12 +30,13 @@ import java.io.*;
 
 public abstract class ImageFilter
 {
+    private static final Logger logger = Logger.getLogger(ImageFilter.class.getName());
   @Deprecated
   protected double paramValue[];
   private Object propertyValue[];
-  
+
   /** Every ImageFilter subclass must provide a constructor which takes no arguments. */
-  
+
   public ImageFilter()
   {
     Property[] properties = getProperties();
@@ -51,33 +54,33 @@ public abstract class ImageFilter
   }
 
   /** Get the name of this filter. */
-  
+
   public abstract String getName();
-  
+
   /** Get a list of all the image components required by this filter.  This should be a sum of the constants
       defined in ComplexImage.  The renderer will attempt to provide all requested components, but some renderers
       may not support all components.  The filter should therefore be prepared for the possibility that some
       components may be null (aside from the basic red, green, blue, and alpha components, which are always
       available). */
-  
+
   public int getDesiredComponents()
   {
     // The default implementation requests red, green, and blue.  Subclasses with other needs should override this.
-    
+
     return ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE;
   }
-  
+
   /** Apply the filter to an image.
       @param image      the image to filter
       @param scene      the Scene which was rendered to create the image
       @param camera     the camera from which the Scene was rendered
       @param cameraPos  the position of the camera in the scene
   */
-  
+
   public abstract void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos);
-  
+
   /** Create an exact duplicate of this filter. */
-  
+
   public ImageFilter duplicate()
   {
     try
@@ -88,17 +91,17 @@ public abstract class ImageFilter
       }
     catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     return null;
   }
-  
+
   /** Given another ImageFilter (of the same class as this one), make this one identical to it. */
-  
+
   public void copy(ImageFilter f)
   {
     // Subclasses should override this if necessary to copy any additional information.
-    
+
     paramValue = new double [f.paramValue.length];
     for (int i = 0; i < paramValue.length; i++)
       paramValue[i] = f.paramValue[i];
@@ -107,15 +110,15 @@ public abstract class ImageFilter
       propertyValue[i] = f.propertyValue[i];
 
   }
-  
+
   /** This method is deprecated.  Call getProperties() instead. */
-  
+
   @Deprecated
   public TextureParameter [] getParameters()
   {
     return new TextureParameter [0];
   }
-  
+
   /** This method is deprecated.  Call getPropertyValue() instead. */
 
   @Deprecated
@@ -125,7 +128,7 @@ public abstract class ImageFilter
     System.arraycopy(paramValue, 0, val, 0, val.length);
     return val;
   }
-  
+
   /** This method is deprecated.  Call setPropertyValue() instead. */
 
   @Deprecated
@@ -184,11 +187,11 @@ public abstract class ImageFilter
   }
 
   /** Write a serialized description of this filter to a stream. */
-  
+
   public abstract void writeToStream(DataOutputStream out, Scene theScene) throws IOException;
 
   /** Reconstruct this filter from its serialized representation. */
-  
+
   public abstract void initFromStream(DataInputStream in, Scene theScene) throws IOException;
 
   /**
@@ -202,12 +205,12 @@ public abstract class ImageFilter
   {
     // The default implementation simply allows the Properties to be edited.  Subclasses may override
     // this to provide more complex configuration panels.
-    
+
     final Property properties[] = getProperties();
     FormContainer form = new FormContainer(2, properties.length);
-    
+
     // Define an inner class to act as a listener on a PropertyEditors.
-    
+
     class EditorListener
     {
       private int which;
@@ -218,7 +221,7 @@ public abstract class ImageFilter
         this.which = which;
         this.editor = editor;
       }
-      
+
       void processEvent()
       {
         setPropertyValue(which, editor.getValue());
@@ -227,7 +230,7 @@ public abstract class ImageFilter
     }
 
     // Create the editing components.
-    
+
     LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
     for (int i = 0; i < properties.length; i++)

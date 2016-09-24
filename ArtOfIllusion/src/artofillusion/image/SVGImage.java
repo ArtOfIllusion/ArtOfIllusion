@@ -21,9 +21,13 @@ import java.io.*;
 import java.lang.ref.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SVGImage extends ImageMap
 {
+    private static final Logger logger = Logger.getLogger(SVGImage.class.getName());
+
   private final byte xml[];
   private SVGDiagram svg;
   private BufferedImage preview;
@@ -125,7 +129,7 @@ public class SVGImage extends ImageMap
         }
         catch (SVGException ex)
         {
-          ex.printStackTrace();
+          logger.log(Level.INFO, "Exception", ex);
           tile = new int[TILE_SIZE*TILE_SIZE];
         }
         tiles.put(key.clone(), new SoftReference<int[]>(tile));

@@ -20,6 +20,8 @@ import buoy.widget.*;
 import java.awt.*;
 import java.lang.reflect.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class implements the dialog box which is used to choose textures for objects.
     It presents a list of all available textures from which the user can select one.
@@ -28,6 +30,7 @@ import java.util.List;
 
 public class ObjectTextureDialog extends BDialog implements ListChangeListener
 {
+    private static final Logger logger = Logger.getLogger(ObjectTextureDialog.class.getName());
   private LayoutWindow window;
   private Scene scene;
   private ObjectInfo obj[], editObj;
@@ -151,7 +154,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     newTextureChoice.addEventLink(ValueChangedEvent.class, this, "doNewTexture");
@@ -184,7 +187,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
       }
       catch (Exception ex)
       {
-        ex.printStackTrace();
+        logger.log(Level.INFO, "Exception", ex);
       }
     }
     newMaterialChoice.addEventLink(ValueChangedEvent.class, this, "doNewMaterial");
@@ -518,7 +521,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 
@@ -547,7 +550,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     }
     catch (Exception ex)
     {
-      ex.printStackTrace();
+      logger.log(Level.INFO, "Exception", ex);
     }
   }
 

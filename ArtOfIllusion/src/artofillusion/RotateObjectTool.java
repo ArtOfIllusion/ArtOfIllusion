@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -40,34 +40,39 @@ public class RotateObjectTool extends EditingTool
   boolean dragged, applyToChildren = true;
   Vec3 rotAxis, rotationCenter[];
   CoordinateSystem objectCoords[];
-  
+
   public RotateObjectTool(EditingWindow fr)
   {
     super(fr);
     initButton("rotate");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("rotateObjectTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return OBJECT_CLICKS+HANDLE_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return true;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("rotateObjectTool.tipText");
   }
-  
+
+  @Override
   public void mousePressedOnObject(WidgetMouseEvent e, ViewerCanvas view, int obj)
   {
     Scene theScene = theWindow.getScene();
@@ -114,6 +119,7 @@ public class RotateObjectTool extends EditingTool
     whichAxes = ALL_AXES;
   }
 
+  @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {
     mousePressedOnObject(e, view, obj);
@@ -137,7 +143,8 @@ public class RotateObjectTool extends EditingTool
       }
     rotAxis = view.getCamera().getViewToWorld().timesDirection(rotAxis);
   }
-  
+
+  @Override
   public void mouseDragged(final WidgetMouseEvent e, final ViewerCanvas view)
   {
     Point dragPoint = e.getPoint();
@@ -189,6 +196,7 @@ public class RotateObjectTool extends EditingTool
     theWindow.setHelpText(Translate.text("rotateMeshTool.dragText", Double.toString(Math.round(angle*1e5*180.0/Math.PI)/1e5)));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     theWindow.getScene().applyTracksAfterModification(toMove);
@@ -199,6 +207,7 @@ public class RotateObjectTool extends EditingTool
     theWindow.updateImage();
   }
 
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     Scene theScene = theWindow.getScene();
@@ -209,7 +218,7 @@ public class RotateObjectTool extends EditingTool
     int key = e.getKeyCode(), numSelected = 0, sel[];
 
     // Find the axis to rotate around.
- 
+
     if (e.isControlDown())
       {
         if (key == KeyPressedEvent.VK_UP || key == KeyPressedEvent.VK_RIGHT)
@@ -290,7 +299,8 @@ public class RotateObjectTool extends EditingTool
   }
 
   /* Allow the user to set options. */
-  
+
+  @Override
   public void iconDoubleClicked()
   {
     BCheckBox childrenBox = new BCheckBox(Translate.text("applyToUnselectedChildren"), applyToChildren);
@@ -303,7 +313,7 @@ public class RotateObjectTool extends EditingTool
     RowContainer row = new RowContainer();
     row.add(Translate.label("rotateAround"));
     row.add(centerChoice);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("rotateToolTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("rotateToolTitle"),
                 new Widget [] {childrenBox, row}, new String [] {null, null});
     if (!dlg.clickedOk())
       return;

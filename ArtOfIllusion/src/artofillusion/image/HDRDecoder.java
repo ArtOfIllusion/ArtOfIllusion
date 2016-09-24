@@ -43,7 +43,7 @@ public class HDRDecoder
     while ((s = readLine(in)).length() > 0)
       {
         if (s.startsWith("FORMAT"))
-          xyze = (s.indexOf("xyze") > -1);
+          xyze = (s.contains("xyze"));
       }
     
     // Parse the resolution string.

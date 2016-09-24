@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.unwrap;
@@ -33,12 +33,12 @@ public class SeamFinder
     findTerminalVertices();
     findSeams();
   }
-  
+
   public List<Integer> getSeamEdges()
   {
     return Collections.unmodifiableList(seamEdges);
   }
-  
+
   private ArrayList<HashSet<Integer>> findSurfaces()
   {
     ArrayList<HashSet<Integer>> surfaces = new ArrayList<HashSet<Integer>>();
@@ -50,9 +50,9 @@ public class SeamFinder
     {
       if (assigned[i])
         continue;
-      
+
       // This face is not part of any surface, so begin a new one.
-      
+
       HashSet<Integer> surface = new HashSet<Integer>();
       surfaces.add(surface);
       int boundarySize = 0;
@@ -60,13 +60,13 @@ public class SeamFinder
       while (boundarySize > 0)
       {
         // Add a boundary face to the surface.
-        
+
         int faceIndex = boundary[--boundarySize];
         surface.add(faceIndex);
         assigned[faceIndex] = true;
-        
+
         // Add all its neighbors to the boundary if they haven't already been assigned.
-        
+
         TriangleMesh.Face face = meshFace[faceIndex];
         int f1 = (meshEdge[face.e1].f1 == faceIndex ? meshEdge[face.e1].f2 : meshEdge[face.e1].f1);
         int f2 = (meshEdge[face.e2].f1 == faceIndex ? meshEdge[face.e2].f2 : meshEdge[face.e2].f1);
@@ -81,7 +81,7 @@ public class SeamFinder
     }
     return surfaces;
   }
-  
+
   private void computeEdgeVisibility()
   {
     MeshVertex meshVertex[] = mesh.getVertices();
@@ -129,7 +129,7 @@ public class SeamFinder
         edgeVisibility[i] += 0.5*faceNorm[edge.f1].dot(faceNorm[edge.f2]);
     }
   }
-  
+
   private void computeVertexDistortion()
   {
     MeshVertex meshVertex[] = mesh.getVertices();
@@ -160,12 +160,12 @@ public class SeamFinder
         if (face.v3 != vertIndex && face.v1 != vertIndex)
           edges.add(face.e3);
       }
-      
+
       // Compute the distortion of this local patch.
-      
+
       localDistortion[vertIndex] = computePatchDistortion(meshVertex[vertIndex].r, edges);
       vertexDistortion[vertIndex] = localDistortion[vertIndex];
-      
+
       // Now keep expanding the patch until the distortion stops increasing.
 
       int iteration = 0;
@@ -211,7 +211,7 @@ public class SeamFinder
 
         // Evaluate the new group.
 
-        if (edges.size() == 0 || faces.size() > meshFace.length/4)
+        if (edges.isEmpty() || faces.size() > meshFace.length/4)
           break;
         double distortion = computePatchDistortion(meshVertex[vertIndex].r, edges);
         if (distortion > vertexDistortion[vertIndex])
@@ -221,7 +221,7 @@ public class SeamFinder
       }
     }
   }
-  
+
   private double computePatchDistortion(Vec3 vertexPos, HashSet<Integer> edges)
   {
     // Divide the edges up into continuous loops.
@@ -234,7 +234,7 @@ public class SeamFinder
     while (remainingEdges.size() > 0)
     {
       // Search for an edge that can be added to an existing loop.
-      
+
       boolean foundEdge = false;
       Iterator<Integer> iter = remainingEdges.iterator();
       while (iter.hasNext() && loopEdges.size() > 0)
@@ -264,7 +264,7 @@ public class SeamFinder
       if (!foundEdge)
       {
         // We didn't find one, so create a new loop starting from the first edge.
-        
+
         HashSet<Integer> newLoopEdges = new HashSet<Integer>();
         HashSet<Integer> newLoopVerts = new HashSet<Integer>();
         int edgeIndex = remainingEdges.iterator().next();
@@ -277,14 +277,14 @@ public class SeamFinder
         remainingEdges.remove(edgeIndex);
       }
     }
-    
+
     // Find the total distortion by adding up the contributions from all the loops.
-    
+
     double totalDistortion = 0;
     for (int loop = 0; loop < loopEdges.size(); loop++)
     {
       // Add up the angles formed by all the edges.
-  
+
       double totalAngle = 0;
       boolean isBoundary = false;
       for (int edgeIndex : loopEdges.get(loop))
@@ -298,9 +298,9 @@ public class SeamFinder
         v2.normalize();
         totalAngle += Math.acos(v1.dot(v2));
       }
-      
+
       // Add in the distortion.
-      
+
       double distortion = 1.0-totalAngle/(2*Math.PI);
       if (isBoundary && distortion > 0)
         distortion = 0;
@@ -308,7 +308,7 @@ public class SeamFinder
     }
     return totalDistortion;
   }
-  
+
   private void findTerminalVertices()
   {
     MeshVertex meshVertex[] = mesh.getVertices();
@@ -334,7 +334,7 @@ public class SeamFinder
     for (int i = 0; i < terminals.size(); i++)
       terminalVertices[i] = terminals.get(i);
   }
-  
+
   private void findSeams()
   {
     // Compute a cost for each edge.
@@ -354,15 +354,15 @@ public class SeamFinder
         edgeCost[edgeIndex] = Math.max(minCost, delta.length()*edgeVisibility[edgeIndex]);
       }
     }
-    
+
     // Cache the list of edges surrounding each vertex, since we will use it often.
-    
+
     int vertEdges[][] = new int[meshVertex.length][];
     for (int vertIndex = 0; vertIndex < meshVertex.length; vertIndex++)
       vertEdges[vertIndex] = ((TriangleMesh.Vertex) meshVertex[vertIndex]).getEdges();
-    
+
     // Create an initial patch for each terminal vertex.
-    
+
     ArrayList<Patch> patches = new ArrayList<Patch>();
     for (int vertIndex : terminalVertices)
     {
@@ -373,7 +373,7 @@ public class SeamFinder
     }
 
     // Now grow the patches.
-    
+
     int nextPatch = -1;
     while (patches.size() > 1)
     {
@@ -381,20 +381,20 @@ public class SeamFinder
       if (nextPatch >= patches.size())
         nextPatch = 0;
       Patch patch = patches.get(nextPatch);
-      if (patch.candidates.size() == 0)
+      if (patch.candidates.isEmpty())
       {
         // Nothing else to do with this patch, so remove it from further consideration.
-        
+
         patches.remove(nextPatch);
         continue;
       }
-      
+
       // Get the candidate vertex to add to the patch.
-      
+
       int newVert = patch.getNextCandidate();
-      
+
       // See if this vertex is already part of another patch.
-      
+
       int alreadyInPatch = -1;
       for (int i = 0; i < patches.size(); i++)
         if (i != nextPatch && patches.get(i).vertices.contains(newVert))
@@ -405,7 +405,7 @@ public class SeamFinder
       if (alreadyInPatch == -1)
       {
         // Add this vertex to the patch.
-        
+
         patch.addVertex(newVert, vertEdges[newVert]);
       }
       else
@@ -419,7 +419,7 @@ public class SeamFinder
 
         // Now merge the two patches together.  The cost to connect a vertex to the new patch is the minimum of the
         // cost to connect it to either of the original patches, or to connect it to the vertex where they meet.
-        
+
         patch.vertices.addAll(otherPatch.vertices);
         patch.candidates.removeAll(otherPatch.vertices);
         otherPatch.candidates.removeAll(patch.vertices);
@@ -432,35 +432,36 @@ public class SeamFinder
       }
    }
   }
-  
+
   private void computeCostToVertex(final double costToVertex[], int vertex, double edgeCost[], int vertEdges[][])
   {
     TriangleMesh.Edge meshEdge[] = mesh.getEdges();
     Arrays.fill(costToVertex, Double.MAX_VALUE);
     costToVertex[vertex] = 0;
     boolean processed[] = new boolean[costToVertex.length];
-    
+
     // The front initially consists of just the central vertex.
 
     PriorityQueue<Integer> front = new PriorityQueue<Integer>(10, new Comparator<Integer>()
     {
+      @Override
       public int compare(Integer v1, Integer v2)
       {
         return Double.compare(costToVertex[v1], costToVertex[v2]);
       }
     });
     front.add(vertex);
-    
+
     // Propagate the front outward, recording the cost to each vertex as we pass it.
-    
+
     while (!front.isEmpty())
     {
       // Find the vertex in the front with lowest cost.
-      
+
       int vertIndex = front.poll();
-      
+
       // Process it.
-      
+
       processed[vertIndex] = true;
       for (int edgeIndex : vertEdges[vertIndex])
       {
@@ -478,14 +479,14 @@ public class SeamFinder
       }
     }
   }
-  
+
   private void connectVertexToPatch(int vertIndex, Patch patch, int vertEdges[][])
   {
     TriangleMesh.Edge meshEdge[] = mesh.getEdges();
     while (patch.costToVertex[vertIndex] > 0)
     {
       // Find the best edge to follow from this vertex.
-      
+
       int bestEdge = -1;
       double bestCost = Double.MAX_VALUE;
       int nextVert = -1;
@@ -504,19 +505,19 @@ public class SeamFinder
       vertIndex = nextVert;
     }
   }
-  
+
   private class Patch
   {
     HashSet<Integer> vertices, candidates;
     double costToVertex[];
-    
+
     Patch()
     {
       vertices = new HashSet<Integer>();
       candidates = new HashSet<Integer>();
       costToVertex = new double[mesh.getVertices().length];
     }
-    
+
     int getNextCandidate()
     {
       int bestIndex = -1;
@@ -529,7 +530,7 @@ public class SeamFinder
         }
       return bestIndex;
     }
-    
+
     void addVertex(int vertIndex, int vertEdges[])
     {
       vertices.add(vertIndex);

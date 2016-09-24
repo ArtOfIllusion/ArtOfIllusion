@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -30,7 +30,7 @@ public class EllipsoidPhotonSource implements PhotonSource
       @param obj    the object for which to create a photon source
       @param map    the photon map for which this will generate photons
   */
-  
+
   public EllipsoidPhotonSource(RTEllipsoid obj, PhotonMap map)
   {
     rx = obj.rx;
@@ -42,11 +42,11 @@ public class EllipsoidPhotonSource implements PhotonSource
     param = obj.param;
     texMap = obj.getTextureMapping();
     color = new RGBColor();
-    
+
     // Calculating the surface area of a general ellipsoid is an incredibly difficult problem involving
     // elliptic integrals.  We can estimate it by triangulating the ellipsoid and adding up the areas
     // of the triangles.
-    
+
     ObjectInfo info = new ObjectInfo(obj.theSphere, new CoordinateSystem(), "");
     RenderingMesh mesh = info.getPreviewMesh();
     double area = 0.0;
@@ -60,10 +60,10 @@ public class EllipsoidPhotonSource implements PhotonSource
       }
     if (texMap.appliesTo() == TextureMapping.FRONT_AND_BACK)
       area *= 2.0;
-    
+
     // Since this method will always underestimate the surface area, apply a correction factor
     // based on how finely it was subdivided.
-    
+
     if (mesh.triangle.length == 8)
       area *= 1.8;
     else if (mesh.triangle.length == 32)
@@ -74,7 +74,7 @@ public class EllipsoidPhotonSource implements PhotonSource
       area *= 1.01;
 
     // Find the average emissive intensity.
-    
+
     TextureSpec spec = map.getWorkspace().surfSpec[0];
     texMap.getTexture().getAverageSpec(spec, map.getRaytracer().getTime(), obj.param);
     color.copy(spec.emissive);
@@ -85,7 +85,7 @@ public class EllipsoidPhotonSource implements PhotonSource
       @param obj    the object for which to create a photon source
       @param map    the photon map for which this will generate photons
   */
-  
+
   public EllipsoidPhotonSource(RTSphere obj, PhotonMap map)
   {
     rx = ry = rz = obj.r;
@@ -100,7 +100,7 @@ public class EllipsoidPhotonSource implements PhotonSource
       area *= 2.0;
 
     // Find the average emissive intensity.
-    
+
     TextureSpec spec = map.getWorkspace().surfSpec[0];
     texMap.getTexture().getAverageSpec(spec, map.getRaytracer().getTime(), obj.param);
     color.copy(spec.emissive);
@@ -109,18 +109,20 @@ public class EllipsoidPhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
   }
-  
+
   /**
    * Generate photons and add them to a map.
    * @param map          the PhotonMap to add the Photons to
    * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
    * @param threads
    */
-  
+
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     Ray r = new Ray(map.getWorkspace().context);
@@ -132,7 +134,7 @@ public class EllipsoidPhotonSource implements PhotonSource
     while (emittedIntensity < intensity)
       {
         // Select an origin and direction.
-        
+
         double ctheta = (map.random.nextDouble()-0.5)*2.0;
         double stheta = Math.sqrt(1.0-ctheta*ctheta);
         double phi = map.random.nextDouble()*2.0*Math.PI;
@@ -144,14 +146,14 @@ public class EllipsoidPhotonSource implements PhotonSource
         emittedIntensity += generateOnePhoton(map, r, norm);
       }
   }
-  
+
   /** Generate a Photon from a point on the sphere.
       @param map       the PhotonMap to add the Photon to
       @param r         a ray whose origin is the point from which to generate the photon (in local coordinates)
       @param norm      the surface normal at the point (in local coordinates)
       @return the intensity of the emitted ray
   */
-  
+
   private float generateOnePhoton(PhotonMap map, Ray r, Vec3 norm)
   {
     RaytracerRenderer rt = map.getRenderer();
@@ -175,21 +177,21 @@ public class EllipsoidPhotonSource implements PhotonSource
       }
 
     // Determine the photon color.
-    
+
     texMap.getTextureSpec(dir, spec, dot, rt.smoothScale, rt.time, param);
     color.copy(spec.emissive);
     intensity = color.getRed()+color.getGreen()+color.getBlue();
     if (intensity < 1.0)
       {
         // Use Russian Roulette sampling.
-      
+
         if (intensity < map.random.nextFloat())
           return intensity;
         color.scale(1.0f/intensity);
       }
-    
+
     // Send out the photon.
-  
+
     fromLocal.transform(r.getOrigin());
     fromLocal.transformDirection(dir);
     r.newID();

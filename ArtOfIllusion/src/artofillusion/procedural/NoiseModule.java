@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -27,44 +27,44 @@ public class NoiseModule extends Module
   double value, error, amplitude, lastBlur;
   Vec3 gradient, tempVec;
   PointInfo point;
-  
+
   public NoiseModule(Point position)
   {
-    super(Translate.text("menu.noiseModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
+    super(Translate.text("menu.noiseModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
       position);
     octaves = 4;
     amplitude = 1.0;
     gradient = new Vec3();
     tempVec = new Vec3();
   }
-  
+
   /** Get the number of octaves. */
-  
+
   public int getOctaves()
   {
     return octaves;
   }
-  
+
   /** Set the number of octaves. */
-  
+
   public void setOctaves(int o)
   {
     octaves = o;
   }
-  
+
   /** Get the amplitude. */
-  
+
   public double getAmplitude()
   {
     return amplitude;
   }
-  
+
   /** Set the amplitude. */
-  
+
   public void setAmplitude(double a)
   {
     amplitude = a;
@@ -72,6 +72,7 @@ public class NoiseModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -79,7 +80,8 @@ public class NoiseModule extends Module
   }
 
   /* Calculate the noise function. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -93,7 +95,7 @@ public class NoiseModule extends Module
     double zsize = (linkFrom[2] == null) ? 0.5*point.zsize+blur : linkFrom[2].getValueError(linkFromIndex[2], blur);
     double amp = 0.5*amplitude, scale = 1.0;
     double cutoff = 0.5/Math.max(Math.max(xsize, ysize), zsize);
-    
+
     value = 0.0;
     for (int i = 0; i < octaves && cutoff > scale; i++)
       {
@@ -110,7 +112,8 @@ public class NoiseModule extends Module
   }
 
   /* Estimate the error from the derivative of the function. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -127,7 +130,7 @@ public class NoiseModule extends Module
     double amp = 0.5*amplitude, scale = 1.0;
     double cutoff = 0.5/Math.max(Math.max(xsize, ysize), zsize);
     int i;
-    
+
     error = 0.0;
     gradient.set(0.0, 0.0, 0.0);
     for (i = 0; i < octaves && cutoff > scale; i++)
@@ -155,6 +158,7 @@ public class NoiseModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)
@@ -206,9 +210,10 @@ public class NoiseModule extends Module
     gradOk = true;
     grad.set(gradient);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
@@ -231,13 +236,14 @@ public class NoiseModule extends Module
     amplitude = ampField.getValue();
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     NoiseModule mod = new NoiseModule(new Point(bounds.x, bounds.y));
-    
+
     mod.octaves = octaves;
     mod.amplitude = amplitude;
     return mod;
@@ -245,14 +251,16 @@ public class NoiseModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
     out.writeDouble(amplitude);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();

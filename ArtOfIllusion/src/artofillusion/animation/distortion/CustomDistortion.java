@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -35,7 +35,8 @@ public class CustomDistortion extends Distortion
   }
 
   /** Determine whether this distortion is identical to another one. */
-  
+
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof CustomDistortion))
@@ -67,9 +68,10 @@ public class CustomDistortion extends Distortion
     return (preTransform != null && preTransform.equals(s.preTransform) &&
       postTransform != null && postTransform.equals(s.postTransform));
   }
-  
+
   /** Create a duplicate of this object. */
-  
+
+  @Override
   public Distortion duplicate()
   {
     CustomDistortion d = new CustomDistortion(proc, procVersion, point, weight, preTransform, postTransform);
@@ -77,9 +79,10 @@ public class CustomDistortion extends Distortion
       d.previous = previous.duplicate();
     return d;
   }
-  
+
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)
@@ -89,7 +92,7 @@ public class CustomDistortion extends Distortion
     Vec3 newvert[] = new Vec3 [vert.length];
     OutputModule output[] = proc.getOutputModules();
     double w2 = 1.0-weight;
-    
+
     for (int i = 0; i < newvert.length; i++)
       {
         newvert[i] = vert[i].r;

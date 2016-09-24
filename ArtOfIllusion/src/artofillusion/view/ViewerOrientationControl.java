@@ -22,12 +22,14 @@ import artofillusion.ui.*;
 
 public class ViewerOrientationControl implements ViewerControl
 {
+  @Override
   public Widget createWidget(final ViewerCanvas view)
   {
     return new OrientationChoice(view);
   }
 
 
+  @Override
   public String getName()
   {
     return Translate.text("ViewDirection");

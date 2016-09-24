@@ -4,8 +4,8 @@ This program is free software; you can redistribute it and/or modify it under th
 terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.view;
@@ -61,16 +61,17 @@ public class GLCanvasDrawer implements CanvasDrawer
     canvas = new GLCanvas(caps);
     canvas.addGLEventListener(new CanvasListener());
   }
-  
+
   /** Get the GLCanvas into which this draws. */
-  
+
   public Component getGLCanvas()
   {
     return canvas;
   }
 
   /** Set the template image. */
-  
+
+  @Override
   public void setTemplateImage(Image im)
   {
     if (im == null)
@@ -87,12 +88,13 @@ public class GLCanvasDrawer implements CanvasDrawer
       ex.printStackTrace();
     }
   }
-  
+
   /** Show feedback to the user in response to a mouse drag, by drawing a Shape over the image.
       Unlike the other methods of this class, this method may be called at arbitrary times
       (though always from the event dispatch thread), not during the process of rendering
       the image. */
 
+  @Override
   public void drawDraggedShape(Shape shape)
   {
     draggedShape = shape;
@@ -100,7 +102,7 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** Prepare for rendering from the camera's current viewpoint.*/
-  
+
   private void prepareView3D(Camera camera)
   {
     if (camera.getObjectToView() == lastObjectTransform)
@@ -122,9 +124,9 @@ public class GLCanvasDrawer implements CanvasDrawer
         -toView.m14, toView.m24, -toView.m34, toView.m44
     }, 0);
   }
-  
+
   /** Prepare for drawing 2D primitives. */
-  
+
   private void prepareView2D()
   {
     if (lastObjectTransform == null)
@@ -139,9 +141,9 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glLoadIdentity();
   }
-  
+
   /** Prepare for drawing with or without depth testing. */
-  
+
   private void prepareDepthTest(boolean depthTest)
   {
     if (depthTest != depthEnabled)
@@ -153,9 +155,9 @@ public class GLCanvasDrawer implements CanvasDrawer
         gl.glDisable(GL.GL_DEPTH_TEST);
     }
   }
-  
+
   /** Prepare for drawing in a solid color. */
-  
+
   private void prepareSolidColor(Color color)
   {
     if (lastColor == color)
@@ -168,9 +170,9 @@ public class GLCanvasDrawer implements CanvasDrawer
     lastColor = color;
     gl.glColor3f(color.getRed()*COLOR_SCALE, color.getGreen()*COLOR_SCALE, color.getBlue()*COLOR_SCALE);
   }
-  
+
   /** Prepare for drawing a shaded surface. */
-  
+
   private void prepareShading(boolean lighting)
   {
     if (lightingEnabled != lighting)
@@ -183,9 +185,9 @@ public class GLCanvasDrawer implements CanvasDrawer
     }
     lastColor = null;
   }
-  
+
   /** Prepare for drawing with or without backface culling. */
-  
+
   private void prepareCulling(boolean hideBackfaces)
   {
     if (cullingEnabled == hideBackfaces)
@@ -196,9 +198,9 @@ public class GLCanvasDrawer implements CanvasDrawer
     else
       gl.glDisable(GL.GL_CULL_FACE);
   }
-  
+
   /** Prepare the buffers used for storing vertex and normal arrays. */
-  
+
   private void prepareBuffers(int requiredSize)
   {
     if (vertBuffer == null || vertBuffer.capacity() < requiredSize)
@@ -209,9 +211,10 @@ public class GLCanvasDrawer implements CanvasDrawer
       gl.glNormalPointer(GL.GL_FLOAT, 0, normBuffer);
     }
   }
-  
+
   /** Draw a border around the rendered image. */
-  
+
+  @Override
   public void drawBorder()
   {
     prepareView2D();
@@ -241,7 +244,8 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Draw a horizontal line across the rendered image.  The parameters are the y coordinate
       of the line and the line color. */
-  
+
+  @Override
   public void drawHRule(int y, Color color)
   {
     prepareView2D();
@@ -257,7 +261,8 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Draw a vertical line across the rendered image.  The parameters are the x coordinate
       of the line and the line color. */
-  
+
+  @Override
   public void drawVRule(int x, Color color)
   {
     prepareView2D();
@@ -272,7 +277,8 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** Draw a filled box in the rendered image. */
-  
+
+  @Override
   public void drawBox(int x, int y, int width, int height, Color color)
   {
     prepareView2D();
@@ -291,6 +297,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Draw a set of filled boxes in the rendered image. */
 
+  @Override
   public void drawBoxes(java.util.List<Rectangle> box, Color color)
   {
     prepareView2D();
@@ -320,7 +327,8 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** Render a filled box at a specified depth in the rendered image. */
-  
+
+  @Override
   public void renderBox(int x, int y, int width, int height, double depth, Color color)
   {
     prepareView2D();
@@ -339,6 +347,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Render a set of filled boxes at specified depths in the rendered image. */
 
+  @Override
   public void renderBoxes(java.util.List<Rectangle> box, java.util.List<Double>depth, Color color)
   {
     prepareView2D();
@@ -369,7 +378,8 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** Draw a line into the rendered image. */
-  
+
+  @Override
   public void drawLine(Point p1, Point p2, Color color)
   {
     prepareView2D();
@@ -382,14 +392,15 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glVertex3d(p2.x*scale, (bounds.height-p2.y)*scale, d);
     gl.glEnd();
   }
-  
+
   /** Render a line into the image.
       @param p1     the first endpoint of the line
       @param p2     the second endpoint of the line
       @param cam    the camera from which to draw the line
       @param color  the line color
   */
-  
+
+  @Override
   public void renderLine(Vec3 p1, Vec3 p2, Camera cam, Color color)
   {
     prepareView3D(cam);
@@ -409,7 +420,8 @@ public class GLCanvasDrawer implements CanvasDrawer
       @param cam    the camera from which to draw the line
       @param color  the line color
   */
-  
+
+  @Override
   public void renderLine(Vec2 p1, double zf1, Vec2 p2, double zf2, Camera cam, Color color)
   {
     prepareView2D();
@@ -430,9 +442,10 @@ public class GLCanvasDrawer implements CanvasDrawer
     }
     gl.glEnd();
   }
-  
+
   /** Render a wireframe object. */
-  
+
+  @Override
   public void renderWireframe(WireframeMesh mesh, Camera cam, Color color)
   {
     prepareView3D(cam);
@@ -457,7 +470,8 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** Render an object with flat shading in subtractive (transparent) mode. */
-  
+
+  @Override
   public void renderMeshTransparent(RenderingMesh mesh, VertexShader shader, Camera cam, Vec3 viewDir, boolean hideFace[])
   {
     prepareView3D(cam);
@@ -493,9 +507,10 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glEnd();
     gl.glDisable(GL.GL_BLEND);
   }
-  
+
   /** Render a mesh to the canvas. */
-  
+
+  @Override
   public void renderMesh(RenderingMesh mesh, VertexShader shader, Camera cam, boolean closed, boolean hideFace[])
   {
     prepareView3D(cam);
@@ -505,7 +520,7 @@ public class GLCanvasDrawer implements CanvasDrawer
     if (uniform)
     {
       // Set up the material properties to let OpenGL shade the surface.
-      
+
       prepareShading(true);
       TextureSpec spec = new TextureSpec();
       shader.getTextureSpec(spec);
@@ -513,9 +528,9 @@ public class GLCanvasDrawer implements CanvasDrawer
       gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_SPECULAR, FloatBuffer.wrap(new float [] {spec.hilight.getRed(), spec.hilight.getGreen(), spec.hilight.getBlue(), 1.0f}));
       gl.glMaterialfv(GL.GL_FRONT_AND_BACK, GL2.GL_EMISSION, FloatBuffer.wrap(new float [] {spec.emissive.getRed(), spec.emissive.getGreen(), spec.emissive.getBlue(), 1.0f}));
       gl.glMaterialf(GL.GL_FRONT_AND_BACK, GL2.GL_SHININESS, (float) ((1.0-spec.roughness)*127.0+1.0));
-      
+
       // Fill in buffers with the vertices and normals.
-      
+
       int vertexIndices[] = null;
       boolean flat = (shader instanceof FlatVertexShader);
       if (hideFace == null && !flat)
@@ -523,7 +538,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       if (vertexIndices != null)
       {
         // This is a fully smoothed mesh, so we can use glDrawElements().
-        
+
         prepareBuffers(mesh.vert.length*3);
         vertBuffer.clear();
         normBuffer.clear();
@@ -546,7 +561,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       else
       {
         // We need a separate normal for each face-vertex.
-        
+
         prepareBuffers(mesh.triangle.length*9);
         vertBuffer.clear();
         normBuffer.clear();
@@ -608,7 +623,7 @@ public class GLCanvasDrawer implements CanvasDrawer
     else
     {
       // We will need to calculate the color of each face/vertex ourselves.
-      
+
       prepareShading(false);
       gl.glBegin(GL.GL_TRIANGLES);
       RGBColor surfaceColor = new RGBColor();
@@ -644,6 +659,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Draw a piece of text onto the canvas. */
 
+  @Override
   public void drawString(String text, int x, int y, Color color)
   {
     if (color != lastTextColor)
@@ -687,6 +703,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Draw an image onto the canvas. */
 
+  @Override
   public void drawImage(Image image, int x, int y)
   {
     try
@@ -710,6 +727,7 @@ public class GLCanvasDrawer implements CanvasDrawer
    * @param camera the camera from which to draw the image
    */
 
+  @Override
   public void renderImage(Image image, Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4, Camera camera)
   {
     GLTexture record;
@@ -743,6 +761,7 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glDisable(imageRenderMode);
   }
 
+  @Override
   public void imageChanged(Image image)
   {
     imageMap.remove(image);
@@ -813,7 +832,8 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** Draw the outline of a Shape into the canvas. */
-  
+
+  @Override
   public void drawShape(Shape shape, Color color)
   {
     drawShape(shape, color, GL.GL_LINE_STRIP);
@@ -821,6 +841,7 @@ public class GLCanvasDrawer implements CanvasDrawer
 
   /** Draw a filled Shape onto the canvas. */
 
+  @Override
   public void fillShape(Shape shape, Color color)
   {
     drawShape(shape, color, GL2.GL_POLYGON);
@@ -859,9 +880,10 @@ public class GLCanvasDrawer implements CanvasDrawer
   }
 
   /** This inner class implements the callbacks to perform drawing with Jogl. */
-  
+
   private class CanvasListener implements GLEventListener
   {
+    @Override
     public void init(GLAutoDrawable drawable)
     {
       GL2 gl = (GL2) drawable.getGL();
@@ -879,7 +901,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       {
         // Determine whether non-power-of-2 textures are supported.
 
-        if (gl.glGetString(GL.GL_EXTENSIONS).indexOf("GL_EXT_texture_rectangle") > -1)
+        if (gl.glGetString(GL.GL_EXTENSIONS).contains("GL_EXT_texture_rectangle"))
         {
           imageRenderMode = GL2.GL_TEXTURE_RECTANGLE_ARB;
           useTextureRectangle = true;
@@ -892,10 +914,12 @@ public class GLCanvasDrawer implements CanvasDrawer
       }
     }
 
+    @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height)
     {
     }
 
+    @Override
     public void display(GLAutoDrawable drawable)
     {
       view.prepareCameraForRendering();

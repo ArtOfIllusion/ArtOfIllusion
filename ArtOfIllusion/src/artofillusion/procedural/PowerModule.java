@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -20,25 +20,27 @@ public class PowerModule extends Module
   boolean valueOk, errorOk, gradOk, powerIsInteger;
   double value, error, valueIn, errorIn, power, lastBlur;
   Vec3 gradient;
-  
+
   public PowerModule(Point position)
   {
     super("Pow", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Exponent", "(1)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
       position);
     gradient = new Vec3();
   }
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
   }
 
   /* Calculate the output value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -76,9 +78,9 @@ public class PowerModule extends Module
     value = (integral(valueIn+errorIn, power)-integral(valueIn-errorIn, power))/(2.0*errorIn);
     return value;
   }
-  
+
   /* This calculates the integral of the power function. */
-  
+
   private double integral(double x, double y)
   {
     if (y == -1.0)
@@ -96,7 +98,8 @@ public class PowerModule extends Module
   }
 
   /* Estimate the error from the derivative of the function. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -118,6 +121,7 @@ public class PowerModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (gradOk && blur == lastBlur)

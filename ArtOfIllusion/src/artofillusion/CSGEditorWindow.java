@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -73,6 +73,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     setVisible(true);
   }
 
+  @Override
   protected ViewerCanvas createViewerCanvas(int index, RowContainer controls)
   {
     return new SceneViewer(theScene, controls, this);
@@ -130,6 +131,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     ViewerCanvas view = getView();
@@ -151,11 +153,13 @@ public class CSGEditorWindow extends ObjectEditorWindow
     displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
   }
 
+  @Override
   public Scene getScene()
   {
     return theScene;
   }
 
+  @Override
   protected void doOk()
   {
     updateFromScene();
@@ -167,7 +171,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     parentWindow.updateImage();
     parentWindow.updateMenus();
   }
-  
+
+  @Override
   protected void doCancel()
   {
     oldObject = theObject = null;
@@ -192,9 +197,9 @@ public class CSGEditorWindow extends ObjectEditorWindow
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
     savePreferences();
   }
-  
+
   /* Update the object based on the scene being used for editing it. */
-  
+
   private void updateFromScene()
   {
     theObject.setComponentObjects(theScene.getObject(0), theScene.getObject(1));
@@ -206,13 +211,13 @@ public class CSGEditorWindow extends ObjectEditorWindow
     updateImage();
     updateMenus();
   }
-  
+
   void propertiesCommand()
   {
     updateFromScene();
     new CSGDialog(this, theObject);
   }
-  
+
   void editObjectCommand()
   {
     int sel[] = theScene.getSelection();
@@ -224,6 +229,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     {
       final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
       obj.edit(this, theScene.getObject(sel[0]), new Runnable() {
+        @Override
         public void run()
         {
           setUndoRecord(undo);
@@ -234,7 +240,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       } );
     }
   }
-  
+
   void objectLayoutCommand()
   {
     int i, sel[] = theScene.getSelection();
@@ -242,7 +248,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     CoordinateSystem coords[] = new CoordinateSystem [sel.length];
     Vec3 orig, size;
     double angles[], values[];
-	
+
     if (sel.length == 0)
       return;
     UndoRecord undo = new UndoRecord(this, false);
@@ -260,7 +266,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       angles = coords[0].getRotationAngles();
       size = theScene.getObject(sel[0]).getBounds().getSize();
       TransformDialog dlg = new TransformDialog(this, Translate.text("objectLayoutTitle", theScene.getObject(sel[0]).getName()),
-          new double [] {orig.x, orig.y, orig.z, angles[0], angles[1], angles[2], 
+          new double [] {orig.x, orig.y, orig.z, angles[0], angles[1], angles[2],
           size.x, size.y, size.z}, false, false);
       values = dlg.getValues();
       if (!Double.isNaN(values[0]))
@@ -337,7 +343,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       dlg = new TransformDialog(this, Translate.text("transformObjectTitle", theScene.getObject(sel[0]).getName()),
 		new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
     else
-      dlg = new TransformDialog(this, Translate.text("transformObjectTitleMultiple"), 
+      dlg = new TransformDialog(this, Translate.text("transformObjectTitleMultiple"),
 		new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
     values = dlg.getValues();
     UndoRecord undo = new UndoRecord(this, false);
@@ -417,15 +423,15 @@ public class CSGEditorWindow extends ObjectEditorWindow
     }));
     pz.add(Translate.label("alignTo"));
     pz.add(vfz = new ValueField(Double.NaN, ValueField.NONE, 5));
-    dlg = new ComponentsDialog(this, Translate.text("alignObjectsTitle"), 
+    dlg = new ComponentsDialog(this, Translate.text("alignObjectsTitle"),
 		new Widget [] {px, py, pz}, new String [] {"X", "Y", "Z"});
     if (!dlg.clickedOk())
       return;
     UndoRecord undo = new UndoRecord(this, false);
     setUndoRecord(undo);
-    
+
     // Determine the position to align the objects to.
-    
+
     alignTo = new Vec3();
     for (i = 0; i < sel.length; i++)
     {
@@ -467,9 +473,9 @@ public class CSGEditorWindow extends ObjectEditorWindow
         alignTo.z += orig.z;
     }
     alignTo.scale(1.0/sel.length);
-    
+
     // Now transform all of the objects.
-    
+
     for (i = 0; i < sel.length; i++)
     {
       obj = theScene.getObject(sel[i]).getObject();
@@ -506,14 +512,14 @@ public class CSGEditorWindow extends ObjectEditorWindow
       coords.setOrigin(orig);
     }
     updateImage();
-  }  
+  }
 
   void centerObjectsCommand()
   {
     BoundingBox bounds = null;
-    
+
     // Determine the bounding box for all objects.
-    
+
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
@@ -526,9 +532,9 @@ public class CSGEditorWindow extends ObjectEditorWindow
     Vec3 center = bounds.getCenter();
     UndoRecord undo = new UndoRecord(this, false);
     setUndoRecord(undo);
-    
+
     // Center the objects.
-    
+
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);
@@ -536,7 +542,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       info.getCoords().setOrigin(info.getCoords().getOrigin().minus(center));
     }
     updateImage();
-  }  
+  }
 
   void convertToTriangleCommand()
   {

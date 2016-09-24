@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -15,8 +15,8 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
 
-/** RTCylinder represents an cylinder, tapered cylinder, or cone to be raytraced.  It is 
-    defined by specifying a Cylinder object, and the transformations to and from local 
+/** RTCylinder represents an cylinder, tapered cylinder, or cone to be raytraced.  It is
+    defined by specifying a Cylinder object, and the transformations to and from local
     coordinates. */
 
 public class RTCylinder extends RTObject
@@ -26,7 +26,7 @@ public class RTCylinder extends RTObject
   double rx, rz, height, halfh, rx2, rz2, toprx2, cx, cy, cz, sy, sz, param[];
   boolean bumpMapped, cone, transform, uniform;
   Mat4 toLocal, fromLocal;
-  
+
   public static final double TOL = 1e-12;
   public static final int TOP = 0;
   public static final int BOTTOM = 1;
@@ -37,7 +37,7 @@ public class RTCylinder extends RTObject
     double ratio = cylinder.getRatio();
     Vec3 vx = toLocal.timesDirection(Vec3.vx()), vy = toLocal.timesDirection(Vec3.vy());
     Vec3 size;
-    
+
     theCylinder = cylinder;
     this.param = param;
     size = cylinder.getBounds().getSize();
@@ -108,14 +108,16 @@ public class RTCylinder extends RTObject
   }
 
   /** Get the MaterialMapping for this object. */
-  
+
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return theCylinder.getMaterialMapping();
   }
 
   /** Get the TextureMapping for this object. */
-  
+
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return theCylinder.getTextureMapping();
@@ -123,6 +125,7 @@ public class RTCylinder extends RTObject
 
   /** Determine whether the given ray intersects this cylinder. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 orig = r.getOrigin(), rdir = r.getDirection();
@@ -201,7 +204,7 @@ public class RTCylinder extends RTObject
               }
           }
       }
-    
+
     // Now see if it hits the sides of the cylinder.
 
     if (sy == 0.0)
@@ -286,10 +289,10 @@ public class RTCylinder extends RTObject
       }
     return new CylinderIntersection(this, intersections, hit, v1, v2, dist1, dist2);
   }
-  
+
   /** Given a point, project it onto the surface of the cylinder.  This is necessary to
       prevent roundoff error. */
-  
+
   private void projectPoint(Vec3 pos)
   {
     if (transform)
@@ -310,7 +313,8 @@ public class RTCylinder extends RTObject
   }
 
   /** Get a bounding box for this cylinder. */
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     if (transform)
@@ -326,6 +330,7 @@ public class RTCylinder extends RTObject
 
   /** Determine whether any part of the surface of the cylinder lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     double x, z;
@@ -367,9 +372,10 @@ public class RTCylinder extends RTObject
       return false;
     return true;
   }
-  
+
   /** Get the transformation from world coordinates to the object's local coordinates. */
-  
+
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -404,16 +410,19 @@ public class RTCylinder extends RTObject
       pos = new Vec3();
     }
 
+    @Override
     public RTObject getObject()
     {
       return cylinder;
     }
 
+    @Override
     public int numIntersections()
     {
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       if (n == 0)
@@ -422,6 +431,7 @@ public class RTCylinder extends RTObject
         p.set(r2x, r2y, r2z);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       if (n == 0)
@@ -430,6 +440,7 @@ public class RTCylinder extends RTObject
         return dist2;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       calcTrueNorm();
@@ -453,6 +464,7 @@ public class RTCylinder extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       TextureMapping map = cylinder.theCylinder.getTextureMapping();
@@ -469,6 +481,7 @@ public class RTCylinder extends RTObject
         }
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       calcTrueNorm();
@@ -477,7 +490,7 @@ public class RTCylinder extends RTObject
 
     /** Calculate the true normal of the point of intersection. */
 
-    private final void calcTrueNorm()
+    private void calcTrueNorm()
     {
       if (trueNormValid)
         return;

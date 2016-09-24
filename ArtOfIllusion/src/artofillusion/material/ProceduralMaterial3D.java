@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.material;
@@ -24,7 +24,7 @@ import java.io.*;
 /** This is a Material3D which uses a Procedure to calculate its properties. */
 
 public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
-{  
+{
   private Procedure proc;
   private boolean shadows;
   private double stepSize, antialiasing;
@@ -62,6 +62,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   private void initThreadLocal()
   {
     renderingProc = new ThreadLocal() {
+      @Override
       protected Object initialValue()
       {
         Procedure localProc = createProcedure();
@@ -75,17 +76,19 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   {
     return "Procedural";
   }
-  
+
+  @Override
   public double getStepSize()
   {
     return stepSize;
   }
-  
+
   public void setStepSize(double step)
   {
     stepSize = step;
   }
 
+  @Override
   public void getMaterialSpec(MaterialSpec spec, double x, double y, double z, double xsize, double ysize, double zsize, double t)
   {
     Procedure pr = (Procedure) renderingProc.get();
@@ -139,6 +142,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
 
   /** Determine whether this Material uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
     Module modules[] = proc.getModules();
@@ -148,24 +152,27 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
         return true;
     return false;
   }
-  
+
   /** The material scatters light if there is anything connected to the scattering output. */
 
+  @Override
   public boolean isScattering()
   {
     OutputModule output[] = proc.getOutputModules();
     return output[4].inputConnected(0);
   }
 
+  @Override
   public boolean castsShadows()
   {
     return shadows;
   }
 
+  @Override
   public Material duplicate()
   {
     ProceduralMaterial3D mat = new ProceduralMaterial3D();
-    
+
     mat.proc.copy(proc);
     mat.setName(getName());
     mat.setIndexOfRefraction(indexOfRefraction());
@@ -174,7 +181,8 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     mat.stepSize = stepSize;
     return mat;
   }
-  
+
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
     new ProcedureEditor(proc, this, sc);
@@ -183,7 +191,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   public ProceduralMaterial3D(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     setName(in.readUTF());
@@ -244,7 +252,8 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     proc.addModule(module);
     proc.addLink(new Link(module.getOutputPorts()[0], output.getInputPorts()[0]));
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);
@@ -257,14 +266,16 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   }
 
   /** Get the title of the procedure's editing window. */
-  
+
+  @Override
   public String getWindowTitle()
   {
     return "Procedural Material";
   }
-  
+
   /** Create an object which displays a preview of the procedure. */
-  
+
+  @Override
   public Object getPreview(ProcedureEditor editor)
   {
     BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
@@ -282,6 +293,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
       {
         processor.addEvent(new Runnable()
         {
+                  @Override
           public void run()
           {
             preview.getScene().setTime(value.getValue());
@@ -300,45 +312,51 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     dlg.setVisible(true);
     return preview;
   }
-  
+
   /** Update the display of the preview. */
-  
+
+  @Override
   public void updatePreview(Object preview)
   {
     initThreadLocal();
     ((MaterialPreviewer) preview).render();
   }
-  
+
   /** Dispose of the preview object when the editor is closed. */
-  
+
+  @Override
   public void disposePreview(Object preview)
   {
     UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
   }
-  
+
   /** Determine whether the procedure may contain View Angle modules. */
-  
+
+  @Override
   public boolean allowViewAngle()
   {
     return false;
   }
-  
+
   /** Determine whether the procedure may contain Parameter modules. */
-  
+
+  @Override
   public boolean allowParameters()
   {
     return false;
   }
-  
+
   /** Determine whether the procedure may be renamed. */
-  
+
+  @Override
   public boolean canEditName()
   {
     return true;
   }
-  
+
   /** This is called when the user clicks OK in the procedure editor. */
-  
+
+  @Override
   public void acceptEdits(ProcedureEditor editor)
   {
     initThreadLocal();
@@ -346,16 +364,17 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     if (i > -1)
       editor.getScene().changeMaterial(i);
   }
-  
+
   /** Display the Properties dialog. */
-  
+
+  @Override
   public void editProperties(ProcedureEditor editor)
   {
     ValueField refractField = new ValueField(indexOfRefraction(), ValueField.POSITIVE);
     ValueField stepField = new ValueField(stepSize, ValueField.POSITIVE);
     ValueField aliasField = new ValueField(antialiasing, ValueField.POSITIVE);
     BCheckBox shadowBox = new BCheckBox(Translate.text("CastsShadows"), shadows);
-    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("editMaterialTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("editMaterialTitle"),
       new Widget [] {refractField, stepField, aliasField, shadowBox},
       new String [] {Translate.text("IndexOfRefraction"), Translate.text("integrationStepSize"),
       Translate.text("Antialiasing"), ""});

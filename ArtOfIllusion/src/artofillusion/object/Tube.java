@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -31,7 +31,7 @@ public class Tube extends Curve
   private double thickness[];
   private int endsStyle;
   private RenderingMesh cachedMesh;
-  
+
   public static final int OPEN_ENDS = 0;
   public static final int CLOSED_ENDS = 1;
   public static final int FLAT_ENDS = 2;
@@ -54,7 +54,7 @@ public class Tube extends Curve
     this.thickness = thickness;
     this.endsStyle = endsStyle;
   }
-  
+
   /** Create a tube, explicitly specifying all parameters. */
 
   public Tube(MeshVertex v[], float smoothness[], double thickness[], int smoothingMethod, int endsStyle)
@@ -65,9 +65,9 @@ public class Tube extends Curve
     this.thickness = thickness;
     this.endsStyle = endsStyle;
   }
-  
+
   /** Create a tube based on a Curve. */
-  
+
   public Tube(Curve c, double thickness[], int endsStyle)
   {
     super(new Vec3 [c.vertex.length], c.smoothness, c.smoothingMethod, endsStyle == CLOSED_ENDS);
@@ -93,6 +93,7 @@ public class Tube extends Curve
 
   /** Create an exact duplicate of this object. */
 
+  @Override
   public Object3D duplicate()
   {
     Curve c = (Curve) super.duplicate();
@@ -105,6 +106,7 @@ public class Tube extends Curve
 
   /** Make this object identical to another one. */
 
+  @Override
   public void copyObject(Object3D obj)
   {
     Tube t = (Tube) obj;
@@ -116,20 +118,20 @@ public class Tube extends Curve
   }
 
   /** Get the thickness of the tube at each vertex. */
-  
+
   public double [] getThickness()
   {
     return thickness;
   }
-  
+
   /** Set the thickness of the tube at each vertex. */
-  
+
   public void setThickness(double thickness[])
   {
     this.thickness = thickness;
     clearCachedMesh();
   }
-  
+
   /** Set the position, smoothness, and thickness values for all points. */
 
   public void setShape(MeshVertex v[], float smoothness[], double thickness[])
@@ -139,14 +141,14 @@ public class Tube extends Curve
     this.smoothness = smoothness;
     clearCachedMesh();
   }
-  
+
   /** Get the ends style. */
-  
+
   public int getEndsStyle()
   {
     return endsStyle;
   }
-  
+
   /** Set the ends style.  This should be one of the following values:
       OPEN_ENDS, CLOSED_ENDS, or FLAT_ENDS. */
 
@@ -156,17 +158,19 @@ public class Tube extends Curve
     closed = (style == CLOSED_ENDS);
     clearCachedMesh();
   }
-  
+
   /** Determine whether this tube is a closed surface. */
-  
+
+  @Override
   public boolean isClosed()
   {
     return (endsStyle != OPEN_ENDS || (thickness[0] == 0.0 && thickness[thickness.length-1] == 0.0));
   }
-  
+
   /** Make sure the ends style is consistent with the closed flag.  Generally,
       setEndsStyle() should be used instead of this method. */
-  
+
+  @Override
   public void setClosed(boolean isClosed)
   {
     super.setClosed(isClosed);
@@ -177,7 +181,8 @@ public class Tube extends Curve
   }
 
   /** Clear the cached mesh. */
-  
+
+  @Override
   protected void clearCachedMesh()
   {
     super.clearCachedMesh();
@@ -185,7 +190,7 @@ public class Tube extends Curve
   }
 
   /** Subdivide the curve which defines this tube to the specified tolerance. */
-  
+
   public Tube subdivideTube(double tol)
   {
     if (vertex.length < 3)
@@ -198,7 +203,7 @@ public class Tube extends Curve
   }
 
   /** Subdivide the curve which defines this tube to the specified tolerance. */
-  
+
   private Tube subdivideTubeApprox(double tol)
   {
     Tube t = this;
@@ -208,7 +213,7 @@ public class Tube extends Curve
     int numParam = (texParam == null ? 0 : texParam.length);
     double newt[], param[][], newparam[][], paramTemp[] = new double [numParam], tol2 = tol*tol;
     boolean refine[], newrefine[];
-    
+
     param = new double [t.vertex.length][numParam];
     for (i = 0; i < numParam; i++)
     {
@@ -253,7 +258,7 @@ public class Tube extends Curve
             if (!refine[j])
               {
                 // Copy over the existing vertex.
-            
+
                 newvert[i] = t.vertex[j];
                 newt[i] = t.thickness[j];
                 news[i] = t.smoothness[j];
@@ -262,7 +267,7 @@ public class Tube extends Curve
             else
               {
                 // Find the new position for the vertex.
-  
+
                 newvert[i] = SplineMesh.calcApproxPoint(t.vertex, t.smoothness, param, paramTemp, p1, p2, p3);
                 newt[i] = calcApproxThickness(t.thickness, t.smoothness, p1, p2, p3);
                 news[i] = t.smoothness[j]*2.0f;
@@ -274,17 +279,17 @@ public class Tube extends Curve
             i++;
             if (!refine[p2] && !refine[p3])
               continue;
-            
+
             // Add a new vertex.
-            
+
             newvert[i] = MeshVertex.blend(t.vertex[p2], t.vertex[p3], 0.5, 0.5);
             newt[i] = 0.5*(t.thickness[p2]+t.thickness[p3]);
             news[i] = 1.0f;
             for (int k = 0; k < numParam; k++)
               newparam[i][k] = 0.5*(param[p2][k]+param[p3][k]);
-            
+
             // Decide whether we need to subdivide further.
-            
+
             if (newvert[i-1].r.distance2(t.vertex[j].r) > tol2)
               {
                 if (newvert[i].r.distance2(newvert[i-1].r) > tol2 && (i < 2 || newvert[i-1].r.distance2(newvert[i-2].r) > tol2))
@@ -320,10 +325,10 @@ public class Tube extends Curve
     }
     return t;
   }
-  
+
 
   /** Subdivide the curve which defines this tube to the specified tolerance. */
-  
+
   private Tube subdivideTubeInterp(double tol)
   {
     Tube t = this;
@@ -333,7 +338,7 @@ public class Tube extends Curve
     int numParam = (texParam == null ? 0 : texParam.length);
     double newt[], param[][], newparam[][], paramTemp[] = new double [numParam], tol2 = tol*tol;
     boolean refine[], newrefine[];
-    
+
     param = new double [t.vertex.length][numParam];
     for (i = 0; i < numParam; i++)
     {
@@ -363,7 +368,7 @@ public class Tube extends Curve
         for (i = 0, j = 0; j < len; j++)
           {
             // Copy over the existing vertex.
-            
+
             newvert[i] = t.vertex[j];
             newt[i] = t.thickness[j];
             news[i] = t.smoothness[j]*2.0f;
@@ -374,7 +379,7 @@ public class Tube extends Curve
             if (j < refine.length && refine[j])
               {
                 // Create the interpolated vertex.
-                
+
                 p1 = j-1;
                 if (p1 < 0)
                   p1 = (t.closed ? len-1 : 0);
@@ -425,13 +430,13 @@ public class Tube extends Curve
     }
     return t;
   }
-  
+
   /* These two routines are used by subdivideTube for calculating the thickness at vertices. */
 
   public static double calcInterpThickness(double t[], float s[], int i, int j, int k, int m)
   {
     double w1, w2, w3, w4;
-    
+
     w1 = -0.0625*s[j];
     w2 = 0.5-w1;
     w4 = -0.0625*s[k];
@@ -442,7 +447,7 @@ public class Tube extends Curve
   public static double calcApproxThickness(double t[], float s[], int i, int j, int k)
   {
     double w1 = 0.125*s[j], w2 = 1.0-2.0*w1;
-    
+
     return (w1*t[i] + w2*t[j] + w1*t[k]);
   }
 
@@ -451,16 +456,16 @@ public class Tube extends Curve
   {
     return true;
   }
-  
+
   @Override
   public int canConvertToTriangleMesh()
   {
     return APPROXIMATELY;
   }
-  
+
   /** Get a rendering mesh representing the surface of this object at the
       specified accuracy. */
-  
+
   @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
@@ -476,7 +481,7 @@ public class Tube extends Curve
     norm.copyInto(n);
     int numnorm = norm.size();
     RenderingTriangle tri[] = new RenderingTriangle [face.size()];
-    
+
     for (int i = 0; i < tri.length; i++)
       {
         int f[] = (int []) face.elementAt(i);
@@ -509,7 +514,7 @@ public class Tube extends Curve
   }
 
   /** When setting the texture, we need to clear the cached meshes. */
-  
+
   @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
@@ -537,7 +542,7 @@ public class Tube extends Curve
       return cachedWire;
     return (cachedWire = convertToTriangleMesh(ArtOfIllusion.getPreferences().getInteractiveSurfaceError()).getWireframeMesh());
   }
-  
+
   /** Get a triangle mesh which approximates the surface of this object at
       the specified accuracy. */
 
@@ -557,9 +562,9 @@ public class Tube extends Curve
     face.copyInto(f);
     int numnorm = norm.size();
     TriangleMesh mesh = new TriangleMesh(v, f);
-    
+
     // Copy information on textures, materials, and parameters.
-    
+
     mesh.copyTextureAndMaterial(this);
     if (paramValue != null)
     {
@@ -578,9 +583,9 @@ public class Tube extends Curve
       }
       mesh.setParameterValues(tubeParamValue);
     }
-    
+
     // Set the smoothness values of edges.
-    
+
     TriangleMesh.Edge ed[] = mesh.getEdges();
     TriangleMesh.Face fc[] = mesh.getFaces();
     for (int i = 0; i < fc.length; i++)
@@ -594,15 +599,15 @@ public class Tube extends Curve
       }
     return mesh;
   }
-  
+
   /** This is a utility routine used by both getRenderingMesh() and convertToTriangleMesh().
       It subdivides the surface and fills in the vectors with lists of vertices, normals,
       faces, and parameter values. */
-  
+
   private void subdivideSurface(double tol, Vector vert, Vector norm, Vector face, Vector param)
   {
     // Subdivide the central curve to the desired tolerance.
-  
+
     Tube t = subdivideTube(tol);
     Vec3 pathv[] = new Vec3[t.vertex.length];
     for (int i = 0; i < pathv.length; i++)
@@ -624,9 +629,9 @@ public class Tube extends Curve
           tubeParamVal[j][i] = val;
       }
     }
-    
+
     // Figure out how many subdivisions we need around the circumference.
-    
+
     double max = 0.0;
     for (int i = 0; i < t.thickness.length; i++)
       if (t.thickness[i] > max)
@@ -638,9 +643,9 @@ public class Tube extends Curve
     if (n < 3)
       n = 3;
 
-    // Construct the Minimally Rotating Frame at every point along the path.  First, 
+    // Construct the Minimally Rotating Frame at every point along the path.  First,
     // subdivide the path and determine its direction at the starting point.
-    
+
     Vec3 subdiv[], zdir[], updir[], xdir[];
     subdiv = new Curve(pathv, t.smoothness, t.getSmoothingMethod(), t.closed).subdivideCurve().getVertexPositions();
     xdir = new Vec3 [subdiv.length];
@@ -657,10 +662,10 @@ public class Tube extends Curve
       zdir[0] = xdir[0].cross(Vec3.vy());
     zdir[0].normalize();
     updir[0] = xdir[0].cross(zdir[0]);
-    
+
     // Now find two vectors perpendicular to the path, and determine how much they
     // contribute to the z and up directions.
-    
+
     Vec3 dir1, dir2;
     double zfrac1, zfrac2, upfrac1, upfrac2;
     zfrac1 = xdir[0].dot(zdir[0]);
@@ -671,9 +676,9 @@ public class Tube extends Curve
     upfrac2 = Math.sqrt(1.0-upfrac1*upfrac1);
     dir2 = updir[0].minus(xdir[0].times(upfrac1));
     dir2.normalize();
-    
+
     // Propagate the vectors along the path.
-    
+
     for (int i = 1; i < subdiv.length; i++)
       {
         if (i == subdiv.length-1)
@@ -694,9 +699,9 @@ public class Tube extends Curve
         updir[i] = xdir[i].cross(zdir[i]);
         updir[i].normalize();
       }
-    
+
     // Now calculate the vertices for the sides of the tube.
-    
+
     double dtheta = 2.0*Math.PI/n, theta = 0.0;
     for (int i = 0; i < pathv.length; i++)
       {
@@ -714,9 +719,9 @@ public class Tube extends Curve
             theta += dtheta;
           }
       }
-    
+
     // Create the faces for the sides of the tube.
-    
+
     for (int i = 0; i < pathv.length-1; i++)
       {
         int k = i*n;
@@ -728,13 +733,13 @@ public class Tube extends Curve
         face.addElement(new int [] {k+n-1, k, k+n+n-1});
         face.addElement(new int [] {k, k+n, k+n+n-1});
       }
-    
+
     // Handle the ends appropriately.
-    
+
     if (endsStyle == CLOSED_ENDS)
       {
         // Connect the ends together.
-        
+
         int k = (pathv.length-1)*n;
         for (int j = 0; j < n-1; j++)
           {
@@ -747,7 +752,7 @@ public class Tube extends Curve
     else if (endsStyle == FLAT_ENDS)
       {
         // Create flat caps covering the ends.
-        
+
         int k = vert.size();
         vert.addElement(new MeshVertex(t.vertex[0]));
         vert.addElement(new MeshVertex(t.vertex[t.vertex.length-1]));
@@ -763,13 +768,15 @@ public class Tube extends Curve
         face.addElement(new int [] {j+n-1, j, k});
       }
   }
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     TubeEditorWindow ed = new TubeEditorWindow(parent, "Tube object '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
+  @Override
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
     TubeEditorWindow ed = new TubeEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
@@ -780,7 +787,8 @@ public class Tube extends Curve
   }
 
   /** Get a MeshViewer which can be used for viewing this mesh. */
-  
+
+  @Override
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
   {
     return new TubeViewer(controller, options);
@@ -812,6 +820,7 @@ public class Tube extends Curve
     endsStyle = in.readInt();
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -822,11 +831,13 @@ public class Tube extends Curve
     out.writeInt(endsStyle);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     if (index == 1)
@@ -834,6 +845,7 @@ public class Tube extends Curve
     return super.getPropertyValue(index);
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 1)
@@ -851,6 +863,7 @@ public class Tube extends Curve
 
   /** Return a Keyframe which describes the current pose of this object. */
 
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new TubeKeyframe(this);
@@ -858,6 +871,7 @@ public class Tube extends Curve
 
   /** Modify this object based on a pose keyframe. */
 
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     TubeKeyframe key = (TubeKeyframe) k;
@@ -873,6 +887,7 @@ public class Tube extends Curve
     bounds = null;
   }
 
+  @Override
   public boolean canConvertToActor()
   {
     return true;
@@ -881,6 +896,7 @@ public class Tube extends Curve
   /** Tubes cannot be keyframed directly, since any change to mesh topology would
       cause all keyframes to become invalid.  Return an actor for this mesh. */
 
+  @Override
   public Object3D getPosableObject()
   {
     Tube m = (Tube) duplicate();
@@ -916,6 +932,7 @@ public class Tube extends Curve
 
     /** Get the Mesh this Gesture belongs to. */
 
+    @Override
     protected Mesh getMesh()
     {
       return tube;
@@ -923,6 +940,7 @@ public class Tube extends Curve
 
     /** Get the positions of all vertices in this Gesture. */
 
+    @Override
     protected Vec3 [] getVertexPositions()
     {
       return vertPos;
@@ -930,6 +948,7 @@ public class Tube extends Curve
 
     /** Set the positions of all vertices in this Gesture. */
 
+    @Override
     protected void setVertexPositions(Vec3 pos[])
     {
       vertPos = pos;
@@ -937,6 +956,7 @@ public class Tube extends Curve
 
     /** Get the skeleton for this pose (or null if it doesn't have one). */
 
+    @Override
     public Skeleton getSkeleton()
     {
       return null;
@@ -944,17 +964,20 @@ public class Tube extends Curve
 
     /** Set the skeleton for this pose. */
 
+    @Override
     public void setSkeleton(Skeleton s)
     {
     }
 
     /** Create a duplicate of this keyframe. */
 
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(tube);
     }
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       TubeKeyframe k = new TubeKeyframe();
@@ -976,6 +999,7 @@ public class Tube extends Curve
 
     /** Get the list of graphable values for this keyframe. */
 
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
@@ -983,6 +1007,7 @@ public class Tube extends Curve
 
     /** Set the list of graphable values for this keyframe. */
 
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -991,16 +1016,19 @@ public class Tube extends Curve
        two, or three others.  These methods should never be called, since Tubes
        can only be keyframed by converting them to Actors. */
 
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       return null;
@@ -1015,6 +1043,7 @@ public class Tube extends Curve
         @param weight    the weights for the different Gestures
     */
 
+    @Override
     public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
     {
       super.blendSurface(average, p, weight);
@@ -1043,6 +1072,7 @@ public class Tube extends Curve
 
     /** Determine whether this keyframe is identical to another one. */
 
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof TubeKeyframe))
@@ -1062,12 +1092,14 @@ public class Tube extends Curve
 
     /** Update the texture parameter values when the texture is changed. */
 
+    @Override
     public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
     {
     }
 
     /** Get the value of a per-vertex texture parameter. */
 
+    @Override
     public ParameterValue getTextureParameter(TextureParameter p)
     {
       return null;
@@ -1075,12 +1107,14 @@ public class Tube extends Curve
 
     /** Set the value of a per-vertex texture parameter. */
 
+    @Override
     public void setTextureParameter(TextureParameter p, ParameterValue value)
     {
     }
 
     /** Write out a representation of this keyframe to a stream. */
 
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0); // version

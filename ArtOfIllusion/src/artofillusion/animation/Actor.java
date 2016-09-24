@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -29,7 +29,7 @@ public class Actor extends ObjectWrapper
   String gestureName[];
   int gestureID[], nextPoseID;
   private ActorKeyframe currentPose;
-  
+
   public Actor(Object3D obj)
   {
     theObject = obj;
@@ -39,9 +39,9 @@ public class Actor extends ObjectWrapper
     nextPoseID = 1;
     currentPose = new ActorKeyframe();
   }
-  
+
   /** Add a new gesture to this actor. */
-  
+
   public void addGesture(Gesture p, String name)
   {
     int num = gesture.length;
@@ -60,7 +60,7 @@ public class Actor extends ObjectWrapper
   }
 
   /** Delete a gesture from this actor. */
-  
+
   public void deleteGestureWithID(int id)
   {
     int which = getGestureIndex(id);
@@ -83,53 +83,53 @@ public class Actor extends ObjectWrapper
     gestureName = newname;
     gestureID = newID;
   }
-  
+
   /** Get the number of gestures defined for this actor. */
-  
+
   public int getNumGestures()
   {
     return gesture.length;
   }
-  
+
   /** Get the i'th gesture defined for this actor. */
-  
+
   public Gesture getGesture(int i)
   {
     return gesture[i];
   }
-  
+
   /** Get the gesture with a particular ID, or null if there is no gesture with that ID. */
-  
+
   public Gesture getGestureWithID(int id)
   {
     int index = getGestureIndex(id);
     return (index == -1 ? null : gesture[index]);
   }
-  
+
   /** Get the name of the i'th gesture defined for this actor. */
-  
+
   public String getGestureName(int i)
   {
     return gestureName[i];
   }
-  
+
   /** Set the name of the i'th gesture defined for this actor. */
-  
+
   public void setGestureName(int i, String name)
   {
     gestureName[i] = name;
   }
-  
+
   /** Get the ID of the i'th gesture defined for this actor. */
-  
+
   public int getGestureID(int i)
   {
     return gestureID[i];
   }
-  
+
   /** Return the index of the gesture with a particular ID, or -1 if there is no gesture with
       that ID. */
-  
+
   public int getGestureIndex(int id)
   {
     int which;
@@ -140,7 +140,8 @@ public class Actor extends ObjectWrapper
   }
 
   /** Create a new object which is an exact duplicate of this one. */
-  
+
+  @Override
   public Object3D duplicate()
   {
     Actor a = new Actor(theObject.duplicate());
@@ -157,10 +158,11 @@ public class Actor extends ObjectWrapper
     a.currentPose = (ActorKeyframe) currentPose.duplicate(a);
     return a;
   }
-  
+
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     Actor a = (Actor) obj;
@@ -180,84 +182,93 @@ public class Actor extends ObjectWrapper
 
   /** The size of an Actor cannot be set directly, since that is determined by its Poses. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
-  
+
   /** If the object can be edited by the user, isEditable() should be overridden to return true.
      edit() should then create a window and allow the user to edit the object. */
-  
+
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ActorEditorWindow(parent, info, this, null, cb);
   }
-  
+
   /** All of the following methods call through to the corresponding methods on the object. */
-  
+
+  @Override
   public boolean canSetTexture()
   {
     return theObject.canSetTexture();
   }
-     
+
+  @Override
   public boolean canSetMaterial()
   {
     return theObject.canSetMaterial();
   }
-     
+
+  @Override
   public void setTexture(Texture tex, TextureMapping map)
   {
     TextureParameter oldParam[] = getParameters();
     theObject.setTexture(tex, map);
-    TextureParameter newParam[] = map.getParameters();    
+    TextureParameter newParam[] = map.getParameters();
     for (int i = 0; i < gesture.length; i++)
       gesture[i].textureChanged(oldParam, newParam);
   }
-  
+
+  @Override
   public void setMaterial(Material mat, MaterialMapping map)
   {
     theObject.setMaterial(mat, map);
   }
-  
+
   /** Set the list of objects defining the values of texture parameters. */
-  
+
+  @Override
   public void setParameterValues(ParameterValue val[])
   {
     // Set them on the current pose.
-    
+
     theObject.setParameterValues(val);
-    
+
     // Set them on every gesture.
-    
+
     TextureParameter params[] = getParameters();
     for (int i = 0; i < gesture.length; i++)
       for (int j = 0; j < params.length; j++)
         gesture[i].setTextureParameter(params[j], val[j].duplicate());
   }
-  
+
   /** Set the values of a texture parameter in every gesture. */
-  
+
+  @Override
   public void setParameterValue(TextureParameter param, ParameterValue value)
   {
     // Set it on the current pose.
-    
+
     theObject.setParameterValue(param, value);
-    
+
     // Set it on every gesture.
-    
+
     for (int i = 0; i < gesture.length; i++)
       gesture[i].setTextureParameter(param, value.duplicate());
   }
-  
+
   /** Given an object (either this Actor's object or a duplicate of it), reshape the object based
       on this Actor's getures.  This function examines the object's skeleton, finds the combination
       of gestures that most nearly reproduce that skeleton shape, and then adjusts all of the vertex
       positions based on the gestures. */
-  
+
   public void shapeMeshFromGestures(Object3D obj)
   {
     Skeleton skeleton = obj.getSkeleton();
@@ -267,9 +278,9 @@ public class Actor extends ObjectWrapper
     int numDof = currentJoint.length*4;
     double coeff[][] = new double[numDof][gesture.length-1];
     double goal[] = new double[numDof];
-    
+
     // Find the right hand side vector.
-    
+
     double d = Math.PI/180.0;
     for (int i = 0; i < defaultJoint.length; i++)
     {
@@ -278,9 +289,9 @@ public class Actor extends ObjectWrapper
       goal[i*4+2] = d*(currentJoint[i].twist.pos - defaultJoint[i].twist.pos);
       goal[i*4+3] = currentJoint[i].length.pos - defaultJoint[i].length.pos;
     }
-    
+
     // Find the matrix of coefficients.
-    
+
     for (int j = 1; j < gesture.length; j++)
     {
       Joint gestureJoint[] = gesture[j].getSkeleton().getJoints();
@@ -292,21 +303,21 @@ public class Actor extends ObjectWrapper
         coeff[i*4+3][j-1] = gestureJoint[i].length.pos - defaultJoint[i].length.pos;
       }
     }
-    
+
     // Solve the equations.  We only want to use gestures with positive weights, since many
     // gestures are not designed to look right when applied with negative weights.  Eventually,
     // I should rewrite this to use a proper nonnegative least squares algorithm.  For the
     // moment, it uses a simpler approximate method: solve the equations using SVD, then check
     // the weights.  If any are negative, remove those gestures and repeat until all weights
     // are nonnegative.
-    
+
     boolean converged = false;
     boolean negative[] = new boolean [gesture.length-1];
     double weight[] = new double [gesture.length-1];
     while (!converged)
     {
       // Build the matrix to solve.
-      
+
       int numGesture = 0;
       for (int i = 0; i < negative.length; i++)
         if (!negative[i])
@@ -330,9 +341,9 @@ public class Actor extends ObjectWrapper
           j++;
         }
       SVD.solve(matrix, rhs, 0.1);
-      
+
       // Check for negative weights.
-      
+
       converged = true;
       for (int i = 0, j = 0; i < negative.length; i++)
       {
@@ -350,9 +361,9 @@ public class Actor extends ObjectWrapper
         }
       }
     }
-    
+
     // Construct the output pose.
-    
+
     Vector gestureList = new Vector();
     Vector weightList = new Vector();
     for (int i = 0; i < weight.length; i++)
@@ -372,9 +383,10 @@ public class Actor extends ObjectWrapper
     ((MeshGesture) gesture[0]).blendSurface(average, poseGesture, poseWeight);
     obj.applyPoseKeyframe(average);
   }
-  
+
   /** Write a representation of this object to a file. */
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -391,7 +403,7 @@ public class Actor extends ObjectWrapper
       }
     currentPose.writeToStream(out);
   }
-  
+
   /** Reconstruct this object from its serialized representation. */
 
   public Actor(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
@@ -431,6 +443,7 @@ public class Actor extends ObjectWrapper
       }
   }
 
+  @Override
   public Property[] getProperties()
   {
     Property prop[] = new Property[currentPose.getNumGestures()];
@@ -440,11 +453,13 @@ public class Actor extends ObjectWrapper
     return prop;
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     return new Double(currentPose.getGestureWeight(index));
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     currentPose.weight[index] = ((Double) value).doubleValue();
@@ -452,14 +467,16 @@ public class Actor extends ObjectWrapper
   }
 
   /** Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return currentPose.duplicate(this);
   }
-  
+
   /** Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     currentPose = (ActorKeyframe) k.duplicate(this);
@@ -471,21 +488,22 @@ public class Actor extends ObjectWrapper
       }
     theObject.applyPoseKeyframe(currentPose.createObjectKeyframe(this));
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [0], new double [0], new double [0][2]);
   }
-  
+
   /** Find the array index for a given pose ID. */
-  
+
   int findPoseIndex(int id)
   {
     int min = 0, max = gestureID.length-1, current = (min+max)>>1;
-    
+
     while (true)
       {
         if (gestureID[current] == id)
@@ -503,18 +521,19 @@ public class Actor extends ObjectWrapper
         current = (min+max)>>1;
       }
   }
-  
+
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     new ActorEditorWindow(parent, info, this, (ActorKeyframe) k, null);
   }
-  
+
   /** This is a utility routine.  It takes an Object3D as its argument.  If the object is an
       Actor, it is simply returned.  If the argument is an ObjectWrapper which contains an Actor,
       the inner Actor is returned.  Otherwise, it returns null. */
-  
+
   public static Actor getActor(Object3D obj)
   {
     while (obj instanceof ObjectWrapper)
@@ -525,50 +544,50 @@ public class Actor extends ObjectWrapper
     }
     return null;
   }
-  
+
   /** Inner class representing a pose for an Actor.  It consists of a list of gestures, and a
       weight for each one. */
-  
+
   public static class ActorKeyframe implements Keyframe
   {
     int id[];
     double weight[];
-    
+
     public ActorKeyframe()
     {
       id = new int [0];
       weight = new double [0];
     }
-    
+
     public ActorKeyframe(int id[], double weight[])
     {
       this.id = id;
       this.weight = weight;
     }
-    
+
     /** Get the number of gestures in this keyframe. */
-    
+
     public int getNumGestures()
     {
       return id.length;
     }
-    
+
     /** Get the ID of a gesture in this keyframe. */
-    
+
     public int getGestureID(int index)
     {
       return id[index];
     }
-    
+
     /** Get the weight for a gesture in this keyframe. */
-    
+
     public double getGestureWeight(int index)
     {
       return weight[index];
     }
-    
+
     /** Add a gesture to an ActorKeyframe. */
-    
+
     public void addGesture(int addID, double addWeight)
     {
       int newid[] = new int [id.length+1];
@@ -580,9 +599,9 @@ public class Actor extends ObjectWrapper
       id = newid;
       weight = newweight;
     }
-    
+
     /** Delete a gesture from an ActorKeyframe. */
-    
+
     public void deleteGesture(int which)
     {
       int newid[] = new int [id.length-1];
@@ -597,14 +616,16 @@ public class Actor extends ObjectWrapper
       id = newid;
       weight = newweight;
     }
-    
+
     /** Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return duplicate();
     }
 
+    @Override
     public Keyframe duplicate()
     {
       ActorKeyframe k = new ActorKeyframe();
@@ -614,9 +635,9 @@ public class Actor extends ObjectWrapper
       System.arraycopy(weight, 0, k.weight, 0, weight.length);
       return k;
     }
-  
+
     /** Make this keyframe identical to another one. */
-    
+
     public void copy(ActorKeyframe key)
     {
       id = new int [key.id.length];
@@ -624,22 +645,24 @@ public class Actor extends ObjectWrapper
       System.arraycopy(key.id, 0, id, 0, id.length);
       System.arraycopy(key.weight, 0, weight, 0, weight.length);
     }
-  
+
     /** Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
     }
-  
+
     /** Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
     }
 
     /** Add the weights from a keyframe into a hashtable. */
-    
+
     private void addWeightsToTable(ActorKeyframe k, Hashtable table, double scale)
     {
       for (int i = 0; i < k.id.length; i++)
@@ -653,9 +676,9 @@ public class Actor extends ObjectWrapper
           table.put(key, weight);
         }
     }
-    
+
     /** Create a keyframe from the information in a hashtable. */
-    
+
     private ActorKeyframe getKeyframeFromTable(Hashtable table)
     {
       ActorKeyframe k = new ActorKeyframe();
@@ -686,30 +709,33 @@ public class Actor extends ObjectWrapper
 
     /** These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       Hashtable table = new Hashtable();
-      
+
       addWeightsToTable(this, table, weight1);
       addWeightsToTable((ActorKeyframe) o2, table, weight2);
       return getKeyframeFromTable(table);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       Hashtable table = new Hashtable();
-      
+
       addWeightsToTable(this, table, weight1);
       addWeightsToTable((ActorKeyframe) o2, table, weight2);
       addWeightsToTable((ActorKeyframe) o3, table, weight3);
       return getKeyframeFromTable(table);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       Hashtable table = new Hashtable();
-      
+
       addWeightsToTable(this, table, weight1);
       addWeightsToTable((ActorKeyframe) o2, table, weight2);
       addWeightsToTable((ActorKeyframe) o3, table, weight3);
@@ -718,7 +744,8 @@ public class Actor extends ObjectWrapper
     }
 
     /** Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof ActorKeyframe))
@@ -731,13 +758,13 @@ public class Actor extends ObjectWrapper
           return false;
       return true;
     }
-    
+
     /** Create a keyframe for the Actor's "inner" object, based on this keyframes list of poses. */
-    
+
     public Keyframe createObjectKeyframe(Actor actor)
     {
       Vector poseVec = new Vector(), weightVec = new Vector();
-      
+
       for (int i = 0; i < id.length; i++)
       {
         int which = actor.findPoseIndex(id[i]);
@@ -756,9 +783,10 @@ public class Actor extends ObjectWrapper
       }
       return actor.gesture[0].blend(blendPose, blendWeight);
     }
-  
+
     /** Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeInt(id.length);
@@ -774,7 +802,7 @@ public class Actor extends ObjectWrapper
     public ActorKeyframe(DataInputStream in, Object parent) throws IOException
     {
       int num = in.readInt();
-      
+
       id = new int [num];
       weight = new double [num];
       for (int i = 0; i < num; i++)

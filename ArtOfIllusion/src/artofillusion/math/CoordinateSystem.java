@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
@@ -16,7 +16,7 @@ import java.io.*;
     system relative to another one.  It is defined by three vectors.  orig defines the position
     of the origin of the new coordinate system, while zdir and updir define the directions
     of the z and y axes, respectively.  (Note that the y axis will only be parallel to
-    updir in the special case that zdir and updir are perpendicular to each other.) 
+    updir in the special case that zdir and updir are perpendicular to each other.)
     Alternatively, the orientation can be represented by three rotation angles about
     the (global) x, y, and z axes.  Both representations are maintained internally. */
 
@@ -25,22 +25,22 @@ public class CoordinateSystem
   Vec3 orig, zdir, updir;
   Mat4 transformTo, transformFrom;
   double xrot, yrot, zrot;
-  
+
   /** Create a new CoordinateSystem which represents an identity transformation (i.e. no
       translation or rotation). */
-  
+
   public CoordinateSystem()
   {
     this(new Vec3(), Vec3.vz(), Vec3.vy());
   }
-  
+
   /** Create a new coordinate system.
       @param orig     the origin of the new coordinate system
       @param zdir     the direction of the new coordinate system's z axis
       @param updir    defines the "up" direction.  If this is perpendicular to zdir, this will be
                       the y axis direction of the new coordinate system.
   */
-  
+
   public CoordinateSystem(Vec3 orig, Vec3 zdir, Vec3 updir)
   {
     this.orig = orig;
@@ -50,7 +50,7 @@ public class CoordinateSystem
     updir.normalize();
     findRotationAngles();
   }
-  
+
   /** Create a new coordinate system.
       @param orig     the origin of the new coordinate system
       @param x        the rotation angle around the x axis
@@ -74,9 +74,9 @@ public class CoordinateSystem
     coords.zrot = zrot;
     return coords;
   }
-  
+
   /** Make this CoordianteSystem identical to another one. */
-  
+
   public final void copyCoords(CoordinateSystem c)
   {
     setOrigin(new Vec3(c.orig.x, c.orig.y, c.orig.z));
@@ -85,9 +85,10 @@ public class CoordinateSystem
     yrot = c.yrot;
     zrot = c.zrot;
   }
-  
+
   /** Determine whether this coordinate system is identical to another one. */
-  
+
+  @Override
   public final boolean equals(Object coords)
   {
     CoordinateSystem c = (CoordinateSystem) coords;
@@ -99,15 +100,15 @@ public class CoordinateSystem
       return false;
     return true;
   }
-  
+
   /** Set the position of this CoordinateSystem's origin. */
-  
+
   public final void setOrigin(Vec3 orig)
   {
     this.orig = orig;
     transformTo = transformFrom = null;
   }
-  
+
   /** Set the orientation of this CoordinateSystem.
       @param zdir     the direction of this coordinate system's z axis
       @param updir    defines the "up" direction.  If this is perpendicular to zdir, this will become
@@ -123,7 +124,7 @@ public class CoordinateSystem
     findRotationAngles();
     transformTo = transformFrom = null;
   }
-  
+
   /** Set the orientation of this CoordinateSystem.
       @param x        the rotation angle around the x axis
       @param y        the rotation angle around the y axis
@@ -133,7 +134,7 @@ public class CoordinateSystem
   public final void setOrientation(double x, double y, double z)
   {
     Mat4 m;
-    
+
     xrot = x*Math.PI/180.0;
     yrot = y*Math.PI/180.0;
     zrot = z*Math.PI/180.0;
@@ -149,14 +150,14 @@ public class CoordinateSystem
   {
     return orig;
   }
-  
+
   /** Get this CoordinateSystem's z axis direction. */
 
   public final Vec3 getZDirection()
   {
     return zdir;
   }
-  
+
   /** Get the vector used to define "up" in this CoordinateSystem (usually but not always the y axis direction). */
 
   public final Vec3 getUpDirection()
@@ -172,7 +173,7 @@ public class CoordinateSystem
   }
 
   /** Transform this CoordinateSystem's orientation by applying a matrix to its axis directions. */
-  
+
   public final void transformAxes(Mat4 m)
   {
     zdir = m.timesDirection(zdir);
@@ -180,7 +181,7 @@ public class CoordinateSystem
     findRotationAngles();
     transformTo = transformFrom = null;
   }
-  
+
   /** Transform this CoordinateSystem's position by applying a matrix to its origin. */
 
   public final void transformOrigin(Mat4 m)
@@ -188,7 +189,7 @@ public class CoordinateSystem
     orig = m.times(orig);
     transformTo = transformFrom = null;
   }
-  
+
   /** Transform this CoordinateSystem's position and orientation by applying a matrix to its origin
       and axis directions. */
 
@@ -200,7 +201,7 @@ public class CoordinateSystem
     findRotationAngles();
     transformTo = transformFrom = null;
   }
-  
+
   /** Return a matrix which will transform points from this coordinate system to the outside
       coordinate system with respect to which it is defined. */
 
@@ -211,7 +212,7 @@ public class CoordinateSystem
     return transformFrom;
   }
 
-  /** Return a matrix which will transform points from the outside coordinate system to 
+  /** Return a matrix which will transform points from the outside coordinate system to
       this local coordinate system. */
 
   public final Mat4 toLocal()
@@ -220,15 +221,15 @@ public class CoordinateSystem
       transformTo = Mat4.viewTransform(orig, zdir, updir);
     return transformTo;
   }
-  
+
   /** Calculate the x, y, and z rotation angles given the current values for zdir and updir. */
-  
+
   private void findRotationAngles()
   {
     Vec3 v;
     double d;
     Mat4 m;
-    
+
     if (zdir.x == 0.0 && zdir.z == 0.0)
       {
         d = Math.sqrt(updir.x*updir.x+updir.z*updir.z);
@@ -270,7 +271,7 @@ public class CoordinateSystem
       rotation.  The from-local transformation is found by simply reversing the sign of the
       rotation angle.  It returns the rotation angle, and overwrites axis with a unit vector
       along the rotation axis. */
-  
+
   public final double getAxisAngleRotation(Vec3 axis)
   {
     double a[][] = new double [4][], b[] = new double [4], ctheta2, cphi, sphi, phi;
@@ -280,7 +281,7 @@ public class CoordinateSystem
     if (zdir.z == 1.0)
       {
         // If the z-axis is unchanged, it must be the rotation axis.
-        
+
         axis.set(0.0, 0.0, 1.0);
         if (updir.y == 1.0)
           return 0.0;
@@ -290,15 +291,15 @@ public class CoordinateSystem
     else
       {
         // The rotation axis is the cross product of (newy-oldy) and (newz-oldz).
-        
-        axis.set((updir.y-1.0)*(zdir.z-1.0) - updir.z*zdir.y, 
-                updir.z*zdir.x - updir.x*(zdir.z-1.0), 
+
+        axis.set((updir.y-1.0)*(zdir.z-1.0) - updir.z*zdir.y,
+                updir.z*zdir.x - updir.x*(zdir.z-1.0),
                 updir.x*zdir.y - (updir.y-1.0)*zdir.x);
         if (axis.length2() < 1e-6)
           {
             xdir = updir.cross(zdir);
-            axis.set(xdir.y*(zdir.z-1.0) - xdir.z*zdir.y, 
-                xdir.z*zdir.x - (xdir.x-1.0)*(zdir.z-1.0), 
+            axis.set(xdir.y*(zdir.z-1.0) - xdir.z*zdir.y,
+                xdir.z*zdir.x - (xdir.x-1.0)*(zdir.z-1.0),
                 (xdir.x-1.0)*zdir.y - xdir.y*zdir.x);
           }
         axis.normalize();
@@ -329,7 +330,7 @@ public class CoordinateSystem
   }
 
   /** Create a CoordinateSystem by reading the information that was written by writeToFile(). */
-  
+
   public CoordinateSystem(DataInputStream in) throws IOException
   {
     orig = new Vec3(in);
@@ -342,7 +343,7 @@ public class CoordinateSystem
   }
 
   /** Write out a serialized representation of this CoordinateSystem. */
-  
+
   public void writeToFile(DataOutputStream out) throws IOException
   {
     orig.writeToFile(out);

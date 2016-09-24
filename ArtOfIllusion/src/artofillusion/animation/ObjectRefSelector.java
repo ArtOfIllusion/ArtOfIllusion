@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -26,21 +26,22 @@ public class ObjectRefSelector extends RowContainer
   private LayoutWindow window;
   private String prompt;
   private ObjectInfo exclude;
-  
+
   /** Create a new selector.  obj specifies the initially selected object reference.
       win specifies the window in which the scene is being edited.  prompt is the string
       which will be used for prompting the user to select a new object.  exclude (which
       may be null) indicates an object which may not be selected. */
-  
+
   public ObjectRefSelector(ObjectRef obj, LayoutWindow win, String prompt, ObjectInfo exclude)
   {
     ref = obj.duplicate();
     window = win;
     this.prompt = prompt;
     this.exclude = exclude;
-    
+
     add(setButton = Translate.button("set", this, "buttonPressed"));
     add(nameLabel = new BLabel(obj.toString()) {
+      @Override
       public Dimension getPreferredSize()
       {
         Dimension dim = super.getPreferredSize();
@@ -50,30 +51,31 @@ public class ObjectRefSelector extends RowContainer
       }
     } );
   }
-  
+
   /** Get the selected ObjectRef. */
-  
+
   public ObjectRef getSelection()
   {
     return ref;
   }
-  
+
   /** Set whether this component is enabled. */
-  
+
+  @Override
   public void setEnabled(boolean enable)
   {
     super.setEnabled(enable);
     setButton.setEnabled(enable);
     nameLabel.setEnabled(enable);
   }
-  
+
   /** When the button is clicked, display a window allowing the user to select a new
       object. */
-  
+
   private void buttonPressed()
   {
     TreeList tree = new TreeList(window);
-    Scene sc = window.getScene();    
+    Scene sc = window.getScene();
     tree.setUpdateEnabled(false);
     for (int i = 0; i < sc.getNumObjects(); i++)
     {
@@ -88,6 +90,7 @@ public class ObjectRefSelector extends RowContainer
     tree.setSelected(ref, true);
     tree.expandToShowObject(ref);
     BScrollPane p = new BScrollPane(tree) {
+      @Override
       public Dimension getPreferredSize()
       {
         return new Dimension(150, 200);

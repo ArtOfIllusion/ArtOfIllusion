@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -21,7 +21,7 @@ public class LayeredTriangle extends RenderingTriangle
   private double x1, x2, x3, y1, y2, y3, z1, z2, z3;
   RenderingTriangle layerTriangle[];
 
-  public LayeredTriangle(int v1, int v2, int v3, int n1, int n2, int n3, 
+  public LayeredTriangle(int v1, int v2, int v3, int n1, int n2, int n3,
         double t1x, double t1y, double t1z, double t2x, double t2y, double t2z,
         double t3x, double t3y, double t3z, LayeredMapping theMapping,
         LayeredTexture theTexture, Vec3 vert[])
@@ -46,6 +46,7 @@ public class LayeredTriangle extends RenderingTriangle
       }
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double time)
   {
     Vec3 pos = new Vec3(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w);
@@ -61,7 +62,7 @@ public class LayeredTriangle extends RenderingTriangle
     float r, g, b, rt = 1.0f, gt = 1.0f, bt = 1.0f;
     double f, ft = 1.0;
     boolean front = (angle > 0.0);
-    
+
     spec.diffuse.setRGB(0.0f, 0.0f, 0.0f);
     spec.specular.setRGB(0.0f, 0.0f, 0.0f);
     spec.hilight.setRGB(0.0f, 0.0f, 0.0f);
@@ -121,6 +122,7 @@ public class LayeredTriangle extends RenderingTriangle
     }
   }
 
+  @Override
   public void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double time)
   {
     Vec3 pos = new Vec3(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w);
@@ -136,7 +138,7 @@ public class LayeredTriangle extends RenderingTriangle
     float r, g, b, rt = 1.0f, gt = 1.0f, bt = 1.0f;
     double f;
     boolean front = (angle > 0.0);
-    
+
     trans.setRGB(1.0f, 1.0f, 1.0f);
     for (int i = 0; i < mapping.length; i++)
       {
@@ -174,6 +176,7 @@ public class LayeredTriangle extends RenderingTriangle
       }
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double time)
   {
     Vec3 pos = new Vec3(x1*u+x2*v+x3*w, y1*u+y2*v+y3*w, z1*u+z2*v+z3*w);
@@ -187,7 +190,7 @@ public class LayeredTriangle extends RenderingTriangle
     double param[] = getParameters(u, v, w);
     TextureMapping mapping[] = map.mapping;
     double f, ft = 1.0, height = 0.0, tempHeight;
-    
+
     for (int i = 0; i < mapping.length; i++)
       {
         f = param[fractParamIndex[i]];
@@ -228,7 +231,8 @@ public class LayeredTriangle extends RenderingTriangle
       @param map       the TextureMapping for this triangle
       @param index     the index of this triangle within the mesh
   */
-  
+
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);

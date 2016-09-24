@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -44,10 +44,10 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Vec3 rotationCenter;
 
   protected final ViewChangedEvent viewChangedEvent;
-  
+
   private static boolean openGLAvailable;
   private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
-  
+
   static
   {
     try
@@ -127,16 +127,20 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
     getComponent().addComponentListener(new ComponentListener()
     {
+      @Override
       public void componentResized(ComponentEvent componentEvent)
       {
         viewChanged(false);
       }
+      @Override
       public void componentMoved(ComponentEvent componentEvent)
       {
       }
+      @Override
       public void componentShown(ComponentEvent componentEvent)
       {
       }
+      @Override
       public void componentHidden(ComponentEvent componentEvent)
       {
       }
@@ -145,9 +149,9 @@ public abstract class ViewerCanvas extends CustomWidget
     perspective = false;
     scale = 100.0;
   }
-  
+
   /** Get the CanvasDrawer which is rendering the image for this canvas. */
-  
+
   public CanvasDrawer getCanvasDrawer()
   {
     return drawer;
@@ -169,7 +173,7 @@ public abstract class ViewerCanvas extends CustomWidget
     }
     viewChanged(false);
   }
-  
+
   private void processMousePressed(WidgetMouseEvent ev)
   {
     if (mouseProcessor != null)
@@ -177,18 +181,19 @@ public abstract class ViewerCanvas extends CustomWidget
     mousePressed(ev);
     mouseProcessor = new ActionProcessor();
   }
-  
+
   private void processMouseDragged(final WidgetMouseEvent ev)
   {
     if (mouseProcessor != null)
       mouseProcessor.addEvent(new Runnable() {
+        @Override
         public void run()
         {
           mouseDragged(ev);
         }
       });
   }
-  
+
   private void processMouseReleased(WidgetMouseEvent ev)
   {
     if (mouseProcessor != null)
@@ -220,44 +225,47 @@ public abstract class ViewerCanvas extends CustomWidget
       setScale(getScale()*Math.pow(0.99, amount));
     }
   }
-  
+
   /** Subclasses should override this to handle events. */
-  
+
   protected void mousePressed(WidgetMouseEvent ev)
   {
   }
-  
+
   /** Subclasses should override this to handle events. */
 
   protected void mouseDragged(WidgetMouseEvent ev)
   {
   }
-  
+
   /** Subclasses should override this to handle events. */
 
   protected void mouseReleased(WidgetMouseEvent ev)
   {
   }
-  
+
   /** This needs to be overridden, since the component may not be a JComponent. */
-  
+
+  @Override
   public void setPreferredSize(Dimension size)
   {
     prefSize = new Dimension(size);
   }
-  
+
+  @Override
   public Dimension getPreferredSize()
   {
     return new Dimension(prefSize);
   }
 
+  @Override
   public Dimension getMinimumSize()
   {
     return new Dimension(0, 0);
   }
 
   /** Get the ActionProcessor which is currently in use for processing mouse events (may be null). */
-  
+
   public ActionProcessor getActionProcessor()
   {
     return mouseProcessor;
@@ -285,28 +293,28 @@ public abstract class ViewerCanvas extends CustomWidget
     currentTool = tool;
     repaint();
   }
-  
+
   /** Get the currently selected tool. */
-  
+
   public EditingTool getCurrentTool()
   {
     return currentTool;
   }
 
   /** Set the tool which should be active when the meta key is pressed. */
-  
+
   public void setMetaTool(EditingTool tool)
   {
     metaTool = tool;
   }
 
   /** Set the tool which should be active when the alt key is pressed. */
-  
+
   public void setAltTool(EditingTool tool)
   {
     altTool = tool;
   }
-  
+
   /** Set whether to display perspective or parallel mode. */
 
   public void setPerspective(boolean perspective)
@@ -315,27 +323,27 @@ public abstract class ViewerCanvas extends CustomWidget
     viewChanged(false);
     repaint();
   }
-  
+
   /** Determine whether the view is currently is perspective mode. */
-  
+
   public boolean isPerspective()
   {
     if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
       return ((SceneCamera) boundCamera.getObject()).isPerspective();
     return perspective;
   }
-  
+
   /** Get the current scale factor for the view. */
-  
+
   public double getScale()
   {
     if (isPerspective())
       return 100.0;
     return scale;
   }
-  
+
   /** Set the scale factor for the view. */
-  
+
   public void setScale(double scale)
   {
     if (scale > 0.0)
@@ -343,69 +351,69 @@ public abstract class ViewerCanvas extends CustomWidget
     viewChanged(false);
     repaint();
   }
-  
+
   /** Get whether a focus ring should be drawn around this component. */
-  
+
   public boolean getDrawFocus()
   {
     return drawFocus;
   }
-  
+
   /** Set whether a focus ring should be drawn around this component. */
-  
+
   public void setDrawFocus(boolean draw)
   {
     drawFocus = draw;
   }
-  
+
   /** Determine whether the coordinate axes are currently showing. */
-  
+
   public boolean getShowAxes()
   {
     return showAxes;
   }
-  
+
   /** Set whether the coordinate axes should be displayed. */
-  
+
   public void setShowAxes(boolean show)
   {
     showAxes = show;
     viewChanged(false);
   }
-  
+
   /** Determine whether the template image is currently showing. */
-  
+
   public boolean getTemplateShown()
   {
     return showTemplate;
   }
-  
+
   /** Set whether the template image should be displayed. */
-  
+
   public void setShowTemplate(boolean show)
   {
     showTemplate = show;
     viewChanged(false);
   }
-  
+
   /** Get the template image. */
-  
+
   public Image getTemplateImage()
   {
     return templateImage;
   }
-  
+
   /** Set the template image. */
-  
+
   public void setTemplateImage(Image im)
   {
     templateImage = im;
     drawer.setTemplateImage(im);
     viewChanged(false);
   }
-  
+
   /** Set the template image based on an image file. */
-  
+
   public void setTemplateImage(File f) throws InterruptedException
   {
     Image im = Toolkit.getDefaultToolkit().getImage(f.getAbsolutePath());
@@ -455,9 +463,9 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     popupManager = manager;
   }
-  
+
   /** Display the popup menu when an appropriate event occurs. */
-  
+
   protected void showPopupIfNeeded(WidgetMouseEvent ev)
   {
     if (popupManager != null && ev instanceof MouseClickedEvent && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
@@ -477,7 +485,7 @@ public abstract class ViewerCanvas extends CustomWidget
     else if (perspective)
       theCamera.setScreenParams(0, scale, bounds.width, bounds.height);
     else
-      theCamera.setScreenParamsParallel(scale, bounds.width, bounds.height);  
+      theCamera.setScreenParamsParallel(scale, bounds.width, bounds.height);
   }
 
   /** Get the SceneCamera (if any) which is bound to this view. */
@@ -488,7 +496,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Set the SceneCamera which is bound to this view (may be null). */
-  
+
   public void setBoundCamera(ObjectInfo boundCamera)
   {
     this.boundCamera = boundCamera;
@@ -540,28 +548,28 @@ public abstract class ViewerCanvas extends CustomWidget
   /** Adjust the camera position and magnification so that the specified box
       fills the view.  This has no effect if there is a camera point to this
       view. */
-  
+
   public void frameBox(BoundingBox bb)
   {
     if (boundCamera != null)
       return;
-    
-    // Move the camera so that it points at the center of the box, and is well outside it. 
-       
+
+    // Move the camera so that it points at the center of the box, and is well outside it.
+
     Rectangle bounds = getBounds();
     if (isPerspective())
       theCamera.setScreenParams(0, 100.0, bounds.width, bounds.height);
     else
-      theCamera.setScreenParamsParallel(100.0, bounds.width, bounds.height);  
+      theCamera.setScreenParamsParallel(100.0, bounds.width, bounds.height);
     double startDist = Camera.DEFAULT_DISTANCE_TO_SCREEN+Math.max(Math.max(bb.maxx-bb.minx, bb.maxy-bb.miny), bb.maxz-bb.minz);
     CoordinateSystem coords = theCamera.getCameraCoordinates();
     Vec3 boxCenter = bb.getCenter();
     coords.setOrigin(boxCenter.minus(coords.getZDirection().times(startDist)));
     theCamera.setCameraCoordinates(coords);
-    
+
     // Now adjust the magnification or camera position to make the box fill
     // the view.
-    
+
     theCamera.setObjectTransform(Mat4.identity());
     Rectangle screenBounds = theCamera.findScreenBounds(bb);
     double scalex = bounds.width/(double) screenBounds.width;
@@ -570,34 +578,34 @@ public abstract class ViewerCanvas extends CustomWidget
     if (isPerspective())
     {
       // Perspective mode, so adjust the camera position.
-      
+
       coords.setOrigin(boxCenter.minus(coords.getZDirection().times(1.1*startDist/minScale)));
       setScale(100.0);
     }
     else
     {
       // Parallel mode, so adjust the magnification.
-      
+
       setScale(minScale*100.0);
     }
     theCamera.setCameraCoordinates(coords);
 
   }
-  
+
   /** This should be called by the CanvasDrawer just before rendering an image.  It sets up the camera correctly. */
-  
+
   public void prepareCameraForRendering()
   {
     if (boundCamera != null)
       boundCamera.getCoords().copyCoords(theCamera.getCameraCoordinates());
     adjustCamera(isPerspective());
   }
-  
+
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
    */
-  
+
   public abstract double[] estimateDepthRange();
 
   /**
@@ -617,12 +625,12 @@ public abstract class ViewerCanvas extends CustomWidget
   public synchronized void updateImage()
   {
     Rectangle bounds = getBounds();
-    
+
     if (bounds.height <= 0)
       return;
-    
+
     // Draw the grid, if necessary.
-    
+
     if (showGrid)
     {
       float scale1 = 0.75f/255.0f;
@@ -636,7 +644,7 @@ public abstract class ViewerCanvas extends CustomWidget
       if (!isPerspective())
       {
         // Parallel mode, so draw a flat grid.
-        
+
         Vec2 v1 = theCamera.getViewToScreen().timesXY(new Vec3());
         Vec2 v2 = theCamera.getViewToScreen().timesXY(new Vec3(gridSpacing, gridSpacing, 1.0));
         Vec2 v3 = theCamera.getWorldToScreen().timesXY(new Vec3());
@@ -702,7 +710,7 @@ public abstract class ViewerCanvas extends CustomWidget
       else
       {
         // Perspective mode, so draw a ground plane.
-        
+
         theCamera.setObjectTransform(Mat4.identity());
         int size = (int) Math.max(10, 10/gridSpacing);
         for (int i = -size; i <= size; i++)
@@ -720,13 +728,13 @@ public abstract class ViewerCanvas extends CustomWidget
       }
     }
   }
-  
+
   /** Draw the coordinate axes into the view. */
-  
+
   protected void drawCoordinateAxes()
   {
     // Select a size for the coordinate axes.
-    
+
     Rectangle bounds = getBounds();
     int axisLength = 50;
     if (axisLength*5 > bounds.width)
@@ -734,9 +742,9 @@ public abstract class ViewerCanvas extends CustomWidget
     if (axisLength*5 > bounds.height)
       axisLength = bounds.height/5;
     double len = axisLength/getScale();
-    
+
     // Calculate the screen positions of the axis ends.
-    
+
     Vec2 offset = new Vec2(0.5*bounds.width-axisLength-15, 0.5*bounds.height-axisLength-15);
     CoordinateSystem cameraCoords = theCamera.getCameraCoordinates();
     Vec3 center = cameraCoords.getOrigin().plus(cameraCoords.getZDirection().times(theCamera.getDistToScreen()));
@@ -747,16 +755,16 @@ public abstract class ViewerCanvas extends CustomWidget
     Vec2 screenX = theCamera.getWorldToScreen().timesXY(xpos).plus(offset);
     Vec2 screenY = theCamera.getWorldToScreen().timesXY(ypos).plus(offset);
     Vec2 screenZ = theCamera.getWorldToScreen().timesXY(zpos).plus(offset);
-    
+
     // Draw the axes.
-    
+
     Point centerPoint = new Point((int) Math.round(screenCenter.x), (int) Math.round(screenCenter.y));
     drawLine(centerPoint, new Point((int) screenX.x, (int) screenX.y), lineColor);
     drawLine(centerPoint, new Point((int) screenY.x, (int) screenY.y), lineColor);
     drawLine(centerPoint, new Point((int) screenZ.x, (int) screenZ.y), lineColor);
-    
+
     // Draw the labels.
-    
+
     if (screenX.minus(screenCenter).length() > 2.0)
     {
       Vec2 dir = screenX.minus(screenCenter);
@@ -787,12 +795,12 @@ public abstract class ViewerCanvas extends CustomWidget
       drawLine(new Point(x-4, y+4), new Point(x+4, y+4), lineColor);
     }
   }
-  
+
   public int getRenderMode()
   {
     return renderMode;
   }
-  
+
   public void setRenderMode(int mode)
   {
     if (mode == RENDER_RENDERED && currentTool != null)
@@ -809,16 +817,16 @@ public abstract class ViewerCanvas extends CustomWidget
     viewChanged(false);
     repaint();
   }
-  
+
   /** Adjust the coordinates of a mouse event to move it to the nearest
       grid location. */
-  
+
   void moveToGrid(WidgetMouseEvent e)
   {
     Point pos = e.getPoint();
     Vec3 v;
     Vec2 v2;
-    
+
     if (!snapToGrid || isPerspective())
       return;
     v = theCamera.convertScreenToWorld(pos, theCamera.getDistToScreen());
@@ -836,7 +844,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Set the view orientation to any of the values shown in the choice menu. */
-  
+
   public void setOrientation(int which)
   {
     orientation = which;
@@ -880,9 +888,9 @@ public abstract class ViewerCanvas extends CustomWidget
     viewChanged(false);
     repaint();
   }
-  
+
   /** If there is a camera bound to this view, copy the coordinates from it. */
-  
+
   public void copyOrientationFromCamera()
   {
     if (boundCamera == null)
@@ -891,17 +899,17 @@ public abstract class ViewerCanvas extends CustomWidget
     coords.copyCoords(boundCamera.getCoords());
     theCamera.setCameraCoordinates(coords);
   }
-  
+
   /** Show feedback to the user in response to a mouse drag, by drawing a Shape over the
       image.  This method should only ever be called from the event dispatch thread. */
-  
+
   public void drawDraggedShape(Shape shape)
   {
     drawer.drawDraggedShape(shape);
   }
-  
+
   /** Draw a border around the rendered image. */
-  
+
   public void drawBorder()
   {
     drawer.drawBorder();
@@ -909,7 +917,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   /** Draw a horizontal line across the rendered image.  The parameters are the y coordinate
       of the line and the line color. */
-  
+
   public void drawHRule(int y, Color color)
   {
     drawer.drawHRule(y, color);
@@ -917,14 +925,14 @@ public abstract class ViewerCanvas extends CustomWidget
 
   /** Draw a vertical line across the rendered image.  The parameters are the x coordinate
       of the line and the line color. */
-  
+
   public void drawVRule(int x, Color color)
   {
     drawer.drawVRule(x, color);
   }
 
   /** Draw a filled box in the rendered image. */
-  
+
   public void drawBox(int x, int y, int width, int height, Color color)
   {
     drawer.drawBox(x, y, width, height, color);
@@ -939,7 +947,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Render a filled box at a specified depth in the rendered image. */
-  
+
   public void renderBox(int x, int y, int width, int height, double depth, Color color)
   {
     drawer.renderBox(x, y, width, height, depth, color);
@@ -954,19 +962,19 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Draw a line into the rendered image. */
-  
+
   public void drawLine(Point p1, Point p2, Color color)
   {
     drawer.drawLine(p1, p2, color);
   }
-  
+
   /** Render a line into the image.
       @param p1     the first endpoint of the line
       @param p2     the second endpoint of the line
       @param cam    the camera from which to draw the line
       @param color  the line color
   */
-  
+
   public void renderLine(Vec3 p1, Vec3 p2, Camera cam, Color color)
   {
     drawer.renderLine(p1, p2, cam, color);
@@ -980,28 +988,28 @@ public abstract class ViewerCanvas extends CustomWidget
       @param cam    the camera from which to draw the line
       @param color  the line color
   */
-  
+
   public void renderLine(Vec2 p1, double zf1, Vec2 p2, double zf2, Camera cam, Color color)
   {
     drawer.renderLine(p1, zf1, p2, zf2, cam, color);
   }
-  
+
   /** Render a wireframe object. */
-  
+
   public void renderWireframe(WireframeMesh mesh, Camera cam, Color color)
   {
     drawer.renderWireframe(mesh, cam, color);
   }
 
   /** Render an object with flat shading in subtractive (transparent) mode. */
-  
+
   public void renderMeshTransparent(RenderingMesh mesh, VertexShader shader, Camera cam, Vec3 viewDir, boolean hideFace[])
   {
     drawer.renderMeshTransparent(mesh, shader, cam, viewDir, hideFace);
   }
-  
+
   /** Render a mesh to the canvas. */
-  
+
   public void renderMesh(RenderingMesh mesh, VertexShader shader, Camera cam, boolean closed, boolean hideFace[])
   {
     drawer.renderMesh(mesh, shader, cam, closed, hideFace);
@@ -1052,7 +1060,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Determine whether OpenGL rendering is available. */
-  
+
   public static boolean isOpenGLAvailable()
   {
     return openGLAvailable;

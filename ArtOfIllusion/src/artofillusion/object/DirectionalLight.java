@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -67,7 +67,7 @@ public class DirectionalLight extends Light
       }
     mesh = new WireframeMesh(vert, from, to);
   }
-  
+
   public DirectionalLight(RGBColor theColor, float theIntensity)
   {
     this(theColor, theIntensity, 1.0);
@@ -79,11 +79,13 @@ public class DirectionalLight extends Light
     setRadius(theRadius);
   }
 
+  @Override
   public Object3D duplicate()
   {
     return new DirectionalLight(color, intensity, radius);
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     DirectionalLight lt = (DirectionalLight) obj;
@@ -92,6 +94,7 @@ public class DirectionalLight extends Light
     setRadius(lt.getRadius());
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -99,6 +102,7 @@ public class DirectionalLight extends Light
 
   /** A DirectionalLight has no size.  Hence, calls to setSize() are ignored. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
@@ -126,28 +130,32 @@ public class DirectionalLight extends Light
    * outside the scene.
    */
 
+  @Override
   public void getLight(RGBColor light, Vec3 position)
   {
     light.copy(color);
     light.scale(intensity);
   }
-  
+
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
-  
+
+
   /* The following two methods are used for reading and writing files.  The first is a
      constructor which reads the necessary data from an input stream.  The other writes
      the object's representation to an output stream. */
@@ -164,6 +172,7 @@ public class DirectionalLight extends Light
     bounds = new BoundingBox(-0.15, 0.15, -0.15, 0.15, -0.15, 0.25);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -175,6 +184,7 @@ public class DirectionalLight extends Light
     out.writeDouble(radius);
   }
 
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     final Widget patch = color.getSample(50, 30);
@@ -184,7 +194,7 @@ public class DirectionalLight extends Light
     typeChoice.setSelectedIndex(type);
     RGBColor oldColor = color.duplicate();
     final BFrame parentFrame = parent.getFrame();
-    
+
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
@@ -192,7 +202,7 @@ public class DirectionalLight extends Light
         patch.setBackground(color.getColor());
       }
     });
-    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"),
         new Widget [] {patch, intensityField, radiusField, typeChoice}, new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius"), Translate.text("lightType")});
     if (!dlg.clickedOk())
     {
@@ -204,11 +214,13 @@ public class DirectionalLight extends Light
     cb.run();
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -225,6 +237,7 @@ public class DirectionalLight extends Light
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -243,25 +256,28 @@ public class DirectionalLight extends Light
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new DirectionalLightKeyframe(color, intensity, radius);
   }
-  
+
   /* Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     DirectionalLightKeyframe key = (DirectionalLightKeyframe) k;
-    
+
     setParameters(key.color.duplicate(), key.intensity, type, 0.5f);
     setRadius(key.radius);
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Intensity", "AngularRadius"},
@@ -270,7 +286,8 @@ public class DirectionalLight extends Light
   }
 
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final DirectionalLightKeyframe key = (DirectionalLightKeyframe) k;
@@ -279,7 +296,7 @@ public class DirectionalLight extends Light
     ValueSelector radiusField = new ValueSelector(key.radius, 0.0, 45.0, 0.1);
     RGBColor oldColor = key.color.duplicate();
     final BFrame parentFrame = parent.getFrame();
-    
+
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
@@ -287,7 +304,7 @@ public class DirectionalLight extends Light
         patch.setBackground(key.color.getColor());
       }
     });
-    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"),
         new Widget [] {patch, intensityField, radiusField},
         new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius")});
     if (!dlg.clickedOk())
@@ -298,45 +315,49 @@ public class DirectionalLight extends Light
     key.intensity = (float) intensityField.getValue();
     key.radius = radiusField.getValue();
   }
-  
+
   /* Inner class representing a pose for a directional light. */
-  
+
   public static class DirectionalLightKeyframe implements Keyframe
   {
     public RGBColor color;
     public float intensity;
     public double radius;
-    
+
     public DirectionalLightKeyframe(RGBColor color, float intensity, double radius)
     {
       this.color = color.duplicate();
       this.intensity = intensity;
       this.radius = radius;
     }
-    
+
     /* Create a duplicate of this keyframe.. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return new DirectionalLightKeyframe(color, intensity, radius);
     }
-    
+
     /* Create a duplicate of this keyframe for a (possibly different) object. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return duplicate();
     }
-  
+
     /* Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {intensity, radius};
     }
-  
+
     /* Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
       intensity = (float) values[0];
@@ -345,7 +366,8 @@ public class DirectionalLight extends Light
 
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       DirectionalLightKeyframe k2 = (DirectionalLightKeyframe) o2;
@@ -355,6 +377,7 @@ public class DirectionalLight extends Light
       return new DirectionalLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity), weight1*radius+weight2*k2.radius);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       DirectionalLightKeyframe k2 = (DirectionalLightKeyframe) o2, k3 = (DirectionalLightKeyframe) o3;
@@ -364,6 +387,7 @@ public class DirectionalLight extends Light
       return new DirectionalLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity), weight1*radius+weight2*k2.radius+weight3*k3.radius);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       DirectionalLightKeyframe k2 = (DirectionalLightKeyframe) o2, k3 = (DirectionalLightKeyframe) o3, k4 = (DirectionalLightKeyframe) o4;
@@ -374,7 +398,8 @@ public class DirectionalLight extends Light
     }
 
     /* Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof DirectionalLightKeyframe))
@@ -382,9 +407,10 @@ public class DirectionalLight extends Light
       DirectionalLightKeyframe key = (DirectionalLightKeyframe) k;
       return (key.color.equals(color) && key.intensity == intensity && key.radius == radius);
     }
-  
+
     /* Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       color.writeToFile(out);

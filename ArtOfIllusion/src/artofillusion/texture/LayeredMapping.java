@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -43,77 +43,78 @@ public class LayeredMapping extends TextureMapping
     blendMode = new int [0];
     fractParamID = new int [0];
   }
-  
+
   /** Get the number of layers. */
-  
+
   public int getNumLayers()
   {
     return texture.length;
   }
-  
+
   /** Get the list of layers for this texture. */
-  
+
   public Texture [] getLayers()
   {
     return texture;
   }
-  
+
   /** Get a particular layer. */
-  
+
   public Texture getLayer(int which)
   {
     return texture[which];
   }
-  
+
   /** Set a particular layer. */
-  
+
   public void setLayer(int which, Texture tex)
   {
     texture[which] = tex;
   }
-  
+
   /** Get the mapping for a particular layer. */
-  
+
   public TextureMapping getLayerMapping(int which)
   {
     return mapping[which];
   }
-  
+
   /** Set the mapping for a particular layer. */
-  
+
   public void setLayerMapping(int which, TextureMapping map)
   {
     mapping[which] = map;
   }
-  
+
   /** Get the blend mode for a particular layer. */
-  
+
   public int getLayerMode(int which)
   {
     return blendMode[which];
   }
-  
-  
+
+
   /** Set the blend mode for a particular layer. */
-  
+
   public void setLayerMode(int which, int mode)
   {
     blendMode[which] = mode;
   }
-    
+
   /** Get the list of texture parameters. */
-  
+
+  @Override
   public TextureParameter[] getParameters()
   {
     Vector<TextureParameter> param = new Vector<TextureParameter>();
     TextureParameter p[];
     int i, j;
-    
+
     // There are two types of parameters: those corresponding to the blending fraction for
     // a layer, and those which belong to layer.  We recalculate the list every time this
     // method is called, since there is no way of knowning when a layer texture might have
     // been edited such that its list of parameters has changed.
-    
+
     fractParamIndex = new int [texture.length];
     paramStartIndex = new int [texture.length];
     numParams = new int [texture.length];
@@ -146,7 +147,7 @@ public class LayeredMapping extends TextureMapping
   }
 
   /** Get the list of texture parameters for a particular layer. */
-  
+
   public TextureParameter [] getLayerParameters(int which)
   {
     TextureParameter p[] = getParameters();
@@ -202,7 +203,7 @@ public class LayeredMapping extends TextureMapping
     int newblendMode[] = new int [texture.length+1];
     int newFractParamID[] = new int [texture.length+1];
     int i;
-    
+
     newtexture[0] = tex;
     newmapping[0] = tex.getDefaultMapping(theObject);
     newblendMode[0] = BLEND;
@@ -265,7 +266,7 @@ public class LayeredMapping extends TextureMapping
     int newblendMode[] = new int [texture.length-1];
     int newFractParamID[] = new int [texture.length-1];
     int i, j;
-    
+
     for (i = j = 0; i < texture.length; i++)
       if (i != which)
         {
@@ -280,9 +281,9 @@ public class LayeredMapping extends TextureMapping
     blendMode = newblendMode;
     fractParamID = newFractParamID;
   }
-  
+
   /** Move a layer to a new position. */
-  
+
   public void moveLayer(int which, int pos)
   {
     Texture newtexture[] = new Texture [texture.length];
@@ -290,7 +291,7 @@ public class LayeredMapping extends TextureMapping
     int newblendMode[] = new int [texture.length];
     int newFractParamID[] = new int [texture.length];
     int i, j;
-    
+
     for (i = j = 0; i < newtexture.length; i++)
       {
         if (j == which)
@@ -317,7 +318,7 @@ public class LayeredMapping extends TextureMapping
     fractParamID = newFractParamID;
   }
 
-  /** Loading and saving of layered mappings works a bit differently from other mappings, 
+  /** Loading and saving of layered mappings works a bit differently from other mappings,
      since it needs to refer other textures in the scene. */
 
   public void readFromFile(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
@@ -326,7 +327,7 @@ public class LayeredMapping extends TextureMapping
     int numTextures = in.readInt();
 
     if (version != 0)
-      throw new InvalidObjectException("");    
+      throw new InvalidObjectException("");
     texture = new Texture [numTextures];
     mapping = new TextureMapping [numTextures];
     blendMode = new int [numTextures];
@@ -348,7 +349,7 @@ public class LayeredMapping extends TextureMapping
           }
       }
   }
-  
+
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -364,6 +365,7 @@ public class LayeredMapping extends TextureMapping
 
   /** This form of writeToFile() is never used, and should never be called. */
 
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     throw new IllegalStateException();
@@ -374,19 +376,21 @@ public class LayeredMapping extends TextureMapping
     return "Layered";
   }
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
-    return new LayeredTriangle(v1, v2, v3, n1, n2, n3, vert[v1].x, vert[v1].y, vert[v1].z, 
+    return new LayeredTriangle(v1, v2, v3, n1, n2, n3, vert[v1].x, vert[v1].y, vert[v1].z,
         vert[v2].x, vert[v2].y, vert[v2].z, vert[v3].x, vert[v3].y, vert[v3].z, this, theTexture, vert);
   }
-  
+
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
-  
+
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     LayeredTriangle lt = (LayeredTriangle) tri;
-    
+
     for (int i = 0; i < lt.layerTriangle.length; i++)
       if (lt.layerTriangle[i] != null && numParams[i] > 0)
         {
@@ -402,9 +406,10 @@ public class LayeredMapping extends TextureMapping
           mapping[i].setParameters(lt.layerTriangle[i], t1, t2, t3, mesh);
         }
   }
-  
+
   /** Determine the surface properties by adding up the properties of all of the layers. */
-  
+
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double t, double param[])
   {
     float rt = 1.0f, gt = 1.0f, bt = 1.0f;
@@ -463,10 +468,10 @@ public class LayeredMapping extends TextureMapping
         return;
     }
   }
-  
-  /** Estimate the average surface properties by adding up the average properties of all 
+
+  /** Estimate the average surface properties by adding up the average properties of all
      of the layers. */
-  
+
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     float rt = 1.0f, gt = 1.0f, bt = 1.0f;
@@ -525,6 +530,7 @@ public class LayeredMapping extends TextureMapping
 
   /** Determine the transparency by adding up all of the layers. */
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double t, double param[])
   {
     float rt = 1.0f, gt = 1.0f, bt = 1.0f;
@@ -560,9 +566,10 @@ public class LayeredMapping extends TextureMapping
         return;
     }
   }
-  
+
   /** Determine the displacement height by adding up all of the layers. */
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double t, double param[])
   {
     double ft = 1.0, height = 0.0, temp;
@@ -596,27 +603,31 @@ public class LayeredMapping extends TextureMapping
   }
 
   /** Get the LayeredTexture object this mapping is associated with */
-  
+
+  @Override
   public Texture getTexture()
   {
     return theTexture;
   }
 
+  @Override
   public Object3D getObject()
   {
     return theObject;
   }
 
   /** Create a new TextureMapping which is identical to this one. */
-  
+
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(theObject, theTexture);
   }
-  
+
   /** Create a new TextureMapping which is identical to this one, but for a
      different Texture. */
-  
+
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     LayeredMapping map = new LayeredMapping(obj, null);
@@ -637,9 +648,10 @@ public class LayeredMapping extends TextureMapping
     map.getParameters();
     return map;
   }
-  
+
   /** Make this mapping identical to another one. */
-  
+
+  @Override
   public void copy(TextureMapping theMap)
   {
     LayeredMapping map = (LayeredMapping) theMap;
@@ -658,10 +670,11 @@ public class LayeredMapping extends TextureMapping
       }
     getParameters();
   }
-  
+
   /** There is no editing panel for layered mappings, since this is handled directly by the
       object texture dialog. */
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return null;

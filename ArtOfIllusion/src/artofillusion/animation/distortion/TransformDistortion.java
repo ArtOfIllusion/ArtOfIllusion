@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -26,6 +26,7 @@ public class TransformDistortion extends Distortion
 
   /** Determine whether this distortion is identical to another one. */
 
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof TransformDistortion))
@@ -42,6 +43,7 @@ public class TransformDistortion extends Distortion
 
   /** Create a duplicate of this object. */
 
+  @Override
   public Distortion duplicate()
   {
     TransformDistortion d = new TransformDistortion(transform);
@@ -52,6 +54,7 @@ public class TransformDistortion extends Distortion
 
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)

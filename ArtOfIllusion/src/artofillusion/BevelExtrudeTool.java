@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -40,21 +40,25 @@ public class BevelExtrudeTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("bevelExtrudeTool.tipText");
   }
-  
+
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -70,6 +74,7 @@ public class BevelExtrudeTool extends MeshEditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -78,11 +83,13 @@ public class BevelExtrudeTool extends MeshEditingTool
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);
@@ -104,15 +111,15 @@ public class BevelExtrudeTool extends MeshEditingTool
     beveler = new TriMeshBeveler(origMesh, selected, mode);
     clickPoint = ev.getMouseEvent().getPoint();
   }
-  
+
   protected void handleDragged(HandleDraggedEvent ev)
   {
     TriangleMesh mesh = (TriangleMesh) controller.getObject().getObject();
     Camera cam = ev.getView().getCamera();
     Point dragPoint = ev.getMouseEvent().getPoint();
-    
+
     // Determine the bevel width and extrude height.
-    
+
     Vec3 dragVec = cam.convertScreenToWorld(dragPoint, cam.getDistToScreen()).minus(cam.convertScreenToWorld(clickPoint, cam.getDistToScreen()));
     width = 0.5*dragVec.x;
     height = dragVec.y;
@@ -133,7 +140,7 @@ public class BevelExtrudeTool extends MeshEditingTool
       if (width < 0.0)
         width = 0.0;
     }
-    
+
     // Update the mesh and redisplay.
 
     if (undo == null)
@@ -161,6 +168,7 @@ public class BevelExtrudeTool extends MeshEditingTool
     undo = null;
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     BComboBox c = new BComboBox(new String [] {

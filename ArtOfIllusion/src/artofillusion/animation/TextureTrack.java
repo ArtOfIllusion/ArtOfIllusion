@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -29,7 +29,7 @@ public class TextureTrack extends Track
   int smoothingMethod;
   WeightTrack theWeight;
   TextureParameter param[];
-  
+
   public TextureTrack(ObjectInfo info)
   {
     super("Texture");
@@ -39,9 +39,10 @@ public class TextureTrack extends Track
     theWeight = new WeightTrack(this);
     param = info.getObject().getParameters();
   }
-  
+
   /* Modify the parameters of the object. */
-  
+
+  @Override
   public void apply(double time)
   {
     ArrayKeyframe val = (ArrayKeyframe) tc.evaluate(time, smoothingMethod);
@@ -68,13 +69,14 @@ public class TextureTrack extends Track
 	}
     info.getObject().setParameterValues(paramValue);
   }
-  
+
   /* Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     TextureTrack t = new TextureTrack((ObjectInfo) obj);
-    
+
     t.name = name;
     t.enabled = enabled;
     t.quantized = quantized;
@@ -84,13 +86,14 @@ public class TextureTrack extends Track
     t.param = param;
     return t;
   }
-  
+
   /* Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     TextureTrack t = (TextureTrack) tr;
-    
+
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
@@ -99,30 +102,34 @@ public class TextureTrack extends Track
     theWeight = (WeightTrack) t.theWeight.duplicate(this);
     param = t.param;
   }
-  
+
   /* Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
   }
 
   /* Get the timecourse describing this track. */
-  
+
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
   }
-  
+
   /* Set a keyframe at the specified time. */
-  
+
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
   }
-  
+
   /* Set a keyframe at the specified time, based on the current state of the Scene. */
-  
+
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     TextureParameter texParam[] = info.getObject().getParameters();
@@ -141,7 +148,8 @@ public class TextureTrack extends Track
   /** Set a keyframe at the specified time, based on the current state of the Scene,
       if and only if the Scene does not match the current state of the track.  Return
       the new Keyframe, or null if none was set. */
-  
+
+  @Override
   public Keyframe setKeyframeIfModified(double time, Scene sc)
   {
     TextureParameter texParam[] = info.getObject().getParameters();
@@ -168,70 +176,79 @@ public class TextureTrack extends Track
   }
 
   /* Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
   }
-  
+
   /* Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
   }
-  
+
   /* This track is null if it has no keyframes. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
   }
-  
+
   /* This has a single child track. */
-  
+
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
   }
 
   /* Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo);
   }
-  
+
   /* Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return info;
   }
-  
+
   /* Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
   }
-  
+
   /* Get the smoothing method for this track. */
-  
+
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
   }
-  
+
   /* Set the smoothing method for this track. */
-  
+
   public void setSmoothingMethod(int method)
   {
     smoothingMethod = method;
   }
-  
+
   /* Get the names of all graphable values for this track. */
-  
+
+  @Override
   public String [] getValueNames()
   {
     String names[] = new String [param.length];
@@ -241,7 +258,8 @@ public class TextureTrack extends Track
   }
 
   /* Get the default list of graphable values (for a track which has no keyframes). */
-  
+
+  @Override
   public double [] getDefaultGraphValues()
   {
     TextureParameter texParam[] = info.getObject().getParameters();
@@ -254,11 +272,12 @@ public class TextureTrack extends Track
 	  d[j] = paramValue[i].getAverageValue();
     return d;
   }
-  
+
   /* Get the allowed range for graphable values.  This returns a 2D array, where elements
      [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
      the nth graphable value. */
-  
+
+  @Override
   public double[][] getValueRange()
   {
     double range[][] = new double [param.length][2];
@@ -269,34 +288,36 @@ public class TextureTrack extends Track
       }
     return range;
   }
-  
+
   /* Get an array of any objects which this track depends on (and which therefore must
-     be updated before this track is applied). */ 
-  
+     be updated before this track is applied). */
+
+  @Override
   public ObjectInfo [] getDependencies()
   {
      return new ObjectInfo [0];
   }
-  
+
   /* Delete all references to the specified object from this track.  This is used when an
      object is deleted from the scene. */
-  
+
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
   }
-  
+
   /* This should be called whenever the list of texture parameters for the object
      changes.  It updates this track's list of parameters to remove any that no
      longer exist. */
-  
+
   public void parametersChanged()
   {
     TextureParameter texParam[] = info.getObject().getParameters();
     boolean exists[] = new boolean [param.length];
     int num = 0;
-    
+
     // Find which parameters still exist.
-    
+
     for (int i = 0; i < param.length; i++)
       for (int j = 0; j < texParam.length; j++)
         if (param[i].equals(texParam[j]))
@@ -305,17 +326,17 @@ public class TextureTrack extends Track
             num++;
             break;
           }
-    
+
     // Update this track's list of parameters.
-    
+
     TextureParameter newparam[] = new TextureParameter [num];
     for (int i = 0, j = 0; i < exists.length; i++)
       if (exists[i])
         newparam[j++] = param[i];
     param = newparam;
-    
+
     // Update the value arrays for all keyframes.
-    
+
     Keyframe key[] = tc.getValues();
     for (int k = 0; k < key.length; k++)
       {
@@ -328,7 +349,8 @@ public class TextureTrack extends Track
   }
 
   /* Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     TextureParameter texParam[] = info.getObject().getParameters();
@@ -352,14 +374,15 @@ public class TextureTrack extends Track
     for (int i = 0; i < t.length; i++)
       {
         out.writeDouble(t[i]);
-        ((ArrayKeyframe) v[i]).writeToStream(out); 
-        s[i].writeToStream(out); 
+        ((ArrayKeyframe) v[i]).writeToStream(out);
+        s[i].writeToStream(out);
       }
     theWeight.writeToStream(out, scene);
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -388,7 +411,8 @@ public class TextureTrack extends Track
   }
 
   /** Present a window in which the user can edit the specified keyframe. */
-  
+
+  @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
     ArrayKeyframe key = (ArrayKeyframe) tc.getValues()[which];
@@ -400,7 +424,7 @@ public class TextureTrack extends Track
     final BCheckBox sameBox = new BCheckBox(Translate.text("separateSmoothness"), !s.isForceSame());
     Widget widget[] = new Widget [param.length+5];
     String label[] = new String [param.length+5];
-    
+
     for (int i = 0; i < param.length; i++)
     {
       widget[i] = param[i].getEditingWidget(key.val[i]);
@@ -441,7 +465,8 @@ public class TextureTrack extends Track
   }
 
   /** This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     BTextField nameField = new BTextField(getName());
@@ -455,9 +480,9 @@ public class TextureTrack extends Track
     TreeList tree = new TreeList(win);
     BScrollPane sp = new BScrollPane(tree);
     Vector<TreeElement> elements = new Vector<TreeElement>();
-    
+
     // Create a tree of all the texture parameters.
-    
+
     TextureParameter texParam[] = info.getObject().getParameters();
     ParameterValue paramValue[] = info.getObject().getParameterValues();
     if (info.getObject().getTextureMapping() instanceof LayeredMapping)
@@ -479,7 +504,7 @@ public class TextureTrack extends Track
               el.setSelected(true);
           v.addElement(el);
         }
-        if (v.size() == 0)
+        if (v.isEmpty())
         {
           TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
           el.setSelectable(false);
@@ -502,7 +527,7 @@ public class TextureTrack extends Track
               el.setSelected(true);
           elements.add(el);
         }
-    if (elements.size() == 0)
+    if (elements.isEmpty())
       {
         TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
         el.setSelectable(false);
@@ -522,9 +547,9 @@ public class TextureTrack extends Track
         {Translate.text("trackName"), Translate.text("SmoothingMethod"), null, null});
     if (!dlg.clickedOk())
       return;
-    
+
     // Update the list of parameters and other info.
-    
+
     win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
     this.setName(nameField.getText());
     smoothingMethod = smoothChoice.getSelectedIndex();

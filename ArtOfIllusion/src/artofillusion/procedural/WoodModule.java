@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -27,14 +27,14 @@ public class WoodModule extends Module
   double value, error, amplitude, spacing, lastBlur;
   Vec3 gradient, tempVec;
   PointInfo point;
-  
+
   public WoodModule(Point position)
   {
-    super(Translate.text("menu.woodModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
+    super(Translate.text("menu.woodModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Noise", "(0.5)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
       position);
     octaves = 2;
     amplitude = 1.0;
@@ -43,44 +43,44 @@ public class WoodModule extends Module
     gradient = new Vec3();
     tempVec = new Vec3();
   }
-  
+
   /** Get the number of octaves. */
-  
+
   public int getOctaves()
   {
     return octaves;
   }
-  
+
   /** Set the number of octaves. */
-  
+
   public void setOctaves(int o)
   {
     octaves = o;
   }
-  
+
   /** Get the amplitude. */
-  
+
   public double getAmplitude()
   {
     return amplitude;
   }
-  
+
   /** Set the amplitude. */
-  
+
   public void setAmplitude(double a)
   {
     amplitude = a;
   }
-  
+
   /** Get the spacing. */
-  
+
   public double getSpacing()
   {
     return spacing;
   }
-  
+
   /** Set the spacing. */
-  
+
   public void setSpacing(double s)
   {
     spacing = s;
@@ -88,6 +88,7 @@ public class WoodModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -96,7 +97,8 @@ public class WoodModule extends Module
 
   /* Calculate the value, error, and gradient all at once, since calculating just the value
      is almost as much work as calculating all three. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -112,7 +114,7 @@ public class WoodModule extends Module
     double cutoff = 0.5/Math.max(Math.max(xsize, ysize), zsize);
 
     // First calculate the turbulence function.
-    
+
     value = 0.0;
     error = 0.0;
     gradient.set(0.0, 0.0, 0.0);
@@ -135,9 +137,9 @@ public class WoodModule extends Module
         amp *= persistence;
         scale *= 2.0;
       }
-    
+
     // Now use that to calculate the wood function.
-    
+
     scale = 1.0/spacing;
     double r = Math.sqrt(x*x+y*y), rinv = 1.0/r;
     if (linkFrom[0] == null)
@@ -184,7 +186,8 @@ public class WoodModule extends Module
   }
 
   /* The error is calculated at the same time as the value. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -194,15 +197,17 @@ public class WoodModule extends Module
 
   /* The gradient is calculated at the same time as the value. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)
       getAverageValue(which, blur);
     grad.set(gradient);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField octavesField = new ValueField((double) octaves, ValueField.POSITIVE+ValueField.INTEGER);
@@ -230,13 +235,14 @@ public class WoodModule extends Module
       return false;
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     WoodModule module = new WoodModule(new Point(bounds.x, bounds.y));
-    
+
     module.octaves = octaves;
     module.amplitude = amplitude;
     module.spacing = spacing;
@@ -246,15 +252,17 @@ public class WoodModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(octaves);
     out.writeDouble(amplitude);
     out.writeDouble(spacing);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     octaves = in.readInt();

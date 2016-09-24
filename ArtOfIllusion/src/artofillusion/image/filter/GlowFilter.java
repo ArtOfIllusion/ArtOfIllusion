@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image.filter;
@@ -34,18 +34,20 @@ public class GlowFilter extends ImageFilter
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Glow");
   }
-  
+
   /** Apply the filter to an image.
       @param image      the image to filter
       @param scene      the Scene which was rendered to create the image
       @param camera     the camera from which the Scene was rendered
       @param cameraPos  the position of the camera in the scene
   */
-  
+
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     String shape = (String) getPropertyValue(0);
@@ -66,9 +68,9 @@ public class GlowFilter extends ImageFilter
         filterComponent(image, ComplexImage.BLUE);
       }
   }
-  
+
   /** Apply the filter to one component of an image. */
-  
+
   private void filterComponent(ComplexImage image, int component)
   {
     Thread currentThread = Thread.currentThread();
@@ -107,9 +109,9 @@ public class GlowFilter extends ImageFilter
     }
     image.setComponentValues(component, glow);
   }
-  
+
   /** Add one "arm" to the glow. */
-  
+
   private void addGlowArm(float glow[], int x, int y, int xstep, int ystep, int width, int height, int radius, float intensity)
   {
     float intensityStep = intensity/radius;
@@ -123,9 +125,9 @@ public class GlowFilter extends ImageFilter
         intensity -= intensityStep;
       }
   }
-  
+
   /** Build the mask for a circular glow. */
-  
+
   private float [] createCircularMask(int radius)
   {
     int size = 2*radius+1, radius2 = radius*radius;
@@ -147,9 +149,9 @@ public class GlowFilter extends ImageFilter
     mask[radius+radius*size] = 0.0f;
     return mask;
   }
-  
+
   /** Apply a circular glow filter to one component of an image. */
-  
+
   private void filterComponentCircular(ComplexImage image, int component, int radius, float mask[])
   {
     Thread currentThread = Thread.currentThread();
@@ -195,7 +197,8 @@ public class GlowFilter extends ImageFilter
   }
 
   /** Write a serialized description of this filter to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     int shape = 0;
@@ -208,7 +211,8 @@ public class GlowFilter extends ImageFilter
   }
 
   /** Reconstruct this filter from its serialized representation. */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     setPropertyValue(0, SHAPES[in.readInt()]);

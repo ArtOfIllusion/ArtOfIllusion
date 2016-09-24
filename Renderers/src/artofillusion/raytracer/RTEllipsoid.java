@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -15,7 +15,7 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
 
-/** RTEllipsoid represents an ellipsoid to be raytraced.  It is defined by specifying a Sphere 
+/** RTEllipsoid represents an ellipsoid to be raytraced.  It is defined by specifying a Sphere
     object, and the transformations to and from local coordinates. */
 
 public class RTEllipsoid extends RTObject
@@ -24,7 +24,7 @@ public class RTEllipsoid extends RTObject
   double rx, ry, rz, rx2, ry2, rz2, cx, cy, cz, sy, sz, param[];
   boolean bumpMapped, transform, uniform;
   Mat4 toLocal, fromLocal;
-  
+
   public static final double TOL = 1e-12;
 
   public RTEllipsoid(Sphere sphere, Mat4 fromLocal, Mat4 toLocal, double param[])
@@ -106,21 +106,24 @@ public class RTEllipsoid extends RTObject
   }
 
   /** Get the TextureMapping for this object. */
-  
+
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return theSphere.getTextureMapping();
   }
 
   /** Get the MaterialMapping for this object. */
-  
+
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return theSphere.getMaterialMapping();
-  }  
+  }
 
   /** Determine whether the given ray intersects this sphere. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 orig = r.getOrigin(), rdir = r.getDirection();
@@ -189,10 +192,10 @@ public class RTEllipsoid extends RTObject
     projectPoint(v1);
     return new EllipsoidIntersection(this, numIntersections, v1, v2, dist1, dist2);
   }
-  
+
   /** Given a point, project it onto the surface of the ellipsoid.  This is necessary to
       prevent roundoff error. */
-  
+
   private void projectPoint(Vec3 pos)
   {
     if (transform)
@@ -211,7 +214,8 @@ public class RTEllipsoid extends RTObject
   }
 
   /** Get a bounding box for this ellipsoid. */
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     if (transform)
@@ -222,6 +226,7 @@ public class RTEllipsoid extends RTObject
 
   /** Determine whether any part of the surface of the ellipsoid lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     double dx, dy, dz, centerx, centery, centerz;
@@ -254,9 +259,9 @@ public class RTEllipsoid extends RTObject
       c.z = bb.minz;
     else if (centerz > bb.maxz)
       c.z = bb.maxz;
-    
+
     // If the ellipsoid lies entirely outside the box, return false.
-    
+
     if (!transform)
       c.set(c.x-centerx, c.y-centery, c.z-centerz);
     if (c.x*c.x + c.y*c.y*sy + c.z*c.z*sz > rx2)
@@ -293,9 +298,10 @@ public class RTEllipsoid extends RTObject
       return true;
     return false;
   }
-  
+
   /** Get the transformation from world coordinates to the object's local coordinates. */
-  
+
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -330,16 +336,19 @@ public class RTEllipsoid extends RTObject
       pos = new Vec3();
     }
 
+    @Override
     public RTObject getObject()
     {
       return ellipse;
     }
 
+    @Override
     public int numIntersections()
     {
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       if (n == 0)
@@ -348,6 +357,7 @@ public class RTEllipsoid extends RTObject
         p.set(r2x, r2y, r2z);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       if (n == 0)
@@ -356,6 +366,7 @@ public class RTEllipsoid extends RTObject
         return dist2;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       calcTrueNorm();
@@ -379,6 +390,7 @@ public class RTEllipsoid extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       TextureMapping map = ellipse.theSphere.getTextureMapping();
@@ -395,6 +407,7 @@ public class RTEllipsoid extends RTObject
       }
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       calcTrueNorm();
@@ -403,7 +416,7 @@ public class RTEllipsoid extends RTObject
 
     /** Calculate the true normal of the point of intersection. */
 
-    private final void calcTrueNorm()
+    private void calcTrueNorm()
     {
       if (trueNormValid)
         return;

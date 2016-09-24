@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -38,6 +38,7 @@ public class CreateSplineMeshTool extends EditingTool
     initButton("splineMesh");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -58,27 +59,31 @@ public class CreateSplineMeshTool extends EditingTool
     else
       smoothingDesc = "approximating";
     theWindow.setHelpText(Translate.text("createSplineMeshTool.helpText",
-      new Object [] {Integer.toString(usize), Integer.toString(vsize), 
+      new Object [] {Integer.toString(usize), Integer.toString(vsize),
       Translate.text("createSplineMeshTool."+shapeDesc).toLowerCase(), Translate.text("menu."+smoothingDesc).toLowerCase()}));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createSplineMeshTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
     shiftDown = e.isShiftDown();
     ((SceneViewer) view).beginDraggingBox(clickPoint, shiftDown);
   }
-  
+
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = ((LayoutWindow) theWindow).getScene();
@@ -87,7 +92,7 @@ public class CreateSplineMeshTool extends EditingTool
     Vec3 v1, v2, v3, orig, xdir, ydir, zdir;
     double xsize, ysize;
     int i;
-    
+
     if (shiftDown)
       {
 	if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
@@ -150,7 +155,7 @@ public class CreateSplineMeshTool extends EditingTool
   {
     Vec3 v[][] = new Vec3 [usize][vsize];
     int i, j;
-    
+
     if (shape == FLAT)
       {
         double xmin = -xsize*0.5, ymin = -ysize*0.5;
@@ -187,11 +192,12 @@ public class CreateSplineMeshTool extends EditingTool
     return v;
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     final ValueSlider thicknessSlider = new ValueSlider(0.0, 1.0, 100, thickness);
     int i, minu, minv;
-    
+
     thicknessSlider.setEnabled(shape == TORUS);
     ValueField usizeField = new ValueField((double) usize, ValueField.POSITIVE+ValueField.INTEGER);
     ValueField vsizeField = new ValueField((double) vsize, ValueField.POSITIVE+ValueField.INTEGER);
@@ -220,7 +226,7 @@ public class CreateSplineMeshTool extends EditingTool
         thicknessSlider.setEnabled(shapeChoice.getSelectedIndex() == 2);
       }
     });
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectMeshSizeShape"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectMeshSizeShape"),
                 new Widget [] {usizeField, vsizeField, shapeChoice, smoothingChoice, thicknessSlider},
                 new String [] {Translate.text("uSize"), Translate.text("vSize"), Translate.text("Shape"), Translate.text("Smoothing Method"), Translate.text("Thickness")});
     if (!dlg.clickedOk())

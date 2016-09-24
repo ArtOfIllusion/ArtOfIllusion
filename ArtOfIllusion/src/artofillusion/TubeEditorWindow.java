@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -106,7 +106,8 @@ public class TubeEditorWindow extends CurveEditorWindow
     endsMenu.add(endsItem[1] = Translate.checkboxMenuItem("closedEnds", this, "endsStyleChanged", obj.getEndsStyle() == Tube.CLOSED_ENDS));
     endsMenu.add(endsItem[2] = Translate.checkboxMenuItem("flatEnds", this, "endsStyleChanged", obj.getEndsStyle() == Tube.FLAT_ENDS));
   }
-  
+
+  @Override
   protected BMenu createShowMenu()
   {
     BMenu menu = Translate.menu("show");
@@ -118,6 +119,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     return menu;
   }
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -136,7 +138,7 @@ public class TubeEditorWindow extends CurveEditorWindow
         meshMenuItem[i].setEnabled(false);
     }
   }
-  
+
   private void endsStyleChanged(WidgetEvent ev)
   {
     Widget source = ev.getWidget();
@@ -152,6 +154,7 @@ public class TubeEditorWindow extends CurveEditorWindow
       }
   }
 
+  @Override
   protected void doOk()
   {
     Tube theMesh = (Tube) objInfo.getObject();
@@ -174,7 +177,8 @@ public class TubeEditorWindow extends CurveEditorWindow
     dispose();
     onClose.run();
   }
-  
+
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -183,6 +187,7 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   /** Delete the selected vertices. */
 
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -232,6 +237,7 @@ public class TubeEditorWindow extends CurveEditorWindow
 
   /** Subdivide the tube between the selected vertices. */
 
+  @Override
   public void subdivideCommand()
   {
     Tube theTube = (Tube) objInfo.getObject();
@@ -242,9 +248,9 @@ public class TubeEditorWindow extends CurveEditorWindow
     double param[][], newparam[][], paramTemp[] = new double [numParam];
     boolean newsel[], split[];
     int i, j, p1, p3, p4, splitcount = 0, method = theTube.getSmoothingMethod();
-    
+
     // Record parameter values.
-    
+
     param = new double [vt.length][numParam];
     ParameterValue paramValue[] = theTube.getParameterValues();
     for (i = 0; i < numParam; i++)
@@ -256,9 +262,9 @@ public class TubeEditorWindow extends CurveEditorWindow
           param[j][i] = val[j];
       }
     }
-    
+
     // Determine which parts need to be subdivided.
-    
+
     if (theTube.getEndsStyle() == Tube.CLOSED_ENDS)
       split = new boolean [vt.length];
     else
@@ -274,7 +280,7 @@ public class TubeEditorWindow extends CurveEditorWindow
     newt = new double [vt.length+splitcount];
     newparam = new double [vt.length+splitcount][numParam];
     newsel = new boolean [vt.length+splitcount];
-    
+
     // Do the subdivision.
 
     for (i = 0, j = 0; i < split.length; i++)
@@ -380,9 +386,9 @@ public class TubeEditorWindow extends CurveEditorWindow
     objectChanged();
     updateImage();
   }
-  
+
   /** Allow the user to set the thickness for selected vertices. */
-  
+
   public void setThicknessCommand()
   {
     Tube theTube = (Tube) objInfo.getObject();

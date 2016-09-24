@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -15,8 +15,8 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
 
-/** RTSphere represents a sphere to be raytraced.  It is defined by specifying a Sphere 
-    object, and the transformations to and from local coordinates.  It must be a true 
+/** RTSphere represents a sphere to be raytraced.  It is defined by specifying a Sphere
+    object, and the transformations to and from local coordinates.  It must be a true
     sphere, not an ellipsoid.  That is, all of its radii must be equal. */
 
 public class RTSphere extends RTObject
@@ -25,7 +25,7 @@ public class RTSphere extends RTObject
   double r, r2, cx, cy, cz, param[];
   boolean bumpMapped;
   Mat4 toLocal, fromLocal;
-  
+
   public static final double TOL = 1e-12;
 
   public RTSphere(Sphere sphere, Mat4 fromLocal, Mat4 toLocal, double param[])
@@ -44,21 +44,24 @@ public class RTSphere extends RTObject
   }
 
   /** Get the TextureMapping for this object. */
-  
+
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return theSphere.getTextureMapping();
   }
 
   /** Get the MaterialMapping for this object. */
-  
+
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return theSphere.getMaterialMapping();
-  }  
+  }
 
   /** Determine whether the given ray intersects this sphere. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
@@ -111,10 +114,10 @@ public class RTSphere extends RTObject
     projectPoint(v1);
     return new SphereIntersection(this, numIntersections, v1, v2, t, t2);
   }
-  
+
   /** Given a point, project it onto the surface of the sphere.  This is necessary to
       prevent roundoff error. */
-  
+
   private void projectPoint(Vec3 pos)
   {
     double dx = pos.x-cx, dy = pos.y-cy, dz = pos.z-cz;
@@ -123,7 +126,8 @@ public class RTSphere extends RTObject
   }
 
   /** Get a bounding box for this sphere. */
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     return new BoundingBox(cx-r, cx+r, cy-r, cy+r, cz-r, cz+r);
@@ -131,6 +135,7 @@ public class RTSphere extends RTObject
 
   /** Determine whether any part of the surface of the sphere lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     Vec3 c = new Vec3(cx, cy, cz);
@@ -149,9 +154,9 @@ public class RTSphere extends RTObject
       c.z = node.minz;
     else if (cz > node.maxz)
       c.z = node.maxz;
-    
+
     // If the sphere lies entirely outside the box, return false.
-    
+
     c.set(c.x-cx, c.y-cy, c.z-cz);
     if (c.length2() > r2)
       return false;
@@ -184,9 +189,10 @@ public class RTSphere extends RTObject
       return true;
     return false;
   }
-  
+
   /** Get the transformation from world coordinates to the object's local coordinates. */
-  
+
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
@@ -220,16 +226,19 @@ public class RTSphere extends RTObject
       pos = new Vec3();
     }
 
+    @Override
     public RTObject getObject()
     {
       return sphere;
     }
 
+    @Override
     public int numIntersections()
     {
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       if (n == 0)
@@ -238,6 +247,7 @@ public class RTSphere extends RTObject
         p.set(r2x, r2y, r2z);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       if (n == 0)
@@ -246,6 +256,7 @@ public class RTSphere extends RTObject
         return dist2;
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       calcTrueNorm();
@@ -268,6 +279,7 @@ public class RTSphere extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       TextureMapping map = sphere.theSphere.getTextureMapping();
@@ -284,6 +296,7 @@ public class RTSphere extends RTObject
       }
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       calcTrueNorm();
@@ -292,7 +305,7 @@ public class RTSphere extends RTObject
 
     /** Calculate the true normal of the point of intersection. */
 
-    private final void calcTrueNorm()
+    private void calcTrueNorm()
     {
       if (trueNormValid)
         return;

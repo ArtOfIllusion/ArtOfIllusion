@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -32,7 +32,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   int yoffset;
   Vector<Marker> markers;
   UndoRecord undo;
-  
+
   private static final Polygon handle;
 
   private static final int HANDLE_SIZE = 7;
@@ -58,44 +58,50 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     addEventLink(RepaintEvent.class, this, "paint");
   }
-  
+
   /** Set the starting time to display. */
-  
+
+  @Override
   public void setStartTime(double time)
   {
     start = time;
   }
-  
+
   /** Set the number of pixels per unit time. */
-  
+
+  @Override
   public void setScale(double s)
   {
     scale = s;
   }
-  
+
   /** Set the number of subdivisions per unit time. */
-  
+
+  @Override
   public void setSubdivisions(int s)
   {
     subdivisions = s;
   }
-  
+
   /*8 Set the y offset (for vertically scrolling the panel). */
-  
+
+  @Override
   public void setYOffset(int offset)
   {
     yoffset = offset;
   }
-  
+
   /*8 Add a marker to the display. */
-  
+
+  @Override
   public void addMarker(Marker m)
   {
     markers.addElement(m);
   }
 
   /*8 Set the mode (select-and-move or scroll-and-scale) for this display. */
-  
+
+  @Override
   public void setMode(int m)
   {
     mode = m;
@@ -109,7 +115,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     Rectangle dim = getBounds();
     int rowHeight = theList.getRowHeight();
     int x, y, i, j, k;
-    
+
     for (i = 0; i < obj.length; i++)
     {
       if (obj[i] instanceof Track)
@@ -139,9 +145,9 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
           g.setColor(Color.black);
       }
     }
-    
+
     // Draw the markers.
-    
+
     for (i = 0; i < markers.size(); i++)
     {
       Marker m = markers.elementAt(i);
@@ -159,9 +165,9 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
         Math.abs(dragPos.x-lastPos.x), Math.abs(dragPos.y-lastPos.y));
     }
   }
-  
+
   /** Record the times of any selected keyframes. */
-  
+
   private void findInitialKeyTimes()
   {
     SelectionInfo sel[] = theScore.getSelectedKeyframes();
@@ -172,13 +178,13 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
 	dragKeyTime[i] = t[sel[i].keyIndex];
       }
   }
-  
+
   private void mousePressed(MousePressedEvent ev)
   {
     lastPos = ev.getPoint();
     int rowHeight = theList.getRowHeight(), y = lastPos.y-yoffset, row = y/rowHeight;
     Object obj[] = theList.getVisibleObjects();
-    
+
     undo = null;
     dragPos = null;
     draggingBox = false;
@@ -220,30 +226,30 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     draggingBox = true;
     theScore.repaintAll();
   }
-  
+
   private void mouseDragged(MouseDraggedEvent ev)
   {
     Point pos = ev.getPoint();
-    
+
     if (effectiveMode == Score.SELECT_AND_MOVE)
     {
       if (draggingBox)
       {
         // Drag a box for selecting keyframes.
-        
+
         dragPos = pos;
         repaint();
         return;
       }
 
       // Drag the selected keyframes.
-      
+
       SelectionInfo sel[] = theScore.getSelectedKeyframes();
       int i, j;
       if (undo == null)
       {
         // Duplicate any tracks with selected keyframes, so we can undo the drag.
-        
+
         undo = new UndoRecord(window, false);
         for (i = 0; i < sel.length; i++)
         {
@@ -258,16 +264,16 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       for (i = 0; i < sel.length; i++)
       {
         // Move each selected keyframe.
-        
+
         int oldindex = sel[i].keyIndex;
         double t = dragKeyTime[i]+dt;
         if (sel[i].track.isQuantized())
           t = Math.round(t*subdivisions)/(double) subdivisions;
         int newindex = sel[i].track.moveKeyframe(oldindex, t);
-        
+
         // If the index of this keyframe within the timecourse has changed, update all
         // the SelectionInfo objects for this track.
-        
+
         if (oldindex != newindex)
         {
           for (j = 0; j < sel.length; j++)
@@ -288,7 +294,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     if (ev.isShiftDown())
     {
       // Change the scale of the time axis.
-      
+
       if (pos.x > lastPos.x)
         window.getScore().setScale(scale*Math.pow(1.01, pos.x-lastPos.x));
       else
@@ -296,9 +302,9 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       lastPos = pos;
       return;
     }
-    
+
     // Scroll the display.
-    
+
     double dt = (pos.x-lastPos.x)/scale;
     if (lastPos.y != pos.y)
       window.getScore().setScrollPosition(lastPos.y-pos.y-yoffset);
@@ -313,7 +319,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     {
       // They were dragging a box, so select any keyframes inside it.  First, find the range
       // of rows intersecting the box.
-      
+
       float rowHeight = (float) theList.getRowHeight();
       int y1 = lastPos.y-yoffset, y2 = dragPos.y-yoffset;
       int row1, row2, x1 = Math.min(lastPos.x, dragPos.x), x2 = Math.max(lastPos.x, dragPos.x);
@@ -338,9 +344,9 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       {
         if (!(obj[row] instanceof Track))
           continue;
-        
+
         // Find any keyframes of this track inside the box.
-        
+
         Track tr = (Track) obj[row];
         double t[] = tr.getKeyTimes();
         for (int i = 0; i < t.length; i++)
@@ -359,7 +365,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
       theScore.repaintGraphs();
     }
   }
-  
+
   private void mouseClicked(MouseClickedEvent ev)
   {
     if (ev.getClickCount() == 2 && effectiveMode == Score.SELECT_AND_MOVE)

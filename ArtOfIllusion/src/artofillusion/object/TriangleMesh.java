@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -22,7 +22,7 @@ import java.io.*;
 import java.lang.ref.*;
 import java.util.*;
 
-/** The TriangleMesh class represents an aritrary surface defined by a mesh of triangular 
+/** The TriangleMesh class represents an aritrary surface defined by a mesh of triangular
     faces.  Depending on the selected smoothing method, the surface may simply consist of
     the triangular faces, or it may be a smooth subdivision surface which either interpolates
     or approximates the vertices of the control mesh. */
@@ -39,7 +39,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     public int edges, firstEdge;
     public float smoothness;
-    
+
     public Vertex(Vec3 p)
     {
       super(p);
@@ -47,7 +47,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       firstEdge = -1;
       smoothness = 1.0f;
     }
-    
+
     public Vertex(Vertex v)
     {
       super(v);
@@ -55,9 +55,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       firstEdge = v.firstEdge;
       smoothness = v.smoothness;
     }
-    
+
     /** Make this vertex identical to another one. */
-    
+
     public void copy(Vertex v)
     {
       r.set(v.r);
@@ -67,18 +67,18 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       ikJoint = v.ikJoint;
       ikWeight = v.ikWeight;
     }
-    
+
     /** Multiple the fields of this vertex by a constant. */
-    
+
     public void scale(double d)
     {
       r.scale(d);
       smoothness *= d;
       ikWeight *= d;
     }
-    
+
     /** Set the various fields to zero. */
-    
+
     public void clear()
     {
       r.set(0.0, 0.0, 0.0);
@@ -132,7 +132,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     public boolean clockwise()
     {
       Face f = face[edge[firstEdge].f1];
-      
+
       if (f.e1 == firstEdge)
         return (vertex[f.v2] == this);
       else if (f.e2 == firstEdge)
@@ -168,7 +168,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   public class Face
   {
     public int v1, v2, v3, e1, e2, e3;
-    
+
     public Face(int vertex1, int vertex2, int vertex3, int edge1, int edge2, int edge3)
     {
       v1 = vertex1;
@@ -193,9 +193,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       return -1;
     }
   }
-  
+
   /* Beginning of TriangleMesh's variables and methods. */
-  
+
   private Vertex vertex[];
   private Edge edge[];
   private Face face[];
@@ -205,7 +205,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   private int smoothingMethod = SMOOTH_SHADING;
   private SoftReference<RenderingMesh> cachedMesh;
   private SoftReference<WireframeMesh> cachedWire;
-  
+
   private static double LOOP_BETA[], BUTTERFLY_COEFF[][];
   private static final int MAX_SUBDIVISIONS = 20;
   private static final Property PROPERTIES[] = new Property [] {
@@ -216,18 +216,18 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
 
   /* The following constants are used during subdivision for recording parameter types. */
-  
+
   private static final int PER_OBJECT = 0;
   private static final int PER_VERTEX = 1;
   private static final int PER_FACE = 2;
   private static final int PER_FACE_VERTEX = 3;
-  
+
   /* Precalculate coefficients for Loop and Butterfly subdivision. */
 
   static {
     double beta;
     int i, j;
-    
+
     LOOP_BETA = new double [32];
     for (i = 3; i < LOOP_BETA.length; i++)
       {
@@ -250,7 +250,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     BUTTERFLY_COEFF[4] = new double [] {.375, 0.0, -0.125, 0.0, 0.75};
     BUTTERFLY_COEFF[6] = new double [] {1.0, 0.125, -0.125, 0.0, -0.125, 0.125, 0.0};
   }
-  
+
   /** The constructor takes three arguments.  v[] is an array containing the vertices.
       faces[][] is an N by 3 array containing the indices of the vertices which define each
       face.  The vertices for each face must be listed in order, such that they go
@@ -269,19 +269,20 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       vt[i] = new Vertex(v[i]);
     setShape(vt, faces);
   }
-  
+
   public TriangleMesh(Vertex v[], int faces[][])
   {
     setSkeleton(new Skeleton());
     setShape(v, faces);
   }
-  
+
   protected TriangleMesh()
   {
   }
 
   /** Create a duplicate of this object. */
 
+  @Override
   public Object3D duplicate()
   {
     TriangleMesh mesh = new TriangleMesh();
@@ -291,10 +292,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** Make this object exactly like another one. */
 
+  @Override
   public void copyObject(Object3D obj)
   {
     TriangleMesh mesh = (TriangleMesh) obj;
-    
+
     texParam = null;
     vertex = new Vertex [mesh.vertex.length];
     edge = new Edge [mesh.edge.length];
@@ -326,10 +328,10 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     int faceEdges[][] = new int [faces.length][3], copiedEdges[] = new int [faces.length*3];
     Edge edges1[] = new Edge [faces.length*3], edges2[] = new Edge [faces.length*3];
 
-    // If the mesh is closed, then each edge should be traversed twice, once in each 
-    // direction.  If the mesh is open, some edges will be traversed only once, which 
+    // If the mesh is closed, then each edge should be traversed twice, once in each
+    // direction.  If the mesh is open, some edges will be traversed only once, which
     // could be in either direction.
-    
+
     closed = true;
     for (i = 0; i < faces.length; i++)
       {
@@ -357,10 +359,10 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       }
     if (numEdges1 != numEdges2)
       closed = false;
-    
+
     // We now have two lists of edges: one for each direction of traversal.  Determine which
     // which ones are duplicates, and add any unique edges from edges2 into edges1.
-    
+
     Hashtable<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
     for (i = 0; i < numEdges1; i++)
       edgeTable.put(new Point(edges1[i].v1, edges1[i].v2), i);
@@ -380,9 +382,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       }
     if (numCopied > 0)
       closed = false;
-    
+
     // Record the edges for each face.
-    
+
     for (i = 0; i < faces.length; i++)
       {
         if (faceEdges[i][0] >= edges1.length)
@@ -410,7 +412,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     double minx, miny, minz, maxx, maxy, maxz;
     Vec3 vert[] = null;
     int i;
-    
+
     if (cachedMesh != null)
     {
       RenderingMesh cached = cachedMesh.get();
@@ -451,6 +453,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       actually touch the sides of this box.  If the smoothing method is set to interpolating,
       the final surface may actually extend outside this box. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (bounds == null)
@@ -460,6 +463,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** These methods return the lists of vertices, edges, and faces for the mesh. */
 
+  @Override
   public MeshVertex[] getVertices()
   {
     return vertex;
@@ -469,12 +473,12 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     return vertex[i];
   }
-  
+
   public Edge[] getEdges()
   {
     return edge;
   }
-  
+
   public Face[] getFaces()
   {
     return face;
@@ -486,9 +490,10 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     return smoothingMethod;
   }
-  
+
   /** Get a list of the positions of all vertices which define the mesh. */
-  
+
+  @Override
   public Vec3 [] getVertexPositions()
   {
     Vec3 v[] = new Vec3 [vertex.length];
@@ -499,6 +504,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
   /** Set the positions for all the vertices of the mesh. */
 
+  @Override
   public void setVertexPositions(Vec3 v[])
   {
     for (int i = 0; i < v.length; i++)
@@ -507,7 +513,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     cachedWire = null;
     bounds = null;
   }
-  
+
   /** Set the smoothing method. */
 
   public void setSmoothingMethod(int method)
@@ -517,17 +523,17 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     cachedWire = null;
     bounds = null;
   }
-  
+
   /** This method rebuilds the mesh based on new lists of vertices and faces.  The smoothness
       values for all edges are lost in the process. */
-  
+
   public void setShape(Vertex v[], int faces[][])
   {
     Vertex v1, v2;
     int i;
-    
+
     // Create the vertices and edges.
-    
+
     vertex = new Vertex [v.length];
     for (i = 0; i < v.length; i++)
       {
@@ -545,9 +551,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     cachedMesh = null;
     cachedWire = null;
     bounds = null;
-    
+
     // Find the edge information for vertices.
-    
+
     for (i = 0; i < edge.length; i++)
       {
         v1 = vertex[edge[i].v1];
@@ -565,17 +571,19 @@ public class TriangleMesh extends Object3D implements FacetedMesh
           }
       }
   }
-  
+
+  @Override
   public boolean isClosed()
   {
     return closed;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     Vec3 size = getBounds().getSize();
     double xscale, yscale, zscale;
-    
+
     if (size.x == 0.0)
       xscale = 1.0;
     else
@@ -601,22 +609,22 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     cachedWire = null;
     bounds = null;
   }
-  
+
   /** Calculate a set of array representing the boundaries of this mesh.  There is one array
       for each distinct boundary, containing the indices of the edges which form that
       boundary. */
-  
+
   public int [][] findBoundaryEdges()
   {
     // First, find every edge which is on a boundary.
-    
+
     Vector<Integer> allEdges = new Vector<Integer>();
     for (int i = 0; i < edge.length; i++)
       if (edge[i].f2 == -1)
         allEdges.addElement(i);
-    
+
     // Form boundaries one at a time.
-    
+
     Vector<Vector<Integer>> boundary = new Vector<Vector<Integer>>();
     while (allEdges.size() > 0)
       {
@@ -645,9 +653,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
           }
         boundary.addElement(current);
       }
-    
+
     // Build the final arrays.
-    
+
     int index[][] = new int [boundary.size()][];
     for (int i = 0; i < index.length; i++)
       {
@@ -659,17 +667,20 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     return index;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
+  @Override
   public void edit(final EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Triangle Mesh '"+ info.getName() +"'", info, cb, true);
     ed.setVisible(true);
   }
 
+  @Override
   public void editGesture(final EditingWindow parent, ObjectInfo info, Runnable cb, ObjectInfo realObject)
   {
     TriMeshEditorWindow ed = new TriMeshEditorWindow(parent, "Gesture '"+ info.getName() +"'", info, cb, false);
@@ -678,14 +689,16 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       ((MeshViewer) views[i]).setScene(parent.getScene(), realObject);
     ed.setVisible(true);
   }
-  
+
   /** Get a MeshViewer which can be used for viewing this mesh. */
-  
+
+  @Override
   public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
   {
     return new TriMeshViewer(controller, options);
   }
 
+  @Override
   public int canConvertToTriangleMesh()
   {
     if (smoothingMethod == NO_SMOOTHING || smoothingMethod == SMOOTH_SHADING)
@@ -694,7 +707,8 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   }
 
   /** Get a more finely subdivided version of this mesh. */
-  
+
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     boolean split[];
@@ -711,6 +725,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     return (TriangleMesh) duplicate();
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     TriangleMesh mesh = this;
@@ -726,9 +741,9 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       if (cached != null)
         return cached;
     }
-    
+
     // If appropriate, subdivide the mesh.
-    
+
     if (smoothingMethod == INTERPOLATING || smoothingMethod == APPROXIMATING)
       {
         split = new boolean [edge.length];
@@ -761,6 +776,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     return wire;
   }
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     TriangleMesh mesh = this;
@@ -783,11 +799,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     {
       RenderingMesh rend = new RenderingMesh(new Vec3 [] {new Vec3()}, new Vec3 [] {Vec3.vx()}, new RenderingTriangle [0], texMapping, matMapping);
       rend.setParameters(mesh.paramValue);
-      return rend;      
+      return rend;
     }
-    
+
     // If appropriate, subdivide the mesh.
-    
+
     if (smoothingMethod == INTERPOLATING || smoothingMethod == APPROXIMATING)
       {
         double tol2 = tol*tol;
@@ -827,7 +843,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
         // The mesh needs to be smooth shaded, so we need to calculate the normal vectors.
         // There may be more than one normal associated with a vertex, if that vertex is
         // on a crease.  Begin by finding a "true" normal for each face.
-        
+
         Vec3 trueNorm[] = new Vec3 [f.length];
         for (i = 0; i < f.length; i++)
           {
@@ -836,16 +852,16 @@ public class TriangleMesh extends Object3D implements FacetedMesh
             if (length > 0.0)
               trueNorm[i].scale(1.0/length);
           }
-        
+
         // Now loop over each vertex.
-        
+
         for (i = 0; i < v.length; i++)
           {
             vert[i] = v[i].r;
             ed = v[i].getEdges();
-            
+
             // If this vertex is a corner, we can just set its normal to null.
-            
+
             if (v[i].smoothness < 1.0f)
               {
                 norm.addElement(null);
@@ -874,10 +890,10 @@ public class TriangleMesh extends Object3D implements FacetedMesh
                 normals++;
                 continue;
               }
-            
+
             // If any of the edges intersecting this vertex are creases, we need to start at
             // one of them.
-            
+
             for (j = 0, k = -1; j < ed.length; j++)
               {
                 Edge tempEdge = e[ed[j]];
@@ -894,7 +910,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
                 // There are 0 or 1 crease edges intersecting this vertex, so we will use
                 // the same normal for every face.  Find it by averaging the normals of all
                 // the faces sharing this point.
-                
+
                 Vec3 temp = new Vec3();
                 int faceIndex = -1;
                 for (j = 0; j < ed.length; j++)
@@ -951,7 +967,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
             // This vertex is intersected by at least two crease edges, so we need to
             // calculate a normal vector for each group of faces between two creases.
-            
+
             first = j = k;
             Edge tempEdge = e[ed[j]];
 groups:     do
@@ -960,7 +976,7 @@ groups:     do
                 do
                   {
                     // For each group of faces, find the first and last edges.  Average
-                    // the normals of the faces in between, and record that these faces 
+                    // the normals of the faces in between, and record that these faces
                     // will use this normal.
 
                     j = (j+1) % ed.length;
@@ -1010,23 +1026,23 @@ groups:     do
                 tempEdge = e[ed[first]];
               } while (last != k);
           }
-            
+
         // Finally, assemble all the normals into an array and create the triangles.
-            
+
         normalArray = new Vec3 [norm.size()];
         for (i = 0; i < normalArray.length; i++)
           normalArray[i] = (Vec3) norm.elementAt(i);
         for (i = 0; i < f.length; i++)
           {
             tempFace = mesh.face[i];
-            tri[i] = texMapping.mapTriangle(tempFace.v1, tempFace.v2, tempFace.v3, 
+            tri[i] = texMapping.mapTriangle(tempFace.v1, tempFace.v2, tempFace.v3,
                     facenorm[i*3], facenorm[i*3+1], facenorm[i*3+2], vert);
           }
       }
     else
       {
         // The mesh is not being smooth shaded, so all the normals can be set to null.
-        
+
         normalArray = new Vec3 [] {null};
         for (i = 0; i < v.length; i++)
           vert[i] = v[i].r;
@@ -1041,7 +1057,7 @@ groups:     do
   }
 
   /** When setting the texture, we need to clear the caches. */
-  
+
   @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
@@ -1067,9 +1083,9 @@ groups:     do
     super.setParameterValues(val);
     cachedMesh = null;
   }
-  
+
   /** When setting texture parameters, we need to clear the caches. */
-  
+
   @Override
   public void setParameterValue(TextureParameter param, ParameterValue val)
   {
@@ -1084,38 +1100,39 @@ groups:     do
   {
     return skeleton;
   }
-  
+
   /** Set the skeleton for this object. */
 
+  @Override
   public void setSkeleton(Skeleton s)
   {
     skeleton = s;
   }
-    
+
   /** Create a vertex which is a blend of two existing ones. */
 
   private Vertex blend(Vertex v1, Vertex v2, double w1, double w2)
   {
     return new Vertex (new Vec3(w1*v1.r.x + w2*v2.r.x, w1*v1.r.y + w2*v2.r.y, w1*v1.r.z + w2*v2.r.z));
   }
-    
+
   /** Create a vertex which is a blend of three existing ones. */
 
   private Vertex blend(Vertex v1, Vertex v2, Vertex v3, double w1, double w2, double w3)
   {
     return new Vertex (new Vec3(w1*v1.r.x + w2*v2.r.x + w3*v3.r.x, w1*v1.r.y + w2*v2.r.y + w3*v3.r.y, w1*v1.r.z + w2*v2.r.z + w3*v3.r.z));
   }
-    
+
   /** Set a vertex to be a blend of two other ones. */
 
   private static void setBlend(Vertex v, Vertex v1, Vertex v2, double w1, double w2)
   {
     v.r.set(w1*v1.r.x + w2*v2.r.x, w1*v1.r.y + w2*v2.r.y, w1*v1.r.z + w2*v2.r.z);
   }
-  
+
   /** Given a pair of vertices and a new vertex that is to be created between them, find the
       IK binding parameters for the new vertex. */
-  
+
   private static void blendIKParams(Vertex newvert, Vertex v1, Vertex v2)
   {
     if (v1.ikJoint == v2.ikJoint)
@@ -1134,37 +1151,37 @@ groups:     do
         newvert.ikWeight = v2.ikWeight;
       }
   }
-  
+
   /** When creating a new vertex during subdivision, calculate per-vertex parameter values for the
       new vertex. */
-  
+
   private static void blendParamValues(double oldValues[][][], double newValues[][][], int paramType[], int v1, int v2, int newv)
   {
     for (int i = 0; i < paramType.length; i++)
       if (paramType[i] == PER_VERTEX)
         newValues[i][0][newv] = 0.5*(oldValues[i][0][v1]+oldValues[i][0][v2]);
   }
-  
+
   /** Set the per-vertex texture parameters for a newly created vertex. */
-  
+
   private static void setBlendParams(double newValues[], double vert1Val[], int v2, double w1, double w2, double oldVertValues[][][], int paramType[])
   {
     for (int i = 0; i < paramType.length; i++)
       if (paramType[i] == PER_VERTEX)
         newValues[i] = w1*vert1Val[i]+w2*oldVertValues[i][0][v2];
   }
-  
+
   /** Set the per-vertex texture parameters for a newly created vertex. */
-  
+
   private static void setBlendParams(double newValues[], int v1, int v2, double w1, double w2, double oldVertValues[][][], int paramType[])
   {
     for (int i = 0; i < paramType.length; i++)
       if (paramType[i] == PER_VERTEX)
         newValues[i] = w1*oldVertValues[i][0][v1]+w2*oldVertValues[i][0][v2];
   }
-  
+
   /** Copy the per-vertex texture parameter values for a vertex into an array. */
-  
+
   private static void recordParamValues(double values[], int v, double vertValues[][][], int paramType[])
   {
     for (int i = 0; i < paramType.length; i++)
@@ -1174,7 +1191,7 @@ groups:     do
 
   /** Subdivide all or part of the mesh using the mesh's defined smoothing method (linear, approximating, or
       interpolating).
-      
+
       @param mesh         the mesh to subdivide
       @param splitEdge    a flag for each edge, specifying which ones should be split.  If this is null,
                           every edge will be split.
@@ -1183,7 +1200,7 @@ groups:     do
                           Double.MAX_VALUE, each edge will be subdivided exactly once.
       @return the subdivided mesh
   */
-  
+
   public static TriangleMesh subdivideEdges(TriangleMesh mesh, boolean splitEdge[], double tol)
   {
     if (mesh.smoothingMethod == INTERPOLATING)
@@ -1195,7 +1212,7 @@ groups:     do
 
   /** This method subdivides each selected edge once, placing a new vertex in the midpoint
       of the edge, and returns the subdivided mesh.
-      
+
       @param mesh    the mesh to subdivide
       @param split   a flag for each edge, specifying which ones should be split.  If this is null,
                      every edge will be split.
@@ -1216,7 +1233,7 @@ groups:     do
         for (i = 0; i < split.length; i++)
           split[i] = true;
       }
-    
+
     // Determine how many vertices, faces, and edges will be in the new mesh, and
     // create arrays.
 
@@ -1238,9 +1255,9 @@ groups:     do
     newvert = new Vertex [numVert];
     newedge = new Edge [numEdge];
     newface = new Face [numFace];
-    
+
     // Create arrays for parameter values.
-    
+
     int paramType[] = new int [mesh.paramValue.length];
     double newParamValue[][][] = new double [mesh.paramValue.length][][];
     double oldParamValue[][][] = new double [mesh.paramValue.length][][];
@@ -1319,12 +1336,12 @@ groups:     do
     return newmesh;
   }
 
-  /** This method subdivides the mesh using approximating (Loop) subdivision, and returns a new 
-      TriangleMesh which approximates the limit surface to within the specified tolerance. 
+  /** This method subdivides the mesh using approximating (Loop) subdivision, and returns a new
+      TriangleMesh which approximates the limit surface to within the specified tolerance.
       The subdivision coefficients are taken (with a few minor changes) from
-      Hoppe et al. "Piecewise Smooth Surface Reconstruction." SIGGRAPH Proceedings, 
+      Hoppe et al. "Piecewise Smooth Surface Reconstruction." SIGGRAPH Proceedings,
       1994, p. 295.  The algorithm for creating semi-smooth points and creases is original.
-      
+
       @param mesh         the mesh to subdivide
       @param refineEdge   a flag for each edge, specifying which ones should be split.  If this is null,
                           every edge will be split.
@@ -1333,7 +1350,7 @@ groups:     do
                           Double.MAX_VALUE, each edge will be subdivided exactly once.
       @return the subdivided mesh
   */
-     
+
   public static TriangleMesh subdivideLoop(TriangleMesh mesh, boolean refineEdge[], double tol)
   {
     Vertex vertex[] = mesh.vertex, newvert[];
@@ -1356,14 +1373,14 @@ groups:     do
       }
 
     // Determine which vertices need to be refined.
-    
+
     refineVert = new boolean [vertex.length];
     for (i = 0; i < refineEdge.length; i++)
       if (refineEdge[i])
             refineVert[edge[i].v1] = refineVert[edge[i].v2] = true;
-    
+
     // Record parameter values.
-    
+
     int paramType[] = new int [mesh.paramValue.length];
     double oldParamValue[][][] = new double [mesh.paramValue.length][][];
     for (i = 0; i < mesh.paramValue.length; i++)
@@ -1399,16 +1416,16 @@ groups:     do
     double finalParam[] = new double [paramType.length];
 
     // Repeatedly subdivide until all portions of the mesh have converged.
-    
+
     int iterations = 0;
     do
       {
         done = true;
         notconverged = new boolean [vertex.length];
-        
+
         // Determine how many vertices, faces, and edges will be in the new mesh, and
         // create arrays.
-        
+
         numVert = vertex.length;
         numEdge = edge.length;
         numFace = face.length;
@@ -1438,8 +1455,8 @@ groups:     do
             newParamValue[i] = new double [3][numFace];
         }
 
-        // Step 1: Find the new positions for existing vertices.  Positions can be calculated by 
-        // three different rules: corner, crease, and smooth.  The final position will be a 
+        // Step 1: Find the new positions for existing vertices.  Positions can be calculated by
+        // three different rules: corner, crease, and smooth.  The final position will be a
         // weighted average of these three positions, depending on the smoothness values of the
         // vertex and all incident edges.
 
@@ -1449,7 +1466,7 @@ groups:     do
             if (!refineVert[i])
               {
                 // This vertex is already converged, so just copy it over.
-                
+
                 newvert[i] = newmesh.new Vertex(vertex[i]);
                 for (j = 0; j < paramType.length; j++)
                   if (paramType[j] == PER_VERTEX)
@@ -1458,7 +1475,7 @@ groups:     do
               }
 
             // First determine the weights.
-        
+
             e = vertex[i].getEdges();
             if (edge[e[0]].f2 == -1) // On the mesh boundary, so use crease rule
               {
@@ -1491,8 +1508,8 @@ groups:     do
               }
 
             // Now determine any of the three positions (corner, crease, and smooth) that are
-            // necessary.  Also determine the "final" position (limit position using either 
-            // the smooth or crease rule), which is used for judging convergence to the 
+            // necessary.  Also determine the "final" position (limit position using either
+            // the smooth or crease rule), which is used for judging convergence to the
             // limit surface.
 
             temp.clear();
@@ -1522,14 +1539,14 @@ groups:     do
             if (smoothWeight > 0.0)
               {
                 // Determine the smooth position.
-                
+
                 setBlend(smoothPos, vertex[i], temp, beta*(1.0/beta-e.length), beta);
                 setBlendParams(smoothParam, tempParam, i, beta*(1.0/beta-e.length), beta, oldParamValue, paramType);
               }
             if (edge[e[0]].f2 == -1)
               {
                 // This is a boundary edge, so use the crease rule.
-                
+
                 tempEdge = edge[e[0]];
                 if (tempEdge.v1 == i)
                 {
@@ -1556,7 +1573,7 @@ groups:     do
             else if (creaseWeight > 0.0)
               {
                 // Determine the crease position.
-                
+
                 creasePos.copy(vertex[i]);
                 creasePos.scale(0.75);
                 for (j = 0; j < paramType.length; j++)
@@ -1604,7 +1621,7 @@ groups:     do
             if (creaseWeight > 0.0)
               {
                 // Calculate final position with crease rule.
-                
+
                 double w1 = creaseWeight/3.0;
                 tempVec.set(creasePos.r);
                 tempVec.scale(4.0);
@@ -1712,7 +1729,7 @@ groups:     do
         doSubdivide(newmesh, vertex, edge, face, refineEdge, newvert, newedge, newface, oldParamValue, newParamValue, paramType);
 
         // Update data structures for the next iteration.
-        
+
         if (!done)
           {
             refineVert = new boolean [newvert.length];
@@ -1747,21 +1764,21 @@ groups:     do
           }
         }
       } while (!done && ++iterations < MAX_SUBDIVISIONS);
-    
+
     // Return the new mesh.
-    
+
     newmesh.closed = mesh.closed;
     newmesh.smoothingMethod = mesh.smoothingMethod;
     newmesh.skeleton = mesh.skeleton.duplicate();
     return newmesh;
   }
 
-  /** This method subdivides the mesh using interpolating (modified Butterfly) subdivision, and returns 
-      a new TriangleMesh which approximates the limit surface to within the specified tolerance. 
-      The subdivision coefficients are taken from Zorin et al. "Interpolating Subdivision for 
+  /** This method subdivides the mesh using interpolating (modified Butterfly) subdivision, and returns
+      a new TriangleMesh which approximates the limit surface to within the specified tolerance.
+      The subdivision coefficients are taken from Zorin et al. "Interpolating Subdivision for
       Meshes with Arbitrary Topology." 1996.  The algorithm for creating semi-smooth points
       and creases is original.
-      
+
       @param mesh         the mesh to subdivide
       @param refineEdge   a flag for each edge, specifying which ones should be split.  If this is null,
                           every edge will be split.
@@ -1770,7 +1787,7 @@ groups:     do
                           Double.MAX_VALUE, each edge will be subdivided exactly once.
       @return the subdivided mesh
   */
-     
+
   public static TriangleMesh subdivideButterfly(TriangleMesh mesh, boolean refineEdge[], double tol)
   {
     Vertex vertex[] = mesh.vertex, newvert[];
@@ -1792,9 +1809,9 @@ groups:     do
         for (i = 0; i < refineEdge.length; i++)
           refineEdge[i] = true;
       }
-    
+
     // Record parameter values.
-    
+
     int paramType[] = new int [mesh.paramValue.length];
     double oldParamValue[][][] = new double [mesh.paramValue.length][][];
     for (i = 0; i < mesh.paramValue.length; i++)
@@ -1830,23 +1847,23 @@ groups:     do
     double tempParam[] = new double [paramType.length];
 
     // Determine which vertices need to be refined.
-    
+
     refineVert = new boolean [vertex.length];
     for (i = 0; i < refineEdge.length; i++)
       if (refineEdge[i])
             refineVert[edge[i].v1] = refineVert[edge[i].v2] = true;
 
     // Repeatedly subdivide until all portions of the mesh have converged.
-    
+
     int iterations = 0;
     do
       {
         done = true;
         notconverged = new boolean [edge.length];
-        
+
         // Determine how many vertices, faces, and edges will be in the new mesh, and
         // create arrays.
-        
+
         numVert = vertex.length;
         numEdge = edge.length;
         numFace = face.length;
@@ -1877,11 +1894,11 @@ groups:     do
         }
 
         // Record the list of edges intersecting each vertex.
-        
+
         vertEdge = new int [vertex.length][];
         for (i = 0; i < vertex.length; i++)
           vertEdge[i] = vertex[i].getEdges();
-        
+
         // Determine the three sharpest edges intersecting each vertex.
 
         s2 = new double [vertex.length];
@@ -1916,7 +1933,7 @@ groups:     do
 
         // Determine the smoothness value for each edge and vertex, and mark which edges
         // are regular.
-        
+
         edgeSmoothness = new double [edge.length];
         for (i = 0; i < edge.length; i++)
           {
@@ -1957,15 +1974,15 @@ groups:     do
             else
               creaseWeight = Math.max(1.0-edgeSmoothness[i]-cornerWeight, 0.0);
             smoothWeight = 1.0-cornerWeight-creaseWeight;
-            
+
             // The corner rule simply places the new point midway between the endpoint.
-            
+
             setBlend(cornerPos, vertex[v1], vertex[v2], 0.5, 0.5);
-            setBlendParams(cornerParam, v1, v2, 0.5, 0.5, oldParamValue, paramType);            
+            setBlendParams(cornerParam, v1, v2, 0.5, 0.5, oldParamValue, paramType);
 
             // The crease rule uses the four-point rule (-1, 9, 9, -1).  Depending on the
             // smoothness values for the second and third points, these weights may be modified.
-            
+
             if (creaseWeight > 0.0)
               {
                 creasePos.copy(vertex[v1]);
@@ -1986,7 +2003,7 @@ groups:     do
                     double w2 = -0.125*vertex[v1].smoothness;
                     double w1 = 1.0-w2;
                     setBlend(creasePos, creasePos, vertex[whichVert], w1, w2);
-                    setBlendParams(creaseParam, creaseParam, whichVert, w1, w2, oldParamValue, paramType);            
+                    setBlendParams(creaseParam, creaseParam, whichVert, w1, w2, oldParamValue, paramType);
                   }
                 temp.copy(vertex[v2]);
                 recordParamValues(tempParam, v2, oldParamValue, paramType);
@@ -2006,7 +2023,7 @@ groups:     do
                     double w2 = -0.125*vertex[v2].smoothness;
                     double w1 = 1.0-w2;
                     setBlend(temp, temp, vertex[whichVert], w1, w2);
-                    setBlendParams(tempParam, tempParam, whichVert, w1, w2, oldParamValue, paramType);            
+                    setBlendParams(tempParam, tempParam, whichVert, w1, w2, oldParamValue, paramType);
                   }
                 setBlend(creasePos, creasePos, temp, 0.5, 0.5);
                 for (k = 0; k < paramType.length; k++)
@@ -2015,13 +2032,13 @@ groups:     do
               }
 
             // The smooth rule uses the modified Butterfly coefficients.
-            
+
             if (smoothWeight > 0.0)
               {
                 if (regular[v1] && regular[v2])
                   {
                     // Both vertices are regular, so use the standard Butterfly coefficients.
-                    
+
                     smoothPos.copy(cornerPos);
                     for (k = 0; k < smoothParam.length; k++)
                       smoothParam[k] = cornerParam[k];
@@ -2093,7 +2110,7 @@ groups:     do
                     // At least one of the vertices is extraordinary.  We calculate the smooth
                     // position based on the extraordinary vertex, or if both vertices are
                     // extraordinary, an average of the two.
-                    
+
                     smoothPos.clear();
                     for (k = 0; k < smoothParam.length; k++)
                       smoothParam[k] = 0.0;
@@ -2141,10 +2158,10 @@ groups:     do
                 newParamValue[k][0][j] = cornerWeight*cornerParam[k] + creaseWeight*creaseParam[k] + smoothWeight*smoothParam[k];
             blendIKParams(newvert[j], vertex[tempEdge.v1], vertex[tempEdge.v2]);
             j++;
-            
-            // Determine how far the newly created point is from the edge, and use this to 
+
+            // Determine how far the newly created point is from the edge, and use this to
             // estimate convergence.
-            
+
             axis.set(vertex[v2].r);
             axis.subtract(vertex[v1].r);
             axis.normalize();
@@ -2164,9 +2181,9 @@ groups:     do
         // Subdivide the mesh.
 
         doSubdivide(newmesh, vertex, edge, face, refineEdge, newvert, newedge, newface, oldParamValue, newParamValue, paramType);
-        
+
         // Update data structures for the next iteration.
-        
+
         if (!done)
           {
             refineVert = new boolean [newvert.length];
@@ -2201,21 +2218,21 @@ groups:     do
           }
         }
       } while (!done && ++iterations < MAX_SUBDIVISIONS);
-    
+
     // Return the new mesh.
-    
+
     newmesh.closed = mesh.closed;
     newmesh.smoothingMethod = mesh.smoothingMethod;
     newmesh.skeleton = mesh.skeleton.duplicate();
     return newmesh;
   }
-  
+
   /** This method is used for Butterfly subdivision.  Given a face and an edge, it finds the
       other face which is across the edge from the specified one, finds the vertex of that face
-      which is opposite the specified edge, and returns its position in pos.  The position of 
-      this "opposite vertex" can be calculated two different ways.  For smooth edges, it is 
-      the actual position of the vertex.  For boundary or crease edges, it is a "virtual 
-      vertex" created by mirroring the specified face across the specified edge.  The 
+      which is opposite the specified edge, and returns its position in pos.  The position of
+      this "opposite vertex" can be calculated two different ways.  For smooth edges, it is
+      the actual position of the vertex.  For boundary or crease edges, it is a "virtual
+      vertex" created by mirroring the specified face across the specified edge.  The
       relative weights of these two are determined by smoothWeight. */
 
   private static void findOppositeVertex(Vertex pos, int whichFace, int whichEdge, double smoothWeight, Vertex v[], Edge e[], Face f[], double paramVal[], double oldParamValue[][][], int paramType[])
@@ -2223,7 +2240,7 @@ groups:     do
     Face fc;
     Vec3 axis, delta, r;
     double dot;
-    
+
     // First find the position of the actual vertex.
 
     if (smoothWeight > 0.0)
@@ -2257,9 +2274,9 @@ groups:     do
       for (int i = 0; i < paramVal.length; i++)
         paramVal[i] = 0.0;
     }
-    
+
     // Next find the position of the virtual vertex.
-    
+
     if (smoothWeight < 1.0)
     {
       axis = v[e[whichEdge].v1].r.minus(v[e[whichEdge].v2].r);
@@ -2280,11 +2297,11 @@ groups:     do
       pos.r.z += (1.0-smoothWeight)*(r.z+axis.z-2.0*delta.z);
     }
   }
-  
+
   /** This method is used for Butterfly subdivision.  Given the number of edges intersecting
       an extraordinary vertex, it returns an array containing the subdivision coefficients
       to use for that vertex. */
-  
+
   private static double [] getButterflyCoeff(int numEdges)
   {
     if (numEdges < BUTTERFLY_COEFF.length)
@@ -2300,10 +2317,10 @@ groups:     do
   }
 
   /** This method is called by the various subdivideXXX() methods to do the actual subdivision.
-      The vertex, edge, and face arguments describe the mesh to be subdivided.  newvert 
-      contains the vertices of the new mesh.  newedge and newface are empty arrays of the 
-      correct length, into which the new faces and edges will be placed.  mesh is the 
-      TriangleMesh which the new edges and faces should belong to.  split is an array 
+      The vertex, edge, and face arguments describe the mesh to be subdivided.  newvert
+      contains the vertices of the new mesh.  newedge and newface are empty arrays of the
+      correct length, into which the new faces and edges will be placed.  mesh is the
+      TriangleMesh which the new edges and faces should belong to.  split is an array
       specifying which edges of the old mesh should be split. */
 
   private static void doSubdivide(TriangleMesh mesh, Vertex vertex[], Edge edge[], Face face[], boolean split[], Vertex newvert[], Edge newedge[], Face newface[], double oldParamValue[][][], double newParamValue[][][], int paramType[])
@@ -2424,7 +2441,7 @@ groups:     do
                   }
               }
           }
- 
+
         // Now subdivide it, and create the new faces and edges.
 
         switch (n)
@@ -2566,9 +2583,9 @@ groups:     do
               }
             newface[k+2] = mesh.new Face(newedge[e1].v2, newedge[e2].v2, newedge[e3].v2, j, j+1, j+2);
         }
-        
+
         // Copy over per-face and per-face/per-vertex parameter values.
-        
+
         int numAddedFaces = n+1;
         addedFace[0] = i;
         for (int m = 0; m < n; m++)
@@ -2651,10 +2668,10 @@ groups:     do
         newvert[newedge[i].v2].edges++;
       }
   }
-  
+
   /** This method splits each selected face into three faces, and returns the subdivided mesh.
       split is a boolean array specifying which faces to split. */
-  
+
   public static TriangleMesh subdivideFaces(TriangleMesh mesh, boolean split[])
   {
     Vertex vertex[] = mesh.vertex, newvert[];
@@ -2679,9 +2696,9 @@ groups:     do
     newvert = new Vertex [numVert];
     newedge = new Edge [numEdge];
     newface = new Face [numFace];
-    
+
     // Create arrays for parameter values.
-    
+
     int paramType[] = new int [mesh.paramValue.length];
     double newParamValue[][][] = new double [mesh.paramValue.length][][];
     double oldParamValue[][][] = new double [mesh.paramValue.length][][];
@@ -2715,9 +2732,9 @@ groups:     do
         paramType[i] = PER_FACE_VERTEX;
       }
     }
-    
+
     // Copy over the vertices, edges, and faces which will not be changed.
-    
+
     for (i = 0; i < vertex.length; i++)
     {
       newvert[i] = newmesh.new Vertex(vertex[i]);
@@ -2818,7 +2835,7 @@ groups:     do
       }
 
     // Return the new mesh.
-    
+
     newmesh.copyTextureAndMaterial(mesh);
     for (i = 0; i < paramType.length; i++)
     {
@@ -2842,10 +2859,10 @@ groups:     do
     newmesh.skeleton = mesh.skeleton.duplicate();
     return newmesh;
   }
-  
+
   /** Create a new triangle mesh by subdividing this one until no edge is longer
       than the specified tolerance. */
-  
+
   public TriangleMesh subdivideToLimit(double tol)
   {
     TriangleMesh newmesh = this;
@@ -2853,7 +2870,7 @@ groups:     do
     double tol2 = 2.0*tol*tol;
 
     // Subdivide the mesh until every edge is smaller than the specified tolerance.
-    
+
     while (!converged)
       {
         converged = true;
@@ -2879,10 +2896,10 @@ groups:     do
       }
     return newmesh;
   }
-  
+
   /** Create a new triangle mesh by applying the displacement map of the texture assigned
       to this object. */
-  
+
   public TriangleMesh getDisplacedMesh(double tol, double time)
   {
     TriangleMesh newmesh = this;
@@ -2891,7 +2908,7 @@ groups:     do
     Vec3 t1 = new Vec3(), t2 = new Vec3(), temp, norm[];
 
     // Subdivide the mesh until every edge is smaller than the specified tolerance.
-    
+
     while (!converged)
       {
         converged = true;
@@ -2915,7 +2932,7 @@ groups:     do
         else
           newmesh = subdivideLinear(newmesh, split);
       }
-    
+
     // Determine the normal (without regard to smoothness values) for each vertex.
 
     Vertex v[] = newmesh.vertex;
@@ -2954,13 +2971,13 @@ groups:     do
           temp.scale(1.0/b);
         norm[i] = temp;
       }
-    
+
     // Find the default parameter values.
-    
+
     double param[] = new double [paramValue.length];
     for (int i = 0; i < paramValue.length; i++)
       param[i] = paramValue[i].getAverageValue();
-    
+
     // Displace each vertex outward along its normal.
 
     TextureMapping map = getTextureMapping();
@@ -2977,9 +2994,9 @@ groups:     do
     System.gc();
     return newmesh;
   }
-  
+
   /** If necessary, reorder the points in each face so that the normals will be properly oriented. */
-  
+
   public void makeRightSideOut()
   {
     Vec3 norm[] = getNormals();
@@ -2997,13 +3014,13 @@ groups:     do
     if (vertex[maxLenVertex].r.dot(norm[maxLenVertex]) < 0.0)
       reverseNormals();
   }
-  
+
   /** Reorder the vertices in each face, so as to reverse all of the normal vectors. */
-  
+
   public void reverseNormals()
   {
     int i, temp;
-    
+
     for (i = 0; i < face.length; i++)
       {
         temp = face[i].v2;
@@ -3018,13 +3035,14 @@ groups:     do
 
   /** Get an array of normal vectors.  This calculates a single normal for each vertex,
       ignoring smoothness values. */
-     
+
+  @Override
   public Vec3 [] getNormals()
   {
     Vec3 faceNorm, norm[] = new Vec3 [vertex.length];
-    
+
     // Calculate a normal for each face, and average the face normals for each vertex.
-    
+
     for (int i = 0; i < norm.length; i++)
       norm[i] = new Vec3();
     for (int i = 0; i < face.length; i++)
@@ -3064,16 +3082,19 @@ groups:     do
     return norm;
   }
 
+  @Override
   public int getFaceCount()
   {
     return face.length;
   }
 
+  @Override
   public int getFaceVertexCount(int faceIndex)
   {
     return 3;
   }
 
+  @Override
   public int getFaceVertexIndex(int faceIndex, int vertexIndex)
   {
     Face f = face[faceIndex];
@@ -3087,7 +3108,7 @@ groups:     do
   /** Return a new mesh which is an "optimized" version of the input mesh.  This is done by rearranging edges
       to eliminate very small angles, or vertices where many edges come together.  The resulting mesh will
       generally produce a better looking surface after smoothing is applied to it. */
-  
+
   public static TriangleMesh optimizeMesh(TriangleMesh mesh)
   {
     Face face[] = mesh.face;
@@ -3103,9 +3124,9 @@ groups:     do
         Vec3 faceNorm[] = new Vec3 [face.length];
         boolean onBoundary[] = new boolean [vertex.length];
         int numEdges[] = new int [vertex.length];
-        
+
         // Initialize the various arrays, and determine which edges are really candidates for optimization.
-        
+
         for (int i = 0; i < face.length; i++)
           {
             Face f = face[i];
@@ -3137,10 +3158,10 @@ groups:     do
             else if (candidate[i] && faceNorm[e.f1] != null && faceNorm[e.f2] != null && faceNorm[e.f1].dot(faceNorm[e.f2]) < 0.99)
               candidate[i] = false;
           }
-        
+
         // For each candidate edge, find the list of vertices and angles involved in swapping it.  The vertices
         // are ordered as follows:
-        
+
         //              <-
         //              /\ 2
         //             /f1\
@@ -3150,14 +3171,14 @@ groups:     do
         //             \f2/
         //              \/ 3
         //              ->
-    
+
         int swapVert[][] = new int [edge.length][];
         double minAngle[][] = new double [edge.length][];
         for (int i = 0; i < edge.length; i++)
           if (candidate[i])
             {
               // First find the vertices.
-              
+
               swapVert[i] = new int [4];
               Edge e = edge[i];
               Face f1 = face[e.f1], f2 = face[e.f2];
@@ -3183,9 +3204,9 @@ groups:     do
                 swapVert[i][3] = f2.v2;
               else
                 swapVert[i][3] = f2.v3;
-              
+
               // Now calculate the angles.
-              
+
               minAngle[i] = new double [4];
               Vec3 d1 = vertex[swapVert[i][1]].r.minus(vertex[swapVert[i][0]].r);
               Vec3 d2 = vertex[swapVert[i][2]].r.minus(vertex[swapVert[i][0]].r);
@@ -3223,9 +3244,9 @@ groups:     do
               a2 = Math.acos(d6.dot(d5));
               minAngle[i][3] = (a1 < a2 ? a1 : a2);
             }
-        
+
         // Calculate scores for each candidate edge, and decide which ones to swap.
-        
+
         double score[] = new double [edge.length];
         boolean swap[] = new boolean [edge.length];
         for (int i = 0; i < score.length; i++)
@@ -3243,19 +3264,19 @@ groups:     do
                 }
             if (best == -1)
               break;
-            
+
             // Mark the edge to be swapped.  Remove it and every other edge that shares a face with it
             // from the candidate list.
-            
+
             swap[best] = true;
             Edge e = edge[best];
             Face f = face[e.f1];
             candidate[f.e1] = candidate[f.e2] = candidate[f.e3] = false;
             f = face[e.f2];
             candidate[f.e1] = candidate[f.e2] = candidate[f.e3] = false;
-            
+
             // Update the numEdges array, and recalculate scores.
-            
+
             numEdges[swapVert[best][0]]--;
             numEdges[swapVert[best][1]]--;
             numEdges[swapVert[best][2]]++;
@@ -3268,9 +3289,9 @@ groups:     do
                     score[vertEdges[j]] = calcSwapScore(minAngle[vertEdges[j]], swapVert[vertEdges[j]], numEdges, onBoundary);
               }
           }
-        
+
         // We now know which edges we want to swap.  Create the new mesh.
-        
+
         int newface[][] = new int [face.length][];
         int next = 0;
         for (int i = 0; i < face.length; i++)
@@ -3287,9 +3308,9 @@ groups:     do
               newface[next++] = new int [] {swapVert[i][2], swapVert[i][3], swapVert[i][1]};
             }
         newmesh = new TriangleMesh(vertex, newface);
-        
+
         // Copy over edge smoothness values.
-        
+
         Vertex newvert[] = (Vertex []) newmesh.getVertices();
         Edge newedge[] = newmesh.getEdges();
         for (int i = 0; i < edge.length; i++)
@@ -3307,9 +3328,9 @@ groups:     do
                     }
                 }
             }
-        
+
         // Determine which edges are candidates for the next iteration.
-        
+
         if (firstSplit == next)
           break;
         vertex = newvert;
@@ -3322,7 +3343,7 @@ groups:     do
             candidate[f.e1] = candidate[f.e2] = candidate[f.e3] = true;
           }
       }
-    
+
     // Copy over other mesh properties.
 
     newmesh.copyTextureAndMaterial(mesh);
@@ -3330,10 +3351,10 @@ groups:     do
     newmesh.skeleton = mesh.skeleton.duplicate();
     return newmesh;
   }
-  
+
   /** This is a utility routine used by optimizeMesh().  It calculates the score for swapping a
       particular edge. */
-  
+
   private static double calcSwapScore(double minAngle[], int vert[], int numEdges[], boolean onBoundary[])
   {
     double s[] = new double [4];
@@ -3378,7 +3399,7 @@ groups:     do
         edge[i].smoothness = 1.0f;
     }
   }
-  
+
   /** The following two methods are used for reading and writing files.  The first is a
       constructor which reads the necessary data from an input stream.  The other writes
       the object's representation to an output stream. */
@@ -3418,9 +3439,9 @@ groups:     do
       face[i] = new Face (in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt());
     closed = in.readBoolean();
     smoothingMethod = in.readInt();
-    
+
     // Find the edge information for vertices.
-    
+
     for (int i = 0; i < edge.length; i++)
       {
         v1 = vertex[edge[i].v1];
@@ -3440,6 +3461,7 @@ groups:     do
     skeleton = new Skeleton(in);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -3477,16 +3499,19 @@ groups:     do
     skeleton.writeToStream(out);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     return PROPERTIES[0].getAllowedValues()[smoothingMethod];
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     Object values[] = PROPERTIES[0].getAllowedValues();
@@ -3496,18 +3521,20 @@ groups:     do
   }
 
   /** Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new TriangleMeshKeyframe(this);
   }
-  
+
   /** Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     TriangleMeshKeyframe key = (TriangleMeshKeyframe) k;
-    
+
     for (int i = 0; i < vertex.length; i++)
       {
         Vertex v = vertex[i];
@@ -3526,15 +3553,17 @@ groups:     do
   }
 
   /** Allow TriangleMeshes to be converted to Actors. */
-  
+
+  @Override
   public boolean canConvertToActor()
   {
     return true;
   }
-  
+
   /** TriangleMeshes cannot be keyframed directly, since any change to mesh topology would
       cause all keyframes to become invalid.  Return an actor for this mesh. */
-  
+
+  @Override
   public Object3D getPosableObject()
   {
     TriangleMesh m = (TriangleMesh) duplicate();
@@ -3542,7 +3571,7 @@ groups:     do
   }
 
   /** This class represents a pose of a TriangleMesh. */
-  
+
   public static class TriangleMeshKeyframe extends MeshGesture
   {
     Vec3 vertPos[];
@@ -3570,53 +3599,60 @@ groups:     do
       for (int i = 0; i < paramValue.length; i++)
         paramValue[i] = mesh.paramValue[i].duplicate();
     }
-    
+
     private TriangleMeshKeyframe()
     {
     }
 
     /** Get the Mesh this Gesture belongs to. */
-    
+
+    @Override
     protected Mesh getMesh()
     {
       return mesh;
     }
-    
+
     /** Get the positions of all vertices in this Gesture. */
-    
+
+    @Override
     protected Vec3 [] getVertexPositions()
     {
       return vertPos;
     }
-    
+
     /** Set the positions of all vertices in this Gesture. */
-    
+
+    @Override
     protected void setVertexPositions(Vec3 pos[])
     {
       vertPos = pos;
     }
 
     /** Get the skeleton for this pose (or null if it doesn't have one). */
-  
+
+    @Override
     public Skeleton getSkeleton()
     {
       return skeleton;
     }
-  
+
     /** Set the skeleton for this pose. */
-  
+
+    @Override
     public void setSkeleton(Skeleton s)
     {
       skeleton = s;
     }
-    
+
     /** Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return duplicate(mesh);
     }
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       TriangleMeshKeyframe k = new TriangleMeshKeyframe();
@@ -3640,16 +3676,18 @@ groups:     do
         k.paramValue[i] = paramValue[i].duplicate();
       return k;
     }
-  
+
     /** Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
     }
-  
+
     /** Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
     }
@@ -3657,17 +3695,20 @@ groups:     do
     /** These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others.  These methods should never be called, since TriangleMeshes
        can only be keyframed by converting them to Actors. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       return null;
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       return null;
@@ -3681,7 +3722,8 @@ groups:     do
         @param p         the list of Gestures to average
         @param weight    the weights for the different Gestures
     */
-    
+
+    @Override
     public void blendSurface(MeshGesture average, MeshGesture p[], double weight[])
     {
       super.blendSurface(average, p, weight);
@@ -3696,7 +3738,7 @@ groups:     do
       }
 
       // Make sure all smoothness values are within legal bounds.
-      
+
       for (int i = 0; i < vertSmoothness.length; i++)
         {
           if (avg.vertSmoothness[i] < 0.0)
@@ -3714,7 +3756,8 @@ groups:     do
     }
 
     /** Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof TriangleMeshKeyframe))
@@ -3737,13 +3780,14 @@ groups:     do
         return false;
       return true;
     }
-  
+
     /** Update the texture parameter values when the texture is changed. */
-  
+
+    @Override
     public void textureChanged(TextureParameter oldParams[], TextureParameter newParams[])
     {
       ParameterValue newval[] = new ParameterValue [newParams.length];
-      
+
       for (int i = 0; i < newParams.length; i++)
         {
           int j;
@@ -3751,7 +3795,7 @@ groups:     do
           if (j == oldParams.length)
             {
               // This is a new parameter, so copy the value from the mesh.
-              
+
               for (int k = 0; k < mesh.texParam.length; k++)
                 if (mesh.texParam[k].equals(newParams[i]))
                 {
@@ -3762,40 +3806,43 @@ groups:     do
           else
             {
               // This is an old parameter, so copy the values over.
-              
+
               newval[i] = paramValue[j];
             }
         }
       paramValue = newval;
     }
-  
+
     /** Get the value of a per-vertex texture parameter. */
-    
+
+    @Override
     public ParameterValue getTextureParameter(TextureParameter p)
     {
       // Determine which parameter to get.
-      
+
       for (int i = 0; i < mesh.texParam.length; i++)
         if (mesh.texParam[i].equals(p))
           return paramValue[i];
       return null;
     }
-  
+
     /** Set the value of a per-vertex texture parameter. */
-    
+
+    @Override
     public void setTextureParameter(TextureParameter p, ParameterValue value)
     {
       // Determine which parameter to set.
-      
+
       int which;
       for (which = 0; which < mesh.texParam.length && !mesh.texParam[which].equals(p); which++);
       if (which == mesh.texParam.length)
         return;
       paramValue[which] = value;
     }
-  
+
     /** Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(1); // version

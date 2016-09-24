@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.view;
@@ -38,7 +38,7 @@ public class TexturedVertexShader implements VertexShader
       @param time      the current time
       @param viewDir   the direction from which it is being viewed
   */
-  
+
   public TexturedVertexShader(RenderingMesh mesh, Object3D object, double time, Vec3 viewDir)
   {
     this.mesh = mesh;
@@ -48,7 +48,7 @@ public class TexturedVertexShader implements VertexShader
     textureID = mesh.mapping.getTexture().getID();
 
     // Determine whether we can cache the color components for each vertex.
-    
+
     cache = true;
     ParameterValue value[] = object.getParameterValues();
     for (int i = 0; i < value.length; i++)
@@ -58,12 +58,12 @@ public class TexturedVertexShader implements VertexShader
         return;
       }
   }
-  
+
   /** In some cases, a texture can be represented by a simpler shader.  In addition, it is
       sometimes possible to reuse shaders, thus avoiding having to repeat texture calculations.
       This method returns a shader which produces identical results to this one, but may or may
       not actually be the same object. */
-  
+
   public VertexShader optimize()
   {
     if (mesh.mapping instanceof UniformMapping && !mesh.mapping.getTexture().hasComponent(Texture.HILIGHT_COLOR_COMPONENT))
@@ -71,8 +71,8 @@ public class TexturedVertexShader implements VertexShader
       // We can use a SmoothVertexShader instead.
 
       mesh.mapping.getTexture().getAverageSpec(spec, time, null);
-      RGBColor color = new RGBColor(spec.diffuse.getRed()+spec.emissive.getRed()+0.5*spec.specular.getRed(), 
-          spec.diffuse.getGreen()+spec.emissive.getGreen()+0.5*spec.specular.getGreen(), 
+      RGBColor color = new RGBColor(spec.diffuse.getRed()+spec.emissive.getRed()+0.5*spec.specular.getRed(),
+          spec.diffuse.getGreen()+spec.emissive.getGreen()+0.5*spec.specular.getGreen(),
           spec.diffuse.getBlue()+spec.emissive.getBlue()+0.5*spec.specular.getBlue());
       color.clip();
       return new SmoothVertexShader(mesh, color, viewDir);
@@ -96,13 +96,14 @@ public class TexturedVertexShader implements VertexShader
     }
     return this;
   }
-  
+
   /** Select the color for a vertex.
       @param face     the index of the triangle being rendered
       @param vertex   the index of the vertex to color
       @param color    the vertex color will be returned in this object
   */
-  
+
+  @Override
   public void getColor(int face, int vertex, RGBColor color)
   {
     RenderingTriangle tri = mesh.triangle[face];
@@ -111,7 +112,7 @@ public class TexturedVertexShader implements VertexShader
     if (cache)
     {
       // Use cached texture information.
-      
+
       if (diffuseCache == null)
       {
         diffuseCache = new RGBColor [mesh.vert.length];
@@ -166,7 +167,7 @@ public class TexturedVertexShader implements VertexShader
     else
     {
       // The texture needs to be recalculated for every face that uses a vertex.
-      
+
       switch (vertex)
       {
         case 0:
@@ -186,9 +187,9 @@ public class TexturedVertexShader implements VertexShader
       hilight = spec.hilight;
       roughness = spec.roughness;
     }
-    
+
     // Select the color.
-    
+
     double absDot = (dot > 0.0f ? dot : -dot);
     color.setRGB(diffuse.getRed()*absDot + emissive.getRed(),
         diffuse.getGreen()*absDot + emissive.getGreen(),
@@ -200,31 +201,34 @@ public class TexturedVertexShader implements VertexShader
     }
     color.clip();
   }
-  
+
   /** Get whether a particular face should be rendered with a single uniform color.
       @param face    the index of the triangle being rendered
   */
-  
+
+  @Override
   public boolean isUniformFace(int face)
   {
     return false;
   }
-  
+
   /** Get whether this shader represents a uniform texture.  If this returns true, all
       texture properties are uniform over the entire surface (although different parts
       may still be colored differently due to lighting).
    */
-  
+
+  @Override
   public boolean isUniformTexture()
   {
     return (mesh.mapping instanceof UniformMapping);
   }
-  
-  
+
+
   /** Get the color of the surface.  This should only be called if isUniformTexture() returns true.
       @param spec     the surface color will be returned in this object
    */
 
+  @Override
   public void getTextureSpec(TextureSpec spec)
   {
     mesh.mapping.getTexture().getAverageSpec(spec, time, null);

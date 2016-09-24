@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image.filter;
@@ -27,32 +27,35 @@ public class OutlineFilter extends ImageFilter
   private static final byte DOWN = 3;
   private static final byte LEFT = 4;
   private static final byte RIGHT = 5;
-  
+
   public OutlineFilter()
   {
   }
 
   /** Get the name of this filter.*/
 
+  @Override
   public String getName()
   {
     return Translate.text("Outline");
   }
-  
+
   /** Get a list of all the image components required by this filter. */
-  
+
+  @Override
   public int getDesiredComponents()
   {
     return ComplexImage.RED+ComplexImage.GREEN+ComplexImage.BLUE+ComplexImage.DEPTH;
   }
-  
+
   /** Apply the filter to an image.
       @param image      the image to filter
       @param scene      the Scene which was rendered to create the image
       @param camera     the camera from which the Scene was rendered
       @param cameraPos  the position of the camera in the scene
   */
-  
+
+  @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
     if (!image.hasFloatData(ComplexImage.DEPTH))
@@ -69,16 +72,16 @@ public class OutlineFilter extends ImageFilter
     applyOutline(image, ComplexImage.GREEN, outline, color.getGreen());
     applyOutline(image, ComplexImage.BLUE, outline, color.getBlue());
   }
-  
+
   /** Create a map of the outlines. */
-  
+
   private float [] findOutline(ComplexImage image, float masks[][])
   {
     int width = image.getWidth(), height = image.getHeight();
     byte edgeType[] = new byte [width*height];
-    
+
     // First find the points that lie on edges.
-    
+
     for (int i = 0; i < width; i++)
       for (int j = 0; j < height; j++)
       {
@@ -88,10 +91,10 @@ public class OutlineFilter extends ImageFilter
         else if (j > 0 && j < height-1 && isOutline(image.getPixelComponent(i, j-1, ComplexImage.DEPTH), depth, image.getPixelComponent(i, j+1, ComplexImage.DEPTH)))
           edgeType[i+j*width] = CENTER;
       }
-    
+
     // Now smooth the outline by finding points on the edge that can be moved a half-pixel
     // in one direction.
-    
+
     for (int i = 1; i < width-1; i++)
       for (int j = 1; j < height-1; j++)
       {
@@ -133,9 +136,9 @@ public class OutlineFilter extends ImageFilter
             edgeType[i+j*width] = RIGHT;
         }
       }
-    
+
     // Now build the image of the outline.
-    
+
     Thread currentThread = Thread.currentThread();
     float outline[] = new float [width*height];
     int maskWidth[] = new int [masks.length];
@@ -154,9 +157,9 @@ public class OutlineFilter extends ImageFilter
     }
     return outline;
   }
-  
+
   /** Given the depths at three adjacent pixels, decide whether this is an outline. */
-  
+
   private boolean isOutline(float d1, float d2, float d3)
   {
     double changeCutoff = (Double) getPropertyValue(1);
@@ -173,9 +176,9 @@ public class OutlineFilter extends ImageFilter
       return true;
     return false;
   }
-  
+
   /** Draw a single dot into the image of the outline. */
-  
+
   private void drawOutlineSpot(int i, int j, float outline[], int width, int height, float mask[], int maskWidth, float fraction)
   {
     int radius = (maskWidth-1)/2;
@@ -196,9 +199,9 @@ public class OutlineFilter extends ImageFilter
         }
       }
   }
-  
+
   /** Add the outline to one component of the image. */
-  
+
   private void applyOutline(ComplexImage image, int component, float outline[], float color)
   {
     int width = image.getWidth(), height = image.getHeight();
@@ -213,7 +216,7 @@ public class OutlineFilter extends ImageFilter
   }
 
   /** Build the mask. */
-  
+
   private float [] createMask(double thickness, double xoffset, double yoffset)
   {
     int size = (int) Math.ceil(thickness-0.001);
@@ -282,7 +285,8 @@ public class OutlineFilter extends ImageFilter
   }
 
   /** Write a serialized description of this filter to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(0);
@@ -296,7 +300,8 @@ public class OutlineFilter extends ImageFilter
   }
 
   /** Reconstruct this filter from its serialized representation. */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int version = in.readShort();

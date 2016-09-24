@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -30,7 +30,7 @@ public class CylinderPhotonSource implements PhotonSource
       @param obj       the object for which to create a photon source
       @param map    the photon map for which this will generate photons
   */
-  
+
   public CylinderPhotonSource(RTCylinder obj, PhotonMap map)
   {
     cylinder = obj;
@@ -54,7 +54,7 @@ public class CylinderPhotonSource implements PhotonSource
     sideArea = 2.0*Math.PI*Math.sqrt(0.5*(rx*rx+rz*rz))*height*(0.5+0.5*ratio);
 
     // Find the average emissive intensity.
-    
+
     TextureSpec spec = map.getWorkspace().surfSpec[0];
     texMap.getTexture().getAverageSpec(spec, map.getRaytracer().getTime(), obj.param);
     color.copy(spec.emissive);
@@ -65,11 +65,12 @@ public class CylinderPhotonSource implements PhotonSource
 
   /** Get the total intensity of light which this object sends into the scene. */
 
+  @Override
   public double getTotalIntensity()
   {
     return lightIntensity;
   }
-  
+
   /**
    * Generate photons and add them to a map.
    *
@@ -77,7 +78,8 @@ public class CylinderPhotonSource implements PhotonSource
    * @param intensity    the PhotonSource should generate Photons whose total intensity is approximately equal to this
    * @param threads
    */
-  
+
+  @Override
   public void generatePhotons(PhotonMap map, double intensity, ThreadManager threads)
   {
     RenderWorkspace workspace = map.getWorkspace();
@@ -96,7 +98,7 @@ public class CylinderPhotonSource implements PhotonSource
         if (p < prob1)
           {
             // Generate the photon from the bottom.
-            
+
             double x, z;
             do
               {
@@ -109,7 +111,7 @@ public class CylinderPhotonSource implements PhotonSource
         else if (p < prob2)
           {
             // Generate the photon from the top.
-            
+
             double x, z;
             do
               {
@@ -122,12 +124,12 @@ public class CylinderPhotonSource implements PhotonSource
         else
           {
             // Generate the photon from the side.
-            
+
             double h, f;
             do
               {
-            	h = map.random.nextDouble();
-            	f = 1.0-(1.0-ratio)*h;
+		h = map.random.nextDouble();
+		f = 1.0-(1.0-ratio)*h;
               } while (f < map.random.nextDouble());
             double phi = 2.0*Math.PI*map.random.nextDouble();
             double cphi = Math.cos(phi), sphi = Math.sin(phi);
@@ -135,13 +137,13 @@ public class CylinderPhotonSource implements PhotonSource
             norm.set(orig.x-cylinder.cx, -(rx+sy*(orig.y-cylinder.cy+halfHeight))*sy, (orig.z-cylinder.cz)*sz);
             norm.normalize();
           }
-        
+
         // Select an origin and direction.
-        
+
         emittedIntensity += generateOnePhoton(map, r, workspace, norm);
       }
   }
-  
+
   /** Generate a Photon from a point on the cylinder.
       @param map       the PhotonMap to add the Photon to
       @param r         a ray whose origin is the point from which to generate the photon (in local coordinates)
@@ -149,7 +151,7 @@ public class CylinderPhotonSource implements PhotonSource
       @param norm      the surface normal at the point (in local coordinates)
       @return the intensity of the emitted ray
   */
-  
+
   private float generateOnePhoton(PhotonMap map, Ray r, RenderWorkspace workspace, Vec3 norm)
   {
     RaytracerRenderer renderer = map.getRenderer();
@@ -173,21 +175,21 @@ public class CylinderPhotonSource implements PhotonSource
       }
 
     // Determine the photon color.
-    
+
     texMap.getTextureSpec(dir, spec, dot, renderer.smoothScale, renderer.time, param);
     color.copy(spec.emissive);
     intensity = color.getRed()+color.getGreen()+color.getBlue();
     if (intensity < 1.0)
       {
         // Use Russian Roulette sampling.
-      
+
         if (intensity < map.random.nextFloat())
           return intensity;
         color.scale(1.0f/intensity);
       }
-    
+
     // Send out the photon.
-  
+
     if (fromLocal != null)
       {
         fromLocal.transform(r.getOrigin());

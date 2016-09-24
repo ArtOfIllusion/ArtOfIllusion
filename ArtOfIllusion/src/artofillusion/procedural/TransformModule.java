@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -27,15 +27,15 @@ public class TransformModule extends Module
   Mat4 trans, gradTrans;
   double xscale, yscale, zscale, lastBlur;
   PointInfo point;
-  
+
   public TransformModule(Point position)
   {
     super(Translate.text("menu.linearModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
       new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"X"}),
       new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Y"}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Z"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Z"})},
       position);
     coords = new CoordinateSystem(new Vec3(0.0, 0.0, 0.0), new Vec3(0.0, 0.0, 1.0), new Vec3(0.0, 1.0, 0.0));
     xscale = yscale = zscale = 1.0;
@@ -46,61 +46,61 @@ public class TransformModule extends Module
     v = new Vec3();
     tempVec = new Vec3();
   }
-  
+
   /** Get the coordinate system which defines the rotations and translations. */
-  
+
   public CoordinateSystem getCoordinates()
   {
     return coords;
   }
-  
+
   /** Set the coordinate system which defines the rotations and translations. */
-  
+
   public void setCoordinates(CoordinateSystem coords)
   {
     this.coords = coords;
     updateTransforms();
   }
-  
+
   /** Get the X scale. */
-  
+
   public double getXScale()
   {
     return xscale;
   }
-  
+
   /** Set the X scale. */
-  
+
   public void setXScale(double scale)
   {
     xscale = scale;
     updateTransforms();
   }
-  
+
   /** Get the Y scale. */
-  
+
   public double getYScale()
   {
     return yscale;
   }
-  
+
   /** Set the Y scale. */
-  
+
   public void setYScale(double scale)
   {
     yscale = scale;
     updateTransforms();
   }
-  
+
   /** Get the Z scale. */
-  
+
   public double getZScale()
   {
     return zscale;
   }
-  
+
   /** Set the Z scale. */
-  
+
   public void setZScale(double scale)
   {
     zscale = scale;
@@ -108,7 +108,7 @@ public class TransformModule extends Module
   }
 
   /* Calculate the transform matrices. */
-  
+
   private void updateTransforms()
   {
     trans = Mat4.scale(xscale, yscale, zscale).times(coords.fromLocal());
@@ -117,6 +117,7 @@ public class TransformModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -125,6 +126,7 @@ public class TransformModule extends Module
 
   /* Calculate the average value of an output. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -143,9 +145,10 @@ public class TransformModule extends Module
     else
       return v.z;
   }
-  
+
   /* Calculate the error of an output. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!errorOk || blur != lastBlur)
@@ -167,9 +170,10 @@ public class TransformModule extends Module
     else
       return tempVec.z;
   }
-  
+
   /* Calculate the gradient of an output. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!gradOk || blur != lastBlur)
@@ -241,9 +245,10 @@ public class TransformModule extends Module
     else
       grad.set(grad3);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final Vec3 orig = coords.getOrigin();
@@ -282,13 +287,14 @@ public class TransformModule extends Module
     dlg.setVisible(true);
     return dlg.clickedOk();
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     TransformModule mod = new TransformModule(new Point(bounds.x, bounds.y));
-    
+
     mod.coords = coords.duplicate();
     mod.xscale = xscale;
     mod.yscale = yscale;
@@ -299,6 +305,7 @@ public class TransformModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     coords.writeToFile(out);
@@ -306,9 +313,10 @@ public class TransformModule extends Module
     out.writeDouble(yscale);
     out.writeDouble(zscale);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     coords = new CoordinateSystem(in);

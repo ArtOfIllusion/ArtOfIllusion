@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -19,17 +19,18 @@ import java.awt.*;
 public class Spacer extends CustomWidget
 {
   private Widget vertical, horizontal;
-  
+
   public Spacer(Widget copyHoriz, Widget copyVert)
   {
     horizontal = copyHoriz;
     vertical = copyVert;
   }
-  
+
+  @Override
   public Dimension getPreferredSize()
   {
     Dimension v = vertical.getPreferredSize(), h = horizontal.getPreferredSize();
-    
+
     return new Dimension(h.width, v.height);
   }
 }

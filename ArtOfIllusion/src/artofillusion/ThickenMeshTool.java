@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -39,16 +39,19 @@ public class ThickenMeshTool extends MeshEditingTool
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
   }
 
+  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("thickenMeshTool.tipText");
   }
 
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -64,6 +67,7 @@ public class ThickenMeshTool extends MeshEditingTool
     }
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
@@ -72,11 +76,13 @@ public class ThickenMeshTool extends MeshEditingTool
       dragInProgress = manipulator.mousePressed(e, view, selectionBounds);
   }
 
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseDragged(e, view);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     manipulator.mouseReleased(e, view);
@@ -89,7 +95,7 @@ public class ThickenMeshTool extends MeshEditingTool
     norm = mesh.getNormals();
     baseVertPos = mesh.getVertexPositions();
   }
-  
+
   protected void handleDragged(HandleDraggedEvent ev)
   {
     Mesh mesh = (Mesh) controller.getObject().getObject();
@@ -129,14 +135,14 @@ public class ThickenMeshTool extends MeshEditingTool
     baseVertPos = null;
     dragInProgress = false;
   }
-  
+
   /* Find the new positions of the vertices . */
 
   private Vec3 [] findNewPositions(Vec3 vert[], double distance)
   {
     Vec3 v[] = new Vec3 [vert.length];
     int selected[] = controller.getSelectionDistance();
-    
+
     for (int i = 0; i < v.length; i++)
       {
         if (selected[i] == 0)

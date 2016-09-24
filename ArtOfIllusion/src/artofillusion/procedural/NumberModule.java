@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -23,38 +23,39 @@ import java.io.*;
 public class NumberModule extends Module
 {
   private double value;
-  
+
   public NumberModule(Point position)
   {
     super("0.0", new IOPort [] {}, new IOPort [] {
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
       position);
   }
-  
-  public NumberModule(Point position, double v) 
-  { 
-    super(Double.toString(v), new IOPort [] {}, new IOPort [] { 
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},  
-      position); 
-    value = v; 
+
+  public NumberModule(Point position, double v)
+  {
+    super(Double.toString(v), new IOPort [] {}, new IOPort [] {
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
+      position);
+    value = v;
   }
-  
+
   /** Get the value. */
-  
+
   public double getValue()
   {
     return value;
   }
-  
+
   /** Set the value. */
-  
+
   public void setValue(double v)
   {
     value = v;
   }
 
   /** Allow the user to set a new value. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField field = new ValueField(value, ValueField.NONE);
@@ -76,7 +77,8 @@ public class NumberModule extends Module
   }
 
   /** This module simply outputs the value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     return value;
@@ -86,13 +88,14 @@ public class NumberModule extends Module
   {
     grad.set(0.0, 0.0, 0.0);
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     NumberModule mod = new NumberModule(new Point(bounds.x, bounds.y));
-    
+
     mod.value = value;
     mod.name = ""+value;
     return mod;
@@ -100,13 +103,15 @@ public class NumberModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(value);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     value = in.readDouble();

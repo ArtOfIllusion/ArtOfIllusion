@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -130,6 +130,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
       meshMenuItem[6].setText(Translate.text("menu.openEnds"));
   }
 
+  @Override
   protected BMenu createShowMenu()
   {
     BMenu menu = Translate.menu("show");
@@ -138,22 +139,24 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     menu.add(showItem[3] = Translate.checkboxMenuItem("entireScene", this, "shownItemChanged", ((MeshViewer) theView[currentView]).getSceneVisible()));
     return menu;
   }
-  
+
   /** Get the object being edited in this window. */
-  
+
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
   }
-  
+
   /** Set the object being edited in this window. */
-  
+
   public void setObject(Object3D obj)
   {
     objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
-  
+
+  @Override
   public void setMesh(Mesh mesh)
   {
     Curve obj = (Curve) mesh;
@@ -163,14 +166,16 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     findSelectionDistance();
     currentTool.getWindow().updateMenus();
   }
-  
+
   /** Get an array of flags telling which vertices are currently selected. */
-  
+
+  @Override
   public boolean[] getSelection()
   {
     return selected;
   }
-  
+
+  @Override
   public void setSelection(boolean sel[])
   {
     selected = sel;
@@ -179,22 +184,25 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     updateImage();
   }
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (maxDistance != getTensionDistance())
       findSelectionDistance();
     return selectionDistance;
   }
-  
+
   /** The return value has no meaning, since there is only one selection mode in this window. */
-  
+
+  @Override
   public int getSelectionMode()
   {
     return 0;
   }
-  
+
   /** This is ignored, since there is only one selection mode in this window. */
-  
+
+  @Override
   public void setSelectionMode(int mode)
   {
   }
@@ -205,12 +213,12 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   {
     Curve theCurve = (Curve) getObject().getObject();
     int i, j, dist[] = new int [theCurve.getVertices().length];
-    
+
     maxDistance = getTensionDistance();
-    
+
     // First, set each distance to 0 or -1, depending on whether that vertex is part of the
     // current selection.
-    
+
     for (i = 0; i < dist.length; i++)
       dist[i] = selected[i] ? 0 : -1;
 
@@ -237,6 +245,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   /* EditingWindow methods. */
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -255,7 +264,8 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
         meshMenuItem[i].setEnabled(false);
     }
   }
-  
+
+  @Override
   protected void doOk()
   {
     Curve theMesh = (Curve) objInfo.getObject();
@@ -264,19 +274,20 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     dispose();
     onClose.run();
   }
-  
+
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
     dispose();
   }
-  
+
   protected void freehandModeChanged()
   {
     for (int i = 0; i < theView.length; i++)
       ((CurveViewer) theView[i]).setFreehandSelection(((BCheckBoxMenuItem) editMenuItem[2]).getState());
   }
-  
+
   private void smoothingChanged(CommandEvent ev)
   {
     Widget source = ev.getWidget();
@@ -289,7 +300,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   }
 
   /** Select the entire curve. */
-  
+
   public void selectAllCommand()
   {
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected.clone()}));
@@ -307,15 +318,15 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     int dist[] = getSelectionDistance();
     boolean newSel[] = new boolean [dist.length];
     tensionDistance = oldDist;
-    
+
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(0), selected.clone()}));
     for (int i = 0; i < dist.length; i++)
       newSel[i] = (dist[i] == 0 || dist[i] == 1);
     setSelection(newSel);
   }
-  
+
   /** Invert the current selection. */
-  
+
   public void invertSelectionCommand()
   {
     boolean newSel[] = new boolean [selected.length];
@@ -325,6 +336,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     setSelection(newSel);
   }
 
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -376,13 +388,13 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     boolean newsel[], split[];
     Vec3 v[], newpos[];
     int i, j, p1, p3, p4, splitcount = 0, method = theCurve.getSmoothingMethod();
-    
+
     v = new Vec3 [vt.length];
     for (i = 0; i < vt.length; i++)
       v[i] = vt[i].r;
-    
+
     // Determine which parts need to be subdivided.
-    
+
     if (theCurve.isClosed())
       split = new boolean [vt.length];
     else
@@ -396,7 +408,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     newpos = new Vec3 [vt.length+splitcount];
     news = new float [vt.length+splitcount];
     newsel = new boolean [vt.length+splitcount];
-    
+
     // Do the subdivision.
 
     for (i = 0, j = 0; i < split.length; i++)
@@ -474,7 +486,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     float value;
     final ValueSlider smoothness;
     int i;
-    
+
     for (i = 0; i < selected.length && !selected[i]; i++);
     if (i == selected.length)
       return;
@@ -519,7 +531,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
       smoothItem[1].setState(true);
     else
       smoothItem[2].setState(true);
-    theCurve.setSmoothingMethod(method);    
+    theCurve.setSmoothingMethod(method);
     objectChanged();
     for (int i = 0; i < theView.length; i++)
       theView[i].repaint();
@@ -547,7 +559,8 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
 
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
-  
+
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];

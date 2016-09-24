@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -23,7 +23,7 @@ import java.io.*;
 public class PointLight extends Light
 {
   double radius;
-  
+
   static BoundingBox bounds;
   static WireframeMesh mesh;
   private static final Property PROPERTIES[] = new Property [] {
@@ -84,24 +84,24 @@ public class PointLight extends Light
 	  }
     mesh = new WireframeMesh(vert, from, to);
   }
-  
+
   public PointLight(RGBColor theColor, float theIntensity, double theRadius)
   {
     this(theColor, theIntensity, theRadius, TYPE_NORMAL, 0.25f);
   }
-  
+
   public PointLight(RGBColor theColor, float theIntensity, double theRadius, int type, float decay)
   {
     setParameters(theColor.duplicate(), theIntensity, type, decay);
     setRadius(theRadius);
     bounds = new BoundingBox(-0.25, 0.25, -0.25, 0.25, -0.25, 0.25);
   }
-  
+
   public double getRadius()
   {
     return radius;
   }
-  
+
   public void setRadius(double r)
   {
     radius = r;
@@ -111,6 +111,7 @@ public class PointLight extends Light
    * Get the attenuated light at a given position relative to the light source.
    */
 
+  @Override
   public void getLight(RGBColor light, Vec3 position)
   {
     double d = position.length()*decayRate;
@@ -118,11 +119,13 @@ public class PointLight extends Light
     light.scale(intensity/(1.0f+d+d*d));
   }
 
+  @Override
   public Object3D duplicate()
   {
     return new PointLight(color, intensity, radius, type, decayRate);
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     PointLight lt = (PointLight) obj;
@@ -131,6 +134,7 @@ public class PointLight extends Light
     setRadius(lt.radius);
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -139,25 +143,30 @@ public class PointLight extends Light
   /** A PointLight is always drawn the same size, which has no connection to the properties
      of the light. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
 
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     final Widget patch = color.getSample(50, 30);
@@ -168,7 +177,7 @@ public class PointLight extends Light
     typeChoice.setSelectedIndex(type);
     RGBColor oldColor = color.duplicate();
     final BFrame parentFrame = parent.getFrame();
-    
+
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
@@ -176,7 +185,7 @@ public class PointLight extends Light
         patch.setBackground(color.getColor());
       }
     });
-    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"), 
+    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"),
 	new Widget [] {patch, intensityField, radiusField, decayField, typeChoice},
 	new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("decayRate"), Translate.text("lightType")});
     if (!dlg.clickedOk())
@@ -205,6 +214,7 @@ public class PointLight extends Light
     setRadius(in.readDouble());
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -217,11 +227,13 @@ public class PointLight extends Light
     out.writeDouble(radius);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -240,6 +252,7 @@ public class PointLight extends Light
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     if (index == 0)
@@ -260,34 +273,38 @@ public class PointLight extends Light
   }
 
   /** Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new PointLightKeyframe(color, intensity, decayRate, radius);
   }
-  
+
   /** Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     PointLightKeyframe key = (PointLightKeyframe) k;
-    
+
     setParameters(key.color.duplicate(), key.intensity, type, key.decayRate);
     setRadius(key.radius);
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Intensity", "Decay Rate", "Radius"},
-        new double [] {intensity, decayRate, radius}, 
+        new double [] {intensity, decayRate, radius},
         new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}});
   }
-  
+
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final PointLightKeyframe key = (PointLightKeyframe) k;
@@ -297,7 +314,7 @@ public class PointLight extends Light
     ValueField decayField = new ValueField(key.decayRate, ValueField.NONNEGATIVE);
     RGBColor oldColor = key.color.duplicate();
     final BFrame parentFrame = parent.getFrame();
-    
+
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
@@ -305,27 +322,27 @@ public class PointLight extends Light
         patch.setBackground(key.color.getColor());
       }
     });
-    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"), 
-	new Widget [] {patch, intensityField, radiusField, decayField}, 
+    ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"),
+	new Widget [] {patch, intensityField, radiusField, decayField},
 	new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("decayRate")});
     if (!dlg.clickedOk())
     {
       key.color.copy(oldColor);
       return;
     }
-    key.intensity = (float) intensityField.getValue(); 
+    key.intensity = (float) intensityField.getValue();
     key.decayRate = (float) decayField.getValue();
     key.radius = radiusField.getValue();
   }
-  
+
   /** Inner class representing a pose for a cylinder. */
-  
+
   public static class PointLightKeyframe implements Keyframe
   {
     public RGBColor color;
     public float intensity, decayRate;
     public double radius;
-    
+
     public PointLightKeyframe(RGBColor color, float intensity, float decayRate, double radius)
     {
       this.color = color.duplicate();
@@ -333,30 +350,34 @@ public class PointLight extends Light
       this.decayRate = decayRate;
       this.radius = radius;
     }
-    
+
     /** Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return new PointLightKeyframe(color, intensity, decayRate, radius);
     }
-    
+
     /** Create a duplicate of this keyframe for a (possibly different) object. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return duplicate();
     }
-  
+
     /** Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {intensity, decayRate, radius};
     }
-  
+
     /** Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
       intensity = (float) values[0];
@@ -366,42 +387,46 @@ public class PointLight extends Light
 
     /** These methods return a new Keyframe which is a weighted average of this one and one,
         two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       PointLightKeyframe k2 = (PointLightKeyframe) o2;
       RGBColor c = new RGBColor(weight1*color.getRed()+weight2*k2.color.getRed(),
         weight1*color.getGreen()+weight2*k2.color.getGreen(),
         weight1*color.getBlue()+weight2*k2.color.getBlue());
-      return new PointLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity), 
-        (float) (weight1*decayRate+weight2*k2.decayRate), 
+      return new PointLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity),
+        (float) (weight1*decayRate+weight2*k2.decayRate),
         weight1*radius+weight2*k2.radius);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       PointLightKeyframe k2 = (PointLightKeyframe) o2, k3 = (PointLightKeyframe) o3;
       RGBColor c = new RGBColor(weight1*color.getRed()+weight2*k2.color.getRed()+weight3*k3.color.getRed(),
         weight1*color.getGreen()+weight2*k2.color.getGreen()+weight3*k3.color.getGreen(),
         weight1*color.getBlue()+weight2*k2.color.getBlue()+weight3*k3.color.getBlue());
-      return new PointLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity), 
-        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate), 
+      return new PointLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity),
+        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate),
         weight1*radius+weight2*k2.radius+weight3*k3.radius);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       PointLightKeyframe k2 = (PointLightKeyframe) o2, k3 = (PointLightKeyframe) o3, k4 = (PointLightKeyframe) o4;
       RGBColor c = new RGBColor(weight1*color.getRed()+weight2*k2.color.getRed()+weight3*k3.color.getRed()+weight4*k4.color.getRed(),
         weight1*color.getGreen()+weight2*k2.color.getGreen()+weight3*k3.color.getGreen()+weight4*k4.color.getGreen(),
         weight1*color.getBlue()+weight2*k2.color.getBlue()+weight3*k3.color.getBlue()+weight4*k4.color.getBlue());
-      return new PointLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity+weight4*k4.intensity), 
-        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate+weight4*k4.decayRate), 
+      return new PointLightKeyframe(c, (float) (weight1*intensity+weight2*k2.intensity+weight3*k3.intensity+weight4*k4.intensity),
+        (float) (weight1*decayRate+weight2*k2.decayRate+weight3*k3.decayRate+weight4*k4.decayRate),
         weight1*radius+weight2*k2.radius+weight3*k3.radius+weight4*k4.radius);
     }
 
     /** Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof PointLightKeyframe))
@@ -409,9 +434,10 @@ public class PointLight extends Light
       PointLightKeyframe key = (PointLightKeyframe) k;
       return (key.color.equals(color) && key.intensity == intensity && key.decayRate == decayRate && key.radius == radius);
     }
-  
+
     /** Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       color.writeToFile(out);

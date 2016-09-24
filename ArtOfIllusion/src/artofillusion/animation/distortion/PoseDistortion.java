@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -32,7 +32,8 @@ public class PoseDistortion extends Distortion
   }
 
   /** Determine whether this distortion is identical to another one. */
-  
+
+  @Override
   public boolean isIdenticalTo(Distortion d)
   {
     if (!(d instanceof PoseDistortion))
@@ -48,9 +49,10 @@ public class PoseDistortion extends Distortion
       return false;
     return true;
   }
-  
+
   /** Create a duplicate of this object. */
-  
+
+  @Override
   public Distortion duplicate()
   {
     PoseDistortion d = new PoseDistortion(weight, pose.duplicate(), actor, relative);
@@ -58,9 +60,10 @@ public class PoseDistortion extends Distortion
       d.previous = previous.duplicate();
     return d;
   }
-  
+
   /** Apply the Distortion, and return a transformed mesh. */
 
+  @Override
   public Mesh transform(Mesh obj)
   {
     if (previous != null)
@@ -98,7 +101,7 @@ public class PoseDistortion extends Distortion
       // The distorted object is no longer the same class as the original object, so that the
       // pose can no longer be applied to it.  There is nothing we can do about this, so just
       // ignore it.
-      
+
       return obj;
     }
   }

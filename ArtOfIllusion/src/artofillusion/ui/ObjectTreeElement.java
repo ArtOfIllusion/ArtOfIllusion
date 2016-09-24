@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -27,7 +27,7 @@ public class ObjectTreeElement extends TreeElement
   {
     this(info, null, tree, true);
   }
-  
+
   public ObjectTreeElement(ObjectInfo info, TreeElement parent, TreeList tree, boolean addChildren)
   {
     this.info = info;
@@ -38,14 +38,16 @@ public class ObjectTreeElement extends TreeElement
       for (int i = 0; i < info.getChildren().length; i++)
         children.addElement(new ObjectTreeElement(info.getChildren()[i], this, tree, true));
   }
-  
+
   /* Get the label to display for this element. */
-  
+
+  @Override
   public String getLabel()
   {
     return info.getName();
   }
 
+  @Override
   public Icon getIcon()
   {
     return (info.isLocked() ? lockIcon : null);
@@ -53,7 +55,8 @@ public class ObjectTreeElement extends TreeElement
 
   /* Determine whether this element can be added as a child of another one  If el is null,
      return whether this element can be added at the root level of the tree. */
-  
+
+  @Override
   public boolean canAcceptAsParent(TreeElement el)
   {
     if (el == null)
@@ -69,17 +72,18 @@ public class ObjectTreeElement extends TreeElement
       }
     return true;
   }
-  
+
   /* This returns true if this element should automatically be selected whenever its parent
      is selected. */
-  
+
 /*  public boolean selectWithParent()
   {
     return true;
   }*/
-  
+
   /* Add another element as a child of this one. */
-  
+
+  @Override
   public void addChild(TreeElement el, int position)
   {
     children.insertElementAt(el, position);
@@ -98,15 +102,16 @@ public class ObjectTreeElement extends TreeElement
         tr.setParent(info);
       }
   }
-  
-  /* Remove any elements corresponding to the given object from this element's list 
+
+  /* Remove any elements corresponding to the given object from this element's list
      of children. */
-  
+
+  @Override
   public void removeChild(Object object)
   {
     TreeElement el = null;
     int pos;
-    
+
     for (pos = 0; pos < children.size(); pos++)
       {
         el = (TreeElement) children.elementAt(pos);
@@ -131,23 +136,25 @@ public class ObjectTreeElement extends TreeElement
       tree.undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object []
           {info, object, new Integer(pos)});
   }
-  
+
   /* Get the object corresponding to this element. */
-  
+
+  @Override
   public Object getObject()
   {
     return info;
   }
-  
+
   /* Get whether this element should be drawn in gray (i.e. to indicate it is deactivated). */
-  
+
+  @Override
   public boolean isGray()
   {
     return !info.isVisible();
   }
-  
+
   /* Add all of the Tracks for this object as children. */
-  
+
   public void addTracks()
   {
     for (int i = 0; i < info.getTracks().length; i++)

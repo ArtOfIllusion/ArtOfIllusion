@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -20,7 +20,7 @@ import java.io.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
 
-/** A CSGObject is an Object3D that represents the union, intersection, or difference of 
+/** A CSGObject is an Object3D that represents the union, intersection, or difference of
     two component objects. */
 
 public class CSGObject extends Object3D
@@ -35,9 +35,9 @@ public class CSGObject extends Object3D
   public static final int INTERSECTION = 1;
   public static final int DIFFERENCE12 = 2;
   public static final int DIFFERENCE21 = 3;
-  
+
   /* Create a CSGObject based on two objects and an operation. */
-  
+
   public CSGObject(ObjectInfo o1, ObjectInfo o2, int op)
   {
     obj1 = o1.duplicate();
@@ -47,19 +47,21 @@ public class CSGObject extends Object3D
     operation = op;
     obj1.setVisible(obj2.visible = true);
   }
-  
+
   /** Create a new object which is an exact duplicate of this one. */
-  
+
+  @Override
   public Object3D duplicate()
   {
     CSGObject obj = new CSGObject(obj1, obj2, operation);
     obj.copyTextureAndMaterial(this);
     return obj;
   }
-  
+
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     CSGObject csg = (CSGObject) obj;
@@ -74,37 +76,37 @@ public class CSGObject extends Object3D
     copyTextureAndMaterial(obj);
     bounds = null;
   }
-  
+
   /** Get the first object. */
-  
+
   public ObjectInfo getObject1()
   {
     return obj1;
   }
-  
+
   /** Get the second object. */
-  
+
   public ObjectInfo getObject2()
   {
     return obj2;
   }
-  
+
   /** Get the boolean operation to be performed. */
-  
+
   public int getOperation()
   {
     return operation;
   }
-  
+
   /** Set the boolean operation to be performed. */
-  
+
   public void setOperation(int op)
   {
     operation = op;
   }
-  
+
   /** Set the component objects. */
-  
+
   public void setComponentObjects(ObjectInfo o1, ObjectInfo o2)
   {
     obj1 = o1;
@@ -115,7 +117,7 @@ public class CSGObject extends Object3D
   }
 
   /** Center the component objects, and return the vector by which they were displaced. */
-  
+
   public Vec3 centerObjects()
   {
     BoundingBox b1 = obj1.getBounds().transformAndOutset(obj1.getCoords().fromLocal());
@@ -132,6 +134,7 @@ public class CSGObject extends Object3D
 
   /** Get a BoundingBox which just encloses the object. */
 
+  @Override
   public BoundingBox getBounds()
   {
     if (bounds == null)
@@ -180,11 +183,12 @@ public class CSGObject extends Object3D
 
   /** Resize the object. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     Vec3 size = bounds.getSize(), objSize;
     double xscale, yscale, zscale;
-    
+
     if (size.x == 0.0)
       xscale = 1.0;
     else
@@ -197,9 +201,9 @@ public class CSGObject extends Object3D
       zscale = 1.0;
     else
       zscale = zsize / size.z;
-    
+
     // Adjust the size and position of each component object.
-    
+
     objSize = obj1.getBounds().getSize();
     obj1.getObject().setSize(objSize.x*xscale, objSize.y*yscale, objSize.z*zscale);
     objSize = obj2.getBounds().getSize();
@@ -213,27 +217,30 @@ public class CSGObject extends Object3D
   }
 
   /** Tells whether the object can be converted to a TriangleMesh. */
-  
+
+  @Override
   public int canConvertToTriangleMesh()
   {
     if (obj1.getObject().canConvertToTriangleMesh() == EXACTLY && obj2.getObject().canConvertToTriangleMesh() == EXACTLY)
       return EXACTLY;
     return APPROXIMATELY;
   }
-  
+
   /** This object is closed if both of its component objects are closed. */
-  
+
+  @Override
   public boolean isClosed()
   {
     return (obj1.getObject().isClosed() && obj2.getObject().isClosed());
   }
-  
+
   /** Create a triangle mesh representing this object. */
 
+  @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     TriangleMesh mesh1, mesh2;
-    
+
     mesh1 = obj1.getObject().convertToTriangleMesh(tol);
     mesh2 = obj2.getObject().convertToTriangleMesh(tol);
     CSGModeller modeller = new CSGModeller(mesh1, mesh2, obj1.getCoords(), obj2.getCoords());
@@ -241,21 +248,24 @@ public class CSGObject extends Object3D
     trimesh.copyTextureAndMaterial(this);
     return trimesh;
   }
-  
+
   /** Allow the user to edit this object. */
-  
+
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new CSGEditorWindow(parent, info.getName(), this, cb);
   }
-    
+
   /** When setting the texture or material, also set it for each of the component objects. */
-     
+
+  @Override
   public void setTexture(Texture tex, TextureMapping mapping)
   {
     super.setTexture(tex, mapping);
@@ -265,6 +275,7 @@ public class CSGObject extends Object3D
     obj2.getObject().setTexture(tex, mapping);
   }
 
+  @Override
   public void setMaterial(Material mat, MaterialMapping mapping)
   {
     super.setMaterial(mat, mapping);
@@ -276,6 +287,7 @@ public class CSGObject extends Object3D
 
   /** Get a RenderingMesh for this object. */
 
+  @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
     if (interactive)
@@ -290,9 +302,10 @@ public class CSGObject extends Object3D
       }
     return convertToTriangleMesh(tol).getRenderingMesh(tol, false, info);
   }
-  
+
   /** Get a WireframeMesh for this object. */
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     if (cachedWire != null)
@@ -305,14 +318,14 @@ public class CSGObject extends Object3D
   }
 
   /** Build the preview meshes and save them for later use. */
-  
+
   private Object[] cacheMeshes(double tol, ObjectInfo info)
   {
     TriangleMesh mesh = convertToTriangleMesh(tol);
     RenderingMesh rendering = mesh.getRenderingMesh(tol, true, info);
     TriangleMesh.Edge edge[] = mesh.getEdges();
     int to[] = new int [edge.length], from[] = new int [edge.length];
-    
+
     for (int i = 0; i < edge.length; i++)
       {
         to[i] = edge[i].v1;
@@ -325,7 +338,8 @@ public class CSGObject extends Object3D
   }
 
   /** Save this object to an output stream. */
-  
+
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -340,7 +354,7 @@ public class CSGObject extends Object3D
     out.writeUTF(obj2.getObject().getClass().getName());
     obj2.getObject().writeToFile(out, theScene);
   }
-  
+
   public CSGObject(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     super(in, theScene);
@@ -378,17 +392,19 @@ public class CSGObject extends Object3D
         obj2.getObject().setMaterial(getMaterial(), getMaterialMapping());
       }
   }
-  
+
   /** Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new CSGKeyframe(obj1.getObject().getPoseKeyframe(), obj2.getObject().getPoseKeyframe(),
       obj1.getCoords().duplicate(), obj2.getCoords().duplicate());
   }
-  
+
   /** Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     CSGKeyframe key = (CSGKeyframe) k;
@@ -401,14 +417,16 @@ public class CSGObject extends Object3D
     cachedMesh = null;
     cachedWire = null;
   }
-  
+
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, final Keyframe k, final ObjectInfo info)
   {
     final CSGObject copy = (CSGObject) duplicate();
     copy.applyPoseKeyframe(k);
     Runnable onClose = new Runnable() {
+          @Override
       public void run()
       {
         CSGKeyframe original = (CSGKeyframe) k;
@@ -421,14 +439,14 @@ public class CSGObject extends Object3D
     };
     new CSGEditorWindow(parent, info.getName(), copy, onClose);
   }
-  
+
   /** Inner class representing a pose for a CSGObject. */
-  
+
   public static class CSGKeyframe implements Keyframe
   {
     public Keyframe key1, key2;
     public CoordinateSystem coords1, coords2;
-    
+
     public CSGKeyframe(Keyframe key1, Keyframe key2, CoordinateSystem coords1, CoordinateSystem coords2)
     {
       this.key1 = key1;
@@ -436,47 +454,52 @@ public class CSGObject extends Object3D
       this.coords1 = coords1;
       this.coords2 = coords2;
     }
-    
+
     /** Create a duplicate of this keyframe. */
-  
+
+    @Override
     public Keyframe duplicate()
     {
       return new CSGKeyframe(key1.duplicate(), key2.duplicate(), coords1.duplicate(), coords2.duplicate());
     }
-    
+
     /** Create a duplicate of this keyframe for a (possibly different) object. */
-  
+
+    @Override
     public Keyframe duplicate(Object owner)
     {
       CSGObject csg = (CSGObject) ((ObjectInfo) owner).getObject();
       return new CSGKeyframe(key1.duplicate(csg.obj1), key2.duplicate(csg.obj2), coords1.duplicate(), coords2.duplicate());
     }
-  
+
     /** Get the list of graphable values for this keyframe. */
-  
+
+    @Override
     public double [] getGraphValues()
     {
       return new double [0];
     }
-  
+
     /** Set the list of graphable values for this keyframe. */
-  
+
+    @Override
     public void setGraphValues(double values[])
     {
     }
 
     /* These methods return a new Keyframe which is a weighted average of this one and one,
        two, or three others. */
-  
+
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       CSGKeyframe k2 = (CSGKeyframe) o2;
       RotationKeyframe rot1, rot2;
       VectorKeyframe orig1, orig2;
       CoordinateSystem c1, c2;
-      
+
       // Find the new coordinate system for the first object.
-      
+
       rot1 = new RotationKeyframe(coords1);
       rot2 = new RotationKeyframe(k2.coords1);
       rot1.setUseQuaternion(true);
@@ -486,9 +509,9 @@ public class CSGObject extends Object3D
       c1 = new CoordinateSystem((Vec3) orig1.blend(orig2, weight1, weight2), Vec3.vz(), Vec3.vy());
       ((RotationKeyframe) rot1.blend(rot2, weight1, weight2)).applyToCoordinates(c1, 1.0, null, null, false,
         true, true, true);
-      
+
       // Find the new coordinate system for the second object.
-      
+
       rot1 = new RotationKeyframe(coords2);
       rot2 = new RotationKeyframe(k2.coords2);
       rot1.setUseQuaternion(true);
@@ -498,22 +521,23 @@ public class CSGObject extends Object3D
       c2 = new CoordinateSystem((Vec3) orig1.blend(orig2, weight1, weight2), Vec3.vz(), Vec3.vy());
       ((RotationKeyframe) rot1.blend(rot2, weight1, weight2)).applyToCoordinates(c2, 1.0, null, null, false,
         true, true, true);
-      
+
       // Construct the new keyframe.
 
-      return new CSGKeyframe(key1.blend(k2.key1, weight1, weight2), 
+      return new CSGKeyframe(key1.blend(k2.key1, weight1, weight2),
         key2.blend(k2.key2, weight1, weight2), c1, c2);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       CSGKeyframe k2 = (CSGKeyframe) o2, k3 = (CSGKeyframe) o3;
       RotationKeyframe rot1, rot2, rot3;
       VectorKeyframe orig1, orig2, orig3;
       CoordinateSystem c1, c2;
-      
+
       // Find the new coordinate system for the first object.
-      
+
       rot1 = new RotationKeyframe(coords1);
       rot2 = new RotationKeyframe(k2.coords1);
       rot3 = new RotationKeyframe(k3.coords1);
@@ -523,13 +547,13 @@ public class CSGObject extends Object3D
       orig1 = new VectorKeyframe(coords1.getOrigin());
       orig2 = new VectorKeyframe(k2.coords1.getOrigin());
       orig3 = new VectorKeyframe(k3.coords1.getOrigin());
-      c1 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, weight1, weight2, weight3), 
+      c1 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, weight1, weight2, weight3),
         Vec3.vz(), Vec3.vy());
-      ((RotationKeyframe) rot1.blend(rot2, rot3, weight1, weight2, weight3)).applyToCoordinates(c1, 1.0, 
+      ((RotationKeyframe) rot1.blend(rot2, rot3, weight1, weight2, weight3)).applyToCoordinates(c1, 1.0,
         null, null, false, true, true, true);
-      
+
       // Find the new coordinate system for the second object.
-      
+
       rot1 = new RotationKeyframe(coords2);
       rot2 = new RotationKeyframe(k2.coords2);
       rot3 = new RotationKeyframe(k3.coords2);
@@ -539,26 +563,27 @@ public class CSGObject extends Object3D
       orig1 = new VectorKeyframe(coords2.getOrigin());
       orig2 = new VectorKeyframe(k2.coords2.getOrigin());
       orig3 = new VectorKeyframe(k3.coords2.getOrigin());
-      c2 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, weight1, weight2, weight3), 
+      c2 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, weight1, weight2, weight3),
         Vec3.vz(), Vec3.vy());
-      ((RotationKeyframe) rot1.blend(rot2, rot3, weight1, weight2, weight3)).applyToCoordinates(c2, 1.0, 
+      ((RotationKeyframe) rot1.blend(rot2, rot3, weight1, weight2, weight3)).applyToCoordinates(c2, 1.0,
         null, null, false, true, true, true);
-      
+
       // Construct the new keyframe.
 
-      return new CSGKeyframe(key1.blend(k2.key1, k3.key1, weight1, weight2, weight3), 
+      return new CSGKeyframe(key1.blend(k2.key1, k3.key1, weight1, weight2, weight3),
         key2.blend(k2.key2, k3.key2, weight1, weight2, weight3), c1, c2);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       CSGKeyframe k2 = (CSGKeyframe) o2, k3 = (CSGKeyframe) o3, k4 = (CSGKeyframe) o4;
       RotationKeyframe rot1, rot2, rot3, rot4;
       VectorKeyframe orig1, orig2, orig3, orig4;
       CoordinateSystem c1, c2;
-      
+
       // Find the new coordinate system for the first object.
-      
+
       rot1 = new RotationKeyframe(coords1);
       rot2 = new RotationKeyframe(k2.coords1);
       rot3 = new RotationKeyframe(k3.coords1);
@@ -571,13 +596,13 @@ public class CSGObject extends Object3D
       orig2 = new VectorKeyframe(k2.coords1.getOrigin());
       orig3 = new VectorKeyframe(k3.coords1.getOrigin());
       orig4 = new VectorKeyframe(k4.coords1.getOrigin());
-      c1 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, orig4, weight1, weight2, weight3, weight4), 
+      c1 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, orig4, weight1, weight2, weight3, weight4),
         Vec3.vz(), Vec3.vy());
-      ((RotationKeyframe) rot1.blend(rot2, rot3, rot4, weight1, weight2, weight3, weight4)).applyToCoordinates(c1, 1.0, 
+      ((RotationKeyframe) rot1.blend(rot2, rot3, rot4, weight1, weight2, weight3, weight4)).applyToCoordinates(c1, 1.0,
         null, null, false, true, true, true);
-      
+
       // Find the new coordinate system for the second object.
-      
+
       rot1 = new RotationKeyframe(coords2);
       rot2 = new RotationKeyframe(k2.coords2);
       rot3 = new RotationKeyframe(k3.coords2);
@@ -590,20 +615,21 @@ public class CSGObject extends Object3D
       orig2 = new VectorKeyframe(k2.coords2.getOrigin());
       orig3 = new VectorKeyframe(k3.coords2.getOrigin());
       orig4 = new VectorKeyframe(k4.coords2.getOrigin());
-      c2 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, orig4, weight1, weight2, weight3, weight4), 
+      c2 = new CoordinateSystem((Vec3) orig1.blend(orig2, orig3, orig4, weight1, weight2, weight3, weight4),
         Vec3.vz(), Vec3.vy());
-      ((RotationKeyframe) rot1.blend(rot2, rot3, rot3, weight1, weight2, weight3, weight4)).applyToCoordinates(c2, 1.0, 
+      ((RotationKeyframe) rot1.blend(rot2, rot3, rot3, weight1, weight2, weight3, weight4)).applyToCoordinates(c2, 1.0,
         null, null, false, true, true, true);
-      
+
       // Construct the new keyframe.
 
-      return new CSGKeyframe(key1.blend(k2.key1, k3.key1, k4.key1, weight1, weight2, 
-        weight3, weight4), key2.blend(k2.key2, k3.key2, k4.key2, weight1, weight2, 
+      return new CSGKeyframe(key1.blend(k2.key1, k3.key1, k4.key1, weight1, weight2,
+        weight3, weight4), key2.blend(k2.key2, k3.key2, k4.key2, weight1, weight2,
         weight3, weight4), c1, c2);
     }
 
     /** Determine whether this keyframe is identical to another one. */
-  
+
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof CSGKeyframe))
@@ -627,9 +653,10 @@ public class CSGObject extends Object3D
         return false;
       return true;
     }
-  
+
     /** Write out a representation of this keyframe to a stream. */
-  
+
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeShort(0);

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.osspecific;
@@ -20,13 +20,14 @@ import java.lang.reflect.*;
 import java.util.prefs.*;
 import javax.swing.*;
 
-/** This is a plugin to make Art of Illusion behave more like a standard Macintosh 
+/** This is a plugin to make Art of Illusion behave more like a standard Macintosh
     application when running under Mac OS X. */
 
 public class MacOSPlugin implements Plugin, InvocationHandler
 {
   private boolean usingAppMenu;
 
+  @Override
   public void processMessage(int message, Object args[])
   {
     if (message == APPLICATION_STARTING)
@@ -40,7 +41,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       try
       {
         // Use reflection to set up the application menu.
-        
+
         Class appClass = Class.forName("com.apple.eawt.Application");
         Object app = appClass.getMethod("getApplication").invoke(null);
         appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
@@ -53,7 +54,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       {
         // An error occured trying to set up the application menu, so just stick with the standard
         // Quit and Preferences menu items in the File and Edit menus.
-        
+
         ex.printStackTrace();
       }
       usingAppMenu = true;
@@ -70,10 +71,10 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       updateWindowProperties(win);
       if (!usingAppMenu)
         return;
-      
+
       // Remove the Quit and Preferences menu items, since we are using the ones in the application
       // menu instead.
-      
+
       removeMenuItem(win, Translate.text("menu.file"), Translate.text("menu.quit"));
       removeMenuItem(win, Translate.text("menu.edit"), Translate.text("menu.preferences"));
     }
@@ -81,7 +82,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     {
       LayoutWindow win = (LayoutWindow) args[1];
       updateWindowProperties(win);
-      win.getComponent().getRootPane().putClientProperty("Window.documentModified", false);      
+      win.getComponent().getRootPane().putClientProperty("Window.documentModified", false);
     }
   }
 
@@ -97,10 +98,10 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       win.getComponent().getRootPane().putClientProperty("Window.documentFile", file);
     }
   }
-  
+
   /** Remove a menu item from a menu in a window.  If it is immediately preceded by a separator,
       also remove that. */
-  
+
   private void removeMenuItem(BFrame frame, String menu, String item)
   {
     BMenuBar bar = frame.getMenuBar();
@@ -123,9 +124,10 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       return;
     }
   }
-  
+
   /** Handle ApplicationListener methods. */
-  
+
+  @Override
   public Object invoke(Object proxy, Method method, Object args[])
   {
     boolean handled = true;
@@ -171,15 +173,15 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       catch (Exception ex)
       {
         // Nothing we can really do about it...
-        
+
         ex.printStackTrace();
       }
     }
     else
       return null;
-    
+
     // Call setHandled(true) on the event to show we have handled it.
-    
+
     try
     {
       Method setHandled = args[0].getClass().getMethod("setHandled", new Class [] {Boolean.TYPE});
@@ -188,15 +190,15 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     catch (Exception ex)
     {
       // Nothing we can really do about it...
-      
+
       ex.printStackTrace();
     }
     return null;
   }
-  
+
   /** This is an inner class used to provide a minimal menu bar when all windows are
       closed. */
-  
+
   private class MacMenuBarWindow extends BFrame implements EditingWindow
   {
     public MacMenuBarWindow()
@@ -214,6 +216,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       RecentFiles.createMenu(recentMenu);
       file.add(recentMenu);
       Preferences.userNodeForPackage(RecentFiles.class).addPreferenceChangeListener(new PreferenceChangeListener() {
+        @Override
         public void preferenceChange(PreferenceChangeEvent ev)
         {
           RecentFiles.createMenu(recentMenu);
@@ -224,61 +227,73 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       setVisible(true);
     }
 
+    @Override
     public ToolPalette getToolPalette()
     {
       return null;
     }
 
+    @Override
     public void setTool(EditingTool tool)
     {
     }
-  
+
+    @Override
     public void setHelpText(String text)
     {
     }
 
+    @Override
     public BFrame getFrame()
     {
       return this;
     }
 
+    @Override
     public void updateImage()
     {
     }
 
+    @Override
     public void updateMenus()
     {
     }
 
+    @Override
     public void setUndoRecord(UndoRecord command)
     {
     }
 
+    @Override
     public void setModified()
     {
     }
 
+    @Override
     public Scene getScene()
     {
       return null;
     }
 
+    @Override
     public ViewerCanvas getView()
     {
       return null;
     }
 
+    @Override
     public ViewerCanvas[] getAllViews()
     {
       return null;
     }
 
+    @Override
     public boolean confirmClose()
     {
       dispose();
       return true;
     }
-    
+
     private void actionPerformed(CommandEvent ev)
     {
       String command = ev.getActionCommand();

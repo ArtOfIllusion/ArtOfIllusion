@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -35,6 +35,7 @@ public class CreatePolygonTool extends EditingTool
     tabulateSines();
   }
 
+  @Override
   public void activate()
   {
     super.activate();
@@ -53,11 +54,13 @@ public class CreatePolygonTool extends EditingTool
     theWindow.setHelpText(Translate.text("createPolygonTool.helpText", Integer.toString(sides), Translate.text("createPolygonTool."+type)));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createPolygonTool.tipText");
@@ -87,12 +90,14 @@ public class CreatePolygonTool extends EditingTool
           maxcosine = cosine[i];
       }
   }
-  
+
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     findPoints(e.getPoint(), e.isShiftDown());
@@ -105,6 +110,7 @@ public class CreatePolygonTool extends EditingTool
     view.drawDraggedShape(new Polygon(x, y, x.length));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -135,11 +141,11 @@ public class CreatePolygonTool extends EditingTool
       vertex[i] = new Vec3(scale*(points[i].x-centerx), -scale*(points[i].y-centery), 0.0);
 
     // Find the object's coordinate system.
-    
+
     ydir = cam.getViewToWorld().timesDirection(Vec3.vy());
     zdir = cam.getViewToWorld().timesDirection(new Vec3(0.0, 0.0, -1.0));
     coords = new CoordinateSystem(orig, zdir, ydir);
-   
+
     if (e.isControlDown())
       {
         int faces[][] = new int [sides][];
@@ -164,7 +170,7 @@ public class CreatePolygonTool extends EditingTool
     points = null;
     theWindow.updateImage();
   }
-  
+
   void findPoints(Point dragPoint, boolean shiftDown)
   {
     double xscale, yscale;
@@ -190,10 +196,11 @@ public class CreatePolygonTool extends EditingTool
       points[i] = new Vec2(centerx+sine[i]*xscale, centery+cosine[i]*yscale);
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     int i;
-    
+
     ValueField sidesField = new ValueField((double) sides, ValueField.NONNEGATIVE+ValueField.INTEGER);
     BComboBox shapeChoice = new BComboBox(new String [] {
       Translate.text("Angled"),
@@ -206,7 +213,7 @@ public class CreatePolygonTool extends EditingTool
       shapeChoice.setSelectedIndex(1);
     else
       shapeChoice.setSelectedIndex(2);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("enterNumSides"), 
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("enterNumSides"),
                 new Widget [] {sidesField, shapeChoice},
                 new String [] {Translate.text("Sides"), Translate.text("Shape")});
     if (!dlg.clickedOk())

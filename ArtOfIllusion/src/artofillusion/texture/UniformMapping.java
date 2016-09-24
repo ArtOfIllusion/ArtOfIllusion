@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -24,28 +24,32 @@ public class UniformMapping extends TextureMapping
 {
   Object3D object;
   UniformTexture texture;
-  
+
   public UniformMapping(Object3D theObject, Texture theTexture)
   {
     object = theObject;
     texture = (UniformTexture) theTexture;
   }
 
+  @Override
   public Texture getTexture()
   {
     return texture;
   }
 
+  @Override
   public Object3D getObject()
   {
     return object;
   }
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     return new UniformTriangle(v1, v2, v3, n1, n2, n3);
   }
-  
+
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double t, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -61,6 +65,7 @@ public class UniformMapping extends TextureMapping
     texture.getTextureSpec(spec);
   }
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double t, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -71,6 +76,7 @@ public class UniformMapping extends TextureMapping
     texture.getTransparency(trans);
   }
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double t, double param[])
   {
     return 0.0;
@@ -81,25 +87,29 @@ public class UniformMapping extends TextureMapping
     return (tex instanceof UniformTexture);
   }
 
+  @Override
   public TextureMapping duplicate()
   {
     UniformMapping map = new UniformMapping(object, texture);
     map.setAppliesTo(appliesTo());
     return map;
   }
-  
+
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     UniformMapping map = new UniformMapping(obj, tex);
     map.setAppliesTo(appliesTo());
     return map;
   }
-  
+
+  @Override
   public void copy(TextureMapping map)
   {
     setAppliesTo(map.appliesTo());
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, final MaterialPreviewer preview)
   {
     RowContainer row = new RowContainer();
@@ -121,11 +131,11 @@ public class UniformMapping extends TextureMapping
     });
     return row;
   }
-  
+
   public UniformMapping(DataInputStream in, Object3D theObject, Texture theTexture) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     if (version == 1)
@@ -133,7 +143,8 @@ public class UniformMapping extends TextureMapping
     object = theObject;
     texture = (UniformTexture) theTexture;
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(1);

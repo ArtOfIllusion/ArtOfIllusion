@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -25,36 +25,41 @@ public class CreateLightTool extends EditingTool
   static int counter = 2;
   Point clickPoint, dragPoint;
   boolean controlDown;
-  
+
   public CreateLightTool(LayoutWindow fr)
   {
     super(fr);
     initButton("light");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createLightTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createLightTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
     dragPoint = null;
     controlDown = e.isControlDown();
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     dragPoint = e.getPoint();
@@ -78,13 +83,14 @@ public class CreateLightTool extends EditingTool
     view.drawDraggedShape(path);
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Scene theScene = ((LayoutWindow) theWindow).getScene();
     Camera cam = view.getCamera();
     Vec3 orig, ydir, zdir;
     Object3D obj;
-    
+
     orig = cam.convertScreenToWorld(clickPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN);
     if (dragPoint == null)
       {

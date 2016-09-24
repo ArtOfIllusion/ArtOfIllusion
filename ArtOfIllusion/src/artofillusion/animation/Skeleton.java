@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -23,23 +23,23 @@ public class Skeleton
 {
   private Joint joint[];
   private int nextID;
-  
+
   private static final int MARKER_WIDTH = 10;
   private static final double BONE_WIDTH = 0.15;
   private static final double WIDEST_POINT = 0.8;
-  
+
   public Skeleton()
   {
     joint = new Joint [0];
     nextID = 1;
   }
-  
+
   /** Create an exact duplicate of this skeleton. */
-  
+
   public Skeleton duplicate()
   {
     Skeleton s = new Skeleton();
-    
+
     s.nextID = nextID;
     s.joint = new Joint [joint.length];
     for (int i = 0; i < joint.length; i++)
@@ -56,7 +56,7 @@ public class Skeleton
   }
 
   /** Make this skeleton idenical to another one. */
-  
+
   public void copy(Skeleton s)
   {
     nextID = s.nextID;
@@ -74,7 +74,8 @@ public class Skeleton
   }
 
   /** Determine if this skeleton is identical to another one. */
-  
+
+  @Override
   public boolean equals(Object o)
   {
     if (!(o instanceof Skeleton))
@@ -89,7 +90,7 @@ public class Skeleton
   }
 
   /** Add a joint to the skeleton. */
-  
+
   public void addJoint(Joint j, int parentID)
   {
     Joint newjoint[] = new Joint [joint.length+1];
@@ -111,7 +112,7 @@ public class Skeleton
     newchildren[parent.children.length] = j;
     parent.children = newchildren;
   }
-  
+
   /** Delete a joint from the skeleton.  If it has children, all of them will be deleted
       as well. */
 
@@ -135,9 +136,9 @@ public class Skeleton
         newchildren[k++] = parent.children[i];
     parent.children = newchildren;
   }
-  
+
   /** Add every joint from another skeleton to this one. */
-  
+
   public void addAllJoints(Skeleton s)
   {
     Joint newjoint[] = new Joint [joint.length+s.joint.length];
@@ -157,9 +158,9 @@ public class Skeleton
     }
     joint = newjoint;
   }
-  
+
   /** Set the parent of a joint. */
-  
+
   public void setJointParent(Joint j, Joint parent)
   {
     if (j.parent != null)
@@ -179,13 +180,13 @@ public class Skeleton
     }
     j.parent = parent;
   }
-  
+
   /** Find the array index for a given joint ID. */
-  
+
   public int findJointIndex(int id)
   {
     int min = 0, max = joint.length-1, current = (min+max)>>1;
-    
+
     if (joint.length == 0)
       return -1;
     while (true)
@@ -205,9 +206,9 @@ public class Skeleton
         current = (min+max)>>1;
       }
   }
-  
+
   /** Get the joint with the specified ID, or null if there is none. */
-  
+
   public Joint getJoint(int id)
   {
     int which = findJointIndex(id);
@@ -215,9 +216,9 @@ public class Skeleton
       return null;
     return joint[which];
   }
-  
+
   /** Get an array of all the joints. */
-  
+
   public Joint [] getJoints()
   {
     Joint j[] = new Joint [joint.length];
@@ -225,23 +226,23 @@ public class Skeleton
       j[i] = joint[i];
     return j;
   }
-  
+
   /** Get the number of joints in the skeleton. */
-  
+
   public int getNumJoints()
   {
     return joint.length;
   }
-  
+
   /** Get the ID for the next joint to be added. */
-  
+
   public int getNextJointID()
   {
     return nextID;
   }
-  
+
   /** Scale the skeleton by the specified amount along each axis. */
-  
+
   public void scale(double x, double y, double z)
   {
     for (int i = 0; i < joint.length; i++)
@@ -271,14 +272,14 @@ public class Skeleton
           joint[i].length.pos = joint[i].coords.getOrigin().distance(joint[i].parent.coords.getOrigin());
       }
   }
-  
+
   /** Modify a Skeleton to be a weighted average of an arbitrary list of Skeletons,
       averaged about this one.
       @param average   the Skeleton to modify to be an average of other Skeletons
       @param s         the list of Skeletons to average
       @param weight    the weights for the different Skeletons
   */
-  
+
   public void blend(Skeleton average, Skeleton s[], double weight[])
   {
     for (int i = 0; i < joint.length; i++)
@@ -293,7 +294,7 @@ public class Skeleton
         rootangles = joint[i].coords.getRotationAngles();
         javg.coords = joint[i].coords.duplicate();
       }
-      
+
       // Find the average DOF values.
 
       javg.angle1.pos = joint[i].angle1.pos;
@@ -328,22 +329,22 @@ public class Skeleton
         javg.angle2.pos = angles[1];
         javg.twist.pos = angles[2];
       }
-      
+
       // Give each DOF a chance to clip the value.
-      
+
       javg.angle1.set(javg.angle1.pos);
       javg.angle2.set(javg.angle2.pos);
       javg.twist.set(javg.twist.pos);
       javg.length.set(javg.length.pos);
     }
-    
+
     // Update coordinate systems.
-    
+
     for (int i = 0; i < average.joint.length; i++)
       if (average.joint[i].parent == null)
         average.joint[i].recalcCoords(true);
   }
-  
+
   /** Utility routine for finding the angle offsets. */
 
   private double findOffset(DOF gesture, DOF defaultPose)
@@ -359,9 +360,9 @@ public class Skeleton
     }
     return diff;
   }
-  
+
   /** Draw the skeleton onto a canvas. */
-  
+
   public void draw(MeshViewer view, boolean enabled)
   {
     Camera cam = view.getCamera();
@@ -372,7 +373,7 @@ public class Skeleton
     double screenZ[] = new double [joint.length];
     Color color = (enabled ? ViewerCanvas.lineColor : ViewerCanvas.disabledColor), col;
     int colInt;
-    
+
     // First calculate the positions of all the joints.
 
     for (int i = 0; i < joint.length; i++)
@@ -383,9 +384,9 @@ public class Skeleton
         screenVert[i] = new Point((int) p[i].x, (int) p[i].y);
         screenZ[i] = cam.getObjectToView().timesZ(pos);
       }
-    
+
     // Now draw the bones.
-    
+
     col = color;
     Mat4 objToScreen = cam.getObjectToScreen();
     for (int i = 0; i < joint.length; i++)
@@ -435,7 +436,7 @@ public class Skeleton
       }
 
     // Finally draw the markers for all the joints.
-    
+
     int selectedID = view.getSelectedJoint();
     boolean locked[] = view.getLockedJoints();
     for (int i = 0; i < joint.length; i++)
@@ -471,18 +472,18 @@ public class Skeleton
           }
       }
   }
-  
+
   /** Update a mesh after its skeleton has moved.  oldMesh is the mesh before movement.
       newMesh is a duplicate of it with its skeleton in a different position.  This
       method repositions the vertices of newMesh based on the skeleton. */
-  
+
   public static void adjustMesh(Mesh oldMesh, Mesh newMesh)
   {
     Skeleton s1 = oldMesh.getSkeleton(), s2 = newMesh.getSkeleton();
     MeshVertex v1[] = oldMesh.getVertices(), v2[] = newMesh.getVertices();
     Vec3 v[] = new Vec3 [v2.length];
     Vec3 temp = new Vec3();
-    
+
     for (int i = 0; i < v2.length; i++)
       {
         v[i] = v2[i].r;
@@ -504,10 +505,10 @@ public class Skeleton
             temp.scale(1.0-weight);
             v[i].add(temp);
           }
-        
+
         // Adjust the vertex positions to reduce the "squashing" effect around
         // bent joints.
-        
+
         double olddist = v1[i].r.distance2(j1.coords.getOrigin());
         double newdist = v[i].distance2(j2.coords.getOrigin());
         if (olddist > 0.0 && newdist > 0.0)
@@ -529,7 +530,7 @@ public class Skeleton
     for (int i = 0; i < joint.length; i++)
       {
         // Write the information about this joint.
-        
+
         Joint j = joint[i];
         out.writeInt(j.id);
         out.writeUTF(j.name);
@@ -544,9 +545,9 @@ public class Skeleton
           out.writeInt(j.children[k].id);
       }
   }
-  
+
   /** Reconstruct a skeleton from its serialized representation. */
-  
+
   public Skeleton(DataInputStream in) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -559,7 +560,7 @@ public class Skeleton
     for (int i = 0; i < joint.length; i++)
       {
         // Read in the information about joints.
-        
+
         int id = in.readInt();
         String name = in.readUTF();
         Joint j = new Joint(new CoordinateSystem(in), null, name);
@@ -577,9 +578,9 @@ public class Skeleton
         if (j.id >= nextID)
           nextID = j.id+1;
       }
-    
+
     // Assign the parents and children for each joint.
-    
+
     for (int i = 0; i < joint.length; i++)
       {
         joint[i].parent = getJoint(parentID[i]);

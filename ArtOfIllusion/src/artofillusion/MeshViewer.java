@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -33,23 +33,23 @@ public abstract class MeshViewer extends ObjectViewer
     super(controller, p);
     lockedJoints = new Vector<Integer>();
   }
-  
+
   /** Get the ID of the selected joint. */
-  
+
   public int getSelectedJoint()
   {
     return selectedJoint;
   }
-  
+
   /** Set the selected joint. */
-  
+
   public void setSelectedJoint(int id)
   {
     selectedJoint = id;
   }
-  
+
   /** Get an array of size [# joints in skeleton] specifyiing which ones are locked. */
-  
+
   public boolean [] getLockedJoints()
   {
     Skeleton s = ((Mesh) getController().getObject().getObject()).getSkeleton();
@@ -64,9 +64,9 @@ public abstract class MeshViewer extends ObjectViewer
     }
     return b;
   }
-  
+
   /** Determine whether a particular joint is locked. */
-  
+
   public boolean isJointLocked(int id)
   {
     for (int i = 0; i < lockedJoints.size(); i++)
@@ -74,67 +74,67 @@ public abstract class MeshViewer extends ObjectViewer
         return true;
     return false;
   }
-  
+
   /** Lock the joint with the specified ID. */
-  
+
   public void lockJoint(int id)
   {
     Integer i = Integer.valueOf(id);
     if (lockedJoints.indexOf(i) == -1)
       lockedJoints.addElement(i);
   }
-  
+
   /** Unlock the joint with the specified ID. */
-  
+
   public void unlockJoint(int id)
   {
     lockedJoints.removeElement(Integer.valueOf(id));
   }
 
   /** Get whether the control mesh is visible. */
-  
+
   public boolean getMeshVisible()
   {
     return showMesh;
   }
 
   /** Set whether the control mesh is visible. */
-  
+
   public void setMeshVisible(boolean visible)
   {
     showMesh = visible;
   }
-  
+
   /** Get whether the surface is visible. */
-  
+
   public boolean getSurfaceVisible()
   {
     return showSurface;
   }
 
   /** Set whether the surface is visible. */
-  
+
   public void setSurfaceVisible(boolean visible)
   {
     showSurface = visible;
   }
-  
+
   /** Get whether the skeleton is visible. */
-  
+
   public boolean getSkeletonVisible()
   {
     return showSkeleton;
   }
 
   /** Set whether the skeleton is visible. */
-  
+
   public void setSkeletonVisible(boolean visible)
   {
     showSkeleton = visible;
   }
-  
+
   /** Get whether the mesh is detached from the skeleton. */
-  
+
   public boolean getSkeletonDetached()
   {
     return detachSkeleton;
@@ -167,6 +167,7 @@ public abstract class MeshViewer extends ObjectViewer
       @return the two element array {minDepth, maxDepth}
    */
 
+  @Override
   public double[] estimateDepthRange()
   {
     // Get the depth range for the object and the rest of the scene.

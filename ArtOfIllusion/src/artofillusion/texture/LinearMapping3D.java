@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -32,7 +32,7 @@ public class LinearMapping3D extends Mapping3D
   protected boolean transform, coordsFromParams, scaleToObject;
   protected int numTextureParams;
   protected TextureParameter xparam, yparam, zparam;
-  
+
   public LinearMapping3D(Object3D obj, Texture theTexture)
   {
     super(obj, theTexture);
@@ -48,7 +48,7 @@ public class LinearMapping3D extends Mapping3D
   }
 
   /* Calculate the mapping coefficients. */
-  
+
   void findCoefficients()
   {
     Vec3 zdir = coords.getZDirection(), ydir = coords.getUpDirection();
@@ -67,14 +67,14 @@ public class LinearMapping3D extends Mapping3D
   }
 
   /** Get a vector whose components contain the center position for the mapping. */
-  
+
   public Vec3 getCenter()
   {
     return new Vec3(dx, dy, dz);
   }
-  
+
   /** Set the center position for the mapping. */
-  
+
   public void setCenter(Vec3 center)
   {
     dx = center.x;
@@ -82,16 +82,16 @@ public class LinearMapping3D extends Mapping3D
     dz = center.z;
     findCoefficients();
   }
-  
+
   /** Get a vector whose components contain the scale factors for the mapping. */
-  
+
   public Vec3 getScale()
   {
     return new Vec3(xscale, yscale, zscale);
   }
-  
+
   /** Set the scale factors for the mapping. */
-  
+
   public void setScale(Vec3 scale)
   {
     xscale = scale.x;
@@ -99,26 +99,26 @@ public class LinearMapping3D extends Mapping3D
     zscale = scale.z;
     findCoefficients();
   }
-  
+
   /** Get a vector whose components contain the rotation angles for the mapping. */
-  
+
   public Vec3 getRotations()
   {
     double angles[] = coords.getRotationAngles();
     return new Vec3(angles[0], angles[1], angles[2]);
   }
-  
+
   /** Set the rotation angles for the mapping. */
-  
+
   public void setRotations(Vec3 angles)
   {
     coords.setOrientation(angles.x, angles.y, angles.z);
     findCoefficients();
   }
-  
+
   /** Determine whether this texture is bound to the surface (texture coordinates are determined by parameters,
       not by position). */
-  
+
   public boolean isBoundToSurface()
   {
     return coordsFromParams;
@@ -126,7 +126,7 @@ public class LinearMapping3D extends Mapping3D
 
   /** Set whether this texture is bound to the surface (texture coordinates are determined by parameters,
       not by position). */
-  
+
   public void setBoundToSurface(boolean bound)
   {
     coordsFromParams = bound;
@@ -146,10 +146,11 @@ public class LinearMapping3D extends Mapping3D
     scaleToObject = scaled;
   }
 
+  @Override
   public RenderingTriangle mapTriangle(int v1, int v2, int v3, int n1, int n2, int n3, Vec3 vert[])
   {
     Vec3 c1 = vert[v1], c2 = vert[v2], c3 = vert[v3];
-    
+
     if (coordsFromParams)
       return new UVWMappedTriangle(v1, v2, v3, n1, n2, n3);
     double x1 = c1.x;
@@ -193,7 +194,8 @@ public class LinearMapping3D extends Mapping3D
 
   /** This method is called once the texture parameters for the vertices of a triangle
       are known. */
-  
+
+  @Override
   public void setParameters(RenderingTriangle tri, double p1[], double p2[], double p3[], RenderingMesh mesh)
   {
     if (!(tri instanceof UVWMappedTriangle))
@@ -238,7 +240,8 @@ public class LinearMapping3D extends Mapping3D
         (float) (x3*ax+y3*bx+z3*cx-dx), (float) (x3*ay+y3*by+z3*cy-dy), (float) (x3*az+y3*bz+z3*cz-dz),
         mesh.vert[uvw.v1], mesh.vert[uvw.v2], mesh.vert[uvw.v3]);
   }
-  
+
+  @Override
   public void getTextureSpec(Vec3 pos, TextureSpec spec, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -296,6 +299,7 @@ public class LinearMapping3D extends Mapping3D
       fromLocal.transformDirection(spec.bumpGrad);
   }
 
+  @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double time, double param[])
   {
     if (!appliesToFace(angle > 0.0))
@@ -346,6 +350,7 @@ public class LinearMapping3D extends Mapping3D
         angle, time, param);
   }
 
+  @Override
   public double getDisplacement(Vec3 pos, double size, double time, double param[])
   {
     double x, y, z;
@@ -400,15 +405,17 @@ public class LinearMapping3D extends Mapping3D
     return Math.sqrt(x*x+y*y+z*z);
   }
 
+  @Override
   public TextureMapping duplicate()
   {
     return duplicate(object, texture);
   }
-  
+
+  @Override
   public TextureMapping duplicate(Object3D obj, Texture tex)
   {
     LinearMapping3D map = new LinearMapping3D(obj, tex);
-    
+
     map.coords = coords.duplicate();
     map.dx = dx;
     map.dy = dy;
@@ -426,11 +433,12 @@ public class LinearMapping3D extends Mapping3D
     map.zparam = zparam;
     return map;
   }
-  
+
+  @Override
   public void copy(TextureMapping mapping)
   {
-    LinearMapping3D map = (LinearMapping3D) mapping; 
-    
+    LinearMapping3D map = (LinearMapping3D) mapping;
+
     coords = map.coords.duplicate();
     dx = map.dx;
     dy = map.dy;
@@ -451,7 +459,8 @@ public class LinearMapping3D extends Mapping3D
   /* Get the list of texture parameters associated with this mapping and its texture.
      That includes the texture's parameters, and possibly parameters for the texture
      coordinates. */
-  
+
+  @Override
   public TextureParameter [] getParameters()
   {
     if (!coordsFromParams)
@@ -478,6 +487,7 @@ public class LinearMapping3D extends Mapping3D
     return p;
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
@@ -503,7 +513,8 @@ public class LinearMapping3D extends Mapping3D
       setAppliesTo(in.readShort());
     scaleToObject = (version > 1 ? in.readBoolean() : false);
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(2);
@@ -518,7 +529,7 @@ public class LinearMapping3D extends Mapping3D
     out.writeShort(appliesTo());
     out.writeBoolean(scaleToObject);
   }
-  
+
   /* Editor is an inner class for editing the mapping. */
 
   class Editor extends FormContainer
@@ -534,9 +545,9 @@ public class LinearMapping3D extends Mapping3D
       super(6, 9);
       theObject = obj;
       this.preview = preview;
-      
+
       // Add the various components to the Panel.
-      
+
       setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
       add(new BLabel(Translate.text("Scale")+":"), 0, 0, 6, 1);
       add(new BLabel("X"), 0, 1);

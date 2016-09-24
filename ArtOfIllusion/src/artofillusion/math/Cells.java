@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
@@ -30,22 +30,22 @@ public class Cells
   private int metric;
 
   private static double prob[];
-  
+
   public static final int EUCLIDEAN = 0;
   public static final int CITY_BLOCK = 1;
   public static final int CHESS_BOARD = 2;
 
   private static final double DENSITY = 3.0;
   private static final int cellIndex[][] = new int [][] {{0, 1, 1}, {2, 1, 1}, {1, 0, 1},
-    {1, 2, 1}, {1, 1, 0}, {1, 1, 2}, {0, 0, 1}, {0, 2, 1}, {0, 1, 0}, {0, 1, 2}, 
-    {2, 0, 1}, {2, 2, 1}, {2, 1, 0}, {2, 1, 2}, {1, 0, 0}, {1, 0, 2}, {1, 2, 0}, 
-    {1, 2, 2}, {0, 0, 0}, {0, 0, 2}, {0, 2, 0}, {0, 2, 2}, {2, 0, 0}, {2, 0, 2}, 
+    {1, 2, 1}, {1, 1, 0}, {1, 1, 2}, {0, 0, 1}, {0, 2, 1}, {0, 1, 0}, {0, 1, 2},
+    {2, 0, 1}, {2, 2, 1}, {2, 1, 0}, {2, 1, 2}, {1, 0, 0}, {1, 0, 2}, {1, 2, 0},
+    {1, 2, 2}, {0, 0, 0}, {0, 0, 2}, {0, 2, 0}, {0, 2, 2}, {2, 0, 0}, {2, 0, 2},
     {2, 2, 0}, {2, 2, 2}};
 
   static
   {
     // Calculate the probabilities for different numbers of points to be in a cell.
-    
+
     prob = new double [10];
     for (int i = 0; i < 10; i++)
       {
@@ -56,7 +56,7 @@ public class Cells
     for (int i = 1; i < 10; i++)
       prob[i] += prob[i-1];
   }
-  
+
   public Cells()
   {
     dx = new double [3];
@@ -75,9 +75,9 @@ public class Cells
     return metric;
   }
 
-  /** Set which distance metric to use.  Allowed values are EUCLIDEAN, CITY_BLOCK, 
+  /** Set which distance metric to use.  Allowed values are EUCLIDEAN, CITY_BLOCK,
       or CHESS_BOARD. */
-  
+
   public void setMetric(int metric)
   {
     this.metric = metric;
@@ -86,7 +86,7 @@ public class Cells
   /** Calculate the various functions at a specified point.  The number of functions to
       evaluate is determined by the length of value[].  The values of the functions are
       returned in value[], and their gradients in grad[].  A "unique identifier" for the
-      nearest, second nearest, etc. feature point is returned in id.  If gradients are 
+      nearest, second nearest, etc. feature point is returned in id.  If gradients are
       not needed, null may be passed for grad[]. */
 
   public void calcFunctions(Vec3 p, double value[], Vec3 grad[], int id[])
@@ -179,14 +179,14 @@ public class Cells
 
   /** Calculate the random number seed to use for cell (i, j, k). */
 
-  private static final int randSeed(int i, int j, int k)
+  private static int randSeed(int i, int j, int k)
   {
     return i*10 + j*1000 + k*100000;
   }
 
   /** Given the squared distance to a feature point, sort that point into the list. */
 
-  private final void sortIntoList(double dist2, int newid, double value[], Vec3 grad[], int id[])
+  private void sortIntoList(double dist2, int newid, double value[], Vec3 grad[], int id[])
   {
     for (int i = 0; i < value.length; i++)
       if (dist2 < value[i])
@@ -230,11 +230,11 @@ public class Cells
           return;
         }
   }
-  
-  /** Given the vector between two points, calculate the distance measure for the 
+
+  /** Given the vector between two points, calculate the distance measure for the
       desired metric. */
-  
-  private final double distance(Vec3 diff)
+
+  private double distance(Vec3 diff)
   {
     if (metric == EUCLIDEAN)
       return diff.length2();
@@ -247,9 +247,9 @@ public class Cells
       return (ax > az ? ax : az);
     return (ay > az ? ay : az);
   }
-  
+
   /** A faster replacement for Math.floor(). */
-  
+
   private static int floor(double d)
   {
     if (d < 0.0)
@@ -262,6 +262,3 @@ public class Cells
     return (int) d;
   }
 }
-
-
-

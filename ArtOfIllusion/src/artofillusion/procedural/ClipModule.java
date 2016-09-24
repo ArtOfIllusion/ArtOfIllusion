@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -23,46 +23,47 @@ import java.io.*;
 public class ClipModule extends Module
 {
   double min, max;
-    
+
   public ClipModule(Point position)
   {
-    super(Translate.text("menu.clipModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})}, 
+    super(Translate.text("menu.clipModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
       position);
     min = 0.0;
     max = 1.0;
   }
-  
+
   /** Get the minimum clipping value. */
-  
+
   public double getMinimum()
   {
     return min;
   }
-  
+
   /** Set the minimum clipping value. */
-  
+
   public void setMinimum(double m)
   {
     min = m;
   }
-  
+
   /** Get the maximum clipping value. */
-  
+
   public double getMaximum()
   {
     return max;
   }
-  
+
   /** Set the maximum clipping value. */
-  
+
   public void setMaximum(double m)
   {
     max = m;
   }
 
   /* Clip the input value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -76,7 +77,8 @@ public class ClipModule extends Module
   }
 
   /* Calculate the error. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (linkFrom[0] == null)
@@ -89,6 +91,7 @@ public class ClipModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)
@@ -102,9 +105,10 @@ public class ClipModule extends Module
     else
       linkFrom[0].getValueGradient(linkFromIndex[0], grad, blur);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueField minField = new ValueField(min, ValueField.NONE);
@@ -139,6 +143,7 @@ public class ClipModule extends Module
 
     /* Create a duplicate of this module. */
 
+  @Override
   public Module duplicate()
   {
     ClipModule mod = new ClipModule(new Point(bounds.x, bounds.y));
@@ -149,14 +154,16 @@ public class ClipModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(min);
     out.writeDouble(max);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     min = in.readDouble();

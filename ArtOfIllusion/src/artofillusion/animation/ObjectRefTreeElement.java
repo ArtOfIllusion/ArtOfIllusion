@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -20,7 +20,7 @@ public class ObjectRefTreeElement extends TreeElement
 {
   ObjectRef ref;
   boolean disabled;
-  
+
   public ObjectRefTreeElement(ObjectRef obj, TreeElement parent, TreeList tree, ObjectInfo exclude)
   {
     ref = obj;
@@ -42,9 +42,10 @@ public class ObjectRefTreeElement extends TreeElement
 	  children.addElement(new ObjectRefTreeElement(new ObjectRef(info.getChildren()[i]), this, tree, exclude));
       }
   }
-  
+
   /* Get the label to display for this element. */
-  
+
+  @Override
   public String getLabel()
   {
     Joint j = ref.getJoint();
@@ -52,47 +53,52 @@ public class ObjectRefTreeElement extends TreeElement
       return j.name;
     return ref.getObject().getName();
   }
-  
+
   /* Determine whether this element can be added as a child of another one  If el is null,
      return whether this element can be added at the root level of the tree. */
-  
+
+  @Override
   public boolean canAcceptAsParent(TreeElement el)
   {
     return false;
   }
-  
+
   /* Add another element as a child of this one. */
-  
+
+  @Override
   public void addChild(TreeElement el, int position)
   {
     children.insertElementAt(el, position);
     ((ObjectRefTreeElement) el).parent = this;
   }
-  
-  /* Remove any elements corresponding to the given object from this element's list 
+
+  /* Remove any elements corresponding to the given object from this element's list
      of children. */
-  
+
+  @Override
   public void removeChild(Object object)
   {
   }
-  
+
   /* Get the object corresponding to this element. */
-  
+
+  @Override
   public Object getObject()
   {
     return ref;
   }
-  
+
   /* Set whether this element is enabled so that it can be selected. */
-  
+
   public void setEnabled(boolean enable)
   {
     disabled = !enable;
     setSelectable(enable);
   }
-  
+
   /* Get whether this element should be drawn in gray (i.e. to indicate it is deactivated). */
-  
+
+  @Override
   public boolean isGray()
   {
     return disabled;

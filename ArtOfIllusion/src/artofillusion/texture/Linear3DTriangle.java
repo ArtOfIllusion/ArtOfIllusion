@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -44,12 +44,14 @@ public class Linear3DTriangle extends RenderingTriangle
       @param index     the index of this triangle within the mesh
   */
 
+  @Override
   public void setMesh(RenderingMesh mesh, TextureMapping map, int index)
   {
     super.setMesh(mesh, map, index);
     this.map = (LinearMapping3D) map;
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double angle, double u, double v, double w, double size, double time)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -91,6 +93,7 @@ public class Linear3DTriangle extends RenderingTriangle
       map.fromLocal.transformDirection(spec.bumpGrad);
   }
 
+  @Override
   public void getTransparency(RGBColor trans, double angle, double u, double v, double w, double size, double time)
   {
     if (!map.appliesToFace(angle > 0.0))
@@ -125,6 +128,7 @@ public class Linear3DTriangle extends RenderingTriangle
         angle, time, getParameters(u, v, w));
   }
 
+  @Override
   public double getDisplacement(double u, double v, double w, double size, double time)
   {
     double sizex = size, sizey = size, sizez = size;

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -27,20 +27,22 @@ public class ViewAngleModule extends Module
 
   public ViewAngleModule(Point position)
   {
-    super(Translate.text("menu.viewAngleModule"), new IOPort [] {}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("menu.viewAngleModule")})}, 
+    super(Translate.text("menu.viewAngleModule"), new IOPort [] {},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("menu.viewAngleModule")})},
       position);
   }
 
   /* Cache the PointInfo object to have access to the angle later on. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
   }
 
   /* This module outputs the value of the view angle. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (abs && point.viewangle < 0.0)
@@ -50,6 +52,7 @@ public class ViewAngleModule extends Module
 
   /* The angle is always considered to be exact. */
 
+  @Override
   public double getValueError(int which, double blur)
   {
     return 0.0;
@@ -57,13 +60,15 @@ public class ViewAngleModule extends Module
 
   /* We always return no gradient, since there is not enough information to actually calculate it. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     grad.set(0.0, 0.0, 0.0);
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     ViewAngleModule mod = new ViewAngleModule(new Point(bounds.x, bounds.y));
@@ -71,9 +76,10 @@ public class ViewAngleModule extends Module
     mod.layout();
     return mod;
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final BCheckBox absBox = new BCheckBox(Translate.text("outputAbsValue"), abs);
@@ -93,13 +99,15 @@ public class ViewAngleModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeBoolean(abs);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     abs = in.readBoolean();

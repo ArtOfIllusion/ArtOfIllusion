@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -55,6 +55,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
    * Save the display mode when the window is closed.
    */
 
+  @Override
   public void dispose()
   {
     for (int i = 0; i < theView.length; i++)
@@ -69,6 +70,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
    * @param controls   the contain to which the canvas should add its controls
    */
 
+  @Override
   protected ViewerCanvas createViewerCanvas(int index, RowContainer controls)
   {
     MeshViewer view = ((Mesh) objInfo.getObject()).createMeshViewer(this, controls);
@@ -143,6 +145,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   /** Load all the preferences into memory. */
 
+  @Override
   protected void loadPreferences()
   {
     super.loadPreferences();
@@ -159,6 +162,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   /** Save user settings that should be persistent between sessions. */
 
+  @Override
   protected void savePreferences()
   {
     super.savePreferences();
@@ -175,26 +179,31 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   /** Set the Mesh object for this viewer. */
 
+  @Override
   public abstract void setMesh(Mesh mesh);
 
   /** Get an array of flags specifying which parts of the mesh are selected.  Depending on the selection mode,
       this may correspond to vertices, faces, edges, etc. */
 
+  @Override
   public abstract boolean[] getSelection();
 
   /** Set an array of flags specifying which parts of the mesh are selected.  Depending on the selection mode,
       this may correspond to vertices, faces, edges, etc. */
 
+  @Override
   public abstract void setSelection(boolean selected[]);
 
   /** Get the distance of each vertex from a selected vertex.  This is 0 for a selected
       vertex, 1 for a vertex adjacent to a selected one, etc., up to a specified maximum
       distance.  For vertices more than the maximum distance for a selected one, it is -1. */
 
+  @Override
   public abstract int[] getSelectionDistance();
 
   /** This should be called whenever the object has changed. */
 
+  @Override
   public void objectChanged()
   {
     getObject().clearCachedMeshes();
@@ -204,11 +213,13 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
   /* EditingWindow methods. */
 
+  @Override
   public Scene getScene()
   {
     return ((MeshViewer) theView[currentView]).getScene();
   }
 
+  @Override
   public void undoCommand()
   {
     super.undoCommand();
@@ -217,6 +228,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       view.viewChanged(false);
   }
 
+  @Override
   public void redoCommand()
   {
     super.redoCommand();
@@ -225,6 +237,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       view.viewChanged(false);
   }
 
+  @Override
   public void updateMenus()
   {
     MeshViewer view = (MeshViewer) theView[currentView];
@@ -649,11 +662,13 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     savePreferences();
   }
 
+  @Override
   public double getMeshTension()
   {
     return tensionArray[meshTension];
   }
 
+  @Override
   public int getTensionDistance()
   {
     return tensionDistance;
@@ -1446,15 +1461,17 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
         for (int i = 0; i < info.getChildren().length; i++)
           children.addElement(new TreeElem(info.getChildren()[i], this, tree));
       }
+      @Override
       public boolean isGray()
       {
         return !selectable;
       }
+      @Override
       public boolean canAcceptAsParent(TreeElement el)
       {
         return false;
       }
-    };
+    }
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo info = theScene.getObject(i);

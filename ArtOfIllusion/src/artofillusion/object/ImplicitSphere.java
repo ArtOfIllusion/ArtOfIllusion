@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -321,6 +321,7 @@ public class ImplicitSphere extends ImplicitObject
 
     /** Create a duplicate of this keyframe. */
 
+    @Override
     public Keyframe duplicate()
     {
       return new ImplicitSphereKeyframe(radius, influenceRadius);
@@ -328,6 +329,7 @@ public class ImplicitSphere extends ImplicitObject
 
     /** Create a duplicate of this keyframe for a (possibly different) object. */
 
+    @Override
     public Keyframe duplicate(Object owner)
     {
       return new ImplicitSphereKeyframe(radius, influenceRadius);
@@ -335,6 +337,7 @@ public class ImplicitSphere extends ImplicitObject
 
     /** Get the list of graphable values for this keyframe. */
 
+    @Override
     public double [] getGraphValues()
     {
       return new double [] {radius, influenceRadius};
@@ -342,6 +345,7 @@ public class ImplicitSphere extends ImplicitObject
 
     /** Set the list of graphable values for this keyframe. */
 
+    @Override
     public void setGraphValues(double values[])
     {
       radius = values[0];
@@ -351,6 +355,7 @@ public class ImplicitSphere extends ImplicitObject
     /** These methods return a new Keyframe which is a weighted average of this one and one,
      two, or three others. */
 
+    @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
       ImplicitSphereKeyframe k2 = (ImplicitSphereKeyframe) o2;
@@ -358,6 +363,7 @@ public class ImplicitSphere extends ImplicitObject
       return new ImplicitSphereKeyframe(weight1*radius+weight2*k2.radius, weight1*influenceRadius+weight2*k2.influenceRadius);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
       ImplicitSphereKeyframe k2 = (ImplicitSphereKeyframe) o2, k3 = (ImplicitSphereKeyframe) o3;
@@ -366,6 +372,7 @@ public class ImplicitSphere extends ImplicitObject
           weight1*influenceRadius+weight2*k2.influenceRadius+weight3*k3.influenceRadius);
     }
 
+    @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
       ImplicitSphereKeyframe k2 = (ImplicitSphereKeyframe) o2, k3 = (ImplicitSphereKeyframe) o3, k4 = (ImplicitSphereKeyframe) o4;
@@ -376,6 +383,7 @@ public class ImplicitSphere extends ImplicitObject
 
     /** Determine whether this keyframe is identical to another one. */
 
+    @Override
     public boolean equals(Keyframe k)
     {
       if (!(k instanceof ImplicitSphereKeyframe))
@@ -386,6 +394,7 @@ public class ImplicitSphere extends ImplicitObject
 
     /** Write out a representation of this keyframe to a stream. */
 
+    @Override
     public void writeToStream(DataOutputStream out) throws IOException
     {
       out.writeDouble(radius);

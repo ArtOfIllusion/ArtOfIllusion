@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.material;
@@ -19,8 +19,8 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
-/** LinearMaterialMapping is a MaterialMapping which represents a linear mapping (this 
-    includes rotations, translations, and scalings) of between material coordinates and 
+/** LinearMaterialMapping is a MaterialMapping which represents a linear mapping (this
+    includes rotations, translations, and scalings) of between material coordinates and
     world coordinates. */
 
 public class LinearMaterialMapping extends MaterialMapping
@@ -50,7 +50,7 @@ public class LinearMaterialMapping extends MaterialMapping
   }
 
   /** Calculate the mapping coefficients. */
-  
+
   private void findCoefficients()
   {
     Vec3 zdir = coords.getZDirection(), ydir = coords.getUpDirection();
@@ -65,16 +65,16 @@ public class LinearMaterialMapping extends MaterialMapping
     bz = zdir.y/zscale;
     cz = zdir.z/zscale;
   }
-  
+
   /** Get a vector whose components contain the center position for the mapping. */
-  
+
   public Vec3 getCenter()
   {
     return new Vec3(dx, dy, dz);
   }
-  
+
   /** Set the center position for the mapping. */
-  
+
   public void setCenter(Vec3 center)
   {
     dx = center.x;
@@ -82,16 +82,16 @@ public class LinearMaterialMapping extends MaterialMapping
     dz = center.z;
     findCoefficients();
   }
-  
+
   /** Get a vector whose components contain the scale factors for the mapping. */
-  
+
   public Vec3 getScale()
   {
     return new Vec3(xscale, yscale, zscale);
   }
-  
+
   /** Set the scale factors for the mapping. */
-  
+
   public void setScale(Vec3 scale)
   {
     xscale = scale.x;
@@ -115,15 +115,15 @@ public class LinearMaterialMapping extends MaterialMapping
   }
 
   /** Get a vector whose components contain the rotation angles for the mapping. */
-  
+
   public Vec3 getRotations()
   {
     double angles[] = coords.getRotationAngles();
     return new Vec3(angles[0], angles[1], angles[2]);
   }
-  
+
   /** Set the rotation angles for the mapping. */
-  
+
   public void setRotations(Vec3 angles)
   {
     coords.setOrientation(angles.x, angles.y, angles.z);
@@ -131,7 +131,8 @@ public class LinearMaterialMapping extends MaterialMapping
   }
 
   /** Get the step size to use for integrating the material. */
-  
+
+  @Override
   public double getStepSize()
   {
     if (scaleToObject)
@@ -154,6 +155,7 @@ public class LinearMaterialMapping extends MaterialMapping
 
   /* Methods from MaterialMapping. */
 
+  @Override
   public void getMaterialSpec(Vec3 pos, MaterialSpec spec, double size, double time)
   {
     double x = pos.x, y = pos.y, z = pos.z;
@@ -195,15 +197,17 @@ public class LinearMaterialMapping extends MaterialMapping
     return Math.sqrt(x*x+y*y+z*z);
   }
 
+  @Override
   public MaterialMapping duplicate()
   {
     return duplicate(object, material);
   }
-  
+
+  @Override
   public MaterialMapping duplicate(Object3D obj, Material mat)
   {
     LinearMaterialMapping map = new LinearMaterialMapping(obj, (Material3D) mat);
-    
+
     map.coords = coords.duplicate();
     map.dx = dx;
     map.dy = dy;
@@ -215,11 +219,12 @@ public class LinearMaterialMapping extends MaterialMapping
     map.findCoefficients();
     return map;
   }
-  
+
+  @Override
   public void copy(MaterialMapping mapping)
   {
-    LinearMaterialMapping map = (LinearMaterialMapping) mapping; 
-    
+    LinearMaterialMapping map = (LinearMaterialMapping) mapping;
+
     coords = map.coords.duplicate();
     dx = map.dx;
     dy = map.dy;
@@ -231,11 +236,12 @@ public class LinearMaterialMapping extends MaterialMapping
     findCoefficients();
   }
 
+  @Override
   public Widget getEditingPanel(Object3D obj, MaterialPreviewer preview)
   {
     return new Editor(obj, preview);
   }
-  
+
   public LinearMaterialMapping(DataInputStream in, Object3D theObject, Material theMaterial) throws IOException, InvalidObjectException
   {
     super(theObject, theMaterial);
@@ -253,7 +259,8 @@ public class LinearMaterialMapping extends MaterialMapping
     scaleToObject = (version > 0 ? in.readBoolean() : false);
     findCoefficients();
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out) throws IOException
   {
     out.writeShort(1);
@@ -266,7 +273,7 @@ public class LinearMaterialMapping extends MaterialMapping
     out.writeDouble(zscale);
     out.writeBoolean(scaleToObject);
   }
-  
+
   /** Editor is an inner class for editing the mapping. */
 
   private class Editor extends FormContainer
@@ -281,9 +288,9 @@ public class LinearMaterialMapping extends MaterialMapping
       super(6, 7);
       theObject = obj;
       this.preview = preview;
-      
+
       // Add the various components to the container.
-      
+
       setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
       add(new BLabel(Translate.text("Scale")+":"), 0, 0, 3, 1);
       add(new BLabel("X"), 0, 1);

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -20,7 +20,7 @@ import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
 
-/** The SplineMeshViewer class is a component which displays a SplineMesh object and 
+/** The SplineMeshViewer class is a component which displays a SplineMesh object and
     allow the user to edit it. */
 
 public class SplineMeshViewer extends MeshViewer
@@ -62,6 +62,7 @@ public class SplineMeshViewer extends MeshViewer
     super.updateImage();
   }
 
+  @Override
   protected void drawObject()
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
@@ -69,17 +70,17 @@ public class SplineMeshViewer extends MeshViewer
     // Draw the object surface.
 
     drawSurface();
-    
+
     // Displace the camera slightly, so edges and points will show through the surface.
-    
+
     Vec3 displace = new Vec3(0.0, 0.0, -0.01);
     theCamera.getViewToWorld().transformDirection(displace);
     getDisplayCoordinates().toLocal().transformDirection(displace);
     Mat4 oldTransform = theCamera.getObjectToWorld();
     theCamera.setObjectTransform(oldTransform.times(Mat4.translation(displace.x, displace.y, displace.z)));
-    
+
     // Draw the points, edges, and skeleton.
-    
+
     Color meshColor, selectedColor;
     if (currentTool instanceof SkeletonTool)
       {
@@ -106,7 +107,7 @@ public class SplineMeshViewer extends MeshViewer
   }
 
   /** Draw the surface of the object. */
-  
+
   private void drawSurface()
   {
     if (!showSurface)
@@ -141,9 +142,9 @@ public class SplineMeshViewer extends MeshViewer
       renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), null);
     }
   }
-  
+
   /** Draw the vertices of the control mesh. */
-  
+
   private void drawVertices(Color unselectedColor, Color selectedColor)
   {
     if (!showMesh)
@@ -176,9 +177,9 @@ public class SplineMeshViewer extends MeshViewer
       }
     renderBoxes(boxes, depths, selectedColor);
   }
-  
+
   /** Draw the edges of the control mesh. */
-  
+
   private void drawEdges(Color unselectedColor, Color selectedColor)
   {
     if (!showMesh)
@@ -253,6 +254,7 @@ public class SplineMeshViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
@@ -265,9 +267,9 @@ public class SplineMeshViewer extends MeshViewer
     deselect = -1;
     dragging = false;
     clickPoint = e.getPoint();
-    
+
     // Determine which tool is active.
-    
+
     if (metaTool != null && e.isMetaDown())
       activeTool = metaTool;
     else if (altTool != null && e.isAltDown())
@@ -289,11 +291,11 @@ public class SplineMeshViewer extends MeshViewer
       return;
 
     // Determine what the click was on.
-    
+
     i = findClickTarget(e.getPoint());
 
     // If the click was not on an object, start dragging a selection box.
-    
+
     if (i == -1)
       {
         if (allowSelectionChange)
@@ -303,10 +305,10 @@ public class SplineMeshViewer extends MeshViewer
         }
         return;
       }
-    
-    // If we are in curve selection mode, find the nearest vertex of the clicked curve, 
+
+    // If we are in curve selection mode, find the nearest vertex of the clicked curve,
     // so that it can be passed to editing tools.
-    
+
     if (controller.getSelectionMode() == MeshEditController.EDGE_MODE)
       {
         j = 0;
@@ -335,7 +337,7 @@ public class SplineMeshViewer extends MeshViewer
 
     // If the click was on a selected object, forward it to the current tool.  If it was a
     // shift-click, the user may want to deselect it, so set a flag.
-    
+
     boolean selected[] = controller.getSelection();
     if (selected[i])
       {
@@ -352,7 +354,7 @@ public class SplineMeshViewer extends MeshViewer
       return;
 
     // The click was on an unselected object.  Select it and send an event to the current tool.
-    
+
     boolean oldSelection[] = selected.clone();
     if (!e.isShiftDown())
       for (k = 0; k < selected.length; k++)
@@ -368,6 +370,7 @@ public class SplineMeshViewer extends MeshViewer
     }
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -381,6 +384,7 @@ public class SplineMeshViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
@@ -395,9 +399,9 @@ public class SplineMeshViewer extends MeshViewer
       for (i = 0; i < selected.length; i++)
         selected[i] = false;
 
-    // If the user was dragging a selection box, then select or deselect anything 
+    // If the user was dragging a selection box, then select or deselect anything
     // it intersects.
-    
+
     if (selectBounds != null)
       {
         boolean newsel = !e.isControlDown();
@@ -451,12 +455,12 @@ public class SplineMeshViewer extends MeshViewer
     controller.setSelection(selected);
     currentTool.getWindow().updateMenus();
   }
-  
+
   /** Determine which vertex or curve (depending on the current selection mode) the
       mouse was clicked on.  If the click was on top of multiple objects, priority is given
       to ones which are currently selected, and then to ones which are in front.  If the
       click is not over any object, -1 is returned. */
-  
+
   int findClickTarget(Point pos)
   {
     SplineMesh mesh = (SplineMesh) getController().getObject().getObject();
@@ -469,7 +473,7 @@ public class SplineMeshViewer extends MeshViewer
     boolean selected[] = controller.getSelection();
     boolean priorityToSelected = (getRenderMode() == RENDER_WIREFRAME || getRenderMode() == RENDER_TRANSPARENT);
     int usize = mesh.getUSize(), vsize = mesh.getVSize();
-    
+
     if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
       {
         for (i = 0; i < vt.length; i++)
@@ -546,28 +550,28 @@ public class SplineMeshViewer extends MeshViewer
       }
     return which;
   }
-  
+
   /** Given a click position and the endpoints of a line, this method determines whether the
       click was on top of the line.  If so, it returns the z coordinate of the line at the
       point where it was clicked.  Otherwise, it returns Double.MAX_VALUE. */
-  
+
   private double lineClickDepth(Point pos, MeshVertex vt[], int p1, int p2)
   {
     Point v1, v2;
     double u, v, w;
-    
+
     if (!visible[p1] || !visible[p2])
       return Double.MAX_VALUE;
     v1 = screenVert[p1];
     v2 = screenVert[p2];
-    if ((pos.x < v1.x-HANDLE_SIZE/2 && pos.x < v2.x-HANDLE_SIZE/2) || 
-            (pos.x > v1.x+HANDLE_SIZE/2 && pos.x > v2.x+HANDLE_SIZE/2) || 
-            (pos.y < v1.y-HANDLE_SIZE/2 && pos.y < v2.y-HANDLE_SIZE/2) || 
+    if ((pos.x < v1.x-HANDLE_SIZE/2 && pos.x < v2.x-HANDLE_SIZE/2) ||
+            (pos.x > v1.x+HANDLE_SIZE/2 && pos.x > v2.x+HANDLE_SIZE/2) ||
+            (pos.y < v1.y-HANDLE_SIZE/2 && pos.y < v2.y-HANDLE_SIZE/2) ||
             (pos.y > v1.y+HANDLE_SIZE/2 && pos.y > v2.y+HANDLE_SIZE/2))
       return Double.MAX_VALUE;
-    
+
     // Determine the distance of the click point from the line.
-    
+
     if (Math.abs(v1.x-v2.x) > Math.abs(v1.y-v2.y))
       {
         if (v2.x > v1.x)

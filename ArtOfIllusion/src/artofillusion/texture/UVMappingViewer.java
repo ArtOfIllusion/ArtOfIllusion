@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -37,9 +37,9 @@ public class UVMappingViewer extends MeshViewer
   private Point screenVert[];
   private Vec2 coord[];
   private int vertIndex[];
-  
+
   private static final int MARKER_SIZE = 4;
-  
+
   public UVMappingViewer(Texture2D tex, UVMappingWindow window, double minu, double maxu, double minv, double maxv, int component, int sampling, double time, double param[])
   {
     super(window, new RowContainer());
@@ -55,29 +55,31 @@ public class UVMappingViewer extends MeshViewer
     setParameters(minu, maxu, minv, maxv, component, sampling);
     setShowTemplate(true);
     getComponent().addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentResized(ComponentEvent e)
       {
         createImage();
       }
     });
   }
-  
+
   /** Get the controller for editing the UV mesh. */
-  
+
+  @Override
   public MeshEditController getController()
   {
     return controller;
   }
 
   /** Set the parameters for what part of the texture to display. */
-  
+
   public void setParameters(double minu, double maxu, double minv, double maxv)
   {
     setParameters(minu, maxu, minv, maxv, component, sampling);
   }
-  
+
   /** Set the parameters for what part of the texture to display. */
-  
+
   public void setParameters(double minu, double maxu, double minv, double maxv, int component, int sampling)
   {
     this.minu = minu;
@@ -94,7 +96,7 @@ public class UVMappingViewer extends MeshViewer
   }
 
   /** Recalculate the camera settings. */
-  
+
   private void adjustCamera()
   {
     Rectangle dim = getBounds();
@@ -105,9 +107,9 @@ public class UVMappingViewer extends MeshViewer
     Mat4 viewToWorld = Mat4.translation(minu+0.5*dim.width/uscale, maxv-0.5*dim.height/vscale, 0.0).times(Mat4.scale(-1.0/uscale, 1.0/vscale, 1.0));
     theCamera.setViewTransform(worldToView, viewToWorld);
   }
-  
+
   /** Recalculate the texture image. */
-  
+
   private void createImage()
   {
     Rectangle dim = getBounds();
@@ -124,19 +126,20 @@ public class UVMappingViewer extends MeshViewer
     adjustCamera();
     setCursor(Cursor.getDefaultCursor());
   }
-  
+
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
    */
-   
+
+  @Override
   public double[] estimateDepthRange()
   {
     return new double [] {-1.0, 1.0};
   }
 
   /** Calculate the screen location of each vertex. */
-  
+
   private void calcScreenPositions()
   {
     Rectangle dim = getBounds();
@@ -151,6 +154,7 @@ public class UVMappingViewer extends MeshViewer
       }
   }
 
+  @Override
   public synchronized void updateImage()
   {
     adjustCamera();
@@ -165,9 +169,10 @@ public class UVMappingViewer extends MeshViewer
     }
     currentTool.drawOverlay(this);
   }
-  
+
   /** Unused method from object viewer. */
 
+  @Override
   protected void drawObject()
   {
   }
@@ -175,7 +180,7 @@ public class UVMappingViewer extends MeshViewer
   /** Get a list of which vertices are selected.  The array length is equal to the
       total number of vertices in the object being edited, not just the ones
       currently displayed in this viewer. */
-  
+
   public boolean [] getSelection()
   {
     boolean sel[] = new boolean [coord.length];
@@ -186,14 +191,14 @@ public class UVMappingViewer extends MeshViewer
   }
 
   /** Set the Mesh object for this viewer. */
-  
+
   public void setMesh(Mesh mesh)
   {
     window.setMesh(mesh);
   }
-  
+
   /** Rebuild the list of vertices to display. */
-  
+
   public void setDisplayedVertices(Vec2 coord[], boolean display[])
   {
     this.coord = coord;
@@ -211,9 +216,9 @@ public class UVMappingViewer extends MeshViewer
     window.selectionDistance = null;
     repaint();
   }
-  
+
   /** Update the positions of the displayed vertices. */
-  
+
   public void updateVertexPositions(Vec2 coord[])
   {
     Vec2 shown[] = new Vec2 [vertIndex.length];
@@ -222,16 +227,16 @@ public class UVMappingViewer extends MeshViewer
     uvmesh.setVertices(shown);
     calcScreenPositions();
   }
-  
+
   /**
    * Get the minimum U value.
    */
-  
+
   public double getMinU()
   {
     return minu;
   }
-  
+
   /**
    * Get the maximum U value.
    */
@@ -240,7 +245,7 @@ public class UVMappingViewer extends MeshViewer
   {
     return maxu;
   }
-  
+
   /**
    * Get the minimum V value.
    */
@@ -249,7 +254,7 @@ public class UVMappingViewer extends MeshViewer
   {
     return minv;
   }
-  
+
   /**
    * Get the maximum V value.
    */
@@ -269,7 +274,7 @@ public class UVMappingViewer extends MeshViewer
   }
 
   /** This is called whenever the mesh has changed. */
-  
+
   public void objectChanged()
   {
     calcScreenPositions();
@@ -283,15 +288,16 @@ public class UVMappingViewer extends MeshViewer
   /** When the user presses the mouse, forward events to the current tool as appropriate.
       If this is a vertex based tool, allow them to select or deselect vertices. */
 
+  @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
     sentClick = true;
     deselect = -1;
     dragging = false;
     clickPoint = e.getPoint();
-    
+
     // Determine which tool is active.
-    
+
     if (metaTool != null && e.isMetaDown())
       activeTool = metaTool;
     else if (altTool != null && e.isAltDown())
@@ -312,11 +318,11 @@ public class UVMappingViewer extends MeshViewer
       return;
 
     // Determine what the click was on.
-    
+
     int i = findClickTarget(e.getPoint());
 
     // If the click was not on an object, start dragging a selection box.
-    
+
     if (i == -1)
       {
         draggingSelectionBox = true;
@@ -327,7 +333,7 @@ public class UVMappingViewer extends MeshViewer
 
     // If the click was on a selected object, forward it to the current tool.  If it was a
     // shift-click, the user may want to deselect it, so set a flag.
-    
+
     if (selected[i])
       {
         if (e.isShiftDown())
@@ -335,9 +341,9 @@ public class UVMappingViewer extends MeshViewer
         activeTool.mousePressedOnHandle(e, this, 0, i);
         return;
       }
-    
+
     // The click was on an unselected object.  Select it and send an event to the current tool.
-    
+
     if (!e.isShiftDown())
       for (int k = 0; k < selected.length; k++)
         selected[k] = false;
@@ -353,6 +359,7 @@ public class UVMappingViewer extends MeshViewer
       activeTool.mousePressedOnHandle(e, this, 0, i);
   }
 
+  @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
@@ -366,6 +373,7 @@ public class UVMappingViewer extends MeshViewer
     super.mouseDragged(e);
   }
 
+  @Override
   protected void mouseReleased(WidgetMouseEvent e)
   {
     endDraggingSelection();
@@ -373,9 +381,9 @@ public class UVMappingViewer extends MeshViewer
       for (int i = 0; i < selected.length; i++)
         selected[i] = false;
 
-    // If the user was dragging a selection box, then select or deselect anything 
+    // If the user was dragging a selection box, then select or deselect anything
     // it intersects.
-    
+
     if (selectBounds != null)
     {
       boolean newsel = !e.isControlDown();
@@ -409,6 +417,7 @@ public class UVMappingViewer extends MeshViewer
     repaint();
   }
 
+  @Override
   protected void processMouseScrolled(MouseScrolledEvent ev)
   {
     int amount = ev.getWheelRotation();
@@ -446,11 +455,11 @@ public class UVMappingViewer extends MeshViewer
   }
 
   /** Inner class representing the vertices being displayed. */
-  
+
   private static class UVMesh extends Object3D implements Mesh
   {
     public MeshVertex vert[];
-    
+
     public UVMesh()
     {
       vert = new MeshVertex [0];
@@ -464,7 +473,8 @@ public class UVMappingViewer extends MeshViewer
     }
 
     /** Create a new object which is an exact duplicate of this one. */
-  
+
+    @Override
     public Object3D duplicate()
     {
       Vec2 uv[] = new Vec2 [vert.length];
@@ -472,10 +482,11 @@ public class UVMappingViewer extends MeshViewer
         uv[i] = new Vec2(vert[i].r.x, vert[i].r.y);
       return new UVMesh(uv);
     }
-  
+
     /** Copy all the properties of another object, to make this one identical to it.  If the
         two objects are of different classes, this will throw a ClassCastException. */
-    
+
+    @Override
     public void copyObject(Object3D obj)
     {
       UVMesh mesh = (UVMesh) obj;
@@ -485,14 +496,16 @@ public class UVMappingViewer extends MeshViewer
     }
 
     /** Get the list of vertices which define the mesh. */
-  
+
+    @Override
     public MeshVertex[] getVertices()
     {
       return vert;
     }
-  
+
     /** Get a list of the positions of all vertices which define the mesh. */
-    
+
+    @Override
     public Vec3 [] getVertexPositions()
     {
       Vec3 v[] = new Vec3 [vert.length];
@@ -500,134 +513,151 @@ public class UVMappingViewer extends MeshViewer
         v[i] = new Vec3(vert[i].r);
       return v;
     }
-  
+
     /** Set the positions for all the vertices of the mesh. */
-  
+
+    @Override
     public void setVertexPositions(Vec3 v[])
     {
       vert = new MeshVertex [v.length];
       for (int i = 0; i < v.length; i++)
         vert[i] = new MeshVertex(v[i]);
     }
-  
+
     /** Set the positions for all the vertices of the mesh. */
-  
+
     public void setVertices(Vec2 v[])
     {
       vert = new MeshVertex [v.length];
       for (int i = 0; i < v.length; i++)
         vert[i] = new MeshVertex(new Vec3(v[i].x, v[i].y, 0.0));
     }
-  
+
     /** Unused method from Object3D. */
-  
+
+    @Override
     public BoundingBox getBounds()
     {
       return null;
     }
-  
+
     /** Unused method from Object3D. */
-  
+
+    @Override
     public void setSize(double xsize, double ysize, double zsize)
     {
     }
-    
+
     /** Unused method from Object3D. */
-    
+
+    @Override
     public WireframeMesh getWireframeMesh()
     {
       return null;
     }
-  
+
     /** Unused method from Object3D. */
-  
+
+    @Override
     public Keyframe getPoseKeyframe()
     {
       return null;
     }
-  
+
     /** Unused method from Object3D. */
-  
+
+    @Override
     public void applyPoseKeyframe(Keyframe k)
     {
     }
-      
+
     /** Unused method from Mesh. */
-      
+
+    @Override
     public Vec3 [] getNormals()
     {
       return null;
     }
-  
+
     /** Unused method from Mesh. */
-    
+
+    @Override
     public Skeleton getSkeleton()
     {
       return null;
     }
-    
+
     /** Unused method from Mesh. */
-  
+
+    @Override
     public void setSkeleton(Skeleton s)
     {
     }
-    
+
     /** Unused method from Mesh. */
-    
+
+    @Override
     public MeshViewer createMeshViewer(MeshEditController controller, RowContainer options)
     {
       return null;
     }
   }
-  
+
   /** Inner class which is the controller for editing the mesh. */
-  
+
   private class UVEditController implements MeshEditController
   {
     /** Get the object being edited in this window. */
-    
+
+    @Override
     public ObjectInfo getObject()
     {
       return meshInfo;
     }
-    
-    
+
+
     /** Set the mesh being edited. */
-    
+
+    @Override
     public void setMesh(Mesh mesh)
     {
     }
-    
+
     /** This should be called whenever the object has changed. */
-    
+
+    @Override
     public void objectChanged()
     {
       UVMappingViewer.this.objectChanged();
     }
-    
+
     /** The return value has no meaning, since there is only one selection mode in this window. */
-        
+
+    @Override
     public int getSelectionMode()
     {
       return POINT_MODE;
     }
-    
+
     /** This is ignored, since there is only one selection mode in this window. */
-        
+
+    @Override
     public void setSelectionMode(int mode)
     {
     }
-    
+
     /** Get an array of flags specifying which parts of the object are selected. */
-    
+
+    @Override
     public boolean[] getSelection()
     {
       return selected;
     }
-    
+
     /** Set an array of flags specifying which parts of the object are selected.  Depending on the selection mode
         and type of object, this may correspond to vertices, faces, edges, etc. */
-    
+
+    @Override
     public void setSelection(boolean selected[])
     {
       UVMappingViewer.this.selected = selected;
@@ -635,6 +665,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Selection distance is simply 0 if the vertex is selected, and -1 otherwise. */
 
+    @Override
     public int[] getSelectionDistance()
     {
       int selectionDistance[] = new int [selected.length];
@@ -645,6 +676,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Get the mesh tension level. */
 
+    @Override
     public double getMeshTension()
     {
       return 1.0;
@@ -652,6 +684,7 @@ public class UVMappingViewer extends MeshViewer
 
     /** Get the distance over which mesh tension applies. */
 
+    @Override
     public int getTensionDistance()
     {
       return 0;

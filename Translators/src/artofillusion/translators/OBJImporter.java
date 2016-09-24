@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.translators;
@@ -87,7 +87,7 @@ public class OBJImporter
         if ("v".equals(fields[0]) && (fields.length == 4 || fields.length == 5))
         {
           // Read in a vertex.
-  
+
           for (int i = 0; i < 3; i++)
           {
             try
@@ -109,7 +109,7 @@ public class OBJImporter
         else if ("vn".equals(fields[0]) && fields.length == 4)
         {
           // Read in a vertex normal.
-  
+
           for (int i = 0; i < 3; i++)
           {
             try
@@ -127,7 +127,7 @@ public class OBJImporter
         else if ("vt".equals(fields[0]) && fields.length > 1)
         {
           // Read in a texture vertex.
-  
+
           for (int i = 0; i < 3; i++)
           {
             try
@@ -156,13 +156,13 @@ public class OBJImporter
             if (fields.length == 4)
             {
               // Add a triangular face.
-  
+
               face.get(i).addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
             }
             else
             {
               // Triangulate the outline.
-  
+
               Vec3 v[] = new Vec3[fields.length-1];
               for (int j = 0; j < v.length; j++)
                 v[j] = vertex.get(vertIndex[j].vert);
@@ -176,7 +176,7 @@ public class OBJImporter
               else
               {
                 // We couldn't triangulate it correctly, so do the best we can.
-  
+
                 int step, start;
                 for (step = 1; 2*step < vertIndex.length; step *= 2)
                 {
@@ -192,7 +192,7 @@ public class OBJImporter
         else if ("s".equals(fields[0]))
         {
           // Set the smoothing group.
-  
+
           if (fields.length == 1 || "off".equalsIgnoreCase(fields[1]))
           {
             smoothingGroup = 0;
@@ -211,7 +211,7 @@ public class OBJImporter
         else if ("g".equals(fields[0]))
         {
           // Set the current group or groups.
-  
+
           if (fields.length == 1)
             fields = new String[] {"g", "default"};
           face.setSize(fields.length-1);
@@ -228,37 +228,37 @@ public class OBJImporter
         else if ("usemtl".equals(fields[0]) && fields.length > 1)
         {
           // Set the current texture.
-  
+
           currentTexture = fields[1];
         }
         else if ("mtllib".equals(fields[0]))
         {
           // Load one or more texture libraries.
-  
+
           for (int i = 1; i < fields.length; i++)
             parseTextures(fields[i], directory, textureTable);
         }
       }
-  
+
       // If no mtl file was specified, but there is one with the same name is the obj file,
       // go ahead and load it.
-  
-      if (textureTable.size() == 0)
+
+      if (textureTable.isEmpty())
       {
         File defaultMtl = new File(directory, objName+".mtl");
         if (defaultMtl.isFile())
           parseTextures(objName+".mtl", directory, textureTable);
       }
-  
+
       // If necessary, rescale the vertices to make the object an appropriate size.
-  
+
       double maxSize = Math.max(Math.max(max[0]-min[0], max[1]-min[1]), max[2]-min[2]);
       double scale = Math.pow(10.0, -Math.floor(Math.log(maxSize)/Math.log(10.0)));
       for (int i = 0; i < vertex.size(); i++)
         vertex.elementAt(i).scale(scale);
-  
+
       // Create a triangle mesh for each group.
-  
+
       Enumeration<String> keys = groupTable.keys();
       Hashtable<String, Texture> realizedTextures = new Hashtable<String, Texture>();
       Hashtable<String, ImageMap> imageMaps = new Hashtable<String, ImageMap>();
@@ -266,11 +266,11 @@ public class OBJImporter
       {
         String group = keys.nextElement();
         Vector<FaceInfo> groupFaces = groupTable.get(group);
-        if (groupFaces.size() == 0)
+        if (groupFaces.isEmpty())
           continue;
-  
+
         // Find which vertices are used by faces in this group.
-  
+
         int realIndex[] = new int [vertex.size()];
         for (int i = 0; i < realIndex.length; i++)
           realIndex[i] = -1;
@@ -283,9 +283,9 @@ public class OBJImporter
               realIndex[fi.getVertex(j).vert] = numVert++;
           fc[i] = new int [] {realIndex[fi.v1.vert], realIndex[fi.v2.vert], realIndex[fi.v3.vert]};
         }
-  
+
         // Build the list of vertices and center them.
-  
+
         Vec3 vert[] = new Vec3 [numVert], center = new Vec3();
         for (int i = 0; i < realIndex.length; i++)
           if (realIndex[i] > -1)
@@ -300,9 +300,9 @@ public class OBJImporter
         info = new ObjectInfo(new TriangleMesh(vert, fc), coords, ("default".equals(group) ? objName : group));
         info.addTrack(new PositionTrack(info), 0);
         info.addTrack(new RotationTrack(info), 1);
-  
+
         // Find the smoothness values for the edges.
-  
+
         TriangleMesh.Edge edge[] = ((TriangleMesh) info.getObject()).getEdges();
         for (int i = 0; i < edge.length; i++)
         {
@@ -313,13 +313,13 @@ public class OBJImporter
           if (f1.smoothingGroup == 0 || f1.smoothingGroup != f2.smoothingGroup)
           {
             // They are in different smoothing groups.
-  
+
             edge[i].smoothness = 0.0f;
             continue;
           }
-  
+
           // Find matching vertices and compare their normals.
-  
+
           for (int j = 0; j < 3; j++)
             for (int k = 0; k < 3; k++)
               if (f1.getVertex(j).vert == f2.getVertex(k).vert)
@@ -331,16 +331,16 @@ public class OBJImporter
                 break;
               }
         }
-  
+
         // Set the texture.  Begin by finding all textures used by the group.
-  
+
         HashSet<String> texNames = new HashSet<String>();
         for (FaceInfo faceInfo : groupFaces)
           if (faceInfo.texture != null)
             texNames.add(faceInfo.texture);
-  
+
         // If multiple textures are needed, create a layered texture.
-  
+
         LayeredMapping layered = null;
         if (texNames.size() > 1)
         {
@@ -348,9 +348,9 @@ public class OBJImporter
           layered = (LayeredMapping) tex.getDefaultMapping(info.getObject());
           info.setTexture(tex, layered);
         }
-  
+
         // Now create all the textures.
-  
+
         for (String texName : texNames)
         {
           Texture tex = realizedTextures.get(texName);
@@ -362,7 +362,7 @@ public class OBJImporter
           if (tex instanceof Texture2D)
           {
             // Set the UV coordinates.
-  
+
             UVMapping map = new UVMapping(info.getObject(), tex);
             if (layered == null)
               info.setTexture(tex, map);
@@ -397,7 +397,7 @@ public class OBJImporter
             {
               // Different faces have different texture coordinates for the same vertex,
               // so we need to use per-face-vertex coordinates.
-  
+
               Vec2 uvf[][] = new Vec2 [groupFaces.size()][3];
               for (int j = 0; j < groupFaces.size(); j++)
               {
@@ -426,10 +426,10 @@ public class OBJImporter
               info.setTexture(layered.getTexture(), layered);
             }
           }
-  
+
           // If we are using a layered texture, set a parameter defining what layer to use
           // for each face.
-  
+
           if (layered != null)
           {
             double paramValue[] = new double[groupFaces.size()];
@@ -474,24 +474,24 @@ public class OBJImporter
       new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
     }
   }
-  
+
   /** Separate a line into pieces divided by whitespace. */
-  
+
   private static String [] breakLine(String line)
   {
     StringTokenizer st = new StringTokenizer(line);
     Vector<String> v = new Vector<String>();
-    
+
     while (st.hasMoreTokens())
       v.addElement(st.nextToken());
     String result[] = new String [v.size()];
     v.copyInto(result);
     return result;
   }
-  
+
   /** Parse the specification for a vertex and return the index of the vertex
       to use. */
-  
+
   private static VertexInfo parseVertexSpec(String spec, Vector vertex, Vector texture, Vector normal, int lineno) throws Exception
   {
     VertexInfo info = new VertexInfo();
@@ -538,9 +538,9 @@ public class OBJImporter
       info.norm = info.vert;
     return info;
   }
-  
+
   /** Parse the contents of a .mtl file and add TextureInfo object to a hashtable. */
-  
+
   private static void parseTextures(String file, File baseDir, Hashtable<String, TextureInfo> textures) throws Exception
   {
     File f = new File(baseDir, file);
@@ -566,7 +566,7 @@ public class OBJImporter
             if ("newmtl".equals(fields[0]))
               {
                 // This is the start of a new texture.
-                
+
                 currentTexture = null;
                 if (fields.length == 1 || textures.get(fields[1]) != null)
                   continue;
@@ -604,9 +604,9 @@ public class OBJImporter
       }
     in.close();
   }
-  
+
   /** Create a texture from a TextureInfo and add it to the scene. */
-  
+
   private static Texture createTexture(TextureInfo info, String name, Scene scene, File baseDir, Hashtable<String, ImageMap> imageMaps) throws Exception
   {
     if (info == null)
@@ -629,7 +629,7 @@ public class OBJImporter
     if (diffuseMap == null && specularMap == null && transparentMap == null && bumpMap == null)
       {
         // Create a uniform texture.
-        
+
         UniformTexture tex = new UniformTexture();
         tex.diffuseColor = info.diffuse.duplicate();
         tex.specularColor = info.specular.duplicate();
@@ -668,9 +668,9 @@ public class OBJImporter
         return tex;
       }
   }
-  
+
   /** Return the image map corresponding to the specified filename, and add it to the scene. */
-  
+
   private static ImageMap loadMap(String name, Scene scene, File baseDir, Hashtable<String, ImageMap> imageMaps) throws Exception
   {
     if (name == null)
@@ -695,9 +695,9 @@ public class OBJImporter
     imageMaps.put(name, map);
     return map;
   }
-  
+
   /** Parse the specification for a color. */
-  
+
   private static RGBColor parseColor(String fields[]) throws NumberFormatException
   {
     if (fields.length < 4)
@@ -706,22 +706,22 @@ public class OBJImporter
         Double.parseDouble(fields[2]),
         Double.parseDouble(fields[3]));
   }
-  
+
   /** Inner class for storing information about a vertex of a face. */
-  
+
   private static class VertexInfo
   {
     public int vert, norm, tex;
   }
-  
+
   /** Inner class for storing information about a face. */
-  
+
   private static class FaceInfo
   {
     public VertexInfo v1, v2, v3;
     public int smoothingGroup;
     public String texture;
-    
+
     public FaceInfo(VertexInfo v1, VertexInfo v2, VertexInfo v3, int smoothingGroup, String texture)
     {
       this.v1 = v1;
@@ -730,7 +730,7 @@ public class OBJImporter
       this.smoothingGroup = smoothingGroup;
       this.texture = texture;
     }
-    
+
     public VertexInfo getVertex(int which)
     {
       switch (which)
@@ -741,18 +741,18 @@ public class OBJImporter
         }
     }
   }
-  
+
   /** Inner class for storing information about a texture in a .mtl file. */
-  
+
   private static class TextureInfo
   {
     public RGBColor ambient, diffuse, specular;
     public double shininess, transparency, specularity, roughness;
     public String ambientMap, diffuseMap, specularMap, transparentMap, bumpMap;
-    
+
     /** This should be called once, after the TextureInfo is created but before it is actually used.  It converts from the
         representation used by .obj files to the one used by Art of Illusion. */
-        
+
     public void resolveColors()
     {
       if (diffuse == null)
@@ -777,9 +777,9 @@ public class OBJImporter
       checkColorRange(diffuse);
       checkColorRange(specular);
     }
-    
+
     /** Make sure that the components of a color are all between 0 and 1. */
-    
+
     private void checkColorRange(RGBColor c)
     {
       float r = c.getRed(), g = c.getGreen(), b = c.getBlue();

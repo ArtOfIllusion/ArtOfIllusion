@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.translators;
@@ -17,26 +17,31 @@ import buoy.widget.*;
 
 public class OBJTranslator implements Translator
 {
+  @Override
   public String getName()
   {
     return "Wavefront (.obj)";
   }
 
+  @Override
   public boolean canImport()
   {
     return true;
   }
-  
+
+  @Override
   public boolean canExport()
   {
     return true;
   }
-  
+
+  @Override
   public void importFile(BFrame parent)
   {
     OBJImporter.importFile(parent);
   }
-  
+
+  @Override
   public void exportFile(BFrame parent, Scene theScene)
   {
     OBJExporter.exportFile(parent, theScene);

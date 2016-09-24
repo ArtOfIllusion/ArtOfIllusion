@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -25,14 +25,15 @@ public class CommentModule extends Module
   {
     this(position, "Double-click to set comment");
   }
-  
-  public CommentModule(Point position, String text) 
-  { 
-    super(text, new IOPort [] {}, new IOPort [] {}, position); 
+
+  public CommentModule(Point position, String text)
+  {
+    super(text, new IOPort [] {}, new IOPort [] {}, position);
   }
 
   /** Allow the user to edit the comment text. */
-  
+
+  @Override
   public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     BTextArea ta = new BTextArea(name, 10, 40);
@@ -43,9 +44,10 @@ public class CommentModule extends Module
     layout();
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     CommentModule mod = new CommentModule(new Point(bounds.x, bounds.y), name);
@@ -54,21 +56,24 @@ public class CommentModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeUTF(name);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     name = in.readUTF();
     layout();
   }
-  
+
   /** Calculate the size on the screen of this module.  */
-  
+
+  @Override
   public void calcSize()
   {
     String lines[] = name.split("\n");
@@ -82,9 +87,10 @@ public class CommentModule extends Module
     bounds.width += IOPort.SIZE*4;
     bounds.height = lines.length*(defaultMetrics.getMaxAscent()+defaultMetrics.getMaxDescent())+IOPort.SIZE*4;
   }
-  
+
   /** Draw the contents of the module. */
-  
+
+  @Override
   protected void drawContents(Graphics2D g)
   {
     g.setColor(Color.black);

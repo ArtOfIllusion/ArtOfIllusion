@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by François Guillet
+/* Copyright (C) 2007 by FranÔøΩois Guillet
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +20,7 @@ import java.util.HashMap;
 /**
  * This ToolButton is the classic button with one icon for standard representation
  * and another one for selected state.
- * 
+ *
  * @author Francois Guillet
  *
  */
@@ -103,6 +103,7 @@ public class DefaultToolButton extends ToolButton
         width = icon.getIconWidth();
     }
 
+    @Override
     public void paint(Graphics2D g) {
         switch(state) {
         case NORMAL_STATE:

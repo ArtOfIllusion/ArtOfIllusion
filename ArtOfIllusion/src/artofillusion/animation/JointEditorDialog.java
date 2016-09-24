@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -41,7 +41,7 @@ public class JointEditorDialog extends BDialog
     oldMesh = ((Object3D) theMesh).duplicate();
     skeleton = theMesh.getSkeleton();
     joint = skeleton.getJoint(jointID);
-    
+
     // Layout the dialog.
 
     BorderContainer content = new BorderContainer();
@@ -70,12 +70,12 @@ public class JointEditorDialog extends BDialog
     pack();
     setVisible(true);
   }
-  
+
   private Widget makeBorder(Widget w)
   {
     return BOutline.createBevelBorder(BOutline.createEmptyBorder(w, 4), false);
   }
-  
+
   private void doOk()
   {
     valueChanged();
@@ -83,7 +83,7 @@ public class JointEditorDialog extends BDialog
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, oldMesh}));
     dispose();
   }
-  
+
   private void doCancel()
   {
     ((Object3D) theMesh).copyObject(oldMesh);
@@ -91,9 +91,9 @@ public class JointEditorDialog extends BDialog
     window.updateImage();
     dispose();
   }
-  
+
   /** This method is called when any of the values in the ValueFields is changed. */
-  
+
   private void valueChanged()
   {
     boolean ok = (ang1Panel.isValid() && ang2Panel.isValid() && twistPanel.isValid() && lengthPanel.isValid());
@@ -112,7 +112,7 @@ public class JointEditorDialog extends BDialog
   }
 
   /** Inner class representing a panel for editing a single degree of freedom. */
-  
+
   private class DOFPanel extends FormContainer
   {
     public ValueField valField, minField, maxField, minComfortField, maxComfortField;
@@ -121,7 +121,7 @@ public class JointEditorDialog extends BDialog
     public double min, max;
     public DOF dof;
     private DOFGraph graph;
-    
+
     public DOFPanel(String name, double min, double max, DOF dof)
     {
       super(3, 7);
@@ -130,13 +130,14 @@ public class JointEditorDialog extends BDialog
       this.dof = dof;
 
       // Create the components for the panel.
-      
+
       valField = new ValueField(dof.pos, ValueField.NONE, 5);
       minField = new ValueField(dof.min, ValueField.NONE, 5);
       maxField = new ValueField(dof.max == Double.MAX_VALUE ? Double.NaN : dof.max, ValueField.NONE, 5);
       minComfortField = new ValueField(dof.minComfort, ValueField.NONE, 5);
       maxComfortField = new ValueField(dof.maxComfort == Double.MAX_VALUE ? Double.NaN : dof.maxComfort, ValueField.NONE, 5);
       valField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           double lower = (rangeBox.getState() ? minField.getValue() : DOFPanel.this.min);
@@ -145,6 +146,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       minField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!rangeBox.getState())
@@ -155,6 +157,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       maxField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!rangeBox.getState())
@@ -165,6 +168,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       minComfortField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!comfortBox.getState() || !rangeBox.getState())
@@ -175,6 +179,7 @@ public class JointEditorDialog extends BDialog
         }
       } );
       maxComfortField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           if (!comfortBox.getState() || !rangeBox.getState())
@@ -214,9 +219,9 @@ public class JointEditorDialog extends BDialog
       fixedBox.addEventLink(ValueChangedEvent.class, this, "checkboxChanged");
       rangeBox.addEventLink(ValueChangedEvent.class, this, "checkboxChanged");
       comfortBox.addEventLink(ValueChangedEvent.class, this, "checkboxChanged");
-      
+
       // Lay them out.
-      
+
       add(new BLabel(name), 0, 0);
       add(valField, 1, 0);
       add(fixedBox, 2, 0);
@@ -232,9 +237,9 @@ public class JointEditorDialog extends BDialog
       add(stiffnessSlider, 0, 6, 3, 1);
       updateComponents();
     }
-    
+
     /* Update the states of the various components. */
-    
+
     public void updateComponents()
     {
       boolean fixed = fixedBox.getState();
@@ -254,9 +259,9 @@ public class JointEditorDialog extends BDialog
       rangeBox.setEnabled(!fixed);
       comfortBox.setEnabled(range);
     }
-    
+
     /* Respond to clicks on the checkboxes. */
-    
+
     private void checkboxChanged(WidgetEvent ev)
     {
       if (ev.getWidget() == comfortBox && comfortBox.getState())
@@ -276,19 +281,19 @@ public class JointEditorDialog extends BDialog
         graph.repaint();
       valueChanged();
     }
-    
+
     /** Determine whether the values entered in the fields are all valid. */
-    
+
     public boolean isValid()
     {
       if (fixedBox.getState())
         return true;
-      return (valField.isValid(valField.getValue()) && minField.isValid(minField.getValue()) && maxField.isValid(maxField.getValue()) && 
+      return (valField.isValid(valField.getValue()) && minField.isValid(minField.getValue()) && maxField.isValid(maxField.getValue()) &&
         minComfortField.isValid(minComfortField.getValue()) && maxComfortField.isValid(maxComfortField.getValue()));
     }
-    
+
     /** Copy the entered values into the DOF object. */
-    
+
     public void recordValues()
     {
       dof.fixed = fixedBox.getState();
@@ -314,9 +319,10 @@ public class JointEditorDialog extends BDialog
       dof.comfort = (range && comfortBox.getState());
       dof.loop = ((max-min == 360.0) && (!range || (dof.max-dof.min == 360.0)));
     }
-    
+
     /** Set the enabled state of every component in this panel. */
-    
+
+    @Override
     public void setEnabled(boolean enabled)
     {
       super.setEnabled(enabled);
@@ -324,9 +330,9 @@ public class JointEditorDialog extends BDialog
       while (child.hasNext())
         ((Widget) child.next()).setEnabled(enabled);
     }
-    
+
     /** Get a graph showing the values for this panel. */
-    
+
     public DOFGraph getGraph()
     {
       if (graph == null)
@@ -334,17 +340,17 @@ public class JointEditorDialog extends BDialog
       return graph;
     }
   }
-  
+
   /** Inner class which draws the circular diagram representing the range of motion for
       a degree of freedom. */
-  
+
   private class DOFGraph extends CustomWidget
   {
     private DOFPanel panel;
     private int dragging;
     private double lastAngle;
     private ActionProcessor process;
-    
+
     private static final int SIZE = 64;
     private static final int RADIUS1 = 64;
     private static final int RADIUS2 = 58;
@@ -353,7 +359,7 @@ public class JointEditorDialog extends BDialog
     private static final int OFFSET1 = (SIZE-RADIUS1+HANDLE_SIZE)/2;
     private static final int OFFSET2 = (SIZE-RADIUS2+HANDLE_SIZE)/2;
     private static final int OFFSET3 = (SIZE-RADIUS3+HANDLE_SIZE)/2;
-    
+
     public DOFGraph(DOFPanel dp)
     {
       panel = dp;
@@ -364,7 +370,7 @@ public class JointEditorDialog extends BDialog
       addEventLink(RepaintEvent.class, this, "paint");
       setPreferredSize(new Dimension(SIZE+2*OFFSET1, SIZE+2*OFFSET1));
     }
-    
+
     private void mousePressed(MousePressedEvent ev)
     {
       process = new ActionProcessor();
@@ -400,7 +406,7 @@ public class JointEditorDialog extends BDialog
       if (dragging > -1)
         disableUpdating = true;
     }
-    
+
     private void mouseReleased(MouseReleasedEvent ev)
     {
       if (process != null)
@@ -409,19 +415,20 @@ public class JointEditorDialog extends BDialog
       dragging = -1;
       disableUpdating = false;
     }
-    
+
     private void mouseDragged(final MouseDraggedEvent ev)
     {
       process.addEvent(new Runnable() {
+        @Override
         public void run()
         {
           dealWithDrag(ev);
         }
       });
     }
-    
+
     /* Deal with a mouse dragged event. */
-    
+
     private void dealWithDrag(MouseDraggedEvent ev)
     {
       if (dragging == -1)
@@ -471,14 +478,14 @@ public class JointEditorDialog extends BDialog
       repaint();
       valueChanged();
     }
-    
+
     private void paint(RepaintEvent ev)
     {
       Graphics g = ev.getGraphics();
       if (panel.fixedBox.getState())
       {
         // The angle is fixed, so just draw a line where it is.
-        
+
         g.setColor(Color.lightGray);
         g.fillOval(0, 0, SIZE+OFFSET1, SIZE+OFFSET1);
         g.setColor(Color.black);
@@ -486,9 +493,9 @@ public class JointEditorDialog extends BDialog
         g.drawLine(SIZE/2+OFFSET1, SIZE/2+OFFSET1, p.x, p.y);
         return;
       }
-      
+
       // Draw the various arcs.
-      
+
       g.setColor(Color.white);
       g.fillOval(OFFSET1, OFFSET1, RADIUS1, RADIUS1);
       int min = (int) (panel.rangeBox.getState() ? panel.minField.getValue() : panel.min);
@@ -507,9 +514,9 @@ public class JointEditorDialog extends BDialog
         g.setColor(Color.black);
       }
       g.drawOval(OFFSET1, OFFSET1, RADIUS1, RADIUS1);
-      
+
       // Draw a line marking the current position, and handles for any draggable points.
-      
+
       Point p = getAnglePosition(panel.valField.getValue(), RADIUS1);
       g.drawLine(SIZE/2+OFFSET1, SIZE/2+OFFSET1, p.x, p.y);
       g.fillRect(p.x-OFFSET1, p.y-OFFSET1, HANDLE_SIZE, HANDLE_SIZE);
@@ -528,20 +535,20 @@ public class JointEditorDialog extends BDialog
         g.fillRect(p.x-OFFSET1, p.y-OFFSET1, HANDLE_SIZE, HANDLE_SIZE);
       }
     }
-    
+
     /* Find the point on the circumference corresponding to a particular angle. */
-    
+
     private Point getAnglePosition(double angle, int radius)
     {
-      return new Point((int) (0.5*(RADIUS1+radius*Math.sin(angle*Math.PI/180.0)))+OFFSET1, 
+      return new Point((int) (0.5*(RADIUS1+radius*Math.sin(angle*Math.PI/180.0)))+OFFSET1,
         (int) (0.5*(RADIUS1-radius*Math.cos(angle*Math.PI/180.0)))+OFFSET1);
     }
-    
+
     /* Return true if the second point is within the required distance of the first point. */
-    
+
     public boolean clicked(Point clickPos, Point targetPos)
     {
-      return (clickPos.x >= targetPos.x-OFFSET1 && clickPos.x <= targetPos.x+OFFSET1 && 
+      return (clickPos.x >= targetPos.x-OFFSET1 && clickPos.x <= targetPos.x+OFFSET1 &&
         clickPos.y >= targetPos.y-OFFSET1 && clickPos.y <= targetPos.y+OFFSET1);
     }
   }

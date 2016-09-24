@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -15,9 +15,9 @@ import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
 
-/** RTDisplacedTriangle represents a displacement mapped triangle to be raytraced.  It is 
+/** RTDisplacedTriangle represents a displacement mapped triangle to be raytraced.  It is
     defined by specifying a
-    RenderingMesh, the index of the RenderingTriangle within the mesh, and a matrix which 
+    RenderingMesh, the index of the RenderingTriangle within the mesh, and a matrix which
     gives the transformation from the mesh's local coordinates to world coordinates.  To
     save time and memory, the constructor is also passed two arrays which contain the
     vertices and normals for the mesh, transformed into world coordinates. */
@@ -38,7 +38,7 @@ public class RTDisplacedTriangle extends RTObject
    * Putting them in a separate object saves memory on triangles that never get hit by a ray (and hence
    * never get initialized).
    */
-  
+
   private static class ExtraInfo
   {
     Mat4 trans;
@@ -50,7 +50,7 @@ public class RTDisplacedTriangle extends RTObject
     double dn1x, dn1y, dn2x, dn2y;
     double minscale, maxscale;
   }
-  
+
   public RTDisplacedTriangle(RenderingMesh mesh, int which, Mat4 fromLocal, Mat4 toLocal, double tol, double time)
   {
     tri = mesh.triangle[which];
@@ -73,7 +73,7 @@ public class RTDisplacedTriangle extends RTObject
     if (trueNorm.dot(norm3) < 0.0) i++;
     if (i > 1)
       trueNorm.scale(-1.0);
-    
+
     // Evaluate the displacement at many points over the triangle.  Use this to determine
     // the maximum and minimum displacements, as well as a bounding box for the object.
 
@@ -82,7 +82,7 @@ public class RTDisplacedTriangle extends RTObject
     bounds = new BoundingBox(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     bounds.minx = bounds.miny = bounds.minz = Double.MAX_VALUE;
     bounds.maxx = bounds.maxy = bounds.maxz = -Double.MAX_VALUE;
-    double d = 2.0*Math.max(Math.max(vert1.minus(vert2).length2(), vert1.minus(vert3).length2()), 
+    double d = 2.0*Math.max(Math.max(vert1.minus(vert2).length2(), vert1.minus(vert3).length2()),
         vert2.minus(vert3).length2());
     int j, divisions = FastMath.ceil(Math.sqrt(d)/tol);
     if (divisions > 499)
@@ -125,19 +125,19 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether this triangle is really displaced.  If the displacement map is completely flat
       over it, return false.  Otherwise, return true. */
-  
+
   public boolean isReallyDisplaced()
   {
     return (minheight != 0.0 || maxheight != 0.0);
   }
-  
+
   /** Set the tolerance which should be used for evaluating the surface. */
-  
+
   public void setTolerance(double tol)
   {
     this.tol = tol;
   }
-  
+
   /** Part of the initialization is done lazily to save time and memory, since some triangles may never
       be hit by any ray. */
 
@@ -146,18 +146,18 @@ public class RTDisplacedTriangle extends RTObject
     if (extraInfo != null)
       return;
     ExtraInfo ex = new ExtraInfo();
-    
+
     // Determine a coordinate transformation which places the triangle in the xy plane, with
     // vertex 3 at the origin and vertex 2 on the y axis.
-    
+
     Vec3 vert[] = tri.theMesh.vert;
     Vec3 vert1 = vert[tri.v1];
     Vec3 vert2 = vert[tri.v2];
     Vec3 vert3 = vert[tri.v3];
     ex.trans = Mat4.viewTransform(vert3, trueNorm, vert2.minus(vert3));
-    
+
     // Find the vertex positions and normals in the coordinate system described above.
-    
+
     Vec3 v1 = ex.trans.times(vert1);
     Vec3 v2 = ex.trans.times(vert2);
     ex.v1x = v1.x;
@@ -179,7 +179,7 @@ public class RTDisplacedTriangle extends RTObject
 
     // Find the bounding box of the volume swept out by the triangle, in the coordinate
     // system described above.
-    
+
     Vec3 pos[] = new Vec3 [6];
     double scale1 = 1.0/norm[tri.n1].dot(trueNorm);
     if (Double.isInfinite(scale1))
@@ -216,7 +216,7 @@ public class RTDisplacedTriangle extends RTObject
     ex.bounds2 = bounds2;
 
     // Create various other objects which will be needed.
-    
+
     ex.dn1x = n1.x-n3.x;
     ex.dn1y = n1.y-n3.y;
     ex.dn2x = n2.x-n3.x;
@@ -227,14 +227,16 @@ public class RTDisplacedTriangle extends RTObject
   }
 
   /** Get the TextureMapping for this object. */
-  
+
+  @Override
   public final TextureMapping getTextureMapping()
   {
     return tri.getTextureMapping();
   }
 
   /** Get the MaterialMapping for this object. */
-  
+
+  @Override
   public final MaterialMapping getMaterialMapping()
   {
     return tri.theMesh.matMapping;
@@ -242,6 +244,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether the given ray intersects this triangle. */
 
+  @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
     DisplacedTriangleIntersection dti = (DisplacedTriangleIntersection) r.rt.rtDispTriPool.getObject();
@@ -266,9 +269,9 @@ public class RTDisplacedTriangle extends RTObject
       mint = dti.mint;
     if (maxt > dti.maxt)
       maxt = dti.maxt;
-    
+
     // See if the ray is entirely outside the triangle.
-    
+
     if (mint < 0.0)
       mint = 0.0;
     double x, y, z;
@@ -335,7 +338,7 @@ public class RTDisplacedTriangle extends RTObject
         if ((outsideU && wasOutsideU) || (outsideV && wasOutsideV) || (outsideW && wasOutsideW))
           {
             // The ray is currently outside the triangle.
-            
+
             above = (z > height);
             prevDelta = z-height;
             prevt = t;
@@ -347,13 +350,13 @@ public class RTDisplacedTriangle extends RTObject
         if ((above && z <= height) || (!above && z >= height))
           {
             // The ray intersects the surface.
-            
+
             double truet = t-(t-prevt)*(z-height)/(z-height-prevDelta);
             if (truet <= tol)
               {
                 // Ignore intersections too close to the ray origin to prevent the surface from
                 // shadowing itself.
-                
+
                 above = (z > height);
                 prevDelta = z-height;
                 prevt = t;
@@ -383,14 +386,14 @@ public class RTDisplacedTriangle extends RTObject
       }
     if (dti.tint[0] == Double.MAX_VALUE)
       return SurfaceIntersection.NO_INTERSECTION;
-    
+
     // Find the point of intersection.
-    
+
     disp = tri.getDisplacement(u, v, w, tol, time);
     dti.rint[0].set(r.origin.x+dti.tint[0]*r.direction.x, r.origin.y+dti.tint[0]*r.direction.y, r.origin.z+dti.tint[0]*r.direction.z);
 
     // Calculate the derivates of the displacement function.
-    
+
     double dhdu = (tri.getDisplacement(u+(1e-5), v, w-(1e-5), tol, time)-disp)*1e5;
     double dhdv = (tri.getDisplacement(u, v+(1e-5), w-(1e-5), tol, time)-disp)*1e5;
 
@@ -448,10 +451,10 @@ public class RTDisplacedTriangle extends RTObject
     dti.v = fract*va + fract2*dti.v;
     dti.w = fract*wa + fract2*dti.w;
   }
-  
+
   /** Given the coordinates of a point along the ray, and a guess about the displacement h,
       find the corresponding guesses about u, v, and w. */
-  
+
   private void guessCoords(DisplacedTriangleIntersection dti, double x, double y, double disp)
   {
     ExtraInfo extra = extraInfo;
@@ -468,7 +471,8 @@ public class RTDisplacedTriangle extends RTObject
   }
 
   /** Get a bounding box for this triangle. */
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -476,6 +480,7 @@ public class RTDisplacedTriangle extends RTObject
 
   /** Determine whether any part of the triangle lies within a bounding box. */
 
+  @Override
   public boolean intersectsNode(OctreeNode node)
   {
     if (!node.intersects(bounds))
@@ -595,10 +600,10 @@ public class RTDisplacedTriangle extends RTObject
       return true;
     return false;
   }
-  
+
   /** Determine whether a ray intersects the bounding box.  If so, return true and set mint and
       maxt to the points where the ray enters and exits the box. */
-  
+
   private static boolean rayIntersectsBounds(Vec3 origin, Vec3 direction, BoundingBox bb, DisplacedTriangleIntersection dti)
   {
     double t1, t2;
@@ -686,16 +691,18 @@ public class RTDisplacedTriangle extends RTObject
     dti.maxt = maxt;
     return true;
   }
-  
+
   /** Get the transformation from world coordinates to the object's local coordinates. */
-  
+
+  @Override
   public Mat4 toLocal()
   {
     return toLocal;
   }
-  
+
   /** Get the mesh this triangle is part of. */
-  
+
+  @Override
   public Object getObject()
   {
     return tri.theMesh;
@@ -714,6 +721,7 @@ public class RTDisplacedTriangle extends RTObject
     public short numIntersections;
     public Ray ray;
 
+    @Override
     public RTObject getObject()
     {
       return rtTri;
@@ -738,6 +746,7 @@ public class RTDisplacedTriangle extends RTObject
       dir.set(r.direction);
     }
 
+    @Override
     public int numIntersections()
     {
       if (numIntersections == -1)
@@ -745,16 +754,19 @@ public class RTDisplacedTriangle extends RTObject
       return numIntersections;
     }
 
+    @Override
     public void intersectionPoint(int n, Vec3 p)
     {
       p.set(rint[n]);
     }
 
+    @Override
     public double intersectionDist(int n)
     {
       return tint[n];
     }
 
+    @Override
     public void intersectionProperties(TextureSpec spec, Vec3 n, Vec3 viewDir, double size, double time)
     {
       n.set(interp);
@@ -768,11 +780,13 @@ public class RTDisplacedTriangle extends RTObject
       }
     }
 
+    @Override
     public void intersectionTransparency(int n, RGBColor trans, double angle, double size, double time)
     {
       rtTri.tri.getTransparency(trans, angle, uint[n], vint[n], 1.0-uint[0]-vint[0], size, time);
     }
 
+    @Override
     public void trueNormal(Vec3 n)
     {
       n.set(interp);

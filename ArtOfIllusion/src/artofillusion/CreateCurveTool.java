@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -41,33 +41,39 @@ public class CreateCurveTool extends EditingTool
     smoothing = Mesh.APPROXIMATING;
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCurveTool.helpText"));
   }
 
+  @Override
   public void deactivate()
   {
     super.deactivate();
     addToScene();
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createCurveTool.tipText");
   }
 
+  @Override
   public boolean hilightSelection()
   {
     return (clickPoint == null);
   }
-  
+
+  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -94,7 +100,8 @@ public class CreateCurveTool extends EditingTool
         view.drawBox((int) screenPos.x-HANDLE_SIZE/2, (int) screenPos.y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, ViewerCanvas.handleColor);
       }
   }
-  
+
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (clickPoint == null)
@@ -110,10 +117,11 @@ public class CreateCurveTool extends EditingTool
       view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), e.getPoint()));
     }
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
-    if (clickPoint.size() == 0)
+    if (clickPoint.isEmpty())
       return;
     Point dragPoint = e.getPoint();
     Vec3 pos = (Vec3) clickPoint.lastElement();
@@ -121,6 +129,7 @@ public class CreateCurveTool extends EditingTool
     view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), dragPoint));
   }
 
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     Camera cam = view.getCamera();
@@ -136,14 +145,14 @@ public class CreateCurveTool extends EditingTool
     if (clickPoint.size() > 1)
       {
         // Create a new line object.  First, find all the points in world coordinates.
-            
+
         vertex = new Vec3 [clickPoint.size()];
         s = new float [clickPoint.size()];
         orig = new Vec3();
         for (int i = 0; i < vertex.length; i++)
           {
             vertex[i] = (Vec3) clickPoint.elementAt(i);
-            s[i] = ((Float) smoothness.elementAt(i)).floatValue();
+            s[i] = smoothness.elementAt(i);
             orig = orig.plus(vertex[i]);
           }
         orig = orig.times(1.0/vertex.length);
@@ -165,7 +174,7 @@ public class CreateCurveTool extends EditingTool
         }
 
         // Transform all of the vertices into the object's coordinate system.
-            
+
         for (int i = 0; i < vertex.length; i++)
           {
             vertex[i] = coords.toLocal().times(vertex[i]);
@@ -181,9 +190,10 @@ public class CreateCurveTool extends EditingTool
       }
     theWindow.updateImage();
   }
-  
+
   /** When the user presses Enter, add the curve to the scene. */
-  
+
+  @Override
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     if (e.getKeyCode() == KeyPressedEvent.VK_ENTER && theCurve != null)
@@ -195,7 +205,7 @@ public class CreateCurveTool extends EditingTool
   }
 
   /** Add the curve to the scene. */
-  
+
   private void addToScene()
   {
     boolean addCurve = (theCurve != null);
@@ -219,6 +229,7 @@ public class CreateCurveTool extends EditingTool
       theWindow.updateImage();
   }
 
+  @Override
   public void iconDoubleClicked()
   {
     BComboBox smoothingChoice = new BComboBox(new String [] {

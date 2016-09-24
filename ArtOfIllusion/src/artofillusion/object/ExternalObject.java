@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -26,12 +26,12 @@ public class ExternalObject extends ObjectWrapper
   private String objectName;
   private String loadingError;
   private boolean includeChildren;
-  
+
   /** Create an ExternalObject from a file.
       @param file    the scene file containing the object
       @param name    the name of the object to load
   */
-  
+
   public ExternalObject(File file, String name)
   {
     externalFile = file;
@@ -39,23 +39,23 @@ public class ExternalObject extends ObjectWrapper
     theObject = new NullObject();
     includeChildren = true;
   }
-  
+
   /** This constructor is used internally. */
-  
+
   private ExternalObject()
   {
     theObject = new NullObject();
   }
-  
+
   /** Get the name of the object in the external scene. */
-  
+
   public String getExternalObjectName()
   {
     return objectName;
   }
-  
+
   /** Set the name of the object in the external scene. */
-  
+
   public void setExternalObjectName(String name)
   {
     objectName = name;
@@ -90,29 +90,29 @@ public class ExternalObject extends ObjectWrapper
   }
 
   /** Get the path to the external scene file. */
-  
+
   public File getExternalSceneFile()
   {
     return externalFile;
   }
-  
+
   /** Set the path to the external scene file. */
-  
+
   public void setExternalSceneFile(File file)
   {
     externalFile = file;
   }
-  
+
   /** Get an error message which describes why the object could not be loaded, or null
       if it was loaded successfully. */
-  
+
   public String getLoadingError()
   {
     return loadingError;
   }
-  
+
   /** Reload the external object from its file. */
-  
+
   public void reloadObject()
   {
     theObject = new NullObject();
@@ -158,7 +158,7 @@ public class ExternalObject extends ObjectWrapper
     catch (Exception ex)
     {
       // If anything goes wrong, use a null object and return an error message.
-      
+
       ex.printStackTrace();
       loadingError = ex.getMessage();
     }
@@ -173,9 +173,10 @@ public class ExternalObject extends ObjectWrapper
     for (ObjectInfo child : obj.getChildren())
       addObjectsToList(child, allObjects, transform);
   }
-  
+
   /** Create a new object which is an exact duplicate of this one. */
-  
+
+  @Override
   public Object3D duplicate()
   {
     ExternalObject obj = new ExternalObject();
@@ -185,10 +186,11 @@ public class ExternalObject extends ObjectWrapper
     obj.includeChildren = includeChildren;
     return obj;
   }
-  
+
   /** Copy all the properties of another object, to make this one identical to it.  If the
       two objects are of different classes, this will throw a ClassCastException. */
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     ExternalObject eo = (ExternalObject) obj;
@@ -200,18 +202,21 @@ public class ExternalObject extends ObjectWrapper
 
   /** ExternalObjects cannot be resized, since they are entirely defined by a separate file. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
-  
+
   /** If the object can be edited by the user, isEditable() should be overridden to return true.
       edit() should then create a window and allow the user to edit the object. */
-  
+
+  @Override
   public boolean isEditable()
   {
     return true;
   }
-  
+
+  @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ExternalObjectEditingWindow(parent, this, info, cb);
@@ -220,30 +225,34 @@ public class ExternalObject extends ObjectWrapper
   /** This method tells whether textures can be assigned to the object.  Objects for which
       it makes no sense to assign a texture (curves, lights, etc.) should override this
       method to return false. */
-  
+
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
-  
+
   /** This method tells whether materials can be assigned to the object.  The default
       implementation will give the correct result for most objects, but subclasses
       can override this if necessary. */
-  
+
+  @Override
   public boolean canSetMaterial()
   {
     return false;
   }
-  
+
   /** Determine whether the user should be allowed to convert this object to an Actor. */
-  
+
+  @Override
   public boolean canConvertToActor()
   {
     return false;
   }
 
   /** The following method writes the object's data to an output stream. */
-  
+
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -254,9 +263,9 @@ public class ExternalObject extends ObjectWrapper
     out.writeInt(objectId);
     out.writeBoolean(includeChildren);
   }
-  
+
   /** Find the relative path from the scene file containing this object to the external scene. */
-  
+
   private String findRelativePath(Scene theScene)
   {
     String scenePath = null, externalPath = null;
@@ -268,12 +277,12 @@ public class ExternalObject extends ObjectWrapper
     catch (IOException ex)
     {
       // We couldn't get the canonical name for one of the files.
-      
+
       return "";
     }
-    
+
     // Break each path into pieces, and find how much they share in common.
-    
+
     String splitExpr = File.separator;
     if ("\\".equals(splitExpr))
       splitExpr = "\\\\";
@@ -292,9 +301,9 @@ public class ExternalObject extends ObjectWrapper
     }
     return relPath.toString();
   }
-  
+
   /** Recreate an ExternalObject by reading in the serialized representation written by writeToFile(). */
-  
+
   public ExternalObject(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     super(in, theScene);
@@ -323,30 +332,36 @@ public class ExternalObject extends ObjectWrapper
       this.objects = objects;
     }
 
+    @Override
     protected Enumeration<ObjectInfo> enumerateObjects(ObjectInfo info, boolean interactive, Scene scene)
     {
       return Collections.enumeration(objects);
     }
 
+    @Override
     public Object3D duplicate()
     {
       return new ExternalObjectCollection(objects);
     }
 
+    @Override
     public void copyObject(Object3D obj)
     {
       objects = ((ExternalObjectCollection) obj).objects;
     }
 
+    @Override
     public void setSize(double xsize, double ysize, double zsize)
     {
     }
 
+    @Override
     public Keyframe getPoseKeyframe()
     {
       return null;
     }
 
+    @Override
     public void applyPoseKeyframe(Keyframe k)
     {
     }

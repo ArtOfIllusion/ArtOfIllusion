@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -26,10 +26,11 @@ public class TubeViewer extends CurveViewer
     super(window, p);
   }
 
+  @Override
   protected void drawObject()
   {
     // First draw the surface.
-    
+
     if (showSurface)
     {
       ObjectInfo objInfo = controller.getObject();
@@ -51,7 +52,7 @@ public class TubeViewer extends CurveViewer
         renderMesh(mesh, shader, theCamera, objInfo.getObject().isClosed(), null);
       }
     }
-    
+
     // Now draw the central curve.
 
     if (showMesh)
@@ -64,9 +65,9 @@ public class TubeViewer extends CurveViewer
         renderLine(v[i].r, v[i+1].r, theCamera, lineColor);
       if (((Tube) getController().getObject().getObject()).getEndsStyle() == Tube.CLOSED_ENDS)
         renderLine(v[v.length-1].r, v[0].r, theCamera, lineColor);
-  
+
       // Draw the handles for the control points.
-  
+
       boolean selected[] = controller.getSelection();
       for (int i = 0; i < v.length; i++)
         if (!selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())

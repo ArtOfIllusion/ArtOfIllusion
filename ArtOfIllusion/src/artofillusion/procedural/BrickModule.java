@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -26,57 +26,57 @@ public class BrickModule extends Module
   double value, error, gap, offset, height, lastBlur;
   PointInfo point;
   Vec3 gradient;
-  
+
   public BrickModule(Point position)
   {
-    super(Translate.text("menu.bricksModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
+    super(Translate.text("menu.bricksModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
       new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
       position);
     gap = .1;
     offset = 0.5;
     height = 0.5;
     gradient = new Vec3();
   }
-  
+
   /** Get the brick height. */
-  
+
   public double getBrickHeight()
   {
     return height;
   }
-  
+
   /** Set the brick height. */
-  
+
   public void setBrickHeight(double h)
   {
     height = h;
   }
-  
+
   /** Get the gap between bricks. */
-  
+
   public double getGap()
   {
     return gap;
   }
-  
+
   /** Set the gap between bricks. */
-  
+
   public void setGap(double g)
   {
     gap = g;
   }
-  
+
   /** Get the offset for alternating rows. */
-  
+
   public double getOffset()
   {
     return offset;
   }
-  
+
   /** Set the offset for alternating rows. */
-  
+
   public void setOffset(double o)
   {
     offset = o;
@@ -84,14 +84,16 @@ public class BrickModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
     valueOk = gradOk = false;
   }
-  
+
   /* Calculate the average value of the function. */
 
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -113,7 +115,7 @@ public class BrickModule extends Module
       }
     double x = (linkFrom[0] == null) ? point.x : linkFrom[0].getAverageValue(linkFromIndex[0], blur);
     double y = (linkFrom[1] == null) ? hinv*point.y : hinv*linkFrom[1].getAverageValue(linkFromIndex[1], blur);
-    double z = (linkFrom[2] == null) ? point.z : linkFrom[2].getAverageValue(linkFromIndex[2], blur);    
+    double z = (linkFrom[2] == null) ? point.z : linkFrom[2].getAverageValue(linkFromIndex[2], blur);
     double d = ((FastMath.floor(y)&1) == 0 ? 0.5*offset : -0.5*offset);
     x += d;
     z += d+0.5;
@@ -157,18 +159,20 @@ public class BrickModule extends Module
       }
     return value;
   }
-  
+
   /* The error is calculated at the same time as the value. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (!valueOk || blur != lastBlur)
       getAverageValue(which, blur);
     return error;
   }
-  
+
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!valueOk || blur != lastBlur)
@@ -220,9 +224,10 @@ public class BrickModule extends Module
     gradOk = true;
     grad.set(gradient);
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, Scene theScene)
   {
     final ValueSlider heightSlider = new ValueSlider(0.0, 1.0, 100, height);
@@ -249,13 +254,14 @@ public class BrickModule extends Module
     offset = offsetSlider.getValue();
     return true;
   }
-  
+
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     BrickModule mod = new BrickModule(new Point(bounds.x, bounds.y));
-    
+
     mod.height = height;
     mod.gap = gap;
     mod.offset = offset;
@@ -264,15 +270,17 @@ public class BrickModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeDouble(height);
     out.writeDouble(gap);
     out.writeDouble(offset);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     height = in.readDouble();

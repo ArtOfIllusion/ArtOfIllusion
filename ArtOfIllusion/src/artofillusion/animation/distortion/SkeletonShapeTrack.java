@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation.distortion;
@@ -26,7 +26,7 @@ public class SkeletonShapeTrack extends Track
   private int smoothingMethod;
   private boolean useGestures;
   private WeightTrack theWeight;
-  
+
   public SkeletonShapeTrack(ObjectInfo info)
   {
     super("Skeleton Shape");
@@ -36,23 +36,24 @@ public class SkeletonShapeTrack extends Track
     useGestures = true;
     theWeight = new WeightTrack(this);
   }
-  
+
   /** Get whether to reshape the mesh based on its gestures. */
-  
+
   public boolean getUseGestures()
   {
     return useGestures;
   }
-  
+
   /** Set whether to reshape the mesh based on its gestures. */
-  
+
   public void setUseGestures(boolean use)
   {
     useGestures = use;
   }
-  
+
   /** Reshape the object based on this track. */
-  
+
+  @Override
   public void apply(double time)
   {
     SkeletonShapeKeyframe key = (SkeletonShapeKeyframe) tc.evaluate(time, smoothingMethod);
@@ -65,9 +66,10 @@ public class SkeletonShapeTrack extends Track
     if (weight > 0.0)
       info.addDistortion(new SkeletonShapeDistortion(key.getSkeleton().duplicate(), weight, actor));
   }
-  
+
   /** Create a duplicate of this track. */
-  
+
+  @Override
   public Track duplicate(Object obj)
   {
     SkeletonShapeTrack t = new SkeletonShapeTrack((ObjectInfo) obj);
@@ -80,9 +82,10 @@ public class SkeletonShapeTrack extends Track
     t.theWeight = (WeightTrack) theWeight.duplicate(t);
     return t;
   }
-  
+
   /** Make this track identical to another one. */
-  
+
+  @Override
   public void copy(Track tr)
   {
     SkeletonShapeTrack t = (SkeletonShapeTrack) tr;
@@ -94,30 +97,34 @@ public class SkeletonShapeTrack extends Track
     tc = t.tc.duplicate(info.getObject());
     theWeight = (WeightTrack) t.theWeight.duplicate(this);
   }
-  
+
   /** Get a list of all keyframe times for this track. */
-  
+
+  @Override
   public double [] getKeyTimes()
   {
     return tc.getTimes();
   }
 
   /** Get the timecourse describing this track. */
-  
+
+  @Override
   public Timecourse getTimecourse()
   {
     return tc;
   }
-  
+
   /** Set a keyframe at the specified time. */
-  
+
+  @Override
   public void setKeyframe(double time, Keyframe k, Smoothness s)
   {
     tc.addTimepoint(k, time, s);
   }
-  
+
   /** Set a keyframe at the specified time, based on the current state of the Scene. */
-  
+
+  @Override
   public Keyframe setKeyframe(double time, Scene sc)
   {
     Keyframe k = tc.evaluate(time, smoothingMethod);
@@ -130,108 +137,122 @@ public class SkeletonShapeTrack extends Track
   }
 
   /** Move a keyframe to a new time, and return its new position in the list. */
-  
+
+  @Override
   public int moveKeyframe(int which, double time)
   {
     return tc.moveTimepoint(which, time);
   }
-  
+
   /** Delete the specified keyframe. */
-  
+
+  @Override
   public void deleteKeyframe(int which)
   {
     tc.removeTimepoint(which);
   }
-  
+
   /** This track is null if it has no keyframes. */
-  
+
+  @Override
   public boolean isNullTrack()
   {
     return (tc.getTimes().length == 0);
   }
-  
+
   /** This has a single child track. */
-  
+
+  @Override
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
   }
 
   /** Determine whether this track can be added as a child of an object. */
-  
+
+  @Override
   public boolean canAcceptAsParent(Object obj)
   {
     return (obj instanceof ObjectInfo && ((ObjectInfo) obj).getSkeleton() != null);
   }
-  
+
   /** Get the parent object of this track. */
-  
+
+  @Override
   public Object getParent()
   {
     return info;
   }
-  
+
   /** Set the parent object of this track. */
-  
+
+  @Override
   public void setParent(Object obj)
   {
     info = (ObjectInfo) obj;
   }
-  
+
   /** Get the smoothing method for this track. */
-  
+
+  @Override
   public int getSmoothingMethod()
   {
     return smoothingMethod;
   }
-  
+
   /** Set the smoothing method for this track. */
-  
+
   public void setSmoothingMethod(int method)
   {
     smoothingMethod = method;
   }
-  
+
   /** Get the names of all graphable values for this track. */
-  
+
+  @Override
   public String [] getValueNames()
   {
     return new String [0];
   }
 
   /** Get the default list of graphable values (for a track which has no keyframes). */
-  
+
+  @Override
   public double [] getDefaultGraphValues()
   {
     return new double [0];
   }
-  
+
   /** Get the allowed range for graphable values.  This returns a 2D array, where elements
       [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
       the nth graphable value. */
-  
+
+  @Override
   public double[][] getValueRange()
   {
     return new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}};
   }
-  
+
   /** Get an array of any objects which this track depends on (and which therefore must
-      be updated before this track is applied). */ 
-  
+      be updated before this track is applied). */
+
+  @Override
   public ObjectInfo [] getDependencies()
   {
      return new ObjectInfo [0];
   }
-  
+
   /** Delete all references to the specified object from this track.  This is used when an
       object is deleted from the scene. */
-  
+
+  @Override
   public void deleteDependencies(ObjectInfo obj)
   {
   }
 
   /** Write a serialized representation of this track to a stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     double t[] = tc.getTimes();
@@ -247,14 +268,15 @@ public class SkeletonShapeTrack extends Track
     for (int i = 0; i < t.length; i++)
     {
       out.writeDouble(t[i]);
-      v[i].writeToStream(out); 
-      s[i].writeToStream(out); 
+      v[i].writeToStream(out);
+      s[i].writeToStream(out);
     }
     theWeight.writeToStream(out, scene);
   }
-  
+
   /** Initialize this tracked based on its serialized representation as written by writeToStream(). */
-  
+
+  @Override
   public void initFromStream(DataInputStream in, Scene scene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -279,10 +301,12 @@ public class SkeletonShapeTrack extends Track
   }
 
   /** Present a window in which the user can edit the specified keyframe. */
-  
+
+  @Override
   public void editKeyframe(final LayoutWindow win, int which)
   {
     SkeletonShapeEditorWindow ed = new SkeletonShapeEditorWindow(win, Translate.text("editKeyframe"), this, which, new Runnable() {
+          @Override
       public void run()
       {
         win.getScore().tracksModified(true);
@@ -295,7 +319,8 @@ public class SkeletonShapeTrack extends Track
   }
 
   /** This method presents a window in which the user can edit the track. */
-  
+
+  @Override
   public void edit(LayoutWindow win)
   {
     final BComboBox smoothChoice;

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -56,9 +56,9 @@ public class RenderingDialog extends BDialog implements RenderListener
     rend.renderScene(sc, cam, this, scm);
     setVisible(true);
   }
-  
+
   /** Render an animation. */
-  
+
   public RenderingDialog(BFrame parent, Renderer rend, Scene sc, Camera cam, ObjectInfo sceneCamera,
     double start, double end, int fps, int subimages, ImageSaver imgsaver)
   {
@@ -116,7 +116,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     UIUtilities.fitWindowToScreen(this);
     addEventLink(WindowClosingEvent.class, this, "doCancel");
   }
-  
+
   private void doCancel()
   {
     done = true;
@@ -142,7 +142,7 @@ public class RenderingDialog extends BDialog implements RenderListener
         ((SceneCamera) sceneCamera.getObject()).setImageFilters(cameraForFilters.getImageFilters());
     }
   }
-  
+
   private void doSave()
   {
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -166,6 +166,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   {
     final CameraFilterDialog.FiltersPanel filtersPanel = new CameraFilterDialog.FiltersPanel(cameraForFilters, new Runnable()
     {
+      @Override
       public void run()
       {
       }
@@ -211,16 +212,16 @@ public class RenderingDialog extends BDialog implements RenderListener
     dlg.pack();
     dlg.setVisible(true);
   }
-  
+
   private void paintCanvas(RepaintEvent ev)
   {
     if (previewImage != null)
       ev.getGraphics().drawImage(previewImage, 0, 0, null);
   }
 
-  
+
   /** Update the label of how much time has elapsed. */
-  
+
   private void updateTimeLabel()
   {
     int sec = (int) ((System.currentTimeMillis()-startTime)/1000);
@@ -269,18 +270,20 @@ public class RenderingDialog extends BDialog implements RenderListener
     previewImage = filteredImage.getImage();
     canvas.repaint();
   }
-  
+
   /** Called when more pixels are available for the current image. */
-  
+
+  @Override
   public void imageUpdated(Image image)
   {
     previewImage = image;
     canvas.repaint();
     updateTimeLabel();
   }
-  
+
   /** Called when the status changes. */
-  
+
+  @Override
   public void statusChanged(String status)
   {
     if (imgsaver != null)
@@ -297,9 +300,10 @@ public class RenderingDialog extends BDialog implements RenderListener
     updateTimeLabel();
   }
 
-  
+
   /** Called when rendering is finished. */
-  
+
+  @Override
   public void imageComplete(ComplexImage image)
   {
     cameraForFilters = ((SceneCamera) sceneCamera.getObject()).duplicate();
@@ -310,6 +314,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     try
     {
       EventQueue.invokeAndWait(new Runnable() {
+              @Override
         public void run()
         {
           try
@@ -332,6 +337,7 @@ public class RenderingDialog extends BDialog implements RenderListener
           catch (final IOException ex)
           {
             EventQueue.invokeLater(new Runnable() {
+                          @Override
               public void run()
               {
                 new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
@@ -349,16 +355,17 @@ public class RenderingDialog extends BDialog implements RenderListener
       ex.printStackTrace();
     }
   }
-  
+
   /** Called when rendering is cancelled. */
-  
+
+  @Override
   public void renderingCanceled()
   {
     dispose();
   }
-  
+
   /** Save the image which has just finished rendering, and begin the next one. */
-  
+
   private void nextFrame() throws IOException
   {
     if (done)

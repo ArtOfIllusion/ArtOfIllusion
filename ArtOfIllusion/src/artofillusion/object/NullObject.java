@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -46,20 +46,23 @@ public class NullObject extends Object3D
     to[2] = 5;
     mesh = new WireframeMesh(vert, from, to);
   }
-  
+
   public NullObject()
   {
   }
-  
+
+  @Override
   public Object3D duplicate()
   {
     return new NullObject();
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
   }
 
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
@@ -67,20 +70,24 @@ public class NullObject extends Object3D
 
   /* A NullObject is always drawn the same size. */
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
   }
 
+  @Override
   public boolean canSetTexture()
   {
     return false;
   }
-  
+
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     return mesh;
   }
 
+  @Override
   public boolean isEditable()
   {
     return false;
@@ -99,22 +106,25 @@ public class NullObject extends Object3D
       throw new InvalidObjectException("");
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
 
     out.writeShort(0);
   }
-  
+
   /* Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new NullKeyframe();
   }
-  
+
   /* Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
   }

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.ui;
@@ -23,7 +23,7 @@ public class AutoScroller implements Runnable
   protected BScrollPane sp;
   protected Thread scrollThread;
   protected int x, y, xinc, yinc, delay;
-  
+
   public AutoScroller(BScrollPane pane, int xincrement, int yincrement)
   {
     xinc = xincrement;
@@ -34,7 +34,7 @@ public class AutoScroller implements Runnable
     pane.getContent().addEventLink(MouseDraggedEvent.class, this, "mouseDragged");
     delay = 100;
   }
-  
+
   private void mousePressed(MousePressedEvent ev)
   {
     x = ev.getX();
@@ -51,18 +51,20 @@ public class AutoScroller implements Runnable
     scrollThread.interrupt();
     scrollThread = null;
   }
-  
+
   private void mouseDragged(MouseDraggedEvent ev)
   {
     x = ev.getX();
     y = ev.getY();
   }
 
+  @Override
   public void run()
   {
     while (true)
       {
         SwingUtilities.invokeLater(new Runnable() {
+              @Override
           public void run()
           {
             Dimension scrollSize = sp.getViewSize();
@@ -81,7 +83,7 @@ public class AutoScroller implements Runnable
           }
       }
   }
-  
+
   /** This is called repeatedly whenever the mouse is dragged outside the visible bounds
       to scroll the BScrollPane.  If additional things need to be done at this time (such
       redrawing objects being dragged), this can be subclassed. */

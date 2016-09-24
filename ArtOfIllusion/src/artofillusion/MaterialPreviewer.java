@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -56,7 +56,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     initObject(tex, mat, objInfo);
     init(objInfo, width, height);
   }
-  
+
   /** Same as above, except you can specify a different object to use instead of a sphere. */
 
   public MaterialPreviewer(Texture tex, Material mat, Object3D obj, int width, int height)
@@ -73,9 +73,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   {
     init(obj.duplicate(), width, height);
   }
-  
+
   /** Initialize the object's texture and material. */
-  
+
   private void initObject(Texture tex, Material mat, ObjectInfo objInfo)
   {
     if (tex == null)
@@ -84,9 +84,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     if (mat != null)
       objInfo.setMaterial(mat, mat.getDefaultMapping(objInfo.getObject()));
   }
-  
+
   /** Initialize the MaterialPreviewer. */
-  
+
   private void init(ObjectInfo obj, int width, int height)
   {
     BoundingBox bounds = obj.getBounds();
@@ -123,14 +123,16 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     addEventLink(RepaintEvent.class, this, "paint");
 
     // Set up other listeners.
-    
+
     getComponent().addComponentListener(new ComponentAdapter() {
+      @Override
       public void componentResized(ComponentEvent ev)
       {
         render();
       }
     });
     getComponent().addHierarchyListener(new HierarchyListener() {
+      @Override
       public void hierarchyChanged(HierarchyEvent ev)
       {
         if ((ev.getChangeFlags()&HierarchyEvent.DISPLAYABILITY_CHANGED) != 0)
@@ -144,9 +146,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     });
     render();
   }
-  
+
   /** Get the object on which the texture and material are being displayed. */
-  
+
   public ObjectInfo getObject()
   {
     return info;
@@ -158,7 +160,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   {
     return theScene;
   }
-  
+
   /* The following methods are used to modify the properties of the object being displayed. */
 
   public void setTexture(Texture tex, TextureMapping map)
@@ -169,7 +171,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
       map = tex.getDefaultMapping(info.getObject());
     info.setTexture(tex, map);
   }
-  
+
   public void setMaterial(Material mat, MaterialMapping map)
   {
     info.setMaterial(mat, map);
@@ -196,7 +198,7 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   }
 
   /** Cancel rendering. */
-  
+
   public synchronized void cancelRendering()
   {
     Renderer rend = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
@@ -249,26 +251,26 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
         theCamera.drawClippedLine(g, vert[from[i]], vert[(last=to[i])]);
     }
   }
-  
+
   /** Rotate the object to show a specific side. */
-  
+
   private void changeView(int view)
   {
     double angles[][] = new double [][] {
-        {0.0, 0.0, 0.0}, 
-        {0.0, 180.0, 0.0}, 
-        {0.0, -90.0, 0.0}, 
-        {0.0, 90.0, 0.0}, 
-        {-90.0, 0.0, 0.0}, 
-        {90.0, 0.0, 0.0}, 
+        {0.0, 0.0, 0.0},
+        {0.0, 180.0, 0.0},
+        {0.0, -90.0, 0.0},
+        {0.0, 90.0, 0.0},
+        {-90.0, 0.0, 0.0},
+        {90.0, 0.0, 0.0},
     };
     objectCoords.setOrientation(angles[view][0], angles[view][1], angles[view][2]);
     objectCoords.setOrigin(new Vec3());
     render();
   }
-  
+
   /** Change what object the texture/material is displayed ob. */
-  
+
   private void changeObject(int object)
   {
     shape[object].setTexture(info.getObject().getTexture(), info.getObject().getTextureMapping());
@@ -279,7 +281,8 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
   }
 
   /** Called when more pixels are available for the current image. */
-  
+
+  @Override
   public void imageUpdated(Image image)
   {
     theImage = image;
@@ -288,22 +291,25 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
 
   /** The renderer may call this method periodically during rendering, to give the listener text descriptions
       of the current status of rendering. */
-  
+
+  @Override
   public void statusChanged(String status)
   {
   }
 
   /** Called when rendering is complete. */
-  
+
+  @Override
   public void imageComplete(ComplexImage image)
   {
     theImage = image.getImage();
     renderInProgress = false;
     repaint();
   }
-  
+
   /** Called when rendering is cancelled. */
-  
+
+  @Override
   public void renderingCanceled()
   {
   }
@@ -315,13 +321,13 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     drawHilight(g);
     g.dispose();
   }
-  
+
   private void mouseExited(MouseExitedEvent e)
   {
     mouseInside = false;
     repaint();
   }
-  
+
   private void mousePressed(MousePressedEvent e)
   {
     Graphics g = getComponent().getGraphics();

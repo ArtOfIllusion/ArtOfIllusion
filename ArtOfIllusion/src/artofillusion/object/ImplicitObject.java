@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -134,6 +134,7 @@ public abstract class ImplicitObject extends Object3D
    * Subclasses should invoke this method in their own writeToFile() methods.
    */
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -229,6 +230,7 @@ public abstract class ImplicitObject extends Object3D
     cachedWireframe = null;
   }
 
+  @Override
   public void sceneChanged(ObjectInfo info, Scene scene)
   {
     if (lastTime != scene.getTime())

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -29,14 +29,14 @@ public class FunctionModule extends Module
   private double a0[], a1[], a2[], a3[], b[];
   private short shape;
   private Vec3 gradient;
-  
+
   public static final short LINEAR = 0;
   public static final short SMOOTH_INTERPOLATE = 1;
 
   public FunctionModule(Point position)
   {
-    super("", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})}, 
+    super("", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
       position);
     x = new double [] {0.0, 1.0};
     y = new double [] {0.0, 1.0};
@@ -44,26 +44,26 @@ public class FunctionModule extends Module
     calcCoefficients();
     gradient = new Vec3();
   }
-  
+
   /** Get the list of x (input) values. */
-  
+
   public double [] getX()
   {
     return x;
   }
-  
+
   /** Get the list of y (output) values. */
-  
+
   public double [] getY()
   {
     return y;
   }
-  
+
   /** Set the lists of (x,y) pairs that define the function.
       @param x  the list of x values
       @param y  the list of y values.  These must be in the range [0,1], and be in increasing order
   */
-  
+
   public void setFunction(double x[], double y[])
   {
     this.x = x;
@@ -72,29 +72,29 @@ public class FunctionModule extends Module
   }
 
   /** Get whether the function should repeat outside the range [0,1]. */
-  
+
   public boolean getRepeat()
   {
     return repeat;
   }
-  
+
   /** Set whether the function should repeat outside the range [0,1]. */
-  
+
   public void setRepeat(boolean repeat)
   {
     this.repeat = repeat;
     calcCoefficients();
   }
-  
+
   /** Get the method for interpolating between the set values (LINEAR or SMOOTH_INTERPOLATE). */
-  
+
   public short getMethod()
   {
     return shape;
   }
-  
+
   /** Set the method for interpolating between the set values (LINEAR or SMOOTH_INTERPOLATE). */
-  
+
   public void setMethod(short method)
   {
     shape = method;
@@ -103,13 +103,14 @@ public class FunctionModule extends Module
 
   /* New point, so the value will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     valueOk = errorOk = gradOk = false;
   }
-    
+
   /* Calculate the output corresponding to a given input value. */
-  
+
   private double calcValue(double value)
   {
     if (value <= 0.0 || value >= 1.0)
@@ -129,14 +130,14 @@ public class FunctionModule extends Module
     else
       return a0[i] + value*2.0*a1[i];
   }
-  
+
   /* Calculate the integral of the function at a given point. */
-  
+
   private double integral(double valueIn)
   {
     double vi, vf, result;
     int i;
-    
+
     if (repeat)
       {
         vi = FastMath.floor(valueIn);
@@ -164,7 +165,7 @@ public class FunctionModule extends Module
   }
 
   /* Calculate the coefficients for evaluating the curves. */
-    
+
   private void calcCoefficients()
   {
     a0 = new double [x.length-1];
@@ -228,7 +229,8 @@ public class FunctionModule extends Module
   }
 
   /* Calculate the output value. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     if (valueOk && blur == lastBlur)
@@ -247,9 +249,10 @@ public class FunctionModule extends Module
     value = (integral(valueIn+errorIn)-integral(valueIn-errorIn))/(2.0*errorIn);
     return value;
   }
-  
+
   /* Calculate the error. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     if (errorOk && blur == lastBlur)
@@ -289,6 +292,7 @@ public class FunctionModule extends Module
 
   /* Calculate the gradient. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (!errorOk || blur != lastBlur)
@@ -311,15 +315,17 @@ public class FunctionModule extends Module
     gradient.scale(deriv);
     grad.set(gradient);
   }
-  
+
   /* Calculate the size of the module. */
-  
+
+  @Override
   public void calcSize()
   {
     bounds.width = 40+IOPort.SIZE*2;
     bounds.height = 25+IOPort.SIZE*2;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     Rectangle r = new Rectangle(bounds.x+IOPort.SIZE, bounds.y+IOPort.SIZE, bounds.width-2*IOPort.SIZE, bounds.height-2*IOPort.SIZE);
@@ -375,11 +381,12 @@ public class FunctionModule extends Module
   }
 
   /* Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     FunctionModule mod = new FunctionModule(new Point(bounds.x, bounds.y));
-    
+
     mod.repeat = repeat;
     mod.shape = shape;
     mod.x = new double [x.length];
@@ -395,6 +402,7 @@ public class FunctionModule extends Module
 
   /* Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(x.length);
@@ -406,9 +414,10 @@ public class FunctionModule extends Module
     out.writeBoolean(repeat);
     out.writeShort(shape);
   }
-  
+
   /* Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int num = in.readInt();
@@ -423,17 +432,18 @@ public class FunctionModule extends Module
     shape = in.readShort();
     calcCoefficients();
   }
-  
+
   /* Allow the user to set the parameters. */
-  
+
+  @Override
   public boolean edit(ProcedureEditor editor, Scene theScene)
   {
     EditingDialog dlg = new EditingDialog(editor);
     return dlg.clickedOk;
   }
-  
+
   /* Inner class used for editing the list of colors. */
-  
+
   private class EditingDialog extends BDialog
   {
     ProcedureEditor editor;
@@ -448,9 +458,9 @@ public class FunctionModule extends Module
     int selected;
     boolean clickedOk, fixRange;
     double miny, maxy, labelstep;
-    
+
     static final int HANDLE_SIZE = 5;
-    
+
     public EditingDialog(ProcedureEditor editor)
     {
       super(editor.getParentFrame(), "Function", true);
@@ -472,6 +482,7 @@ public class FunctionModule extends Module
       row.add(new BLabel("X:"));
       row.add(xField = new ValueField(Double.NaN, ValueField.NONE));
       xField.setValueChecker(new ValueChecker() {
+        @Override
         public boolean isValid(double val)
         {
           return (val >= 0.0 && val <= 1.0);
@@ -510,9 +521,9 @@ public class FunctionModule extends Module
       fm = canvas.getComponent().getFontMetrics(canvas.getFont());
       setVisible(true);
     }
-    
+
     /* Adjust the various components in the window based on the currently selected point. */
-    
+
     private void adjustComponents()
     {
       xField.setValue(x[selected]);
@@ -521,9 +532,9 @@ public class FunctionModule extends Module
       xField.setEnabled(movable);
       deleteButton.setEnabled(movable);
     }
-    
+
     /* Determine the range of y values and the labels to use on the y axis. */
-    
+
     private void findRange()
     {
       if (fixRange)
@@ -548,7 +559,7 @@ public class FunctionModule extends Module
     }
 
     /* Calculate the position of all the handles. */
-    
+
     private void positionHandles(Rectangle r)
     {
       for (int i = 0; i < x.length; i++)
@@ -557,16 +568,16 @@ public class FunctionModule extends Module
           handlePos[i].y = (int) (r.y+(maxy-y[i])*r.height/(maxy-miny));
         }
     }
-    
+
     /* Paint the axes on the graph, and calculate the bounds of the graph. */
-    
+
     private void paintAxes(Graphics2D g)
     {
       int maxWidth = 0, fontHeight = fm.getHeight();
       Rectangle bounds = canvas.getBounds();
       double pos = labelstep*Math.ceil(miny/labelstep);
       String label;
-      
+
       graphBounds.y = HANDLE_SIZE/2;
       graphBounds.height = bounds.height-HANDLE_SIZE-fontHeight-5;
       g.setColor(Color.black);
@@ -599,9 +610,9 @@ public class FunctionModule extends Module
       g.drawLine(graphBounds.x, graphBounds.y+graphBounds.height, graphBounds.x+graphBounds.width, graphBounds.y+graphBounds.height);
       positionHandles(graphBounds);
     }
-    
+
     /* Draw the canvas. */
-    
+
     private void paintCanvas(RepaintEvent ev)
     {
       Graphics2D g = ev.getGraphics();
@@ -646,9 +657,9 @@ public class FunctionModule extends Module
           g.fillRect(handlePos[i].x-HANDLE_SIZE/2, handlePos[i].y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE);
         }
     }
-    
+
     /* Add a new handle at the specified position. */
-    
+
     private void addHandle(double where, double val)
     {
       double newx[] = new double [x.length+1], newy[] = new double [y.length+1];
@@ -679,7 +690,7 @@ public class FunctionModule extends Module
       canvas.repaint();
       editor.updatePreview();
     }
-    
+
     /* Delete the currently selected handle. */
 
     private void doDelete()
@@ -715,20 +726,20 @@ public class FunctionModule extends Module
       canvas.repaint();
       editor.updatePreview();
     }
-    
+
     private void doAdd()
     {
       addHandle(0.5, calcValue(0.5));
     }
-    
+
     private void doOk()
     {
       clickedOk = true;
       dispose();
     }
-    
+
     /* Respond to keypresses. */
-    
+
     private void keyPressed(KeyPressedEvent ev)
     {
       if (ev.getKeyCode() == KeyPressedEvent.VK_ENTER)
@@ -740,9 +751,9 @@ public class FunctionModule extends Module
       if (ev.getKeyCode() == KeyPressedEvent.VK_BACK_SPACE || ev.getKeyCode() == KeyPressedEvent.VK_DELETE)
         doDelete();
     }
-    
+
     /* Deal with mouse clicks on the canvas. */
-    
+
     private void mousePressed(MousePressedEvent ev)
     {
       fixRange = true;
@@ -759,7 +770,7 @@ public class FunctionModule extends Module
       for (int i = 0; i < handlePos.length; i++)
       {
         int xh = handlePos[i].x, yh = handlePos[i].y;
-        if (clickPoint.x >= xh-HANDLE_SIZE/2 && clickPoint.x <= xh+HANDLE_SIZE/2 && 
+        if (clickPoint.x >= xh-HANDLE_SIZE/2 && clickPoint.x <= xh+HANDLE_SIZE/2 &&
             clickPoint.y >= yh-HANDLE_SIZE/2 && clickPoint.y <= yh+HANDLE_SIZE/2)
         {
           selected = i;
@@ -770,15 +781,15 @@ public class FunctionModule extends Module
       }
       clickPoint = null;
     }
-    
+
     /* Move the currently selected handle. */
-    
+
     private void mouseDragged(MouseDraggedEvent ev)
     {
       if (clickPoint == null)
         return;
       Point pos = ev.getPoint();
-      
+
       handlePos[selected].x = pos.x;
       double newx = ((double) pos.x-graphBounds.x)/(graphBounds.width-1.0);
       double newy = ((double) (graphBounds.height-pos.y+graphBounds.y))/(graphBounds.height-1.0);
@@ -830,9 +841,9 @@ public class FunctionModule extends Module
       adjustComponents();
       canvas.repaint();
     }
-    
+
     /* Reposition the handles when the user finished dragging one. */
-    
+
     private void mouseReleased(MouseReleasedEvent ev)
     {
       clickPoint = null;
@@ -843,7 +854,7 @@ public class FunctionModule extends Module
       canvas.repaint();
       editor.updatePreview();
     }
-    
+
     private void textChanged()
     {
       x[selected] = xField.getValue();
@@ -876,7 +887,7 @@ public class FunctionModule extends Module
       }
       functionChanged();
     }
-    
+
     private void functionChanged()
     {
       repeat = repeatBox.getState();

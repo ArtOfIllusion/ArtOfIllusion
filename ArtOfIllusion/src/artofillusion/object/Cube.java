@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.object;
@@ -43,29 +43,33 @@ public class Cube extends Object3D
     bounds = new BoundingBox(-halfx, halfx, -halfy, halfy, -halfz, halfz);
   }
 
+  @Override
   public Object3D duplicate()
   {
     Cube obj = new Cube(halfx*2.0, halfy*2.0, halfz*2.0);
     obj.copyTextureAndMaterial(this);
     return obj;
   }
-  
+
+  @Override
   public void copyObject(Object3D obj)
   {
     Cube c = (Cube) obj;
     Vec3 size = c.getBounds().getSize();
-    
+
     setSize(size.x, size.y, size.z);
     copyTextureAndMaterial(obj);
     cachedMesh = null;
     cachedWire = null;
   }
-  
+
+  @Override
   public BoundingBox getBounds()
   {
     return bounds;
   }
 
+  @Override
   public void setSize(double xsize, double ysize, double zsize)
   {
     halfx = xsize/2.0;
@@ -81,18 +85,18 @@ public class Cube extends Object3D
   {
     return EXACTLY;
   }
-  
+
   @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
     Vec3 v[] = new Vec3 [14];
     TriangleMesh mesh;
     int i, faces[][] = {{1, 0, 12}, {2, 1, 12}, {3, 2, 12}, {0, 3, 12},
-    	{1, 2, 9}, {2, 6, 9}, {6, 5, 9}, {5, 1, 9},
-    	{0, 1, 8}, {1, 5, 8}, {5, 4, 8}, {4, 0, 8},
-    	{3, 0, 11}, {0, 4, 11}, {4, 7, 11}, {7, 3, 11},
-    	{4, 5, 13}, {5, 6, 13}, {6, 7, 13}, {7, 4, 13},
-    	{2, 3, 10}, {3, 7, 10}, {7, 6, 10}, {6, 2, 10}};
+	{1, 2, 9}, {2, 6, 9}, {6, 5, 9}, {5, 1, 9},
+	{0, 1, 8}, {1, 5, 8}, {5, 4, 8}, {4, 0, 8},
+	{3, 0, 11}, {0, 4, 11}, {4, 7, 11}, {7, 3, 11},
+	{4, 5, 13}, {5, 6, 13}, {6, 7, 13}, {7, 4, 13},
+	{2, 3, 10}, {3, 7, 10}, {7, 6, 10}, {6, 2, 10}};
 
     for (i = 0; i < 14; i++)
       v[i] = new Vec3();
@@ -108,11 +112,12 @@ public class Cube extends Object3D
     return mesh;
   }
 
+  @Override
   public WireframeMesh getWireframeMesh()
   {
     Vec3 vert[];
     int from[], to[];
-    
+
     if (cachedWire != null)
       return cachedWire;
     vert = bounds.getCorners();
@@ -177,9 +182,9 @@ public class Cube extends Object3D
   {
     return true;
   }
-  
+
   /* Allow the user to edit the cube's shape. */
-  
+
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
@@ -211,6 +216,7 @@ public class Cube extends Object3D
     bounds = new BoundingBox(-halfx, halfx, -halfy, halfy, -halfz, halfz);
   }
 
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     super.writeToFile(out, theScene);
@@ -221,11 +227,13 @@ public class Cube extends Object3D
     out.writeDouble(halfz);
   }
 
+  @Override
   public Property[] getProperties()
   {
     return (Property []) PROPERTIES.clone();
   }
 
+  @Override
   public Object getPropertyValue(int index)
   {
     switch (index)
@@ -240,6 +248,7 @@ public class Cube extends Object3D
     return null;
   }
 
+  @Override
   public void setPropertyValue(int index, Object value)
   {
     double val = ((Double) value).doubleValue();
@@ -252,33 +261,37 @@ public class Cube extends Object3D
   }
 
   /* Return a Keyframe which describes the current pose of this object. */
-  
+
+  @Override
   public Keyframe getPoseKeyframe()
   {
     return new VectorKeyframe(2.0*halfx, 2.0*halfy, 2.0*halfz);
   }
-  
+
   /* Modify this object based on a pose keyframe. */
-  
+
+  @Override
   public void applyPoseKeyframe(Keyframe k)
   {
     VectorKeyframe key = (VectorKeyframe) k;
-    
+
     setSize(key.x, key.y, key.z);
   }
-  
+
   /** This will be called whenever a new pose track is created for this object.  It allows
       the object to configure the track by setting its graphable values, subtracks, etc. */
-  
+
+  @Override
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Size", "Y Size", "Z Size"},
-        new double [] {2.0*halfx, 2.0*halfy, 2.0*halfz}, 
+        new double [] {2.0*halfx, 2.0*halfy, 2.0*halfz},
         new double [][] {{0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}});
   }
-  
+
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
-  
+
+  @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     VectorKeyframe key = (VectorKeyframe) k;

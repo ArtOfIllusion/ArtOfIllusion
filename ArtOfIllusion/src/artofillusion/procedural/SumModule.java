@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -19,18 +19,19 @@ import java.awt.*;
 public class SumModule extends Module
 {
   Vec3 tempVec;
-  
+
   public SumModule(Point position)
   {
     super("+", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Value 1", "(0)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(0)"})}, 
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Sum"})}, 
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(0)"})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Sum"})},
       position);
     tempVec = new Vec3();
   }
 
   /* This module outputs the sum of the two values. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     double value1 = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getAverageValue(linkFromIndex[0], blur);
@@ -41,13 +42,14 @@ public class SumModule extends Module
 
   /* The errors add in quadrature, which involves a square root.  This is a faster
      approximation to it. */
-  
+
+  @Override
   public double getValueError(int which, double blur)
   {
     double value1 = (linkFrom[0] == null) ? 0.0 : linkFrom[0].getValueError(linkFromIndex[0], blur);
     double value2 = (linkFrom[1] == null) ? 0.0 : linkFrom[1].getValueError(linkFromIndex[1], blur);
     double min, max, ratio;
-    
+
     if (value1 < value2)
       {
 	min = value1;
@@ -66,6 +68,7 @@ public class SumModule extends Module
 
   /* The gradient is the sum of the two gradients. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     if (linkFrom[0] == null)

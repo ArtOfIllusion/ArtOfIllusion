@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.raytracer;
@@ -20,9 +20,9 @@ import java.util.*;
 /** This class is a three dimensional data structure containing the photons in a scene.  The map can
     be searched very efficiently for locating the photons near a particular point and evaluating the
     local illumination
-    
+
     Parts of this class are based on the descriptions and sample code in
-    
+
     Henrick Wann Jensen, "Realistic Image Synthesis Using Photon Mapping", A K Peters, Natick, MA, 2001. */
 
 public class PhotonMap
@@ -38,7 +38,7 @@ public class PhotonMap
   private double lightScale;
   private float cutoffDist2;
   public Random random;
-  
+
   /** Create a new PhotonMap
    * @param totalPhotons        the number of photons which should be stored in this map
    * @param numEstimate         the number of photons to use when estimating the illumination from this map
@@ -52,7 +52,7 @@ public class PhotonMap
    * @param filter              specifies which type of filter to apply to the photon intensities
    * @param shared              another PhotonMap with which this one may share data structures to save memory (may be null)
    */
-  
+
   public PhotonMap(int totalPhotons, int numEstimate, boolean includeCaustics, boolean includeDirect, boolean includeIndirect, boolean includeVolume, Raytracer raytracer, RaytracerRenderer renderer, BoundingBox bounds, int filter, PhotonMap shared)
   {
     numWanted = totalPhotons;
@@ -71,9 +71,9 @@ public class PhotonMap
       direction = new Vec3 [65536];
     random = new Random(1);
   }
-  
+
   /** Get the Raytracer for which this map holds photons. */
-  
+
   public Raytracer getRaytracer()
   {
     return rt;
@@ -94,7 +94,7 @@ public class PhotonMap
   }
 
   /** Get a bounding box enclosing all objects at which photons should be directed. */
-  
+
   public BoundingBox getBounds()
   {
     return bounds;
@@ -108,24 +108,24 @@ public class PhotonMap
   }
 
   /** Generate photons from all sources until the desired number has been collected. */
-  
+
   public void generatePhotons(PhotonSource source[])
   {
     Thread currentThread = Thread.currentThread();
     double totalIntensity = 0.0, currentIntensity, totalRequested = 0.0;
     double sourceIntensity[] = new double [source.length], totalSourceIntensity = 0.0;
-    
+
     // Determine the total intensity of all sources.
-    
+
     for (int i = 0; i < source.length; i++)
       {
         sourceIntensity[i] = source[i].getTotalIntensity();
         totalSourceIntensity += sourceIntensity[i];
       }
     currentIntensity = 0.1*numWanted;
-    
+
     // Generate photons.
-    
+
     photonList = new ArrayList<Photon>((int) (1.1*numWanted));
     int iteration = 0;
     ThreadManager threads = new ThreadManager();
@@ -142,7 +142,7 @@ public class PhotonMap
           }
         if (photonList.size() >= numWanted*0.9)
           break;
-        if (photonList.size() == 0 && currentIntensity > 5.0 && iteration > 2)
+        if (photonList.isEmpty() && currentIntensity > 5.0 && iteration > 2)
           break; // Insignificant numbers of photons will be stored no matter how many we send out.
         totalIntensity += currentIntensity;
         if (photonList.size() < 10)
@@ -163,14 +163,14 @@ public class PhotonMap
       lightScale *= 1.5f;
 
     // Create the balanced kd-tree.
-    
+
     int numPhotons = photonList.size();
     workspace = photonList.toArray(new Photon [numPhotons]);
     photonList = null;
     photon = new Photon [numPhotons];
     buildTree(0, numPhotons-1, 0);
     workspace = null;
-    
+
     // Select a maximum search radius.  We use two different methods to select cutoffs, one based on photon
     // intensity and one based on density, then keep whichever cutoff is smaller.  First, find the N brightest
     // photons in the map.  The PhotonList can help us to do this.
@@ -203,13 +203,13 @@ public class PhotonMap
     double cutoff2 = Math.pow(0.5*volume*nearbyPhotons.photon.length/photon.length, 1.0/3.0);
     cutoffDist2 = (float) (cutoff1 < cutoff2 ? cutoff1*cutoff1 : cutoff2*cutoff2);
   }
-  
+
   /** Spawn a Photon, and see whether it hits anything in the scene.  If so, add it to the map.
       @param r         the ray along which to spawn the photon
       @param color     the photon color
       @param indirect  specifies whether the photon's source should be treated as indirect illumination
   */
-  
+
   public void spawnPhoton(Ray r, RGBColor color, boolean indirect)
   {
     if (!r.intersects(bounds))
@@ -226,7 +226,7 @@ public class PhotonMap
     else
       tracePhoton(r, color, 0, node, SurfaceIntersection.NO_INTERSECTION, materialObject.getMaterialMapping(), null, materialObject.toLocal(), null, 0.0, indirect, false);
   }
-  
+
   /** Trace a photon through the scene, and record where it is absorbed.
       @param r                  the ray to trace
       @param color              the photon color
@@ -241,7 +241,7 @@ public class PhotonMap
       @param diffuse            true if this ray has been diffusely reflected since leaving the eye
       @param caustic            true if this ray has been specularly reflected or refracted since leaving the eye
   */
-  
+
   private void tracePhoton(Ray r, RGBColor color, int treeDepth, OctreeNode node, SurfaceIntersection first, MaterialMapping currentMaterial, MaterialMapping prevMaterial, Mat4 currentMatTrans, Mat4 prevMatTrans, double totalDist, boolean diffuse, boolean caustic)
   {
     SurfaceIntersection second = SurfaceIntersection.NO_INTERSECTION;
@@ -273,9 +273,9 @@ public class PhotonMap
       intersect = first;
       intersect.intersectionPoint(0, intersectionPoint);
     }
-    
+
     // Get the surface properties at the point of intersection.
-    
+
     dist = intersect.intersectionDist(0);
     totalDist += dist;
     intersect.trueNormal(trueNorm);
@@ -322,7 +322,7 @@ public class PhotonMap
     }
 
     // Decide whether to spawn reflected and/or transmitted photons.
-    
+
     if (treeDepth == renderer.maxRayDepth-1)
       return;
     boolean spawnSpecular = false, spawnTransmitted = false, spawnDiffuse = false;
@@ -341,9 +341,9 @@ public class PhotonMap
         if (spec.diffuse.getRed()+spec.diffuse.getGreen()+spec.diffuse.getBlue() > renderer.minRayIntensity)
           spawnDiffuse = true;
       }
-    
+
     // Spawn additional photons.
-    
+
     double dot = norm.dot(r.getDirection());
     RGBColor col = workspace.rayIntensity[treeDepth+1];
     boolean totalReflect = false;
@@ -359,7 +359,7 @@ public class PhotonMap
         if (hitObject.getMaterialMapping() == null)
           {
             // Not a solid object, so the bulk material does not change.
-            
+
             temp.set(r.getDirection());
             nextMaterial = currentMaterial;
             nextMatTrans = currentMatTrans;
@@ -425,7 +425,7 @@ public class PhotonMap
             if (d < 0.0)
               {
                 // Make sure it comes out the correct side.
-            
+
                 d += Raytracer.TOL;
                 temp.x -= d*trueNorm.x;
                 temp.y -= d*trueNorm.y;
@@ -455,7 +455,7 @@ public class PhotonMap
         if (d >= 0.0)
           {
             // Make sure it comes out the correct side.
-            
+
             d += Raytracer.TOL;
             temp.x += d*trueNorm.x;
             temp.y += d*trueNorm.y;
@@ -485,7 +485,7 @@ public class PhotonMap
         if (d > 0.0)
           {
             // Make sure it comes out the correct side.
-            
+
             temp.scale(-1.0);
           }
         workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
@@ -651,7 +651,7 @@ public class PhotonMap
   }
 
   /** Add a Photon to the map. */
-  
+
   private void addPhoton(Vec3 pos, Vec3 dir, RGBColor color)
   {
     Photon p = new Photon(pos, dir, color);
@@ -734,22 +734,22 @@ public class PhotonMap
       }
     dir.normalize();
   }
-  
+
   /** This method is called recursively to build the packed kd-tree of photons from the workspace array.
       @param start      the start of the segment from which to build the tree
       @param end        the end of the segment from which to build the tree
       @param root       the position in the packed array where the root of the tree should go
   */
-  
+
   private void buildTree(int start, int end, int root)
   {
     if (start == end)
       photon[root] = workspace[start];
     if (start >= end)
       return;
-  
+
     // Find a bounding box for the photons in this segment, and decide which axis to split.
-    
+
     float minx = Float.MAX_VALUE, miny = Float.MAX_VALUE, minz = Float.MAX_VALUE;
     float maxx = -Float.MAX_VALUE, maxy = -Float.MAX_VALUE, maxz = -Float.MAX_VALUE;
     for (int i = start; i <= end; i++)
@@ -770,9 +770,9 @@ public class PhotonMap
       axis = 1;
     else
       axis = 2;
-    
+
     // Split the photons about the median along this axis.
-    
+
     int size = end-start+1;
     int medianPos = 1;
     while (4*medianPos <= size)
@@ -784,21 +784,21 @@ public class PhotonMap
     medianSplit(start, end, medianPos, axis);
 
     // Store the median photon, and build the subtrees.
-    
+
     photon[root] = workspace[medianPos];
     photon[root].axis = (short) axis;
     buildTree(start, medianPos-1, 2*root+1);
     buildTree(medianPos+1, end, 2*root+2);
   }
-  
+
   /** This method splits the photons about their median along a particular axis.  When this returns,
       all the photons before medianPos will have values <= the value in medianPos, and all the ones
       after medianPos will have values >= the value in medianPos. */
-  
+
   private void medianSplit(int start, int end, int medianPos, int axis)
   {
     float medianEstimate;
-    
+
     if (start == end)
       return;
     if (end-start == 1)
@@ -810,7 +810,7 @@ public class PhotonMap
     while (start < end)
       {
         // Estimate the median value.
-      
+
         float a = axisPosition(start, axis);
         float b = axisPosition(start+1, axis);
         float c = axisPosition(end, axis);
@@ -828,9 +828,9 @@ public class PhotonMap
             else
               medianEstimate = b;
           }
-        
+
         // Split the photons based on whether they are greater than or less than the median estimate.
-        
+
         int i = start, j = end;
         while (true)
           {
@@ -849,9 +849,9 @@ public class PhotonMap
           start = i;
       }
   }
-  
+
   /** Get the position of a photon along an axis. */
-  
+
   private float axisPosition(int index, int axis)
   {
     switch (axis)
@@ -864,16 +864,16 @@ public class PhotonMap
           return workspace[index].z;
       }
   }
-  
+
   /** Swap two photons in the workspace array. */
-  
+
   private void swap(int first, int second)
   {
     Photon temp = workspace[first];
     workspace[first] = workspace[second];
     workspace[second] = temp;
   }
-  
+
   /** Determine the surface lighting at a point due to the photons in this map.
       @param pos      the position near which to locate photons
       @param spec     the surface properties at the point being evaluated
@@ -883,7 +883,7 @@ public class PhotonMap
       @param light    the total lighting contribution will be stored in this
       @param pmc      the PhotonMapContext from which this is being invoked
   */
-   
+
   public void getLight(Vec3 pos, TextureSpec spec, Vec3 normal, Vec3 viewDir, boolean front, RGBColor light, PhotonMapContext pmc)
   {
     light.setRGB(0.0f, 0.0f, 0.0f);
@@ -994,7 +994,7 @@ public class PhotonMap
       @param index    the point in the map from which to start searching
       @param pmc      the PhotonMapContext from which this is being invoked
   */
-  
+
   private void findPhotons(Vec3 pos, int index, PhotonMapContext pmc)
   {
     Photon p = photon[index];
@@ -1052,7 +1052,7 @@ public class PhotonMap
         validateTree(child2);
       }
   }
-  
+
   private void validateLowerBranch(int pos, int axis, float median)
   {
     float value = median(pos, axis);

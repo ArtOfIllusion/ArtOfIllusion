@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.animation;
@@ -23,25 +23,25 @@ public class ObjectRef
   private ObjectInfo object;
   private int objectID, jointID;
   private Scene theScene;
-  
+
   /** Create a "null" reference which does not refer to any object. */
-  
+
   public ObjectRef()
   {
     objectID = jointID = -1;
   }
-  
+
   /** Create a reference to an existing object. */
-  
+
   public ObjectRef(ObjectInfo info)
   {
     object = info;
     objectID = info.getId();
     jointID = -1;
   }
-  
+
   /** Create a reference to a joint within an existing object. */
-  
+
   public ObjectRef(ObjectInfo info, Joint j)
   {
     object = info;
@@ -50,16 +50,17 @@ public class ObjectRef
   }
 
   /** Create a reference to an object/joint which may not have been loaded yet. */
-  
+
   public ObjectRef(int objectID, int jointID, Scene sc)
   {
     this.objectID = objectID;
     this.jointID = jointID;
     theScene = sc;
   }
-  
+
   /** Two ObjectRefs are equals if they refer to the same object or joint. */
-  
+
+  @Override
   public boolean equals(Object obj)
   {
     if (!(obj instanceof ObjectRef))
@@ -67,9 +68,9 @@ public class ObjectRef
     ObjectRef ref = (ObjectRef) obj;
     return (ref.objectID == objectID && ref.jointID == jointID);
   }
-  
+
   /** Get the object this reference refers to. */
-  
+
   public ObjectInfo getObject()
   {
     if (object == null)
@@ -87,9 +88,9 @@ public class ObjectRef
     }
     return object;
   }
-  
+
   /** Get the joint this reference refers to, or null if it does not refer to a joint. */
-  
+
   public Joint getJoint()
   {
     if (jointID == -1)
@@ -102,9 +103,9 @@ public class ObjectRef
       return s.getJoint(jointID);
     return null;
   }
-  
+
   /** Get the coordinate system for the object/joint this refers to. */
-  
+
   public CoordinateSystem getCoords()
   {
     ObjectInfo info = getObject();
@@ -130,7 +131,7 @@ public class ObjectRef
   }
 
   /** Create an exact duplicate of this object reference. */
-  
+
   public ObjectRef duplicate()
   {
     ObjectRef ref = new ObjectRef();
@@ -140,9 +141,9 @@ public class ObjectRef
     ref.theScene = theScene;
     return ref;
   }
-  
+
   /** Make this ObjectRef identical to another one. */
-  
+
   public void copy(ObjectRef ref)
   {
     objectID = ref.objectID;
@@ -160,16 +161,17 @@ public class ObjectRef
   }
 
   /** Construct an object reference from its serialized representation. */
-  
+
   public ObjectRef(DataInputStream in, Scene theScene) throws IOException
   {
     objectID = in.readInt();
     jointID = in.readInt();
     this.theScene = theScene;
   }
-  
+
   /** Get a text string describing the object and joint. */
-  
+
+  @Override
   public String toString()
   {
     ObjectInfo info = getObject();

@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
@@ -41,13 +41,13 @@ public class ImageModule extends Module
 
   public ImageModule(Point position)
   {
-    super("("+Translate.text("menu.imageModule")+")", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}), 
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"})}, 
+    super("("+Translate.text("menu.imageModule")+")", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"})},
       new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Color")}),
       new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Red")}),
       new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Green")}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Blue")}), 
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Mask")})}, 
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Blue")}),
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {Translate.text("Mask")})},
       position);
     xscale = yscale = xinv = yinv = 1.0;
     tilex = tiley = true;
@@ -60,103 +60,103 @@ public class ImageModule extends Module
     valueOk = new boolean [4];
     gradOk = new boolean [4];
   }
-  
+
   /** Get the image map used by this module. */
-  
+
   public ImageMap getMap()
   {
     return map;
   }
-  
+
   /** Set the image map used by this module. */
-  
+
   public void setMap(ImageMap map)
   {
     this.map = map;
     maxComponent = (map == null ? 0 : map.getComponentCount()-1);
   }
-  
+
   /** Get the X scale. */
-  
+
   public double getXScale()
   {
     return xscale;
   }
-  
+
   /** Set the X scale. */
-  
+
   public void setXScale(double scale)
   {
     xscale = scale;
     xinv = 1.0/scale;
   }
-  
+
   /** Get the Y scale. */
-  
+
   public double getYScale()
   {
     return yscale;
   }
-  
+
   /** Set the Y scale. */
-  
+
   public void setYScale(double scale)
   {
     yscale = scale;
     yinv = 1.0/scale;
   }
-  
+
   /** Get whether the image is tiled in the X direction. */
-  
+
   public boolean getTileX()
   {
     return tilex;
   }
-  
+
   /** Set whether the image is tiled in the X direction. */
-  
+
   public void setTileX(boolean b)
   {
     tilex = b;
   }
-  
+
   /** Get whether the image is tiled in the Y direction. */
-  
+
   public boolean getTileY()
   {
     return tiley;
   }
-  
+
   /** Set whether the image is tiled in the Y direction. */
-  
+
   public void setTileY(boolean b)
   {
     tiley = b;
   }
 
   /** Get whether the image is mirrored in the X direction. */
-  
+
   public boolean getMirrorX()
   {
     return mirrorx;
   }
-  
+
   /** Set whether the image is mirrored in the X direction. */
-  
+
   public void setMirrorX(boolean b)
   {
     mirrorx = b;
   }
-  
+
   /** Get whether the image is mirrored in the Y direction. */
-  
+
   public boolean getMirrorY()
   {
     return mirrory;
   }
-  
+
   /** Set whether the image is mirrored in the Y direction. */
-  
+
   public void setMirrorY(boolean b)
   {
     mirrory = b;
@@ -178,6 +178,7 @@ public class ImageModule extends Module
 
   /** New point, so the color will need to be recalculated. */
 
+  @Override
   public void init(PointInfo p)
   {
     point = p;
@@ -187,7 +188,7 @@ public class ImageModule extends Module
   }
 
   /** Find the point at which the image is being evaluated. */
-  
+
   private void findPoint(double blur)
   {
     pointOk = true;
@@ -228,7 +229,8 @@ public class ImageModule extends Module
   }
 
   /** Calculate the color. */
-  
+
+  @Override
   public void getColor(int which, RGBColor c, double blur)
   {
     if (colorOk && blur == lastBlur)
@@ -257,9 +259,10 @@ public class ImageModule extends Module
     map.getColor(color, wrapx, wrapy, x, y, xsize, ysize);
     c.copy(color);
   }
-  
+
   /** Get the value of one of the components. */
-  
+
+  @Override
   public double getAverageValue(int which, double blur)
   {
     int component = which-1;
@@ -298,6 +301,7 @@ public class ImageModule extends Module
 
   /** Get the gradient of one of the components. */
 
+  @Override
   public void getValueGradient(int which, Vec3 grad, double blur)
   {
     int component = which-1;
@@ -399,6 +403,7 @@ public class ImageModule extends Module
     gradOk[component] = true;
   }
 
+  @Override
   public void calcSize()
   {
     bounds.width = ImageMap.PREVIEW_WIDTH+IOPort.SIZE*2;
@@ -407,6 +412,7 @@ public class ImageModule extends Module
       bounds.height = output.length*IOPort.SIZE*3;
   }
 
+  @Override
   protected void drawContents(Graphics2D g)
   {
     if (map == null)
@@ -416,13 +422,14 @@ public class ImageModule extends Module
       }
     g.drawImage(map.getPreview(), bounds.x+bounds.width/2-ImageMap.PREVIEW_WIDTH/2, bounds.y+bounds.height/2-ImageMap.PREVIEW_HEIGHT/2, null);
   }
-  
+
   /** Create a duplicate of this module. */
-  
+
+  @Override
   public Module duplicate()
   {
     ImageModule mod = new ImageModule(new Point(bounds.x, bounds.y));
-    
+
     mod.map = map;
     mod.xscale = xscale;
     mod.yscale = yscale;
@@ -463,9 +470,10 @@ public class ImageModule extends Module
       output[3].setDescription(new String [] {Translate.text("Saturation")});
     }
   }
-  
+
   /** Allow the user to set a new value. */
-  
+
+  @Override
   public boolean edit(final ProcedureEditor editor, final Scene theScene)
   {
     ImageMap oldMap = map;
@@ -508,6 +516,7 @@ public class ImageModule extends Module
     modelChoice.addEventLink(ValueChangedEvent.class, listener);
     modelChoice.setSelectedIndex(colorModel);
     final BLabel preview = new BLabel() {
+          @Override
       public Dimension getPreferredSize()
       {
         return new Dimension(ImageMap.PREVIEW_WIDTH, ImageMap.PREVIEW_HEIGHT);
@@ -517,6 +526,7 @@ public class ImageModule extends Module
       preview.setIcon(new ImageIcon(map.getPreview()));
     preview.setAlignment(BLabel.CENTER);
     BOutline outline = new BOutline(preview, BorderFactory.createLineBorder(Color.black)) {
+          @Override
       public Dimension getMaximumSize()
       {
         return new Dimension(ImageMap.PREVIEW_WIDTH+2, ImageMap.PREVIEW_HEIGHT+2);
@@ -565,6 +575,7 @@ public class ImageModule extends Module
 
   /** Write out the parameters. */
 
+  @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeInt(-2);
@@ -580,16 +591,17 @@ public class ImageModule extends Module
     out.writeBoolean(mirrory);
     out.writeInt(colorModel);
   }
-  
+
   /** Read in the parameters. */
-  
+
+  @Override
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     int version = in.readInt();
     if (version < -2)
       throw new InvalidObjectException("");
     int index = (version > -2 ? version : in.readInt());
-    
+
     if (index > -1)
       map = theScene.getImage(index);
     else

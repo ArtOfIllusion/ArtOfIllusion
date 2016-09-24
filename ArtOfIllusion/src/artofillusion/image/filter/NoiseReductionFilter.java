@@ -3,9 +3,9 @@
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
-   
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image.filter;
@@ -57,6 +57,7 @@ public class NoiseReductionFilter extends ImageFilter
     for (int i = 0; i < iterations; i++)
     {
       ConductivityFunction fn = new ConductivityFunction() {
+        @Override
         public float evaluate(int x1, int y1, int x2, int y2)
         {
           float object1 = image.getPixelComponent(x1, y1, ComplexImage.OBJECT);
@@ -127,7 +128,7 @@ public class NoiseReductionFilter extends ImageFilter
       for (int j = 0; j < height-1; j++)
         cv[i][j] = fn.evaluate(i, j, i, j+1);
   }
-  
+
   /**
    * Apply the filter to one component of an image.
    */

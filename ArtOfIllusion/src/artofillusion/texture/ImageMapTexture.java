@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.texture;
@@ -30,7 +30,7 @@ public class ImageMapTexture extends Texture2D
   public ImageMapTexture()
   {
     RGBColor white = new RGBColor(1.0f, 1.0f, 1.0f);
-    
+
     // Generate the default texture.
 
     diffuseColor = new ImageOrColor(white);
@@ -53,12 +53,13 @@ public class ImageMapTexture extends Texture2D
     return "Image Mapped";
   }
 
+  @Override
   public void getTextureSpec(TextureSpec spec, double x, double y, double xsize, double ysize, double angle, double t, double param[])
   {
     float transVal, specVal;
     boolean wrapx, wrapy;
     double f;
-    
+
     if ((!tileX && (x < 0.0 || x > 1.0)) || (!tileY && (y < 0.0 || y > 1.0)))
       {
         // The point falls outside the image, so set the surfaceSpec to be transparent.
@@ -95,7 +96,7 @@ public class ImageMapTexture extends Texture2D
     wrapx = tileX && !mirrorX;
     wrapy = tileY && !mirrorY;
     transVal = transparency.getValue(wrapx, wrapy, x, y, xsize, ysize);
-    specVal = specularity.getValue(wrapx, wrapy, x, y, xsize, ysize);    
+    specVal = specularity.getValue(wrapx, wrapy, x, y, xsize, ysize);
     diffuseColor.getColor(spec.diffuse, wrapx, wrapy, x, y, xsize, ysize);
     spec.diffuse.scale((1.0f-transVal)*(1.0f-specVal));
     specularColor.getColor(spec.specular, wrapx, wrapy, x, y, xsize, ysize);
@@ -111,13 +112,14 @@ public class ImageMapTexture extends Texture2D
     bump.getGradient(grad, wrapx, wrapy, x, y, xsize, ysize);
     spec.bumpGrad.set(grad.x*0.04, grad.y*0.04, 0.0);
   }
-  
+
+  @Override
   public void getTransparency(RGBColor trans, double x, double y, double xsize, double ysize, double angle, double t, double param[])
   {
     float transVal;
     boolean wrapx, wrapy;
     double f;
-    
+
     if ((!tileX && (x < 0.0 || x > 1.0)) || (!tileY && (y < 0.0 || y > 1.0)))
       {
         // The point falls outside the image, so the texture is completely transparent.
@@ -152,11 +154,12 @@ public class ImageMapTexture extends Texture2D
     trans.scale(transVal);
   }
 
+  @Override
   public double getDisplacement(double x, double y, double xsize, double ysize, double t, double param[])
   {
     boolean wrapx, wrapy;
     double f;
-    
+
     if ((!tileX && (x < 0.0 || x > 1.0)) || (!tileY && (y < 0.0 || y > 1.0)))
       {
         // The point falls outside the image.
@@ -188,10 +191,11 @@ public class ImageMapTexture extends Texture2D
     return (double) displacement.getValue(wrapx, wrapy, x, y, xsize, ysize);
   }
 
+  @Override
   public void getAverageSpec(TextureSpec spec, double time, double param[])
   {
     float transVal = transparency.getAverageValue(), specVal = specularity.getAverageValue();
-    
+
     diffuseColor.getAverageColor(spec.diffuse);
     spec.diffuse.scale((1.0f-transVal)*(1.0f-specVal));
     specularColor.getAverageColor(spec.specular);
@@ -205,25 +209,27 @@ public class ImageMapTexture extends Texture2D
     spec.cloudiness = cloudiness.getAverageValue();
     spec.bumpGrad.set(0.0, 0.0, 0.0);
   }
-  
+
   /** Determine whether this Texture uses the specified image. */
 
+  @Override
   public boolean usesImage(ImageMap image)
   {
-    return (diffuseColor.getImage() == image || specularColor.getImage() == image || 
-      transparentColor.getImage() == image || emissiveColor.getImage() == image || 
-      roughness.getImage() == image || cloudiness.getImage() == image || 
-      transparency.getImage() == image || specularity.getImage() == image || 
+    return (diffuseColor.getImage() == image || specularColor.getImage() == image ||
+      transparentColor.getImage() == image || emissiveColor.getImage() == image ||
+      roughness.getImage() == image || cloudiness.getImage() == image ||
+      transparency.getImage() == image || specularity.getImage() == image ||
       shininess.getImage() == image || bump.getImage() == image ||
       displacement.getImage() == image);
   }
 
   /** Create a duplicate of the texture. */
-  
+
+  @Override
   public Texture duplicate()
   {
     ImageMapTexture m = new ImageMapTexture();
-    
+
     m.name = name;
     m.diffuseColor.copy(diffuseColor);
     m.specularColor.copy(specularColor);
@@ -246,7 +252,8 @@ public class ImageMapTexture extends Texture2D
   /** Determine whether this texture has a non-zero value anywhere for a particular component.
       @param component    the texture component to check for (one of the *_COMPONENT constants)
   */
-  
+
+  @Override
   public boolean hasComponent(int component)
   {
     switch (component)
@@ -274,22 +281,23 @@ public class ImageMapTexture extends Texture2D
       }
     return false;
   }
-  
+
   /** Allow the user to interactively edit the texture. */
-  
+
+  @Override
   public void edit(BFrame fr, Scene sc)
   {
     new Editor(fr, sc);
   }
-  
+
   /** The following two methods are used for reading and writing files.  The first is a
       constructor which reads the necessary data from an input stream.  The other writes
       the object's representation to an output stream. */
-  
+
   public ImageMapTexture(DataInputStream in, Scene theScene) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    
+
     if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     name = in.readUTF();
@@ -312,7 +320,8 @@ public class ImageMapTexture extends Texture2D
     mirrorX = in.readBoolean();
     mirrorY = in.readBoolean();
   }
-  
+
+  @Override
   public void writeToFile(DataOutputStream out, Scene theScene) throws IOException
   {
     out.writeShort(1);
@@ -333,9 +342,9 @@ public class ImageMapTexture extends Texture2D
     out.writeBoolean(mirrorX);
     out.writeBoolean(mirrorY);
   }
-  
+
   /** A member class which represents a dialog box for editing the texture. */
-  
+
   private class Editor extends BDialog
   {
     BTextField nameField;
@@ -347,7 +356,7 @@ public class ImageMapTexture extends Texture2D
     ImageMapTexture newTexture;
     BFrame parent;
     Scene scene;
-    
+
     public Editor(BFrame fr, Scene sc)
     {
       super(fr, true);
@@ -363,7 +372,7 @@ public class ImageMapTexture extends Texture2D
       buttons.add(Translate.button("ok", this, "doOk"));
       buttons.add(Translate.button("cancel", this, "dispose"));
       content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-      
+
       // Add the left panel.
 
       FormContainer left = new FormContainer(2, 6);
@@ -452,7 +461,8 @@ public class ImageMapTexture extends Texture2D
         scene.changeTexture(index);
       dispose();
     }
-    
+
+    @Override
     public void dispose()
     {
       renderProcessor.stopProcessing();
@@ -466,6 +476,7 @@ public class ImageMapTexture extends Texture2D
       newTexture.mirrorX = mirrorXBox.getState();
       newTexture.mirrorY = mirrorYBox.getState();
       renderProcessor.addEvent(new Runnable() {
+        @Override
         public void run()
         {
           preview.render();

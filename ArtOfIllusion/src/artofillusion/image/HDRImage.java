@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.image;
@@ -35,9 +35,9 @@ public class HDRImage extends ImageMap
     findAverage();
     createPreview();
   }
-  
+
   /** Given the r, g, b, and e arrays for an image, this method builds the full set of mipmaps for it. */
-  
+
   private void buildMipMaps(byte r[], byte g[], byte b[], byte e[], int w, int h)
   {
     byte map0[][] = new byte[][] {r, g, b, e};
@@ -46,7 +46,7 @@ public class HDRImage extends ImageMap
 
     // Determine the size for the first reduced map.  Its width and height must both be
     // powers of 2.
-    
+
     for (w1 = 2; w1 < w; w1 *= 2);
     for (h1 = 2; h1 < h; h1 *= 2);
     w1 /= 2;
@@ -63,9 +63,9 @@ public class HDRImage extends ImageMap
         h1 /= 2;
         hratio *= 0.5;
       }
-    
+
     // Determine the total number of mipmaps we will need, and allocate the arrays.
-    
+
     for (num = 0; (1<<num) < w1 && (1<<num) < h1; num++);
     num += 2;
     if (w == 1 || h == 1)
@@ -81,9 +81,9 @@ public class HDRImage extends ImageMap
     width[0] = w;
     height[0] = h;
     scale[0] = 1.0/Math.min(w, h);
-    
+
     // Construct the first reduced map.
-    
+
     if (num > 1)
       {
         width[1] = w1;
@@ -108,9 +108,9 @@ public class HDRImage extends ImageMap
               }
           }
       }
-    
+
     // Now construct the remaining mipmaps.
-    
+
     RGBColor avg = new RGBColor();
     RGBColor tempColor = new RGBColor();
     for (i = 2; i < num; i++)
@@ -142,30 +142,30 @@ public class HDRImage extends ImageMap
               maps[i][3][k+w*m] = (byte) ((ergb>>24)&0xFF);
             }
       }
-    
+
     // Precompute multipliers used for doing the mipmapping.
-    
+
     for (i = 0; i < num-1; i++)
       scaleMult[i] = 1.0/(scale[i+1]-scale[i]);
 
     // Finally, record the scales for all of the maps.
-    
+
     for (i = 0; i < num; i++)
       {
         xscale[i] = (double) width[i];
         yscale[i] = (double) height[i];
       }
   }
-    
+
   /** This method calculates the average value for each component over the entire image. */
-  
+
   private void findAverage()
   {
     byte map[][] = maps[maps.length-1];
     RGBColor avg = new RGBColor();
     RGBColor tempColor = new RGBColor();
     int len = map[0].length;
-    
+
     for (int i = 0; i < len; i++)
       {
         tempColor.setERGB(map[0][i], map[1][i], map[2][i], map[3][i]);
@@ -174,13 +174,13 @@ public class HDRImage extends ImageMap
     avg.scale(1.0/len);
     average = new float [] {avg.getRed(), avg.getGreen(), avg.getBlue()};
   }
-  
+
   /** Construct the preview image. */
-  
+
   private void createPreview()
   {
     int w, h;
-    
+
     if (width[0] <= PREVIEW_WIDTH && height[0] <= PREVIEW_HEIGHT)
       {
         w = width[0];
@@ -219,46 +219,50 @@ public class HDRImage extends ImageMap
     MemoryImageSource src = new MemoryImageSource(w, h, data, 0, w);
     preview = Toolkit.getDefaultToolkit().createImage(src);
   }
-  
+
   /** Get the width of the image. */
-  
+
+  @Override
   public int getWidth()
   {
     return width[0];
   }
-  
+
   /** Get the height of the image. */
-  
+
+  @Override
   public int getHeight()
   {
     return height[0];
   }
-  
+
   /** Get the number of components in the image. */
-  
+
+  @Override
   public int getComponentCount()
   {
     return 3;
   }
 
   /** Get the value of a single component at a particular location in the image.  The components are:
-      
+
       0: Red
       1: Green
       2: Blue
       3: Alpha
-      
+
       The location is specified by x and y, which must lie between 0 and 1.  The value is
-      averaged over a region of width (xsize, ysize).  wrapx and wrapy specify whether, for 
-      purposes of interpolation, the image should be treated as wrapping around so that 
+      averaged over a region of width (xsize, ysize).  wrapx and wrapy specify whether, for
+      purposes of interpolation, the image should be treated as wrapping around so that
       opposite edges touch each other. */
-  
+
+  @Override
   public float getComponent(int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
     float frac;
     double size;
-    
+
     if (component > 2)
       return 1.0f;
     if (xsize*xscale[0] > ysize*yscale[0])
@@ -266,17 +270,17 @@ public class HDRImage extends ImageMap
     else
       size = ysize;
     y = 1.0-y;
-    
+
     // If size falls outside the range of scales spanned by the mipmaps, just use the first
     // or last one, as appropriate.
-    
+
     if (size <= scale[0])
       return getMapComponent(component, 0, wrapx, wrapy, x, y);
     if (size >= scale[maps.length-1])
       return average[component];
-    
+
     // Determine which mipmaps to use.
-    
+
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
     return (1.0f-frac)*getMapComponent(component, which, wrapx, wrapy, x, y) + frac*getMapComponent(component, which+1, wrapx, wrapy, x, y);
@@ -292,7 +296,7 @@ public class HDRImage extends ImageMap
     int w = width[which], h = height[which];
     float frac1, frac2, w1, w2, w3, w4;
     byte map[][] = maps[which];
-    
+
     // Determine which elements to interpolate between.
 
     frac1 = (float) (x*xscale[which]);
@@ -319,16 +323,16 @@ public class HDRImage extends ImageMap
     ind2 = i1+j2*w;
     ind3 = i2+j1*w;
     ind4 = i2+j2*w;
-    
+
     // Find the interpolation coefficients.
-    
+
     w1 = (1.0f-frac1)*(1.0f-frac2);
     w2 = (1.0f-frac1)*frac2;
     w3 = frac1*(1.0f-frac2);
     w4 = frac1*frac2;
-    
+
     // Calculate the final value.
-    
+
     float value1 = (map[component][ind1]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind1]&0xFF];
     float value2 = (map[component][ind2]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind2]&0xFF];
     float value3 = (map[component][ind3]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind3]&0xFF];
@@ -337,7 +341,8 @@ public class HDRImage extends ImageMap
   }
 
   /** Get the average value for a particular component, over the entire image. */
-  
+
+  @Override
   public float getAverageComponent(int component)
   {
     if (component >= 3)
@@ -345,17 +350,18 @@ public class HDRImage extends ImageMap
     return average[component];
   }
 
-  /** Get the color at a particular location.  The location is specified by x and y, 
-      which must lie between 0 and 1.  The color is averaged over a region of width 
-      (xsize, ysize).  wrapx and wrapy specify whether, for purposes of interpolation, the 
+  /** Get the color at a particular location.  The location is specified by x and y,
+      which must lie between 0 and 1.  The color is averaged over a region of width
+      (xsize, ysize).  wrapx and wrapy specify whether, for purposes of interpolation, the
       image should be treated as wrapping around so that opposite edges touch each other. */
 
+  @Override
   public void getColor(RGBColor theColor, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
     float frac;
     double size;
-    
+
     if (xsize*xscale[0] > ysize*yscale[0])
       size = xsize;
     else
@@ -364,7 +370,7 @@ public class HDRImage extends ImageMap
 
     // If size falls outside the range of scales spanned by the mipmaps, just use the first
     // or last one, as appropriate.
-    
+
     if (size <= scale[0])
       {
         getMapColor(theColor, 0, wrapx, wrapy, x, y);
@@ -375,9 +381,9 @@ public class HDRImage extends ImageMap
         getMapColor(theColor, maps.length-1,wrapx, wrapy, x, y);
         return;
       }
-    
+
     // Determine which mipmaps to use.
-    
+
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
     RGBColor tempColor = new RGBColor();
@@ -398,7 +404,7 @@ public class HDRImage extends ImageMap
     int w = width[which], h = height[which];
     float frac1, frac2, w1, w2, w3, w4;
     byte map[][] = maps[which];
-    
+
     // Determine which elements to interpolate between.
 
     frac1 = (float) (x*xscale[which]);
@@ -425,16 +431,16 @@ public class HDRImage extends ImageMap
     ind2 = i1+j2*w;
     ind3 = i2+j1*w;
     ind4 = i2+j2*w;
-    
+
     // Find the interpolation coefficients.
-    
+
     w1 = (1.0f-frac1)*(1.0f-frac2);
     w2 = (1.0f-frac1)*frac2;
     w3 = frac1*(1.0f-frac2);
     w4 = frac1*frac2;
-    
+
     // Calculate the final value for each component.
-    
+
     theColor.setERGB(map[0][ind1], map[1][ind1], map[2][ind1], map[3][ind1]);
     theColor.scale(w1);
     RGBColor tempColor = new RGBColor();
@@ -448,28 +454,29 @@ public class HDRImage extends ImageMap
     tempColor.scale(w4);
     theColor.add(tempColor);
   }
-  
-  /** Get the gradient of a single component at a particular location in the image.  
+
+  /** Get the gradient of a single component at a particular location in the image.
       The location is specified by x and y, which must lie between 0 and 1.  The value is
-      averaged over a region of width (xsize, ysize) before the gradient is calculated.  
-      wrapx and wrapy specify whether, for purposes of interpolation, the image should be 
+      averaged over a region of width (xsize, ysize) before the gradient is calculated.
+      wrapx and wrapy specify whether, for purposes of interpolation, the image should be
       treated as wrapping around so that opposite edges touch each other. */
-  
+
+  @Override
   public void getGradient(Vec2 grad, int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize)
   {
     int which;
     double frac;
     double size;
-    
+
     if (xsize*xscale[0] > ysize*yscale[0])
       size = xsize;
     else
       size = ysize;
     y = 1.0-y;
-    
+
     // If size falls outside the range of scales spanned by the mipmaps, just use the first
     // or last one, as appropriate.
-    
+
     if (size <= scale[0])
       {
         getMapGradient(grad, component, 0, wrapx, wrapy, x, y);
@@ -480,9 +487,9 @@ public class HDRImage extends ImageMap
         grad.set(0.0, 0.0);
         return;
       }
-    
+
     // Determine which mipmaps to use.
-    
+
     for (which = 0; size > scale[which+1]; which++);
     frac = (float) ((size-scale[which]) * scaleMult[which]);
     Vec2 tempVec = new Vec2();
@@ -504,7 +511,7 @@ public class HDRImage extends ImageMap
     int w = width[which], h = height[which];
     double frac1, frac2, v1, v2, v3, v4;
     byte map[][] = maps[which];
-    
+
     // Determine which elements to interpolate between.
 
     frac1 = x*xscale[which];
@@ -531,30 +538,31 @@ public class HDRImage extends ImageMap
     ind2 = i1+j2*w;
     ind3 = i2+j1*w;
     ind4 = i2+j2*w;
-    
+
     // Find the values at the four points.
-    
+
     v1 = (map[component][ind1]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind1]&0xFF];
     v2 = (map[component][ind2]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind2]&0xFF];
     v3 = (map[component][ind3]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind3]&0xFF];
     v4 = (map[component][ind4]&0xFF)*RGBColor.ERGB_EXP_SCALE[map[3][ind4]&0xFF];
-    
+
     // Calculate the final value.
-    
+
     grad.x = ((v3-v1)*(1.0-frac2) + (v4-v2)*frac2) * xscale[which];
     grad.y = ((v2-v1)*(1.0-frac1) + (v4-v3)*frac1) * yscale[which];
   }
 
   /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
       (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
-  
+
+  @Override
   public Image getPreview()
   {
     return preview;
   }
 
   /** Reconstruct an image from its serialized representation. */
-  
+
   public HDRImage(DataInputStream in) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
@@ -571,9 +579,10 @@ public class HDRImage extends ImageMap
     findAverage();
     createPreview();
   }
-  
+
   /** Serialize an image to an output stream. */
-  
+
+  @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
     out.writeShort(0);

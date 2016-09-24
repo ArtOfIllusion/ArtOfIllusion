@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -115,7 +115,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   void createMeshMenu(SplineMesh obj)
   {
     BMenu smoothMenu, closedMenu;
-    
+
     meshMenu = Translate.menu("mesh");
     menubar.add(meshMenu);
     meshMenuItem = new BMenuItem [8];
@@ -163,31 +163,33 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     skeletonMenu.add(skeletonMenuItem[5] = Translate.menuItem("unbindSkeleton", this, "unbindSkeletonCommand"));
     skeletonMenu.add(skeletonMenuItem[6] = Translate.checkboxMenuItem("detachSkeleton", this, "skeletonDetachedChanged", false));
   }
-  
+
   /** Get the object being edited in this window. */
-  
+
+  @Override
   public ObjectInfo getObject()
   {
     return objInfo;
   }
-  
+
   /** Set the object being edited in this window. */
-  
+
   public void setObject(Object3D obj)
   {
     objInfo.setObject(obj);
     objInfo.clearCachedMeshes();
   }
-  
+
   /** When the selection mode changes, do our best to convert the old selection to the new mode. */
-  
+
+  @Override
   public void setSelectionMode(int mode)
   {
     SplineMesh mesh = (SplineMesh) getObject().getObject();
     MeshVertex vert[] = mesh.getVertices();
     int i, j, usize = mesh.getUSize(), vsize = mesh.getVSize();
     boolean newSel[];
-    
+
     if (mode == selectMode)
       return;
     if (mode == POINT_MODE)
@@ -218,20 +220,23 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     if (modes.getSelection() != mode)
       modes.selectTool(modes.getTool(mode));
   }
-  
+
+  @Override
   public int getSelectionMode()
   {
     return selectMode;
   }
-  
+
   /** Get an array of flags telling which parts of the mesh are currently selected.  Depending
       on the current selection mode, these flags may correspond to vertices or curves. */
-  
+
+  @Override
   public boolean[] getSelection()
   {
     return selected;
   }
-  
+
+  @Override
   public void setSelection(boolean sel[])
   {
     selected = sel;
@@ -242,6 +247,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     repaint();
   }
 
+  @Override
   public int[] getSelectionDistance()
   {
     if (maxDistance != getTensionDistance())
@@ -257,12 +263,12 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     int i, j, k, usize = mesh.getUSize(), vsize = mesh.getVSize();
     boolean uclosed = mesh.isUClosed(), vclosed = mesh.isVClosed();
     int dist[] = new int [mesh.getVertices().length];
-    
+
     maxDistance = getTensionDistance();
-    
+
     // First, set each distance to 0 or -1, depending on whether that vertex is part of the
     // current selection.
-    
+
     if (selectMode == POINT_MODE)
       for (i = 0; i < dist.length; i++)
         dist[i] = selected[i] ? 0 : -1;
@@ -315,7 +321,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
             }
     selectionDistance = dist;
   }
-  
+
+  @Override
   public void setMesh(Mesh mesh)
   {
     SplineMesh obj = (SplineMesh) mesh;
@@ -336,6 +343,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   /* EditingWindow methods. */
 
+  @Override
   public void setTool(EditingTool tool)
   {
     if (tool instanceof GenericTool)
@@ -355,6 +363,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     }
   }
 
+  @Override
   public void updateImage()
   {
     if (lastSelectedJoint != ((MeshViewer) theView[currentView]).getSelectedJoint())
@@ -362,6 +371,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     super.updateImage();
   }
 
+  @Override
   public void updateMenus()
   {
     super.updateMenus();
@@ -369,7 +379,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     boolean curvemode = (selectMode == EDGE_MODE);
     MeshViewer view = (MeshViewer) theView[currentView];
     int count = 0;
-    
+
     for (int i = 0; i < selected.length; i++)
       if (selected[i])
         count++;
@@ -479,11 +489,13 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   /** Get the extra texture parameter which was added to the mesh to keep track of
       joint weighting. */
 
+  @Override
   public TextureParameter getJointWeightParam()
   {
     return jointWeightParam;
   }
 
+  @Override
   protected void doOk()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
@@ -508,7 +520,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     if (onClose != null)
       onClose.run();
   }
-  
+
+  @Override
   protected void doCancel()
   {
     oldMesh = null;
@@ -519,7 +532,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   {
     setFreehand((((BCheckBoxMenuItem) editMenuItem[2]).getState()));
   }
-  
+
   private void smoothingChanged(CommandEvent ev)
   {
     Object source = ev.getWidget();
@@ -527,7 +540,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       if (source == smoothItem[i])
         setSmoothingMethod(i+2);
   }
-  
+
   private void closedTypeChanged(CommandEvent ev)
   {
     Object source = ev.getWidget();
@@ -535,7 +548,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       if (source == closedItem[i])
         setClosed(i);
   }
-  
+
   private void skeletonDetachedChanged()
   {
     for (int i = 0; i < theView.length; i++)
@@ -573,7 +586,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   }
 
   /** Select the entire mesh. */
-  
+
   public void selectAllCommand()
   {
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, new Integer(selectMode), selected.clone()}));
@@ -617,9 +630,9 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       setSelection(newSelection);
     }
   }
-  
+
   /** Invert the current selection. */
-  
+
   public void invertSelectionCommand()
   {
     boolean newSel[] = new boolean [selected.length];
@@ -630,7 +643,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   }
 
   /** Delete the current selection. */
-  
+
+  @Override
   public void deleteCommand()
   {
     if (!topology)
@@ -684,7 +698,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     setMesh(theMesh);
     updateImage();
   }
-  
+
   void subdivideCommand()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
@@ -696,7 +710,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     int i, j, usplitcount = 0, vsplitcount = 0;
     int usize = theMesh.getUSize(), vsize = theMesh.getVSize();
     int numParam = (theMesh.getParameters() == null ? 0 : theMesh.getParameters().length);
-    
+
     if (selectMode != EDGE_MODE)
       return;
     for (i = 0; !selected[i] && i < selected.length; i++);
@@ -704,7 +718,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       return;
 
     // Determine which parts need to be subdivided.
-    
+
     if (theMesh.isUClosed())
       splitu = new boolean [usize];
     else
@@ -728,7 +742,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     newus = new float [usize+usplitcount];
     newvs = new float [vsize+vsplitcount];
     newsel = new boolean [selected.length+usplitcount+vsplitcount];
-    
+
     // Do the subdivision along the u direction.
 
     v = new MeshVertex [vsize][usize];
@@ -762,9 +776,9 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
           param[i][j][k] = newparam[j][i][k];
     newparam = new double [usize+usplitcount][vsize+vsplitcount][numParam];
     splitOneAxis(v, newv, vs, newvs, splitv, param, newparam, theMesh.isVClosed());
-    
+
     // Determine the new selection, and update the mesh.
-    
+
     for (i = 0, j = 0; i < usize; i++)
     {
       if (selected[i])
@@ -805,7 +819,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     int numParam = param[0][0].length;
     double paramTemp[] = new double [numParam];
     int i, j, k, p1, p3, p4;
-        
+
     for (i = 0, j = 0; i < split.length; i++)
     {
       p1 = i-1;
@@ -910,10 +924,10 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       return;
     for (which = 0; which < selected.length && !selected[which]; which++);
     if (which == selected.length)
-      return;    
-    
+      return;
+
     // Now find the sequence of vertices.
-    
+
     boolean closed;
     Vec3 v[];
     float smoothness[];
@@ -965,7 +979,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     final float usmoothness[] = theMesh.getUSmoothness(), vsmoothness[] = theMesh.getVSmoothness();
     float value;
     int i;
-    
+
     if (selectMode != EDGE_MODE)
       return;
     for (i = 0; i < selected.length && !selected[i]; i++);
@@ -994,7 +1008,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         updateImage();
       }
     } );
-    ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("setCurveSmoothness"), 
+    ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("setCurveSmoothness"),
         new Widget [] {smoothness}, new String [] {Translate.text("Smoothness")});
     if (dlg.clickedOk())
       setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, oldMesh}));
@@ -1023,7 +1037,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     for (int i = 0; i < smoothItem.length; i++)
       smoothItem[i].setState(false);
     smoothItem[method-2].setState(true);
-    theMesh.setSmoothingMethod(method);    
+    theMesh.setSmoothingMethod(method);
     objectChanged();
     updateImage();
   }
@@ -1042,7 +1056,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   /* Given a list of deltas which will be added to the selected vertices, calculate the
      corresponding deltas for the unselected vertices according to the mesh tension. */
-  
+
+  @Override
   public void adjustDeltas(Vec3 delta[])
   {
     int dist[] = getSelectionDistance(), count[] = new int [delta.length];
@@ -1050,7 +1065,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     int maxDistance = getTensionDistance(), usize = theMesh.getUSize(), vsize = theMesh.getVSize();
     double tension = getMeshTension(), scale[] = new double [maxDistance+1];
 
-    
+
     for (int i = 0; i < delta.length; i++)
       if (dist[i] != 0)
         delta[i].set(0.0, 0.0, 0.0);

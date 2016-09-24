@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -25,41 +25,46 @@ public class CreateSphereTool extends EditingTool
   private boolean shiftDown;
   private Point clickPoint;
   private ObjectInfo objInfo;
-  
+
   public CreateSphereTool(LayoutWindow fr)
   {
     super(fr);
     initButton("sphere");
   }
 
+  @Override
   public void activate()
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createSphereTool.helpText"));
   }
 
+  @Override
   public int whichClicks()
   {
     return ALL_CLICKS;
   }
 
+  @Override
   public String getToolTipText()
   {
     return Translate.text("createSphereTool.tipText");
   }
 
+  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();
     shiftDown = e.isShiftDown();
   }
-  
+
+  @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
     if (objInfo == null)
     {
       // Create the sphere.
-      
+
       Scene theScene = ((LayoutWindow) theWindow).getScene();
       objInfo = new ObjectInfo(new Sphere(1.0, 1.0, 1.0), new CoordinateSystem(), "Sphere "+(counter++));
       objInfo.addTrack(new PositionTrack(objInfo), 0);
@@ -71,14 +76,14 @@ public class CreateSphereTool extends EditingTool
       theWindow.setUndoRecord(undo);
       ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
     }
-    
+
     // Determine the size and position for the sphere.
-    
+
     Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
     Vec3 v1, v2, v3, orig, xdir, ydir, zdir;
     double xsize, ysize, zsize;
-    
+
     if (shiftDown)
     {
       if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
@@ -116,7 +121,7 @@ public class CreateSphereTool extends EditingTool
     zsize = Math.min(xsize, ysize);
 
     // Update the size and position, and redraw the display.
-    
+
     ((Sphere) objInfo.getObject()).setSize(xsize, ysize, zsize);
     objInfo.getCoords().setOrigin(orig);
     objInfo.getCoords().setOrientation(zdir, ydir);
@@ -124,7 +129,8 @@ public class CreateSphereTool extends EditingTool
     theWindow.setModified();
     theWindow.updateImage();
   }
-  
+
+  @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
     objInfo = null;

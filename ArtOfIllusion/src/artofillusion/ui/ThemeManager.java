@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Fran�ois Guillet
+/* Copyright (C) 2007 by François Guillet
    Some parts copyright 2007 by Peter Eastman
 
  This program is free software; you can redistribute it and/or modify it under the
@@ -41,7 +41,7 @@ import artofillusion.math.RGBColor;
  * various colors used in AoI GUI as well as the look and feel of some GUI
  * elements (eg buttons). In this respect, the theme manager is thus a factory of GUI elements.
  *
- * @author Fran�ois Guillet
+ * @author François Guillet
  *
  */
 public class ThemeManager {
@@ -50,7 +50,7 @@ public class ThemeManager {
     /**
      * This class hold all the colors used by a theme. A theme can propose several color sets.
      *
-     * @author Francois Guillet
+     * @author François Guillet
      *
      */
     public static class ColorSet {

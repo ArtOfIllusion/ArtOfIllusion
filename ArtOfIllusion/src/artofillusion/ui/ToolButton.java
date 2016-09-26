@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by François Guillet
+/* Copyright (C) 2007 by Fran√ßois Guillet
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software

@@ -1460,6 +1460,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     }
     if (treeDepth == 0)
       workspace.firstObjectHit = first.getObject();
+    //the intersection object backing 'first' might get recycled,
+    //but we still need the object for transmitted rays.
+    RTObject hitObject = first.getObject();
     dist = intersection.intersectionDist(0);
     totalDist += dist;
     intersection.trueNormal(trueNorm);
@@ -1564,7 +1567,6 @@ public class RaytracerRenderer implements Renderer, Runnable
       col.scale(transmittedScale);
       workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
       temp = workspace.ray[treeDepth].tempVec1;
-      RTObject hitObject = first.getObject();
       if (hitObject.getMaterialMapping() == null)
       {
         // Not a solid object, so the bulk material does not change.

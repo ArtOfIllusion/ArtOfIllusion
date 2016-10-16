@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2015 by Peter Eastman
+/* Copyright (C) 1999-2016 by Peter Eastman and Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -51,12 +51,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   TreeList itemTree;
   Scene theScene;
   BMenuBar menubar;
-  BMenu fileMenu, recentFilesMenu, editMenu, objectMenu, createMenu, toolsMenu, scriptMenu;
-  BMenu animationMenu, editKeyframeMenu,sceneMenu;
+  BMenu fileMenu, recentFilesMenu, editMenu, objectMenu, createMenu, toolsMenu, viewMenu, scriptMenu;
+  BMenu animationMenu, editKeyframeMenu, sceneMenu;
   BMenu addTrackMenu, positionTrackMenu, rotationTrackMenu, distortionMenu;
-  BMenuItem fileMenuItem[], editMenuItem[], objectMenuItem[], toolsMenuItem[];
-  BMenuItem animationMenuItem[], sceneMenuItem[], popupMenuItem[];
+  BMenuItem fileMenuItem[], editMenuItem[], objectMenuItem[], toolsMenuItem[], viewMenuItem[];
+  BMenuItem animationMenuItem[], popupMenuItem[];
   BCheckBoxMenuItem displayItem[];
+  BRadioButtonMenuItem viewModeItem[];
   BPopupMenu popupMenu;
   UndoStack undoStack;
   int numViewsShown, currentView;
@@ -200,6 +201,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     createObjectMenu();
     createAnimationMenu();
     createToolsMenu();
+    createViewMenu();
     createPopupMenu();
     preferences = Preferences.userNodeForPackage(getClass()).node("LayoutWindow");
     loadPreferences();
@@ -541,8 +543,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         return (o1.getName().compareTo(o2.getName()));
       }
     });
+	
     toolsMenu = Translate.menu("tools");
     menubar.add(toolsMenu);
+	
     toolsMenuItem = new BMenuItem [modellingTools.size()];
     for (int i = 0; i < modellingTools.size(); i++)
       {
@@ -557,6 +561,37 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     toolsMenu.add(Translate.menuItem("editScript", this, "actionPerformed"));
     toolsMenu.add(scriptMenu = Translate.menu("scripts"));
     rebuildScriptsMenu();
+  }
+  
+  /*
+    Creating the View menu. All viewmanipulation related menuitems and sub menus should be added here. 
+  */
+  private void createViewMenu()
+  {
+    BMenu displayMenu;
+	
+    viewMenu = Translate.menu("view");	
+	menubar.add(viewMenu);
+	viewMenuItem = new BMenuItem [5];	
+	
+	viewMenu.add(displayMenu = Translate.menu("displayMode"));
+    displayItem = new BCheckBoxMenuItem [6];
+    displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
+    displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_FLAT));
+    displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
+    displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
+	
+    viewMenu.add(viewMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
+    viewMenu.add(viewMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
+    viewMenu.add(Translate.menuItem("grid", this, "setGridCommand"));
+    viewMenu.add(viewMenuItem[2] = Translate.menuItem("showCoordinateAxes", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[3] = Translate.menuItem("showTemplate", this, "actionPerformed"));
+    viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
+    viewMenu.addSeparator();
+    viewMenu.add(viewMenuItem[4] = Translate.menuItem("frameSelection", this, "actionPerformed"));
+    viewMenu.add(Translate.menuItem("frameScene", this, "actionPerformed"));
   }
 
   /** Rebuild the list of tool scripts in the Tools menu.  This should be called whenever a
@@ -659,31 +694,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   private void createSceneMenu()
   {
-    BMenu displayMenu;
-
     sceneMenu = Translate.menu("scene");
     menubar.add(sceneMenu);
-    sceneMenuItem = new BMenuItem [5];
+
     sceneMenu.add(Translate.menuItem("renderScene", this, "renderCommand"));
     sceneMenu.add(Translate.menuItem("renderImmediately", this, "actionPerformed"));
-    sceneMenu.addSeparator();
-    sceneMenu.add(displayMenu = Translate.menu("displayMode"));
-    displayItem = new BCheckBoxMenuItem [6];
-    displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
-    displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_FLAT));
-    displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
-    displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
-    displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
-    displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
-    sceneMenu.add(sceneMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
-    sceneMenu.add(sceneMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
-    sceneMenu.add(Translate.menuItem("grid", this, "setGridCommand"));
-    sceneMenu.add(sceneMenuItem[2] = Translate.menuItem("showCoordinateAxes", this, "actionPerformed"));
-    sceneMenu.add(sceneMenuItem[3] = Translate.menuItem("showTemplate", this, "actionPerformed"));
-    sceneMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
-    sceneMenu.addSeparator();
-    sceneMenu.add(sceneMenuItem[4] = Translate.menuItem("frameSelection", this, "actionPerformed"));
-    sceneMenu.add(Translate.menuItem("frameScene", this, "actionPerformed"));
+
     sceneMenu.addSeparator();
     sceneMenu.add(Translate.menuItem("textures", this, "texturesCommand"));
     sceneMenu.add(Translate.menuItem("images", this, "actionPerformed"));
@@ -814,6 +830,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     return toolsMenu;
   }
 
+  /** Get the View menu. */
+
+  public BMenu getViewMenu()
+  {
+    return viewMenu;
+  }
+  
   /** Get the popup menu. */
 
   public BPopupMenu getPopupMenu()
@@ -1016,11 +1039,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenuItem[12].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
     addTrackMenu.setEnabled(numSelObjects > 0);
     distortionMenu.setEnabled(sel.length > 0);
-    sceneMenuItem[1].setText(Translate.text(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0 ? "menu.showObjectList" : "menu.hideObjectList"));
-    sceneMenuItem[2].setText(Translate.text(view.getShowAxes() ? "menu.hideCoordinateAxes" : "menu.showCoordinateAxes"));
-    sceneMenuItem[3].setEnabled(view.getTemplateImage() != null); // Show template
-    sceneMenuItem[3].setText(Translate.text(view.getTemplateShown() ? "menu.hideTemplate" : "menu.showTemplate"));
-    sceneMenuItem[4].setEnabled(sel.length > 0); // Frame Selection With Camera
+	
+    viewMenuItem[1].setText(Translate.text(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0 ? "menu.showObjectList" : "menu.hideObjectList"));
+    viewMenuItem[2].setText(Translate.text(view.getShowAxes() ? "menu.hideCoordinateAxes" : "menu.showCoordinateAxes"));
+    viewMenuItem[3].setEnabled(view.getTemplateImage() != null); // Show template
+    viewMenuItem[3].setText(Translate.text(view.getTemplateShown() ? "menu.hideTemplate" : "menu.showTemplate"));
+    viewMenuItem[4].setEnabled(sel.length > 0); // Frame Selection With Camera
+	
     displayItem[0].setState(view.getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
     displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
     displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
@@ -1556,29 +1581,34 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           RenderSetupDialog.renderImmediately(this, theScene);
         else if (command.equals("hideObjectList"))
           setObjectListVisible(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0);
-        else if (command.equals("showCoordinateAxes"))
-          {
-            boolean wasShown = theView[currentView].getShowAxes();
-            for (int i = 0; i < theView.length; i++)
-              theView[i].setShowAxes(!wasShown);
-            savePreferences();
-            updateImage();
-            updateMenus();
-          }
-        else if (command.equals("showTemplate"))
-          {
-            boolean wasShown = theView[currentView].getTemplateShown();
-            theView[currentView].setShowTemplate(!wasShown);
-            updateImage();
-            updateMenus();
-          }
-        else if (command.equals("frameSelection"))
-          frameWithCameraCommand(true);
-        else if (command.equals("frameScene"))
-          frameWithCameraCommand(false);
         else if (command.equals("images"))
           new ImagesDialog(this, theScene, null);
       }
+	 
+	else if (menu == viewMenu)
+	{
+	  if (command.equals("showCoordinateAxes"))
+      {
+        boolean wasShown = theView[currentView].getShowAxes();
+        for (int i = 0; i < theView.length; i++)
+          theView[i].setShowAxes(!wasShown);
+        savePreferences();
+        updateImage();
+        updateMenus();
+      }
+      else if (command.equals("showTemplate"))
+      {
+        boolean wasShown = theView[currentView].getTemplateShown();
+        theView[currentView].setShowTemplate(!wasShown);
+        updateImage();
+        updateMenus();
+      }
+      else if (command.equals("frameSelection"))
+        frameWithCameraCommand(true);
+      else if (command.equals("frameScene"))
+        frameWithCameraCommand(false);
+	}
+
     else if (menu == popupMenu)
       {
         if (command.equals("selectChildren"))
@@ -2658,7 +2688,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       viewsContainer.setColumnWeight(1, (currentView == 1 || currentView == 3) ? 1 : 0);
       viewsContainer.setRowWeight(0, (currentView == 0 || currentView == 1) ? 1 : 0);
       viewsContainer.setRowWeight(1, (currentView == 2 || currentView == 3) ? 1 : 0);
-      sceneMenuItem[0].setText(Translate.text("menu.fourViews"));
+      viewMenuItem[0].setText(Translate.text("menu.fourViews"));
     }
     else
     {
@@ -2667,7 +2697,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       viewsContainer.setColumnWeight(1, 1);
       viewsContainer.setRowWeight(0, 1);
       viewsContainer.setRowWeight(1, 1);
-      sceneMenuItem[0].setText(Translate.text("menu.oneView"));
+      viewMenuItem[0].setText(Translate.text("menu.oneView"));
     }
     viewsContainer.layoutChildren();
     savePreferences();

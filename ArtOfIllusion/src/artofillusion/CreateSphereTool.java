@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -101,9 +102,9 @@ public class CreateSphereTool extends EditingTool
           dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
       }
     }
-    v1 = cam.convertScreenToWorld(clickPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN);
-    v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), Camera.DEFAULT_DISTANCE_TO_SCREEN);
-    v3 = cam.convertScreenToWorld(dragPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN);
+    v1 = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
+    v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), view.getDistToPlane());
+    v3 = cam.convertScreenToWorld(dragPoint, view.getDistToPlane());
     orig = v1.plus(v3).times(0.5);
     if (dragPoint.x < clickPoint.x)
       xdir = v1.minus(v2);

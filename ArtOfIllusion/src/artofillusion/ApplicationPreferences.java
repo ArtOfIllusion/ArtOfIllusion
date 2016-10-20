@@ -142,7 +142,7 @@ public class ApplicationPreferences
     useCompoundMeshTool = false;
     reverseZooming = false;
 	useViewAnimations = true;
-	maxAnimationDuration = 1.2;
+	maxAnimationDuration = 1.0;
 	animationFrameRate = 60.0;
   }
 

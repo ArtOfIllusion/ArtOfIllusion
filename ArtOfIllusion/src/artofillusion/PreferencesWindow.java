@@ -29,7 +29,7 @@ public class PreferencesWindow
   private BCheckBox glBox, backupBox, reverseZoomBox, useViewAnimationsBox;
   private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
-
+  private Object chageBox;
   public PreferencesWindow(BFrame parent)
   {
     BTabbedPane tabs = new BTabbedPane();
@@ -38,6 +38,7 @@ public class PreferencesWindow
     tabs.add(keystrokePanel, Translate.text("shortcuts"));
     tabs.setSelectedTab(lastTab);
     boolean done = false;
+
     while (!done)
     {
       PanelDialog dlg = new PanelDialog(parent, Translate.text("prefsTitle"), tabs);
@@ -115,10 +116,13 @@ public class PreferencesWindow
     glBox.setEnabled(ViewerCanvas.isOpenGLAvailable());
     backupBox = new BCheckBox(Translate.text("keepBackupFiles"), prefs.getKeepBackupFiles());
     reverseZoomBox  = new BCheckBox(Translate.text("reverseScrollWheelZooming"), prefs.getReverseZooming());
-	
+
 	useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
 	animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
 	animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
+
+	//useViewAnimationsBox.addEventLink(ValueChangedEvent.class, this, "useViewAnimationsChanged");
+	//animationDurationField.addEventLink(ValueChangedEvent.class, this, "animationDurationChanged");
 
     List allThemes = ThemeManager.getThemes();
     themes = new ArrayList<ThemeManager.ThemeInfo>();
@@ -202,7 +206,7 @@ public class PreferencesWindow
 	panel.add(Translate.label("animationFrameRate"), 0, 15, labelLayout);
 	panel.add(animationDurationField, 1, 14, widgetLayout);
 	panel.add(animationFrameRateField, 1, 15, widgetLayout);
-	animationDurationField.setEnabled(false);
+	//animationDurationField.setEnabled(false);
 	animationFrameRateField.setEnabled(false);
     return panel;
   }

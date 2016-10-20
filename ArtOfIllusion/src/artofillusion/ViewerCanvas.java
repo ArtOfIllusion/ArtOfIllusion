@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,12 +30,13 @@ import java.util.List;
 
 public abstract class ViewerCanvas extends CustomWidget
 {
+
   protected Camera theCamera;
   protected ObjectInfo boundCamera;
   protected EditingTool currentTool, activeTool, metaTool, altTool;
   protected PopupMenuManager popupManager;
-  protected int renderMode, gridSubdivisions, orientation;
-  protected double gridSpacing, scale;
+  protected int renderMode, gridSubdivisions, orientation, navigationMode;
+  protected double gridSpacing, scale, distToPlane;
   protected boolean perspective, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected ActionProcessor mouseProcessor;
   protected Image templateImage, renderedImage;
@@ -42,7 +44,9 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Dimension prefSize;
   protected Map<ViewerControl,Widget> controlMap;
   protected Vec3 rotationCenter;
-
+  protected ViewAnimation animation;
+  protected	ClickedPointFinder finder;
+  
   protected final ViewChangedEvent viewChangedEvent;
 
   private static boolean openGLAvailable;
@@ -89,6 +93,11 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int VIEW_BOTTOM = 5;
   public static final int VIEW_OTHER = Integer.MAX_VALUE;
 
+  public static final int NAVIGATE_MODEL_SPACE = 0;
+  public static final int NAVIGATE_MODEL_LANDSCAPE = 1;
+  public static final int NAVIGATE_TRAVEL_SPACE = 2;
+  public static final int NAVIGATE_TRAVEL_LANDSCAPE = 3;
+  
   public ViewerCanvas()
   {
     this(ArtOfIllusion.getPreferences().getUseOpenGL() && openGLAvailable);
@@ -101,7 +110,11 @@ public abstract class ViewerCanvas extends CustomWidget
     controlMap = new HashMap<ViewerControl,Widget>();
     theCamera = new Camera();
     theCamera.setCameraCoordinates(coords);
+	animation = new ViewAnimation();
+	finder = new ClickedPointFinder();
     setBackground(backgroundColor);
+	setRotationCenter(new Vec3());
+	setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
     if (useOpenGL)
     {
       try
@@ -204,28 +217,19 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
-  protected void processMouseScrolled(MouseScrolledEvent ev)
+  /**
+      Scrolling the mouse wheel is handled in the MoveViewTool, which is the 
+	  default metaTool for subclasses of Editing Windows.
+	  
+	  Any metaTool should have a mouseScrolled method.
+	  MouseScrolledEvent comes from buoy.event.*
+  */
+  
+  protected void processMouseScrolled(MouseScrolledEvent e)
   {
-    int amount = ev.getWheelRotation();
-    if (!ev.isAltDown())
-      amount *= 10;
-    if (ArtOfIllusion.getPreferences().getReverseZooming())
-      amount *= -1;
-    if (isPerspective())
-    {
-      CoordinateSystem coords = theCamera.getCameraCoordinates();
-      Vec3 delta = coords.getZDirection().times(-0.1*amount);
-      coords.setOrigin(coords.getOrigin().plus(delta));
-      theCamera.setCameraCoordinates(coords);
-      viewChanged(false);
-      repaint();
-    }
-    else
-    {
-      setScale(getScale()*Math.pow(0.99, amount));
-    }
+	metaTool.mouseScrolled(e, this);
   }
-
+  
   /** Subclasses should override this to handle events. */
 
   protected void mousePressed(WidgetMouseEvent ev)
@@ -241,6 +245,16 @@ public abstract class ViewerCanvas extends CustomWidget
   /** Subclasses should override this to handle events. */
 
   protected void mouseReleased(WidgetMouseEvent ev)
+  {
+  }
+  
+  /** 
+   *  Subclasses should override this to handle different content. 
+   *
+   *  The method should find a new scale, camera location, and rotationCenter and then 
+   *  call animation.start(). 
+   */
+  public void fitToSelection()
   {
   }
 
@@ -315,14 +329,50 @@ public abstract class ViewerCanvas extends CustomWidget
     altTool = tool;
   }
 
-  /** Set whether to display perspective or parallel mode. */
+	/** Set whether to display perspective or parallel mode. 
+	 *
+	 * When the mode changes the view scale and camera distance from 
+	 * drawing plane are recalculated so that the perceived scale on 
+	 * the plane does not change
+	 */
+	 
+	public void setPerspective(boolean perspective)
+	{
+		// don't recalculate if not necessary
+		if (this.perspective == perspective)
+			return;
+	
+		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
+		if(perspective)
+		{
+			// converting scale to distance
+			distToPlane = 2000.0/scale;	
+			scale = 100;
 
-  public void setPerspective(boolean perspective)
-  {
-    this.perspective = perspective;
-    viewChanged(false);
-    repaint();
-  }
+			// repositioning camera
+			Vec3 cz = new Vec3(coords.getZDirection());
+			Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
+			coords.setOrigin(cp);
+			System.out.println(coords.getOrigin());
+			theCamera.setCameraCoordinates(coords);
+			//theCamera.getCameraCoordinates().setOrigin(cp);	// This did not work 100%		
+		}
+		else
+		{
+			// converting distance to scale
+			scale = 2000.0/distToPlane; // This should probably be 'default scale * theCamera.distToScreen / distToPlane'
+			distToPlane = Camera.DEFAULT_DISTANCE_TO_SCREEN;
+
+			// repositioning camera
+			Vec3 cz = coords.getZDirection();
+			Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
+			coords.setOrigin(cp);
+			theCamera.setCameraCoordinates(coords);
+		}
+		this.perspective = perspective;
+		viewChanged(false);
+		repaint();
+	}
 
   /** Determine whether the view is currently is perspective mode. */
 
@@ -436,7 +486,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   * Set the location around which the view should be rotated.  This may be null, in which case the value
+   * Set the location around which the view should be rotated. This may be null, in which case the value
    * returned by {@link #getDefaultRotationCenter()} will be used instead.
    */
 
@@ -446,17 +496,77 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   * Get the default location around which the view should be rotated.  This value will be used if
-   * {@link #getRotationCenter()} returns null.
+   * This method will be called if {@link #getRotationCenter()} returns null. 
+   * 
+   * It should be made sure that the rotation center is always known and never null, but if 
+   * null is returned this recreates it and returns the new value
    */
 
   public Vec3 getDefaultRotationCenter()
   {
     CoordinateSystem coords = theCamera.getCameraCoordinates();
     double distToCenter = -coords.getZDirection().dot(coords.getOrigin());
-    return coords.getOrigin().plus(coords.getZDirection().times(distToCenter));
+	setRotationCenter(coords.getOrigin().plus(coords.getZDirection().times(distToCenter)));
+    return getRotationCenter();
   }
 
+  /** 
+   * Set the distance from camera to drawing plane 
+   * 
+   * The rotation center should be set onto the drawing plane on Camera Z-axis. 
+   * This has to be done separately. The viewerCanvas does not make that happen automatically.
+   */
+
+  public void setDistToPlane(double dist)
+  {
+	distToPlane = dist;
+  }
+
+  /** Get the distance from camera to drawing plane */
+  public double getDistToPlane()
+  {
+	return distToPlane;
+  }
+
+  /** Get the currently used navigation mode */
+  public int getNavigationMode()
+  {
+    return navigationMode;
+  }
+ 
+  /** 
+   * Set navigation mode 
+   *
+   * @ param mode may be one of
+   *   NAVIGATE_MODEL_SPACE = 0;
+   *   NAVIGATE_MODEL_LANDSCAPE = 1;
+   *   NAVIGATE_TRAVEL_SPACE = 2;
+   *   NAVIGATE_TRAVEL_LANDSCAPE = 3;
+   * 
+   * Setting the value higher than 3 will have MoveViewTool and RotateViewTool ignore mouse commands. 
+   * This may be helpful for plug-in added navigation modes.
+   *
+   * If the view is in tilted orientation and then set to 'landscape' the tilt angle will be reset
+   * and the view set to y = up.
+   */
+   
+  public void setNavigationMode(int mode)
+  {
+	if (mode != navigationMode){
+	  if ((navigationMode == 0 || navigationMode == 2)&&(mode == 1 || mode == 3))
+      {
+		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
+		Vec3 z  = coords.getZDirection();
+		// Camera camera is aligned with model z-axis it should be OK to landscape modes
+		if (z.x != 0.0 && z.y != 0.0){
+			coords.setOrientation(z, new Vec3(0,1,0));
+			animation.start(this, coords, rotationCenter, scale, orientation);
+		}
+	  }
+	  navigationMode = mode;
+    }
+  }
+  
   /** Set the PopupMenuManager for this canvas. */
 
   public void setPopupMenuManager(PopupMenuManager manager)
@@ -475,6 +585,9 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
+  
+  /** I wonder, what this does....*/
+  
   public void adjustCamera(boolean perspective)
   {
     Rectangle bounds = getBounds();
@@ -843,54 +956,67 @@ public abstract class ViewerCanvas extends CustomWidget
     return orientation;
   }
 
-  /** Set the view orientation to any of the values shown in the choice menu. */
+  /** 
+   *  Set the view orientation to any of the values shown in the drop-down menu. 
+   *
+   *  This method calls the ViewAnimation to perform the turn.
+   */
 
   public void setOrientation(int which)
   {
-    orientation = which;
-    if (which > 5 && which != VIEW_OTHER)
-      return;
-    CoordinateSystem coords = theCamera.getCameraCoordinates();
-    double dist = theCamera.getDistToScreen();
-    Vec3 center = coords.getOrigin().plus(coords.getZDirection().times(dist));
-
+	if (orientation == which)
+		return;
+    if (which > 5){
+		orientation = which;
+		viewChanged(false);
+		return;
+	}
+	CoordinateSystem coords = new CoordinateSystem();
+	Vec3 center = new Vec3(getRotationCenter());
     if (which == 0)             // Front
     {
-      center.z += dist;
+      center.z += distToPlane;
       coords = new CoordinateSystem(center, new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     }
     else if (which == 1)        // Back
     {
-      center.z -= dist;
+      center.z -= distToPlane;
       coords = new CoordinateSystem(center, Vec3.vz(), Vec3.vy());
     }
     else if (which == 2)        // Left
     {
-      center.x -= dist;
+      center.x -= distToPlane;
       coords = new CoordinateSystem(center, Vec3.vx(), Vec3.vy());
     }
     else if (which == 3)        // Right
     {
-      center.x += dist;
+      center.x += distToPlane;
       coords = new CoordinateSystem(center, new Vec3(-1.0, 0.0, 0.0), Vec3.vy());
     }
     else if (which == 4)        // Top
     {
-      center.y += dist;
+      center.y += distToPlane;
       coords = new CoordinateSystem(center, new Vec3(0.0, -1.0, 0.0), new Vec3(0.0, 0.0, -1.0));
     }
     else if (which == 5)        // Bottom
     {
-      center.y -= dist;
+      center.y -= distToPlane;
       coords = new CoordinateSystem(center, Vec3.vy(), Vec3.vz());
     }
-    theCamera.setCameraCoordinates(coords);
-    viewChanged(false);
-    repaint();
+	
+	animation.start(this, coords, rotationCenter, scale, which);
   }
 
+  /** 
+   *  ViewAnimation calls this when the animation is finished, 
+   *  so the menu will be up to date.
+   */
+  public void finishOrientation(int which)
+  {
+    orientation = which;
+  }
+  
   /** If there is a camera bound to this view, copy the coordinates from it. */
-
   public void copyOrientationFromCamera()
   {
     if (boundCamera == null)
@@ -898,6 +1024,21 @@ public abstract class ViewerCanvas extends CustomWidget
     CoordinateSystem coords = theCamera.getCameraCoordinates();
     coords.copyCoords(boundCamera.getCoords());
     theCamera.setCameraCoordinates(coords);
+  }
+
+  /** Subclasses need to override to handle local coordinates */
+  public void centerToPoint(Point pointOnView)
+  {
+    // Need to get ris of this eventually
+	// Should figure out how the Scene Camera works...
+	if (getBoundCamera() != null) return;
+	
+	Vec3 pointInSpace = finder.newPoint(this, pointOnView);
+	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate(); 
+	Vec3 cz = coords.getZDirection();
+	Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
+	coords.setOrigin(cp);
+	animation.start(this, coords, pointInSpace, scale, orientation);
   }
 
   /** Show feedback to the user in response to a mouse drag, by drawing a Shape over the

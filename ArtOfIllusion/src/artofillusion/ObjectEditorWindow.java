@@ -119,14 +119,18 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    theView[3].setPerspective(true);
-    theView[currentView].setDrawFocus(true);
+	theView[3].setPerspective(true);
+	theView[3].setNavigationMode(1);
     viewsContainer.add(viewPanel[0], 0, 0);
     viewsContainer.add(viewPanel[1], 1, 0);
     viewsContainer.add(viewPanel[2], 0, 1);
     viewsContainer.add(viewPanel[3], 1, 1);
+	theView[currentView].setDrawFocus(true);
+
     menubar = new BMenuBar();
     setMenuBar(menubar);
+	//theView[3].viewChanged(false); //No help
+	//updateImage(); //No help
   }
 
   /**

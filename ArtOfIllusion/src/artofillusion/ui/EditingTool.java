@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes Copyright 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -142,6 +143,10 @@ public abstract class EditingTool
   }
   
   public void mouseMoved(WidgetMouseEvent e, ViewerCanvas view)
+  {
+  }
+  
+  public void mouseScrolled(MouseScrolledEvent e, ViewerCanvas view)
   {
   }
   

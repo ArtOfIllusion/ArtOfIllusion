@@ -14,6 +14,7 @@ import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.view.ClickedPointFinder;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -96,6 +97,22 @@ public abstract class ObjectViewer extends ViewerCanvas
     return new double [] {min, max};
   }
 
+  @Override
+  public void centerToPoint(Point pointOnView)
+  {	
+	ClickedPointFinder finder = new ClickedPointFinder();
+	Vec3 pointInSpace = finder.newPoint(this, pointOnView);
+
+    Mat4 t = this.getDisplayCoordinates().fromLocal();
+	pointInSpace = t.times(pointInSpace);
+
+	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate(); 
+	Vec3 cz = coords.getZDirection();
+	Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
+	coords.setOrigin(cp);
+	animation.start(this, coords, pointInSpace, scale, orientation);
+  }
+  
   @Override
   public void viewChanged(boolean selectionOnly)
   {

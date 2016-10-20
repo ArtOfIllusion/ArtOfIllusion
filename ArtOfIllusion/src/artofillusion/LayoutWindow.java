@@ -1,5 +1,7 @@
-/* Copyright (C) 1999-2016 by Peter Eastman and Petri Ihalainen
+/* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes Copyrigh (C) 2016 by Petri Ihalainen
+
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -119,11 +121,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(MousePressedEvent.class, listen);
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
+	  theView[i].setNavigationMode(1);
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
     theView[3].setOrientation(6);
     theView[3].setPerspective(true);
+
     theView[currentView].setDrawFocus(true);
     viewsContainer = new FormContainer(new double [] {1, 1}, new double [] {1, 1});
     viewsContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
@@ -563,6 +567,37 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     toolsMenu.add(Translate.menuItem("editScript", this, "actionPerformed"));
     toolsMenu.add(scriptMenu = Translate.menu("scripts"));
     rebuildScriptsMenu();
+  }
+  
+  /*
+    Creating the View menu. All viewmanipulation related menuitems and sub menus should be added here. 
+  */
+  private void createViewMenu()
+  {
+    BMenu displayMenu, navigationMenu;
+
+    viewMenu = Translate.menu("view");	
+	menubar.add(viewMenu);
+	viewMenuItem = new BMenuItem [5];	
+
+	viewMenu.add(displayMenu = Translate.menu("displayMode"));
+    displayItem = new BCheckBoxMenuItem [6];
+    displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
+    displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_FLAT));
+    displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
+    displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
+
+    viewMenu.add(viewMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
+    viewMenu.add(viewMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
+    viewMenu.add(Translate.menuItem("grid", this, "setGridCommand"));
+    viewMenu.add(viewMenuItem[2] = Translate.menuItem("showCoordinateAxes", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[3] = Translate.menuItem("showTemplate", this, "actionPerformed"));
+    viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
+    viewMenu.addSeparator();
+    viewMenu.add(viewMenuItem[4] = Translate.menuItem("frameSelection", this, "actionPerformed"));
+    viewMenu.add(Translate.menuItem("frameScene", this, "actionPerformed"));
   }
   
   /*

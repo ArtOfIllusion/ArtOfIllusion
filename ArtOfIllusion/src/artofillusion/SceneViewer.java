@@ -117,7 +117,7 @@ public class SceneViewer extends ViewerCanvas
       viewChanged(false);
     }
   }
-
+  
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
@@ -659,24 +659,6 @@ public class SceneViewer extends ViewerCanvas
 	  }
 	} );
     }
-  }
-
-  @Override
-  protected void processMouseScrolled(MouseScrolledEvent ev)
-  {
-    if (isPerspective() && boundCamera != null)
-    {
-      // We are moving an actual camera in the scene, so we need to set an undo record, move
-      // its children, and repaint all views in the window.
-
-      UndoRecord undo = new UndoRecord(getEditingWindow(), false);
-      super.processMouseScrolled(ev);
-      moveChildren(boundCamera, theCamera.getCameraCoordinates().fromLocal().times(boundCamera.getCoords().toLocal()), undo);
-      getEditingWindow().setUndoRecord(undo);
-      getEditingWindow().updateImage();
-    }
-    else
-      super.processMouseScrolled(ev);
   }
 
   /** This is called recursively to move any children of a bound camera. */

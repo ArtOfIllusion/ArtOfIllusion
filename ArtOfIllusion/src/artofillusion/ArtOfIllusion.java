@@ -202,7 +202,8 @@ public class ArtOfIllusion
     ViewerCanvas.addViewerControl(new ViewerOrientationControl());
     ViewerCanvas.addViewerControl(new ViewerPerspectiveControl());
     ViewerCanvas.addViewerControl(new ViewerScaleControl());
-    
+    ViewerCanvas.addViewerControl(new ViewerNavigationControl());
+
     for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
     {
       try

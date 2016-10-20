@@ -8,27 +8,29 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.view;
 
-//import artofillusion.*;
+import artofillusion.*;
 import artofillusion.math.*;
 import javax.swing.*;
 import java.awt.event.*;
 
 /**
-	ViewAnimation is the animation engine, that is used to produce smooth swithcing between 
-	view orientations and other automated moves. It sets the animation to happen within a 
-	maximum duration so that shorter transitions happen at slower speed than larger ones, 
-	but still take less time to perform.
+	ViewAnimation is the animation engine, that is used to produce eg. smooth swithcing between 
+	view orientations. It sets the animation to happen within a maximum duration so that shorter 
+	transitions happen at slower speed than larger ones, but still take less time to perform.
 	
-	ViewAniamiton checks from user preferences if the user wants to use animations or not. 
-	Generally speaking the coalsce setting should take care, that even with heavier scenes on 
-	slower hardware the animation does not consume more time than the setting allows. It 
-	just uses fewer frames.
+	ViewAnimation checks from user preferences if the user wants to use animations or not.
+	
+	The coalesce setting should take care, that even with heavier scenes on slower hardware the 
+	animation does not consume more time than the setting allows. It just uses fewer frames.
+	
+	ViewAnimation also takes care of sending ViewChanged a event and repainting the 
+	view after the animation is done. 
 */
 
 public class ViewAnimation
-{
+{	
 	boolean animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	double maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
 	double displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
@@ -41,7 +43,6 @@ public class ViewAnimation
 	Vec3 rotEnd, rotStart, rotAni, aniZ, aniOrigin;
 	ViewerCanvas view;
 	Camera cam;
-	//ViewParameters p;
 	double[] startAngles, endAngles;
 	double startDist, endDist, aniDist, distanceFactor, moveDist; 
 	double startWeightLin, endWeightLin, startWeightExp, endWeightExp;
@@ -70,45 +71,47 @@ public class ViewAnimation
 			}
 		});
 	
-	/** Create an animation engine */
-	
+	/** 
+	 * Create an animation engine.
+	 * Each view should have one of it's own.
+	 */
 	public void ViewAnimation(){}
 
-	/** Start the animation sequence */
-	
-	// There are no viewparameter lists currently available
-	//public void start(ViewerCanvas v0, ViewParameters p0, CoordinateSystem c1, Vec3 rotationCenter, double newScale, int orientation)
+	/** 
+	 * Start the animation sequence 
+	 */
 	public void start(ViewerCanvas view, CoordinateSystem newCoords, Vec3 newRotationCenter, double newScale, int newOrientation)
 	{
+		checkPreferences(); // This only works for the 'animate'
 		this.view = view;
-		// p = p0; // Not used ... 
 		endCoords = newCoords;
 		rotEnd = newRotationCenter;		
 		endScale = newScale;
 		endOrientation = newOrientation;
 		cam = view.getCamera();
-		
+
 		if (! animate)
 		{
-			endAnimation();
+			endAnimation(); // Go directly to the last frame
 			return;
 		}
-		
+
 		startCoords = cam.getCameraCoordinates().duplicate();
 		aniCoords = startCoords.duplicate();
 		rotStart = view.getRotationCenter(); // get from view
 		startScale = view.getScale(); // get from view
 
-		step = firstStep;
+		if (noMove())
+			return;
 
 		startAngles = startCoords.getRotationAngles();
 		endAngles = endCoords.getRotationAngles();
 		startDist = (startCoords.getOrigin().minus(rotStart).length());
 		endDist  = (endCoords.getOrigin().minus(rotEnd).length());
 		aniDist = startDist;
-		
 		moveDist = (rotEnd.minus(rotStart).length());
-		
+		step = firstStep;
+
 		// CHECKING ROTATIONS
 		//========================
 		// These are here because the logic in angles of Bottom view differs from Top and Front
@@ -155,7 +158,6 @@ public class ViewAnimation
 			timeDist = maxDuration*(1.0-endDist/(endDist+distSlope*(startDist-endDist)));
 			
 		timeMove = 0.0;
-
 		if (view.isPerspective())
 		{
 			double pixS = moveDist*2000/startDist;
@@ -185,27 +187,20 @@ public class ViewAnimation
 		if (timeAni == 0.0) // zero for time = nothing moves & division by zero next --> Blank view.
 			return;
 		
-		steps = (int)(timeAni/interval);
-
+		steps = (int)(timeAni/interval);		
 		scalingFactor = Math.pow((endScale/startScale),(1.0/steps));
 		distanceFactor = Math.pow((endDist/startDist),(1.0/steps));
-		
+
+		// Now we  know all we need to know to launch the animation sequence.
+		// Restart because the previous move could still be running.	
 		view.setOrientation(ViewerCanvas.VIEW_OTHER); // in case the move is interrupted
-				
-		// Now we  know all we need to know to
-		// launch the animation sequence.
-		
-		// msStart = System.currentTimeMillis();
-		timer.restart(); // restart because the previous move could still be running
+		timer.restart();
 	}
 
 	/* Play one step of the animation */
-	
+
 	private void animationStep()
 	{	
-		//if (step == firstStep) ms1st = System.currentTimeMillis();
-		//msLast = System.currentTimeMillis();
-
 		startWeightLin = (double)(steps-step)/(double)steps;
 		endWeightLin = (double)step/(double)steps;
 		
@@ -256,21 +251,22 @@ public class ViewAnimation
 		step++;
 	}
 
-	/* When all the steps of an animation have been played clean the environment */
-	
+	/* When all the steps of an animation have been played */
+
 	private void endAnimation()
 	{
 		timer.stop();
-		//msEnd = System.currentTimeMillis();
-		view.setOrientation(endOrientation);
+		view.finishOrientation(endOrientation);
 		cam.setCameraCoordinates(endCoords);
 		view.setScale(endScale);
 		view.setRotationCenter(rotEnd);
-		view.updateImage();
+		view.repaint();
+		//view.updateImage();
+		view.viewChanged(false);
 	}
-	
+
 	/* Check if there is anything that should move */
-	
+
 	private boolean noMove()
 	{
 		if (! rotStart.equals(rotEnd)) return false;
@@ -279,10 +275,20 @@ public class ViewAnimation
 		if (startAngles[1] != endAngles[1]) return false;
 		if (startAngles[2] != endAngles[2]) return false;
 		if (startScale != endScale) return false;
-		
 		return true;
 	}
-	
+
+	private void checkPreferences()
+	{
+		// This only works for the boolean to take effect immediately
+		// Don't know why?
+		animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
+		
+		//maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
+		//displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
+		//interval = maxDuration/displayFrq; //
+		//timerInterval =(int)(interval*900); // to milliseconds but make it 10% ahead of time
+	}
 /*
 	// Not used
 	public void stop()
@@ -291,5 +297,4 @@ public class ViewAnimation
 		step=0;
 	}
 */
-
 }

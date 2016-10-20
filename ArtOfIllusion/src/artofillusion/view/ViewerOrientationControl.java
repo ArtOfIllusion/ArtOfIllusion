@@ -28,7 +28,6 @@ public class ViewerOrientationControl implements ViewerControl
     return new OrientationChoice(view);
   }
 
-
   @Override
   public String getName()
   {

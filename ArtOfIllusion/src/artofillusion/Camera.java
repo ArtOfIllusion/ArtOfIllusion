@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,20 +55,22 @@ public class Camera implements Cloneable
   /**
    * Set the distance from the camera to the screen.
    *
-   * @deprecated use setScreenParams() instead
+   * The distToScreen parameter controls the perpective strength. Smaller value means 
+   * stronger perspective and vice versa. It is also used to track mouse moves from 
+   * scene to view in perspective mode. Hence the moves need to be corrected to match 
+   * the desired distance to draving plane: 
+   * <pre>
+   *   Vec3 captudredMove, trueMove;
+   *   trueMove = captudredMove.times(distToPlane/cemera.getDistToScreen();
+   * </pre>
    */
 
   public void setDistToScreen(double dist)
   {
-    double oldScale = scale/distToScreen;
-    
     distToScreen = dist;
-    frontClipPlane = dist/20.0;
-    if (perspective)
-      setScreenParams(viewDist, oldScale, hres, vres);
-    else
-      setScreenParamsParallel(scale, hres, vres);
   }
+  
+  /** Get the perspective strength parameter */
   
   public double getDistToScreen()
   {
@@ -123,19 +126,22 @@ public class Camera implements Cloneable
     worldToScreen = viewToScreen.times(worldToView);
     objectToScreen = worldToScreen.times(objectToWorld);
   }
-  
+
   /**
    * Set the camera to perspective mode with the specified parameters.
    */
 
   public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
   {
-    viewDist = newViewDist;
+    viewDist = newViewDist; // = always0.0
     scale = newScale*distToScreen;
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
-    frontClipPlane = distToScreen/20.0;
+	
+	// Zero does not work. Things VERY close to the camera don't get calculated correctly.
+	// But setting it to  1.0 was blunt....
+    frontClipPlane = 0.05;
     perspective = true;
   }
   

@@ -25,8 +25,8 @@ import java.awt.event.*;
 	The coalesce setting should take care, that even with heavier scenes on slower hardware the 
 	animation does not consume more time than the setting allows. It just uses fewer frames.
 	
-	ViewAnimation also takes care of sending ViewChanged a event and repainting the 
-	view after the animation is done. 
+	ViewAnimation also takes care of sending a ViewChanged event and repainting the 
+	view after the animation is done. So the calling method won't have to.
 */
 
 public class ViewAnimation
@@ -34,11 +34,11 @@ public class ViewAnimation
 	boolean animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	double maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
 	double displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
-	double interval = maxDuration/displayFrq; //
-	int timerInterval =(int)(interval*900); // to milliseconds but make it 10% ahead of time
-	
+	double interval = 1.0/displayFrq; //
+	int timerInterval =(int)(interval*950); // to milliseconds but make it 5% ahead of time
+
 	int steps = 0, step = 0, firstStep = 1;
-	
+
 	CoordinateSystem startCoords, endCoords, aniCoords;
 	Vec3 rotEnd, rotStart, rotAni, aniZ, aniOrigin;
 	ViewerCanvas view;
@@ -52,9 +52,9 @@ public class ViewAnimation
 	double rotSlope = 1.0, moveSlope = 1.5, scaleSlope = .1, distSlope = .1;
 	int endOrientation;
 	long msStart, msEnd, ms1st=0, msLast, msLatest;
-	
+
 	/* The timer that keeps launcing animation 'frames' */
-	
+
 	private Timer timer = new Timer(timerInterval, new ActionListener() 
 		{
 			public void actionPerformed(ActionEvent e) 
@@ -70,7 +70,7 @@ public class ViewAnimation
 				}
 			}
 		});
-	
+
 	/** 
 	 * Create an animation engine.
 	 * Each view should have one of it's own.

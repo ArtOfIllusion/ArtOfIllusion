@@ -557,7 +557,8 @@ public abstract class ViewerCanvas extends CustomWidget
       {
 		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
 		Vec3 z  = coords.getZDirection();
-		// Camera camera is aligned with model z-axis it should be OK to landscape modes
+		Vec3 up = coords.getUpDirection();
+		// If camera is aligned with model z-axis it should be OK to landscape modes
 		if (z.x != 0.0 && z.y != 0.0){
 			coords.setOrientation(z, new Vec3(0,1,0));
 			animation.start(this, coords, rotationCenter, scale, orientation);
@@ -565,6 +566,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	  }
 	  navigationMode = mode;
     }
+    viewChanged(false);
   }
   
   /** Set the PopupMenuManager for this canvas. */
@@ -1003,7 +1005,6 @@ public abstract class ViewerCanvas extends CustomWidget
       center.y -= distToPlane;
       coords = new CoordinateSystem(center, Vec3.vy(), Vec3.vz());
     }
-	
 	animation.start(this, coords, rotationCenter, scale, which);
   }
 

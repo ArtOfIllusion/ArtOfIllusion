@@ -55,7 +55,7 @@ public class ViewerNavigationControl implements ViewerControl
       setSelectedIndex(0);
       addEventLink(ValueChangedEvent.class, this, "valueChanged");
       view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
-      setPreferredVisibleRows(8); // More than we have, just in case...
+      setPreferredVisibleRows(2); // More than we have, just in case...
     }
 	
 	private void valueChanged()

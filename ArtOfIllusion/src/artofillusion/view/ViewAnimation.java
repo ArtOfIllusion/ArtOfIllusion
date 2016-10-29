@@ -90,8 +90,7 @@ public class ViewAnimation
 		endOrientation = newOrientation;
 		cam = view.getCamera();
 
-		if (! animate)
-		{
+		if (! animate){
 			endAnimation(); // Go directly to the last frame
 			return;
 		}
@@ -101,13 +100,14 @@ public class ViewAnimation
 		rotStart = view.getRotationCenter(); // get from view
 		startScale = view.getScale(); // get from view
 
-		if (noMove())
-			return;
-
 		startAngles = startCoords.getRotationAngles();
 		endAngles = endCoords.getRotationAngles();
 		startDist = (startCoords.getOrigin().minus(rotStart).length());
 		endDist  = (endCoords.getOrigin().minus(rotEnd).length());
+
+		if (noMove())
+			return;
+
 		aniDist = startDist;
 		moveDist = (rotEnd.minus(rotStart).length());
 		step = firstStep;
@@ -260,6 +260,7 @@ public class ViewAnimation
 		cam.setCameraCoordinates(endCoords);
 		view.setScale(endScale);
 		view.setRotationCenter(rotEnd);
+		view.setDistToPlane(endCoords.getOrigin().minus(rotEnd).length()); // It seemed to work withoout this too..
 		view.repaint();
 		//view.updateImage();
 		view.viewChanged(false);

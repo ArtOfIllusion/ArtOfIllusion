@@ -91,14 +91,8 @@ public class CoordinateSystem
   @Override
   public final boolean equals(Object coords)
   {
-    CoordinateSystem c = (CoordinateSystem) coords;
-    if (!orig.equals(c.orig))
-      return false;
-    if (!zdir.equals(c.zdir))
-      return false;
-    if (!updir.equals(c.updir))
-      return false;
-    return true;
+    CoordinateSystem cs = (CoordinateSystem) coords;
+    return (orig.equals(cs.orig) && zdir.equals(cs.zdir) && updir.equals(cs.updir));
   }
 
   /** Set the position of this CoordinateSystem's origin. */

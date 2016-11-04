@@ -231,9 +231,7 @@ public class WoodModule extends Module
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectWoodProperties"),
       new Widget [] {ampField, spacingField, octavesField, modBox},
       new String [] {Translate.text("noiseAmplitude"), Translate.text("ringSpacing"), Translate.text("noiseOctaves"), null});
-    if (!dlg.clickedOk())
-      return false;
-    return true;
+    return dlg.clickedOk();
   }
 
   /* Create a duplicate of this module. */

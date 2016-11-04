@@ -83,11 +83,7 @@ public class Joint
   
   public boolean equals(Joint j)
   {
-    if (!angle1.equals(j.angle1) || !angle2.equals(j.angle2) || !twist.equals(j.twist) || !length.equals(j.length))
-      return false;
-    if (!name.equals(j.name))
-      return false;
-    return true;
+    return (name.equals(j.name) && angle1.equals(j.angle1) && angle2.equals(j.angle2) && twist.equals(j.twist) && length.equals(j.length));
   }
   
   /** Recalculate the coordinate system for this joint after its parent joint has moved. */
@@ -198,13 +194,10 @@ public class Joint
     
     /** Determine if this DOF is identical to another one. */
     
-    public boolean equals(DOF d)
+    public boolean equals(DOF t)
     {
-      if (fixed != d.fixed || comfort != d.comfort || loop != d.loop)
-        return false;
-      if (pos != d.pos || min != d.min || max != d.max || minComfort != d.minComfort || maxComfort != d.maxComfort || stiffness != d.stiffness)
-        return false;
-      return true;
+      return (fixed == t.fixed && comfort == t.comfort && loop == t.loop && pos == t.pos && min == t.min 
+              && max == t.max && minComfort == t.minComfort && maxComfort == t.maxComfort && stiffness == t.stiffness);
     }
     
     public void set(double val)

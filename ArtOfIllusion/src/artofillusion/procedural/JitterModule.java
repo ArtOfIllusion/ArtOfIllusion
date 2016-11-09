@@ -239,9 +239,7 @@ public class JitterModule extends Module
     p.add(scale2, 2, 2);
     p.add(scale3, 3, 2);
     PanelDialog dlg = new PanelDialog(editor.getParentFrame(), Translate.text("selectJitterParameters"), p);
-    if (!dlg.clickedOk())
-      return false;
-    return true;
+    return dlg.clickedOk();
   }
 
   /* Create a duplicate of this module. */

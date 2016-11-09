@@ -92,9 +92,7 @@ public class ViewAngleModule extends Module
     });
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectOutputProperties"),
       new Widget [] {absBox}, new String [] {null});
-    if (!dlg.clickedOk())
-      return false;
-    return true;
+    return dlg.clickedOk();
   }
 
   /* Write out the parameters. */

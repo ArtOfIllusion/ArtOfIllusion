@@ -212,9 +212,7 @@ public class GridModule extends Module
     zField.addEventLink(ValueChangedEvent.class, listener);
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), "Set Grid Spacing:", new Widget [] {xField, yField, zField},
       new String [] {"X", "Y", "Z"});
-    if (!dlg.clickedOk())
-      return false;
-    return true;
+    return dlg.clickedOk();
   }
 
   /* Create a duplicate of this module. */

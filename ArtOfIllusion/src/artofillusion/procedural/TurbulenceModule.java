@@ -232,9 +232,7 @@ public class TurbulenceModule extends Module
     ampField.addEventLink(ValueChangedEvent.class, listener);
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectTurbulenceProperties"), new Widget [] {ampField, octavesField},
       new String [] {Translate.text("Amplitude"), Translate.text("Octaves")});
-    if (!dlg.clickedOk())
-      return false;
-    return true;
+    return dlg.clickedOk();
   }
 
   /* Create a duplicate of this module. */

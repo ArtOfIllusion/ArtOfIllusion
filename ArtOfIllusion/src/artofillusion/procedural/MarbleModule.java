@@ -246,9 +246,7 @@ public class MarbleModule extends Module
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("selectMarbleProperties"),
       new Widget [] {ampField, spacingField, octavesField},
       new String [] {Translate.text("Noise Amplitude"), Translate.text("Band Spacing"), Translate.text("Octaves")});
-    if (!dlg.clickedOk())
-      return false;
-    return true;
+    return dlg.clickedOk();
   }
 
   /* Create a duplicate of this module. */

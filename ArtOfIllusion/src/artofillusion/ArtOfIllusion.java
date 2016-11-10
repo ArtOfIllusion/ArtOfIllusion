@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -388,7 +388,8 @@ public class ArtOfIllusion
   private static void runStartupScripts()
   {
     String files[] = new File(STARTUP_SCRIPT_DIRECTORY).list();
-    if(null == files) return;
+    if(null == files)
+      return;
     HashMap<String, Object> variables = new HashMap<String, Object>();
     
     for (String file : files)

@@ -22,10 +22,15 @@ import artofillusion.math.*;
 
 public class ViewerScaleControl implements ViewerControl
 {
+  private ViewerCanvas view;
+  private ValueField scaleField;
+  private double newScale;
   @Override
   public Widget createWidget(final ViewerCanvas view)
   {
+    this.view = view;
     final ValueField scaleField = new ValueField(100.0, ValueField.POSITIVE, 5);
+	this.scaleField = scaleField;
     scaleField.setText("100");
     scaleField.setMinDecimalPlaces(1);
     view.addEventLink(ViewChangedEvent.class, new Object() {
@@ -43,46 +48,89 @@ public class ViewerScaleControl implements ViewerControl
             scaleField.setValue(view.getScale());
         }
       }
-    });
+	});
+
     scaleField.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
-  		// This should be animated, but can not at the moment:
-		// The animation starts at first digit and as the animaton starts 
-		// the value begins to change, before you have finished writing.
-
 		if (! view.isPerspective())
 		{
-          view.setScale(scaleField.getValue());
-		  view.repaint(); 
+          //view.setScale(scaleField.getValue());
+		  //view.repaint(); 
+		  view.getViewAnimation().start(view, view.getCamera().getCameraCoordinates(), view.getRotationCenter(), scaleField.getValue(), view.getOrientation());
 		}
 		else
 		{
-			view.setDistToPlane(scaleField.getValue());
-			if (view.getNavigationMode() == 0 || view.getNavigationMode() == 1)
-			{
-				CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
-				Vec3 rc = view.getRotationCenter();
-				Vec3 cc = rc.plus(coords.getZDirection().times(-view.getDistToPlane()));
-				coords.setOrigin(cc);
-				view.getCamera().setCameraCoordinates(coords);
-				view.repaint();
-				
-				// view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
-			}
-			else
-			{
-				CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
-				Vec3 rc = coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane()));
-				view.setRotationCenter(rc);
-				view.repaint();
-			}
+		  view.setDistToPlane(scaleField.getValue());
+		  if (view.getNavigationMode() == 0 || view.getNavigationMode() == 1)
+		  {
+		    CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
+		    Vec3 rc = view.getRotationCenter();
+		    Vec3 cc = rc.plus(coords.getZDirection().times(-view.getDistToPlane()));
+		    coords.setOrigin(cc);
+		    //view.getCamera().setCameraCoordinates(coords);
+		    //view.repaint();
+		    view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
+		  }
+		  else
+		  {
+		    CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
+		    Vec3 rc = coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane()));
+		    //view.setRotationCenter(rc);
+		    //view.repaint();
+		    view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
+		  }
 		}
       }
     });
+
+	//scaleField.addEventLink(KeyPressedEvent.class, this, "processKeyPressed");
     return scaleField;
   }
 
+  /*
+  private void processKeyPressed(KeyPressedEvent kpe)
+  {
+	System.out.println(kpe.getKeyCode());
+	if (kpe.getKeyCode() == KeyPressedEvent.VK_ENTER)
+    {
+	  System.out.println("ENTER " + newScale);
+
+	  if (! view.isPerspective())
+	  {   
+	    view.setScale(scaleField.getValue());
+	    //view.setScale(newScale);
+	    view.repaint(); 
+		System.out.println("HERE");
+	  }
+	  else
+	  {
+		System.out.println("OR HERE");
+	    view.setDistToPlane(scaleField.getValue());
+	    if (view.getNavigationMode() == 0 || view.getNavigationMode() == 1)
+	    {
+	      CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
+	      Vec3 rc = view.getRotationCenter();
+	      Vec3 cc = rc.plus(coords.getZDirection().times(-view.getDistToPlane()));
+	      coords.setOrigin(cc);
+	      //view.getCamera().setCameraCoordinates(coords);
+	      //view.repaint();
+	      view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
+		  System.out.println("DEEP HERE");
+		  System.out.println(view.getDistToPlane());
+	    }
+	    else
+	    {
+	      CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
+	      Vec3 rc = coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane()));
+	      view.setRotationCenter(rc);
+	      view.repaint();
+		  System.out.println("UNDER HERE");
+	    }
+	  }
+    }
+  }
+*/
   @Override
   public String getName()
   {

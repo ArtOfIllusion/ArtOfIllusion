@@ -922,7 +922,6 @@ public abstract class ViewerCanvas extends CustomWidget
       if (!isPerspective())
       {
         // Parallel mode, so draw a flat grid.
-
         Vec2 v1 = theCamera.getViewToScreen().timesXY(new Vec3());
         Vec2 v2 = theCamera.getViewToScreen().timesXY(new Vec3(gridSpacing, gridSpacing, 1.0));
         Vec2 v3 = theCamera.getWorldToScreen().timesXY(new Vec3());
@@ -988,7 +987,6 @@ public abstract class ViewerCanvas extends CustomWidget
       else
       {
         // Perspective mode, so draw a ground plane.
-
         theCamera.setObjectTransform(Mat4.identity());
         int size = (int) Math.max(10, 10/gridSpacing);
         for (int i = -size; i <= size; i++)
@@ -1132,7 +1130,6 @@ public abstract class ViewerCanvas extends CustomWidget
   {
 	if (orientation == which || which > 5)
 		return;
-		
 	CoordinateSystem coords = new CoordinateSystem();
 	Vec3 center = new Vec3(getRotationCenter());
     if (which == 0)             // Front
@@ -1165,7 +1162,6 @@ public abstract class ViewerCanvas extends CustomWidget
       center.y -= distToPlane;
       coords = new CoordinateSystem(center, Vec3.vy(), Vec3.vz());
     }
-	
 	animation.start(this, coords, rotationCenter, scale, which);
   }
 
@@ -1176,7 +1172,6 @@ public abstract class ViewerCanvas extends CustomWidget
   public void finishAnimation(int which)
   {
     orientation = which;
-	System.out.println("vc " + which);
   }
   
   /** If there is a camera bound to this view, copy the coordinates from it. */
@@ -1194,7 +1189,6 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     // Need to get ris of this eventually
 	// Should figure out how the Scene Camera works...
-	
 	Vec3 pointInSpace = finder.newPoint(this, pointOnView);
 	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate(); 
 	Vec3 cz = coords.getZDirection();
@@ -1599,7 +1593,6 @@ public abstract class ViewerCanvas extends CustomWidget
 		double y0 = center.y-(int)(distance);
 		double x1 = center.x+(int)(distance);
 		double y1 = center.y+(int)(distance);
-        
 		p0 = new Point((int)x0, (int)y0);
 		p1 = new Point((int)x1, (int)y0);
 		drawLine(p0 ,p1, color);

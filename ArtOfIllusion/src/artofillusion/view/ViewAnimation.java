@@ -88,7 +88,8 @@ public class ViewAnimation
 		this.endScale = endScale;
 		this.endOrientation = endOrientation;
 		cam = view.getCamera();
-
+		//startOrientation = view.getOrientation();
+		
 		if (! animate){
 			endAnimation(); // Go directly to the last frame
 			return;
@@ -98,13 +99,14 @@ public class ViewAnimation
 		aniCoords = startCoords.duplicate();
 		rotStart = view.getRotationCenter(); // get from view
 		startScale = view.getScale(); // get from view
-
+		
 		startAngles = startCoords.getRotationAngles();
 		endAngles = endCoords.getRotationAngles();
 		startDist = (startCoords.getOrigin().minus(rotStart).length());
 		endDist  = (endCoords.getOrigin().minus(endRotationCenter).length());
 
 		if (noMove()){
+			endAnimation(); // did not help...
 			return;
 		}
 
@@ -194,17 +196,14 @@ public class ViewAnimation
 		scalingFactor = Math.pow((endScale/startScale),(1.0/steps));
 		distanceFactor = Math.pow((endDist/startDist),(1.0/steps));
 
-		// Now we  know all we need to know to launch the animation sequence.
-		// Restart because the previous move could still be running.
-		System.out.println("@ diff or" + view.getOrientation() + " " + endOrientation);		
 		if (endOrientation != view.getOrientation())
 		{	
-		  System.out.println("@ if " + view.getOrientation() + " " + endOrientation);		
-
-			//view.setBoundCamera(null); // This should not be needed
 			view.setOrientation(ViewerCanvas.VIEW_OTHER); // in case the move is interrupted
 			view.viewChanged(false);
 		}
+		
+		// Now we  know all we need to know to launch the animation sequence.
+		// Restart because the previous move could still be running.
 		timer.restart();
 	}
 
@@ -268,19 +267,19 @@ public class ViewAnimation
 	private void endAnimation()
 	{
 		timer.stop();
-		view.finishAnimation(endOrientation);
 		cam.setCameraCoordinates(endCoords);
 		view.setScale(endScale);
 		view.setRotationCenter(endRotationCenter);
-		view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work withoout this too... But not with SceneCamera
+		view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work without this too... But not with SceneCamera
 		wipeExtGraphs();
-		view.viewChanged(false);	}
+		view.finishAnimation(endOrientation);
+		view.viewChanged(false);
+	}
 
 	/* Check if there is anything that should move */
 
 	private boolean noMove()
 	{
-		System.out.println(view.getOrientation() + " " + endOrientation);
 		if (! rotStart.equals(endRotationCenter)) return false;
 		if (! startCoords.getOrigin().equals(endCoords.getOrigin())) return false;
 		if (startAngles[0] != endAngles[0]) return false;
@@ -302,29 +301,14 @@ public class ViewAnimation
 		//interval = maxDuration/displayFrq; //
 		//timerInterval =(int)(interval*900); // to milliseconds but make it 10% ahead of time
 	}
-/*
+	/*
 	// Not used
 	public void stop()
 	{
 		timer.stop();
 		step=0;
 	}
-*/
-/*
-  private void setExtGraphs()
-  {
-
-		
-	for (ViewerCanvas v : theWindow.getAllViews()){
-      if (v == view)
-		v.extRC = null;
-	  else{
-	    v.extRC = new Vec3(view.getRotationCenter());
-	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
-		v.repaint();
-	  }
-    }
-  }*/
+	*/
   private void setExtGraphs()
   {
 	if (theWindow == null)

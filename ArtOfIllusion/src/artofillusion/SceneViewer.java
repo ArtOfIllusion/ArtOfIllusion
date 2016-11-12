@@ -122,9 +122,10 @@ public class SceneViewer extends ViewerCanvas
     else
     {
       boundCamera = null;
-	  orientation = VIEW_OTHER;
+	  if (which > 5) // Would have thought that the super takes care of this but not always.
+		orientation = VIEW_OTHER;
       viewChanged(false);
-	  repaint();
+	  //repaint();
     }
   }
 
@@ -138,6 +139,7 @@ public class SceneViewer extends ViewerCanvas
     if (which > 5  && which < 6+cameras.size())
 		boundCamera = cameras.elementAt(which-6);
     orientation = which;
+	viewChanged(false);
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,

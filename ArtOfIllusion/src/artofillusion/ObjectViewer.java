@@ -309,6 +309,19 @@ public abstract class ObjectViewer extends ViewerCanvas
     viewChanged(false);
   }
 
+  /** Set orientation of this view */
+
+  public void setOrientation (int which)
+  {
+    if (which < 6)
+	  super.setOrientation(which);
+	else
+	{
+	  orientation = VIEW_OTHER;
+	  viewChanged(false);
+	}
+  }
+
   /** Begin dragging a selection region.  The variable square determines whether
       the region should be constrained to be square. */
 

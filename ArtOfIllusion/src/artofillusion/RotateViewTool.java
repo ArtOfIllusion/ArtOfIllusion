@@ -83,8 +83,11 @@ public class RotateViewTool extends EditingTool
  
 	@Override
   	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
-	{	
-		switch (view.getNavigationMode()) {
+	{
+		if (e.getPoint() != clickPoint && view.getBoundCamera() == null) // This is needed even if the mouse has not been dragged yet.
+			view.setOrientation(ViewerCanvas.VIEW_OTHER);
+		switch (view.getNavigationMode()) 
+		{
 			case ViewerCanvas.NAVIGATE_MODEL_SPACE:
 				dragRotateSpace(e, view);
 				break;
@@ -96,6 +99,7 @@ public class RotateViewTool extends EditingTool
 				break;
 			case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
 				dragRotateTravelLandscape(e, view);
+				break;
 			default:
 				break;
 		}
@@ -108,7 +112,7 @@ public class RotateViewTool extends EditingTool
 	}
 	
 	private void dragRotateTravelSpace(WidgetMouseEvent e, ViewerCanvas view)
-	{	
+	{
 		Point dragPoint = e.getPoint();
 		Vec3 axis, location;
 		CoordinateSystem c = oldCoords.duplicate();
@@ -163,7 +167,7 @@ public class RotateViewTool extends EditingTool
 	private void dragRotateSpace(WidgetMouseEvent e, ViewerCanvas view)
 	{
 		// This is modified from AoI 2.7
-		
+
 		Point dragPoint = e.getPoint();
 		CoordinateSystem c = oldCoords.duplicate();
 		int dx, dy;
@@ -279,7 +283,7 @@ public class RotateViewTool extends EditingTool
 	private void dragRotateTravelLandscape(WidgetMouseEvent e, ViewerCanvas view)
 	{
 		//This is modified from AoI 3.0
-		
+		view.setOrientation(ViewerCanvas.VIEW_OTHER);
 		Vec3 vertical = new Vec3(0.0,1.0,0.0); 
 		
 		Point dragPoint = e.getPoint();
@@ -350,28 +354,28 @@ public class RotateViewTool extends EditingTool
   @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    mouseDragged(e, view);
+    //mouseDragged(e, view); // I wonder why this extra one was there. Seemed to cause somethign unexpected.
 	view.mouseDown = false;
 	view.tilting = false;
 
     Point dragPoint = e.getPoint();
-    if ((dragPoint.x != clickPoint.x || dragPoint.y != clickPoint.y) && view.getBoundCamera() == null)
-      view.setOrientation(ViewerCanvas.VIEW_OTHER);
     if (theWindow != null)
-      {
+    {
         ObjectInfo bound = view.getBoundCamera();
         if (bound != null)
-          {
+        {
             // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
             // the camera.
             UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
             moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
             theWindow.setUndoRecord(undo);
-          }
+        }
         theWindow.updateImage();
-      }
+    }
+	
+	// If the mouse was not dragged then center to the given point
 	if (dragPoint.x == clickPoint.x && dragPoint.y == clickPoint.y)
-	  view.centerToPoint(dragPoint);
+	    view.centerToPoint(dragPoint);
 	  
 	wipeExtGraphs();
   }

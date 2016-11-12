@@ -25,12 +25,12 @@ import java.util.List;
 
 public class RenderSetupDialog
 {
-  private BFrame parent;
-  private List<Renderer> renderers;
-  private ObjectInfo cameras[];
-  private Scene theScene;
+  private final BFrame parent;
+  private final List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
+  private final List<ObjectInfo> cameras;
+  private final Scene theScene;
   private BComboBox rendChoice, camChoice;
-  private BRadioButton singleBox, movieBox;
+  private BRadioButton movieBox;
   private RadioButtonGroup movieGroup;
   private ValueField widthField, heightField, startField, endField, fpsField, subimagesField;
   private Widget configPanel;
@@ -46,35 +46,21 @@ public class RenderSetupDialog
   {
     this.parent = parent;
     this.theScene = theScene;
-    renderers = PluginRegistry.getPlugins(Renderer.class);
+    
     if (currentRenderer == null)
       currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
-
+      
     // Find all the cameras in the scene.
 
-    ObjectInfo obj;
-    int i, count;
-
-    for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
-    {
-      obj = theScene.getObject(i);
-      if (obj.getObject() instanceof SceneCamera)
-        count++;
-    }
-    if (count == 0)
+    cameras = theScene.getCameras();
+    if(cameras.isEmpty())
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
-      return;
+      return;        
     }
-    if (count <= currentCamera)
+    if(cameras.size() <= currentCamera)
       currentCamera = 0;
-    cameras = new ObjectInfo [count];
-    for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
-    {
-      obj = theScene.getObject(i);
-      if (obj.getObject() instanceof SceneCamera)
-        cameras[count++] = obj;
-    }
+
     showDialog();
   }
 
@@ -96,7 +82,7 @@ public class RenderSetupDialog
     top.add(heightField = new ValueField((double) height, ValueField.POSITIVE+ValueField.INTEGER), 1, 1);
     movieGroup = new RadioButtonGroup();
     movieGroup.addEventLink(SelectionChangedEvent.class, this, "enableMovieComponents");
-    top.add(singleBox = new BRadioButton("Single Image", !movie, movieGroup), 1, 2);
+    top.add(new BRadioButton("Single Image", !movie, movieGroup), 1, 2);
     top.add(startField = new ValueField(startTime, ValueField.NONE), 1, 3);
     top.add(endField = new ValueField(endTime, ValueField.NONE), 1, 4);
     top.add(new BLabel(Translate.text("Renderer")+":"), 2, 0, labelLayout);
@@ -142,9 +128,10 @@ public class RenderSetupDialog
     if (currentRenderer.recordConfiguration())
     {
       theScene.setMetadata(currentRenderer.getClass().getName()+" settings", currentRenderer.getConfiguration());
+      ObjectInfo cameraInfo = cameras.get(currentCamera);
       Camera cam = new Camera();
-      SceneCamera sc = (SceneCamera) cameras[currentCamera].getObject();
-      cam.setCameraCoordinates(cameras[currentCamera].getCoords().duplicate());
+      SceneCamera sc = (SceneCamera) cameraInfo.getObject();
+      cam.setCameraCoordinates(cameraInfo.getCoords().duplicate());
       cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
       if (movie)
       {
@@ -155,7 +142,7 @@ public class RenderSetupDialog
           if (!saver.clickedOk())
             return;
           new RenderingDialog(parent, currentRenderer, theScene,
-            cam, cameras[currentCamera], startTime, endTime, fps, subimages, saver);
+            cam, cameraInfo, startTime, endTime, fps, subimages, saver);
         }
         catch (IOException ex)
         {
@@ -163,7 +150,7 @@ public class RenderSetupDialog
         }
       }
       else
-        new RenderingDialog(parent, currentRenderer, theScene, cam, cameras[currentCamera]);
+        new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo);
     }
   }
 
@@ -173,10 +160,7 @@ public class RenderSetupDialog
   {
     // Find the camera to render from.
 
-    ArrayList<ObjectInfo> cameras = new ArrayList<ObjectInfo>();
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      if (theScene.getObject(i).getObject() instanceof SceneCamera)
-        cameras.add(theScene.getObject(i));
+    List<ObjectInfo> cameras = theScene.getCameras();
     if (cameras.isEmpty())
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);

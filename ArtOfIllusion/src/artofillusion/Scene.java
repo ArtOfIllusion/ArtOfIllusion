@@ -994,6 +994,21 @@ public class Scene
     return textures.size();
   }
 
+  /** Get the list of scene cameras. */
+  
+  public List<ObjectInfo> getCameras()
+  {
+    List<ObjectInfo> list = new ArrayList<ObjectInfo>();
+    for(ObjectInfo sceneObject: objects)
+    {        
+        if(sceneObject.getObject() instanceof SceneCamera)
+        {
+            list.add(sceneObject);
+        }
+    }
+    return list;
+  }
+
   /** Get the index of the specified texture. */
 
   public int indexOf(Texture tex)

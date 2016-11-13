@@ -132,7 +132,6 @@ public class ArtOfIllusion
     classTranslations.put("artofillusion.tools.tapDesigner.TapLeaf", "artofillusion.tapDesigner.TapLeaf");
   }
 
-  @SuppressWarnings("CallToPrintStackTrace")
   public static void main(String args[])
   {
     Translate.setLocale(Locale.getDefault());
@@ -273,7 +272,6 @@ public class ArtOfIllusion
   }
 
   /** Create a new window for editing the specified scene. */
-  @SuppressWarnings("CallToPrintStackTrace")
   public static void newWindow(final Scene theScene)
   {
     // New windows should always be created on the event thread.
@@ -323,7 +321,6 @@ public class ArtOfIllusion
   }
 
   /** Close a window. */
-  @SuppressWarnings("CallToPrintStackTrace")
   public static void closeWindow(EditingWindow win)
   {
     if (win.confirmClose())
@@ -357,7 +354,6 @@ public class ArtOfIllusion
   }
 
   /** Quit Art of Illusion. */
-  @SuppressWarnings("CallToPrintStackTrace")
   public static void quit()
   {
     for (int i = windows.size()-1; i >= 0; i--)
@@ -384,7 +380,6 @@ public class ArtOfIllusion
   }
 
   /** Execute all startup scripts. */
-  @SuppressWarnings("CallToPrintStackTrace")
   private static void runStartupScripts()
   {
     String files[] = new File(STARTUP_SCRIPT_DIRECTORY).list();
@@ -480,7 +475,6 @@ public class ArtOfIllusion
 
   /** Save a scene to a file.  This method returns true if the scene is successfully saved,
       false if an error occurs. */
-  @SuppressWarnings("CallToPrintStackTrace")
   public static boolean saveScene(Scene sc, LayoutWindow fr)
   {
     // Create the file.

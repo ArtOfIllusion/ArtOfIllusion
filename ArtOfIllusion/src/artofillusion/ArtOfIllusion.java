@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -201,21 +202,20 @@ public class ArtOfIllusion
     ViewerCanvas.addViewerControl(new ViewerOrientationControl());
     ViewerCanvas.addViewerControl(new ViewerPerspectiveControl());
     ViewerCanvas.addViewerControl(new ViewerScaleControl());
-    List plugins = PluginRegistry.getPlugins(Plugin.class);
-    for (int i = 0; i < plugins.size(); i++)
+    
+    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
     {
       try
       {
-        ((Plugin) plugins.get(i)).processMessage(Plugin.APPLICATION_STARTING, new Object [0]);
+        plugin.processMessage(Plugin.APPLICATION_STARTING, new Object [0]);
       }
       catch (Throwable tx)
       {
         tx.printStackTrace();
-        String name = plugins.get(i).getClass().getName();
-        name = name.substring(name.lastIndexOf('.')+1);
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", name)), BStandardDialog.ERROR).showMessageDialog(null);
+        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
       }
     }
+    
     for (int i = 0; i < args.length; i++)
     {
       try
@@ -272,7 +272,6 @@ public class ArtOfIllusion
   }
 
   /** Create a new window for editing the specified scene. */
-
   public static void newWindow(final Scene theScene)
   {
     // New windows should always be created on the event thread.
@@ -284,19 +283,17 @@ public class ArtOfIllusion
       {
         LayoutWindow fr = new LayoutWindow(theScene);
         windows.add(fr);
-        List plugins = PluginRegistry.getPlugins(Plugin.class);
-        for (int i = 0; i < plugins.size(); i++)
+        
+        for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
         {
           try
           {
-            ((Plugin) plugins.get(i)).processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
+            plugin.processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
           }
           catch (Throwable tx)
           {
             tx.printStackTrace();
-            String name = plugins.get(i).getClass().getName();
-            name = name.substring(name.lastIndexOf('.')+1);
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
+            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
           }
         }
         fr.setVisible(true);
@@ -324,7 +321,6 @@ public class ArtOfIllusion
   }
 
   /** Close a window. */
-
   public static void closeWindow(EditingWindow win)
   {
     if (win.confirmClose())
@@ -332,19 +328,16 @@ public class ArtOfIllusion
         windows.remove(win);
         if (win instanceof LayoutWindow)
         {
-          List plugins = PluginRegistry.getPlugins(Plugin.class);
-          for (int i = 0; i < plugins.size(); i++)
+          for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
           {
             try
             {
-              ((Plugin) plugins.get(i)).processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
+              plugin.processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
             }
             catch (Throwable tx)
             {
               tx.printStackTrace();
-              String name = plugins.get(i).getClass().getName();
-              name = name.substring(name.lastIndexOf('.')+1);
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
+              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
             }
           }
         }
@@ -361,7 +354,6 @@ public class ArtOfIllusion
   }
 
   /** Quit Art of Illusion. */
-
   public static void quit()
   {
     for (int i = windows.size()-1; i >= 0; i--)
@@ -371,51 +363,50 @@ public class ArtOfIllusion
       if (windows.contains(win))
         return;
     }
-    List plugins = PluginRegistry.getPlugins(Plugin.class);
-    for (int i = 0; i < plugins.size(); i++)
+    
+    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
     {
       try
       {
-        ((Plugin) plugins.get(i)).processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
+        plugin.processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
       }
       catch (Throwable tx)
       {
         tx.printStackTrace();
-        String name = plugins.get(i).getClass().getName();
-        name = name.substring(name.lastIndexOf('.')+1);
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
+        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
       }
     }
     System.exit(0);
   }
 
   /** Execute all startup scripts. */
-
   private static void runStartupScripts()
   {
     String files[] = new File(STARTUP_SCRIPT_DIRECTORY).list();
+    if(null == files)
+      return;
     HashMap<String, Object> variables = new HashMap<String, Object>();
-    if (files != null)
-      for (String file : files)
+    
+    for (String file : files)
+    {
+      try
       {
+        String language = ScriptRunner.getLanguageForFilename(file);
         try
         {
-          String language = ScriptRunner.getLanguageForFilename(file);
-          try
-          {
-            String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
-            ScriptRunner.executeScript(language, script, variables);
-          }
-          catch (IOException ex)
-          {
-            ex.printStackTrace();
-          }
+          String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
+          ScriptRunner.executeScript(language, script, variables);
         }
-        catch (IllegalArgumentException ex)
+        catch (IOException ex)
         {
-          // This file isn't a known scripting language.
+          ex.printStackTrace();
         }
       }
+      catch (IllegalArgumentException ex)
+      {
+        // This file isn't a known scripting language.
+      }
+    }
   }
 
   /** Get a class specified by name.  This checks both the system classes, and all plugins.
@@ -484,7 +475,6 @@ public class ArtOfIllusion
 
   /** Save a scene to a file.  This method returns true if the scene is successfully saved,
       false if an error occurs. */
-
   public static boolean saveScene(Scene sc, LayoutWindow fr)
   {
     // Create the file.
@@ -493,19 +483,17 @@ public class ArtOfIllusion
     {
       File f = new File(sc.getDirectory(), sc.getName());
       sc.writeToFile(f);
-      List plugins = PluginRegistry.getPlugins(Plugin.class);
-      for (int i = 0; i < plugins.size(); i++)
+      
+      for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
       {
         try
         {
-          ((Plugin) plugins.get(i)).processMessage(Plugin.SCENE_SAVED, new Object [] {f, fr});
+          plugin.processMessage(Plugin.SCENE_SAVED, new Object [] {f, fr});
         }
         catch (Throwable tx)
         {
           tx.printStackTrace();
-          String name = plugins.get(i).getClass().getName();
-          name = name.substring(name.lastIndexOf('.')+1);
-          new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", name)), BStandardDialog.ERROR).showMessageDialog(null);
+          new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
         }
       }
       RecentFiles.addRecentFile(f);

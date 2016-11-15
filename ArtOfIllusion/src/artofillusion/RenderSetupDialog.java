@@ -50,14 +50,14 @@ public class RenderSetupDialog
     
     if (currentRenderer == null)
       currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
-      
+
     // Find all the cameras in the scene.
 
     cameras = theScene.getCameras();
-    if(cameras.isEmpty())
+    if (cameras.isEmpty())
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
-      return;        
+      return;
     }
     if(cameras.size() <= currentCamera)
       currentCamera = 0;

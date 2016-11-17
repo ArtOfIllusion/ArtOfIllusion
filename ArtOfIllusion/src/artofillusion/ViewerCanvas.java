@@ -20,6 +20,7 @@ import buoy.widget.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -141,6 +142,7 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseReleasedEvent.class, this, "processMouseReleased");
     addEventLink(MouseDraggedEvent.class, this, "processMouseDragged");
     addEventLink(MouseMovedEvent.class, this, "processMouseDragged"); // Workaround for Mac OS X bug
+	addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
     getComponent().addComponentListener(new ComponentListener()
@@ -213,6 +215,20 @@ public abstract class ViewerCanvas extends CustomWidget
       });
   }
 
+  private void processMouseMoved(final MouseMovedEvent ev)
+  {
+	if (mouseProcessor != null)
+      mouseProcessor.stopProcessing();
+    mouseProcessor = new ActionProcessor();
+    mouseProcessor.addEvent(new Runnable() {
+      @Override
+      public void run()
+      {
+        mouseMoved(ev);
+      }
+    });
+  }
+
   private void processMouseReleased(WidgetMouseEvent ev)
   {
     if (mouseProcessor != null)
@@ -228,24 +244,26 @@ public abstract class ViewerCanvas extends CustomWidget
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
-	scrolling = true;
-	scrollTimer.restart();
-	
-      switch (getNavigationMode()) {
-	  case ViewerCanvas.NAVIGATE_MODEL_SPACE:
-	  case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+    scrolling = true;
+    scrollTimer.restart();
+    
+    switch (getNavigationMode()) 
+    {
+      case ViewerCanvas.NAVIGATE_MODEL_SPACE:
+      case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
         scrollMoveModel(e);
-		break;
-	  case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-	  case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
+        break;
+      case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
+      case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
         scrollMoveTravel(e);
-		break;
-	  default:
-	    break;
-	  }
+        break;
+      default:
+        break;
+    }
+
     viewChanged(false);
     repaint();
-	metaTool.mouseScrolled(e, this);
+    metaTool.mouseScrolled(e, this); // to draw cue graphics.... A weird arrangement
   }
   
   private void scrollMoveModel(MouseScrolledEvent e)
@@ -378,19 +396,13 @@ public abstract class ViewerCanvas extends CustomWidget
   {
   }
 
+  protected void mouseMoved(MouseMovedEvent ev)
+  {
+  }
+
   /** Subclasses should override this to handle events. */
 
   protected void mouseReleased(WidgetMouseEvent ev)
-  {
-  }
-  
-  /** 
-   *  Subclasses should override this to handle different content. 
-   *
-   *  The method should find a new scale, camera location, and rotationCenter and then 
-   *  call animation.start(). 
-   */
-  public void fitToSelection()
   {
   }
 
@@ -870,6 +882,78 @@ public abstract class ViewerCanvas extends CustomWidget
 
   }
 
+  public void alignWithClosestAxis()
+  {
+    CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
+	int newOrientation = ViewerCanvas.VIEW_OTHER;
+    Vec3 zDir = coords.getZDirection();
+    Vec3 upDir = coords.getUpDirection();
+	Vec3 center;
+	
+    Vec3 zNew  =  new Vec3(0,0,zDir.z);
+    if (Math.abs(zDir.x) > Math.abs(zDir.z)) zNew  =  new Vec3(zDir.x,0,0);
+    if (Math.abs(zDir.y) > Math.abs(zDir.z) && Math.abs(zDir.y) > Math.abs(zDir.x)) zNew  =  new Vec3(0,zDir.y,0);
+    
+    Vec3 upNew  =  new Vec3(0,upDir.y,0);
+    if (Math.abs(upDir.z) > Math.abs(upDir.y)) upNew  =  new Vec3(0,0,upDir.z);
+    if (Math.abs(upDir.x) > Math.abs(upDir.y) && Math.abs(upDir.x) > Math.abs(upDir.z)) upNew  =  new Vec3(upDir.x,0,0);
+    
+    zNew.normalize();
+    upNew.normalize();
+	
+	// Sometimes the new Up- and Z-directions end up on the same or opposite
+	// Then find the next couse to the 
+	if (zNew.equals(upNew) || zNew.equals(upNew.times(-1)))
+	{
+		if (Math.max(Math.max(Math.abs(zDir.x),Math.abs(zDir.y)),Math.abs(zDir.z)) < Math.max(Math.max(Math.abs(upDir.x),Math.abs(upDir.y)),Math.abs(upDir.z)))
+			zNew = findNextAxis(zDir, upNew);
+		else
+			upNew = findNextAxis(upDir, zNew);
+	}
+	if (zNew.equals(upNew) || zNew.equals(upNew.times(-1))) // A safety measure
+		return;
+		
+    center = rotationCenter.plus(zNew.times(-distToPlane));
+    coords.setOrientation(zNew,upNew);
+    coords.setOrigin(center);
+	
+	if (theCamera == null)
+	{
+		if (zNew.z == -1 && upNew.y ==  1) newOrientation = 0; // Front
+		if (zNew.z ==  1 && upNew.y ==  1) newOrientation = 1; // Back
+		if (zNew.x ==  1 && upNew.y ==  1) newOrientation = 2; // Left
+		if (zNew.x == -1 && upNew.y ==  1) newOrientation = 3; // Right
+		if (zNew.y == -1 && upNew.z == -1) newOrientation = 4; // Top
+		if (zNew.y ==  1 && upNew.z ==  1) newOrientation = 5; // Bottom
+	}
+	else
+		newOrientation = orientation;
+	
+    animation.start(this, coords, rotationCenter, scale, newOrientation);
+  }
+  
+  private Vec3 findNextAxis(Vec3 dir, Vec3 fixed)
+  {
+	double maxD = Math.max(Math.max(Math.abs(dir.x),Math.abs(dir.y)),Math.abs(dir.z));
+	double minD = Math.min(Math.min(Math.abs(dir.x),Math.abs(dir.y)),Math.abs(dir.z));
+	Vec3 nextDir;
+	
+	if (Math.abs(dir.x) != maxD && Math.abs(dir.x) != minD) nextDir = new Vec3(dir.x,0,0);
+	else if (Math.abs(dir.y) != maxD && Math.abs(dir.y) != minD) nextDir = new Vec3(0,dir.y,0);
+	else nextDir = new Vec3(0,0,dir.z);
+	nextDir.normalize();
+	
+	// There still is the possibility that the directions are same
+	// try in a different order
+	if (nextDir.equals(fixed) || nextDir.equals(fixed.times(-1)))
+		if (Math.abs(dir.z) != maxD && Math.abs(dir.z) != minD) nextDir = new Vec3(0,0,dir.z);
+		else if (Math.abs(dir.y) != maxD && Math.abs(dir.y) != minD) nextDir = new Vec3(0,0,dir.y);
+		else nextDir = new Vec3(0,0,dir.x);
+	nextDir.normalize();
+
+	return nextDir;
+  }
+  
   /** This should be called by the CanvasDrawer just before rendering an image.  It sets up the camera correctly. */
 
   public void prepareCameraForRendering()
@@ -1121,9 +1205,10 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   *  Set the view orientation to any of the values shown in the drop-down menu. 
+   *  Launch an orientation change procedure to turn the orientation into any of the 
+   *  presets shown in the drop-down menu. 
    *
-   *  This method calls the ViewAnimation to perform the turn.
+   *  This method calls the ViewAnimation to perform the turn, if needed.
    */
 
   public void setOrientation(int which)
@@ -1166,8 +1251,8 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   *  ViewAnimation calls this when the animation is finished, 
-   *  so the menu will be up to date.
+   *  ViewAnimation calls this when the animation is finished, so the orientation menu 
+   *  will be up to date, but no orientation change procedure is launched.
    */
   public void finishAnimation(int which)
   {
@@ -1184,16 +1269,16 @@ public abstract class ViewerCanvas extends CustomWidget
     theCamera.setCameraCoordinates(coords);
   }
 
-  /** Subclasses may need to override to handle local coordinates */
+  /** 
+   * Center the view to a point in the model space
+   * No need to override by subclasses. Local coordinates are handled by the finder. 
+   */
   public void centerToPoint(Point pointOnView)
   {
-    // Need to get ris of this eventually
-	// Should figure out how the Scene Camera works...
 	Vec3 pointInSpace = finder.newPoint(this, pointOnView);
 	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate(); 
 	Vec3 cz = coords.getZDirection();
-	if (perspective)
-		distToPlane = coords.getOrigin().minus(pointInSpace).length();
+	distToPlane = coords.getOrigin().minus(pointInSpace).length();
 	Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
 	coords.setOrigin(cp);
 	
@@ -1451,7 +1536,8 @@ public abstract class ViewerCanvas extends CustomWidget
 		if (scrollBlendY < 0.0) scrollBlendY = 0.0;
 		if (scrollBlendY > 1.0) scrollBlendY = 1.0;
 		
-		if (scrolling){
+		if (scrolling)
+		{
 			if (navigationMode == NAVIGATE_TRAVEL_SPACE)
 			{
 				repaint();
@@ -1507,7 +1593,9 @@ public abstract class ViewerCanvas extends CustomWidget
 				}
 			}
 		}
-		if (extRC != null){
+		
+		if (extRC != null)
+		{
 			Vec2 rcs = getCamera().getWorldToScreen().timesXY(extRC);
 			drawLine(new Point((int)rcs.x, (int)rcs.y-2), new Point((int)rcs.x, (int)rcs.y+3), Color.GREEN);
 			drawLine(new Point((int)rcs.x-2, (int)rcs.y), new Point((int)rcs.x+3, (int)rcs.y), Color.GREEN);
@@ -1546,6 +1634,12 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	}
 	
+	private void drawMouseGraphics(Point p)
+	{
+		drawCircle(p, 10.0, 6, gray);
+	}
+	
+	
 	private Timer scrollTimer = new Timer(300, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 
@@ -1568,6 +1662,12 @@ public abstract class ViewerCanvas extends CustomWidget
 
 	public void drawCircle(Point center, double radius, int segments, Color color)
 	{
+		// Works only with SWCanvasDrawer
+		/*
+		Ellipse2D.Double circle = new Ellipse2D.Double();
+		circle.setFrameFromCenter(center, new Point(center.x+(int)radius, center.y+(int)radius));
+		drawer.drawShape(circle, color);
+		*/
 		Point p0, p1;
 		
 		for (int i = 0; i < segments; i++)
@@ -1609,11 +1709,9 @@ public abstract class ViewerCanvas extends CustomWidget
 	
 	private void getNavigationColorSet()
 	{
-		//gray   = Color.DARK_GRAY;
 		gray   = new Color(52, 52, 73);
 		red    = new Color(127+31,0,0);
 		green  = new Color(0,127+31,0);
-		//green  = new Color(0,63,0);
 		blue   = new Color(0,0,127+31);
 		yellow = new Color(127+31,127+31,0);
 	}
@@ -1625,5 +1723,9 @@ public abstract class ViewerCanvas extends CustomWidget
 		int B = (int)(color0.getBlue()*(1.0-blend) + color1.getBlue()*blend);
 		
 		return new Color(R, G, B);
+	}
+	
+	void drawOverlay()
+	{
 	}
 }

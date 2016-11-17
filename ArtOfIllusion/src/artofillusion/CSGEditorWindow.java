@@ -127,7 +127,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
       viewMenu.addSeparator();
       viewMenu.add(Translate.menuItem("renderPreview", this, "renderPreviewCommand"));
     }
-  }
+    viewMenu.add(Translate.menuItem("alignWithClosestAxis", this, "closestAxisCommand"));
+}
 
   /* EditingWindow methods. */
 

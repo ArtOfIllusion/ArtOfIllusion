@@ -1,5 +1,4 @@
 /* Copyright (C) 2016 by Petri Ihalainen
-   Changes Copyright 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +29,7 @@ public class ClickedPointFinder
 	 */
 	public Vec3 newPoint(ViewerCanvas v, Point point)
 	{
-		Vec3 clickedPoint = v.getCamera().convertScreenToWorld(point, v.getDistToPlane());
+		Vec3 clickedPoint = v.getCamera().convertScreenToWorld(point, v.getDistToPlane()); // defaultpoint if nothing is there
 		Vec3 pointOnTriangle;
 		boolean inSpace = true;
 		bary = new double[3];
@@ -38,13 +37,22 @@ public class ClickedPointFinder
 		Vec3 cameraOrigin = v.getCamera().getCameraCoordinates().getOrigin();
 		Vec3 cameraZ = v.getCamera().getCameraCoordinates().getZDirection();
 
+		// ToView projects onto an abstract "view" entity 
+		// in the model space, in parallel mode and in AoI units.
+
+		//Mat4 objToView = v.getCamera().getObjectToView();
+		//Mat4 worldToView = v.getCamera().getWorldToView();
+		
+		// ToScreen produces the actual pixel coordinates on the ViewerCanvas also in perspective mode.
+		
 		Mat4 objToScreen = v.getCamera().getObjectToScreen();
 		Mat4 worldToScreen = v.getCamera().getWorldToScreen();
+		
 		Mat4 toScene, toThisObject, fromExtToLocal;
 		ObjectInfo[] objList = renderableObjects(v);
 		RenderingMesh rMesh;
 		Vec3[] corner3D = new Vec3[3];
-		Vec2[] corner2D = new Vec2[3];
+		Vec2[] corner2D = new Vec2[3],  corner2DS = new Vec2[3];
 		Vec2 point2D = new Vec2(point.x, point.y);
 		CoordinateSystem localCoords;
 
@@ -63,35 +71,40 @@ public class ClickedPointFinder
 				corner3D[1] = new Vec3 (fromExtToLocal.times(rMesh.vert[rMesh.triangle[j].v2]));
 				corner3D[2] = new Vec3 (fromExtToLocal.times(rMesh.vert[rMesh.triangle[j].v3]));				
 
-				corner2D[0] = worldToScreen.timesXY(corner3D[0]);
-				corner2D[1] = worldToScreen.timesXY(corner3D[1]);
-				corner2D[2] = worldToScreen.timesXY(corner3D[2]);
-
 				if ((v instanceof ObjectViewer) && !(((ObjectViewer)v).getUseWorldCoords()))
 				{
 					corner2D[0] = objToScreen.timesXY(corner3D[0]);
 					corner2D[1] = objToScreen.timesXY(corner3D[1]);
 					corner2D[2] = objToScreen.timesXY(corner3D[2]);
 				}
-				if (onTriangle(corner2D, point2D))
-				{	
-					(corner3D[0] = corner3D[0]).scale(bary[0]);
-					(corner3D[1] = corner3D[1]).scale(bary[1]);
-					(corner3D[2] = corner3D[2]).scale(bary[2]);
-				
-					pointOnTriangle = new Vec3(corner3D[0].plus(corner3D[1].plus(corner3D[2])));
-					if (inSpace)
+				else
+				{			
+					corner2D[0] = worldToScreen.timesXY(corner3D[0]);
+					corner2D[1] = worldToScreen.timesXY(corner3D[1]);
+					corner2D[2] = worldToScreen.timesXY(corner3D[2]);				
+				}
+				// Strange things may happen if we calculate triangles, that are far outside the active screen
+				if (onScreen(corner2D, v)) 
+				{
+					if (onTriangle(corner2D, point2D))
 					{	
-						clickedPoint = pointOnTriangle;
-						inSpace = false;
+						(corner3D[0] = corner3D[0]).scale(bary[0]);
+						(corner3D[1] = corner3D[1]).scale(bary[1]);
+						(corner3D[2] = corner3D[2]).scale(bary[2]);
+					
+						pointOnTriangle = new Vec3(corner3D[0].plus(corner3D[1].plus(corner3D[2])));
+						if (inSpace)
+						{	
+							clickedPoint = pointOnTriangle; // The first one found --> point no longer "in space".
+							inSpace = false;
+						}
+						else
+							if (closer(pointOnTriangle, clickedPoint, cameraOrigin, cameraZ) && onFrontSide(pointOnTriangle, cameraOrigin, cameraZ, v.isPerspective()))
+								clickedPoint = pointOnTriangle;
 					}
-					else
-						if (closer(pointOnTriangle, clickedPoint, cameraOrigin, cameraZ) && onFrontSide(pointOnTriangle, cameraOrigin, cameraZ, v.isPerspective()))
-							clickedPoint = pointOnTriangle;
 				}
 			}
 		}
-		System.out.println("Clicked " + clickedPoint);
 		return clickedPoint;
 	}
 
@@ -108,7 +121,7 @@ public class ClickedPointFinder
 
 	private boolean onFrontSide(Vec3 p, Vec3 cameraOrigin, Vec3 cameraZ, boolean perspective)
 	{
-		if (!perspective)
+		if (!perspective) // Don't care. CAmera distance is irrelevant.
 			return true;
 			
 		double distToP = p.minus(cameraOrigin).dot(cameraZ);
@@ -122,11 +135,24 @@ public class ClickedPointFinder
 	{
 		// The sum of barycentric coordinates is always 1.0. 
 		// If the point is outside, some of those will be negative. 
+		
 		bary = TriangleMath.bary(corner2D, point2D);		
-		if(bary[0] >= 0.0 && bary[1] >= 0.0 && + bary[2] >= 0.0) 
+		if (bary[0] >= 0.0 && bary[1] >= 0.0 && + bary[2] >= 0.0) 
 			return true;
 		else
 			return false;
+	}
+
+	private boolean onScreen(Vec2[] corner2D, ViewerCanvas v)
+	{
+		int w = v.getBounds().width;
+		int h = v.getBounds().height;
+		boolean is = false;
+		
+		for (Vec2 c : corner2D)
+			if (c.x >= 0 && c.x <= w && c.y >= 0 && c.y <= h)
+				is = true;
+		return is;
 	}
 
 	private ObjectInfo[] renderableObjects(ViewerCanvas v)

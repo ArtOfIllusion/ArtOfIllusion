@@ -419,6 +419,12 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     savePreferences();
     updateImage();
   }
+  
+  /** Align the view with the closest main axix directions */
+  public void closestAxisCommand()
+  {
+    getView().alignWithClosestAxis();
+  }
 
   /** Undo the most recent action. */
 

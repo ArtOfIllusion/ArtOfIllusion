@@ -29,7 +29,7 @@ public class SceneViewer extends ViewerCanvas
   EditingWindow parentFrame;
   private Vector<ObjectInfo> cameras;
   boolean draggingBox, draggingSelectionBox, squareBox, sentClick, dragging;
-  Point clickPoint, dragPoint;
+  Point clickPoint, dragPoint, mousePoint;
   ObjectInfo clickedObject;
   int deselect;
   Vec3 nextCenter = new Vec3();
@@ -305,6 +305,7 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
+	drawOverlay();
 	currentTool.drawOverlay(this);
 	if (activeTool != null)
 		activeTool.drawOverlay(this);
@@ -529,6 +530,8 @@ public class SceneViewer extends ViewerCanvas
   @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
+	mousePoint = e.getPoint();
+	drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {
@@ -536,6 +539,8 @@ public class SceneViewer extends ViewerCanvas
       if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
         return;
     }
+	
+	
     dragging = true;
     deselect = -1;
     if (draggingBox)
@@ -667,7 +672,8 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < newSelection.length && !changed; i++)
       changed = (oldSelection[i] != newSelection[i]);
     if (changed)
-     parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
+      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
+	dragging = false;
   }
 
   /** Double-clicking on object should bring up its editor. */
@@ -679,14 +685,14 @@ public class SceneViewer extends ViewerCanvas
       final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
-          @Override
-	  public void run()
-	  {
-	    theScene.objectModified(obj);
-	    parentFrame.updateImage();
-	    parentFrame.updateMenus();
-	  }
-	} );
+        @Override
+	    public void run()
+	    {
+	      theScene.objectModified(obj);
+	      parentFrame.updateImage();
+	      parentFrame.updateMenus();
+	    }
+	});
     }
   }
 
@@ -701,4 +707,36 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < obj.getChildren().length; i++)
       moveChildren(obj.getChildren()[i], transform, undo);
   }
+  
+	@Override
+	protected void mouseMoved(MouseMovedEvent e)
+	{
+		//mousePoint = e.getPoint();
+		//System.out.println("MM " + mousePoint + " " + dragging);
+		//repaint(); // Strange but true, this is needed.
+	}
+	/*
+	@Override
+  	void drawOverlay()
+	{
+		//System.out.println("OVL " + mousePoint + " " + dragging);
+		if (mousePoint != null){
+
+		if (!dragging)
+		{
+			drawCircle(mousePoint, 12.25, 20, Color.blue);
+			drawCircle(mousePoint,  8.25, 20, Color.blue);
+			drawCircle(mousePoint, 16.25, 20, Color.blue);
+		}
+		//drawCircle(mousePoint, 16.0, 20, Color.green);
+		//drawCircle(mousePoint, 15.0, 20, Color.red);
+		//	if (dragging){
+		//		drawCircle(mousePoint, 16.25, 24, red);
+			//repaint();
+		//	}
+		
+		}
+
+	}
+	*/
 }

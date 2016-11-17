@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2016 by Peter Eastman and Petri Ihalainen
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -47,6 +48,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   BScrollPane itemTreeScroller;
   Score theScore;
   ToolPalette tools;
+  private TexturesAndMaterialsDialog assetsDialog;
   BLabel helpText;
   TreeList itemTree;
   Scene theScene;
@@ -2781,9 +2783,24 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void texturesCommand()
   {
-    theScene.showTexturesDialog(this);
+    showTexturesDialog(theScene);
   }
 
+  /** Show the dialog for editing textures and materials. */
+  
+  public void showTexturesDialog(Scene target)
+  {
+    if (null == assetsDialog)
+    {
+      assetsDialog = new TexturesAndMaterialsDialog(this, target);
+    }
+    Rectangle r = assetsDialog.getBounds();
+    assetsDialog.dispose();
+    assetsDialog = new TexturesAndMaterialsDialog(this, target);
+    assetsDialog.setBounds(r);
+    assetsDialog.setVisible(true);
+  }
+  
   public void environmentCommand()
   {
     final RGBColor ambColor = theScene.getAmbientColor(), envColor = theScene.getEnvironmentColor(), fogColor = theScene.getFogColor();

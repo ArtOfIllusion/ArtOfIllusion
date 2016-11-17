@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,7 +34,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
   private ObjectInfo obj[], editObj;
   private BTabbedPane tabs;
   private BList texList, matList, layerList;
-  private BButton texMapButton, matMapButton, addLayerButton, deleteLayerButton, moveUpButton, moveDownButton, editTexturesButton;
+  private BButton texMapButton, matMapButton, addLayerButton, deleteLayerButton, moveUpButton, moveDownButton;
   private BComboBox newTextureChoice, newMaterialChoice;
   private BorderContainer content, texturesTab, materialsTab;
   private FormContainer texTitlePanel, texListPanel, matListPanel, layerPanel, paramsPanel;
@@ -141,13 +142,13 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     texButtonRow.add(texMapButton = Translate.button("editMapping", this, "doEditTextureMapping"));
     texButtonRow.add(newTextureChoice = new BComboBox());
     newTextureChoice.add(Translate.text("button.newTexture"));
-    java.util.List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
-    for (Texture texture : textureTypes)
+    
+    for (Texture texture : PluginRegistry.getPlugins(Texture.class))
     {
       try
       {
-        Method mtd = texture.getClass().getMethod("getTypeName", null);
-        newTextureChoice.add(mtd.invoke(null, null));
+        Method mtd = texture.getClass().getMethod("getTypeName", (Class<?>[])null);
+        newTextureChoice.add(mtd.invoke(null, (Object[])null));
       }
       catch (Exception ex)
       {
@@ -174,13 +175,13 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     matButtonRow.add(matMapButton = Translate.button("editMapping", this, "doEditMaterialMapping"));
     matButtonRow.add(newMaterialChoice = new BComboBox());
     newMaterialChoice.add(Translate.text("button.newMaterial"));
-    java.util.List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
-    for (Material material : materialTypes)
+    
+    for (Material material : PluginRegistry.getPlugins(Material.class))
     {
       try
       {
-        Method mtd = material.getClass().getMethod("getTypeName", null);
-        newMaterialChoice.add(mtd.invoke(null, null));
+        Method mtd = material.getClass().getMethod("getTypeName", (Class<?>[])null);
+        newMaterialChoice.add(mtd.invoke(null, (Object[])null));
       }
       catch (Exception ex)
       {
@@ -243,7 +244,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-    buttons.add(editTexturesButton = Translate.button("texturesAndMaterials", this, "doEditTextures"));
+    buttons.add(Translate.button("texturesAndMaterials", this, "doEditTextures"));
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
 
@@ -553,7 +554,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
   private void doEditTextures()
   {
-    scene.showTexturesDialog(window);
+    window.showTexturesDialog(scene);
   }
 
   private void doAddLayer()

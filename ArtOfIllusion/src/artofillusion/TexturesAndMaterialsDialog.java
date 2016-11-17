@@ -1,4 +1,5 @@
 /* Copyright (C) 2011 by Helge Hansen and Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,6 +31,7 @@ import java.util.List;
 
 public class TexturesAndMaterialsDialog extends BDialog
 {
+  private static final File assetsFolder = new File(ArtOfIllusion.APP_DIRECTORY, "Textures and Materials");
   Scene theScene;
   EditingWindow parentFrame;
   BTree libraryList;
@@ -47,7 +49,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
   MaterialPreviewer matPre;
   BLabel matInfo;
-  File mainFolder;
+  
   private boolean showTextures, showMaterials;
   private final ArrayList<Object> rootNodes;
 
@@ -85,9 +87,7 @@ public class TexturesAndMaterialsDialog extends BDialog
 
     theScene.addMaterialListener(listListener);
     theScene.addTextureListener(listListener);
-
-    mainFolder = new File(ArtOfIllusion.APP_DIRECTORY, "Textures and Materials");
-
+    
     BorderContainer content = new BorderContainer();
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
 
@@ -147,7 +147,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     buttons.add(new BLabel(Translate.text("sceneFunctions"), BLabel.CENTER));
 
     typeChoice = new BComboBox();
-    typeChoice.add(Translate.text("button.new")+"...");
+    typeChoice.add(Translate.text("button.new") + "...");
 
     java.lang.reflect.Method mtd;
 
@@ -155,8 +155,8 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       try
       {
-        mtd = tex.getClass().getMethod("getTypeName", null);
-        typeChoice.add((String) mtd.invoke(null, null)+" texture");
+        mtd = tex.getClass().getMethod("getTypeName", (Class<?>[])null);
+        typeChoice.add((String) mtd.invoke(null, (Object[])null) + " texture");
       }
       catch (Exception ex)
       {
@@ -166,8 +166,8 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       try
       {
-        mtd = mat.getClass().getMethod("getTypeName", null);
-        typeChoice.add((String) mtd.invoke(null, null)+" material");
+        mtd = mat.getClass().getMethod("getTypeName", (Class<?>[])null);
+        typeChoice.add((String) mtd.invoke(null, (Object[])null) + " material");
       }
       catch (Exception ex)
       {
@@ -201,7 +201,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     showTextures = true;
     showMaterials = true;
     rootNodes.add(new SceneTreeNode(null, theScene));
-    for (File file : mainFolder.listFiles())
+    for (File file : assetsFolder.listFiles())
     {
       if (file.isDirectory())
         rootNodes.add(new FolderTreeNode(file));
@@ -212,7 +212,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     setSelection(libraryList.getRootNode(), theScene, theScene.getDefaultTexture());
     pack();
     UIUtilities.centerDialog(this, parentFrame.getFrame());
-    setVisible(true);
+    
   }
 
   private String getTypeName(Object item)
@@ -220,8 +220,8 @@ public class TexturesAndMaterialsDialog extends BDialog
     String typeName = "";
     try
     {
-      Method mtd = item.getClass().getMethod("getTypeName", null);
-      typeName = (String) mtd.invoke(null, null);
+      Method mtd = item.getClass().getMethod("getTypeName", (Class<?>[])null);
+      typeName = (String) mtd.invoke(null, (Object[])null);
     }
     catch (Exception ex)
     {
@@ -565,7 +565,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     }
     if (selectedTexture != null || selectedMaterial != null)
     {
-      BFileChooser fcOut = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text(itemText), mainFolder);
+      BFileChooser fcOut = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text(itemText), assetsFolder);
       if (fcOut.showDialog(this))
         saveToFile(fcOut.getSelectedFile());
     }
@@ -652,7 +652,7 @@ public class TexturesAndMaterialsDialog extends BDialog
 
   public void doNewLib()
   {
-    BFileChooser fcNew = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("selectNewLibraryName"), mainFolder);
+    BFileChooser fcNew = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("selectNewLibraryName"), assetsFolder);
     if (fcNew.showDialog(this))
     {
       File saveFile = fcNew.getSelectedFile();

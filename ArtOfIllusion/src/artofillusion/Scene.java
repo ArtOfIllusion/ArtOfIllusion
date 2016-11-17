@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,6 @@ import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import artofillusion.util.*;
-import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -765,21 +765,12 @@ public class Scene
 
   /** Show the dialog for editing textures and materials. */
 
+  @Deprecated
   public void showTexturesDialog(EditingWindow parent)
-
   {
-    if (texDlg == null)
-      texDlg = new TexturesAndMaterialsDialog(parent, this);
-    else
-    {
-      Rectangle r = texDlg.getBounds();
-      texDlg.dispose();
-      texDlg = new TexturesAndMaterialsDialog(parent, this);
-      texDlg.setBounds(r);
-    }
-    texDlg.setVisible(true);
+    ((LayoutWindow)parent).showTexturesDialog(this);
   }
-
+  
   /** Add an image map to the scene. */
 
   public void addImage(ImageMap im)

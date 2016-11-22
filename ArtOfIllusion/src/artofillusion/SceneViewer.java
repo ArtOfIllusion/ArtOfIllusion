@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +27,7 @@ public class SceneViewer extends ViewerCanvas
 {
   Scene theScene;
   EditingWindow parentFrame;
-  Vector<ObjectInfo> cameras;
+  private Vector<ObjectInfo> cameras;
   boolean draggingBox, draggingSelectionBox, squareBox, sentClick, dragging;
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
@@ -71,13 +72,9 @@ public class SceneViewer extends ViewerCanvas
 
   public void rebuildCameraList()
   {
-    cameras.removeAllElements();
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-    {
-      ObjectInfo obj = theScene.getObject(i);
-      if (obj.getObject() instanceof SceneCamera)
-        cameras.addElement(obj);
-    }
+    cameras.clear();
+    cameras.addAll(theScene.getCameras());
+    
     for (int i = 0; i < theScene.getNumObjects(); i++)
     {
       ObjectInfo obj = theScene.getObject(i);

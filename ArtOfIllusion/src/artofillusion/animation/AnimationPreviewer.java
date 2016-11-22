@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.*;
-
+import java.util.List;
 import javax.imageio.ImageIO;
 
 /** This class generates a wireframe preview of an animation. */
@@ -51,36 +52,21 @@ public class AnimationPreviewer implements Runnable
     theScene = window.getScene();
 
     // Find all the cameras in the scene.
-
-    ObjectInfo obj;
-    int i, count;
-
-    for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
-    {
-      obj = theScene.getObject(i);
-      if (obj.getObject() instanceof SceneCamera)
-        count++;
-    }
-    if (count == 0)
+    List<ObjectInfo> cameras = theScene.getCameras();
+    
+    if (cameras.isEmpty())
     {
       new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.INFORMATION).showMessageDialog(window);
       return;
     }
-    if (count <= currentCamera)
+    if (cameras.size() <= currentCamera)
       currentCamera = 0;
-    ObjectInfo cameras[] = new ObjectInfo [count];
-    for (i = 0, count = 0; i < theScene.getNumObjects(); i++)
-    {
-      obj = theScene.getObject(i);
-      if (obj.getObject() instanceof SceneCamera)
-        cameras[count++] = obj;
-    }
 
     // Create the components.
 
     camChoice = new BComboBox();
-    for (i = 0; i < cameras.length; i++)
-      camChoice.add(cameras[i].getName());
+    for (ObjectInfo camera : cameras)
+      camChoice.add(camera.getName());
     camChoice.setSelectedIndex(currentCamera);
     modeChoice = new BComboBox(new Object [] {
        Translate.text("menu.wireframeDisplay"),
@@ -106,7 +92,7 @@ public class AnimationPreviewer implements Runnable
     if (!dlg.clickedOk())
       return;
     currentCamera = camChoice.getSelectedIndex();
-    sceneCamera = cameras[currentCamera];
+    sceneCamera = cameras.get(currentCamera);
     mode = modeChoice.getSelectedIndex();
     width = (int) widthField.getValue();
     height = (int) heightField.getValue();

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Changes copyright (C) 2016 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -992,6 +993,21 @@ public class Scene
   public int getNumTextures()
   {
     return textures.size();
+  }
+
+  /** Get the list of scene cameras. */
+  
+  public List<ObjectInfo> getCameras()
+  {
+    List<ObjectInfo> list = new ArrayList<ObjectInfo>();
+    for(ObjectInfo sceneObject: objects)
+    {        
+        if(sceneObject.getObject() instanceof SceneCamera)
+        {
+            list.add(sceneObject);
+        }
+    }
+    return list;
   }
 
   /** Get the index of the specified texture. */

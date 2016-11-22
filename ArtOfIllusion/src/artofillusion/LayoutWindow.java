@@ -58,7 +58,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   BMenu fileMenu, recentFilesMenu, editMenu, objectMenu, createMenu, toolsMenu, viewMenu, scriptMenu;
   BMenu animationMenu, editKeyframeMenu, sceneMenu;
   BMenu addTrackMenu, positionTrackMenu, rotationTrackMenu, distortionMenu;
-  BMenuItem fileMenuItem[], editMenuItem[], objectMenuItem[], toolsMenuItem[], viewMenuItem[];
+  private BMenuItem fileMenuItem[], editMenuItem[], objectMenuItem[], viewMenuItem[];
   BMenuItem animationMenuItem[], popupMenuItem[];
   BCheckBoxMenuItem displayItem[];
   BPopupMenu popupMenu;
@@ -562,19 +562,20 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     });
     
     toolsMenu = Translate.menu("tools");
-    menubar.add(toolsMenu);    
-    toolsMenuItem = new BMenuItem [modellingTools.size()];
-    for (int i = 0; i < modellingTools.size(); i++)
-      {
-        BMenuItem item = new BMenuItem(modellingTools.get(i).getName());
-        toolsMenu.add(item);
-        item.setActionCommand("modellingTool");
-        item.addEventLink(CommandEvent.class, this, "modellingToolCommand");
-        toolsMenuItem[i] = item;
-      }
+    menubar.add(toolsMenu);
+	
+    for (ModellingTool tool: modellingTools)
+    {
+      BMenuItem item = new BMenuItem(tool.getName());
+      item.setActionCommand("modellingTool");
+      item.addEventLink(CommandEvent.class, this, "modellingToolCommand");
+      item.getComponent().putClientProperty("tool", tool);
+      toolsMenu.add(item);
+    }
+    
     toolsMenu.addSeparator();
     toolsMenu.add(Translate.menuItem("createScriptObject", this, "createScriptObjectCommand"));
-    toolsMenu.add(Translate.menuItem("editScript", this, "actionPerformed"));
+    toolsMenu.add(Translate.menuItem("editScript", this, "editScriptCommand"));
     toolsMenu.add(scriptMenu = Translate.menu("scripts"));
     rebuildScriptsMenu();
   }
@@ -1541,11 +1542,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         else if (command.equals("unlockAll"))
           setObjectsLocked(false, false);
       }
-    else if (menu == toolsMenu)
-      {
-        if (command.equals("editScript"))
-          new ExecuteScriptWindow(this);
-      }
     else if (menu == animationMenu || menu == theScore.getPopupMenu())
       {
         if (command.equals("showScore"))
@@ -1747,11 +1743,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   }
 
   void modellingToolCommand(CommandEvent ev)
-  {
-    Widget item = ev.getWidget();
-    for (int i = 0; i < toolsMenuItem.length; i++)
-      if (toolsMenuItem[i] == item)
-        modellingTools.get(i).commandSelected(this);
+  {    
+    BMenuItem item = (BMenuItem)ev.getWidget();
+    Object tool = item.getComponent().getClientProperty("tool");
+    if(null == tool)
+    {
+      return;
+    }
+    ((ModellingTool)tool).commandSelected(this);
+    
   }
 
   public void saveCommand()
@@ -2630,6 +2630,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
+  public void editScriptCommand()
+  {
+    new ExecuteScriptWindow(this);
+  }
+  
   public void createScriptObjectCommand()
   {
     // Prompt the user to select a name and, optionally, a predefined script.

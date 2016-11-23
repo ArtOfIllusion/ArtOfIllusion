@@ -3585,8 +3585,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     viewMenu.add(viewMenuItem[3] = Translate.menuItem("showTemplate", this, "actionPerformed"));
     viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
     viewMenu.addSeparator();
-    viewMenu.add(viewMenuItem[4] = Translate.menuItem("frameSelection", this, "actionPerformed"));
-    viewMenu.add(viewMenuItem[5] = Translate.menuItem("frameScene", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[4] = Translate.menuItem("fitToSelection", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[5] = Translate.menuItem("fitToAll", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[6] = Translate.menuItem("alignWithClosestAxis", this, "actionPerformed"));
   }
 
@@ -4598,14 +4598,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }
+      }	  /*
       else if (command.equals("frameSelection"))
         frameWithCameraCommand(true);
       else if (command.equals("frameScene"))
-        frameWithCameraCommand(false);
+        frameWithCameraCommand(false);      */      else if (command.equals("fitToSelection"))        //fitToSelectionCommand();		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))	    //fitToAllCommand();		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
-	    closestAxisCommand();
-	}
+		//closestAxisCommand();	    getView().alignWithClosestAxis();	}
 
     else if (menu == popupMenu)
       {
@@ -5741,7 +5740,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].setGrid(theScene.getGridSpacing(), theScene.getGridSubdivisions(), theScene.getShowGrid(), theScene.getSnapToGrid());
     updateImage();
   }
-
+  /**    * Use ViewerCanvas.fitToObjects() instead   */  @Deprecated
   public void frameWithCameraCommand(boolean selectionOnly)
   {
     int sel[] = getSelectionWithChildren();
@@ -5776,12 +5775,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[i].frameBox(bb);
     updateImage();
   }
-
-  public void closestAxisCommand()
+  // I don't think the "Commands" are needed. They are just one line.....  /*  public void fitToAllCommand()  {	getView().fitToObjects(getScene().getAllObjects());  }    public void fitToSelectionCommand()  {	getView().fitToObjects(getSelectedObjects());  }    public void closestAxisCommand()
   {
     getView().alignWithClosestAxis();
   }
-
+  */
   public void texturesCommand()
   {
     theScene.showTexturesDialog(this);

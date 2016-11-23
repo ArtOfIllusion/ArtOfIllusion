@@ -122,6 +122,13 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     item.setEnabled(Actor.getActor(obj) != null);
   }
 
+  @Override
+  protected void createViewMenu()
+  {
+	super.createViewMenu();
+	viewMenu.remove(fitToSelItem);
+  }
+  
   /* EditingWindow methods. */
 
   @Override
@@ -132,6 +139,14 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     Skeleton s = keyframe.getSkeleton();
     Joint selJoint = s.getJoint(view.getSelectedJoint());
     skeletonMenuItem[0].setEnabled(selJoint != null);
+	
+	// This should go to the super class, but some plugin editors can not handle it
+	boolean selected[] = getSelection();
+	boolean enable = false;
+	for (int i = 0; i < selected.length; i++)
+		enable = (selected[i] ? true : enable);
+	fitToSelItem.setEnabled(enable);
+
   }
 
   /** Get the object being edited in this window. */

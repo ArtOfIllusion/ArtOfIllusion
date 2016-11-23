@@ -708,6 +708,8 @@ public class SceneViewer extends ViewerCanvas
       moveChildren(obj.getChildren()[i], transform, undo);
   }
   
+  
+  
 	@Override
 	protected void mouseMoved(MouseMovedEvent e)
 	{

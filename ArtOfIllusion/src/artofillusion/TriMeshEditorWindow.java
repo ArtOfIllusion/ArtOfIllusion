@@ -399,6 +399,14 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     skeletonMenuItem[2].setEnabled(selJoint != null);
     skeletonMenuItem[4].setEnabled(any);
     skeletonMenuItem[5].setEnabled(selJoint != null);
+	
+	// This should go to the super class, but some plugin editors can not handle it
+	boolean selected[] = getSelection();
+	boolean enable = false;
+	for (i = 0; i < selected.length; i++)
+		enable = (selected[i] ? true : enable);
+	fitToSelItem.setEnabled(enable);
+
   }
 
   /** Get which faces are hidden.  This may be null, which means that all faces are visible. */

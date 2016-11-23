@@ -408,6 +408,14 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     skeletonMenuItem[2].setEnabled(selJoint != null);
     skeletonMenuItem[4].setEnabled(count > 0);
     skeletonMenuItem[5].setEnabled(selJoint != null);
+	
+	// This should go to the super class, but some plugin editors can not handle it
+	boolean selected[] = getSelection();
+	boolean enable = false;
+	for (int i = 0; i < selected.length; i++)
+		enable = (selected[i] ? true : enable);
+	fitToSelItem.setEnabled(enable);
+
   }
 
   /** Add an extra texture parameter to the mesh which will be used for keeping track of

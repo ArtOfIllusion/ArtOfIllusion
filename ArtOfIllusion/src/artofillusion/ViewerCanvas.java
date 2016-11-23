@@ -836,9 +836,12 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Adjust the camera position and magnification so that the specified box
-      fills the view.  This has no effect if there is a camera point to this
-      view. */
+      fills the view.  This has no effect if there is a camera bound to this
+      view. 
 
+	  Use <b>fitToObjects()</b> instead.
+  */
+  @Deprecated
   public void frameBox(BoundingBox bb)
   {
     if (boundCamera != null)
@@ -882,6 +885,157 @@ public abstract class ViewerCanvas extends CustomWidget
 
   }
 
+  /**
+   *  Fit view to the selected MeshVertices.
+   */
+ 
+  public void fitToVertices(MeshEditorWindow w, boolean selection)
+  {
+	BoundingBox b = boundsOfSelection(w, selection);		
+	if (b == null) 
+		return;
+
+	Vec3 newCenter = new Vec3(b.getCenter());
+
+	//viewToWorld.transform(newCenter);
+	CoordinateSystem newCoords = theCamera.getCameraCoordinates().duplicate();
+	int d = Math.min(getBounds().width, getBounds().height);
+	double diag = Math.sqrt((b.maxx-b.minx)*(b.maxx-b.minx)+(b.maxy-b.miny)*(b.maxy-b.miny)+(b.maxz-b.minz)*(b.maxz-b.minz));
+
+	if (perspective)
+	{
+		double newDistToPlane = 2000 / (double)d / 0.9 * diag;
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(b.maxz-b.minz) * 0.5)));
+
+		animation.start(this, newCoords, newCenter, scale, orientation);
+	}
+	else
+	{
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
+		double newScale = (double)d * 0.9 / diag; // with minimum 5% margins
+
+		animation.start(this, newCoords, newCenter, newScale, orientation);
+	}
+  }
+	
+	public BoundingBox boundsOfSelection(MeshEditorWindow w, boolean selection)
+	{	
+		Mesh mesh = (Mesh) w.getObject().getObject();
+		MeshVertex vert[] = mesh.getVertices();
+		int selected[] = w.getSelectionDistance();
+		double minx, miny, minz, maxx, maxy, maxz;
+		boolean anything = false;
+		minx = miny = minz = Double.MAX_VALUE;
+		maxx = maxy = maxz = -Double.MAX_VALUE;
+		Mat4 t = ((ObjectViewer)w.getView()).getDisplayCoordinates().fromLocal();
+		
+		for (int i = 0; i < vert.length; i++)
+		{
+			if (selected[i] == 0 || !selection)
+			{
+				anything = true;
+				Vec3 v = t.times(vert[i].r);
+				if (v.x < minx) minx = v.x;
+				if (v.x > maxx) maxx = v.x;
+				if (v.y < miny) miny = v.y;
+				if (v.y > maxy) maxy = v.y;
+				if (v.z < minz) minz = v.z;
+				if (v.z > maxz) maxz = v.z;
+			}
+		}
+		if (anything)
+		{	
+			// This is in case you have selected only on vertex.
+			// The size of it would be zero --> ViewerCavas would go  blank
+			// The zero size should be handled in the calling method
+			
+			if (maxx-minx < 0.001) {maxx += 0.0005; minx -= 0.0005;}
+			if (maxy-miny < 0.001) {maxy += 0.0005; miny -= 0.0005;}
+			if (maxz-minz < 0.001) {maxz += 0.0005; minz -= 0.0005;}
+			
+			return new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
+		}
+		else
+			return null;
+	}
+  
+  /**
+   *  Fit view to the given set of objects.
+   *  Each object is given the space of a sphere, that would just cover it's bounding box.
+   */
+  public void fitToObjects(Collection<ObjectInfo> objects)
+  {
+	if (objects.size() == 0) 
+		return;
+	 
+	CoordinateSystem newCoords;
+	BoundingBox b;
+	double br, z; // box radius, view z coordinate
+	Vec3 bc;   // box center
+	Vec3 cx, cy, cz, newCenter;
+	cz = theCamera.getCameraCoordinates().getZDirection();
+	cy = theCamera.getCameraCoordinates().getUpDirection();
+	cx = cz.cross(cy);
+	Vec2 p;  // x-y-point in view space
+	Mat4 toScene, worldToView, viewToWorld;
+	worldToView = theCamera.getWorldToView();
+	viewToWorld = theCamera.getViewToWorld();
+	int w = getBounds().width;
+	int h = getBounds().height;
+	int d = Math.min(w, h);
+
+	double minx, miny, minz, maxx, maxy, maxz;
+	minx = miny = minz = Double.POSITIVE_INFINITY;
+	maxx = maxy = maxz = Double.NEGATIVE_INFINITY;
+
+	for (ObjectInfo info : objects)
+	{
+		b = info.getBounds();
+		bc = b.getCenter();
+		br = Math.sqrt((b.maxx-b.minx)*(b.maxx-b.minx)+(b.maxy-b.miny)*(b.maxy-b.miny)+(b.maxz-b.minz)*(b.maxz-b.minz)) / 2.0;
+		toScene = info.getCoords().fromLocal();
+		toScene.transform(bc);
+
+		p = worldToView.timesXY(bc.plus(cx.times(-br))); // In view space x is 'backwards'.
+		maxx = Math.max(maxx, p.x);
+		p = worldToView.timesXY(bc.plus(cx.times(br)));
+		minx = Math.min(minx, p.x);
+		
+ 		p = worldToView.timesXY(bc.plus(cy.times(br)));
+		maxy = Math.max(maxy, p.y);
+		p = worldToView.timesXY(bc.plus(cy.times(-br)));
+		miny = Math.min(miny, p.y);
+		
+		z = worldToView.timesZ(bc.plus(cz.times(br)));
+		maxz= Math.max(maxz, z);
+		z = worldToView.timesZ(bc.plus(cz.times(-br)));
+		minz = Math.min(minz, z);
+	}
+
+	newCenter = new Vec3((minx+maxx)*0.5, (miny+maxy)*0.5, (minz+maxz)*0.5);
+	viewToWorld.transform(newCenter);
+	newCoords = theCamera.getCameraCoordinates().duplicate();
+	
+	if (perspective)
+	{
+		double newDistToPlane = 2000 / (double)d / 0.9 * Math.max(maxx-minx, maxy-miny);
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));
+
+		animation.start(this, newCoords, newCenter, scale, orientation);
+	}
+	else
+	{
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
+		double newScale = (double)d * 0.9 / Math.max(maxx-minx, maxy-miny); // with minimum 5% margins
+
+		animation.start(this, newCoords, newCenter, newScale, orientation);
+	}
+  }
+
+  /** 
+   *  Turn the view to match the closest main coordinate directions, 
+   *  which maybe positive or negative.
+   */
   public void alignWithClosestAxis()
   {
     CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
@@ -901,8 +1055,8 @@ public abstract class ViewerCanvas extends CustomWidget
     zNew.normalize();
     upNew.normalize();
 	
-	// Sometimes the new Up- and Z-directions end up on the same or opposite
-	// Then find the next couse to the 
+	// Sometimes the new Up- and Z-directions end up the same or opposite.
+	// Then keep the one that was closer to what was found and find the next closest to the other one.
 	if (zNew.equals(upNew) || zNew.equals(upNew.times(-1)))
 	{
 		if (Math.max(Math.max(Math.abs(zDir.x),Math.abs(zDir.y)),Math.abs(zDir.z)) < Math.max(Math.max(Math.abs(upDir.x),Math.abs(upDir.y)),Math.abs(upDir.z)))
@@ -910,7 +1064,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		else
 			upNew = findNextAxis(upDir, zNew);
 	}
-	if (zNew.equals(upNew) || zNew.equals(upNew.times(-1))) // A safety measure
+	if (zNew.equals(upNew) || zNew.equals(upNew.times(-1))) // A safety measure. Should not be needed
 		return;
 		
     center = rotationCenter.plus(zNew.times(-distToPlane));
@@ -946,9 +1100,9 @@ public abstract class ViewerCanvas extends CustomWidget
 	// There still is the possibility that the directions are same
 	// try in a different order
 	if (nextDir.equals(fixed) || nextDir.equals(fixed.times(-1)))
-		if (Math.abs(dir.z) != maxD && Math.abs(dir.z) != minD) nextDir = new Vec3(0,0,dir.z);
-		else if (Math.abs(dir.y) != maxD && Math.abs(dir.y) != minD) nextDir = new Vec3(0,0,dir.y);
-		else nextDir = new Vec3(0,0,dir.x);
+		if (Math.abs(dir.z) != maxD && Math.abs(dir.z) != minD) nextDir = new Vec3(0,0,dir.z); // already z ?
+		else if (Math.abs(dir.y) != maxD && Math.abs(dir.y) != minD) nextDir = new Vec3(0,0,dir.y); // already checked
+		else nextDir = new Vec3(0,0,dir.x); // this would be definitely different.
 	nextDir.normalize();
 
 	return nextDir;

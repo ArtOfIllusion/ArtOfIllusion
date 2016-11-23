@@ -53,15 +53,19 @@ public class Camera implements Cloneable
   }
 
   /**
-   * Set the distance from the camera to the screen.
+   * Set the distance from the 'camera lens' to the 'camera screen'.
    *
-   * The distToScreen parameter controls the perpective strength. Smaller value means 
-   * stronger perspective and vice versa. It is also used to track mouse moves from 
-   * scene to view in perspective mode. Hence the moves need to be corrected to match 
-   * the desired distance to draving plane: 
+   * The distToScreen parameter controls the perpective strength. 'Screen' should be understood
+   * to repserent the screen of a camera obscura, when the view is in perspective mode. 
+   * A smaller value means stronger perspective and vice versa. In parallel mode this 
+   * parameter has no meaning. 
+   *
+   * It is also used to track mouse moves from computer screen to scene. Hence the moves need to 
+   * be corrected to match the desired distance to draving plane: 
    * <pre>
-   *   Vec3 captudredMove, trueMove;
-   *   trueMove = captudredMove.times(distToPlane/cemera.getDistToScreen();
+   *   Vec2 mouseMove;
+   *   Vec3 sceneMove;
+   *   sceneMove = mouseMove.times(ViewerCanvas.getDistToPlane/Camera.getDistToScreen());
    * </pre>
    */
 
@@ -140,8 +144,9 @@ public class Camera implements Cloneable
     setScreenTransform(screenTransform, newHres, newVres);
 	
 	// Zero does not work. Things VERY close to the camera don't get calculated correctly.
-	// But setting it to  1.0 was blunt....
-	// Actually ~below 1.0 the grid starts to make mess...
+	// Setting it to 1.0 was blunt but actually below 1.0 the grid starts to make mess and the 
+	// closer you go the more there are problems.
+	// I'd like to be able to go 1E-5 or smaller.
     frontClipPlane = 0.01;
     perspective = true;
   }
@@ -156,7 +161,7 @@ public class Camera implements Cloneable
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale);
     screenTransform = Mat4.translation((double) newHres/2.0, (double) newVres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
-    frontClipPlane = -Double.MAX_VALUE;
+    frontClipPlane = -Double.MAX_VALUE; // I wonder if NEGATIVE_INFINITY would work here?
     perspective = false;
   }
   

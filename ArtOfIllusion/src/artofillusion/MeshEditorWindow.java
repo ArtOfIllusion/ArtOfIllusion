@@ -28,7 +28,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 {
   protected Mesh oldMesh;
   protected BMenu viewMenu, colorSurfaceMenu;
-  protected BMenuItem undoItem, redoItem, templateItem, axesItem, splitViewItem;
+  protected BMenuItem undoItem, redoItem, templateItem, axesItem, splitViewItem, fitToSelItem;
   protected BCheckBoxMenuItem displayItem[], coordsItem[], showItem[], colorSurfaceItem[];
   protected int meshTension, tensionDistance;
 
@@ -41,7 +41,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   protected static boolean lastShowSkeleton[] = new boolean [] {true, true, true, true};
   protected static boolean lastShowScene[] = new boolean [] {false, false, false, false};
   protected static boolean lastFreehand, lastUseWorldCoords;
-
+  
   public MeshEditorWindow(EditingWindow parent, String title, ObjectInfo obj)
   {
     super(parent, title, obj);
@@ -110,6 +110,9 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     viewMenu.add(axesItem = Translate.menuItem(view.getShowAxes() ? "hideCoordinateAxes" : "showCoordinateAxes", this, "showAxesCommand"));
     viewMenu.add(templateItem = Translate.menuItem("showTemplate", this, "showTemplateCommand"));
     viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
+    viewMenu.addSeparator();
+    viewMenu.add(fitToSelItem = Translate.menuItem("fitToSelection", this, "fitToVerticesCommand"));
+    viewMenu.add(Translate.menuItem("fitToAll", this, "fitToMeshCommand"));
     viewMenu.add(Translate.menuItem("alignWithClosestAxis", this, "closestAxisCommand"));
   }
 
@@ -272,6 +275,12 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       for (int i = 2; i < colorSurfaceItem.length; i++)
         colorSurfaceItem[i].setState(view.getSurfaceTextureParameter() == params[i-2]);
     }
+
+	//boolean selected[] = getSelection();
+	//boolean enable = false;
+	//for (int s = 0; s < selected.length; s++)
+	//	enable = (selected[s] ? true : enable);
+	//fitToSelItem.setEnabled(enable);
   }
 
   private void displayModeChanged(WidgetEvent ev)
@@ -1503,6 +1512,18 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     ((MeshViewer) theView[currentView]).previewObject();
   }
 
+  /** Fit the active view to the selected vertices */
+  public void fitToVerticesCommand()
+  {
+    getView().fitToVertices(this, true);
+  }
+
+  /** Fit the active view to the ControlMesh */
+  public void fitToMeshCommand()
+  {
+    getView().fitToVertices(this, false);
+  }
+  
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
 

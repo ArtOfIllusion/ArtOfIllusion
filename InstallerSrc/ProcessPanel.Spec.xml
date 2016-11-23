@@ -1,4 +1,4 @@
-<processing>
+<izpack:processing version="5.0" xmlns:izpack="http://izpack.org/schema/processing">
   <job name="Cleanup_unix">
         <os family="unix" /> 
     <executefile name="$INSTALL_PATH/utils/cleanup.sh">
@@ -12,4 +12,4 @@
     </executefile>
   </job> -->
 
-</processing>
+</izpack:processing>

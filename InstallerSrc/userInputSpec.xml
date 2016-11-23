@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF8" standalone="yes" ?>
 
-<userInput>
+<izpack:userInput version="5.0" xmlns:izpack="http://izpack.org/schema/userinput">
 <panel order="0">
   <field type="staticText" align="left" 
        txt="Additional JMF setup (needs archive file from Sun)"
@@ -38,4 +38,4 @@
   </spec>
 </field>-->
 </panel>
-</userInput>
+</izpack:userInput>

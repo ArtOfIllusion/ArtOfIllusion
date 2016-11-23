@@ -1,7 +1,8 @@
-<shortcuts>
-  <!-- <skipIfNotSupported/> -->
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<izpack:shortcuts version="5.0" xmlns:izpack="http://izpack.org/schema/shortcuts">
+
   <programGroup defaultName="Art of Illusion"
-                location="applications||startMenu"/>
+                location="applications"/>
   <shortcut
     name="Start Art of Illusion"
     target="$INSTALL_PATH\Art of Illusion.exe"
@@ -14,7 +15,6 @@
     programGroup="yes"
     desktop="yes"
     applications="yes"
-    startMenu="yes"
-    startup="no">
-  </shortcut>
-</shortcuts>
+    startMenu="no"
+    startup="no"/>
+</izpack:shortcuts>

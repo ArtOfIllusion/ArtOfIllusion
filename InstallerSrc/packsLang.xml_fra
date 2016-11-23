@@ -2,7 +2,7 @@
 
 <!-- The French langpack -->
 
-<langpack>
+<izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
     <!-- General installer strings -->
     <str id="desktopPanelTitle" txt="Intégration bureau Gnome/KDE (free desktop)"/>
     <str id="desktopPanelTitle.description" txt="Association de fichiers .aoi et icône"/>
@@ -16,4 +16,5 @@
     <str id="JMF.description" txt="Java Media Framework (utilisé pour sauver des animations au format Quicktime, à télécharger d'abord)"/>
     <str id="core" txt="Base AoI"/>
     <str id="core.description" txt="Constituants AoI de base"/>
-</langpack>
+</izpack:langpack>
+

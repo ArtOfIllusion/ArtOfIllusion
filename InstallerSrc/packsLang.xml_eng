@@ -2,7 +2,7 @@
 
 <!-- The English langpack -->
 
-<langpack>
+<izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
     <!-- General installer strings -->
     <str id="desktopPanelTitle" txt="Gnome/KDE (free desktop) desktop integration"/>
     <str id="gnomePanelTitle.description" txt="Desktop file assocation and icon"/>
@@ -16,4 +16,4 @@
     <str id="jogl-windows-AMD64.description" txt="OpenGL rendering support for 64 bit OS. Install only the version appropriate for your OS (32 or 64 bit). This improves performance, but is incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option."/>
     <str id="core" txt="AoI Base files"/>
     <str id="core.description" txt="AoI core files"/>
-</langpack>
+</izpack:langpack>

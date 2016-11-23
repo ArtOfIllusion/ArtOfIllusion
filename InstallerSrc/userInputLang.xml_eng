@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF8" standalone="yes" ?>
 
-<langpack>
+<izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
   <str id="jmf.input.location" txt="Java Media Framework Installation (leave empty to ignore)"/>
   <str id="jmf.searchfield.description" txt="Select JFM archive file location"/>
   <str id="jmf.path.file" txt="Path to JMF zip file:"/>
@@ -8,5 +8,5 @@
   <str id="help.searchfield.description" txt="Select AoI Manual archive file location"/>
   <str id="help.path.file" txt="Path to AoI Manual zip file:"/>
   <str id="staticJMFText.text" txt="Additional JMF setup (needs archive file from Sun)" />
-</langpack>
+</izpack:langpack>
 

@@ -2,7 +2,7 @@
 
 <!-- The German langpack -->
 
-<langpack>
+<izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
     <!-- General installer strings -->
     <str id="desktopPanelTitle" txt="Gnome/KDE (free desktop) Desktop Einbindung"/>
     <str id="gnomePanelTitle.description" txt="Desktop Dateiverknüpfung und Icon"/>
@@ -16,4 +16,4 @@
     <str id="JMF.description" txt="Java Media Framework (wird nur benötigt um Animationen direkt im Quicktime Format zu speichern - bitte zuvor Datei runterladen)"/>
     <str id="core" txt="AoI Basis Dateinen"/>
     <str id="core.description" txt="AoI Kern Dateien"/>
-</langpack>
+</izpack:langpack>

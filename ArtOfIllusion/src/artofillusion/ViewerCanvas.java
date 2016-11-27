@@ -886,7 +886,9 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   *  Fit view to the selected MeshVertices.
+   *  Fit view to the selected MeshVertices OR the entire mesh.
+   *
+   *  @param selection set to true, fits to selected vertices.
    */
  
   public void fitToVertices(MeshEditorWindow w, boolean selection)
@@ -917,7 +919,12 @@ public abstract class ViewerCanvas extends CustomWidget
 		animation.start(this, newCoords, newCenter, newScale, orientation);
 	}
   }
-	
+
+  /** Sub classes that can handle bones needs to override this */
+  public void fitToBone(ObjectInfo info)
+  {
+  }
+
 	public BoundingBox boundsOfSelection(MeshEditorWindow w, boolean selection)
 	{	
 		Mesh mesh = (Mesh) w.getObject().getObject();

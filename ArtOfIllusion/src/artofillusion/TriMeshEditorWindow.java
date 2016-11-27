@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
+   Modifications copyright (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -402,11 +403,10 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 	
 	// This should go to the super class, but some plugin editors can not handle it
 	boolean selected[] = getSelection();
-	boolean enable = false;
+	boolean enable = (view.getSelectedJoint() > 0);
 	for (i = 0; i < selected.length; i++)
 		enable = (selected[i] ? true : enable);
 	fitToSelItem.setEnabled(enable);
-
   }
 
   /** Get which faces are hidden.  This may be null, which means that all faces are visible. */

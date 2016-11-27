@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2006 by Peter Eastman
+   Modifications copyright (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -123,12 +124,11 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   }
 
   @Override
-  protected void createViewMenu()
+  public void fitToVerticesCommand()
   {
-	super.createViewMenu();
-	viewMenu.remove(fitToSelItem);
+    getView().fitToBone(objInfo);
   }
-  
+
   /* EditingWindow methods. */
 
   @Override
@@ -139,14 +139,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     Skeleton s = keyframe.getSkeleton();
     Joint selJoint = s.getJoint(view.getSelectedJoint());
     skeletonMenuItem[0].setEnabled(selJoint != null);
-	
-	// This should go to the super class, but some plugin editors can not handle it
-	boolean selected[] = getSelection();
-	boolean enable = false;
-	for (int i = 0; i < selected.length; i++)
-		enable = (selected[i] ? true : enable);
-	fitToSelItem.setEnabled(enable);
-
+	fitToSelItem.setEnabled(selJoint != null);
   }
 
   /** Get the object being edited in this window. */

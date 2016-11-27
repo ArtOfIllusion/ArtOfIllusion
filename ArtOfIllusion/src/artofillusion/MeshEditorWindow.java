@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
+   Modifications copyright (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software

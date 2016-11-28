@@ -108,6 +108,9 @@ public class MoveViewTool extends EditingTool
 	private void dragMoveTravel(WidgetMouseEvent e, ViewerCanvas view)
 	{
 		Camera cam = view.getCamera();
+		
+		// We compare the move to the moment when the mouse button was pressed
+		CoordinateSystem coords = oldCoords.duplicate();
 		Point dragPoint = e.getPoint();
 		int dx, dy;
 		
@@ -116,18 +119,20 @@ public class MoveViewTool extends EditingTool
 
 		if (controlDown) // forward move!
 		{ 	
+			Vec3 hDir;
+			if (view.getNavigationMode() == 3)
 			{
-				CoordinateSystem coords = cam.getCameraCoordinates();
-				
-				Vec3 hDir = new Vec3(coords.getZDirection().x, 0.0, coords.getZDirection().z);
+				hDir = new Vec3(coords.getZDirection().x, 0.0, coords.getZDirection().z);
 				hDir.normalize();
-				
-				Vec3 newPos = oldCamPos.plus(hDir.times(-dy*0.01*oldDist/cam.getDistToScreen()));
-				coords.setOrigin(newPos);
-				
-				cam.setCameraCoordinates(coords);
-				view.setRotationCenter(newPos.plus(coords.getZDirection().times(oldDist)));
 			}
+			else
+				hDir = coords.getZDirection();
+				
+			Vec3 newPos = oldCamPos.plus(hDir.times(-dy*0.04*oldDist/cam.getDistToScreen()));
+			coords.setOrigin(newPos);
+			
+			cam.setCameraCoordinates(coords);
+			view.setRotationCenter(newPos.plus(coords.getZDirection().times(oldDist)));
 		}
 		else // Move up-down-right-left
 		{
@@ -138,18 +143,23 @@ public class MoveViewTool extends EditingTool
 				else
 					dx = 0;
 			}
-			Vec3 vDir = (new Vec3(0.0, cam.getCameraCoordinates().getOrigin().y, 0.0));
-			vDir.normalize();
-			
-			Vec3 hMove = cam.findDragVector(clickPos, dx, 0.0); // Check findDragVector()!			
+			Vec3 vDir;
+			if (view.getNavigationMode() == 3)
+				vDir = new Vec3(0,1,0);
+			else
+				vDir = coords.getUpDirection();
+
+			// Horizontal move
+			Vec3 hMove = cam.findDragVector(clickPos, dx, 0.0);
 			Mat4 m = Mat4.translation(-hMove.x, 0.0, -hMove.z);
-			CoordinateSystem coords = oldCoords.duplicate();	
-			Vec3 newPos = oldCamPos.plus(vDir.times(dy*0.01*oldDist/cam.getDistToScreen()));
-			
-			coords.setOrigin(newPos);
 			coords.transformOrigin(m);
+
+			// Vertical move
+			Vec3 newPos = coords.getOrigin().plus(vDir.times(dy*0.01*view.getDistToPlane()/cam.getDistToScreen()));
+			coords.setOrigin(newPos);
+			
 			cam.setCameraCoordinates(coords);
-			view.setRotationCenter(newPos.plus(coords.getZDirection().times(oldDist)));
+			view.setRotationCenter(newPos.plus(coords.getZDirection().times(view.getDistToPlane())));
 		}
 	}
 	
@@ -265,6 +275,7 @@ public class MoveViewTool extends EditingTool
 	  }
 	  else{
 	    v.extRC = new Vec3(view.getRotationCenter());
+		System.out.println(v.extRC);
 	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
 		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
 		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());

@@ -16,10 +16,8 @@
     <!-- The gui preferences indication -->
     <!-- Flexible and in the screen proportions -->
     <guiprefs height="580" resizable="yes" width="640">
-        <laf name="looks">
-           <os family="windows"/>
-        </laf>
 
+	
 	<!-- GUI addaption for more informations see "Modifying the GUI" in the documentation -->
         <modifier key="layoutAnchor" value="CENTER"/>
         <modifier key="headingPanelCounter" value="progressbar"/>
@@ -39,7 +37,7 @@
 
     <!-- Variables. -->
     <variables>
-        <variable name="TargetPanel.dir.windows" value="${USER_HOME}/Programs/ArtOfIllusion"/>
+        <variable name="TargetPanel.dir.windows" value="${USER_HOME}\Programs\ArtOfIllusion"/>
     </variables>
 
 

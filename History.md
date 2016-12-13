@@ -1,5 +1,13 @@
 Art of Illusion Version History
 
+v3.0.3, Dec. 12, 2016
+
+- Fix bug related to shaded mesh objects having wrong material properties calculated
+- Fix twitchy smoothed Position/Rotation tracks
+- Upgrade Jogl Libraries
+- Move View controls to their own menu
+- Performance enhancement for better multi-thread raytracing on many-core processers
+
 v3.0.2, May 17, 2015
 
 - Reduced memory use for raytracer.

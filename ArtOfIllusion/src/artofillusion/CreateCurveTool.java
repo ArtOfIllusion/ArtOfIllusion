@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,15 +11,22 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
-import artofillusion.math.*;
+import artofillusion.animation.PositionTrack;
+import artofillusion.animation.RotationTrack;
+import artofillusion.math.CoordinateSystem;
+import artofillusion.math.Mat4;
+import artofillusion.math.Vec2;
+import artofillusion.math.Vec3;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 
-import java.awt.*;
-import java.awt.geom.*;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+
 import java.util.Vector;
 
 /** CreateCurveTool is an EditingTool used for creating Curve objects. */
@@ -93,12 +101,22 @@ public class CreateCurveTool extends EditingTool
       for (int i = 0; i < mesh.from.length; i++)
         view.drawLine(p[mesh.from[i]], p[mesh.to[i]], ViewerCanvas.lineColor);
     }
-    for (int i = 0; i < clickPoint.size(); i++)
-      {
-        Vec3 pos = (Vec3) clickPoint.lastElement();
-        Vec2 screenPos = view.getCamera().getWorldToScreen().timesXY(pos);
-        view.drawBox((int) screenPos.x-HANDLE_SIZE/2, (int) screenPos.y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, ViewerCanvas.handleColor);
-      }
+    
+    if(clickPoint.isEmpty()) 
+    {
+      return;
+    }
+    int lastPoint = clickPoint.size()-1;
+    
+    Mat4 cameraWorldToScreen = cam.getWorldToScreen();
+    
+    for (int listIndex = 0; listIndex < clickPoint.size(); listIndex++)
+    {
+      Vec2 screenPos = cameraWorldToScreen.timesXY(clickPoint.get(listIndex));        
+      Color handleColor = (listIndex == lastPoint) ? ViewerCanvas.highlightColor : ViewerCanvas.handleColor;
+      view.drawBox((int) screenPos.x-HANDLE_SIZE/2, (int) screenPos.y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, handleColor);
+    }
+
   }
 
   @Override

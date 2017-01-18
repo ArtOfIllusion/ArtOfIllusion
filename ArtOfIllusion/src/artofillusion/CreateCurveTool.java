@@ -113,7 +113,7 @@ public class CreateCurveTool extends EditingTool
     for (int listIndex = 0; listIndex < clickPoint.size(); listIndex++)
     {
       Vec2 screenPos = cameraWorldToScreen.timesXY(clickPoint.get(listIndex));        
-      Color handleColor = (listIndex == lastPoint) ? ViewerCanvas.highlightColor : ViewerCanvas.handleColor;
+      Color handleColor = (listIndex == lastPoint) ? ViewerCanvas.highlightColor : ViewerCanvas.disabledColor;
       view.drawBox((int) screenPos.x-HANDLE_SIZE/2, (int) screenPos.y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, handleColor);
     }
 

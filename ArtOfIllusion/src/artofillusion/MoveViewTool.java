@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes Copyright (C) 2106 by Petri Ihalainen
+   Changes Copyright (C) 2016-2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -211,7 +211,7 @@ public class MoveViewTool extends EditingTool
 		}
 	}
 
-
+/*
   @Override
   public void mouseScrolled(MouseScrolledEvent e, ViewerCanvas view)
   {
@@ -223,13 +223,13 @@ public class MoveViewTool extends EditingTool
   {
 	  wipeExtGraphs();
   }
-
+*/
   @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
 	mouseDown = false;
 	view.moving = false;
-    mouseDragged(e, view);
+    // mouseDragged(e, view); // unnecessary, I think
     if (theWindow != null)
       {
         ObjectInfo bound = view.getBoundCamera();
@@ -237,14 +237,14 @@ public class MoveViewTool extends EditingTool
         {
           // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
           // the camera.
-
+          // bound.setCoords(view.getCamera().getCameraCoordinates().duplicate()); // has to be a duplicate or copy coords or ....
+		  bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
           UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
           moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
           theWindow.setUndoRecord(undo);
         }
         theWindow.updateImage();
       }
-	
 	wipeExtGraphs();
   }
 
@@ -265,17 +265,8 @@ public class MoveViewTool extends EditingTool
   public void setExtGraphs(ViewerCanvas view)
   {
 	for (ViewerCanvas v : theWindow.getAllViews()){
-      if (v == view){
-		v.extRC = null;
-		v.extCC = null;
-		v.extC0 = null;
-		v.extC1 = null;
-		v.extC2 = null;
-		v.extC3 = null;
-	  }
-	  else{
+      if (v != view){
 	    v.extRC = new Vec3(view.getRotationCenter());
-		System.out.println(v.extRC);
 	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
 		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
 		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());

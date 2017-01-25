@@ -150,9 +150,11 @@ public abstract class EditingTool
   {
   }
   
+  /*
   public void mouseStoppedScrolling()
   {
   }
+  */
   
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {

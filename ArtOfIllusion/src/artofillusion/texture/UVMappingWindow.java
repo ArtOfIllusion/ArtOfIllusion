@@ -125,6 +125,7 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
     meshView.setTool(new GenericTool(this, "movePoints", Translate.text("reshapeMeshTool.tipText")));
     meshView.setMetaTool(new MoveViewTool(this));
     meshView.setAltTool(new RotateViewTool(this));
+	meshView.setScrollTool(new ScrollViewTool(this));
     BSplitPane meshViewPanel = new BSplitPane(BSplitPane.VERTICAL, meshView, preview = new MaterialPreviewer(objInfo, 150, 150));
     meshViewPanel.setResizeWeight(0.7);
     meshViewPanel.setContinuousLayout(true);

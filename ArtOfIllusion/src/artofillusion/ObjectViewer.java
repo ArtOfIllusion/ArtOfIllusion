@@ -225,15 +225,13 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     // Finish up.
 
-    drawBorder(); // Why?
+    drawOverlay();
 	currentTool.drawOverlay(this);
 	if (activeTool != null)
 		activeTool.drawOverlay(this);
-	drawNavigationGraphics();
-	drawScrollGraphics();
-    drawBorder();
     if (showAxes)
       drawCoordinateAxes();
+    drawBorder();
   }
 
   protected abstract void drawObject();
@@ -506,4 +504,16 @@ public abstract class ObjectViewer extends ViewerCanvas
     theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
+  
+   	@Override
+	protected void mouseMoved(MouseMovedEvent e)
+	{
+		mouseMoving = true;
+		mousePoint = e.getPoint();
+		mouseMoveTimer.restart();
+		((EditingWindow)controller).updateImage();
+		//parentFrame.updateImage(); // I wonder why, but that's how it works
+	}
+
+  
 }

@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2106-2107 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,7 +30,7 @@ public class SceneViewer extends ViewerCanvas
   EditingWindow parentFrame;
   private Vector<ObjectInfo> cameras;
   boolean draggingBox, draggingSelectionBox, squareBox, sentClick, dragging;
-  Point clickPoint, dragPoint, mousePoint;
+  Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
   int deselect;
   Vec3 nextCenter = new Vec3();
@@ -309,8 +310,6 @@ public class SceneViewer extends ViewerCanvas
 	currentTool.drawOverlay(this);
 	if (activeTool != null)
 		activeTool.drawOverlay(this);
-	drawNavigationGraphics();
-	drawScrollGraphics();
     drawBorder();
     if (showAxes)
       drawCoordinateAxes();
@@ -676,10 +675,14 @@ public class SceneViewer extends ViewerCanvas
 	dragging = false;
   }
 
-  /** Double-clicking on object should bring up its editor. */
+  /** 
+    Double-clicking on object should bring up its editor. 
+   */
 
   public void mouseClicked(MouseClickedEvent e)
   {
+	//super.mouseClicked(e);
+	
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
@@ -696,6 +699,15 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
+ 	@Override
+	protected void mouseMoved(MouseMovedEvent e)
+	{
+		mouseMoving = true;
+		mousePoint = e.getPoint();
+		mouseMoveTimer.restart();
+		parentFrame.updateImage(); // I wonder why, but that's how it works
+	}
+	
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)
@@ -710,35 +722,5 @@ public class SceneViewer extends ViewerCanvas
   
   
   
-	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		//mousePoint = e.getPoint();
-		//System.out.println("MM " + mousePoint + " " + dragging);
-		//repaint(); // Strange but true, this is needed.
-	}
-	/*
-	@Override
-  	void drawOverlay()
-	{
-		//System.out.println("OVL " + mousePoint + " " + dragging);
-		if (mousePoint != null){
 
-		if (!dragging)
-		{
-			drawCircle(mousePoint, 12.25, 20, Color.blue);
-			drawCircle(mousePoint,  8.25, 20, Color.blue);
-			drawCircle(mousePoint, 16.25, 20, Color.blue);
-		}
-		//drawCircle(mousePoint, 16.0, 20, Color.green);
-		//drawCircle(mousePoint, 15.0, 20, Color.red);
-		//	if (dragging){
-		//		drawCircle(mousePoint, 16.25, 24, red);
-			//repaint();
-		//	}
-		
-		}
-
-	}
-	*/
 }

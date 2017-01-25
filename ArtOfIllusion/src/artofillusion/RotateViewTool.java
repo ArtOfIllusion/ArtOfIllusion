@@ -29,6 +29,8 @@ public class RotateViewTool extends EditingTool
   private CoordinateSystem oldCoords;
   private Vec3 rotationCenter;
   private double angle, distToRot, xAngle, yAngle, r;
+  private Camera camera;
+  //private ObjectInfo boundCamera;
  
   private Point viewCenter, p0, p1;
  
@@ -66,8 +68,8 @@ public class RotateViewTool extends EditingTool
   @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
-    Camera cam = view.getCamera();
-    oldCoords = cam.getCameraCoordinates().duplicate();
+    camera = view.getCamera();
+    oldCoords = camera.getCameraCoordinates().duplicate();
 	
 	// Make sure that the rotation Center is on Camera Z-axis.
 	// Some plugins like PolyMesh can have them separated
@@ -75,10 +77,11 @@ public class RotateViewTool extends EditingTool
 	
     controlDown = e.isControlDown();
     clickPoint = e.getPoint();
-    viewToWorld = cam.getViewToWorld();
+    viewToWorld = camera.getViewToWorld();
     rotationCenter = view.getRotationCenter();
 	distToRot = oldCoords.getOrigin().minus(rotationCenter).length();
 	view.mouseDown = true;
+	view.rotating = true;
   }
  
 	@Override
@@ -105,7 +108,9 @@ public class RotateViewTool extends EditingTool
 		}
 		view.viewChanged(false);	
 		if (view.getBoundCamera() != null)
+		{
 			repaintAllViews();
+		}
 		else
 			view.repaint();
 		setExtGraphs(view);
@@ -122,7 +127,7 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown && ! e.isShiftDown())
+		if (controlDown && !e.isShiftDown())
 		{
 			view.tilting = true;
 			tilt(e, view, clickPoint);
@@ -133,7 +138,7 @@ public class RotateViewTool extends EditingTool
 			rotateSpace(e, view, clickPoint);
 			return;
 		}
-		else if (e.isShiftDown() && ! controlDown)
+		else if (!controlDown && e.isShiftDown())
 		{
 			if (Math.abs(dx) > Math.abs(dy))
 			{
@@ -176,7 +181,7 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown && ! e.isShiftDown())
+		if (controlDown && !e.isShiftDown())
 		{
 			view.tilting = true;
 			tilt(e, view, clickPoint);
@@ -229,7 +234,7 @@ public class RotateViewTool extends EditingTool
 		//if (controlDown)
 		//	rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vz()), -dx*DRAG_SCALE);
 		//else
-		if (e.isShiftDown() && !controlDown)
+		if (!controlDown && e.isShiftDown())
 		{
 			if (Math.abs(dx) > Math.abs(dy))
 				rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE);
@@ -240,7 +245,7 @@ public class RotateViewTool extends EditingTool
 				rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dragAngleFw);
 			}
 		}
-		if (e.isShiftDown() && controlDown)
+		else if (controlDown && e.isShiftDown())
 		{
 			panLandscape(e, view, clickPoint, vertical);
 			return;
@@ -283,7 +288,6 @@ public class RotateViewTool extends EditingTool
 	private void dragRotateTravelLandscape(WidgetMouseEvent e, ViewerCanvas view)
 	{
 		//This is modified from AoI 3.0
-		view.setOrientation(ViewerCanvas.VIEW_OTHER);
 		Vec3 vertical = new Vec3(0.0,1.0,0.0); 
 		
 		Point dragPoint = e.getPoint();
@@ -295,7 +299,7 @@ public class RotateViewTool extends EditingTool
 		//if (controlDown)
 		//	rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vz()), -dx*DRAG_SCALE);
 		//else
-		if (e.isShiftDown() && !controlDown)
+		if (!controlDown && e.isShiftDown())
 		{
 			if (Math.abs(dx) > Math.abs(dy))
 				rotation = Mat4.axisRotation(vertical, dx*DRAG_SCALE/distToRot);
@@ -306,7 +310,7 @@ public class RotateViewTool extends EditingTool
 				rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dragAngleFw);
 			}
 		}
-		if (e.isShiftDown() && controlDown)
+		else if (controlDown && e.isShiftDown())
 		{
 			rotateLandscape(e, view, clickPoint, vertical);
 			return;
@@ -357,15 +361,18 @@ public class RotateViewTool extends EditingTool
     //mouseDragged(e, view); // I wonder why this extra one was there. Seemed to cause somethign unexpected.
 	view.mouseDown = false;
 	view.tilting = false;
+	view.rotating = false;
 
     Point dragPoint = e.getPoint();
     if (theWindow != null)
     {
-        ObjectInfo bound = view.getBoundCamera();
+        //if (boundCamera != null)
+		ObjectInfo bound = view.getBoundCamera();
         if (bound != null)
         {
             // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
             // the camera.
+			bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates()); // for precise action.
             UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
             moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
             theWindow.setUndoRecord(undo);
@@ -374,6 +381,7 @@ public class RotateViewTool extends EditingTool
     }
 	
 	// If the mouse was not dragged then center to the given point
+	// This shouls be directly in the ViewerCanvas but it had a side-effect.
 	if (dragPoint.x == clickPoint.x && dragPoint.y == clickPoint.y)
 	    view.centerToPoint(dragPoint);
 	  
@@ -403,16 +411,8 @@ public class RotateViewTool extends EditingTool
   public void setExtGraphs(ViewerCanvas view)
   {
 	for (ViewerCanvas v : theWindow.getAllViews()){
-      if (v == view){
-		v.extRC = null;
-		v.extCC = null;
-		v.extC0 = null;
-		v.extC1 = null;
-		v.extC2 = null;
-		v.extC3 = null;
-	  }
-	  else{
-	    v.extRC = new Vec3(view.getRotationCenter());	
+      if (v != view){
+	    v.extRC = new Vec3(view.getRotationCenter());
 	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
 		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
 		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
@@ -422,6 +422,7 @@ public class RotateViewTool extends EditingTool
 	  }
     }
   }
+
   public void wipeExtGraphs()
   {
 	for (ViewerCanvas v : theWindow.getAllViews()){
@@ -438,7 +439,7 @@ public class RotateViewTool extends EditingTool
   private void tilt(WidgetMouseEvent e, ViewerCanvas view, Point clickPoint)
   {
 	int d = Math.min(view.getBounds().width, view.getBounds().height);
-	r = d*0.4;
+	r = d*0.45;
 	int cx = view.getBounds().width/2;
 	int cy = view.getBounds().height/2;
 	viewCenter = new Point(cx, cy);
@@ -485,8 +486,8 @@ public class RotateViewTool extends EditingTool
 	Point dragPoint = e.getPoint();
 	int dx = dragPoint.x-clickPoint.x;
 	int dy = dragPoint.y-clickPoint.y;
-	Camera cam = view.getCamera();
-	double dts = cam.getDistToScreen();
+	//Camera cam = view.getCamera();
+	double dts = camera.getDistToScreen();
 	
 	if (view.getBoundCamera() != null){
 		int yp = view.getBounds().height/2;
@@ -522,7 +523,7 @@ public class RotateViewTool extends EditingTool
 		else
 			c.transformCoordinates(Mat4.translation(cc.x, cc.y, cc.z));
 
-		cam.setCameraCoordinates(c);
+		camera.setCameraCoordinates(c);
 		view.setRotationCenter(cc.plus(c.getZDirection().times(view.getDistToPlane())));
 	}
   }
@@ -591,22 +592,20 @@ public class RotateViewTool extends EditingTool
   {
 	//view.drawLine(new Point(100,100), new Point(200, 0), Color.RED);
     if (view.tilting){
- 	  //view.drawLine(viewCenter, p1, view.red);
-	  //view.drawLine(viewCenter, new Point(viewCenter.x, viewCenter.y+(int)r), view.gray);
-	  //view.drawLine(viewCenter, new Point(viewCenter.x, viewCenter.y-(int)r), view.gray);
-	  //view.drawLine(viewCenter, p0, view.blue);
+	  view.repaint();
 	  for (int i=0; i<4; i++)
-		view.drawLine(viewCenter, Math.PI/2.0*i, 0.0, r, view.gray);
+		view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.teal);
+	  
+	  view.drawLine(viewCenter, -Math.PI/2.0, r*0.1, r, view.red);
+	  view.drawLine(viewCenter, Math.PI/2.0, r*0.1, r, view.red);
+	  view.drawLine(viewCenter, Math.PI, r*0.1, r, view.blue);
+	  view.drawLine(viewCenter, 0.0, r*0.1, r, view.blue);
+	  
 	  for (int i=0; i<24; i++)
-		view.drawLine(viewCenter, Math.PI/12.0*i, r*0.8, r, view.gray);
-	  view.drawLine(viewCenter, -Math.PI/2.0+angle, r*0.1, r, view.red);
-	  view.drawLine(viewCenter, Math.PI/2.0+angle, r*0.1, r, view.red);
-	  view.drawLine(viewCenter, Math.PI+angle, r*0.1, r, view.blue);
-	  view.drawLine(viewCenter, angle, r*0.1, r, view.blue);
-	  
-	  view.drawCircle(viewCenter, r, 60, view.gray);
-      view.drawCircle(viewCenter, r*.8, 60, view.gray);
-	  
+		view.drawLine(viewCenter, Math.PI/12.0*i+angle, r/.45*.4, r, view.teal);
+		
+	  view.drawCircle(viewCenter, r, 48, view.teal);
+      view.drawCircle(viewCenter, r/.45*.4, 48, view.teal);
 	}
   }
 }

@@ -159,7 +159,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       pixel[index1] = pixel[index2] = black;
       if (drawFocus)
         //pixel[index1+1] = pixel[index2-1] = line;
-        pixel[index1+1] = pixel[index2-1] = Color.GREEN.getRGB();
+        pixel[index1+1] = pixel[index2-1] = Color.GRAY.getRGB();
     }
     index1 = bounds.width*(bounds.height-1);
     for (i = 1; i < bounds.width-1; i++)
@@ -167,7 +167,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       pixel[i] = pixel[index1+i] = black;
       if (drawFocus){
         //pixel[i+bounds.width] = pixel[index1+i-bounds.width] = line;
-        pixel[i+bounds.width] = pixel[index1+i-bounds.width] = Color.GREEN.getRGB();
+        pixel[i+bounds.width] = pixel[index1+i-bounds.width] = Color.GRAY.getRGB();
 	  }
     }
   }

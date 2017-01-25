@@ -36,6 +36,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Camera theCamera;
   protected ObjectInfo boundCamera;
   protected EditingTool currentTool, activeTool, metaTool, altTool;
+  protected ScrollViewTool scrollTool;
   protected PopupMenuManager popupManager;
   protected int renderMode, gridSubdivisions, orientation, navigationMode;
   protected double gridSpacing, scale, distToPlane, scrollRadius, scrollX, scrollY, scrollBlend, scrollBlendX, scrollBlendY;
@@ -52,8 +53,9 @@ public abstract class ViewerCanvas extends CustomWidget
   
   protected final ViewChangedEvent viewChangedEvent;
 
-  public Color gray, red, green, blue, yellow;
+  public Color gray, red, green, blue, yellow, cone, teal, TEAL;
   public Vec3 extRC, extCC, extC0, extC1, extC2, extC3;
+  public Point mousePoint;
   
   private static boolean openGLAvailable;
   private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
@@ -103,7 +105,8 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int NAVIGATE_TRAVEL_SPACE = 2;
   public static final int NAVIGATE_TRAVEL_LANDSCAPE = 3;
   
-  public boolean mouseDown, tilting, moving, scrolling;
+  public boolean mouseDown, mouseMoving, tilting, moving, rotating, scrolling, dragging;
+  public Color blendColorR, blendColorX, blendColorY;
   
   public ViewerCanvas()
   {
@@ -145,6 +148,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
+    //addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     getComponent().addComponentListener(new ComponentListener()
     {
       @Override
@@ -244,146 +248,9 @@ public abstract class ViewerCanvas extends CustomWidget
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
-    scrolling = true;
-    scrollTimer.restart();
-    
-    switch (getNavigationMode()) 
-    {
-      case ViewerCanvas.NAVIGATE_MODEL_SPACE:
-      case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
-        scrollMoveModel(e);
-        break;
-      case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-      case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
-        scrollMoveTravel(e);
-        break;
-      default:
-        break;
-    }
-
-    viewChanged(false);
-    repaint();
-    metaTool.mouseScrolled(e, this); // to draw cue graphics.... A weird arrangement
+	scrollTool.mouseScrolled(e, this);
   }
-  
-  private void scrollMoveModel(MouseScrolledEvent e)
-  {
-    int amount = e.getWheelRotation();
-    if (!e.isAltDown())
-      amount *= 10;
-    if (ArtOfIllusion.getPreferences().getReverseZooming())
-      amount *= -1;
-    if (theCamera.isPerspective())
-    {
-      CoordinateSystem coords = theCamera.getCameraCoordinates();
-	  CoordinateSystem oldCoords = coords.duplicate();
-	  double oldDist = getDistToPlane();
-	  //double newDist = oldDist*Math.pow(1.0/1.01, amount);
-	  double newDist = oldDist*Math.pow(1.01, amount);
-	  Vec3 oldPos = new Vec3(coords.getOrigin());
-	  Vec3 newPos = getRotationCenter().plus(coords.getZDirection().times(-newDist));
-	  coords.setOrigin(newPos);
-      theCamera.setCameraCoordinates(coords);
-	  setDistToPlane(newDist);
-    }
-    else
-    {
-      setScale(getScale()*Math.pow(1.0/1.01, amount));
-    }
-  }
-  
-  private void scrollMoveTravel(MouseScrolledEvent e)
-  {	
-    int amount = e.getWheelRotation();
-    if (!e.isAltDown())
-      amount *= 10;
-    if (ArtOfIllusion.getPreferences().getReverseZooming())
-      amount *= -1;
 
-	Point scrollPoint = e.getPoint();
-	int cx = getBounds().width/2;
-	int cy = getBounds().height/2;
-	int d = Math.min(getBounds().width, getBounds().height);
-
-	Vec3 axis, oldPos, newPos;
-	double angle, deltaZ, deltaY;
-	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
-	
-	if (navigationMode == NAVIGATE_TRAVEL_SPACE)
-	{
-		int rx = scrollPoint.x - cx;
-		int ry = scrollPoint.y - cy;
-		scrollRadius = Math.sqrt(rx*rx + ry*ry);
-		if (scrollRadius < 0.1*d) scrollRadius = 0.1*d;
-		if (scrollRadius > 0.4*d) scrollRadius = 0.4*d;
-		scrollBlend = (scrollRadius-0.1*d)/(0.3*d);
-		
-		axis = new Vec3(-ry, rx, 0.0);
-		axis.normalize();
-		axis = theCamera.getViewToWorld().timesDirection(axis);
-		angle = scrollRadius*scrollBlend*amount*0.00002;
-		
-		deltaZ = -getDistToPlane()*0.01*amount*(1.0-scrollBlend);
-		deltaY = 0.0;
-
-		// Calculate the turn
-		Vec3 location = coords.getOrigin();
-		coords.transformCoordinates(Mat4.translation(-location.x, -location.y, -location.z));
-		coords.transformCoordinates(Mat4.axisRotation(axis, angle));
-		coords.transformCoordinates(Mat4.translation(location.x, location.y, location.z));
-
-		// Calculate the move
-		oldPos = new Vec3(coords.getOrigin());
-		newPos = oldPos.plus(coords.getZDirection().times(deltaZ));
-		coords.setOrigin(newPos);
-	}
-
-	else if (navigationMode == NAVIGATE_TRAVEL_LANDSCAPE)
-	{
-		scrollX = scrollPoint.x - cx;
-		if (Math.abs(scrollX) < 0.1*d) scrollX = 0.1*d*Math.signum(scrollX);
-		if (Math.abs(scrollX) > 0.4*d) scrollX = 0.4*d*Math.signum(scrollX);
-		scrollBlendX = (Math.abs(scrollX)-0.1*d)/(0.3*d);
-		
-		scrollY = scrollPoint.y - cy;
-		if (Math.abs(scrollY) < 0.1*d) scrollY = 0.1*d*Math.signum(scrollY);
-		if (Math.abs(scrollY) > 0.4*d) scrollY = 0.4*d*Math.signum(scrollY);
-		scrollBlendY = (Math.abs(scrollY)-0.1*d)/(0.3*d);
-
-		axis = new Vec3(0,1,0);
-		angle = scrollX*scrollBlendX*amount*0.00002;
-		
-		deltaZ = -getDistToPlane()*0.01*amount*(1.0-Math.max(scrollBlendX, scrollBlendY));
-		deltaY = getDistToPlane()*0.002*amount*(scrollBlendY)*Math.signum(scrollY);
-
-		// Calculate the turn
-		Vec3 location = coords.getOrigin();
-		coords.transformCoordinates(Mat4.translation(-location.x, -location.y, -location.z));
-		coords.transformCoordinates(Mat4.axisRotation(axis, angle));
-		coords.transformCoordinates(Mat4.translation(location.x, location.y, location.z));
-
-		// Calculate the move
-		Vec3 hDir, vDir;
-		vDir = new Vec3 (0,1,0);
-		if (coords.getZDirection().z < 0.0)
-			hDir = new Vec3 (coords.getZDirection().plus(coords.getUpDirection()));
-		else
-			hDir = new Vec3 (coords.getZDirection().minus(coords.getUpDirection()));
-		hDir.y = 0.0;
-		hDir.normalize();
-
-		oldPos = new Vec3(coords.getOrigin());
-		newPos = oldPos.plus(hDir.times(deltaZ));
-		newPos = newPos.plus(vDir.times(deltaY));
-		coords.setOrigin(newPos);
-	}
-	else 
-		return;
-	
-    theCamera.setCameraCoordinates(coords);
-	rotationCenter = newPos.plus(coords.getZDirection().times(distToPlane));
-  }
-  
   /** Subclasses should override this to handle events. */
 
   protected void mousePressed(WidgetMouseEvent ev)
@@ -396,6 +263,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
   }
 
+  /** Subclasses should override this to handle events. */
   protected void mouseMoved(MouseMovedEvent ev)
   {
   }
@@ -477,6 +345,20 @@ public abstract class ViewerCanvas extends CustomWidget
     altTool = tool;
   }
 
+  /** 
+    Set the tool to handle scroll wheel events. Currently those are handled 
+	by VieverCanvas. Only extGraphics are set by the tool.
+	
+	For object editors this too is set in the abstract ObjectEditorWindow, 
+	whereas the alt- and meta tools are set in each sub(-sub-sub) class of it.
+	This way it get inherited to plugin tools too (like PME). 
+  */
+
+  public void setScrollTool(ScrollViewTool tool)
+  {
+    scrollTool = tool;
+  }
+
   /** Set the animation engine */
   public void setViewAnimation(ViewAnimation ani)
   {
@@ -510,9 +392,9 @@ public abstract class ViewerCanvas extends CustomWidget
 		if(perspective)
 		{
 			// converting scale to distance
-			distToPlane = 2000.0/scale;
-			// scale needs to be 100 in perspective mode or the magnification is incorrect.
-			scale = 100;
+			distToPlane = 100.0*theCamera.getDistToScreen()/scale; //*(20.0/theCamera.getDistToScreen());
+			scale = 100.0; // scale needs to be 100 in perspective mode or the magnification is incorrect.
+			
 			// repositioning camera
 			CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
 			Vec3 cz = new Vec3(coords.getZDirection());
@@ -523,8 +405,9 @@ public abstract class ViewerCanvas extends CustomWidget
 		else
 		{
 			// converting distance to scale
-			scale = 2000.0/distToPlane; // This should probably be 'default scale * theCamera.distToScreen / distToPlane'
-			distToPlane = 20;
+			scale = 100.0*theCamera.getDistToScreen()/distToPlane;
+			distToPlane = 20.0; // to follow the convention
+			
 			// repositioning camera
 			CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
 			Vec3 cz = new Vec3(coords.getZDirection());
@@ -752,16 +635,40 @@ public abstract class ViewerCanvas extends CustomWidget
     popupManager = manager;
   }
 
-  /** Display the popup menu when an appropriate event occurs. */
-
+   /** Display the popup menu when an appropriate event occurs. */
   protected void showPopupIfNeeded(WidgetMouseEvent ev)
   {
     if (popupManager != null && ev instanceof MouseClickedEvent && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
+    //if (popupManager != null && ev.isMetaDown() && ev.getClickCount() == 1)
     {
       Point pos = ev.getPoint();
       popupManager.showPopupMenu(this, pos.x, pos.y);
     }
   }
+  
+  /* 
+      Decide what to do when a mouse is clicked on the viewercanvas
+	  - Show pop-up menu
+	  - Center to a new point
+	  - Sub classes may override
+  */
+
+  //For some reason after this, when an object was opened for editing by double clicking it on the view
+  //the first time of pressing Cancel or OK launched an undo sequence. If the object was opened by 
+  //pop-up menu or by double clicking th eobject, the editor windoe behaved normally.
+
+  //protected void mouseClicked(MouseClickedEvent ev)
+  //{
+  //  //if (popupManager != null && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
+  //  if (popupManager != null && ev.isMetaDown() && ev.getClickCount() == 1)
+  //  {
+  //    Point pos = ev.getPoint();
+  //    popupManager.showPopupMenu(this, pos.x, pos.y);
+  //  }
+  //  if (ev.isAltDown() && ev.getClickCount() == 1)
+  //  //if (ev.getButton() == WidgetMouseEvent.BUTTON2 && ev.getClickCount() == 1)
+  //	centerToPoint(ev.getPoint());
+  //}
   
   /** I wonder, what this does....*/
   
@@ -1664,151 +1571,190 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     return Collections.unmodifiableMap(controlMap);
   }
-  
-	public void drawNavigationGraphics()
+	
+	//---------------------------------------------------//
+	//   The cue graphics drawing starts here            //
+	//---------------------------------------------------//
+	
+	/** Get the centermost point of the screen */
+	public Point getViewCenter()
 	{
 		int x = getBounds().width;
 		int y = getBounds().height;
-		int d = Math.min(x, y);
 		int cx = x/2;
 		int cy = y/2;
-		Point viewCenter = new Point(cx, cy);
+		return (new Point(cx, cy));
+	}
+	
+	private void drawMouseMoveGraphics()
+	{
+		// Nothing to draw currently
+	}
+  
+	private void drawNavigationGraphics()
+	{
+		if (tilting || moving || rotating) return;
+		
+		int d = Math.min(getBounds().width, getBounds().height);
+		Point viewCenter = getViewCenter();
+		Color color1, colorR, colorX, colorY;
+		
+		if (scrolling){
+			color1 = teal;
+			colorR = blendColorR;
+			colorX = blendColorX;
+			colorY = blendColorY;
+		}
+		else{
+			color1 = gray;
+			colorR = gray;
+			colorX = gray;
+			colorY = gray;
+		}
 		if (navigationMode == 2){
-			drawCircle(viewCenter, d*0.1, 60, gray);
-			drawCircle(viewCenter, d*0.4, 60, gray);
+			drawCircle(viewCenter, d*0.1, 30, color1);
+			drawCircle(viewCenter, d*0.4, 60, color1);
 		}
 		if (navigationMode == 3){
-			drawSquare(viewCenter, d*0.1, gray);
-			drawSquare(viewCenter, d*0.4, gray);
+			drawSquare(viewCenter, d*0.1, color1);
+			drawSquare(viewCenter, d*0.4, color1);
 		}
-	}
-	
-	public void drawScrollGraphics()
-	{
-		int vr  = (Math.min(getBounds().width, getBounds().height))/2;
-		int cx = getBounds().width/2;
-		int cy = getBounds().height/2;
-		Point cp = new Point(cx,cy);
-		Color bcx, bcy;
 		
-		// These checkd should not be needed, but they are.
-		if (scrollBlendX < 0.0) scrollBlendX = 0.0;
-		if (scrollBlendX > 1.0) scrollBlendX = 1.0;
-		if (scrollBlendY < 0.0) scrollBlendY = 0.0;
-		if (scrollBlendY > 1.0) scrollBlendY = 1.0;
+		if (mousePoint == null) return; // This is very important!
 		
-		if (scrolling)
+		double mx, my;
+		mx = mousePoint.x-viewCenter.x;
+		my = mousePoint.y-viewCenter.y;
+		double angle = Math.atan2(my, mx);
+		double rMouse = Math.sqrt(mx*mx+my*my);
+		
+		// Draw the radial pointer
+		if (navigationMode == 2)
 		{
-			if (navigationMode == NAVIGATE_TRAVEL_SPACE)
+			if(rMouse >= (double)d*.1)
 			{
-				repaint();
-				if (scrollBlend < 0.5)
-					drawCircle(cp, scrollRadius, 60, blendColor(green, yellow, scrollBlend*2.0));
-				else
-					drawCircle(cp, scrollRadius, 60, blendColor(yellow, red, scrollBlend*2.0-1.0));
-			}
-			if (navigationMode == NAVIGATE_TRAVEL_LANDSCAPE)
-			{
-				repaint();
+				drawLine(viewCenter, angle, d*.1, d*.4, colorR);
 				
-				bcx = green;
-				bcy = green;
-				if (scrollBlendX == 0.0)
+				Point point = mousePoint;
+				if (rMouse > (double)d*.4)
 				{
-					drawLine(new Point(cx+(int)scrollX, (int)(cy+vr*0.2)), 
-					         new Point(cx+(int)scrollX, (int)(cy-vr*0.2)), 
-					         bcx);
-					drawLine(new Point(cx-(int)scrollX, (int)(cy+vr*0.2)), 
-					         new Point(cx-(int)scrollX, (int)(cy-vr*0.2)), 
-					         bcx);
+					double r = (double)d*.4;
+					int px = (int)(Math.cos(angle)*(double)d*.4);
+					int py = (int)(Math.sin(angle)*(double)d*.4);
+					point = new Point(viewCenter.x+px, viewCenter.y+py);
 				}
-				else
-				{
-					if (scrollBlendX < 0.5)
-						bcx = blendColor(green, yellow, scrollBlendX*2.0);
-					else
-						bcx = blendColor(yellow, red, scrollBlendX*2.0-1.0);
-						
-					drawLine(new Point(cx+(int)scrollX, (int)(cy+vr*0.8)), 
-							new Point(cx+(int)scrollX, (int)(cy-vr*0.8)), 
-							bcx);
-				}
-				if (scrollBlendY == 0.0){
-					drawLine(new Point((int)(cx+vr*0.2), cy+(int)scrollY), 
-					         new Point((int)(cx-vr*0.2), cy+(int)scrollY),
-					         bcy);
-					drawLine(new Point((int)(cx+vr*0.2), cy-(int)scrollY), 
-					         new Point((int)(cx-vr*0.2), cy-(int)scrollY),
-					         bcy);
-				}
-				else
-				{
-					if (scrollBlendY < 0.5)
-						bcy = blendColor(green, yellow, scrollBlendY*2.0);
-					else
-						bcy = blendColor(yellow, red, scrollBlendY*2.0-1.0);
-						
-					drawLine(new Point((int)(cx+vr*0.8), cy+(int)scrollY), 
-							new Point((int)(cx-vr*0.8), cy+(int)scrollY), 
-							bcy);
-				}
+				drawCircle(point, 10.0, 12, colorR);
 			}
+			else
+				if (scrolling)
+					drawCircle(viewCenter, (double)d*.1, 30, green); // Just draw the center circle green if mouse is inside it.
 		}
-		
-		if (extRC != null)
+		// Draw vertical and horizontal ponters
+		if (navigationMode == 3)
 		{
-			Vec2 rcs = getCamera().getWorldToScreen().timesXY(extRC);
-			drawLine(new Point((int)rcs.x, (int)rcs.y-2), new Point((int)rcs.x, (int)rcs.y+3), Color.GREEN);
-			drawLine(new Point((int)rcs.x-2, (int)rcs.y), new Point((int)rcs.x+3, (int)rcs.y), Color.GREEN);
-			Vec2 ccs = getCamera().getWorldToScreen().timesXY(extCC);
-			drawLine(new Point((int)ccs.x, (int)ccs.y-2), new Point((int)ccs.x, (int)ccs.y+3), Color.MAGENTA);
-			drawLine(new Point((int)ccs.x-2, (int)ccs.y), new Point((int)ccs.x+3, (int)ccs.y), Color.MAGENTA);
+			int cx = viewCenter.x;
+			int cy = viewCenter.y;
 			
-			Point pc = (new Point((int)ccs.x, (int)ccs.y));
-			if (extC0 != null){
-				Vec2 v0, v1;
-				Point p0, p1;
-
-				v0 = new Vec2(getCamera().getWorldToScreen().timesXY(extC0));
-				v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC1));
-				p0 = new Point((int)v0.x, (int)v0.y);
-				p1 = new Point((int)v1.x, (int)v1.y);
-				drawLine (p0, p1, green);
-				drawLine (pc, p0, green);
-				drawLine (pc, p1, green);
-				
-
-				v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC2));
-				p1 = new Point((int)v1.x, (int)v1.y);
-				drawLine (p0, p1, green);
-				
-				v0 = new Vec2(getCamera().getWorldToScreen().timesXY(extC3));
-				p0 = new Point((int)v0.x, (int)v0.y);
-				drawLine (p0, p1, green);
-				drawLine (pc, p0, green);
-				drawLine (pc, p1, green);		
-				
-				v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC1));
-				p1 = new Point((int)v1.x, (int)v1.y);
-				drawLine (p0, p1, green);
+			if (Math.abs(mx) >= d*.1){
+				drawLine(new Point(viewCenter.x+(int)((d*.1)*Math.signum(mx)), viewCenter.y), 
+				         new Point(viewCenter.x+(int)((d*.4)*Math.signum(mx)), viewCenter.y),
+						 colorX);
+				if (Math.abs(mx) <= d*.4)
+					drawCircle(new Point(viewCenter.x+(int)mx, viewCenter.y), 10.0, 8, colorX);
+				else
+					drawCircle(new Point(viewCenter.x+(int)((d*.4)*Math.signum(mx)), viewCenter.y), 10.0, 8, colorX);
+			}
+			else if(scrolling)
+			{
+				drawLine(new Point(cx+(int)(d*.1), (int)(cy+d*0.1)), 
+				         new Point(cx+(int)(d*.1), (int)(cy-d*0.1)), 
+				         green);
+				drawLine(new Point(cx-(int)(d*.1), (int)(cy+d*0.1)), 
+				         new Point(cx-(int)(d*.1), (int)(cy-d*0.1)), 
+				         green);
+			}
+			if (Math.abs(my) >= d*.1){
+				drawLine(new Point(viewCenter.x, viewCenter.y+(int)((d*.1)*Math.signum(my))), 
+				         new Point(viewCenter.x, viewCenter.y+(int)((d*.4)*Math.signum(my))),
+						 colorY);
+				if (Math.abs(my) <= d*.4)
+					drawCircle(new Point(viewCenter.x, viewCenter.y+(int)my), 10.0, 8, colorY);
+				else
+					drawCircle(new Point(viewCenter.x, viewCenter.y+(int)((d*.4)*Math.signum(my))), 10.0, 8, colorY);
+			}
+			else if(scrolling)
+			{
+				drawLine(new Point((int)(cx+(int)(d*.1)), cy+(int)(d*.1)), 
+				         new Point((int)(cx-(int)(d*.1)), cy+(int)(d*.1)),
+				         blendColorY);
+				drawLine(new Point((int)(cx+(int)(d*.1)), cy-(int)(d*.1)), 
+				         new Point((int)(cx-(int)(d*.1)), cy-(int)(d*.1)),
+				         blendColorY);
 			}
 		}
 	}
+
+	/**
+	    This is a kind of a procedure, that seems pertty cumbersome to me as it is now.
+	    Currently the graphics are set by each view manipulation tool individually  
+		and there is only one type of them.
+		
+		There should be a common procedure, that each tool could call and
+		there ought to be a couple of different versions at least for palallel 
+		and perspective views.
+	*/
 	
-	private void drawMouseGraphics(Point p)
+	private void drawExtGraphics()
 	{
-		drawCircle(p, 10.0, 6, gray);
+		if (extRC == null) return;
+		
+		Vec2 rcs = getCamera().getWorldToScreen().timesXY(extRC);
+		drawLine(new Point((int)rcs.x, (int)rcs.y-2), new Point((int)rcs.x, (int)rcs.y+3), Color.GREEN);
+		drawLine(new Point((int)rcs.x-2, (int)rcs.y), new Point((int)rcs.x+3, (int)rcs.y), Color.GREEN);
+		Vec2 ccs = getCamera().getWorldToScreen().timesXY(extCC);
+		drawLine(new Point((int)ccs.x, (int)ccs.y-2), new Point((int)ccs.x, (int)ccs.y+3), Color.MAGENTA);
+		drawLine(new Point((int)ccs.x-2, (int)ccs.y), new Point((int)ccs.x+3, (int)ccs.y), Color.MAGENTA);
+		
+		Point pc = (new Point((int)ccs.x, (int)ccs.y));
+		if (extC0 != null){
+			Vec2 v0, v1;
+			Point p0, p1;
+        
+			v0 = new Vec2(getCamera().getWorldToScreen().timesXY(extC0));
+			v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC1));
+			p0 = new Point((int)v0.x, (int)v0.y);
+			p1 = new Point((int)v1.x, (int)v1.y);
+			drawLine (p0, p1, cone);
+			drawLine (pc, p0, cone);
+			drawLine (pc, p1, cone);
+			
+        
+			v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC2));
+			p1 = new Point((int)v1.x, (int)v1.y);
+			drawLine (p0, p1, cone);
+			
+			v0 = new Vec2(getCamera().getWorldToScreen().timesXY(extC3));
+			p0 = new Point((int)v0.x, (int)v0.y);
+			drawLine (p0, p1, cone);
+			drawLine (pc, p0, cone);
+			drawLine (pc, p1, cone);		
+			
+			v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC1));
+			p1 = new Point((int)v1.x, (int)v1.y);
+			drawLine (p0, p1, cone);
+		}
 	}
 	
-	
-	private Timer scrollTimer = new Timer(300, new ActionListener() 
+	protected Timer mouseMoveTimer = new Timer(500, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 
 		{
-			scrollTimer.setCoalesce(false);
-			scrolling = false;
-			scrollTimer.stop();
-			metaTool.mouseStoppedScrolling();
+			//repaint();
+			//mouseMoveTimer.setCoalesce(false);
+			mouseMoving = false;
+			mouseMoveTimer.stop();
+			mousePoint = null;
+			repaint();
 		}
 	});
 	
@@ -1870,11 +1816,45 @@ public abstract class ViewerCanvas extends CustomWidget
 	
 	private void getNavigationColorSet()
 	{
-		gray   = new Color(52, 52, 73);
-		red    = new Color(127+31,0,0);
-		green  = new Color(0,127+31,0);
-		blue   = new Color(0,0,127+31);
-		yellow = new Color(127+31,127+31,0);
+		//gray   = new Color(63, 63, 96);
+		//gray   = new Color(127, 127, 147);
+		//red    = new Color(200,0,0);
+		//green  = new Color(0,200,0);
+		//blue   = new Color(0,0,200);
+		//yellow = new Color(200,200,0);
+		TEAL = new Color(0, 127, 127);
+		//aimColor = new Color(00, 127, 127);
+		
+		gray   = new Color(Color.GRAY.getRed()/2+backgroundColor.getRed()/2,
+                           Color.GRAY.getGreen()/2+backgroundColor.getGreen()/2,
+                           Color.GRAY.getBlue()/2+backgroundColor.getBlue()/2);
+						 
+		red    = new Color(Color.RED.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.RED.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.RED.getBlue()*3/4+backgroundColor.getBlue()/4);
+						 
+		yellow = new Color(Color.YELLOW.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.YELLOW.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.YELLOW.getBlue()*3/4+backgroundColor.getBlue()/4);
+						   
+		green  = new Color(Color.GREEN.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.GREEN.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.GREEN.getBlue()*3/4+backgroundColor.getBlue()/4);
+				 		 
+		blue   = new Color(Color.BLUE.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.BLUE.getBlue()*3/4+backgroundColor.getBlue()/4);
+				 		 
+		teal   = new Color(TEAL.getRed()*3/4+backgroundColor.getRed()/4,
+                           TEAL.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           TEAL.getBlue()*3/4+backgroundColor.getBlue()/4);
+				 		 
+						 
+		cone   = new Color(Color.GREEN.getRed()/2+backgroundColor.getRed()/2,
+                           Color.GREEN.getGreen()/2+backgroundColor.getGreen()/2,
+                           Color.GREEN.getBlue()/2+backgroundColor.getBlue()/2);
+						 
+			
 	}
 	
 	private Color  blendColor(Color color0, Color color1, double blend)
@@ -1886,7 +1866,10 @@ public abstract class ViewerCanvas extends CustomWidget
 		return new Color(R, G, B);
 	}
 	
-	void drawOverlay()
+	public void drawOverlay()
 	{
+		if (mouseMoving || scrolling)
+			drawNavigationGraphics();
+		drawExtGraphics();
 	}
 }

@@ -372,6 +372,8 @@ public class PoseTrack extends Track
   @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK,
+			    new Object[] {this, duplicate(info)}));
     info.getObject().editKeyframe(win, tc.getValues()[which], info);
   }
 

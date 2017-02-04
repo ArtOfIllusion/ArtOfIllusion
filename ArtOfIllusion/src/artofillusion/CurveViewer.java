@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2006 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -40,21 +41,25 @@ public class CurveViewer extends MeshViewer
     WireframeMesh wireframe = getController().getObject().getObject().getWireframeMesh();
     for (int i = 0; i < wireframe.from.length; i++)
       renderLine(wireframe.vert[wireframe.from[i]], wireframe.vert[wireframe.to[i]], theCamera, lineColor);
-    for (int i = 0; i < v.length; i++)
-      if (!selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
+
+	//if (animation == null ||  !animation.changingPerspective()) // mismatch at animation
+	//{
+      for (int i = 0; i < v.length; i++)
+        if (!selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
         {
           Vec2 p = theCamera.getObjectToScreen().timesXY(v[i].r);
           double z = theCamera.getObjectToView().timesZ(v[i].r);
           renderBox(((int) p.x) - HANDLE_SIZE/2, ((int) p.y) - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, z, lineColor);
         }
-    Color col = (currentTool.hilightSelection() ? highlightColor : lineColor);
-    for (int i = 0; i < v.length; i++)
-      if (selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
+      Color col = (currentTool.hilightSelection() ? highlightColor : lineColor);
+      for (int i = 0; i < v.length; i++)
+        if (selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
         {
           Vec2 p = theCamera.getObjectToScreen().timesXY(v[i].r);
           double z = theCamera.getObjectToView().timesZ(v[i].r);
           renderBox(((int) p.x) - HANDLE_SIZE/2, ((int) p.y) - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, z, col);
         }
+	//}
   }
 
   /** When the user presses the mouse, forward events to the current tool as appropriate.

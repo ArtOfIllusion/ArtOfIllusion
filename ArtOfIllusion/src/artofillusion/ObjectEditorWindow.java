@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -118,7 +119,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       theView[i].setShowAxes(lastShowAxes);
       theView[i].setGrid(lastGridSpacing, lastGridSubdivisions, lastShowGrid, lastSnapToGrid);
       theView[i].addEventLink(MousePressedEvent.class, listen);
-	  theView[i].setViewAnimation (new ViewAnimation(this));
+	  theView[i].setViewAnimation (new ViewAnimation(this, theView[i]));
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);

@@ -2,7 +2,6 @@
    Changes copyright (C) 2016 by Maksim Khramov
    Changes Copyrigh (C) 2016 by Petri Ihalainen
 
-
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -121,12 +120,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(MousePressedEvent.class, listen);
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
+	  theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
 	  theView[i].setNavigationMode(1);
-	  theView[i].setViewAnimation(new ViewAnimation(this));
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    theView[3].setPerspective(true);
+    //theView[3].setPerspective(true);
     theView[3].setOrientation(6);
 
     theView[currentView].setDrawFocus(true);
@@ -188,7 +187,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
 	// Scroll tool does not go to the pallette.
     scrollTool = new ScrollViewTool(this);
-	
+
     if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
       defaultTool = compoundTool;
     tools.setDefaultTool(defaultTool);
@@ -196,9 +195,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);
- 	  theView[i].setScrollTool(scrollTool);
-   }
+      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
+    }
 
     // Fill in the left hand panel.
 
@@ -558,8 +556,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     });
 	
     toolsMenu = Translate.menu("tools");
-    menubar.add(toolsMenu);
-	
+    menubar.add(toolsMenu);	
     toolsMenuItem = new BMenuItem [modellingTools.size()];
     for (int i = 0; i < modellingTools.size(); i++)
       {
@@ -1616,19 +1613,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }
-	  /*
+      }	  /*
       else if (command.equals("frameSelection"))
         frameWithCameraCommand(true);
       else if (command.equals("frameScene"))
-        frameWithCameraCommand(false);
-      */
-      else if (command.equals("fitToSelection"))
-        //fitToSelectionCommand();
-		getView().fitToObjects(getSelectedObjects());
-      else if (command.equals("fitToAll"))
-	    //fitToAllCommand();
-		getView().fitToObjects(getScene().getAllObjects());
+        frameWithCameraCommand(false);      */      else if (command.equals("fitToSelection"))        //fitToSelectionCommand();		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))	    //fitToAllCommand();		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
 		//closestAxisCommand();
 	    getView().alignWithClosestAxis();

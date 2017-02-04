@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -94,16 +95,19 @@ public class SplineMeshViewer extends MeshViewer
         if (showSkeleton && mesh.getSkeleton() != null)
           mesh.getSkeleton().draw(this, false);
       }
-    if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
+	//if (animation == null || !animation.changingPerspective()) // mismatch at animation
+	//{
+      if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
       {
         drawEdges(disabledColor, disabledColor);
         drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
       }
-    else
-      drawEdges(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
-    if (currentTool instanceof SkeletonTool)
-      if (showSkeleton && mesh.getSkeleton() != null)
-        mesh.getSkeleton().draw(this, true);
+      else
+        drawEdges(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+      if (currentTool instanceof SkeletonTool)
+        if (showSkeleton && mesh.getSkeleton() != null)
+          mesh.getSkeleton().draw(this, true);
+	//}
   }
 
   /** Draw the surface of the object. */

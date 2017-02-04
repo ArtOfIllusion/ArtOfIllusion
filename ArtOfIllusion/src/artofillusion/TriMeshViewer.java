@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -79,27 +80,32 @@ public class TriMeshViewer extends MeshViewer
     drawSurface();
     Color meshColor, selectedColor;
     if (currentTool instanceof SkeletonTool)
-      {
-        meshColor = disabledColor;
-        selectedColor = new Color(255, 127, 255);
-      }
+    {
+      meshColor = disabledColor;
+      selectedColor = new Color(255, 127, 255);
+    }
     else
-      {
-        meshColor = lineColor;
-        selectedColor = highlightColor;
+    {
+      meshColor = lineColor;
+      selectedColor = highlightColor;
+	  //if (animation == null || !animation.changingPerspective()){
         if (showSkeleton && mesh.getSkeleton() != null)
           mesh.getSkeleton().draw(this, false);
-      }
-    if (controller.getSelectionMode() == MeshEditController.POINT_MODE)
+	  //}
+    }
+	//if (animation == null || !animation.changingPerspective()) // mismatch at animation -- turned off for perspective change animation
+	//{
+      if (controller.getSelectionMode() == MeshEditController.POINT_MODE)
       {
         drawEdges(screenVec2, disabledColor, disabledColor);
         drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
       }
-    else
-      drawEdges(screenVec2, meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
-    if (currentTool instanceof SkeletonTool)
-      if (showSkeleton && mesh.getSkeleton() != null)
-        mesh.getSkeleton().draw(this, true);
+      else
+	    drawEdges(screenVec2, meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+      if (currentTool instanceof SkeletonTool)
+        if (showSkeleton && mesh.getSkeleton() != null)
+          mesh.getSkeleton().draw(this, true);
+	//}
   }
 
   /** Draw the surface of the object. */

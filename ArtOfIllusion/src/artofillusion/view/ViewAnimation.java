@@ -34,7 +34,8 @@ import java.awt.*;
 
 public class ViewAnimation
 {	
-	EditingWindow theWindow;
+	EditingWindow window;
+	
 	boolean animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	double maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
 	double displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
@@ -46,20 +47,36 @@ public class ViewAnimation
 	CoordinateSystem startCoords, endCoords, aniCoords;
 	Vec3 endRotationCenter, rotStart, rotAni, aniZ, aniOrigin;
 	ViewerCanvas view;
-	Camera cam;
+	Camera camera;
 	double[] startAngles, endAngles;
-	double startDist, endDist, aniDist, distanceFactor, moveDist; 
-	double startWeightLin, endWeightLin, startWeightExp, endWeightExp;
-	double angleX, angleY, angleZ, angleMax;
-	double startScale, endScale, scalingFactor;
-	double timeRot, timeScale, timeDist, timeMove, timeAni;
-	double rotSlope = 1.0, moveSlope = 1.5, scaleSlope = .1, distSlope = .1;
-	int endOrientation;
-	long msStart, msEnd, ms1st=0, msLast, msLatest;
-
-	public ViewAnimation(EditingWindow win)
+	double   startDist, endDist, aniDist, distanceFactor, moveDist; 
+	double   startWeightLin, endWeightLin, startWeightExp, endWeightExp;
+	double   angleX, angleY, angleZ, angleMax;
+	double   startScale, endScale, scalingFactor, startAngle, endAngle, angleStep, aniAngle;
+	double   timeRot, timeScale, timeDist, timeMove, timeAni;
+	double   endDistToScreen, refDistToScreen, refDistToPlane, refTangent;
+	double   rotSlope = 1.0, moveSlope = 1.5, scaleSlope = .1, distSlope = .1,  perspSlope = 1.0/3.0;;
+	int      endOrientation, endNavigation;
+	long     msStart, msEnd, ms1st=0, msLast, msLatest;
+	boolean  endPerspective,changingPerspective, animatingMove, endShowGrid;
+	int      viewH, viewW;
+	
+	public ViewAnimation(EditingWindow win, ViewerCanvas v)
 	{
-		theWindow = win;
+		window = win;
+		view = v;
+		viewH = view.getBounds().height;
+		viewW = view.getBounds().width;
+	}
+	
+	public boolean changingPerspective()
+	{
+		return changingPerspective;
+	}
+	
+	public boolean animatingMove()
+	{
+		return animatingMove;
 	}
 	
 	/* The timer that keeps launcing animation 'frames' */
@@ -69,33 +86,126 @@ public class ViewAnimation
 			public void actionPerformed(ActionEvent e) 
 			{	
 				timer.setCoalesce(false);
-				if (step > steps)
+				if (step >= steps)
 					endAnimation();
 				else 
-					animationStep();
+					if (changingPerspective)
+						perspectiveStep();
+					else
+						animationStep();
 			}
 		});
-
-	/** 
-	 * Start the animation sequence 
-	 */
-	public void start(ViewerCanvas view, CoordinateSystem endCoords, Vec3 endRotationCenter, double endScale, int endOrientation)
-	{
-		checkPreferences(); // This only works for the 'animate'
-		this.view = view;
-		this.endCoords = endCoords;
-		this.endRotationCenter = endRotationCenter;		
-		this.endScale = endScale;
-		this.endOrientation = endOrientation;
-		cam = view.getCamera();
-		//startOrientation = view.getOrientation();
 		
+	/** Start animation of perspective change. */
+	
+	// Navigation mode change should be handled here in the future
+	
+	public void start(boolean nextPerspective, double refDistToPlane, int nextNavigation)
+	{
+		camera = view.getCamera();
+		endRotationCenter = view.getRotationCenter();
+		endOrientation = view.getOrientation();
+		endPerspective = nextPerspective;
+		endNavigation = nextNavigation;
+		endDistToScreen = camera.getDistToScreen();
+		refDistToScreen = endDistToScreen;
+
+		endCoords = camera.getCameraCoordinates().duplicate();
+		if(nextPerspective){
+			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-refDistToPlane)));
+			endScale = 100.0;
+		}
+		else{
+			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-20)));
+			//endScale = 100.0/refDistToPlane*refDistToScreen/20;
+			endScale = 100.0*refDistToScreen/refDistToPlane;
+		}
+		
+		checkPreferences(); // This only works for the 'animate'
 		if (! animate){
 			endAnimation(); // Go directly to the last frame
 			return;
 		}
 
-		startCoords = cam.getCameraCoordinates().duplicate();
+		endShowGrid = view.getShowGrid();
+		view.setShowGrid(false);
+		
+		this.refDistToPlane = refDistToPlane;
+		startCoords = camera.getCameraCoordinates().duplicate();
+		aniCoords =  camera.getCameraCoordinates().duplicate();
+		
+		double sinComp = view.getBounds().height/2.0/100.0;
+		double cosComp = camera.getDistToScreen();
+		double halfViewAngle = Math.atan2(sinComp, cosComp);
+		double timePersp = 0.0;
+		refTangent = (cosComp/sinComp);
+		
+		if (nextPerspective)
+		{
+			startAngle = Math.PI*0.5;
+			endAngle =   Math.PI*0.5-halfViewAngle;
+		}
+		else
+		{
+			endAngle =   Math.PI*0.5;
+			startAngle = Math.PI*0.5-halfViewAngle;
+		}
+		
+		if (endAngle == startAngle)
+			return;
+		else
+			timePersp = maxDuration*Math.pow((halfViewAngle/(Math.PI/2.0)), perspSlope); // root curve
+
+		steps = (int)(timePersp/interval);
+		angleStep = (endAngle - startAngle)/steps;	
+		
+		step = 1;
+		changingPerspective = true;
+		timer.restart();
+	}
+
+	private void perspectiveStep()
+	{
+		aniAngle = startAngle + step*angleStep;
+		distanceFactor = Math.tan(aniAngle)/refTangent;	
+	
+		aniDist = refDistToPlane*distanceFactor;	
+		aniOrigin = endRotationCenter.plus(aniCoords.getZDirection().times(-aniDist));
+		aniCoords.setOrigin(aniOrigin);
+		camera.setCameraCoordinates(aniCoords);
+		view.setDistToPlane(aniDist);
+		camera.setDistToScreen(refDistToScreen*distanceFactor);
+
+		view.repaint();
+		// extGraphs shows up wrong. Possibly numerical accuaracy issue.
+		// setExtGraphs();
+		step++;
+	}
+		
+	/** 
+	 * Start the animation sequence 
+	 */
+	public void start(CoordinateSystem endCoords, Vec3 endRotationCenter, double endScale, int endOrientation, int nextNavigation)
+	{
+		if (changingPerspective) return;
+		
+		this.endCoords = endCoords;
+		this.endRotationCenter = endRotationCenter;		
+		this.endScale = endScale;
+		this.endOrientation = endOrientation;
+		this.endPerspective = view.isPerspectiveSwitch();
+		this.endNavigation = nextNavigation;
+		this.endShowGrid = view.getShowGrid();
+		camera = view.getCamera();
+		endDistToScreen = camera.getDistToScreen();
+		
+		checkPreferences(); // This only works for the 'animate'
+		if (! animate){
+			endAnimation(); // Go directly to the last frame
+			return;
+		}
+
+		startCoords = camera.getCameraCoordinates().duplicate();
 		aniCoords = startCoords.duplicate();
 		rotStart = view.getRotationCenter(); // get from view
 		startScale = view.getScale(); // get from view
@@ -204,6 +314,7 @@ public class ViewAnimation
 		
 		// Now we  know all we need to know to launch the animation sequence.
 		// Restart because the previous move could still be running.
+		animatingMove = true;
 		timer.restart();
 	}
 
@@ -255,7 +366,7 @@ public class ViewAnimation
 		aniOrigin = rotAni.plus(aniZ.times(-aniDist));
 		
 		aniCoords.setOrigin(aniOrigin);
-		cam.setCameraCoordinates(aniCoords);
+		camera.setCameraCoordinates(aniCoords);
 		view.setScale(view.getScale()*scalingFactor);
 		view.repaint();
 		setExtGraphs();
@@ -267,17 +378,26 @@ public class ViewAnimation
 	private void endAnimation()
 	{
 		timer.stop();
-		cam.setCameraCoordinates(endCoords);
+		camera.setCameraCoordinates(endCoords);
+		camera.setDistToScreen(endDistToScreen);
+		//camera.setScreenParams(0, 100.0, viewW, viewH); // not this way at least
 		view.setScale(endScale);
 		view.setRotationCenter(endRotationCenter);
 		view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work without this too... But not with SceneCamera
+		view.setShowGrid(endShowGrid);
+		changingPerspective = false;
+		animatingMove = false;
+
 		wipeExtGraphs();
-		view.finishAnimation(endOrientation);
+		view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
 		view.viewChanged(false);
+		view.repaint();
 	}
 
-	/* Check if there is anything that should move */
-
+	/** 
+	 * Check if there is anything that should move 
+	 * This is for the <b>non-perspectivechanging</b> animations
+	 */
 	private boolean noMove()
 	{
 		if (! rotStart.equals(endRotationCenter)) return false;
@@ -311,18 +431,10 @@ public class ViewAnimation
 	*/
   private void setExtGraphs()
   {
-	if (theWindow == null)
+	if (window == null)
 		return;
-	for (ViewerCanvas v : theWindow.getAllViews()){
-      if (v == view){
-		v.extRC = null;
-		v.extCC = null;
-		v.extC0 = null;
-		v.extC1 = null;
-		v.extC2 = null;
-		v.extC3 = null;
-	  }
-	  else{
+	for (ViewerCanvas v : window.getAllViews()){
+      if (v != view){
 	    v.extRC = new Vec3(view.getRotationCenter());
 	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
 		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
@@ -335,7 +447,7 @@ public class ViewAnimation
   }
   public void wipeExtGraphs()
   {
-	for (ViewerCanvas v : theWindow.getAllViews()){
+	for (ViewerCanvas v : window.getAllViews()){
 		v.extRC = null;
 		v.extCC = null;
 		v.extC0 = null;

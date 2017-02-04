@@ -109,8 +109,9 @@ public class SceneViewer extends ViewerCanvas
 		ObjectInfo nextCamera = cameras.elementAt(which-6);
 		CoordinateSystem coords = nextCamera.coords.duplicate();
 
-		if (nextCamera.getObject() instanceof SceneCamera)
+		if (nextCamera.getObject() instanceof SceneCamera){
 			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
+		}
 		else if (nextCamera.getObject() instanceof SpotLight)
 			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
 		else if (nextCamera.getObject() instanceof DirectionalLight)
@@ -118,7 +119,7 @@ public class SceneViewer extends ViewerCanvas
 		else
 			return;
 
-		animation.start(this, coords, rotationCenter, 100.0, which);
+		animation.start(coords, rotationCenter, 100.0, which, navigation);
     }
     else
     {
@@ -135,12 +136,15 @@ public class SceneViewer extends ViewerCanvas
   *  so the menu will be up to date.
   */
   @Override
-  public void finishAnimation(int which)
+  public void finishAnimation(int which, boolean persp, int navi)
   {
     if (which > 5  && which < 6+cameras.size())
 		boundCamera = cameras.elementAt(which-6);
     orientation = which;
+	perspective = persp;
+	navigation = navi;
 	viewChanged(false);
+	repaint();
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -263,7 +267,7 @@ public class SceneViewer extends ViewerCanvas
 
     // Hilight the selection.
 
-    if (currentTool.hilightSelection())
+    if (currentTool.hilightSelection())// && !animation.changingPerspective())
     {
       ArrayList<Rectangle> selectedBoxes = new ArrayList<Rectangle>();
       ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<Rectangle>();

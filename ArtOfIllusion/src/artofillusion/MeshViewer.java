@@ -264,14 +264,14 @@ public abstract class MeshViewer extends ObjectViewer
 		double newDistToPlane = 2000 / (double)d / 0.9 * boneLength;
 		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane)));
 
-		animation.start(this, newCoords, newCenter, scale, orientation);
+		animation.start(newCoords, newCenter, scale, orientation, navigation);
 	}
 	else
 	{
 		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
 		double newScale = (double)d * 0.9 / boneLength; // with minimum 5% margins
 
-		animation.start(this, newCoords, newCenter, newScale, orientation);
+		animation.start(newCoords, newCenter, newScale, orientation, navigation);
 	}
   }
 }

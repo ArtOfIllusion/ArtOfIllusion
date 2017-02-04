@@ -60,7 +60,7 @@ public class ViewerNavigationControl implements ViewerControl
 	
 	private void valueChanged()
     {
-      if (getSelectedIndex() != view.getNavigationMode())
+      //if (getSelectedIndex() != view.getNavigationMode()) // this prevented some events...
         view.setNavigationMode(getSelectedIndex());
     }
 

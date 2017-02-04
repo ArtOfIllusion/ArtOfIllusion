@@ -1,4 +1,5 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -57,7 +58,8 @@ public class ViewerScaleControl implements ViewerControl
 		{
           //view.setScale(scaleField.getValue());
 		  //view.repaint(); 
-		  view.getViewAnimation().start(view, view.getCamera().getCameraCoordinates(), view.getRotationCenter(), scaleField.getValue(), view.getOrientation());
+		  view.getViewAnimation().start(view.getCamera().getCameraCoordinates(), view.getRotationCenter(), 
+		                                scaleField.getValue(), view.getOrientation(), view.getNavigationMode() );
 		}
 		else
 		{
@@ -70,7 +72,7 @@ public class ViewerScaleControl implements ViewerControl
 		    coords.setOrigin(cc);
 		    //view.getCamera().setCameraCoordinates(coords);
 		    //view.repaint();
-		    view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
+		    view.getViewAnimation().start(coords, rc, view.getScale(), view.getOrientation(), view.getNavigationMode());
 		  }
 		  else
 		  {
@@ -78,7 +80,7 @@ public class ViewerScaleControl implements ViewerControl
 		    Vec3 rc = coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane()));
 		    //view.setRotationCenter(rc);
 		    //view.repaint();
-		    view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
+		    view.getViewAnimation().start(coords, rc, view.getScale(), view.getOrientation(), view.getNavigationMode());
 		  }
 		}
       }

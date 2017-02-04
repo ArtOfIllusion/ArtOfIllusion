@@ -1,4 +1,5 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,14 +34,22 @@ public class ViewerPerspectiveControl implements ViewerControl
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
-        if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+        if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
+		  view.setPerspective(true);
+		  perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
           perspectiveChoice.setEnabled(false);
+		}
         else if (view.getRenderMode() == ViewerCanvas.RENDER_RENDERED)
           perspectiveChoice.setEnabled(false);
+		else if (view.getNavigationMode() >= 2) // this covers cases where navigation modes might be added by a plugin
+		{
+		  perspectiveChoice.setEnabled(false);
+		  perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
+        }
         else
         {
           perspectiveChoice.setEnabled(true);
-          perspectiveChoice.setSelectedIndex(view.isPerspective() ? 0 : 1);
+          perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
         }
       }
     });

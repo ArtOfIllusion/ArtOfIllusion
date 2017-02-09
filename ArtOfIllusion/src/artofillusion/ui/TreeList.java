@@ -11,6 +11,7 @@
 package artofillusion.ui;
 
 import artofillusion.*;
+import artofillusion.object.ObjectInfo;
 import buoy.event.*;
 import buoy.widget.*;
 
@@ -738,18 +739,25 @@ public class TreeList extends CustomWidget
 
   private void mouseClicked(MouseClickedEvent ev)
   {
-    if (ev.getClickCount() != 2)
-      return;
-    Point pos = ev.getPoint();
-    pos.y -= yoffset;
-    int row = pos.y/rowHeight, i = pos.x/INDENT_WIDTH;
-    if (row >= showing.size())
-      return;
-    int ind = indent.elementAt(row);
-    TreeElement el = (TreeElement) showing.elementAt(row);
-    if (i < ind)
-      return;
-    dispatchEvent(new ElementDoubleClickedEvent(el));
+    if (ev.getClickCount() == 1 && ev.isAltDown())
+	{
+    	window.getView().fitToObjects(((LayoutWindow)window).getSelectedObjects());
+    	return;
+	}
+	else if (ev.getClickCount() == 2)
+	{
+		Point pos = ev.getPoint();
+		pos.y -= yoffset;
+		int row = pos.y/rowHeight, i = pos.x/INDENT_WIDTH;
+		if (row >= showing.size())
+			return;
+		int ind = indent.elementAt(row);
+		TreeElement el = (TreeElement) showing.elementAt(row);
+		if (i < ind)
+			return;
+		dispatchEvent(new ElementDoubleClickedEvent(el));
+		return;
+	}
   }
 
   /** Draw the insertion point to show where dragged items will be moved to. */

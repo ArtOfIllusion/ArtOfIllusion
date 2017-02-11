@@ -67,6 +67,7 @@ public class ViewAnimation
 		view = v;
 		viewH = view.getBounds().height;
 		viewW = view.getBounds().width;
+		timer.setCoalesce(false);
 	}
 	
 	public boolean changingPerspective()
@@ -82,33 +83,36 @@ public class ViewAnimation
 	/* The timer that keeps launcing animation 'frames' */
 
 	private Timer timer = new Timer(timerInterval, new ActionListener() 
-		{
-			public void actionPerformed(ActionEvent e) 
-			{	
-				timer.setCoalesce(false);
-				if (step >= steps)
-					endAnimation();
-				else 
-					if (changingPerspective)
-						perspectiveStep();
-					else
-						animationStep();
-			}
-		});
-		
+	{
+		public void actionPerformed(ActionEvent e) 
+		{	
+			if (step >= steps)
+				endAnimation();
+			else 
+				if (changingPerspective)
+					perspectiveStep();
+				else
+					animationStep();
+		}
+	});
+
 	/** Start animation of perspective change. */
-	
 	// Navigation mode change should be handled here in the future
-	
-	public void start(boolean nextPerspective, double refDistToPlane, int nextNavigation)
+	public void start(boolean nextPerspective)
 	{
 		camera = view.getCamera();
+		
+		endPerspective = nextPerspective;
 		endRotationCenter = view.getRotationCenter();
 		endOrientation = view.getOrientation();
-		endPerspective = nextPerspective;
-		endNavigation = nextNavigation;
+		endNavigation = view.getNavigationMode();
 		endDistToScreen = camera.getDistToScreen();
-		refDistToScreen = endDistToScreen;
+		refDistToScreen = endDistToScreen = camera.getDistToScreen();
+		if (view.isPerspective())
+			refDistToPlane = view.getDistToPlane();
+		else
+			refDistToPlane = 100.0/view.getScale()*camera.getDistToScreen();
+		
 
 		endCoords = camera.getCameraCoordinates().duplicate();
 		if(nextPerspective){
@@ -117,7 +121,6 @@ public class ViewAnimation
 		}
 		else{
 			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-20)));
-			//endScale = 100.0/refDistToPlane*refDistToScreen/20;
 			endScale = 100.0*refDistToScreen/refDistToPlane;
 		}
 		
@@ -135,7 +138,7 @@ public class ViewAnimation
 		aniCoords =  camera.getCameraCoordinates().duplicate();
 		
 		double sinComp = view.getBounds().height/2.0/100.0;
-		double cosComp = camera.getDistToScreen();
+		double cosComp = refDistToScreen;
 		double halfViewAngle = Math.atan2(sinComp, cosComp);
 		double timePersp = 0.0;
 		refTangent = (cosComp/sinComp);
@@ -158,7 +161,7 @@ public class ViewAnimation
 
 		steps = (int)(timePersp/interval);
 		angleStep = (endAngle - startAngle)/steps;	
-		
+
 		step = 1;
 		changingPerspective = true;
 		timer.restart();
@@ -176,12 +179,17 @@ public class ViewAnimation
 		view.setDistToPlane(aniDist);
 		camera.setDistToScreen(refDistToScreen*distanceFactor);
 
+		// This has to be the last thing before repaint
+		// or the view will react to it
+		if (step == 1){
+			view.preparePerspectiveAnimation();
+		}
 		view.repaint();
 		// extGraphs shows up wrong. Possibly numerical accuaracy issue.
 		// setExtGraphs();
 		step++;
 	}
-		
+
 	/** 
 	 * Start the animation sequence 
 	 */
@@ -380,7 +388,6 @@ public class ViewAnimation
 		timer.stop();
 		camera.setCameraCoordinates(endCoords);
 		camera.setDistToScreen(endDistToScreen);
-		//camera.setScreenParams(0, 100.0, viewW, viewH); // not this way at least
 		view.setScale(endScale);
 		view.setRotationCenter(endRotationCenter);
 		view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work without this too... But not with SceneCamera

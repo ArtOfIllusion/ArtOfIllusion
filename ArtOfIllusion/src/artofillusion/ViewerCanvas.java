@@ -40,7 +40,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected PopupMenuManager popupManager;
   protected int renderMode, gridSubdivisions, orientation, navigation;
   protected double gridSpacing, scale, distToPlane, scrollRadius, scrollX, scrollY, scrollBlend, scrollBlendX, scrollBlendY;
-  protected boolean perspectiveSwitch, perspective, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
+  protected boolean perspective, perspectiveSwitch, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected boolean lastModelPerspective;
   protected ActionProcessor mouseProcessor;
   protected Image templateImage, renderedImage;
@@ -50,7 +50,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Vec3 rotationCenter;
   protected ViewAnimation animation;
   protected	ClickedPointFinder finder;
-  
+
   protected final ViewChangedEvent viewChangedEvent;
 
   public Color gray, red, green, blue, yellow, cone, teal, TEAL;
@@ -173,6 +173,7 @@ public abstract class ViewerCanvas extends CustomWidget
     perspective = false;
     scale = 100.0;
 	getNavigationColorSet();
+	mouseMoveTimer.setCoalesce(false);
   }
 
   /** Get the CanvasDrawer which is rendering the image for this canvas. */
@@ -408,22 +409,34 @@ public abstract class ViewerCanvas extends CustomWidget
 			perspective = perspectiveSwitch = nextPerspective;
 			return;
 		}
-		
+
 		if (animation.animatingMove() || animation.changingPerspective()) 
 			return;
-			
+
+		// Prepare for animation
+		
 		perspectiveSwitch = nextPerspective;			
+		//double refDistToPlane;
+		//if (perspective)
+		//	refDistToPlane = distToPlane;
+		//else
+		//	refDistToPlane = 100.0/scale*theCamera.getDistToScreen(); // *theCamera.getDistToScreen()/20.0;
 		
-		double refDistToPlane;
-		if (perspective)
-			refDistToPlane = distToPlane;
-		else
-			refDistToPlane = 100.0/scale*theCamera.getDistToScreen(); // *theCamera.getDistToScreen()/20.0;
-		perspective = true;
-		scale = 100;
+		// The view must be set to perspective before going to animation
+		// The first frame needs to be calculated here to avoid flick
+		// Apparently setting perspective true causes a flick on the screen
+		// though repaint is not used.
 		
-		animation.start(nextPerspective, refDistToPlane, navigation);
-      
+		//if (nextPerspective)
+		//{
+		//	theCamera.setDistToScreen(Double.MAX_VALUE);
+		//	distToPlane = Double.MAX_VALUE;
+		//}
+		//perspective = true;
+		//scale = 100;
+
+		animation.start(nextPerspective); // , refDistToPlane, navigation);
+
 	  /*
 	  else{
 		if(nextPerspective)
@@ -457,6 +470,17 @@ public abstract class ViewerCanvas extends CustomWidget
 		repaint();
 	  }
 	  */
+	}
+
+	/** 
+	 * This is needed when animated perspective change parallel to perspective begins. 
+	 * The scale and perspective parameters can not be accessed directly form the 
+	 * animation engine
+	 */
+	public void preparePerspectiveAnimation()
+	{
+		scale = 100.0;
+		perspective = true;
 	}
 
   /** Determine whether the view is currently is perspective mode. */
@@ -1855,6 +1879,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	}
 	
+	// coalesce should probabaly be set false when the timer is created
 	protected Timer mouseMoveTimer = new Timer(500, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 

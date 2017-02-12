@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes Copyright (C) 2016-2017 by Petri Ihalainen
+   Changes copyright (C) 2016-2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,6 @@ import buoy.event.*;
 import java.awt.*;
 
 /** MoveViewTool is an EditingTool used for moving the viewpoint. */
-
 public class MoveViewTool extends EditingTool
 {
   private Point clickPoint;
@@ -51,9 +50,6 @@ public class MoveViewTool extends EditingTool
   @Override
   public boolean hilightSelection()
   {
-/*    if (theWindow instanceof LayoutWindow)
-      return false;
-    else*/
       return true;
   }
 
@@ -96,12 +92,9 @@ public class MoveViewTool extends EditingTool
 			default:
 				break;
 		}
+		setAuxGraphs(view);
+		repaintAllViews();
 		view.viewChanged(false);	
-		if (view.getBoundCamera() != null)
-			repaintAllViews();
-		else
-			view.repaint();
-		setExtGraphs(view);
 	}
 
 	/* The view must be set to Perspective for travel modes! */
@@ -183,6 +176,7 @@ public class MoveViewTool extends EditingTool
 				view.getCamera().setCameraCoordinates(coords);
 				view.setDistToPlane(newDist);
 			}
+			else
 			{
 				double newScale = oldScale*(Math.pow(1.01,(double)dy));
 				view.setScale(newScale);
@@ -211,25 +205,11 @@ public class MoveViewTool extends EditingTool
 		}
 	}
 
-/*
-  @Override
-  public void mouseScrolled(MouseScrolledEvent e, ViewerCanvas view)
-  {
-      setExtGraphs(view);
-  }
-
-  @Override
-  public void mouseStoppedScrolling()
-  {
-	  wipeExtGraphs();
-  }
-*/
   @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
 	mouseDown = false;
 	view.moving = false;
-    // mouseDragged(e, view); // unnecessary, I think
     if (theWindow != null)
       {
         ObjectInfo bound = view.getBoundCamera();
@@ -237,7 +217,6 @@ public class MoveViewTool extends EditingTool
         {
           // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
           // the camera.
-          // bound.setCoords(view.getCamera().getCameraCoordinates().duplicate()); // has to be a duplicate or copy coords or ....
 		  bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
           UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
           moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
@@ -249,7 +228,6 @@ public class MoveViewTool extends EditingTool
   }
 
   /** This is called recursively to move any children of a bound camera. */
-
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
   {
     for (int i = 0; i < parent.getChildren().length; i++)
@@ -264,30 +242,15 @@ public class MoveViewTool extends EditingTool
 
   public void setExtGraphs(ViewerCanvas view)
   {
-	for (ViewerCanvas v : theWindow.getAllViews()){
-      if (v != view){
-	    v.extRC = new Vec3(view.getRotationCenter());
-	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
-		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
-		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
-		v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
-		v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
-		v.repaint();
-	  }
-    }
+	for (ViewerCanvas v : theWindow.getAllViews())
+      if (v != view)
+		v.extGraphs.set(view, true);
   }
   
   public void wipeExtGraphs()
   {
-	for (ViewerCanvas v : theWindow.getAllViews()){
-		v.extRC = null;
-		v.extCC = null;
-		v.extC0 = null;
-		v.extC1 = null;
-		v.extC2 = null;
-		v.extC3 = null;
-		v.repaint();
-    }
+	for (ViewerCanvas v : theWindow.getAllViews())
+		v.extGraphs.wipe();
   }
 
   /** This is used when a SceneCamera moves in the scene */
@@ -295,7 +258,7 @@ public class MoveViewTool extends EditingTool
   {
 	ViewerCanvas[] views = theWindow.getAllViews();
 	for (ViewerCanvas v : views){
-      v.repaint();
+      //v.repaint();
     }
   }
   

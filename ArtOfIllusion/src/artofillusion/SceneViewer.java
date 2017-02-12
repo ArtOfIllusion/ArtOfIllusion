@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
-   Changes copyright (C) 2106-2107 by Petri Ihalainen
+   Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -314,9 +314,9 @@ public class SceneViewer extends ViewerCanvas
 	currentTool.drawOverlay(this);
 	if (activeTool != null)
 		activeTool.drawOverlay(this);
-    drawBorder();
     if (showAxes)
       drawCoordinateAxes();
+    drawBorder();
 }
 
   /** Begin dragging a box.  The variable square determines whether the box should be

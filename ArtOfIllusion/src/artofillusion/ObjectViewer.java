@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-
+   Modifications copyright (C) 2017 Petri Ihalainen
+   
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -191,11 +192,13 @@ public abstract class ObjectViewer extends ViewerCanvas
         drawImage(renderedImage, 0, 0);
       else
         viewChanged(false);
+      drawOverlay();
       drawBorder();
       if (showAxes)
         drawCoordinateAxes();
       return;
     }
+
     super.updateImage();
     if (controller.getObject() == null)
       return;
@@ -512,8 +515,5 @@ public abstract class ObjectViewer extends ViewerCanvas
 		mousePoint = e.getPoint();
 		mouseMoveTimer.restart();
 		((EditingWindow)controller).updateImage();
-		//parentFrame.updateImage(); // I wonder why, but that's how it works
 	}
-
-  
 }

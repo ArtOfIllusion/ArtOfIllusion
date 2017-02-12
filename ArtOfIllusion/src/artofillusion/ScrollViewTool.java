@@ -36,6 +36,7 @@ public class ScrollViewTool
 	public ScrollViewTool(EditingWindow ew)
 	{
 		window = ew;
+		scrollTimer.setCoalesce(false);
 	}
 
 	protected void mouseScrolled(MouseScrolledEvent e, ViewerCanvas v)
@@ -48,14 +49,12 @@ public class ScrollViewTool
 		bounds = view.getBounds();
 		camera = view.getCamera();
 		boundCamera = view.getBoundCamera();
-		//startCoords = camera.getCameraCoordinates().duplicate();
 		if (boundCamera != null)
 			startCoords = boundCamera.getCoords().duplicate();
 		
 		mousePoint = view.mousePoint = e.getPoint();
 		scrollTimer.restart(); // The timer takes case of teh graphics and updating the children of a camera object
 
-		
 		switch (navigationMode) 
 		{
 			case ViewerCanvas.NAVIGATE_MODEL_SPACE:
@@ -74,11 +73,11 @@ public class ScrollViewTool
 		{
 			boundCamera.setCoords(camera.getCameraCoordinates().duplicate());
 			moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()));
-			repaintAllViews();
+
 		}
+		setAuxGraphs(view);
+		repaintAllViews();
 		view.viewChanged(false);
-		view.repaint();
-		setExtGraphs(view);
 	}
 		
 	private void scrollMoveModel(MouseScrolledEvent e)
@@ -214,57 +213,22 @@ public class ScrollViewTool
 		view.setRotationCenter(newPos.plus(coords.getZDirection().times(distToPlane)));
 	}
 
-	/** Maybe some day? */
-	public void drawOverlay()
-	{ }
-
-	public void setExtGraphs(ViewerCanvas view)
-	{
-		for (ViewerCanvas v : window.getAllViews()){
-			if (v != view){
-				v.extRC = new Vec3(view.getRotationCenter());
-				v.extCC = new Vec3(camera.getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
-				v.extC0 = camera.convertScreenToWorld(new Point(0, 0), distToPlane);
-				v.extC1 = camera.convertScreenToWorld(new Point(bounds.width, 0), distToPlane);
-				v.extC2 = camera.convertScreenToWorld(new Point(0, bounds.height), distToPlane);
-				v.extC3 = camera.convertScreenToWorld(new Point(bounds.width, bounds.height), distToPlane);
-				v.repaint();
-			}
-		}
-	}
-	
-	public void wipeExtGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews()){
-			v.extRC = null;
-			v.extCC = null;
-			v.extC0 = null;
-			v.extC1 = null;
-			v.extC2 = null;
-			v.extC3 = null;
-			v.repaint();
-		}
-	}
-
 	public void mouseStoppedScrolling()
 	{
 		// This should set an undorecord if a camera moved
 		wipeExtGraphs();
 	}
 
-	
 	private Timer scrollTimer = new Timer(500, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 
 		{
-			//scrollTimer.setCoalesce(false);
 			scrollTimer.stop();
 			view.scrolling = false;
 			view.mousePoint = null;
 			mouseStoppedScrolling();
 		}
 	});
-	
 
 	private Color  blendColor(Color color0, Color color1, double blend)
 	{
@@ -274,7 +238,6 @@ public class ScrollViewTool
 		
 		return new Color(R, G, B);
 	}
-
 
 	/** 
 	    This is called recursively to move any children of a bound camera. 
@@ -294,8 +257,24 @@ public class ScrollViewTool
 	private void repaintAllViews()
 	{
 		ViewerCanvas[] views = window.getAllViews();
-		for (ViewerCanvas v : views){
-			v.repaint();
-		}
+			for (ViewerCanvas v : views)
+				v.repaint();
 	}
+
+	public void setExtGraphs(ViewerCanvas view)
+	{
+		for (ViewerCanvas v : window.getAllViews())
+			if (v != view)
+				v.extGraphs.set(view, true);
+	}
+
+	public void wipeExtGraphs()
+	{
+		for (ViewerCanvas v : window.getAllViews())
+			v.extGraphs.wipe();
+	}
+
+	/** Maybe some day? */
+	public void drawOverlay()
+	{}
 }

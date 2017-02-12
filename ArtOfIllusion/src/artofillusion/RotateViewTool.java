@@ -106,14 +106,9 @@ public class RotateViewTool extends EditingTool
 			default:
 				break;
 		}
+		setAuxGraphs(view);
+		repaintAllViews();
 		view.viewChanged(false);	
-		if (view.getBoundCamera() != null)
-		{
-			repaintAllViews();
-		}
-		else
-			view.repaint();
-		setExtGraphs(view);
 	}
 	
 	private void dragRotateTravelSpace(WidgetMouseEvent e, ViewerCanvas view)
@@ -358,7 +353,6 @@ public class RotateViewTool extends EditingTool
   @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-    //mouseDragged(e, view); // I wonder why this extra one was there. Seemed to cause somethign unexpected.
 	view.mouseDown = false;
 	view.tilting = false;
 	view.rotating = false;
@@ -366,7 +360,6 @@ public class RotateViewTool extends EditingTool
     Point dragPoint = e.getPoint();
     if (theWindow != null)
     {
-        //if (boundCamera != null)
 		ObjectInfo bound = view.getBoundCamera();
         if (bound != null)
         {
@@ -402,40 +395,6 @@ public class RotateViewTool extends EditingTool
     }
   }
   
-  private void repaintAllViews()
-  {
-	for (ViewerCanvas v : theWindow.getAllViews())
-		v.repaint();
-  }
-
-  public void setExtGraphs(ViewerCanvas view)
-  {
-	for (ViewerCanvas v : theWindow.getAllViews()){
-      if (v != view){
-	    v.extRC = new Vec3(view.getRotationCenter());
-	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
-		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
-		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
-		v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
-		v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
-		v.repaint();
-	  }
-    }
-  }
-
-  public void wipeExtGraphs()
-  {
-	for (ViewerCanvas v : theWindow.getAllViews()){
-		v.extRC = null;
-		v.extCC = null;
-		v.extC0 = null;
-		v.extC1 = null;
-		v.extC2 = null;
-		v.extC3 = null;
-		v.repaint();
-    }
-  }
-
   private void tilt(WidgetMouseEvent e, ViewerCanvas view, Point clickPoint)
   {
 	int d = Math.min(view.getBounds().width, view.getBounds().height);
@@ -486,7 +445,6 @@ public class RotateViewTool extends EditingTool
 	Point dragPoint = e.getPoint();
 	int dx = dragPoint.x-clickPoint.x;
 	int dy = dragPoint.y-clickPoint.y;
-	//Camera cam = view.getCamera();
 	double dts = camera.getDistToScreen();
 	
 	if (view.getBoundCamera() != null){
@@ -587,10 +545,28 @@ public class RotateViewTool extends EditingTool
 		}
   }
 
+  private void repaintAllViews()
+  {
+	for (ViewerCanvas v : theWindow.getAllViews())
+		v.repaint();
+  }
+
+  public void setExtGraphs(ViewerCanvas view)
+  {
+	for (ViewerCanvas v : theWindow.getAllViews())
+      if (v != view)
+		v.extGraphs.set(view, true);
+  }
+  
+  public void wipeExtGraphs()
+  {
+	for (ViewerCanvas v : theWindow.getAllViews())
+		v.extGraphs.wipe();
+  }
+
   @Override
   public void drawOverlay(ViewerCanvas view)
   {
-	//view.drawLine(new Point(100,100), new Point(200, 0), Color.RED);
     if (view.tilting){
 	  view.repaint();
 	  for (int i=0; i<4; i++)

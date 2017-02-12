@@ -53,9 +53,10 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected final ViewChangedEvent viewChangedEvent;
 
-  public Color gray, red, green, blue, yellow, cone, teal, TEAL;
+  public static Color gray, red, green, blue, yellow, cone, teal, TEAL;
   public Vec3 extRC, extCC, extC0, extC1, extC2, extC3;
   public Point mousePoint;
+  public ExternalGraphics extGraphs = new ExternalGraphics();
   
   private static boolean openGLAvailable;
   private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
@@ -389,7 +390,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	public void setPerspective(boolean nextPerspective)
 	{		
 		// Can't not go parallel in travel modes
-		// The setNavigationMode() also takes car of perspective
+		// The setNavigationMode() also takes care of perspective setting
 		if (navigation == NAVIGATE_TRAVEL_SPACE || navigation == NAVIGATE_TRAVEL_LANDSCAPE)
 			return;
 
@@ -666,7 +667,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	if(nextPerspective)
 	{
 		// converting scale to distance
-		distToPlane = 100.0*theCamera.getDistToScreen()/scale; //*(20.0/theCamera.getDistToScreen());
+		distToPlane = 100.0*theCamera.getDistToScreen()/scale;
 		scale = 100.0; // scale needs to be 100 in perspective mode or the magnification is incorrect.
 		
 		// repositioning camera
@@ -1776,55 +1777,6 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	}
 
-	/**
-		This draws the view cone of the active view on the other views. <p>
-		
-		Currently the graphics don't make distinction between perspective and 
-		parallel modes.
-	*/
-	
-	private void drawExtGraphics()
-	{
-		if (extRC == null) return;
-		
-		Vec2 rcs = getCamera().getWorldToScreen().timesXY(extRC);
-		drawLine(new Point((int)rcs.x, (int)rcs.y-2), new Point((int)rcs.x, (int)rcs.y+3), Color.GREEN);
-		drawLine(new Point((int)rcs.x-2, (int)rcs.y), new Point((int)rcs.x+3, (int)rcs.y), Color.GREEN);
-		Vec2 ccs = getCamera().getWorldToScreen().timesXY(extCC);
-		drawLine(new Point((int)ccs.x, (int)ccs.y-2), new Point((int)ccs.x, (int)ccs.y+3), Color.MAGENTA);
-		drawLine(new Point((int)ccs.x-2, (int)ccs.y), new Point((int)ccs.x+3, (int)ccs.y), Color.MAGENTA);
-		
-		Point pc = (new Point((int)ccs.x, (int)ccs.y));
-		if (extC0 != null){
-			Vec2 v0, v1;
-			Point p0, p1;
-        
-			v0 = new Vec2(getCamera().getWorldToScreen().timesXY(extC0));
-			v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC1));
-			p0 = new Point((int)v0.x, (int)v0.y);
-			p1 = new Point((int)v1.x, (int)v1.y);
-			drawLine (p0, p1, cone);
-			drawLine (pc, p0, cone);
-			drawLine (pc, p1, cone);
-			
-        
-			v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC2));
-			p1 = new Point((int)v1.x, (int)v1.y);
-			drawLine (p0, p1, cone);
-			
-			v0 = new Vec2(getCamera().getWorldToScreen().timesXY(extC3));
-			p0 = new Point((int)v0.x, (int)v0.y);
-			drawLine (p0, p1, cone);
-			drawLine (pc, p0, cone);
-			drawLine (pc, p1, cone);		
-			
-			v1 = new Vec2(getCamera().getWorldToScreen().timesXY(extC1));
-			p1 = new Point((int)v1.x, (int)v1.y);
-			drawLine (p0, p1, cone);
-		}
-	}
-	
-
 	protected Timer mouseMoveTimer = new Timer(500, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 
@@ -1836,6 +1788,16 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	});
 	
+	/* Draw a point in the modelling space on the screen */
+	private void renderPoint(Vec3 p, Color c)
+	{
+		Vec2 ps = getCamera().getWorldToScreen().timesXY(p);
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x+2, (int)ps.y), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x-2, (int)ps.y), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x, (int)ps.y+2), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x, (int)ps.y-1), c);		
+	}
+
 	/** 
 	 *  Draw a line on the screen as segment of a radius from a center point. 
 	 *  Angle ar radii and r0 and r1 as screen (pixel) coordinate scale.
@@ -1936,7 +1898,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	 * Blend between two colors. 
 	 * The 'blend' is the balance of the color in range 0.0 - 1.0 from color0 to color1
 	 */
-	private Color  blendColor(Color color0, Color color1, double blend)
+	private Color blendColor(Color color0, Color color1, double blend)
 	{
 		int R = (int)(color0.getRed()*(1.0-blend) + color1.getRed()*blend);
 		int G = (int)(color0.getGreen()*(1.0-blend) + color1.getGreen()*blend);
@@ -1950,6 +1912,187 @@ public abstract class ViewerCanvas extends CustomWidget
 	{
 		if (mouseMoving || scrolling)
 			drawNavigationGraphics();
-		drawExtGraphics();
+		//drawExtGraphics();
+		extGraphs.render();
+	}
+	
+	/** 
+		This class creates and stores information for drawing view cones or other 
+		temporary 3D graphics and privides a method to draw them on the screen.
+	*/
+	public class ExternalGraphics
+	{
+		private ArrayList<Vec3>   points;
+		private ArrayList<Vec3[]> lines;
+		private ArrayList<Color>  pointColors, lineColors;
+		private ViewerCanvas      parent;
+		
+		/** Create an empty externalGraphics object */
+		public ExternalGraphics()
+		{}
+
+		/* Create emply point list */
+		private void newPoints(){
+			points = new ArrayList<Vec3>();
+			pointColors = new ArrayList<Color>();
+		}
+			
+		/* Create emply point list */
+		private void newLines(){
+			lines = new ArrayList<Vec3[]>();
+			lineColors = new ArrayList<Color>();
+		}
+		/** 
+			Create contents using the given view<p>
+			
+			@ param newGraphics tells to clear any previously stored graphics
+		*/
+		public void set(ViewerCanvas v, boolean newGraphics)
+		{
+			if (newGraphics){
+				newPoints();
+				newLines();
+			}
+			
+			Camera ca = v.getCamera();
+			CoordinateSystem cs = ca.getCameraCoordinates();
+			Vec3 rc = v.getRotationCenter();
+			System.out.println(rc);
+			Vec3 cz = cs.getZDirection();
+			Vec3 cp = new Vec3(cs.getOrigin().plus(cz.times(0.0001))); // Need to move so that the camera can see it
+			double dp = v.getDistToPlane();
+
+			// rotation center 
+			add(new Vec3(rc), Color.GREEN);
+			
+			// view edges
+			Rectangle b = v.getBounds();
+			Vec3 c0, c1, c2, c3;
+			c0 = ca.convertScreenToWorld(new Point(0, 0), dp);
+			c1 = ca.convertScreenToWorld(new Point(b.width, 0), dp);
+			c2 = ca.convertScreenToWorld(new Point(b.width, b.height), dp);
+			c3 = ca.convertScreenToWorld(new Point(0, b.height), dp);
+			
+			// screen border
+			add(new Vec3[]{c0, c1}, cone);
+			add(new Vec3[]{c1, c2}, cone);
+			add(new Vec3[]{c2, c3}, cone);
+			add(new Vec3[]{c3, c0}, cone);
+			
+			if (v.isPerspective()){
+				// camera position
+				add(new Vec3(cp), Color.MAGENTA);
+				// corner lines
+				add(new Vec3[]{c0, cp}, cone);
+				add(new Vec3[]{c1, cp}, cone);
+				add(new Vec3[]{c2, cp}, cone);
+				add(new Vec3[]{c3, cp}, cone);
+			}
+			else{
+				Vec3 m0, m1, m2, m3, mh, cpp;
+				
+				// pseudo location for view point position
+				double cppDist = 100.0*ca.getDistToScreen()/v.getScale();
+				cpp = rc.minus(cz.times(cppDist*1.0));
+				add(cpp, Color.MAGENTA);
+				
+				m0 = c0.minus(cz.times(cppDist*0.618033)); // "Golden mean.. :) "
+				m1 = c1.minus(cz.times(cppDist*0.618033));
+				m2 = c2.minus(cz.times(cppDist*0.618033));
+				m3 = c3.minus(cz.times(cppDist*0.618033));
+
+				add(new Vec3[]{m0, m1}, cone);
+				add(new Vec3[]{m1, m2}, cone);
+				add(new Vec3[]{m2, m3}, cone);
+				add(new Vec3[]{m3, m0}, cone);
+
+				add(new Vec3[]{c0, m0}, cone);
+				add(new Vec3[]{c1, m1}, cone);
+				add(new Vec3[]{c2, m2}, cone);
+				add(new Vec3[]{c3, m3}, cone);
+
+				add(new Vec3[]{m0, cpp}, gray);
+				add(new Vec3[]{m1, cpp}, gray);
+				add(new Vec3[]{m2, cpp}, gray);
+				add(new Vec3[]{m3, cpp}, gray);
+			}
+		}
+
+		/** Add a point */
+		public void add(Vec3 point, Color pointColor)
+		{
+			if (points == null)
+				newPoints();
+			points.add(point);
+			pointColors.add(pointColor);
+		}
+
+		/** Add a line */
+		public void add(Vec3[] lineEnds, Color lineColor)
+		{
+			if (lines == null)
+				newLines();
+			lines.add(lineEnds);
+			lineColors.add(lineColor);
+		}
+
+		/** Copy all information from an existing graphics object */
+		public void copy(ExternalGraphics ext)
+		{
+			points = ext.getPoints();
+			pointColors = ext.getPointColors(); 
+			lines = ext.getLines();
+			lineColors = ext.getLineColors(); 
+		}
+
+		public ArrayList<Vec3> getPoints()
+		{
+			return points;
+		}
+
+		public ArrayList<Color> getPointColors()
+		{
+			return pointColors;
+		}
+
+		public ArrayList<Vec3[]> getLines()
+		{
+			return lines;
+		}
+
+		public ArrayList<Color> getLineColors()
+		{
+			return lineColors;
+		}
+
+		/** Render the object on screen */
+		public void render()
+		{
+			Vec2 v0, v1;
+			Point p0, p1;
+			if (points != null)
+				for(int i = 0; i < points.size(); i++)
+					renderPoint(points.get(i), pointColors.get(i));
+			if (lines != null)
+				for(int i = 0; i < lines.size(); i++){
+				
+					// renderLine of CanvasDrawer does not work right here. Object dependencies...
+
+					v0 = new Vec2(theCamera.getWorldToScreen().timesXY(lines.get(i)[0]));
+					v1 = new Vec2(theCamera.getWorldToScreen().timesXY(lines.get(i)[1]));
+					p0 = new Point((int)v0.x, (int)v0.y);
+					p1 = new Point((int)v1.x, (int)v1.y);
+					drawLine (p0, p1, lineColors.get(i));
+				}
+		}
+
+		/** Empty the object */
+		public void wipe()
+		{
+			points = null;
+			pointColors = null;
+			lines = null;
+			lineColors = null;
+		}
 	}
 }

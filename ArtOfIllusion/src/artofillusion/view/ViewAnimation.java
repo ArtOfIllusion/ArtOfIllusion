@@ -415,34 +415,16 @@ public class ViewAnimation
 	}
 
 	/* Set view cone craphis */
-	private void setExtGraphs()
+	public void setExtGraphs()
 	{
-		if (window == null)
-			return;
-		for (ViewerCanvas v : window.getAllViews()){
-			if (v != view){
-				v.extRC = new Vec3(view.getRotationCenter());
-				v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
-				v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
-				v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
-				v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
-				v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
-				v.repaint();
-			}
-		}
+		for (ViewerCanvas v : window.getAllViews())
+			if (v != view)
+				v.extGraphs.set(view, true);
 	}
 
-	/* Clear view cone graphics */
 	public void wipeExtGraphs()
 	{
-		for (ViewerCanvas v : window.getAllViews()){
-			v.extRC = null;
-			v.extCC = null;
-			v.extC0 = null;
-			v.extC1 = null;
-			v.extC2 = null;
-			v.extC3 = null;
-			v.repaint();
-		}
+		for (ViewerCanvas v : window.getAllViews())
+			v.extGraphs.wipe();
 	}
 }

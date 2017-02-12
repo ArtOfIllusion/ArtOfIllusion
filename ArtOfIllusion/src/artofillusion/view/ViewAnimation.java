@@ -29,20 +29,18 @@ import java.awt.*;
 	animation does not consume more time than the setting allows. It just uses fewer frames.
 	
 	ViewAnimation also takes care of sending a ViewChanged event and repainting the 
-	view after the animation is done. So the calling method won't have to.
+	view after the animation is done, so the calling method won't have to.
 */
 
 public class ViewAnimation
 {	
 	EditingWindow window;
-	
 	boolean animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	double maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
 	double displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
 	double interval = 1.0/displayFrq; //
 	int timerInterval =(int)(interval*1000);
-
-	int steps = 0, step = 0, firstStep = 1;
+	int steps = 0, step = 1;
 
 	CoordinateSystem startCoords, endCoords, aniCoords;
 	Vec3 endRotationCenter, rotStart, rotAni, aniZ, aniOrigin;
@@ -55,12 +53,13 @@ public class ViewAnimation
 	double   startScale, endScale, scalingFactor, startAngle, endAngle, angleStep, aniAngle;
 	double   timeRot, timeScale, timeDist, timeMove, timeAni;
 	double   endDistToScreen, refDistToScreen, refDistToPlane, refTangent;
-	double   rotSlope = 1.0, moveSlope = 1.5, scaleSlope = .1, distSlope = .1,  perspSlope = 1.0/3.0;;
+	double   rotSlope = 1.5, moveSlope = 1.5, scaleSlope = .1, distSlope = .1,  perspSlope = 3.0;;
 	int      endOrientation, endNavigation;
 	long     msStart, msEnd, ms1st=0, msLast, msLatest;
 	boolean  endPerspective,changingPerspective, animatingMove, endShowGrid;
 	int      viewH, viewW;
 	
+	/** A new view animation engine. Each view need's it's own.*/
 	public ViewAnimation(EditingWindow win, ViewerCanvas v)
 	{
 		window = win;
@@ -70,18 +69,19 @@ public class ViewAnimation
 		timer.setCoalesce(false);
 	}
 	
+	/** Check is the engine is working on an animation, that includes perspetive change */
 	public boolean changingPerspective()
 	{
 		return changingPerspective;
 	}
 	
+	/** Check if the engine is at an animation, that moves the view camera and/or changes scale */
 	public boolean animatingMove()
 	{
 		return animatingMove;
 	}
 	
-	/* The timer that keeps launcing animation 'frames' */
-
+	/** The timer that keeps launcing animation 'frames' */
 	private Timer timer = new Timer(timerInterval, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 
@@ -97,7 +97,6 @@ public class ViewAnimation
 	});
 
 	/** Start animation of perspective change. */
-	// Navigation mode change should be handled here in the future
 	public void start(boolean nextPerspective)
 	{
 		camera = view.getCamera();
@@ -157,7 +156,7 @@ public class ViewAnimation
 		if (endAngle == startAngle)
 			return;
 		else
-			timePersp = maxDuration*Math.pow((halfViewAngle/(Math.PI/2.0)), perspSlope); // root curve
+			timePersp = maxDuration*Math.pow((halfViewAngle/Math.PI/2.0), 1.0/perspSlope); // root curve
 
 		steps = (int)(timePersp/interval);
 		angleStep = (endAngle - startAngle)/steps;	
@@ -179,8 +178,8 @@ public class ViewAnimation
 		view.setDistToPlane(aniDist);
 		camera.setDistToScreen(refDistToScreen*distanceFactor);
 
-		// This has to be the last thing before repaint
-		// or the view will react to it
+		// This has to be the last thing before repaint.
+		// The view will react to it immediately.
 		if (step == 1){
 			view.preparePerspectiveAnimation();
 		}
@@ -191,7 +190,7 @@ public class ViewAnimation
 	}
 
 	/** 
-	 * Start the animation sequence 
+	 * Start the 'linear' animation sequence 
 	 */
 	public void start(CoordinateSystem endCoords, Vec3 endRotationCenter, double endScale, int endOrientation, int nextNavigation)
 	{
@@ -230,12 +229,13 @@ public class ViewAnimation
 
 		aniDist = startDist;
 		moveDist = (endRotationCenter.minus(rotStart).length());
-		step = firstStep;
+		step = 1;
 
 		// CHECKING ROTATIONS
 		//========================
 		// These are here because the logic in angles of Bottom view differs from Top and Front
-		// Helps in most cases to make the turn cleaner.
+		// Helps in most cases to make the turn cleaner but does not always find the shortest
+		// possible rotation.
 	
 		if (startAngles[0] == 90.0 && startAngles[1] == 0.0 && startAngles[2] == 180.0)
 		{
@@ -248,7 +248,6 @@ public class ViewAnimation
 			endAngles[2] = 0.0;
 		}
 
-		//-------------
 		if (endAngles[0]-startAngles[0] < -180.0) endAngles[0] += 360.0; 
 		if (endAngles[1]-startAngles[1] < -180.0) endAngles[1] += 360.0; 
 		if (endAngles[2]-startAngles[2] < -180.0) endAngles[2] += 360.0; 
@@ -270,7 +269,6 @@ public class ViewAnimation
 		if (startScale > endScale)
 			timeScale = maxDuration*(1.0-endScale/(endScale+scaleSlope*(startScale-endScale)));
 
-
 		timeDist = 0.0;
 		if (endDist > startDist)
 			timeDist = maxDuration*(1.0-startDist/(startDist+distSlope*(endDist-startDist)));
@@ -283,7 +281,6 @@ public class ViewAnimation
 			double pixS = moveDist*2000/startDist;
 			double pixE = moveDist*2000/endDist;
 			double pixA = pixS+pixE; // Take both to account. "Average" happens in the next equation.
-
 			timeMove = maxDuration*(1.0-1.0/(1.0+pixA/3200*moveSlope));
 		}
 		else
@@ -291,7 +288,6 @@ public class ViewAnimation
 			double pixS = moveDist*startScale;
 			double pixE = moveDist*endScale;
 			double pixA = pixS+pixE; // Take both to account. "Average" happens in the next equation.
-
 			timeMove = maxDuration*(1.0-1.0/(1.0+pixA/3200*moveSlope));
 		}
 
@@ -301,15 +297,15 @@ public class ViewAnimation
 		if (timeAni < timeRot) timeAni = timeRot;
 		if (timeAni < timeScale) timeAni = timeScale;
 		if (timeAni < timeDist) timeAni = timeDist;
-		if (timeRot == 0.0)
-			if (timeAni < timeMove) timeAni = timeMove;
+		//if (timeRot == 0.0) // this must be a remnant from something else
+		if (timeAni < timeMove) timeAni = timeMove;
 				
 		if (timeAni == 0.0) // zero for time = nothing moves & division by zero next --> Blank view.
 		{
 			endAnimation();
 			return;
 		}
-		
+
 		steps = (int)(timeAni/interval);		
 		scalingFactor = Math.pow((endScale/startScale),(1.0/steps));
 		distanceFactor = Math.pow((endDist/startDist),(1.0/steps));
@@ -327,7 +323,6 @@ public class ViewAnimation
 	}
 
 	/* Play one step of the animation */
-
 	private void animationStep()
 	{	
 		startWeightLin = (double)(steps-step)/(double)steps;
@@ -335,33 +330,28 @@ public class ViewAnimation
 		
 		if(view.isPerspective())
 		{
-			if (distanceFactor == 1.0 || steps <= 1)
-			{
+			if (distanceFactor == 1.0 || steps <= 1){
 				startWeightExp = startWeightLin;
 				endWeightExp = endWeightLin;
 			}
-			else
-			{
+			else{
 				startWeightExp =(Math.pow(1.0/distanceFactor,(double)(steps-step))-1.0)/(1.0/Math.pow(distanceFactor,(double)steps)-1.0);
 				endWeightExp = 1.0 - startWeightExp;
 			}
 		}
 		else
 		{
-			if (scalingFactor == 1.0 || steps <= 1)
-			{
+			if (scalingFactor == 1.0 || steps <= 1){
 				startWeightExp = startWeightLin;
 				endWeightExp = endWeightLin;
 			}
-			else
-			{
+			else{
 				startWeightExp =(Math.pow(scalingFactor,(double)(steps-step))-1.0)/(Math.pow(scalingFactor,(double)steps)-1.0);
 				endWeightExp = 1.0 - startWeightExp;
 			}
 		}
 		
 		aniDist = aniDist*distanceFactor;
-		
 		rotAni = rotStart.times(startWeightExp).plus(endRotationCenter.times(endWeightExp));
 		
 		angleX = startAngles[0]*startWeightLin + endAngles[0]*endWeightLin;
@@ -382,7 +372,6 @@ public class ViewAnimation
 	}
 
 	/* When all the steps of an animation have been played */
-
 	private void endAnimation()
 	{
 		timer.stop();
@@ -402,7 +391,7 @@ public class ViewAnimation
 	}
 
 	/** 
-	 * Check if there is anything that should move 
+	 * Check if there is anything that should move. 
 	 * This is for the <b>non-perspectivechanging</b> animations
 	 */
 	private boolean noMove()
@@ -417,51 +406,43 @@ public class ViewAnimation
 		return true;
 	}
 
+	/* Check how the user has congigured the animation engine  */
 	private void checkPreferences()
 	{
 		// This only works for the boolean to take effect immediately
 		// Don't know why?
 		animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
-		
-		//maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
-		//displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
-		//interval = maxDuration/displayFrq; //
-		//timerInterval =(int)(interval*900); // to milliseconds but make it 10% ahead of time
 	}
-	/*
-	// Not used
-	public void stop()
+
+	/* Set view cone craphis */
+	private void setExtGraphs()
 	{
-		timer.stop();
-		step=0;
+		if (window == null)
+			return;
+		for (ViewerCanvas v : window.getAllViews()){
+			if (v != view){
+				v.extRC = new Vec3(view.getRotationCenter());
+				v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
+				v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
+				v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
+				v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
+				v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
+				v.repaint();
+			}
+		}
 	}
-	*/
-  private void setExtGraphs()
-  {
-	if (window == null)
-		return;
-	for (ViewerCanvas v : window.getAllViews()){
-      if (v != view){
-	    v.extRC = new Vec3(view.getRotationCenter());
-	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
-		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
-		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
-		v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
-		v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
-		v.repaint();
-	  }
-    }
-  }
-  public void wipeExtGraphs()
-  {
-	for (ViewerCanvas v : window.getAllViews()){
-		v.extRC = null;
-		v.extCC = null;
-		v.extC0 = null;
-		v.extC1 = null;
-		v.extC2 = null;
-		v.extC3 = null;
-		v.repaint();
-    }
-  }
+
+	/* Clear view cone graphics */
+	public void wipeExtGraphs()
+	{
+		for (ViewerCanvas v : window.getAllViews()){
+			v.extRC = null;
+			v.extCC = null;
+			v.extC0 = null;
+			v.extC1 = null;
+			v.extC2 = null;
+			v.extC3 = null;
+			v.repaint();
+		}
+	}
 }

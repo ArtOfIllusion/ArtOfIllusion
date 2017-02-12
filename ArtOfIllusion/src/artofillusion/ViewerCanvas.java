@@ -108,11 +108,13 @@ public abstract class ViewerCanvas extends CustomWidget
   public boolean mouseDown, mouseMoving, tilting, moving, rotating, scrolling, dragging;
   public Color blendColorR, blendColorX, blendColorY;
   
+  /** Create a new ViewerCanvas */
   public ViewerCanvas()
   {
     this(ArtOfIllusion.getPreferences().getUseOpenGL() && openGLAvailable);
   }
 
+  /** Create a new ViewerCanvas */
   public ViewerCanvas(boolean useOpenGL)
   {
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
@@ -148,7 +150,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
-    //addEventLink(MouseClickedEvent.class, this, "mouseClicked");
+    //addEventLink(MouseClickedEvent.class, this, "mouseClicked"); // Did not work as expected. See below....
     getComponent().addComponentListener(new ComponentListener()
     {
       @Override
@@ -374,37 +376,35 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
 	/** 
-	 * Set whether to display perspective or parallel mode. 
-	 *
-	 * When the mode changes the view scale and camera distance from 
-	 * drawing plane are recalculated so that the perceived scale on 
-	 * the plane does not change
-	 *
-	 * For animated perspective changes the view has to be in perspective during the animation.
-	 * That's why the method first changes teh value of <b>perspectiveSwitch</b> which tells teh user's 
-	 * last setting and the <b>perspective</b> parameter is set false for parallel mode at 
-	 * <b>finishAnimation</b>.
-	 */
+	  Set whether to display perspective or parallel mode. <p>
+	  
+	  When the mode changes the view scale and camera distance from 
+	  drawing plane are recalculated so that the perceived scale on 
+	  the drawing plane does not change.<p>
 	 
+	  For animated perspective changes the view has to be in perspective during the animation and
+	  the perspective-parameter is turned false at finishAnimation() if needed. The perspectiveSwitch-
+	  parameter tells the users last perspehtive selection during animation. 
+	 */
 	public void setPerspective(boolean nextPerspective)
 	{		
 		// Can't not go parallel in travel modes
-		// The setNAvigationMode also takes gase of perspective
+		// The setNavigationMode() also takes car of perspective
 		if (navigation == NAVIGATE_TRAVEL_SPACE || navigation == NAVIGATE_TRAVEL_LANDSCAPE)
 			return;
-			
+
 		// don't recalculate if not necessary
 		if (perspectiveSwitch == nextPerspective){
 			return;
 		}
-		
+
 		// if the view is not up yet
 		if (getBounds().height == 0 || getBounds().width == 0 || theCamera == null){
 			perspective = perspectiveSwitch = nextPerspective;
 			return;
 		}
 
-		// I wonder about this
+		// I wonder if this is right....
 		if (boundCamera != null){
 			perspective = perspectiveSwitch = nextPerspective;
 			return;
@@ -413,69 +413,14 @@ public abstract class ViewerCanvas extends CustomWidget
 		if (animation.animatingMove() || animation.changingPerspective()) 
 			return;
 
-		// Prepare for animation
-		
 		perspectiveSwitch = nextPerspective;			
-		//double refDistToPlane;
-		//if (perspective)
-		//	refDistToPlane = distToPlane;
-		//else
-		//	refDistToPlane = 100.0/scale*theCamera.getDistToScreen(); // *theCamera.getDistToScreen()/20.0;
-		
-		// The view must be set to perspective before going to animation
-		// The first frame needs to be calculated here to avoid flick
-		// Apparently setting perspective true causes a flick on the screen
-		// though repaint is not used.
-		
-		//if (nextPerspective)
-		//{
-		//	theCamera.setDistToScreen(Double.MAX_VALUE);
-		//	distToPlane = Double.MAX_VALUE;
-		//}
-		//perspective = true;
-		//scale = 100;
-
 		animation.start(nextPerspective); // , refDistToPlane, navigation);
-
-	  /*
-	  else{
-		if(nextPerspective)
-		{
-			// converting scale to distance
-			distToPlane = 100.0*theCamera.getDistToScreen()/scale; //*(20.0/theCamera.getDistToScreen());
-			scale = 100.0; // scale needs to be 100 in perspective mode or the magnification is incorrect.
-			
-			// repositioning camera
-			CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
-			Vec3 cz = new Vec3(coords.getZDirection());
-			Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
-			coords.setOrigin(cp);
-			theCamera.setCameraCoordinates(coords);	
-		}
-		else
-		{
-			// converting distance to scale
-			scale = 100.0*theCamera.getDistToScreen()/distToPlane;
-			distToPlane = 20.0; // to follow the convention
-			
-			// repositioning camera
-			CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
-			Vec3 cz = new Vec3(coords.getZDirection());
-			Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
-			coords.setOrigin(cp);
-			theCamera.setCameraCoordinates(coords);
-		}
-		perspective = nextPerspective;
-		viewChanged(false);
-		repaint();
-	  }
-	  */
 	}
 
 	/** 
-	 * This is needed when animated perspective change parallel to perspective begins. 
-	 * The scale and perspective parameters can not be accessed directly form the 
-	 * animation engine
+	  This is needed when animated perspective change parallel to perspective begins. 
+	  The scale and perspective parameters can not be accessed directly form the 
+	  animation engine
 	 */
 	public void preparePerspectiveAnimation()
 	{
@@ -501,8 +446,6 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public double getScale()
   {
-    //if (isPerspective())
-    //  return 100.0; // Changing to perspective sets scale to 100.
     return scale;
   }
 
@@ -588,8 +531,8 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   * Get the location around which the view should be rotated.  This may be null, in which case the value
-   * returned by {@link #getDefaultRotationCenter()} will be used instead.
+    Get the location around which the view should be rotated.  This may be null, in which case the value
+    returned by {@link #getDefaultRotationCenter()} will be used instead.
    */
 
   public Vec3 getRotationCenter()
@@ -598,8 +541,8 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   * Set the location around which the view should be rotated. This may be null, in which case the value
-   * returned by {@link #getDefaultRotationCenter()} will be used instead.
+    Set the location around which the view should be rotated. This may be null, in which case the value
+    returned by {@link #getDefaultRotationCenter()} will be used instead.
    */
 
   public void setRotationCenter(Vec3 rotationCenter)
@@ -608,10 +551,10 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   * This method will be called if {@link #getRotationCenter()} returns null. 
-   * 
-   * It should be made sure that the rotation center is always known and never null, but if 
-   * null is returned this recreates it and returns the new value
+    This method will be called if {@link #getRotationCenter()} returns null. 
+    
+    It should be made sure that the rotation center is always known and never null, but if 
+    null is returned this recreates it and returns the new value
    */
 
   public Vec3 getDefaultRotationCenter()
@@ -623,9 +566,12 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   * Set the distance from drawing plane to camera
+    Set the distance from drawing plane to view camera. <p>
+	
+	Depending on the view action this may be used to recalculate 
+	the positon of the camera or the rotationCenter or it may be 
+	recalculated from the rotationCenter and camera position.
    */
-
   public void setDistToPlane(double dist)
   {
 	distToPlane = dist;
@@ -652,19 +598,19 @@ public abstract class ViewerCanvas extends CustomWidget
   }
  
   /** 
-   * Set navigation mode 
-   *
-   * @ param mode may be one of
-   *   NAVIGATE_MODEL_SPACE = 0;
-   *   NAVIGATE_MODEL_LANDSCAPE = 1;
-   *   NAVIGATE_TRAVEL_SPACE = 2;
-   *   NAVIGATE_TRAVEL_LANDSCAPE = 3;
-   * 
-   * Setting the value higher than 3 will have MoveViewTool and RotateViewTool ignore mouse commands. 
-   * This may be helpful for plug-in added navigation modes.
-   *
-   * If the view is in tilted orientation and then set to 'landscape' the tilt angle will be reset
-   * and the view set to y = up.
+    Set navigation mode 
+   
+    @ param mode may be one of
+      NAVIGATE_MODEL_SPACE = 0;
+      NAVIGATE_MODEL_LANDSCAPE = 1;
+      NAVIGATE_TRAVEL_SPACE = 2;
+      NAVIGATE_TRAVEL_LANDSCAPE = 3;
+    
+    Setting the value higher than 3 will have MoveViewTool and RotateViewTool ignore mouse commands. 
+    This may be helpful for plug-in added navigation modes.
+   
+    If the view is in tilted orientation and then set to 'landscape' the tilt angle will be reset
+    and the view set to y = up.
    */
 
   public void setNavigationMode(int nextNavigation)
@@ -769,27 +715,28 @@ public abstract class ViewerCanvas extends CustomWidget
 	  - Show pop-up menu
 	  - Center to a new point
 	  - Sub classes may override but should call super first
-	  I wonder if this needs an action processor
+	  I wonder if this needs an action processor?
   */
 
   //For some reason after this, when an object was opened for editing by double clicking it on the view, 
   //the first time of pressing Cancel or OK launched an undo sequence. If the object was opened by 
-  //pop-up menu or by double clicking the object, the editor windoew behaved normally.
-
-  //protected void mouseClicked(MouseClickedEvent ev)
-  //{
-  //  //if (popupManager != null && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
-  //  if (popupManager != null && ev.isMetaDown() && ev.getClickCount() == 1)
-  //  {
-  //    Point pos = ev.getPoint();
-  //    popupManager.showPopupMenu(this, pos.x, pos.y);
-  //  }
-  //  if (ev.isAltDown() && ev.getClickCount() == 1)
-  //  //if (ev.getButton() == WidgetMouseEvent.BUTTON2 && ev.getClickCount() == 1)
-  //	centerToPoint(ev.getPoint());
-  //}
+  //pop-up menu or by double clicking the object, the editor window behaved normally.
+  /*
+  protected void mouseClicked(MouseClickedEvent ev)
+  {
+    //if (popupManager != null && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
+    if (popupManager != null && ev.isMetaDown() && ev.getClickCount() == 1)
+    {
+      Point pos = ev.getPoint();
+      popupManager.showPopupMenu(this, pos.x, pos.y);
+    }
+    if (ev.isAltDown() && ev.getClickCount() == 1)
+    //if (ev.getButton() == WidgetMouseEvent.BUTTON2 && ev.getClickCount() == 1)
+  	centerToPoint(ev.getPoint());
+  }
+  */
   
-  /** I wonder, what this does....*/
+  /** Matching the view with a SceneCamera if needed */ // I guess?
   
   public void adjustCamera(boolean perspective)
   {
@@ -869,7 +816,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   /** 
       @deprecated <p>
-	  Use {@link "fitToObjects(ObjectInfo)} instead.<p>
+	  Use {@link "fitToObjects()} instead.<p>
 	  
       Adjust the camera position and magnification so that the specified box
       fills the view.  This has no effect if there is a camera bound to this
@@ -920,10 +867,10 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   *  Fit view to the selected MeshVertices OR the entire mesh.<p>
-   *
-   *  @param selection If set to true, fits to selected vertices else 
-   *  fit to the entire mesh.
+	Fit view to the selected MeshVertices OR the entire mesh.<p>
+	
+	@param selection If set to true, fits to selected vertices else 
+	fit to the entire mesh.
    */
  
   public void fitToVertices(MeshEditorWindow w, boolean selection)
@@ -933,8 +880,6 @@ public abstract class ViewerCanvas extends CustomWidget
 		return;
 
 	Vec3 newCenter = new Vec3(b.getCenter());
-
-	//viewToWorld.transform(newCenter);
 	CoordinateSystem newCoords = theCamera.getCameraCoordinates().duplicate();
 	int d = Math.min(getBounds().width, getBounds().height);
 	double diag = Math.sqrt((b.maxx-b.minx)*(b.maxx-b.minx)+(b.maxy-b.miny)*(b.maxy-b.miny)+(b.maxz-b.minz)*(b.maxz-b.minz));
@@ -1003,8 +948,8 @@ public abstract class ViewerCanvas extends CustomWidget
 	}
   
   /**
-   *  Fit view to the given set of objects.<p>
-   *  Each object is given the space of a sphere, that would just fits tt's bounding box.
+     Fit view to the given set of objects.<p>
+     Each object is given the space of a sphere, that would just fits tt's bounding box.
    */
   public void fitToObjects(Collection<ObjectInfo> objects)
   {
@@ -1076,8 +1021,8 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   *  Turn the view to match the closest main coordinate directions, 
-   *  which maybe positive or negative.
+     Turn the view to match the closest main coordinate directions, 
+     which maybe positive or negative.
    */
   public void alignWithClosestAxis()
   {
@@ -1291,7 +1236,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected void drawCoordinateAxes()
   {
     // Select a size for the coordinate axes.
-	//drawLine(new Point(200,1), new Point (100,100), Color.ORANGE);
+	// drawLine(new Point(200,1), new Point (100,100), Color.ORANGE);
 
     Rectangle bounds = getBounds();
     int axisLength = 50;
@@ -1376,8 +1321,10 @@ public abstract class ViewerCanvas extends CustomWidget
     repaint();
   }
 
-  /** Adjust the coordinates of a mouse event to move it to the nearest
-      grid location. */
+  /** 
+     Adjust the coordinates of a mouse event to move it to the nearest
+     grid location. 
+   */
 
   void moveToGrid(WidgetMouseEvent e)
   {
@@ -1393,7 +1340,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-   * Get the current orientation mode.
+    Get the current orientation mode.
    */
 
   public int getOrientation()
@@ -1402,10 +1349,10 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   *  Launch an orientation change procedure to turn the orientation into any of the 
-   *  presets shown in the drop-down menu. 
-   *
-   *  This method calls the ViewAnimation to perform the turn, if needed.
+     Launch an orientation change procedure to turn the orientation into any of the 
+     presets shown in the drop-down menu. 
+   
+     This method calls the ViewAnimation to perform the turn, if needed.
    */
 
   public void setOrientation(int which)
@@ -1448,9 +1395,9 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   *  ViewAnimation calls this when the animation is finished, so the orientation menu 
-   *  will be up to date and the perspective is set to it's value without launched 
-   *  launcing a new animation sequence.
+    ViewAnimation calls this when the animation is finished, so the orientation menu 
+    will be up to date and the perspective is set to it's value without launched 
+    launcing a new animation sequence.
    */
   public void finishAnimation(int which, boolean persp, int navi)
   {
@@ -1472,8 +1419,9 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** 
-   * Center the view to a point in the model space
-   * No need to override by subclasses. Local coordinates are handled by the finder. 
+    Center the view to a point in the model space. No need to 
+	override by subclasses. Local coordinates are handled 
+	by the ClickedPointFinder, 'finder'. 
    */
   public void centerToPoint(Point pointOnView)
   {
@@ -1829,13 +1777,10 @@ public abstract class ViewerCanvas extends CustomWidget
 	}
 
 	/**
-	    This is a kind of a procedure, that seems pertty cumbersome to me as it is now.
-	    Currently the graphics are set by each view manipulation tool individually  
-		and there is only one type of them.
+		This draws the view cone of the active view on the other views. <p>
 		
-		There should be a common procedure, that each tool could call and
-		there ought to be a couple of different versions at least for palallel 
-		and perspective views.
+		Currently the graphics don't make distinction between perspective and 
+		parallel modes.
 	*/
 	
 	private void drawExtGraphics()
@@ -1879,7 +1824,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	}
 	
-	// coalesce should probabaly be set false when the timer is created
+
 	protected Timer mouseMoveTimer = new Timer(500, new ActionListener() 
 	{
 		public void actionPerformed(ActionEvent e) 
@@ -1891,6 +1836,10 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	});
 	
+	/** 
+	 *  Draw a line on the screen as segment of a radius from a center point. 
+	 *  Angle ar radii and r0 and r1 as screen (pixel) coordinate scale.
+	 */
 	public void drawLine(Point center, double angle, double r0, double r1, Color color)
 	{
 		Point p0, p1;
@@ -1900,6 +1849,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		drawLine(p0, p1, color);
 	}
 
+	/** Draw a circle on the screen out of small pieces of lines*/
 	public void drawCircle(Point center, double radius, int segments, Color color)
 	{
 		// Works only with SWCanvasDrawer
@@ -1926,6 +1876,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 	}
 	
+	/** draw a suare on the screen */
 	public void drawSquare(Point center, double distance, Color color)
 	{
 		Point p0, p1;
@@ -1947,6 +1898,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		drawLine(p0 ,p1, color);
 	}
 	
+	/* These colors are used on the navigation cue graphics */
 	private void getNavigationColorSet()
 	{
 		TEAL = new Color(0, 127, 127);
@@ -1980,6 +1932,10 @@ public abstract class ViewerCanvas extends CustomWidget
                            Color.GREEN.getBlue()/2+backgroundColor.getBlue()/2);
 	}
 	
+	/* 
+	 * Blend between two colors. 
+	 * The 'blend' is the balance of the color in range 0.0 - 1.0 from color0 to color1
+	 */
 	private Color  blendColor(Color color0, Color color1, double blend)
 	{
 		int R = (int)(color0.getRed()*(1.0-blend) + color1.getRed()*blend);
@@ -1989,6 +1945,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		return new Color(R, G, B);
 	}
 	
+	/** Call all the methods that draw informative graphics on the screen */
 	public void drawOverlay()
 	{
 		if (mouseMoving || scrolling)

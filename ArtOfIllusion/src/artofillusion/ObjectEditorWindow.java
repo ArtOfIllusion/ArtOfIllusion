@@ -226,6 +226,21 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     currentTool = tool;
   }
 
+  /** When a tool gets selected in the tool palette, notify the UI.
+      It may be possible, that some options need to be disabled/changed etc.  */
+
+  public void toolChanged(EditingTool tool)
+  {
+    for (ViewerCanvas v:theView)
+	{
+		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+			v.navigationTravelEnabled = false;
+		else
+			v.navigationTravelEnabled = true;
+		v.viewChanged(false); // This should do nothing now...
+	}
+  }
+
   @Override
   public boolean confirmClose()
   {

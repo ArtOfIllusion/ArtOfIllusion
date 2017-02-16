@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 by Petri Ihalainen
+/* Copyright (C) 2016-2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,54 +22,53 @@ import artofillusion.ui.*;
 
 public class ViewerNavigationControl implements ViewerControl
 { 
-  @Override
-  public Widget createWidget(final ViewerCanvas view)
-  {
-    return new NavigationChoice(view);
-  }
-
-  @Override
-  public String getName()
-  {
-    return Translate.text("Navigation");
-  }
-
-  public Object getItem(int index)
-  {
-    return this.getItem(index);
-  }
-  
-  public static class NavigationChoice extends BComboBox
-  {
-    private final ViewerCanvas view;
-
-    private NavigationChoice(ViewerCanvas view)
-    {
-      super(new String [] {
-        Translate.text("ModelSpace"),
-        Translate.text("ModelLandscape"),
-        Translate.text("TravelSpace"),
-        Translate.text("TravelLandscape")
-      });
-      this.view = view;
-      setSelectedIndex(0);
-      addEventLink(ValueChangedEvent.class, this, "valueChanged");
-      view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
-      setPreferredVisibleRows(4);
-    }
+	@Override
+	public Widget createWidget(final ViewerCanvas view)
+	{
+		return new NavigationChoice(view);
+	}
 	
-	private void valueChanged()
-    {
-      //if (getSelectedIndex() != view.getNavigationMode()) // this prevented some events...
-        view.setNavigationMode(getSelectedIndex());
-    }
-
-	private void viewChanged()
-    {
-      if (view.getNavigationMode() != getSelectedIndex())
-      {
-          setSelectedIndex(view.getNavigationMode());
-      }
-    }
-  }
+	@Override
+	public String getName()
+	{
+		return Translate.text("Navigation");
+	}
+	
+	public Object getItem(int index)
+	{
+		return this.getItem(index);
+	}
+	
+	public static class NavigationChoice extends BComboBox
+	{
+		private final ViewerCanvas view;
+		
+		private NavigationChoice(ViewerCanvas view)
+		{
+			super(new String [] {
+				Translate.text("ModelSpace"),
+				Translate.text("ModelLandscape"),
+				Translate.text("TravelSpace"),
+				Translate.text("TravelLandscape")
+			});
+			this.view = view;
+			setSelectedIndex(0);
+			addEventLink(ValueChangedEvent.class, this, "valueChanged");
+			view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
+			setPreferredVisibleRows(4);
+		}
+		
+		private void valueChanged()
+		{
+			//if (getSelectedIndex() != view.getNavigationMode()) // this prevented some events...
+			view.setNavigationMode(getSelectedIndex());
+		}
+	
+		private void viewChanged()
+		{
+			if (view.getNavigationMode() != getSelectedIndex())
+				setSelectedIndex(view.getNavigationMode());
+			//setEnabled(view.navigationEnabled);
+		}
+	}
 }

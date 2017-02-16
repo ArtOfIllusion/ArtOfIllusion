@@ -184,8 +184,8 @@ public class ViewAnimation
 			view.preparePerspectiveAnimation();
 		}
 		view.repaint();
-		// extGraphs shows up wrong. Possibly numerical accuaracy issue.
-		// setExtGraphs();
+		// auxGraphs shows up wrong. Possibly numerical accuaracy issue.
+		// setAuxGraphs();
 		step++;
 	}
 
@@ -367,7 +367,7 @@ public class ViewAnimation
 		camera.setCameraCoordinates(aniCoords);
 		view.setScale(view.getScale()*scalingFactor);
 		view.repaint();
-		setExtGraphs();
+		setAuxGraphs();
 		step++;
 	}
 
@@ -384,7 +384,7 @@ public class ViewAnimation
 		changingPerspective = false;
 		animatingMove = false;
 
-		wipeExtGraphs();
+		wipeAuxGraphs();
 		view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
 		view.viewChanged(false);
 		view.repaint();
@@ -415,16 +415,16 @@ public class ViewAnimation
 	}
 
 	/* Set view cone craphis */
-	public void setExtGraphs()
+	public void setAuxGraphs()
 	{
 		for (ViewerCanvas v : window.getAllViews())
 			if (v != view)
-				v.extGraphs.set(view, true);
+				v.auxGraphs.set(view, true);
 	}
 
-	public void wipeExtGraphs()
+	public void wipeAuxGraphs()
 	{
 		for (ViewerCanvas v : window.getAllViews())
-			v.extGraphs.wipe();
+			v.auxGraphs.wipe();
 	}
 }

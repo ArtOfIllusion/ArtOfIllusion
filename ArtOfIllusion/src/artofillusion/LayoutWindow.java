@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
-   Changes Copyrigh (C) 2016 by Petri Ihalainen
+   Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -167,7 +167,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     // Build the tool palette.
 
-    tools = new ToolPalette(2, 7);
+    tools = new ToolPalette(2, 7, this);
     EditingTool metaTool, altTool, defaultTool, compoundTool;
 	ScrollViewTool scrollTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
@@ -582,7 +582,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     viewMenu = Translate.menu("view");	
 	menubar.add(viewMenu);
-	viewMenuItem = new BMenuItem [7];	
+	viewMenuItem = new BMenuItem [8];	
 
 	viewMenu.add(displayMenu = Translate.menu("displayMode"));
     displayItem = new BCheckBoxMenuItem [6];
@@ -603,6 +603,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     viewMenu.add(viewMenuItem[4] = Translate.menuItem("fitToSelection", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[5] = Translate.menuItem("fitToAll", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[6] = Translate.menuItem("alignWithClosestAxis", this, "actionPerformed"));
+    //viewMenu.addSeparator();
+    //viewMenu.add(viewMenuItem[7] = Translate.menuItem("viewSettings", this, "actionPerformed"));
   }
 
   /** Rebuild the list of tool scripts in the Tools menu.  This should be called whenever a
@@ -922,7 +924,24 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setTool(EditingTool tool)
   {
     for (int i = 0; i < theView.length; i++)
+	{
       theView[i].setTool(tool);
+	}
+  }
+
+  /** When a tool gets selected in the tool palette, notify the UI.
+      It may be possible, that some options need to be disabled/changed etc.  */
+
+  public void toolChanged(EditingTool tool)
+  {
+    for (ViewerCanvas v:theView)
+	{
+		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+			v.navigationTravelEnabled = false;
+		else
+			v.navigationTravelEnabled = true;
+		v.viewChanged(false); // This should do nothing now...
+	}
   }
 
   /** Set the help text displayed at the bottom of the window. */
@@ -1264,7 +1283,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     return tools;
   }
-
+  
   /** Set whether a DockableWidget contained in this window is visible. */
 
   private void setDockableWidgetVisible(DockableWidget widget, boolean visible)
@@ -1613,14 +1632,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }	  /*
-      else if (command.equals("frameSelection"))
-        frameWithCameraCommand(true);
-      else if (command.equals("frameScene"))
-        frameWithCameraCommand(false);      */      else if (command.equals("fitToSelection"))        //fitToSelectionCommand();		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))	    //fitToAllCommand();		getView().fitToObjects(getScene().getAllObjects());
+      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
-		//closestAxisCommand();
 	    getView().alignWithClosestAxis();
+	  /*
+	  // Place holder for a view settings menuitem
+	  // to launch an options window settings window
+	  else if (command.equals("viewSettings"))
+	  {
+		new ViewSettingsWindow(this);
+	  }
+	  */
     }
 
     else if (menu == popupMenu)
@@ -2759,6 +2781,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   }
 
   /** 
+   * @deprecated
    * Use ViewerCanvas.fitToObjects() instead
    */
   @Deprecated

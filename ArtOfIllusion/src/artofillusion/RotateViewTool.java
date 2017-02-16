@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
-   Changes Copyright (C) 2106 by Petri Ihalainen
+   Changes copyright (C) 2106-2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,8 +14,10 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.view.*;
 import buoy.event.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
 
@@ -28,9 +30,9 @@ public class RotateViewTool extends EditingTool
   private boolean controlDown;
   private CoordinateSystem oldCoords;
   private Vec3 rotationCenter;
-  private double angle, distToRot, xAngle, yAngle, r;
+  private double angle, distToRot, xAngle, yAngle, r, fwMax, fwMin;
   private Camera camera;
-  //private ObjectInfo boundCamera;
+  private int selectedNavigation;
  
   private Point viewCenter, p0, p1;
  
@@ -69,6 +71,8 @@ public class RotateViewTool extends EditingTool
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     camera = view.getCamera();
+	
+	selectedNavigation = view.getNavigationMode();
     oldCoords = camera.getCameraCoordinates().duplicate();
 	
 	// Make sure that the rotation Center is on Camera Z-axis.
@@ -80,6 +84,17 @@ public class RotateViewTool extends EditingTool
     viewToWorld = camera.getViewToWorld();
     rotationCenter = view.getRotationCenter();
 	distToRot = oldCoords.getOrigin().minus(rotationCenter).length();
+	
+	// If the tool is selected and used, sitch the view to modeling navigation.
+	// Leaving switching back to travel to the user.
+	if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
+	    !e.isAltDown() && !e.isMetaDown()){
+		if (view.getNavigationMode() > 3)
+			view.setNavigationMode(0);
+		else if (view.getNavigationMode() > 1)
+			view.setNavigationMode(view.getNavigationMode()-2);
+	}
+
 	view.mouseDown = true;
 	view.rotating = true;
   }
@@ -87,24 +102,54 @@ public class RotateViewTool extends EditingTool
 	@Override
   	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
 	{
+		/*
+		// Don't allow rotating by mouse buttons if the move view tool is selected
+		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() instanceof MoveViewTool)
+			return;
+		*/
 		if (e.getPoint() != clickPoint && view.getBoundCamera() == null) // This is needed even if the mouse has not been dragged yet.
 			view.setOrientation(ViewerCanvas.VIEW_OTHER);
-		switch (view.getNavigationMode()) 
+			
+		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
+		    !e.isAltDown() && !e.isMetaDown()) // If the tool i selected in the tool palette
 		{
-			case ViewerCanvas.NAVIGATE_MODEL_SPACE:
+			/*
+			// If this tool is selected in the palette, don't allow usinh with alt and meta modifiers
+			if (e.isAltDown() || e.isMetaDown())
+				return;
+			*/
+			if (view.getNavigationMode() == 0)
 				dragRotateSpace(e, view);
-				break;
-			case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+			else if (view.getNavigationMode() == 1)
+			{
+				Vec3 zD = oldCoords.getZDirection();
+				fwMax = Math.PI*0.5+Math.asin(zD.y);
+				fwMin = -Math.PI*0.5+Math.asin(zD.y);
 				dragRotateLandscape(e, view);
-				break;
-			case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-				dragRotateTravelSpace(e, view);
-				break;
-			case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
-				dragRotateTravelLandscape(e, view);
-				break;
-			default:
-				break;
+			}
+		}
+		else
+		{
+			switch (view.getNavigationMode()) 
+			{
+				case ViewerCanvas.NAVIGATE_MODEL_SPACE:
+					dragRotateSpace(e, view);
+					break;
+				case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+					Vec3 zD = oldCoords.getZDirection();
+					fwMax = Math.PI*0.5+Math.asin(zD.y);
+					fwMin = -Math.PI*0.5+Math.asin(zD.y);
+					dragRotateLandscape(e, view);
+					break;
+				case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
+					dragRotateTravelSpace(e, view);
+					break;
+				case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
+					dragRotateTravelLandscape(e, view);
+					break;
+				default:
+					break;
+			}
 		}
 		setAuxGraphs(view);
 		repaintAllViews();
@@ -225,6 +270,7 @@ public class RotateViewTool extends EditingTool
 		int dx = dragPoint.x-clickPoint.x;
 		int dy = dragPoint.y-clickPoint.y;
 		Mat4 rotation;
+		
 		// Tilting disabled for the time being
 		//if (controlDown)
 		//	rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vz()), -dx*DRAG_SCALE);
@@ -235,8 +281,8 @@ public class RotateViewTool extends EditingTool
 				rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE);
 			else{
 				double dragAngleFw = dy*DRAG_SCALE;
-				if (dragAngleFw > Math.PI) dragAngleFw = Math.PI; // These may hep a bit but not all the way
-				if (dragAngleFw < -Math.PI) dragAngleFw = -Math.PI;
+				if (dragAngleFw > fwMax) dragAngleFw = fwMax; // These may hep a bit but not all the way
+				if (dragAngleFw < fwMin) dragAngleFw = fwMin;
 				rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dragAngleFw);
 			}
 		}
@@ -247,9 +293,10 @@ public class RotateViewTool extends EditingTool
 		}
 		else
 		{
+			// Prevent tilting forward or back more than 90 degrees
 			double dragAngleFw = dy*DRAG_SCALE;
-			if (dragAngleFw > Math.PI) dragAngleFw = Math.PI;
-			if (dragAngleFw < -Math.PI) dragAngleFw = -Math.PI;
+			if (dragAngleFw > fwMax) dragAngleFw = fwMax; // These may hep a bit but not all the way
+			if (dragAngleFw < fwMin) dragAngleFw = fwMin;
 			rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dragAngleFw);
 			rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE).times(rotation);
 		}
@@ -258,25 +305,7 @@ public class RotateViewTool extends EditingTool
 			CoordinateSystem c = oldCoords.duplicate();
 			c.transformCoordinates(Mat4.translation(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z));
 			c.transformCoordinates(rotation);
-
-			// Prevent tilting forward or back more than 90 degrees.
-			// almost works
-			if (c.getUpDirection().y < 0.0)
-			{
-				Vec3 upD = new Vec3(c.getUpDirection().x,0.0,c.getUpDirection().z); 
-				upD.normalize();
-				Vec3 zD = new Vec3();
-				if (c.getZDirection().y < 0.0) 
-					zD.y = -1.0;
-				else
-					zD.y = 1.0;
-				Vec3 cp = rotationCenter.plus(zD.times(-distToRot));
-				c.setOrientation(zD,upD);
-				c.setOrigin(cp);
-			}
-			else
-				c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
-
+			c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
 			view.getCamera().setCameraCoordinates(c);
 		}
 	}
@@ -356,6 +385,7 @@ public class RotateViewTool extends EditingTool
 	view.mouseDown = false;
 	view.tilting = false;
 	view.rotating = false;
+	view.setNavigationMode(selectedNavigation);
 
     Point dragPoint = e.getPoint();
     if (theWindow != null)
@@ -378,7 +408,7 @@ public class RotateViewTool extends EditingTool
 	if (dragPoint.x == clickPoint.x && dragPoint.y == clickPoint.y)
 	    view.centerToPoint(dragPoint);
 	  
-	wipeExtGraphs();
+	wipeAuxGraphs();
   }
 
   /** This is called recursively to move any children of a bound camera. */
@@ -511,38 +541,38 @@ public class RotateViewTool extends EditingTool
 	int dx = dragPoint.x-clickPoint.x;
 	int dy = dragPoint.y-clickPoint.y;
 
-		//double dragAngleFw = dy*DRAG_SCALE;
-		//if (dragAngleFw > Math.PI) dragAngleFw = Math.PI;
-		//if (dragAngleFw < -Math.PI) dragAngleFw = -Math.PI;
-		Mat4 rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dy*DRAG_SCALE);
-		rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE).times(rotation);
-
-		if (!rotation.equals(Mat4.identity()))
+	//double dragAngleFw = dy*DRAG_SCALE;
+	//if (dragAngleFw > Math.PI) dragAngleFw = Math.PI;
+	//if (dragAngleFw < -Math.PI) dragAngleFw = -Math.PI;
+	Mat4 rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dy*DRAG_SCALE);
+	rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE).times(rotation);
+    
+	if (!rotation.equals(Mat4.identity()))
+	{
+		CoordinateSystem c = oldCoords.duplicate();
+		c.transformCoordinates(Mat4.translation(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z));
+		c.transformCoordinates(rotation);
+    
+		// Prevent tilting forward or back more than 90 degrees.
+		// almost works
+		if (c.getUpDirection().y < 0.0)
 		{
-			CoordinateSystem c = oldCoords.duplicate();
-			c.transformCoordinates(Mat4.translation(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z));
-			c.transformCoordinates(rotation);
-
-			// Prevent tilting forward or back more than 90 degrees.
-			// almost works
-			if (c.getUpDirection().y < 0.0)
-			{
-				Vec3 upD = new Vec3(c.getUpDirection().x,0.0,c.getUpDirection().z); 
-				upD.normalize();
-				Vec3 zD = new Vec3();
-				if (c.getZDirection().y < 0.0) 
-					zD.y = -1.0;
-				else
-					zD.y = 1.0;
-				Vec3 cp = rotationCenter.plus(zD.times(-distToRot));
-				c.setOrientation(zD,upD);
-				c.setOrigin(cp);
-			}
+			Vec3 upD = new Vec3(c.getUpDirection().x,0.0,c.getUpDirection().z); 
+			upD.normalize();
+			Vec3 zD = new Vec3();
+			if (c.getZDirection().y < 0.0) 
+				zD.y = -1.0;
 			else
-				c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
-
-			view.getCamera().setCameraCoordinates(c);
+				zD.y = 1.0;
+			Vec3 cp = rotationCenter.plus(zD.times(-distToRot));
+			c.setOrientation(zD,upD);
+			c.setOrigin(cp);
 		}
+		else
+			c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
+    
+		view.getCamera().setCameraCoordinates(c);
+	}
   }
 
   private void repaintAllViews()
@@ -551,17 +581,17 @@ public class RotateViewTool extends EditingTool
 		v.repaint();
   }
 
-  public void setExtGraphs(ViewerCanvas view)
+  private void setAuxGraphs(ViewerCanvas view)
   {
 	for (ViewerCanvas v : theWindow.getAllViews())
       if (v != view)
-		v.extGraphs.set(view, true);
+		v.auxGraphs.set(view, true);
   }
   
-  public void wipeExtGraphs()
+  private void wipeAuxGraphs()
   {
 	for (ViewerCanvas v : theWindow.getAllViews())
-		v.extGraphs.wipe();
+		v.auxGraphs.wipe();
   }
 
   @Override
@@ -577,10 +607,11 @@ public class RotateViewTool extends EditingTool
 	  view.drawLine(viewCenter, Math.PI, r*0.1, r, view.blue);
 	  view.drawLine(viewCenter, 0.0, r*0.1, r, view.blue);
 	  
+	  // draw dial lines
 	  for (int i=0; i<24; i++)
-		view.drawLine(viewCenter, Math.PI/12.0*i+angle, r/.45*.4, r, view.teal);
+		view.drawLine(viewCenter, Math.PI/12.0*i+angle, r/.45*.4, r, view.ghost);
 		
-	  view.drawCircle(viewCenter, r, 48, view.teal);
+	  view.drawCircle(viewCenter, r, 48, view.ghost);
       view.drawCircle(viewCenter, r/.45*.4, 48, view.teal);
 	}
   }

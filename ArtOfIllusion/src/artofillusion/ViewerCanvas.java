@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -53,10 +53,11 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected final ViewChangedEvent viewChangedEvent;
 
-  public static Color gray, red, green, blue, yellow, cone, teal, TEAL;
-  public Vec3 extRC, extCC, extC0, extC1, extC2, extC3;
+  public static Color gray, ghost, red, green, blue, yellow, cone, teal, TEAL;
   public Point mousePoint;
-  public ExternalGraphics extGraphs = new ExternalGraphics();
+  public AuxiliaryGraphics auxGraphs = new AuxiliaryGraphics();
+  public boolean navigationTravelEnabled = true;
+  public boolean showViewCone = true;
   
   private static boolean openGLAvailable;
   private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
@@ -175,7 +176,7 @@ public abstract class ViewerCanvas extends CustomWidget
     orientation = 0;
     perspective = false;
     scale = 100.0;
-	getNavigationColorSet();
+	setNavigationColors();
 	mouseMoveTimer.setCoalesce(false);
   }
 
@@ -239,7 +240,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   private void processMouseReleased(WidgetMouseEvent ev)
   {
-    if (mouseProcessor != null)
+	if (mouseProcessor != null)
     {
       mouseProcessor.stopProcessing();
       mouseProcessor = null;
@@ -252,7 +253,7 @@ public abstract class ViewerCanvas extends CustomWidget
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
-    // Should there be an ActionProcessor just in case
+    // Should there be an ActionProcessor just in case?
 	scrollTool.mouseScrolled(e, this);
   }
 
@@ -325,7 +326,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public void setTool(EditingTool tool)
   {
-    currentTool = tool;
+    currentTool = tool;	
     repaint();
   }
 
@@ -350,13 +351,10 @@ public abstract class ViewerCanvas extends CustomWidget
     altTool = tool;
   }
 
-  /** 
-    Set the tool to handle scroll wheel events. Currently those are handled 
-	by VieverCanvas. Only extGraphics are set by the tool.
-	
-	For object editors this too is set in the abstract ObjectEditorWindow, 
+  /** 	
+	For object editors this tool is set in the abstract ObjectEditorWindow, 
 	whereas the alt- and meta tools are set in each sub(-sub-sub) class of it.
-	This way it get inherited to plugin tools too (like PME). 
+	This way it gets inherited to plugin tools too (like PME). 
   */
 
   public void setScrollTool(ScrollViewTool tool)
@@ -637,25 +635,41 @@ public abstract class ViewerCanvas extends CustomWidget
 	  flipPerspectiveSwitch(true);
     else {// what if there are more options?
 	}
-    
+
     // Turn y up for landscape modes
     if ((navigation == 0 || navigation == 2)&&(nextNavigation == 1 || nextNavigation == 3))
     {
-      CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
-      Vec3 z  = coords.getZDirection();
-      Vec3 up = coords.getUpDirection();
-      // If camera is aligned with model z-axis the orientation is good for lanscape modes
-      if (z.x != 0.0 && z.y != 0.0){
-          coords.setOrientation(z, new Vec3(0,1,0));
-          animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
-      }
+		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
+		Vec3 z  = coords.getZDirection();
+		Vec3 up = coords.getUpDirection();
+
+		// if camera z-axis is aligned with world y-axis the orientation is good for 
+		// landscape modes. The z.y may be 1.0 but z.x and z.x may have error in the 
+		// magnitude of 1E-15.
+		if((z.x < 1E-6 && z.x > -1E-6) && (z.z < 1E-6 && z.z > -1E-6))
+		{
+			z.x = z.z = 0.0; 
+			z.y = 1.0*Math.signum(z.y); 
+			
+			coords.setOrientation(z, up);
+			coords.setOrigin(rotationCenter.minus(z.times(distToPlane)));
+			theCamera.setCameraCoordinates(coords);
+			navigation = nextNavigation;
+			repaint();
+		}
+		else
+		{
+			// The system uses only the projection of the y-direction, that is needed.
+			coords.setOrientation(z, new Vec3(0,1,0)); // new coords
+			animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
+		}
     }
-    else
+	else
     {
-      navigation = nextNavigation;
-      viewChanged(false);
-      repaint();
-    }
+		navigation = nextNavigation;
+		viewChanged(false);
+		repaint();
+	}
   }
   
   /* changing perspective without animation */
@@ -710,7 +724,7 @@ public abstract class ViewerCanvas extends CustomWidget
       popupManager.showPopupMenu(this, pos.x, pos.y);
     }
   }
-  
+
   /* 
       Decide what to do when a mouse is clicked on the viewercanvas
 	  - Show pop-up menu
@@ -718,7 +732,6 @@ public abstract class ViewerCanvas extends CustomWidget
 	  - Sub classes may override but should call super first
 	  I wonder if this needs an action processor?
   */
-
   //For some reason after this, when an object was opened for editing by double clicking it on the view, 
   //the first time of pressing Cancel or OK launched an undo sequence. If the object was opened by 
   //pop-up menu or by double clicking the object, the editor window behaved normally.
@@ -736,7 +749,7 @@ public abstract class ViewerCanvas extends CustomWidget
   	centerToPoint(ev.getPoint());
   }
   */
-  
+
   /** Matching the view with a SceneCamera if needed */ // I guess?
   
   public void adjustCamera(boolean perspective)
@@ -1689,10 +1702,10 @@ public abstract class ViewerCanvas extends CustomWidget
 			colorY = blendColorY;
 		}
 		else{
-			color1 = gray;
-			colorR = gray;
-			colorX = gray;
-			colorY = gray;
+			color1 = ghost;
+			colorR = ghost;
+			colorX = ghost;
+			colorY = ghost;
 		}
 		if (navigation == 2){
 			drawCircle(viewCenter, d*0.1, 30, color1);
@@ -1861,13 +1874,17 @@ public abstract class ViewerCanvas extends CustomWidget
 	}
 	
 	/* These colors are used on the navigation cue graphics */
-	private void getNavigationColorSet()
+	private void setNavigationColors()
 	{
 		TEAL = new Color(0, 127, 127);
 		
 		gray   = new Color(Color.GRAY.getRed()/2+backgroundColor.getRed()/2,
                            Color.GRAY.getGreen()/2+backgroundColor.getGreen()/2,
                            Color.GRAY.getBlue()/2+backgroundColor.getBlue()/2);
+						 
+		ghost  = new Color(Color.GRAY.getRed()/3+backgroundColor.getRed()*2/3,
+                           Color.GRAY.getGreen()/3+backgroundColor.getGreen()*2/3,
+                           Color.GRAY.getBlue()/3+backgroundColor.getBlue()*2/3);
 						 
 		red    = new Color(Color.RED.getRed()*3/4+backgroundColor.getRed()/4,
                            Color.RED.getGreen()*3/4+backgroundColor.getGreen()/4,
@@ -1912,23 +1929,21 @@ public abstract class ViewerCanvas extends CustomWidget
 	{
 		if (mouseMoving || scrolling)
 			drawNavigationGraphics();
-		//drawExtGraphics();
-		extGraphs.render();
+		auxGraphs.render();
 	}
 	
 	/** 
 		This class creates and stores information for drawing view cones or other 
 		temporary 3D graphics and privides a method to draw them on the screen.
 	*/
-	public class ExternalGraphics
+	public class AuxiliaryGraphics
 	{
 		private ArrayList<Vec3>   points;
 		private ArrayList<Vec3[]> lines;
 		private ArrayList<Color>  pointColors, lineColors;
-		private ViewerCanvas      parent;
 		
-		/** Create an empty externalGraphics object */
-		public ExternalGraphics()
+		/** Create an empty AuxiliaryGraphics object */
+		public AuxiliaryGraphics()
 		{}
 
 		/* Create emply point list */
@@ -1949,6 +1964,8 @@ public abstract class ViewerCanvas extends CustomWidget
 		*/
 		public void set(ViewerCanvas v, boolean newGraphics)
 		{
+			if(! showViewCone)
+				return;
 			if (newGraphics){
 				newPoints();
 				newLines();
@@ -1957,7 +1974,6 @@ public abstract class ViewerCanvas extends CustomWidget
 			Camera ca = v.getCamera();
 			CoordinateSystem cs = ca.getCameraCoordinates();
 			Vec3 rc = v.getRotationCenter();
-			System.out.println(rc);
 			Vec3 cz = cs.getZDirection();
 			Vec3 cp = new Vec3(cs.getOrigin().plus(cz.times(0.0001))); // Need to move so that the camera can see it
 			double dp = v.getDistToPlane();
@@ -1996,10 +2012,10 @@ public abstract class ViewerCanvas extends CustomWidget
 				cpp = rc.minus(cz.times(cppDist*1.0));
 				add(cpp, Color.MAGENTA);
 				
-				m0 = c0.minus(cz.times(cppDist*0.618033)); // "Golden mean.. :) "
-				m1 = c1.minus(cz.times(cppDist*0.618033));
-				m2 = c2.minus(cz.times(cppDist*0.618033));
-				m3 = c3.minus(cz.times(cppDist*0.618033));
+				m0 = c0.minus(cz.times(cppDist*(1-0.618033))); // "Golden mean.. :) "
+				m1 = c1.minus(cz.times(cppDist*(1-0.618033)));
+				m2 = c2.minus(cz.times(cppDist*(1-0.618033)));
+				m3 = c3.minus(cz.times(cppDist*(1-0.618033)));
 
 				add(new Vec3[]{m0, m1}, cone);
 				add(new Vec3[]{m1, m2}, cone);
@@ -2037,7 +2053,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 
 		/** Copy all information from an existing graphics object */
-		public void copy(ExternalGraphics ext)
+		public void copy(AuxiliaryGraphics ext)
 		{
 			points = ext.getPoints();
 			pointColors = ext.getPointColors(); 

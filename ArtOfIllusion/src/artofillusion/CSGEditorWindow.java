@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications copyright (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -47,7 +48,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
     content.add(buttons, 0, 2, 2, 1, new LayoutInfo());
-    content.add(tools = new ToolPalette(1, 5), 0, 0);
+    content.add(tools = new ToolPalette(1, 5, this), 0, 0);
     EditingTool metaTool, altTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));

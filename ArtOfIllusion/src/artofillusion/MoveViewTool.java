@@ -26,6 +26,7 @@ public class MoveViewTool extends EditingTool
   private boolean controlDown;
   private CoordinateSystem oldCoords;
   private double oldScale, oldDist;
+  private int selectedNavigation;
   boolean mouseDown;
 
   public MoveViewTool(EditingWindow fr)
@@ -64,6 +65,7 @@ public class MoveViewTool extends EditingTool
   {
     Camera cam = view.getCamera();
 
+	selectedNavigation = view.getNavigationMode();
     controlDown = e.isControlDown();
     clickPoint = e.getPoint();
     clickPos = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
@@ -73,6 +75,17 @@ public class MoveViewTool extends EditingTool
     oldScale = view.getScale();
     oldDist = view.getDistToPlane(); // distToPlane needs to be kept up to date
 	view.setRotationCenter(oldCoords.getOrigin().plus(oldCoords.getZDirection().times(oldDist)));
+	
+	// If the tool is selected and used, sitch the view to modeling navigation.
+	// Leaving switching back to travel to the user.
+	if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
+	    !e.isAltDown() && !e.isMetaDown()){
+		if (view.getNavigationMode() > 3)
+			view.setNavigationMode(0);
+		else if (view.getNavigationMode() > 1)
+			view.setNavigationMode(view.getNavigationMode()-2);
+	}
+
 	mouseDown = true;
 	view.moving = true;
   }
@@ -80,17 +93,35 @@ public class MoveViewTool extends EditingTool
 	@Override
 	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
 	{
-		switch (view.getNavigationMode()) {
-			case ViewerCanvas.NAVIGATE_MODEL_SPACE:
-			case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
-				dragMoveModel(e, view);
-				break;
-			case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-			case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
-				dragMoveTravel(e, view);
-				break;
-			default:
-				break;
+		/*
+		// Don't allow moving by mouse buttons if the rotate view tool is selected
+		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() instanceof RotateViewTool)
+			return;
+		*/
+		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
+		    !e.isAltDown() && !e.isMetaDown()) // If the tool i selected in the tool palette
+		{
+			/*
+			// If this tool is selected in the palette, don't allow using with alt and meta modifiers
+			if (e.isAltDown() || e.isMetaDown())
+				return;
+			*/
+			dragMoveModel(e, view);
+		}
+		else
+		{
+			switch (view.getNavigationMode()) {
+				case ViewerCanvas.NAVIGATE_MODEL_SPACE:
+				case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+					dragMoveModel(e, view);
+					break;
+				case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
+				case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
+					dragMoveTravel(e, view);
+					break;
+				default:
+					break;
+			}
 		}
 		setAuxGraphs(view);
 		repaintAllViews();
@@ -210,6 +241,7 @@ public class MoveViewTool extends EditingTool
   {
 	mouseDown = false;
 	view.moving = false;
+	view.setNavigationMode(selectedNavigation);
     if (theWindow != null)
       {
         ObjectInfo bound = view.getBoundCamera();
@@ -224,7 +256,7 @@ public class MoveViewTool extends EditingTool
         }
         theWindow.updateImage();
       }
-	wipeExtGraphs();
+	wipeAuxGraphs();
   }
 
   /** This is called recursively to move any children of a bound camera. */
@@ -240,20 +272,8 @@ public class MoveViewTool extends EditingTool
     }  
   }
 
-  public void setExtGraphs(ViewerCanvas view)
-  {
-	for (ViewerCanvas v : theWindow.getAllViews())
-      if (v != view)
-		v.extGraphs.set(view, true);
-  }
-  
-  public void wipeExtGraphs()
-  {
-	for (ViewerCanvas v : theWindow.getAllViews())
-		v.extGraphs.wipe();
-  }
-
   /** This is used when a SceneCamera moves in the scene */
+  // Seems obsolete now
   private void repaintAllViews()
   {
 	ViewerCanvas[] views = theWindow.getAllViews();
@@ -261,7 +281,20 @@ public class MoveViewTool extends EditingTool
       //v.repaint();
     }
   }
+
+  private void setAuxGraphs(ViewerCanvas view)
+  {
+	for (ViewerCanvas v : theWindow.getAllViews())
+      if (v != view)
+		v.auxGraphs.set(view, true);
+  }
   
+  private void wipeAuxGraphs()
+  {
+	for (ViewerCanvas v : theWindow.getAllViews())
+		v.auxGraphs.wipe();
+  }
+
   @Override
   public void drawOverlay(ViewerCanvas view)
   {

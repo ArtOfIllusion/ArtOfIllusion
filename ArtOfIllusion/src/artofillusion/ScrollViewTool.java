@@ -216,7 +216,7 @@ public class ScrollViewTool
 	public void mouseStoppedScrolling()
 	{
 		// This should set an undorecord if a camera moved
-		wipeExtGraphs();
+		wipeAuxGraphs();
 	}
 
 	private Timer scrollTimer = new Timer(500, new ActionListener() 
@@ -261,17 +261,17 @@ public class ScrollViewTool
 				v.repaint();
 	}
 
-	public void setExtGraphs(ViewerCanvas view)
+	public void setAuxGraphs(ViewerCanvas view)
 	{
 		for (ViewerCanvas v : window.getAllViews())
 			if (v != view)
-				v.extGraphs.set(view, true);
+				v.auxGraphs.set(view, true);
 	}
 
-	public void wipeExtGraphs()
+	public void wipeAuxGraphs()
 	{
 		for (ViewerCanvas v : window.getAllViews())
-			v.extGraphs.wipe();
+			v.auxGraphs.wipe();
 	}
 
 	/** Maybe some day? */

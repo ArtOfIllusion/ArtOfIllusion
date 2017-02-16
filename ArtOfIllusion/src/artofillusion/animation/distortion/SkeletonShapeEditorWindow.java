@@ -1,5 +1,5 @@
 /* Copyright (C) 2004-2006 by Peter Eastman
-   Modifications copyright (C) 2016 Petri Ihalainen
+   Modifications copyright (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -57,7 +57,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
     content.add(buttons, 0, 2, 2, 1, new LayoutInfo());
-    content.add(tools = new ToolPalette(1, 3), 0, 0, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, null, null));
+    content.add(tools = new ToolPalette(1, 3, this), 0, 0, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, null, null));
     EditingTool metaTool, altTool;
     tools.addTool(defaultTool = new SkeletonTool(this, false) {
       @Override

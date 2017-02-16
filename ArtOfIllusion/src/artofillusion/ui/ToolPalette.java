@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2006 by Peter Eastman
+   Modification copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +14,7 @@ package artofillusion.ui;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import artofillusion.*;
 
 /** A ToolPalette is drawn as a grid of images, one for each EditingTool that is added to
     the palette.  It allows a single tool to be selected at any time. */
@@ -22,14 +24,22 @@ public class ToolPalette extends CustomWidget
   private int width, height, numTools, selected, lastSelected, defaultTool;
   private EditingTool tool[];
   private Dimension maxsize;
+  private EditingWindow window;
 
-  /** Create a new ToolPalette.  w and h give the width and height of the tool palette,
-      measured in icons. */
+  /** Create a new ToolPalette without the information of the parent window */
 
   public ToolPalette(int w, int h)
   {
+	this(w, h, null);
+  }
+  /** Create a new ToolPalette.  w and h give the width and height of the tool palette,
+      measured in icons. */
+
+  public ToolPalette(int w, int h, EditingWindow win)
+  {
     width = w;
     height = h;
+	window = win;
     tool = new EditingTool [w*h];
     numTools = 0;
     selected = 0;
@@ -188,6 +198,14 @@ public class ToolPalette extends CustomWidget
       repaint();
       tool[i].activate();
     }
+	// This is a bit ugly. The 'toolChanged' should be defined in EditingWindow but that 
+	// causes error at compile with Score and UVMappingEditorWindow
+	if(window != null){
+	  if (window instanceof LayoutWindow)
+		((LayoutWindow)window).toolChanged(tool[i]);
+	  if (window instanceof ObjectEditorWindow)
+		((ObjectEditorWindow)window).toolChanged(tool[i]);
+	}
   }
 
   private void mouseClicked(MouseClickedEvent e)

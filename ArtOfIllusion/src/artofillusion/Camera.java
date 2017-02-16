@@ -137,16 +137,25 @@ public class Camera implements Cloneable
 
   public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
   {
-    viewDist = newViewDist; // = always0.0
+    viewDist = newViewDist; // = always 0.0
     scale = newScale*distToScreen;
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
 	
-	// Zero does not work. Things VERY close to the camera don't get calculated correctly.
-	// Setting it to 1.0 was blunt but actually below 1.0 the grid starts to make mess and the 
-	// closer you go the more there are problems.
+    /*frontClipPlane = distToScreen/20.0;*/
+	
+	// Setting it to distToScreen/20.0 = 1.0 was blunt but below 1.0 the grid 
+	// starts to make mess on SWCanvasDrawer. 
+	//
+	// From user's point of view 0.0 would be perfect. On SWC that works for objects 
+	// but not for grid. On CLC it seems to work for everything (may render views white
+	// if the session is not restarted after pref changee).
+	//
+	// Somewhere below 0.01 scroll wheel zoom for the camera view stops working.
+    //
 	// I'd like to be able to go 1E-5 or smaller.
+	
     frontClipPlane = 0.01;
     perspective = true;
   }
@@ -410,14 +419,14 @@ public class Camera implements Cloneable
   public static final int VISIBLE = 2;
 
   /** Given a bounding box (specified in object coordinates), determine whether the object is
-  visible.  It returns one of the following values:
-  <ul>
-  <li>NOT_VISIBLE: The entire bounding box is offscreen.  The object does not need to be drawn.</li>
-  <li>NEEDS_CLIPPING: The object is partly visible, but at least one corner of the box lies
-  in front of the clipping plane.  It should be drawn using the clipping drawing routines.</li>
-  <li>VISIBLE: The object is entirely in front of the viewer, and can be drawn with the
-  faster (non-clipping) drawing routines.</li>
-  </ul>
+      visible.  It returns one of the following values:
+      <ul>
+      <li>NOT_VISIBLE: The entire bounding box is offscreen.  The object does not need to be drawn.</li>
+      <li>NEEDS_CLIPPING: The object is partly visible, but at least one corner of the box lies
+      in front of the clipping plane.  It should be drawn using the clipping drawing routines.</li>
+      <li>VISIBLE: The object is entirely in front of the viewer, and can be drawn with the
+      faster (non-clipping) drawing routines.</li>
+      </ul>
   */
 
   public int visibility(BoundingBox bb)

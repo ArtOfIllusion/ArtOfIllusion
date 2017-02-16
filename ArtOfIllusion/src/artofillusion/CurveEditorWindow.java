@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Modifications copyright (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -44,7 +45,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
     content.add(buttons, 0, 2, 2, 1, new LayoutInfo());
-    content.add(tools = new ToolPalette(1, 7), 0, 0, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, null, null));
+    content.add(tools = new ToolPalette(1, 7, this), 0, 0, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, null, null));
     EditingTool metaTool, altTool, compoundTool;
     tools.addTool(defaultTool = new ReshapeMeshTool(this, this));
     tools.addTool(new ScaleMeshTool(this, this));

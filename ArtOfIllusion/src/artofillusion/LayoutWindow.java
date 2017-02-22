@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2016 by Peter Eastman and Petri Ihalainen
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -479,7 +480,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     editMenu = Translate.menu("edit");
     menubar.add(editMenu);
-    editMenuItem = new BMenuItem [9];
+    editMenuItem = new BMenuItem [10];
     editMenu.add(editMenuItem[0] = Translate.menuItem("undo", this, "undoCommand"));
     editMenu.add(editMenuItem[1] = Translate.menuItem("redo", this, "redoCommand"));
     editMenu.addSeparator();
@@ -490,8 +491,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenu.add(editMenuItem[6] = Translate.menuItem("selectChildren", this, "actionPerformed"));
     editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
     editMenu.addSeparator();
-    editMenu.add(editMenuItem[7] = Translate.menuItem("duplicate", this, "duplicateCommand"));
-    editMenu.add(editMenuItem[8] = Translate.menuItem("sever", this, "severCommand"));
+    editMenu.add(editMenuItem[7] = Translate.menuItem("unselectAll", this, "clearSelection"));
+    editMenu.addSeparator();
+    editMenu.add(editMenuItem[8] = Translate.menuItem("duplicate", this, "duplicateCommand"));
+    editMenu.add(editMenuItem[9] = Translate.menuItem("sever", this, "severCommand"));
     editMenu.addSeparator();
     editMenu.add(Translate.menuItem("preferences", this, "preferencesCommand"));
   }
@@ -713,7 +716,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createPopupMenu()
   {
     popupMenu = new BPopupMenu();
-    popupMenuItem = new BMenuItem [14];
+    popupMenuItem = new BMenuItem [15];
     popupMenu.add(popupMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand", null));
     popupMenu.add(popupMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand", null));
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTextureAndMaterial", this, "setTextureCommand", null));
@@ -731,6 +734,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.add(popupMenuItem[11] = Translate.menuItem("copy", this, "copyCommand", null));
     popupMenu.add(popupMenuItem[12] = Translate.menuItem("paste", this, "pasteCommand", null));
     popupMenu.add(popupMenuItem[13] = Translate.menuItem("clear", this, "clearCommand", null));
+    popupMenu.addSeparator();
+    popupMenu.add(popupMenuItem[14] = Translate.menuItem("unselectAll", this, "clearSelection", null));
   }
 
   /** Display the popup menu. */
@@ -785,6 +790,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[10].setEnabled(sel.length > 0); // Cut
         popupMenuItem[11].setEnabled(sel.length > 0); // Copy
         popupMenuItem[13].setEnabled(sel.length > 0); // Clear
+        popupMenuItem[14].setEnabled(sel.length > 0); // Unselect All
       }
     popupMenuItem[12].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     popupMenu.show(w, x, y);
@@ -1003,8 +1009,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenuItem[4].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     editMenuItem[5].setEnabled(numSelObjects > 0); // Clear
     editMenuItem[6].setEnabled(hasChildren); // Select Children
-    editMenuItem[7].setEnabled(numSelObjects > 0); // Make Live Duplicates
-    editMenuItem[8].setEnabled(numSelObjects > 0); // Sever Duplicates
+    editMenuItem[7].setEnabled(numSelObjects > 0); // Unselect All
+    editMenuItem[8].setEnabled(numSelObjects > 0); // Make Live Duplicates
+    editMenuItem[9].setEnabled(numSelObjects > 0); // Sever Duplicates
     if (numSelObjects == 0)
     {
       for (i = 0; i < objectMenuItem.length; i++)
@@ -1416,6 +1423,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.clearSelection();
     itemTree.deselectAll();
     theScore.rebuildList();
+	updateImage();
     updateMenus();
   }
 

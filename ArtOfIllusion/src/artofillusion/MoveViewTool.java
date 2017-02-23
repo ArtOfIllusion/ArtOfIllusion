@@ -27,7 +27,6 @@ public class MoveViewTool extends EditingTool
   private CoordinateSystem oldCoords;
   private double oldScale, oldDist;
   private int selectedNavigation;
-  boolean mouseDown;
 
   public MoveViewTool(EditingWindow fr)
   {
@@ -76,38 +75,23 @@ public class MoveViewTool extends EditingTool
     oldDist = view.getDistToPlane(); // distToPlane needs to be kept up to date
 	view.setRotationCenter(oldCoords.getOrigin().plus(oldCoords.getZDirection().times(oldDist)));
 	
-	// If the tool is selected and used, sitch the view to modeling navigation.
-	// Leaving switching back to travel to the user.
 	if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
 	    !e.isAltDown() && !e.isMetaDown()){
 		if (view.getNavigationMode() > 3)
 			view.setNavigationMode(0);
 		else if (view.getNavigationMode() > 1)
-			view.setNavigationMode(view.getNavigationMode()-2);
+			view.setNavigationMode(view.getNavigationMode()-2, true);
 	}
-
-	mouseDown = true;
+	view.mouseDown = true;
 	view.moving = true;
   }
 
 	@Override
 	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
 	{
-		/*
-		// Don't allow moving by mouse buttons if the rotate view tool is selected
-		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() instanceof RotateViewTool)
-			return;
-		*/
-		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
-		    !e.isAltDown() && !e.isMetaDown()) // If the tool i selected in the tool palette
-		{
-			/*
-			// If this tool is selected in the palette, don't allow using with alt and meta modifiers
-			if (e.isAltDown() || e.isMetaDown())
-				return;
-			*/
+		// If the tool is selected in the tool palette
+		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && !e.isAltDown() && !e.isMetaDown())
 			dragMoveModel(e, view);
-		}
 		else
 		{
 			switch (view.getNavigationMode()) {
@@ -239,7 +223,7 @@ public class MoveViewTool extends EditingTool
   @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
-	mouseDown = false;
+	view.mouseDown = false;
 	view.moving = false;
 	view.setNavigationMode(selectedNavigation);
     if (theWindow != null)
@@ -257,6 +241,7 @@ public class MoveViewTool extends EditingTool
         theWindow.updateImage();
       }
 	wipeAuxGraphs();
+	view.viewChanged(false);
   }
 
   /** This is called recursively to move any children of a bound camera. */

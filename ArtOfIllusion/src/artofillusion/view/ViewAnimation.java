@@ -200,7 +200,10 @@ public class ViewAnimation
 		this.endRotationCenter = endRotationCenter;		
 		this.endScale = endScale;
 		this.endOrientation = endOrientation;
-		this.endPerspective = view.isPerspectiveSwitch();
+		if (nextNavigation > 1)
+			this.endPerspective = true;
+		else
+			this.endPerspective = view.isPerspectiveSwitch();
 		this.endNavigation = nextNavigation;
 		this.endShowGrid = view.getShowGrid();
 		camera = view.getCamera();
@@ -223,7 +226,7 @@ public class ViewAnimation
 		endDist  = (endCoords.getOrigin().minus(endRotationCenter).length());
 
 		if (noMove()){
-			endAnimation(); // did not help...
+			endAnimation();
 			return;
 		}
 

@@ -56,6 +56,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public static Color gray, ghost, red, green, blue, yellow, cone, teal, TEAL;
   public Point mousePoint;
   public AuxiliaryGraphics auxGraphs = new AuxiliaryGraphics();
+  public boolean perspectiveEnabled = true;
   public boolean navigationTravelEnabled = true;
   public boolean showViewCone = true;
   
@@ -388,7 +389,6 @@ public abstract class ViewerCanvas extends CustomWidget
 	public void setPerspective(boolean nextPerspective)
 	{		
 		// Can't not go parallel in travel modes
-		// The setNavigationMode() also takes care of perspective setting
 		if (navigation == NAVIGATE_TRAVEL_SPACE || navigation == NAVIGATE_TRAVEL_LANDSCAPE)
 			return;
 
@@ -615,29 +615,41 @@ public abstract class ViewerCanvas extends CustomWidget
   public void setNavigationMode(int nextNavigation)
   {
     if (nextNavigation == navigation)
+	  return;
+
+	if (nextNavigation < 2)
+ 	  setNavigationMode(nextNavigation, perspectiveSwitch);
+	else
+	  setNavigationMode(nextNavigation, true);
+  }
+
+  /** Set navigation mode and perspective */
+  
+  public void setNavigationMode(int nextNavigation, boolean nextPerspective)
+  {
+    // If not changing, do nothing
+    if (nextNavigation == navigation)
 	return;
-	
-    if (navigation == 0 || navigation == 1)
-      lastModelPerspective = perspectiveSwitch; 
-    
-    // if the view is not up yet
+
+    // If the view is not up yet, just set the parameters
     if (getBounds().height == 0 || getBounds().width == 0 || theCamera == null)
 	{
  	  navigation = nextNavigation;
       if (navigation > 1)
-	    perspective = perspectiveSwitch = true;
+	    perspective = true;
       return;
     }
     
-    if (nextNavigation == 0 || nextNavigation == 1)
-	  flipPerspectiveSwitch(lastModelPerspective);
-    else if (nextNavigation == 2 || nextNavigation == 3)
-	  flipPerspectiveSwitch(true);
-    else {// what if there are more options?
-	}
+	// Change perspective without animation, if needed.
+    if (nextNavigation < 2) // ...?
+	  perspective = nextPerspective;
+    else
+	  perspective = true;
+	
+	repaint(); 
 
-    // Turn y up for landscape modes
-    if ((navigation == 0 || navigation == 2)&&(nextNavigation == 1 || nextNavigation == 3))
+    // Turn y up for landscape modes. Animated
+    if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
     {
 		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
 		Vec3 z  = coords.getZDirection();
@@ -655,6 +667,7 @@ public abstract class ViewerCanvas extends CustomWidget
 			coords.setOrigin(rotationCenter.minus(z.times(distToPlane)));
 			theCamera.setCameraCoordinates(coords);
 			navigation = nextNavigation;
+			viewChanged(false);
 			repaint();
 		}
 		else

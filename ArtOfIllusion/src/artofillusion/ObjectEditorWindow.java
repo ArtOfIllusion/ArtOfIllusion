@@ -123,8 +123,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    theView[3].setNavigationMode(1);
-    theView[3].setPerspective(true);
+    theView[3].setNavigationMode(1,true);
+    //theView[3].setPerspective(true);
 	
 	/* 
 	   I wonder if this would have any side effects?

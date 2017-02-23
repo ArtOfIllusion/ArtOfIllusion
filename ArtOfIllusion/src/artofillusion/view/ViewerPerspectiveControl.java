@@ -30,7 +30,9 @@ public class ViewerPerspectiveControl implements ViewerControl
       Translate.text("Perspective"),
       Translate.text("Parallel")
     });
+	
     perspectiveChoice.setSelectedIndex(1);
+	
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
@@ -41,7 +43,7 @@ public class ViewerPerspectiveControl implements ViewerControl
 		}
         else if (view.getRenderMode() == ViewerCanvas.RENDER_RENDERED)
           perspectiveChoice.setEnabled(false);
-		else if (view.getNavigationMode() >= 2) // this covers cases where navigation modes might be added by a plugin
+		else if (view.getNavigationMode() > 1)
 		{
 		  perspectiveChoice.setEnabled(false);
 		  perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
@@ -51,8 +53,10 @@ public class ViewerPerspectiveControl implements ViewerControl
           perspectiveChoice.setEnabled(true);
           perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
         }
+		perspectiveChoice.setEnabled(view.perspectiveEnabled);
       }
     });
+
     perspectiveChoice.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {

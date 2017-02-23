@@ -42,6 +42,7 @@ public class ViewerNavigationControl implements ViewerControl
 	public static class NavigationChoice extends BComboBox
 	{
 		private final ViewerCanvas view;
+		private boolean viewChangedByThis = false;
 		
 		private NavigationChoice(ViewerCanvas view)
 		{
@@ -60,15 +61,23 @@ public class ViewerNavigationControl implements ViewerControl
 		
 		private void valueChanged()
 		{
-			//if (getSelectedIndex() != view.getNavigationMode()) // this prevented some events...
 			view.setNavigationMode(getSelectedIndex());
+			if (getSelectedIndex() > 1) 
+				view.perspectiveEnabled = false;
+			else
+				view.perspectiveEnabled = true;
+			viewChangedByThis = true;
+			view.viewChanged(false); // This sending 'viewChaged' loops this control back to itself. Hence the 'viewChangedByThis'.
 		}
-	
+
 		private void viewChanged()
 		{
+			if (viewChangedByThis){
+				viewChangedByThis = false;
+				return;
+			}
 			if (view.getNavigationMode() != getSelectedIndex())
 				setSelectedIndex(view.getNavigationMode());
-			//setEnabled(view.navigationEnabled);
 		}
 	}
 }

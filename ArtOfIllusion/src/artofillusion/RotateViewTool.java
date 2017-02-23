@@ -85,16 +85,13 @@ public class RotateViewTool extends EditingTool
     rotationCenter = view.getRotationCenter();
 	distToRot = oldCoords.getOrigin().minus(rotationCenter).length();
 	
-	// If the tool is selected and used, sitch the view to modeling navigation.
-	// Leaving switching back to travel to the user.
 	if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
 	    !e.isAltDown() && !e.isMetaDown()){
 		if (view.getNavigationMode() > 3)
 			view.setNavigationMode(0);
 		else if (view.getNavigationMode() > 1)
-			view.setNavigationMode(view.getNavigationMode()-2);
+			view.setNavigationMode(view.getNavigationMode()-2, true);
 	}
-
 	view.mouseDown = true;
 	view.rotating = true;
   }
@@ -102,22 +99,11 @@ public class RotateViewTool extends EditingTool
 	@Override
   	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
 	{
-		/*
-		// Don't allow rotating by mouse buttons if the move view tool is selected
-		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() instanceof MoveViewTool)
-			return;
-		*/
 		if (e.getPoint() != clickPoint && view.getBoundCamera() == null) // This is needed even if the mouse has not been dragged yet.
 			view.setOrientation(ViewerCanvas.VIEW_OTHER);
 			
-		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
-		    !e.isAltDown() && !e.isMetaDown()) // If the tool i selected in the tool palette
+		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && !e.isAltDown() && !e.isMetaDown())
 		{
-			/*
-			// If this tool is selected in the palette, don't allow usinh with alt and meta modifiers
-			if (e.isAltDown() || e.isMetaDown())
-				return;
-			*/
 			if (view.getNavigationMode() == 0)
 				dragRotateSpace(e, view);
 			else if (view.getNavigationMode() == 1)
@@ -407,8 +393,8 @@ public class RotateViewTool extends EditingTool
 	// This shouls be directly in the ViewerCanvas but it had a side-effect.
 	if (dragPoint.x == clickPoint.x && dragPoint.y == clickPoint.y)
 	    view.centerToPoint(dragPoint);
-	  
 	wipeAuxGraphs();
+	view.viewChanged(false);
   }
 
   /** This is called recursively to move any children of a bound camera. */

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 by Petri Ihalainen
+/* Copyright (C) 2016-2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -97,7 +97,7 @@ public class ViewAnimation
 	});
 
 	/** Start animation of perspective change. */
-	public void start(boolean nextPerspective)
+	public void start(boolean nextPerspective, int nextNavigation, CoordinateSystem nextCoords)
 	{
 		camera = view.getCamera();
 		

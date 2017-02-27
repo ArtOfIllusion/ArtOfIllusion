@@ -413,18 +413,32 @@ public abstract class ViewerCanvas extends CustomWidget
 			return;
 
 		perspectiveSwitch = nextPerspective;			
-		animation.start(nextPerspective); // , refDistToPlane, navigation);
+		animation.start(nextPerspective, navigation, theCamera.getCameraCoordinates()); // , refDistToPlane, navigation);
 	}
 
 	/** 
 	  This is needed when animated perspective change parallel to perspective begins. 
 	  The scale and perspective parameters can not be accessed directly form the 
-	  animation engine
+	  animation engine and they take immediade effect on the camera.
 	 */
 	public void preparePerspectiveAnimation()
 	{
 		scale = 100.0;
 		perspective = true;
+	}
+
+	/** 
+	  ViewAnimation calls this when the animation is finished, so the orientation menu 
+	  will be up to date and the perspective is set to it's value without launched 
+	  launcing a new animation sequence.
+	*/
+	public void finishAnimation(int which, boolean persp, int navi)
+	{
+		orientation = which;
+		perspective = persp;
+		navigation = navi;
+		viewChanged(false);
+		repaint();
 	}
 
   /** Determine whether the view is currently is perspective mode. */
@@ -639,6 +653,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	    perspective = true;
       return;
     }
+
     
 	// Change perspective without animation, if needed.
     if (nextNavigation < 2) // ...?
@@ -648,6 +663,9 @@ public abstract class ViewerCanvas extends CustomWidget
 	
 	repaint(); 
 
+	//if (nextNavigation > 1)
+	  nextPerspective = true; // Just to be sure
+	//
     // Turn y up for landscape modes. Animated
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
     {
@@ -675,6 +693,7 @@ public abstract class ViewerCanvas extends CustomWidget
 			// The system uses only the projection of the y-direction, that is needed.
 			coords.setOrientation(z, new Vec3(0,1,0)); // new coords
 			animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
+			//animation.start(nextPerspective, nextNavigation, coords);
 		}
     }
 	else
@@ -763,15 +782,16 @@ public abstract class ViewerCanvas extends CustomWidget
   }
   */
 
-  /** Matching the view with a SceneCamera if needed */ // I guess?
+  /** Matching the camera with the cirrent state of the view */ // I guess?
   
   public void adjustCamera(boolean perspective)
   {
     Rectangle bounds = getBounds();
     double scale = getScale();
 
-    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
       theCamera.setScreenTransform(((SceneCamera) boundCamera.getObject()).getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
+	}
     else if (perspective)
       theCamera.setScreenParams(0, scale, bounds.width, bounds.height);
     else
@@ -1421,20 +1441,6 @@ public abstract class ViewerCanvas extends CustomWidget
 	animation.start(coords, rotationCenter, scale, which, navigation);
   }
 
-  /** 
-    ViewAnimation calls this when the animation is finished, so the orientation menu 
-    will be up to date and the perspective is set to it's value without launched 
-    launcing a new animation sequence.
-   */
-  public void finishAnimation(int which, boolean persp, int navi)
-  {
-    orientation = which;
-	perspective = persp;
-	navigation = navi;
-	viewChanged(false);
-	repaint();
-  }
-  
   /** If there is a camera bound to this view, copy the coordinates from it. */
   public void copyOrientationFromCamera()
   {
@@ -1815,13 +1821,13 @@ public abstract class ViewerCanvas extends CustomWidget
 	});
 	
 	/* Draw a point in the modelling space on the screen */
-	private void renderPoint(Vec3 p, Color c)
+	private void renderPoint(Vec3 p, Color c, int radius)
 	{
 		Vec2 ps = getCamera().getWorldToScreen().timesXY(p);
-		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x+2, (int)ps.y), c);		
-		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x-2, (int)ps.y), c);		
-		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x, (int)ps.y+2), c);		
-		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x, (int)ps.y-1), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x+radius+1, (int)ps.y), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x-radius, (int)ps.y), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x, (int)ps.y+radius+1), c);		
+		drawLine(new Point((int)ps.x, (int)ps.y), new Point((int)ps.x, (int)ps.y-radius), c);		
 	}
 
 	/** 
@@ -2097,11 +2103,14 @@ public abstract class ViewerCanvas extends CustomWidget
 		/** Render the object on screen */
 		public void render()
 		{
+		
 			Vec2 v0, v1;
 			Point p0, p1;
+			int pointRadius = 4;
 			if (points != null)
-				for(int i = 0; i < points.size(); i++)
-					renderPoint(points.get(i), pointColors.get(i));
+				for(int i = 0; i < points.size(); i++){
+					renderPoint(points.get(i), pointColors.get(i), pointRadius);
+				}
 			if (lines != null)
 				for(int i = 0; i < lines.size(); i++){
 				
@@ -2123,5 +2132,5 @@ public abstract class ViewerCanvas extends CustomWidget
 			lines = null;
 			lineColors = null;
 		}
-	}
+	} // AuxiliaryGraphics
 }

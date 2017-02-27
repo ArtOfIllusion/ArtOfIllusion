@@ -52,6 +52,13 @@ public class ScrollViewTool
 		if (boundCamera != null)
 			startCoords = boundCamera.getCoords().duplicate();
 		
+		// Make sure that the rotation Center is on Camera Z-axis.
+		// After a SceneCamera is read from a file, that may not be the case.
+		// A SceneCamera should have a 'distToPlane' that should be saved with the camera.
+		// Makin it saveable will cause version incompatibility.
+		CoordinateSystem coords = camera.getCameraCoordinates();
+		view.setRotationCenter(coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane())));
+	
 		mousePoint = view.mousePoint = e.getPoint();
 		scrollTimer.restart(); // The timer takes case of teh graphics and updating the children of a camera object
 
@@ -72,6 +79,7 @@ public class ScrollViewTool
 		if (boundCamera != null && window != null) // wonder why the window is here...
 		{
 			boundCamera.setCoords(camera.getCameraCoordinates().duplicate());
+			((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);
 			moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()));
 
 		}
@@ -79,7 +87,7 @@ public class ScrollViewTool
 		repaintAllViews();
 		view.viewChanged(false);
 	}
-		
+
 	private void scrollMoveModel(MouseScrolledEvent e)
 	{
 		int amount = e.getWheelRotation();
@@ -87,7 +95,7 @@ public class ScrollViewTool
 			amount *= 10;
 		if (ArtOfIllusion.getPreferences().getReverseZooming())
 			amount *= -1;
-		if (camera.isPerspective())
+		if (view.isPerspective())
 		{
 			CoordinateSystem coords = camera.getCameraCoordinates();
 			double oldDist = distToPlane;
@@ -98,7 +106,7 @@ public class ScrollViewTool
 			coords.setOrigin(newPos);
 			camera.setCameraCoordinates(coords);
 			view.setDistToPlane(newDist);
-			distToPlane = newDist; // for ext graphs
+			distToPlane = newDist; // local field
 		}
 		else
 		{

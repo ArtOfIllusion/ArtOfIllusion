@@ -723,8 +723,4 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < obj.getChildren().length; i++)
       moveChildren(obj.getChildren()[i], transform, undo);
   }
-  
-  
-  
-
 }

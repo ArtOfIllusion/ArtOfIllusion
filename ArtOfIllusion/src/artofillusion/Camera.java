@@ -142,21 +142,13 @@ public class Camera implements Cloneable
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
-	
-    /*frontClipPlane = distToScreen/20.0;*/
-	
-	// Setting it to distToScreen/20.0 = 1.0 was blunt but below 1.0 the grid 
-	// starts to make mess on SWCanvasDrawer. 
-	//
+
 	// From user's point of view 0.0 would be perfect. On SWC that works for objects 
-	// but not for grid. On CLC it seems to work for everything (may render views white
-	// if the session is not restarted after pref changee).
-	//
-	// Somewhere below 0.01 scroll wheel zoom for the camera view stops working.
-    //
+	// but not for grid. GLCanvasDrawer ignores ignores this setting entirely.
 	// I'd like to be able to go 1E-5 or smaller.
 	
-    frontClipPlane = 0.01;
+    frontClipPlane = distToScreen/20.0;
+    //frontClipPlane = 0.05; 
     perspective = true;
   }
   
@@ -170,7 +162,7 @@ public class Camera implements Cloneable
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale);
     screenTransform = Mat4.translation((double) newHres/2.0, (double) newVres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
-    frontClipPlane = -Double.MAX_VALUE; // I wonder if NEGATIVE_INFINITY would work here?
+    frontClipPlane = -Double.MAX_VALUE;
     perspective = false;
   }
   

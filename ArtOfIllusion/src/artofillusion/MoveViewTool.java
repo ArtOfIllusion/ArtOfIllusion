@@ -257,13 +257,11 @@ public class MoveViewTool extends EditingTool
     }  
   }
 
-  /** This is used when a SceneCamera moves in the scene */
-  // Seems obsolete now
   private void repaintAllViews()
   {
 	ViewerCanvas[] views = theWindow.getAllViews();
 	for (ViewerCanvas v : views){
-      //v.repaint();
+      v.repaint();
     }
   }
 

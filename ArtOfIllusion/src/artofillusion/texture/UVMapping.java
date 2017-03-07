@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,6 +27,11 @@ public class UVMapping extends Mapping2D
   int numTextureParams;
   TextureParameter uparam, vparam;
 
+  public UVMapping()
+  {
+    this(null,null);
+  }
+  
   public UVMapping(Object3D theObject, Texture theTexture)
   {
     super(theObject, theTexture);
@@ -117,10 +123,10 @@ public class UVMapping extends Mapping2D
   @Override
   public void getTransparency(Vec3 pos, RGBColor trans, double angle, double size, double time, double param[])
   {
-    if (!appliesToFace(angle > 0.0))
-      trans.setRGB(1.0f, 1.0f, 1.0f);
-    else
+    if (appliesToFace(angle > 0.0))
       texture.getTransparency(trans, pos.x, pos.y, size, size, angle, time, param);
+    else
+      trans.setRGB(1.0f, 1.0f, 1.0f);
   }
 
   /** This method should not generally be called.  The mapping is undefined without knowing

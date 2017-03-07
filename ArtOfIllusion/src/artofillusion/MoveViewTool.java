@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
 import java.awt.*;
 
@@ -108,7 +109,7 @@ public class MoveViewTool extends EditingTool
 			}
 		}
 		setAuxGraphs(view);
-		repaintAllViews();
+		repaintAllViews(view);
 		view.viewChanged(false);	
 	}
 
@@ -257,24 +258,28 @@ public class MoveViewTool extends EditingTool
     }  
   }
 
-  private void repaintAllViews()
+  private void repaintAllViews(ViewerCanvas view)
   {
-	ViewerCanvas[] views = theWindow.getAllViews();
-	for (ViewerCanvas v : views){
-      v.repaint();
-    }
+    if (theWindow == null || theWindow instanceof UVMappingWindow)
+	  view.repaint();
+    else
+	  for (ViewerCanvas v : theWindow.getAllViews())
+	  	v.repaint();
   }
 
   private void setAuxGraphs(ViewerCanvas view)
   {
-	for (ViewerCanvas v : theWindow.getAllViews())
-      if (v != view)
-		v.auxGraphs.set(view, true);
+
+	if (theWindow != null)
+	  for (ViewerCanvas v : theWindow.getAllViews())
+        if (v != view)
+	      v.auxGraphs.set(view, true);
   }
   
   private void wipeAuxGraphs()
   {
-	for (ViewerCanvas v : theWindow.getAllViews())
+    if (theWindow != null)
+	  for (ViewerCanvas v : theWindow.getAllViews())
 		v.auxGraphs.wipe();
   }
 

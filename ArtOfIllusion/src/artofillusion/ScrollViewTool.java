@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -84,7 +85,7 @@ public class ScrollViewTool
 
 		}
 		setAuxGraphs(view);
-		repaintAllViews();
+		repaintAllViews(view);
 		view.viewChanged(false);
 	}
 
@@ -261,26 +262,30 @@ public class ScrollViewTool
 		}  
 	}
 
-	/** This is used when a SceneCamera moves in the scene */
-	private void repaintAllViews()
-	{
-		ViewerCanvas[] views = window.getAllViews();
-			for (ViewerCanvas v : views)
-				v.repaint();
-	}
+  private void repaintAllViews(ViewerCanvas view)
+  {
+    if (window == null || window instanceof UVMappingWindow)
+	  view.repaint();
+    else
+	  for (ViewerCanvas v : window.getAllViews())
+	  	v.repaint();
+  }
 
-	public void setAuxGraphs(ViewerCanvas view)
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			if (v != view)
-				v.auxGraphs.set(view, true);
-	}
+  private void setAuxGraphs(ViewerCanvas view)
+  {
 
-	public void wipeAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			v.auxGraphs.wipe();
-	}
+	if (window != null)
+	  for (ViewerCanvas v : window.getAllViews())
+        if (v != view)
+	      v.auxGraphs.set(view, true);
+  }
+  
+  private void wipeAuxGraphs()
+  {
+    if (window != null)
+	  for (ViewerCanvas v : window.getAllViews())
+		v.auxGraphs.wipe();
+  }
 
 	/** Maybe some day? */
 	public void drawOverlay()

@@ -15,6 +15,7 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import artofillusion.view.*;
+import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -138,7 +139,7 @@ public class RotateViewTool extends EditingTool
 			}
 		}
 		setAuxGraphs(view);
-		repaintAllViews();
+		repaintAllViews(view);
 		view.viewChanged(false);	
 	}
 	
@@ -561,29 +562,36 @@ public class RotateViewTool extends EditingTool
 	}
   }
 
-  private void repaintAllViews()
+  private void repaintAllViews(ViewerCanvas view)
   {
-	for (ViewerCanvas v : theWindow.getAllViews())
-		v.repaint();
+    if (theWindow == null || theWindow instanceof UVMappingWindow)
+	  view.repaint();
+    else
+	  for (ViewerCanvas v : theWindow.getAllViews())
+	  	v.repaint();
   }
 
   private void setAuxGraphs(ViewerCanvas view)
   {
-	for (ViewerCanvas v : theWindow.getAllViews())
-      if (v != view)
-		v.auxGraphs.set(view, true);
+
+	if (theWindow != null)
+	  for (ViewerCanvas v : theWindow.getAllViews())
+        if (v != view)
+	      v.auxGraphs.set(view, true);
   }
   
   private void wipeAuxGraphs()
   {
-	for (ViewerCanvas v : theWindow.getAllViews())
+    if (theWindow != null)
+	  for (ViewerCanvas v : theWindow.getAllViews())
 		v.auxGraphs.wipe();
   }
 
   @Override
   public void drawOverlay(ViewerCanvas view)
   {
-    if (view.tilting){
+    if (theWindow != null && view.tilting)
+	{
 	  view.repaint();
 	  for (int i=0; i<4; i++)
 		view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.teal);

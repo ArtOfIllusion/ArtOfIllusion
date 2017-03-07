@@ -255,7 +255,8 @@ public abstract class ViewerCanvas extends CustomWidget
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
     // Should there be an ActionProcessor just in case?
-	scrollTool.mouseScrolled(e, this);
+	if (scrollTool != null)
+	  scrollTool.mouseScrolled(e, this);
   }
 
   /** Subclasses should override this to handle events. */

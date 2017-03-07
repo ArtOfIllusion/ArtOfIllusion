@@ -480,7 +480,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     editMenu = Translate.menu("edit");
     menubar.add(editMenu);
-    editMenuItem = new BMenuItem [10];
+    editMenuItem = new BMenuItem [11];
     editMenu.add(editMenuItem[0] = Translate.menuItem("undo", this, "undoCommand"));
     editMenu.add(editMenuItem[1] = Translate.menuItem("redo", this, "redoCommand"));
     editMenu.addSeparator();
@@ -489,12 +489,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenu.add(editMenuItem[4] = Translate.menuItem("paste", this, "pasteCommand"));
     editMenu.add(editMenuItem[5] = Translate.menuItem("clear", this, "clearCommand"));
     editMenu.add(editMenuItem[6] = Translate.menuItem("selectChildren", this, "actionPerformed"));
-    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.add(editMenuItem[7] = Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.add(editMenuItem[8] = Translate.menuItem("unselectAll", this, "clearSelection"));
     editMenu.addSeparator();
-    editMenu.add(editMenuItem[7] = Translate.menuItem("unselectAll", this, "clearSelection"));
-    editMenu.addSeparator();
-    editMenu.add(editMenuItem[8] = Translate.menuItem("duplicate", this, "duplicateCommand"));
-    editMenu.add(editMenuItem[9] = Translate.menuItem("sever", this, "severCommand"));
+    editMenu.add(editMenuItem[9] = Translate.menuItem("duplicate", this, "duplicateCommand"));
+    editMenu.add(editMenuItem[10] = Translate.menuItem("sever", this, "severCommand"));
     editMenu.addSeparator();
     editMenu.add(Translate.menuItem("preferences", this, "preferencesCommand"));
   }

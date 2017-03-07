@@ -19,7 +19,6 @@ import java.awt.*;
 
 public class ClickedPointFinder
 {
-	private TriangleMath T = new TriangleMath();
 	private double[] bary;
 
 	public ClickedPointFinder(){};
@@ -67,8 +66,8 @@ public class ClickedPointFinder
 				corner2D[0] = worldToScreen.timesXY(corner3D[0]);
 				corner2D[1] = worldToScreen.timesXY(corner3D[1]);
 				corner2D[2] = worldToScreen.timesXY(corner3D[2]);
-				
-				if (v instanceof ObjectViewer && ! ((ObjectViewer)v).getUseWorldCoords())
+
+				if ((v instanceof ObjectViewer) && !(((ObjectViewer)v).getUseWorldCoords()))
 				{
 					corner2D[0] = objToScreen.timesXY(corner3D[0]);
 					corner2D[1] = objToScreen.timesXY(corner3D[1]);
@@ -87,11 +86,12 @@ public class ClickedPointFinder
 						inSpace = false;
 					}
 					else
-						if (closer(pointOnTriangle, clickedPoint, cameraOrigin, cameraZ) && onFrontSide(pointOnTriangle, cameraOrigin, cameraZ))
+						if (closer(pointOnTriangle, clickedPoint, cameraOrigin, cameraZ) && onFrontSide(pointOnTriangle, cameraOrigin, cameraZ, v.isPerspective()))
 							clickedPoint = pointOnTriangle;
 				}
 			}
 		}
+		System.out.println("Clicked " + clickedPoint);
 		return clickedPoint;
 	}
 
@@ -100,21 +100,18 @@ public class ClickedPointFinder
 		double distTo1 = p1.minus(cameraOrigin).dot(cameraZ);
 		double distTo2 = p2.minus(cameraOrigin).dot(cameraZ);
 
-		System.out.println("distTo1 = " + distTo1);
-		System.out.println("distTo2 = " + distTo2);
-		
 		if (distTo1 < distTo2)
 			return true;
 		else
 			return false;
 	}
 
-	private boolean onFrontSide(Vec3 p, Vec3 cameraOrigin, Vec3 cameraZ)
+	private boolean onFrontSide(Vec3 p, Vec3 cameraOrigin, Vec3 cameraZ, boolean perspective)
 	{
+		if (!perspective)
+			return true;
+			
 		double distToP = p.minus(cameraOrigin).dot(cameraZ);
-
-		System.out.println("distToP = " + distToP);
-		
 		if (distToP > 0.0)
 			return true;
 		else
@@ -125,7 +122,7 @@ public class ClickedPointFinder
 	{
 		// The sum of barycentric coordinates is always 1.0. 
 		// If the point is outside, some of those will be negative. 
-		bary = T.bary(corner2D, point2D);		
+		bary = TriangleMath.bary(corner2D, point2D);		
 		if(bary[0] >= 0.0 && bary[1] >= 0.0 && + bary[2] >= 0.0) 
 			return true;
 		else

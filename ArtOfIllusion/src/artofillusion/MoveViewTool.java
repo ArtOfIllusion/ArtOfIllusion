@@ -27,6 +27,7 @@ public class MoveViewTool extends EditingTool
   private boolean controlDown;
   private CoordinateSystem oldCoords;
   private double oldScale, oldDist;
+  boolean mouseDown;
 
   public MoveViewTool(EditingWindow fr)
   {
@@ -46,7 +47,7 @@ public class MoveViewTool extends EditingTool
   {
     return ALL_CLICKS;
   }
-
+  
   @Override
   public boolean hilightSelection()
   {
@@ -69,41 +70,91 @@ public class MoveViewTool extends EditingTool
 
     controlDown = e.isControlDown();
     clickPoint = e.getPoint();
-    clickPos = cam.convertScreenToWorld(clickPoint, cam.getDistToScreen());
+    clickPos = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     oldCoords = cam.getCameraCoordinates().duplicate();
-	oldCamPos = oldCoords.getOrigin();
-	oldRotCenter = new Vec3(view.getRotationCenter());
+    oldCamPos = oldCoords.getOrigin();
+    oldRotCenter = new Vec3(view.getRotationCenter());
     oldScale = view.getScale();
-	//oldDist = oldRotCenter.minus(oldCamPos).length();
-	oldDist = view.getDistToPlane(); // distToPlane needs to be kept up to date
+    oldDist = view.getDistToPlane(); // distToPlane needs to be kept up to date
+	view.setRotationCenter(oldCoords.getOrigin().plus(oldCoords.getZDirection().times(oldDist)));
+	mouseDown = true;
+	view.moving = true;
   }
 
-  @Override
-  public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
-  {
-    switch (view.getNavigationMode()) {
-	  case ViewerCanvas.NAVIGATE_MODEL_SPACE:
-	  case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
-        dragMoveModel(e, view);
-		break;
-	  case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-	  case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
-        dragMoveTravel(e, view);
-		break;
-	  default:
-	    break;
+	@Override
+	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
+	{
+		switch (view.getNavigationMode()) {
+			case ViewerCanvas.NAVIGATE_MODEL_SPACE:
+			case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+				dragMoveModel(e, view);
+				break;
+			case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
+			case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
+				dragMoveTravel(e, view);
+				break;
+			default:
+				break;
+		}
+		view.viewChanged(false);	
+		if (view.getBoundCamera() != null)
+			repaintAllViews();
+		else
+			view.repaint();
+		setExtGraphs(view);
 	}
-	if (view.getBoundCamera() != null)
-	{	
-		repaintAllViews();
-	}
-  }
 
-	private void dragMoveTravel(WidgetMouseEvent e, ViewerCanvas view){}
+	/* The view must be set to Perspective for travel modes! */
+	private void dragMoveTravel(WidgetMouseEvent e, ViewerCanvas view)
+	{
+		Camera cam = view.getCamera();
+		Point dragPoint = e.getPoint();
+		int dx, dy;
+		
+		dx = dragPoint.x-clickPoint.x;
+		dy = dragPoint.y-clickPoint.y;
+
+		if (controlDown) // forward move!
+		{ 	
+			{
+				CoordinateSystem coords = cam.getCameraCoordinates();
+				
+				Vec3 hDir = new Vec3(coords.getZDirection().x, 0.0, coords.getZDirection().z);
+				hDir.normalize();
+				
+				Vec3 newPos = oldCamPos.plus(hDir.times(-dy*0.01*oldDist/cam.getDistToScreen()));
+				coords.setOrigin(newPos);
+				
+				cam.setCameraCoordinates(coords);
+				view.setRotationCenter(newPos.plus(coords.getZDirection().times(oldDist)));
+			}
+		}
+		else // Move up-down-right-left
+		{
+			if (e.isShiftDown()) // Shift down move just up or down.
+			{
+				if (Math.abs(dx) > Math.abs(dy))
+					dy = 0;
+				else
+					dx = 0;
+			}
+			Vec3 vDir = (new Vec3(0.0, cam.getCameraCoordinates().getOrigin().y, 0.0));
+			vDir.normalize();
+			
+			Vec3 hMove = cam.findDragVector(clickPos, dx, 0.0); // Check findDragVector()!			
+			Mat4 m = Mat4.translation(-hMove.x, 0.0, -hMove.z);
+			CoordinateSystem coords = oldCoords.duplicate();	
+			Vec3 newPos = oldCamPos.plus(vDir.times(dy*0.01*oldDist/cam.getDistToScreen()));
+			
+			coords.setOrigin(newPos);
+			coords.transformOrigin(m);
+			cam.setCameraCoordinates(coords);
+			view.setRotationCenter(newPos.plus(coords.getZDirection().times(oldDist)));
+		}
+	}
 	
 	private void dragMoveModel(WidgetMouseEvent e, ViewerCanvas view)
-	{
-		//
+	{	
 		Camera cam = view.getCamera();
 		Point dragPoint = e.getPoint();
 		int dx, dy;
@@ -122,13 +173,12 @@ public class MoveViewTool extends EditingTool
 				view.getCamera().setCameraCoordinates(coords);
 				view.setDistToPlane(newDist);
 			}
-			else
 			{
 				double newScale = oldScale*(Math.pow(1.01,(double)dy));
 				view.setScale(newScale);
 			}
 		}
-		else // Move up down-right-left
+		else // Move up-down-right-left
 		{
 			if (e.isShiftDown()) // Shift down move just up or down.
 			{
@@ -141,7 +191,7 @@ public class MoveViewTool extends EditingTool
 
 			// Scaling the move from Camera to Scene
 			if (view.isPerspective())
-				move = move.times(oldDist/cam.getDistToScreen());
+				move = move.times(oldDist/view.getDistToPlane());
 			
 			Mat4 m = Mat4.translation(-move.x, -move.y, -move.z);
 			CoordinateSystem newCoords = oldCoords.duplicate();			
@@ -149,72 +199,26 @@ public class MoveViewTool extends EditingTool
 			cam.setCameraCoordinates(newCoords);
 			view.setRotationCenter(newCoords.getOrigin().plus(newCoords.getZDirection().times(oldDist)));
 		}
-		view.viewChanged(false);
-		view.repaint();
 	}
+
 
   @Override
   public void mouseScrolled(MouseScrolledEvent e, ViewerCanvas view)
   {
-      switch (view.getNavigationMode()) {
-	  case ViewerCanvas.NAVIGATE_MODEL_SPACE:
-	  case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
-        scrollMoveModel(e, view);
-		break;
-	  case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-	  case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
-        scrollMoveTravel(e, view);
-		break;
-	  default:
-	    break;
-	  }
+      setExtGraphs(view);
   }
-  
-  private void scrollMoveModel(MouseScrolledEvent e, ViewerCanvas view)
+
+  @Override
+  public void mouseStoppedScrolling()
   {
-    int amount = e.getWheelRotation();
-    if (!e.isAltDown())
-      amount *= 10;
-    if (ArtOfIllusion.getPreferences().getReverseZooming())
-      amount *= -1;
-    if (view.getCamera().isPerspective())
-    {
-      CoordinateSystem coords = view.getCamera().getCameraCoordinates();
-	  CoordinateSystem oldCoords = coords.duplicate();
-	  double oldDist = view.getDistToPlane();
-	  double newDist = oldDist*Math.pow(1.0/1.01, amount);
-	  //double newDist = oldDist*Math.pow(1.01, amount);
-	  Vec3 oldPos = new Vec3(coords.getOrigin());
-	  Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
-	  coords.setOrigin(newPos);
-      view.getCamera().setCameraCoordinates(coords);
-	  view.setDistToPlane(newDist);
-	  
-	  if (view.getBoundCamera() != null)
-	  {	
-		//repaintAllViews();
-		ObjectInfo bound = view.getBoundCamera();
-        moveChildrenLive(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), null);
-	  }
-      view.viewChanged(false);
-      view.repaint();
-    }
-    else
-    {
-     view.setScale(view.getScale()*Math.pow(1.0/1.01, amount));
-     //view.setScale(view.getScale()*Math.pow(1.01, amount));
-    }
+	  wipeExtGraphs();
   }
-  
-  private void scrollMoveTravel(MouseScrolledEvent e, ViewerCanvas view)
-  {	
-	//Vec3 delta = coords.getZDirection().times(-0.1*amount); //??
-	//coords.setOrigin(coords.getOrigin().plus(delta));
-  }
-  
+
   @Override
   public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
   {
+	mouseDown = false;
+	view.moving = false;
     mouseDragged(e, view);
     if (theWindow != null)
       {
@@ -223,13 +227,15 @@ public class MoveViewTool extends EditingTool
         {
           // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
           // the camera.
-        
+
           UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
           moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
           theWindow.setUndoRecord(undo);
         }
         theWindow.updateImage();
       }
+	
+	wipeExtGraphs();
   }
 
   /** This is called recursively to move any children of a bound camera. */
@@ -245,34 +251,57 @@ public class MoveViewTool extends EditingTool
       moveChildren(parent.getChildren()[i], transform, undo);
     }  
   }
-  
-  /** This is called by mouseDragged and Mouse Scrolled */
-  
-  private void moveViewZ()
-  {
-  }
-  
-  /** This is called recursively during mouseDragged to move any children of a bound camera. */
 
-  private void moveChildrenLive(ObjectInfo parent, Mat4 transform, UndoRecord undo)
+  public void setExtGraphs(ViewerCanvas view)
   {
-    for (int i = 0; i < parent.getChildren().length; i++)
-    {
-      CoordinateSystem coords = parent.getChildren()[i].getCoords();
-      CoordinateSystem oldCoords = coords.duplicate();
-	  coords.transformCoordinates(transform);
-      moveChildrenLive(parent.getChildren()[i], transform, undo);
+	for (ViewerCanvas v : theWindow.getAllViews()){
+      if (v == view){
+		v.extRC = null;
+		v.extCC = null;
+		v.extC0 = null;
+		v.extC1 = null;
+		v.extC2 = null;
+		v.extC3 = null;
+	  }
+	  else{
+	    v.extRC = new Vec3(view.getRotationCenter());
+	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin().plus(view.getCamera().getCameraCoordinates().getZDirection().times(0.0001)));
+		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
+		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
+		v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
+		v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
+		v.repaint();
+	  }
     }
-	repaintAllViews();
   }
   
+  public void wipeExtGraphs()
+  {
+	for (ViewerCanvas v : theWindow.getAllViews()){
+		v.extRC = null;
+		v.extCC = null;
+		v.extC0 = null;
+		v.extC1 = null;
+		v.extC2 = null;
+		v.extC3 = null;
+		v.repaint();
+    }
+  }
+
   /** This is used when a SceneCamera moves in the scene */
   private void repaintAllViews()
   {
 	ViewerCanvas[] views = theWindow.getAllViews();
 	for (ViewerCanvas v : views){
-	  v.viewChanged(false);
       v.repaint();
     }
+  }
+  
+  @Override
+  public void drawOverlay(ViewerCanvas view)
+  {
+     if (view.moving){
+       //view.drawLine(new Point (0,0), new Point (100, 100), Color.MAGENTA);
+	 }
   }
 }

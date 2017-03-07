@@ -141,7 +141,8 @@ public class Camera implements Cloneable
 	
 	// Zero does not work. Things VERY close to the camera don't get calculated correctly.
 	// But setting it to  1.0 was blunt....
-    frontClipPlane = 0.05;
+	// Actually ~below 1.0 the grid starts to make mess...
+    frontClipPlane = 0.01;
     perspective = true;
   }
   

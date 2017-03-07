@@ -96,22 +96,6 @@ public abstract class ObjectViewer extends ViewerCanvas
     }
     return new double [] {min, max};
   }
-
-  @Override
-  public void centerToPoint(Point pointOnView)
-  {	
-	ClickedPointFinder finder = new ClickedPointFinder();
-	Vec3 pointInSpace = finder.newPoint(this, pointOnView);
-
-    Mat4 t = this.getDisplayCoordinates().fromLocal();
-	pointInSpace = t.times(pointInSpace);
-
-	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate(); 
-	Vec3 cz = coords.getZDirection();
-	Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
-	coords.setOrigin(cp);
-	animation.start(this, coords, pointInSpace, scale, orientation);
-  }
   
   @Override
   public void viewChanged(boolean selectionOnly)
@@ -241,6 +225,12 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     // Finish up.
 
+    drawBorder(); // Why?
+	currentTool.drawOverlay(this);
+	if (activeTool != null)
+		activeTool.drawOverlay(this);
+	drawNavigationGraphics();
+	drawScrollGraphics();
     drawBorder();
     if (showAxes)
       drawCoordinateAxes();
@@ -468,6 +458,21 @@ public abstract class ObjectViewer extends ViewerCanvas
       activeTool.mouseDragged(e, this);
   }
 
+  /** Subclasses may need to override to handle local coordinates */
+  @Override
+  public void centerToPoint(Point pointOnView)
+  {
+	Vec3 pointInSpace = finder.newPoint(this, pointOnView);
+	CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate(); 
+	Vec3 cz = coords.getZDirection();
+	if (perspective)
+		distToPlane = coords.getOrigin().minus(pointInSpace).length();
+	Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
+	coords.setOrigin(cp);
+	if (getUseWorldCoords())
+		theCamera.getObjectToWorld().times(pointInSpace);
+	animation.start(this, coords, pointInSpace, scale, orientation);
+  }
   public void previewObject()
   {
     Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();

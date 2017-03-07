@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications Copyright (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -152,18 +153,22 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     index2 = bounds.width-1;
     int black = 0xFF000000;
     int line = ViewerCanvas.lineColor.getRGB();
+
     for (i = 0; i < bounds.height; i++, index1 += bounds.width, index2 += bounds.width)
     {
       pixel[index1] = pixel[index2] = black;
       if (drawFocus)
-        pixel[index1+1] = pixel[index2-1] = line;
+        //pixel[index1+1] = pixel[index2-1] = line;
+        pixel[index1+1] = pixel[index2-1] = Color.GREEN.getRGB();
     }
     index1 = bounds.width*(bounds.height-1);
     for (i = 1; i < bounds.width-1; i++)
     {
       pixel[i] = pixel[index1+i] = black;
-      if (drawFocus)
-        pixel[i+bounds.width] = pixel[index1+i-bounds.width] = line;
+      if (drawFocus){
+        //pixel[i+bounds.width] = pixel[index1+i-bounds.width] = line;
+        pixel[i+bounds.width] = pixel[index1+i-bounds.width] = Color.GREEN.getRGB();
+	  }
     }
   }
 
@@ -290,6 +295,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
         if (dx > 0)
           {
             x = x1;
+			
             y = y1<<16+32768;
             dy = (dy<<16)/dx;
             end = x2 < bounds.width ? x2 : bounds.width;

@@ -48,14 +48,14 @@ public class ViewerNavigationControl implements ViewerControl
       super(new String [] {
         Translate.text("ModelSpace"),
         Translate.text("ModelLandscape"),
-        //Translate.text("TravelSpace"),
-        //Translate.text("TravelLandscape")
+        Translate.text("TravelSpace"),
+        Translate.text("TravelLandscape")
       });
       this.view = view;
       setSelectedIndex(0);
       addEventLink(ValueChangedEvent.class, this, "valueChanged");
       view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
-      setPreferredVisibleRows(2); // More than we have, just in case...
+      setPreferredVisibleRows(4);
     }
 	
 	private void valueChanged()
@@ -68,12 +68,7 @@ public class ViewerNavigationControl implements ViewerControl
     {
       if (view.getNavigationMode() != getSelectedIndex())
       {
-	    if (view.getNavigationMode() > 1) // make it '> 3' for travel modes.
-		  setEnabled(false);
-	    else{
-		  setEnabled(true);
           setSelectedIndex(view.getNavigationMode());
-		}
       }
     }
   }

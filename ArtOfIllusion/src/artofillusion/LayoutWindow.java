@@ -21,6 +21,7 @@ import artofillusion.object.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
+import artofillusion.view.ViewAnimation;
 import artofillusion.keystroke.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -122,11 +123,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
 	  theView[i].setNavigationMode(1);
+	  theView[i].setViewAnimation(new ViewAnimation(this));
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    theView[3].setOrientation(6);
     theView[3].setPerspective(true);
+    theView[3].setOrientation(6);
 
     theView[currentView].setDrawFocus(true);
     viewsContainer = new FormContainer(new double [] {1, 1}, new double [] {1, 1});

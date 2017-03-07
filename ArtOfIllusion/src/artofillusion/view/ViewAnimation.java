@@ -11,9 +11,12 @@
 package artofillusion.view;
 
 import artofillusion.*;
+import artofillusion.ui.*;
 import artofillusion.math.*;
-import javax.swing.*;
+import artofillusion.object.ObjectInfo;
+import javax.swing.Timer;
 import java.awt.event.*;
+import java.awt.*;
 
 /**
 	ViewAnimation is the animation engine, that is used to produce eg. smooth swithcing between 
@@ -31,16 +34,17 @@ import java.awt.event.*;
 
 public class ViewAnimation
 {	
+	EditingWindow theWindow;
 	boolean animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	double maxDuration = ArtOfIllusion.getPreferences().getMaxAnimationDuration(); // Seconds
 	double displayFrq =  ArtOfIllusion.getPreferences().getAnimationFrameRate();  //Hz
 	double interval = 1.0/displayFrq; //
-	int timerInterval =(int)(interval*950); // to milliseconds but make it 5% ahead of time
+	int timerInterval =(int)(interval*1000);
 
 	int steps = 0, step = 0, firstStep = 1;
 
 	CoordinateSystem startCoords, endCoords, aniCoords;
-	Vec3 rotEnd, rotStart, rotAni, aniZ, aniOrigin;
+	Vec3 endRotationCenter, rotStart, rotAni, aniZ, aniOrigin;
 	ViewerCanvas view;
 	Camera cam;
 	double[] startAngles, endAngles;
@@ -53,6 +57,11 @@ public class ViewAnimation
 	int endOrientation;
 	long msStart, msEnd, ms1st=0, msLast, msLatest;
 
+	public ViewAnimation(EditingWindow win)
+	{
+		theWindow = win;
+	}
+	
 	/* The timer that keeps launcing animation 'frames' */
 
 	private Timer timer = new Timer(timerInterval, new ActionListener() 
@@ -61,33 +70,23 @@ public class ViewAnimation
 			{	
 				timer.setCoalesce(false);
 				if (step > steps)
-				{
 					endAnimation();
-				}
 				else 
-				{
 					animationStep();
-				}
 			}
 		});
 
 	/** 
-	 * Create an animation engine.
-	 * Each view should have one of it's own.
-	 */
-	public void ViewAnimation(){}
-
-	/** 
 	 * Start the animation sequence 
 	 */
-	public void start(ViewerCanvas view, CoordinateSystem newCoords, Vec3 newRotationCenter, double newScale, int newOrientation)
+	public void start(ViewerCanvas view, CoordinateSystem endCoords, Vec3 endRotationCenter, double endScale, int endOrientation)
 	{
 		checkPreferences(); // This only works for the 'animate'
 		this.view = view;
-		endCoords = newCoords;
-		rotEnd = newRotationCenter;		
-		endScale = newScale;
-		endOrientation = newOrientation;
+		this.endCoords = endCoords;
+		this.endRotationCenter = endRotationCenter;		
+		this.endScale = endScale;
+		this.endOrientation = endOrientation;
 		cam = view.getCamera();
 
 		if (! animate){
@@ -103,13 +102,14 @@ public class ViewAnimation
 		startAngles = startCoords.getRotationAngles();
 		endAngles = endCoords.getRotationAngles();
 		startDist = (startCoords.getOrigin().minus(rotStart).length());
-		endDist  = (endCoords.getOrigin().minus(rotEnd).length());
+		endDist  = (endCoords.getOrigin().minus(endRotationCenter).length());
 
-		if (noMove())
+		if (noMove()){
 			return;
+		}
 
 		aniDist = startDist;
-		moveDist = (rotEnd.minus(rotStart).length());
+		moveDist = (endRotationCenter.minus(rotStart).length());
 		step = firstStep;
 
 		// CHECKING ROTATIONS
@@ -143,13 +143,13 @@ public class ViewAnimation
 		if (Math.abs(endAngles[2]-startAngles[2]) > angleMax) angleMax = Math.abs(endAngles[2]-startAngles[2]);
 		
 		timeRot = maxDuration*((1.0-1.0/(1.0+angleMax/180.0*rotSlope)));
-		
+
 		timeScale = 0.0;
 		if (endScale > startScale)
 			timeScale = maxDuration*(1.0-startScale/(startScale+scaleSlope*(endScale-startScale)));
 		if (startScale > endScale)
 			timeScale = maxDuration*(1.0-endScale/(endScale+scaleSlope*(startScale-endScale)));
-	
+
 
 		timeDist = 0.0;
 		if (endDist > startDist)
@@ -178,22 +178,33 @@ public class ViewAnimation
 		// Finding maximum time of the candidates
 		timeAni = 0.0;
 		
-		if(timeAni < timeRot) timeAni = timeRot;
-		if(timeAni < timeScale) timeAni = timeScale;
-		if(timeAni < timeDist) timeAni = timeDist;
+		if (timeAni < timeRot) timeAni = timeRot;
+		if (timeAni < timeScale) timeAni = timeScale;
+		if (timeAni < timeDist) timeAni = timeDist;
 		if (timeRot == 0.0)
-			if(timeAni < timeMove) timeAni = timeMove;
+			if (timeAni < timeMove) timeAni = timeMove;
 				
 		if (timeAni == 0.0) // zero for time = nothing moves & division by zero next --> Blank view.
+		{
+			endAnimation();
 			return;
+		}
 		
 		steps = (int)(timeAni/interval);		
 		scalingFactor = Math.pow((endScale/startScale),(1.0/steps));
 		distanceFactor = Math.pow((endDist/startDist),(1.0/steps));
 
 		// Now we  know all we need to know to launch the animation sequence.
-		// Restart because the previous move could still be running.	
-		view.setOrientation(ViewerCanvas.VIEW_OTHER); // in case the move is interrupted
+		// Restart because the previous move could still be running.
+		System.out.println("@ diff or" + view.getOrientation() + " " + endOrientation);		
+		if (endOrientation != view.getOrientation())
+		{	
+		  System.out.println("@ if " + view.getOrientation() + " " + endOrientation);		
+
+			//view.setBoundCamera(null); // This should not be needed
+			view.setOrientation(ViewerCanvas.VIEW_OTHER); // in case the move is interrupted
+			view.viewChanged(false);
+		}
 		timer.restart();
 	}
 
@@ -233,7 +244,7 @@ public class ViewAnimation
 		
 		aniDist = aniDist*distanceFactor;
 		
-		rotAni = rotStart.times(startWeightExp).plus(rotEnd.times(endWeightExp));
+		rotAni = rotStart.times(startWeightExp).plus(endRotationCenter.times(endWeightExp));
 		
 		angleX = startAngles[0]*startWeightLin + endAngles[0]*endWeightLin;
 		angleY = startAngles[1]*startWeightLin + endAngles[1]*endWeightLin;
@@ -248,6 +259,7 @@ public class ViewAnimation
 		cam.setCameraCoordinates(aniCoords);
 		view.setScale(view.getScale()*scalingFactor);
 		view.repaint();
+		setExtGraphs();
 		step++;
 	}
 
@@ -256,26 +268,26 @@ public class ViewAnimation
 	private void endAnimation()
 	{
 		timer.stop();
-		view.finishOrientation(endOrientation);
+		view.finishAnimation(endOrientation);
 		cam.setCameraCoordinates(endCoords);
 		view.setScale(endScale);
-		view.setRotationCenter(rotEnd);
-		view.setDistToPlane(endCoords.getOrigin().minus(rotEnd).length()); // It seemed to work withoout this too..
-		view.repaint();
-		//view.updateImage();
-		view.viewChanged(false);
-	}
+		view.setRotationCenter(endRotationCenter);
+		view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work withoout this too... But not with SceneCamera
+		wipeExtGraphs();
+		view.viewChanged(false);	}
 
 	/* Check if there is anything that should move */
 
 	private boolean noMove()
 	{
-		if (! rotStart.equals(rotEnd)) return false;
+		System.out.println(view.getOrientation() + " " + endOrientation);
+		if (! rotStart.equals(endRotationCenter)) return false;
 		if (! startCoords.getOrigin().equals(endCoords.getOrigin())) return false;
 		if (startAngles[0] != endAngles[0]) return false;
 		if (startAngles[1] != endAngles[1]) return false;
 		if (startAngles[2] != endAngles[2]) return false;
 		if (startScale != endScale) return false;
+		if (view.getOrientation() != endOrientation) return false;
 		return true;
 	}
 
@@ -298,4 +310,55 @@ public class ViewAnimation
 		step=0;
 	}
 */
+/*
+  private void setExtGraphs()
+  {
+
+		
+	for (ViewerCanvas v : theWindow.getAllViews()){
+      if (v == view)
+		v.extRC = null;
+	  else{
+	    v.extRC = new Vec3(view.getRotationCenter());
+	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
+		v.repaint();
+	  }
+    }
+  }*/
+  private void setExtGraphs()
+  {
+	if (theWindow == null)
+		return;
+	for (ViewerCanvas v : theWindow.getAllViews()){
+      if (v == view){
+		v.extRC = null;
+		v.extCC = null;
+		v.extC0 = null;
+		v.extC1 = null;
+		v.extC2 = null;
+		v.extC3 = null;
+	  }
+	  else{
+	    v.extRC = new Vec3(view.getRotationCenter());
+	    v.extCC = new Vec3(view.getCamera().getCameraCoordinates().getOrigin());
+		v.extC0 = view.getCamera().convertScreenToWorld(new Point(0, 0), view.getDistToPlane());
+		v.extC1 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, 0), view.getDistToPlane());
+		v.extC2 = view.getCamera().convertScreenToWorld(new Point(0, view.getBounds().height), view.getDistToPlane());
+		v.extC3 = view.getCamera().convertScreenToWorld(new Point(view.getBounds().width, view.getBounds().height), view.getDistToPlane());
+		v.repaint();
+	  }
+    }
+  }
+  public void wipeExtGraphs()
+  {
+	for (ViewerCanvas v : theWindow.getAllViews()){
+		v.extRC = null;
+		v.extCC = null;
+		v.extC0 = null;
+		v.extC1 = null;
+		v.extC2 = null;
+		v.extC3 = null;
+		v.repaint();
+    }
+  }
 }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
+   Modifications Copyright 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,6 +26,7 @@ import java.io.*;
 public class SpotLight extends Light
 {
   double radius, angle, falloff, cosangle, exponent;
+  double distToPlane = Camera.DEFAULT_DISTANCE_TO_SCREEN;
 
   static BoundingBox bounds;
   static WireframeMesh mesh;
@@ -81,6 +83,16 @@ public class SpotLight extends Light
     setRadius(theRadius);
     setAngle(theAngle);
     setFalloff(falloffRate);
+  }
+
+  public double getDistToPlane()
+  {
+	return distToPlane;
+  }
+
+  public void setDistToPlane(double dist)
+  {
+	distToPlane = dist;
   }
 
   public double getRadius()
@@ -211,6 +223,7 @@ public class SpotLight extends Light
     setRadius(in.readDouble());
     setAngle(in.readDouble());
     setFalloff(in.readDouble());
+	//distToPlane = in.readDouble();
     bounds = new BoundingBox(-0.2, 0.2, -0.2, 0.2, -0.2, 0.2);
   }
 
@@ -227,6 +240,7 @@ public class SpotLight extends Light
     out.writeDouble(radius);
     out.writeDouble(angle);
     out.writeDouble(falloff);
+    //out.writeDouble(distToPlane);
   }
 
   @Override

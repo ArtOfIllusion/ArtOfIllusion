@@ -19,21 +19,22 @@ import artofillusion.math.*;
  */
 public class TriangleMath
 {
-	/** Constructor for TriangleProps */
-	public void TriangleMath(){}
+	// Private constructor
+	private TriangleMath() {};
+	
 	
 	//********************************//
 	//*   METHODS FOR 3D TRIANGLES   *//
 	//********************************//
 
 	/** Cross product of two side vectors in 3D*/ 
-	public Vec3 cross(Vec3 A, Vec3 B, Vec3 C)
+	private static Vec3 cross(Vec3 A, Vec3 B, Vec3 C)
 	{
 		return B.minus(A).cross(C.minus(A));
 	}
 
 	/** Triangle normal in 3D space */
-	public Vec3 normal(Vec3 A, Vec3 B, Vec3 C)
+	public static Vec3 normal(Vec3 A, Vec3 B, Vec3 C)
 	{	
 		Vec3 n = cross(A, B, C);
 		n.normalize();
@@ -41,19 +42,19 @@ public class TriangleMath
 	}
 
 	/** Triangle area in 3D-space. Triangle expressed as corner vectors */
-	public double area(Vec3 A, Vec3 B, Vec3 C)
+	public static double area(Vec3 A, Vec3 B, Vec3 C)
 	{
 		return  cross(A, B, C).length() * 0.5;
 	}
 
 	/** Triangle area in 3D-space. Triangle as a RenderingTriangle. */
-	public double area(RenderingTriangle t)
+	public static double area(RenderingTriangle t)
 	{
 		return area(t.theMesh.vert[t.v1], t.theMesh.vert[t.v2], t.theMesh.vert[t.v3]);
 	}
 
 	/** Triangle center in 3D-space. Triangle as corner vectors. */
-	public Vec3 center(Vec3 A, Vec3 B, Vec3 C)
+	public static Vec3 center(Vec3 A, Vec3 B, Vec3 C)
 	{
 		return A.plus(B).plus(C).times(1.0/3.0);
 	}
@@ -62,7 +63,7 @@ public class TriangleMath
 	 *  Barycentric coordinates in 3D space. The point can be anywhere in the space. It will be 
 	 *  treated as projected on the triangle plane
 	 */
-	public double[] bary(Vec3 A, Vec3 B, Vec3 C, Vec3 p)
+	public static double[] bary(Vec3 A, Vec3 B, Vec3 C, Vec3 p)
 	{
 		double[] bary = new double[3];	
 		Vec3 triCross = cross(A, B, C);
@@ -76,7 +77,7 @@ public class TriangleMath
 	/** 
 	 *  Interpolated point on triangle plane in 3D by given barycentic coordinates.
 	 */
-	public Vec3 interpolate(Vec3 A, Vec3 B, Vec3 C, double[] bary)
+	public static Vec3 interpolate(Vec3 A, Vec3 B, Vec3 C, double[] bary)
 	{
 		return A.times(bary[0]).plus(B.times(bary[1])).plus(C.times(bary[3]));
 	}
@@ -84,7 +85,7 @@ public class TriangleMath
 	/** 
 	 *  Interpolated point on a RenderingTriangle plane by given barycentic coordinates.
 	 */
-	public Vec3 interpolate(RenderingTriangle t, double[] bary)
+	public static Vec3 interpolate(RenderingTriangle t, double[] bary)
 	{
 		return interpolate(t.theMesh.vert[t.v1], t.theMesh.vert[t.v2], t.theMesh.vert[t.v3], bary);
 	}
@@ -92,7 +93,7 @@ public class TriangleMath
 	/** 
 	 *  Projection of a point on a triangle plane in 3D. The point can be anywhere in the space.
 	 */
-	public Vec3 project(Vec3 A, Vec3 B, Vec3 C, Vec3 p)
+	public static Vec3 project(Vec3 A, Vec3 B, Vec3 C, Vec3 p)
 	{
 		double[] bary = new double[3];
 		bary = bary(A, B, C, p);
@@ -104,19 +105,19 @@ public class TriangleMath
 	//********************************//
 
 	/** Triangle area in 2D-space. Triangle as corner vectors. */
-	public double area(Vec2 A, Vec2 B, Vec2 C)
+	public static double area(Vec2 A, Vec2 B, Vec2 C)
 	{	
 		return (B.minus(A).cross(C.minus(A)) * 0.5);
 	}
 
 	/** Triangle area in 2D-space. The triangle as Vec2[3]. */
-	public double area(Vec2[] t)
+	public static double area(Vec2[] t)
 	{
 		return (area(t[0], t[1], t[2]));
 	}
 
 	/** Barycentric coordinates in 2D space. The triangle as corner vectors. */
-	public double[] bary(Vec2 A, Vec2 B, Vec2 C, Vec2 p)
+	public static double[] bary(Vec2 A, Vec2 B, Vec2 C, Vec2 p)
 	{
 		double[] bary = new double[3];
 		double wholeArea = area(A, B, C);
@@ -127,7 +128,7 @@ public class TriangleMath
 	}
 
 	/** Barycentric coordinates in 2D space. The triangle as Vec2[3]. */
-	public double[] bary(Vec2[] t, Vec2 p)
+	public static double[] bary(Vec2[] t, Vec2 p)
 	{
 		return bary(t[0], t[1], t[2], p);
 	}

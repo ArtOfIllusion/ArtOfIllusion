@@ -32,6 +32,7 @@ public class SceneViewer extends ViewerCanvas
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
   int deselect;
+  Vec3 nextCenter = new Vec3();
 
   public SceneViewer(Scene s, RowContainer p, EditingWindow fr)
   {
@@ -104,20 +105,41 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-      boundCamera = cameras.elementAt(which-6);
-      CoordinateSystem coords = theCamera.getCameraCoordinates();
-      coords.copyCoords(boundCamera.getCoords());
-      theCamera.setCameraCoordinates(coords);
-      viewChanged(false);
-      repaint();
+		ObjectInfo nextCamera = cameras.elementAt(which-6);
+		CoordinateSystem coords = nextCamera.coords.duplicate();
+
+		if (nextCamera.getObject() instanceof SceneCamera)
+			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
+		else if (nextCamera.getObject() instanceof SpotLight)
+			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
+		else if (nextCamera.getObject() instanceof DirectionalLight)
+			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
+		else
+			return;
+
+		animation.start(this, coords, rotationCenter, 100.0, which);
     }
     else
     {
       boundCamera = null;
+	  orientation = VIEW_OTHER;
       viewChanged(false);
+	  repaint();
     }
   }
-  
+
+  /** 
+  *  ViewAnimation calls this when the animation is finished, 
+  *  so the menu will be up to date.
+  */
+  @Override
+  public void finishAnimation(int which)
+  {
+    if (which > 5  && which < 6+cameras.size())
+		boundCamera = cameras.elementAt(which-6);
+    orientation = which;
+  }
+
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
       but should err on the side of returning bounds that are slightly too large.
       @return the two element array {minDepth, maxDepth}
@@ -281,10 +303,15 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
+	currentTool.drawOverlay(this);
+	if (activeTool != null)
+		activeTool.drawOverlay(this);
+	drawNavigationGraphics();
+	drawScrollGraphics();
     drawBorder();
     if (showAxes)
       drawCoordinateAxes();
-  }
+}
 
   /** Begin dragging a box.  The variable square determines whether the box should be
       constrained to be square. */

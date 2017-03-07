@@ -13,6 +13,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.view.ViewAnimation;
 import artofillusion.keystroke.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -116,21 +117,20 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       theView[i].setShowAxes(lastShowAxes);
       theView[i].setGrid(lastGridSpacing, lastGridSubdivisions, lastShowGrid, lastSnapToGrid);
       theView[i].addEventLink(MousePressedEvent.class, listen);
+	  theView[i].setViewAnimation (new ViewAnimation(this));
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-	theView[3].setPerspective(true);
-	theView[3].setNavigationMode(1);
+    theView[3].setNavigationMode(1);
+    theView[3].setPerspective(true);
     viewsContainer.add(viewPanel[0], 0, 0);
     viewsContainer.add(viewPanel[1], 1, 0);
     viewsContainer.add(viewPanel[2], 0, 1);
     viewsContainer.add(viewPanel[3], 1, 1);
-	theView[currentView].setDrawFocus(true);
+    theView[currentView].setDrawFocus(true);
 
     menubar = new BMenuBar();
     setMenuBar(menubar);
-	//theView[3].viewChanged(false); //No help
-	//updateImage(); //No help
   }
 
   /**
@@ -238,7 +238,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     for (ViewerCanvas view : theView)
       view.repaint();
   }
-
+  
   @Override
   public void setUndoRecord(UndoRecord command)
   {

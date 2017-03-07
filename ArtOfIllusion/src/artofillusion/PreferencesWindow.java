@@ -207,7 +207,7 @@ public class PreferencesWindow
 	panel.add(animationDurationField, 1, 14, widgetLayout);
 	panel.add(animationFrameRateField, 1, 15, widgetLayout);
 	//animationDurationField.setEnabled(false);
-	animationFrameRateField.setEnabled(false);
+	//animationFrameRateField.setEnabled(false);
     return panel;
   }
 

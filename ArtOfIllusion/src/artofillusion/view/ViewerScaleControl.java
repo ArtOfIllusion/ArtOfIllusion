@@ -14,6 +14,7 @@ import buoy.widget.*;
 import buoy.event.*;
 import artofillusion.*;
 import artofillusion.ui.*;
+import artofillusion.math.*;
 
 /**
  * This is a ViewerControl for adjusting the scale of the view.
@@ -31,7 +32,10 @@ public class ViewerScaleControl implements ViewerControl
       void processEvent()
       {
         if (view.isPerspective() || view.getBoundCamera() != null)
-          scaleField.setEnabled(false);
+		{
+          //scaleField.setEnabled(false);
+		  scaleField.setValue(view.getDistToPlane());
+		}
         else
         {
           scaleField.setEnabled(true);
@@ -43,12 +47,41 @@ public class ViewerScaleControl implements ViewerControl
     scaleField.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
-        view.setScale(scaleField.getValue());
+  		// This should be animated, but can not at the moment:
+		// The animation starts at first digit and as the animaton starts 
+		// the value begins to change, before you have finished writing.
+
+		if (! view.isPerspective())
+		{
+          view.setScale(scaleField.getValue());
+		  view.repaint(); 
+		}
+		else
+		{
+			view.setDistToPlane(scaleField.getValue());
+			if (view.getNavigationMode() == 0 || view.getNavigationMode() == 1)
+			{
+				CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
+				Vec3 rc = view.getRotationCenter();
+				Vec3 cc = rc.plus(coords.getZDirection().times(-view.getDistToPlane()));
+				coords.setOrigin(cc);
+				view.getCamera().setCameraCoordinates(coords);
+				view.repaint();
+				
+				// view.getViewAnimation().start(view, coords, rc, view.getScale(), view.getOrientation());
+			}
+			else
+			{
+				CoordinateSystem coords = view.getCamera().getCameraCoordinates().duplicate();
+				Vec3 rc = coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane()));
+				view.setRotationCenter(rc);
+				view.repaint();
+			}
+		}
       }
     });
     return scaleField;
   }
-
 
   @Override
   public String getName()

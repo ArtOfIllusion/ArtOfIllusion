@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications copyright (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,13 +17,14 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.util.*;
 
 /** The CSGEditorWindow class represents the window for editing CSGObjects. */
 
 public class CSGEditorWindow extends ObjectEditorWindow
 {
   private CSGObject oldObject, theObject;
-  private BMenuItem undoItem, redoItem, objectMenuItem[], templateItem, axesItem, splitViewItem;
+  private BMenuItem undoItem, redoItem, objectMenuItem[], templateItem, axesItem, splitViewItem, fitToSelItem;
   private BCheckBoxMenuItem displayItem[];
   private Scene theScene;
   private Runnable onClose;
@@ -46,7 +48,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "doCancel"));
     content.add(buttons, 0, 2, 2, 1, new LayoutInfo());
-    content.add(tools = new ToolPalette(1, 5), 0, 0);
+    content.add(tools = new ToolPalette(1, 5, this), 0, 0);
     EditingTool metaTool, altTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));
@@ -127,7 +129,12 @@ public class CSGEditorWindow extends ObjectEditorWindow
       viewMenu.addSeparator();
       viewMenu.add(Translate.menuItem("renderPreview", this, "renderPreviewCommand"));
     }
-  }
+    viewMenu.addSeparator();
+	
+    viewMenu.add(fitToSelItem = Translate.menuItem("fitToSelection", this, "fitToSelectedCommand"));
+    viewMenu.add(Translate.menuItem("fitToAll", this, "fitToBooleanCommand"));
+    viewMenu.add(Translate.menuItem("alignWithClosestAxis", this, "closestAxisCommand"));
+}
 
   /* EditingWindow methods. */
 
@@ -151,6 +158,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
     displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
     displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
+	fitToSelItem.setEnabled(selected.length > 0);
   }
 
   @Override
@@ -595,5 +603,30 @@ public class CSGEditorWindow extends ObjectEditorWindow
     rend.configurePreview();
     ObjectInfo cameraInfo = new ObjectInfo(new SceneCamera(), theCamera.getCameraCoordinates(), "");
     new RenderingDialog(this, rend, sc, theCamera, cameraInfo);
+  }
+  
+  /** Fit the active view to the selected object(s) */
+  public void fitToSelectedCommand()
+  {
+	int selected[] = theScene.getSelection();
+
+	if (selected.length == 0)
+		return;
+
+	ArrayList selection = new ArrayList<ObjectInfo>();
+	
+	// This did not work if only object 1 was selected. Strange bug.
+	//for (int s : selected)
+
+	for (int s = 0; s < selected.length; s++)
+		selection.add(theScene.getObject(selected[s]));
+
+    getView().fitToObjects(selection);
+  }
+
+  /** Fit the active view to the whole boolean */
+  public void fitToBooleanCommand()
+  {
+    getView().fitToObjects(theScene.getAllObjects());
   }
 }

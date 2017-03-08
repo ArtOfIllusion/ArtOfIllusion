@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -91,7 +92,7 @@ public class CreateLightTool extends EditingTool
     Vec3 orig, ydir, zdir;
     Object3D obj;
 
-    orig = cam.convertScreenToWorld(clickPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN);
+    orig = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     if (dragPoint == null)
       {
         ydir = new Vec3(0.0, 1.0, 0.0);
@@ -101,7 +102,7 @@ public class CreateLightTool extends EditingTool
     else
       {
         dragPoint = e.getPoint();
-        zdir = cam.findDragVector(cam.convertScreenToWorld(clickPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN),
+        zdir = cam.findDragVector(cam.convertScreenToWorld(clickPoint, view.getDistToPlane()),
                 dragPoint.x-clickPoint.x, dragPoint.y-clickPoint.y);
         zdir.normalize();
         ydir = cam.getViewToWorld().times(Vec3.vz());

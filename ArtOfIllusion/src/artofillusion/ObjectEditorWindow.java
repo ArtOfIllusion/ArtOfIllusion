@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.view.ViewAnimation;
 import artofillusion.keystroke.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -45,7 +47,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   protected static boolean lastShowAxes, lastShowGrid, lastSnapToGrid;
   protected static int lastNumViews = 4, lastGridSubdivisions = 10;
   protected static double lastGridSpacing = 1.0;
-
+  protected ScrollViewTool scrollTool;
+  
   public ObjectEditorWindow(EditingWindow parent, String title, ObjectInfo obj)
   {
     super(title);
@@ -116,15 +119,28 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       theView[i].setShowAxes(lastShowAxes);
       theView[i].setGrid(lastGridSpacing, lastGridSubdivisions, lastShowGrid, lastSnapToGrid);
       theView[i].addEventLink(MousePressedEvent.class, listen);
+	  theView[i].setViewAnimation (new ViewAnimation(this, theView[i]));
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    theView[3].setPerspective(true);
-    theView[currentView].setDrawFocus(true);
-    viewsContainer.add(viewPanel[0], 0, 0);
+    theView[3].setNavigationMode(1,true);
+    //theView[3].setPerspective(true);
+	
+	/* 
+	   I wonder if this would have any side effects?
+	   At least this way it will be in the sub classes, including plugins.
+	*/
+	scrollTool = new ScrollViewTool(this);
+	for (ViewerCanvas v : theView)
+		v.setScrollTool(scrollTool);
+
+	viewsContainer.add(viewPanel[0], 0, 0);
     viewsContainer.add(viewPanel[1], 1, 0);
     viewsContainer.add(viewPanel[2], 0, 1);
     viewsContainer.add(viewPanel[3], 1, 1);
+
+    theView[currentView].setDrawFocus(true);
+
     menubar = new BMenuBar();
     setMenuBar(menubar);
   }
@@ -210,6 +226,21 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     currentTool = tool;
   }
 
+  /** When a tool gets selected in the tool palette, notify the UI.
+      It may be possible, that some options need to be disabled/changed etc.  */
+
+  public void toolChanged(EditingTool tool)
+  {
+    for (ViewerCanvas v:theView)
+	{
+		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+			v.navigationTravelEnabled = false;
+		else
+			v.navigationTravelEnabled = true;
+		v.viewChanged(false); // This should do nothing now...
+	}
+  }
+
   @Override
   public boolean confirmClose()
   {
@@ -234,7 +265,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     for (ViewerCanvas view : theView)
       view.repaint();
   }
-
+  
   @Override
   public void setUndoRecord(UndoRecord command)
   {
@@ -414,6 +445,12 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       theView[i].setGrid(lastGridSpacing, lastGridSubdivisions, lastShowGrid, lastSnapToGrid);
     savePreferences();
     updateImage();
+  }
+  
+  /** Align the view with the closest main axix directions */
+  public void closestAxisCommand()
+  {
+    getView().alignWithClosestAxis();
   }
 
   /** Undo the most recent action. */

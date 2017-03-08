@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
+   Modifications copyright (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -52,7 +53,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     FormContainer toolsContainer = new FormContainer(new double [] {1}, new double [] {1, 0});
     toolsContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.BOTH));
     content.add(toolsContainer, 0, 0);
-    toolsContainer.add(tools = new ToolPalette(1, 9), 0, 0);
+    toolsContainer.add(tools = new ToolPalette(1, 9, this), 0, 0);
     EditingTool metaTool, altTool, compoundTool;
     tools.addTool(defaultTool = new ReshapeMeshTool(this, this));
     tools.addTool(new ScaleMeshTool(this, this));
@@ -408,6 +409,14 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     skeletonMenuItem[2].setEnabled(selJoint != null);
     skeletonMenuItem[4].setEnabled(count > 0);
     skeletonMenuItem[5].setEnabled(selJoint != null);
+	
+	// This should go to the super class, but some plugin editors can not handle it
+	boolean selected[] = getSelection();
+	boolean enable = (view.getSelectedJoint() > 0);
+	for (int i = 0; i < selected.length; i++)
+		enable = (selected[i] ? true : enable);
+	fitToSelItem.setEnabled(enable);
+
   }
 
   /** Add an extra texture parameter to the mesh which will be used for keeping track of

@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-
+   Modifications copyright (C) 2017 Petri Ihalainen
+   
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -14,6 +15,7 @@ import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import artofillusion.view.ClickedPointFinder;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -95,7 +97,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     }
     return new double [] {min, max};
   }
-
+  
   @Override
   public void viewChanged(boolean selectionOnly)
   {
@@ -190,11 +192,13 @@ public abstract class ObjectViewer extends ViewerCanvas
         drawImage(renderedImage, 0, 0);
       else
         viewChanged(false);
+      drawOverlay();
       drawBorder();
       if (showAxes)
         drawCoordinateAxes();
       return;
     }
+
     super.updateImage();
     if (controller.getObject() == null)
       return;
@@ -224,9 +228,13 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     // Finish up.
 
-    drawBorder();
+    drawOverlay();
+	currentTool.drawOverlay(this);
+	if (activeTool != null)
+		activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
+    drawBorder();
   }
 
   protected abstract void drawObject();
@@ -300,6 +308,19 @@ public abstract class ObjectViewer extends ViewerCanvas
   {
     useWorldCoords = use;
     viewChanged(false);
+  }
+
+  /** Set orientation of this view */
+
+  public void setOrientation (int which)
+  {
+    if (which < 6)
+	  super.setOrientation(which);
+	else
+	{
+	  orientation = VIEW_OTHER;
+	  viewChanged(false);
+	}
   }
 
   /** Begin dragging a selection region.  The variable square determines whether
@@ -486,4 +507,13 @@ public abstract class ObjectViewer extends ViewerCanvas
     theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
+  
+   	@Override
+	protected void mouseMoved(MouseMovedEvent e)
+	{
+		mouseMoving = true;
+		mousePoint = e.getPoint();
+		mouseMoveTimer.restart();
+		((EditingWindow)controller).updateImage();
+	}
 }

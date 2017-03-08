@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications Copyright (C) Petri Ihalainen 2016
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,7 +35,9 @@ public abstract class MeshViewer extends ObjectViewer
     lockedJoints = new Vector<Integer>();
   }
 
-  /** Get the ID of the selected joint. */
+  /** 
+   *  Get the ID of the selected joint. If no joint is selected return 0.
+   */
 
   public int getSelectedJoint()
   {
@@ -185,5 +188,90 @@ public abstract class MeshViewer extends ObjectViewer
       range[1] = Math.max(range[1], depth);
     }
     return range;
+  }
+
+  /**
+   *  Fit view to the selected MeshVertices OR the entire mesh.
+   *
+   *  @param selection set to true, fits to selected vertices.
+   *  
+   *  If a bone is selected instead of vertices direct the request to fitToBone()
+   */
+ 
+  @Override
+  public void fitToVertices(MeshEditorWindow w, boolean selection)
+  {
+	if (!selection) // Called by fitToAll
+		super.fitToVertices(w,  selection);
+	else
+	{
+		boolean anyVertices, anyJoint;
+		boolean selected[] = w.getSelection();
+		anyJoint = anyVertices = false;
+		
+		for (int i = 0; i < selected.length; i++)
+			anyVertices = (selected[i] ? true : anyVertices);
+		anyJoint = (selectedJoint > 0);
+		
+		if (currentTool instanceof SkeletonTool)
+			if (anyJoint)
+				fitToBone(w.getObject());
+			else
+				super.fitToVertices(w,  selection);
+		else
+			if (anyVertices)
+				super.fitToVertices(w,  selection);
+			else
+				fitToBone(w.getObject());
+	}
+  }
+
+  /**
+   *   Fit to the selected joint and it's parent. Parent may be null.
+   */ 
+  @Override
+  public void fitToBone(ObjectInfo info)
+  {
+    int jointNumber;
+	Joint selected, parent;
+	Vec3  v1, v2, newCenter;
+	double boneLength;
+
+    jointNumber = getSelectedJoint();
+	if (jointNumber == 0)
+		return;
+
+	selected = info.getSkeleton().getJoint(jointNumber);
+	v1 = selected.coords.getOrigin();
+	parent = selected.parent;
+	if (parent != null)
+	{
+	  v2 = parent.coords.getOrigin();
+	  newCenter = v1.plus(v2).times(0.5);
+	  boneLength = v1.distance(v2);
+	}
+	else
+	{
+	  newCenter = v1;
+	  boneLength = 0.01;
+	}
+
+	CoordinateSystem newCoords = theCamera.getCameraCoordinates().duplicate();
+	int d = Math.min(getBounds().width, getBounds().height);
+
+	if (perspective)
+	{
+		double newDistToPlane = 2000 / (double)d / 0.9 * boneLength;
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane)));
+
+		animation.start(newCoords, newCenter, scale, orientation, navigation);
+	}
+	else
+	{
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
+		double newScale = (double)d * 0.9 / boneLength; // with minimum 5% margins
+
+		animation.start(newCoords, newCenter, newScale, orientation, navigation);
+	}
   }
 }

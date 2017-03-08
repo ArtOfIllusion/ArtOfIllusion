@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Modifications Copyright 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,6 +27,7 @@ import java.io.*;
 public class SceneCamera extends Object3D
 {
   private double fov, depthOfField, focalDist;
+  private double distToPlane = Camera.DEFAULT_DISTANCE_TO_SCREEN;
   private boolean perspective;
   private ImageFilter filter[];
   private int extraComponents;
@@ -34,10 +36,10 @@ public class SceneCamera extends Object3D
   private static WireframeMesh mesh;
   private static final int SEGMENTS = 8;
   private static final Property PROPERTIES[] = new Property [] {
-    new Property(Translate.text("fieldOfView"), 0.0, 180.0, 30.0),
+      new Property(Translate.text("fieldOfView"), 0.0, 180.0, 30.0),
       new Property(Translate.text("depthOfField"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN/2.0),
       new Property(Translate.text("focalDist"), Double.MIN_VALUE, Double.MAX_VALUE, Camera.DEFAULT_DISTANCE_TO_SCREEN),
-      new Property(Translate.text("Perspective"), true)
+      new Property(Translate.text("Perspective"), true),
   };
 
   static
@@ -133,6 +135,16 @@ public class SceneCamera extends Object3D
     focalDist = Camera.DEFAULT_DISTANCE_TO_SCREEN;
     perspective = true;
     filter = new ImageFilter [0];
+  }
+
+  public double getDistToPlane()
+  {
+	return distToPlane;
+  }
+
+  public void setDistToPlane(double dist)
+  {
+	distToPlane = dist;
   }
 
   public double getFieldOfView()
@@ -319,6 +331,7 @@ public class SceneCamera extends Object3D
   {
     SceneCamera sc = new SceneCamera();
 
+	sc.distToPlane = distToPlane;
     sc.fov = fov;
     sc.depthOfField = depthOfField;
     sc.focalDist = focalDist;
@@ -334,6 +347,7 @@ public class SceneCamera extends Object3D
   {
     SceneCamera sc = (SceneCamera) obj;
 
+	sc.distToPlane = distToPlane;
     fov = sc.fov;
     depthOfField = sc.depthOfField;
     focalDist = sc.focalDist;
@@ -510,6 +524,7 @@ public class SceneCamera extends Object3D
     short version = in.readShort();
     if (version < 0 ||version > 2)
       throw new InvalidObjectException("");
+	//distToPlane = in.readDouble();
     fov = in.readDouble();
     depthOfField = in.readDouble();
     focalDist = in.readDouble();
@@ -545,6 +560,7 @@ public class SceneCamera extends Object3D
     super.writeToFile(out, theScene);
 
     out.writeShort(2);
+	//out.writeDouble(distToPlane);
     out.writeDouble(fov);
     out.writeDouble(depthOfField);
     out.writeDouble(focalDist);

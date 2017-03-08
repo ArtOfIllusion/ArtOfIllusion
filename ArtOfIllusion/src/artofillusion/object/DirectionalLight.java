@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Modifications Copyright 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,7 +25,7 @@ import java.io.*;
 public class DirectionalLight extends Light
 {
   private double radius;
-
+  double distToPlane = Camera.DEFAULT_DISTANCE_TO_SCREEN;
   static BoundingBox bounds;
   static WireframeMesh mesh;
   static final int SEGMENTS = 8;
@@ -71,12 +72,14 @@ public class DirectionalLight extends Light
   public DirectionalLight(RGBColor theColor, float theIntensity)
   {
     this(theColor, theIntensity, 1.0);
+	//setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
 
   public DirectionalLight(RGBColor theColor, float theIntensity, double theRadius)
   {
     setParameters(theColor.duplicate(), theIntensity, TYPE_NORMAL, 0.5f);
     setRadius(theRadius);
+	//setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
 
   @Override
@@ -98,6 +101,16 @@ public class DirectionalLight extends Light
   public BoundingBox getBounds()
   {
     return bounds;
+  }
+
+  public double getDistToPlane()
+  {
+	return distToPlane;
+  }
+
+  public void setDistToPlane(double dist)
+  {
+	distToPlane = dist;
   }
 
   /** A DirectionalLight has no size.  Hence, calls to setSize() are ignored. */
@@ -169,6 +182,7 @@ public class DirectionalLight extends Light
       throw new InvalidObjectException("");
     setParameters(new RGBColor(in), in.readFloat(), version == 0 ? TYPE_NORMAL : in.readShort(), 0.0f);
     setRadius(version > 1 ? in.readDouble() : 0.0);
+	//distToPlane = in.readDouble();
     bounds = new BoundingBox(-0.15, 0.15, -0.15, 0.15, -0.15, 0.25);
   }
 
@@ -182,6 +196,8 @@ public class DirectionalLight extends Light
     out.writeFloat(intensity);
     out.writeShort(type);
     out.writeDouble(radius);
+    //out.writeDouble(distToPlane);
+	
   }
 
   @Override

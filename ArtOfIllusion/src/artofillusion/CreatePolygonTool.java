@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -134,8 +135,8 @@ public class CreatePolygonTool extends EditingTool
         for (int i = 0; i < points.length; i++)
           s[i] = 1.0f;
       }
-    orig = cam.convertScreenToWorld(new Point((int) centerx, (int) centery), Camera.DEFAULT_DISTANCE_TO_SCREEN, false);
-    temp = cam.convertScreenToWorld(new Point(1+(int) centerx, (int) centery), Camera.DEFAULT_DISTANCE_TO_SCREEN, false);
+    orig = cam.convertScreenToWorld(new Point((int) centerx, (int) centery), view.getDistToPlane(), false);
+    temp = cam.convertScreenToWorld(new Point(1+(int) centerx, (int) centery), view.getDistToPlane(), false);
     scale = temp.minus(orig).length();
     for (int i = 0; i < points.length; i++)
       vertex[i] = new Vec3(scale*(points[i].x-centerx), -scale*(points[i].y-centery), 0.0);

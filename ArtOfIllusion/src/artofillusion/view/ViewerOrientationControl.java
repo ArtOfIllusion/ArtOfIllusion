@@ -28,7 +28,6 @@ public class ViewerOrientationControl implements ViewerControl
     return new OrientationChoice(view);
   }
 
-
   @Override
   public String getName()
   {
@@ -64,7 +63,7 @@ public class ViewerOrientationControl implements ViewerControl
       if (view.getOrientation() != getSelectedIndex())
       {
         if (view.getOrientation() < getItemCount())
-          setSelectedIndex(view.getOrientation());
+         setSelectedIndex(view.getOrientation());
         else
           setSelectedIndex(getItemCount()-1);
       }

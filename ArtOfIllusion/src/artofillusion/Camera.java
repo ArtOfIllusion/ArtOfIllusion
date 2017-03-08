@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -52,22 +53,28 @@ public class Camera implements Cloneable
   }
 
   /**
-   * Set the distance from the camera to the screen.
+   * Set the distance from the 'camera lens' to the 'camera screen'.
    *
-   * @deprecated use setScreenParams() instead
+   * The distToScreen parameter controls the perpective strength. 'Screen' should be understood
+   * to repserent the screen of a camera obscura, when the view is in perspective mode. 
+   * A smaller value means stronger perspective and vice versa. In parallel mode this 
+   * parameter has no meaning. 
+   *
+   * It is also used to track mouse moves from computer screen to scene. Hence the moves need to 
+   * be corrected to match the desired distance to draving plane: 
+   * <pre>
+   *   Vec2 mouseMove;
+   *   Vec3 sceneMove;
+   *   sceneMove = mouseMove.times(ViewerCanvas.getDistToPlane/Camera.getDistToScreen());
+   * </pre>
    */
 
   public void setDistToScreen(double dist)
   {
-    double oldScale = scale/distToScreen;
-    
     distToScreen = dist;
-    frontClipPlane = dist/20.0;
-    if (perspective)
-      setScreenParams(viewDist, oldScale, hres, vres);
-    else
-      setScreenParamsParallel(scale, hres, vres);
   }
+  
+  /** Get the perspective strength parameter */
   
   public double getDistToScreen()
   {
@@ -123,19 +130,25 @@ public class Camera implements Cloneable
     worldToScreen = viewToScreen.times(worldToView);
     objectToScreen = worldToScreen.times(objectToWorld);
   }
-  
+
   /**
    * Set the camera to perspective mode with the specified parameters.
    */
 
   public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
   {
-    viewDist = newViewDist;
+    viewDist = newViewDist; // = always 0.0
     scale = newScale*distToScreen;
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
+
+	// From user's point of view 0.0 would be perfect. On SWC that works for objects 
+	// but not for grid. GLCanvasDrawer ignores ignores this setting entirely.
+	// I'd like to be able to go 1E-5 or smaller.
+	
     frontClipPlane = distToScreen/20.0;
+    //frontClipPlane = 0.05; 
     perspective = true;
   }
   
@@ -398,14 +411,14 @@ public class Camera implements Cloneable
   public static final int VISIBLE = 2;
 
   /** Given a bounding box (specified in object coordinates), determine whether the object is
-  visible.  It returns one of the following values:
-  <ul>
-  <li>NOT_VISIBLE: The entire bounding box is offscreen.  The object does not need to be drawn.</li>
-  <li>NEEDS_CLIPPING: The object is partly visible, but at least one corner of the box lies
-  in front of the clipping plane.  It should be drawn using the clipping drawing routines.</li>
-  <li>VISIBLE: The object is entirely in front of the viewer, and can be drawn with the
-  faster (non-clipping) drawing routines.</li>
-  </ul>
+      visible.  It returns one of the following values:
+      <ul>
+      <li>NOT_VISIBLE: The entire bounding box is offscreen.  The object does not need to be drawn.</li>
+      <li>NEEDS_CLIPPING: The object is partly visible, but at least one corner of the box lies
+      in front of the clipping plane.  It should be drawn using the clipping drawing routines.</li>
+      <li>VISIBLE: The object is entirely in front of the viewer, and can be drawn with the
+      faster (non-clipping) drawing routines.</li>
+      </ul>
   */
 
   public int visibility(BoundingBox bb)

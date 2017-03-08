@@ -1,5 +1,6 @@
-/* Copyright (C) 1999-2016 by Peter Eastman and Petri Ihalainen
+/* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,6 +20,7 @@ import artofillusion.object.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
+import artofillusion.view.ViewAnimation;
 import artofillusion.keystroke.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -59,7 +61,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   BMenuItem fileMenuItem[], editMenuItem[], objectMenuItem[], toolsMenuItem[], viewMenuItem[];
   BMenuItem animationMenuItem[], popupMenuItem[];
   BCheckBoxMenuItem displayItem[];
-  BRadioButtonMenuItem viewModeItem[];
   BPopupMenu popupMenu;
   UndoStack undoStack;
   int numViewsShown, currentView;
@@ -119,11 +120,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(MousePressedEvent.class, listen);
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
+	  theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
+	  theView[i].setNavigationMode(1,false);
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    theView[3].setOrientation(6);
-    theView[3].setPerspective(true);
+    //theView[3].setPerspective(true);
+    theView[3].setOrientation(6); // This shiuld be mde to take care of the perspectivebusiness...
+
     theView[currentView].setDrawFocus(true);
     viewsContainer = new FormContainer(new double [] {1, 1}, new double [] {1, 1});
     viewsContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
@@ -163,8 +167,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     // Build the tool palette.
 
-    tools = new ToolPalette(2, 7);
+    tools = new ToolPalette(2, 7, this);
     EditingTool metaTool, altTool, defaultTool, compoundTool;
+	ScrollViewTool scrollTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));
     tools.addTool(new ScaleObjectTool(this));
@@ -179,6 +184,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     tools.addTool(new CreateLightTool(this));
     tools.addTool(metaTool = new MoveViewTool(this));
     tools.addTool(altTool = new RotateViewTool(this));
+
+	// Scroll tool does not go to the pallette.
+    scrollTool = new ScrollViewTool(this);
+
     if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
       defaultTool = compoundTool;
     tools.setDefaultTool(defaultTool);
@@ -186,7 +195,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);
+      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
     }
 
     // Fill in the left hand panel.
@@ -479,7 +488,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     editMenu = Translate.menu("edit");
     menubar.add(editMenu);
-    editMenuItem = new BMenuItem [9];
+    editMenuItem = new BMenuItem [10];
     editMenu.add(editMenuItem[0] = Translate.menuItem("undo", this, "undoCommand"));
     editMenu.add(editMenuItem[1] = Translate.menuItem("redo", this, "redoCommand"));
     editMenu.addSeparator();
@@ -490,8 +499,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenu.add(editMenuItem[6] = Translate.menuItem("selectChildren", this, "actionPerformed"));
     editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
     editMenu.addSeparator();
-    editMenu.add(editMenuItem[7] = Translate.menuItem("duplicate", this, "duplicateCommand"));
-    editMenu.add(editMenuItem[8] = Translate.menuItem("sever", this, "severCommand"));
+    editMenu.add(editMenuItem[7] = Translate.menuItem("unselectAll", this, "clearSelection"));
+    editMenu.addSeparator();
+    editMenu.add(editMenuItem[8] = Translate.menuItem("duplicate", this, "duplicateCommand"));
+    editMenu.add(editMenuItem[9] = Translate.menuItem("sever", this, "severCommand"));
     editMenu.addSeparator();
     editMenu.add(Translate.menuItem("preferences", this, "preferencesCommand"));
   }
@@ -547,8 +558,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     });
 	
     toolsMenu = Translate.menu("tools");
-    menubar.add(toolsMenu);
-	
+    menubar.add(toolsMenu);	
     toolsMenuItem = new BMenuItem [modellingTools.size()];
     for (int i = 0; i < modellingTools.size(); i++)
       {
@@ -570,12 +580,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   */
   private void createViewMenu()
   {
-    BMenu displayMenu;
-	
+    BMenu displayMenu, navigationMenu;
+
     viewMenu = Translate.menu("view");	
 	menubar.add(viewMenu);
-	viewMenuItem = new BMenuItem [5];	
-	
+	viewMenuItem = new BMenuItem [8];	
+
 	viewMenu.add(displayMenu = Translate.menu("displayMode"));
     displayItem = new BCheckBoxMenuItem [6];
     displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
@@ -584,7 +594,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
     displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
     displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
-	
+
     viewMenu.add(viewMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
     viewMenu.add(viewMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
     viewMenu.add(Translate.menuItem("grid", this, "setGridCommand"));
@@ -592,8 +602,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     viewMenu.add(viewMenuItem[3] = Translate.menuItem("showTemplate", this, "actionPerformed"));
     viewMenu.add(Translate.menuItem("setTemplate", this, "setTemplateCommand"));
     viewMenu.addSeparator();
-    viewMenu.add(viewMenuItem[4] = Translate.menuItem("frameSelection", this, "actionPerformed"));
-    viewMenu.add(Translate.menuItem("frameScene", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[4] = Translate.menuItem("fitToSelection", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[5] = Translate.menuItem("fitToAll", this, "actionPerformed"));
+    viewMenu.add(viewMenuItem[6] = Translate.menuItem("alignWithClosestAxis", this, "actionPerformed"));
+    //viewMenu.addSeparator();
+    //viewMenu.add(viewMenuItem[7] = Translate.menuItem("viewSettings", this, "actionPerformed"));
   }
 
   /** Rebuild the list of tool scripts in the Tools menu.  This should be called whenever a
@@ -713,7 +726,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createPopupMenu()
   {
     popupMenu = new BPopupMenu();
-    popupMenuItem = new BMenuItem [14];
+    popupMenuItem = new BMenuItem [15];
     popupMenu.add(popupMenuItem[0] = Translate.menuItem("editObject", this, "editObjectCommand", null));
     popupMenu.add(popupMenuItem[1] = Translate.menuItem("objectLayout", this, "objectLayoutCommand", null));
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTextureAndMaterial", this, "setTextureCommand", null));
@@ -731,6 +744,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.add(popupMenuItem[11] = Translate.menuItem("copy", this, "copyCommand", null));
     popupMenu.add(popupMenuItem[12] = Translate.menuItem("paste", this, "pasteCommand", null));
     popupMenu.add(popupMenuItem[13] = Translate.menuItem("clear", this, "clearCommand", null));
+    popupMenu.addSeparator();
+    popupMenu.add(popupMenuItem[14] = Translate.menuItem("unselectAll", this, "clearSelection", null));
   }
 
   /** Display the popup menu. */
@@ -785,6 +800,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[10].setEnabled(sel.length > 0); // Cut
         popupMenuItem[11].setEnabled(sel.length > 0); // Copy
         popupMenuItem[13].setEnabled(sel.length > 0); // Clear
+        popupMenuItem[14].setEnabled(sel.length > 0); // Unselect All
       }
     popupMenuItem[12].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     popupMenu.show(w, x, y);
@@ -913,7 +929,24 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setTool(EditingTool tool)
   {
     for (int i = 0; i < theView.length; i++)
+	{
       theView[i].setTool(tool);
+	}
+  }
+
+  /** When a tool gets selected in the tool palette, notify the UI.
+      It may be possible, that some options need to be disabled/changed etc.  */
+
+  public void toolChanged(EditingTool tool)
+  {
+    for (ViewerCanvas v:theView)
+	{
+		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+			v.navigationTravelEnabled = false;
+		else
+			v.navigationTravelEnabled = true;
+		v.viewChanged(false); // This should do nothing now...
+	}
   }
 
   /** Set the help text displayed at the bottom of the window. */
@@ -1003,8 +1036,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenuItem[4].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     editMenuItem[5].setEnabled(numSelObjects > 0); // Clear
     editMenuItem[6].setEnabled(hasChildren); // Select Children
-    editMenuItem[7].setEnabled(numSelObjects > 0); // Make Live Duplicates
-    editMenuItem[8].setEnabled(numSelObjects > 0); // Sever Duplicates
+    editMenuItem[7].setEnabled(numSelObjects > 0); // Unselect All
+    editMenuItem[8].setEnabled(numSelObjects > 0); // Make Live Duplicates
+    editMenuItem[9].setEnabled(numSelObjects > 0); // Sever Duplicates
     if (numSelObjects == 0)
     {
       for (i = 0; i < objectMenuItem.length; i++)
@@ -1255,7 +1289,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     return tools;
   }
-
+  
   /** Set whether a DockableWidget contained in this window is visible. */
 
   private void setDockableWidgetVisible(DockableWidget widget, boolean visible)
@@ -1416,6 +1450,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.clearSelection();
     itemTree.deselectAll();
     theScore.rebuildList();
+	updateImage();
     updateMenus();
   }
 
@@ -1604,12 +1639,18 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }
-      else if (command.equals("frameSelection"))
-        frameWithCameraCommand(true);
-      else if (command.equals("frameScene"))
-        frameWithCameraCommand(false);
-	}
+      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
+	  else if (command.equals("alignWithClosestAxis"))
+	    getView().alignWithClosestAxis();
+	  /*
+	  // Place holder for a view settings menuitem
+	  // to launch an options window settings window
+	  else if (command.equals("viewSettings"))
+	  {
+		new ViewSettingsWindow(this);
+	  }
+	  */
+    }
 
     else if (menu == popupMenu)
       {
@@ -1810,6 +1851,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
+  public void clearSelectionCommand()
+  {
+  }
+  
   public void selectAllCommand()
   {
     int i, which[] = new int [theScene.getNumObjects()];
@@ -2746,6 +2791,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
+  /** 
+   * @deprecated
+   * Use ViewerCanvas.fitToObjects() instead
+   */
+  @Deprecated
   public void frameWithCameraCommand(boolean selectionOnly)
   {
     int sel[] = getSelectionWithChildren();

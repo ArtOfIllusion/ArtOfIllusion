@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
+   Changes Copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,8 +24,8 @@ public class ApplicationPreferences
 {
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
-  private double interactiveTol;
-  private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming;
+  private double interactiveTol, maxAnimationDuration, animationFrameRate;
+  private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming, useViewAnimations;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
 
   /**
@@ -140,6 +141,9 @@ public class ApplicationPreferences
     keepBackupFiles = false;
     useCompoundMeshTool = false;
     reverseZooming = false;
+	useViewAnimations = true;
+	maxAnimationDuration = 1.0;
+	animationFrameRate = 60.0;
   }
 
   /** Parse the properties loaded from the preferences file. */
@@ -156,6 +160,11 @@ public class ApplicationPreferences
     keepBackupFiles = parseBooleanProperty("keepBackupFiles", keepBackupFiles);
     useCompoundMeshTool = parseBooleanProperty("useCompoundMeshTool", useCompoundMeshTool);
     reverseZooming = parseBooleanProperty("reverseZooming", reverseZooming);
+	
+	useViewAnimations = parseBooleanProperty("useViewAnimations", useViewAnimations);
+	maxAnimationDuration = parseDoubleProperty("maxAnimationDuration", maxAnimationDuration);
+	animationFrameRate = parseDoubleProperty("animationFrameRate", animationFrameRate);
+	
     Translate.setLocale(parseLocaleProperty("language"));
     if (properties.getProperty("theme") == null)
     {
@@ -435,5 +444,50 @@ public class ApplicationPreferences
   {
     reverseZooming = reverse;
     properties.put("reverseZooming", Boolean.toString(reverse));
+  }
+  
+   /** Get whether to animate view moves. */
+
+  public final boolean getUseViewAnimations()
+  {
+    return useViewAnimations;
+  }
+
+  /** Set whether to animate views moves. */
+
+  public final void setUseViewAnimations(boolean animate)
+  {
+    useViewAnimations = animate;
+    properties.put("useViewAnimations", Boolean.toString(animate));
+  }
+  
+  /** Get maximum duration of view animations. */
+  
+  public final double getMaxAnimationDuration()
+  {
+    return maxAnimationDuration;
+  }
+  
+  /** Set maximum duration of view animations. */
+  
+  public final void setMaxAnimationDuration(double duration)
+  {
+    maxAnimationDuration = duration;
+	properties.put("maxAnimationDuration", Double.toString(duration));
+  }
+  
+  /** Get default framerate of view animations. */
+  
+  public final double getAnimationFrameRate()
+  {
+    return animationFrameRate;
+  }
+  
+  /** Set default framerate for view animations. */
+  
+  public final void setAnimationFrameRate(double rate)
+  {
+    animationFrameRate = rate;
+	properties.put("animationFrameRate", Double.toString(rate));
   }
 }

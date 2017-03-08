@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyrignt (C) 2016 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -157,7 +158,7 @@ public class CreateCurveTool extends EditingTool
 
     if (e.getClickCount() != 2)
       {
-        clickPoint.addElement(cam.convertScreenToWorld(dragPoint, Camera.DEFAULT_DISTANCE_TO_SCREEN));
+        clickPoint.addElement(cam.convertScreenToWorld(dragPoint, view.getDistToPlane()));
         smoothness.addElement(e.isShiftDown() ? 0.0f : 1.0f);
       }
     if (clickPoint.size() > 1)

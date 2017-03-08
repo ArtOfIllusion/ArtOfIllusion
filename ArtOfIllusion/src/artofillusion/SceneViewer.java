@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -32,6 +33,7 @@ public class SceneViewer extends ViewerCanvas
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
   int deselect;
+  Vec3 nextCenter = new Vec3();
 
   public SceneViewer(Scene s, RowContainer p, EditingWindow fr)
   {
@@ -104,18 +106,45 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-      boundCamera = cameras.elementAt(which-6);
-      CoordinateSystem coords = theCamera.getCameraCoordinates();
-      coords.copyCoords(boundCamera.getCoords());
-      theCamera.setCameraCoordinates(coords);
-      viewChanged(false);
-      repaint();
+		ObjectInfo nextCamera = cameras.elementAt(which-6);
+		CoordinateSystem coords = nextCamera.coords.duplicate();
+
+		if (nextCamera.getObject() instanceof SceneCamera){
+			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
+		}
+		else if (nextCamera.getObject() instanceof SpotLight)
+			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
+		else if (nextCamera.getObject() instanceof DirectionalLight)
+			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
+		else
+			return;
+
+		animation.start(coords, rotationCenter, 100.0, which, navigation);
     }
     else
     {
       boundCamera = null;
+	  if (which > 5) // Would have thought that the super takes care of this but not always.
+		orientation = VIEW_OTHER;
       viewChanged(false);
+	  //repaint();
     }
+  }
+
+  /** 
+  *  ViewAnimation calls this when the animation is finished, 
+  *  so the menu will be up to date.
+  */
+  @Override
+  public void finishAnimation(int which, boolean persp, int navi)
+  {
+    if (which > 5  && which < 6+cameras.size())
+		boundCamera = cameras.elementAt(which-6);
+    orientation = which;
+	perspective = persp;
+	navigation = navi;
+	viewChanged(false);
+	repaint();
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -238,7 +267,7 @@ public class SceneViewer extends ViewerCanvas
 
     // Hilight the selection.
 
-    if (currentTool.hilightSelection())
+    if (currentTool.hilightSelection())// && !animation.changingPerspective())
     {
       ArrayList<Rectangle> selectedBoxes = new ArrayList<Rectangle>();
       ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<Rectangle>();
@@ -281,10 +310,14 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
-    drawBorder();
+	drawOverlay();
+	currentTool.drawOverlay(this);
+	if (activeTool != null)
+		activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
-  }
+    drawBorder();
+}
 
   /** Begin dragging a box.  The variable square determines whether the box should be
       constrained to be square. */
@@ -500,6 +533,8 @@ public class SceneViewer extends ViewerCanvas
   @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
+	mousePoint = e.getPoint();
+	drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {
@@ -507,6 +542,8 @@ public class SceneViewer extends ViewerCanvas
       if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
         return;
     }
+	
+	
     dragging = true;
     deselect = -1;
     if (draggingBox)
@@ -638,47 +675,43 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < newSelection.length && !changed; i++)
       changed = (oldSelection[i] != newSelection[i]);
     if (changed)
-     parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
+      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
+	dragging = false;
   }
 
-  /** Double-clicking on object should bring up its editor. */
+  /** 
+    Double-clicking on object should bring up its editor. 
+   */
 
   public void mouseClicked(MouseClickedEvent e)
   {
+	//super.mouseClicked(e);
+	
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
-          @Override
-	  public void run()
-	  {
-	    theScene.objectModified(obj);
-	    parentFrame.updateImage();
-	    parentFrame.updateMenus();
-	  }
-	} );
+        @Override
+	    public void run()
+	    {
+	      theScene.objectModified(obj);
+	      parentFrame.updateImage();
+	      parentFrame.updateMenus();
+	    }
+	});
     }
   }
 
-  @Override
-  protected void processMouseScrolled(MouseScrolledEvent ev)
-  {
-    if (isPerspective() && boundCamera != null)
-    {
-      // We are moving an actual camera in the scene, so we need to set an undo record, move
-      // its children, and repaint all views in the window.
-
-      UndoRecord undo = new UndoRecord(getEditingWindow(), false);
-      super.processMouseScrolled(ev);
-      moveChildren(boundCamera, theCamera.getCameraCoordinates().fromLocal().times(boundCamera.getCoords().toLocal()), undo);
-      getEditingWindow().setUndoRecord(undo);
-      getEditingWindow().updateImage();
-    }
-    else
-      super.processMouseScrolled(ev);
-  }
-
+ 	@Override
+	protected void mouseMoved(MouseMovedEvent e)
+	{
+		mouseMoving = true;
+		mousePoint = e.getPoint();
+		mouseMoveTimer.restart();
+		parentFrame.updateImage(); // I wonder why, but that's how it works
+	}
+	
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)

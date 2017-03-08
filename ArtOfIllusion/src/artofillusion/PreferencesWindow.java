@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
-
+   Changes Copyright (C) 2016 by Petri Ihalainen
+   
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -24,11 +25,11 @@ import java.awt.*;
 public class PreferencesWindow
 {
   private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, localeChoice, themeChoice, colorChoice, toolChoice;
-  private ValueField interactiveTolField, undoField;
-  private BCheckBox glBox, backupBox, reverseZoomBox;
+  private ValueField interactiveTolField, undoField, animationDurationField, animationFrameRateField;
+  private BCheckBox glBox, backupBox, reverseZoomBox, useViewAnimationsBox;
   private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
-
+  private Object chageBox;
   public PreferencesWindow(BFrame parent)
   {
     BTabbedPane tabs = new BTabbedPane();
@@ -37,6 +38,7 @@ public class PreferencesWindow
     tabs.add(keystrokePanel, Translate.text("shortcuts"));
     tabs.setSelectedTab(lastTab);
     boolean done = false;
+
     while (!done)
     {
       PanelDialog dlg = new PanelDialog(parent, Translate.text("prefsTitle"), tabs);
@@ -73,7 +75,11 @@ public class PreferencesWindow
     prefs.setUseOpenGL(glBox.getState());
     prefs.setKeepBackupFiles(backupBox.getState());
     prefs.setReverseZooming(reverseZoomBox.getState());
+    prefs.setUseViewAnimations(useViewAnimationsBox.getState());
+	prefs.setMaxAnimationDuration(animationDurationField.getValue());
+	prefs.setAnimationFrameRate(animationFrameRateField.getValue());
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
+	
     ThemeManager.setSelectedTheme(themes.get(themeChoice.getSelectedIndex()));
     ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[colorChoice.getSelectedIndex()]);
     prefs.savePreferences();
@@ -110,6 +116,14 @@ public class PreferencesWindow
     glBox.setEnabled(ViewerCanvas.isOpenGLAvailable());
     backupBox = new BCheckBox(Translate.text("keepBackupFiles"), prefs.getKeepBackupFiles());
     reverseZoomBox  = new BCheckBox(Translate.text("reverseScrollWheelZooming"), prefs.getReverseZooming());
+
+	useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
+	animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
+	animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
+
+	//useViewAnimationsBox.addEventLink(ValueChangedEvent.class, this, "useViewAnimationsChanged");
+	//animationDurationField.addEventLink(ValueChangedEvent.class, this, "animationDurationChanged");
+
     List allThemes = ThemeManager.getThemes();
     themes = new ArrayList<ThemeManager.ThemeInfo>();
     for (int i = 0; i < allThemes.size(); i++)
@@ -160,7 +174,7 @@ public class PreferencesWindow
 
     // Layout the panel.
 
-    FormContainer panel = new FormContainer(2, 12);
+    FormContainer panel = new FormContainer(2, 16);
     panel.setColumnWeight(1, 1.0);
     LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null);
     LayoutInfo widgetLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null);
@@ -186,6 +200,14 @@ public class PreferencesWindow
     panel.add(glBox, 0, 9, 2, 1, centerLayout);
     panel.add(backupBox, 0, 10, 2, 1, centerLayout);
     panel.add(localeChoice, 1, 11, widgetLayout);
+    panel.add(new BLabel(" "), 1, 12, labelLayout);
+	panel.add(useViewAnimationsBox, 1, 13, widgetLayout);
+	panel.add(Translate.label("maxAnimationDuration"), 0, 14, labelLayout);
+	panel.add(Translate.label("animationFrameRate"), 0, 15, labelLayout);
+	panel.add(animationDurationField, 1, 14, widgetLayout);
+	panel.add(animationFrameRateField, 1, 15, widgetLayout);
+	//animationDurationField.setEnabled(false);
+	//animationFrameRateField.setEnabled(false);
     return panel;
   }
 

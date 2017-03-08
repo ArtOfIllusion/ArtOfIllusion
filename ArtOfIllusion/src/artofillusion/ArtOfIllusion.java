@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -202,7 +203,8 @@ public class ArtOfIllusion
     ViewerCanvas.addViewerControl(new ViewerOrientationControl());
     ViewerCanvas.addViewerControl(new ViewerPerspectiveControl());
     ViewerCanvas.addViewerControl(new ViewerScaleControl());
-    
+    ViewerCanvas.addViewerControl(new ViewerNavigationControl());
+
     for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
     {
       try

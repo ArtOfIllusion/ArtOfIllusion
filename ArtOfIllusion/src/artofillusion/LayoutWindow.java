@@ -51,7 +51,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   Score theScore;
   ToolPalette tools;
   private TexturesAndMaterialsDialog assetsDialog;
-  BLabel helpText;
+  private BLabel helpText;
   TreeList itemTree;
   Scene theScene;
   BMenuBar menubar;
@@ -195,7 +195,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
+      theView[i].setAltTool(altTool);
+	  theView[i].setScrollTool(scrollTool);
     }
 
     // Fill in the left hand panel.
@@ -1638,7 +1639,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
+      }
+      else if (command.equals("fitToSelection"))
+		getView().fitToObjects(getSelectedObjects());
+      else if (command.equals("fitToAll"))
+		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
 	    getView().alignWithClosestAxis();
 	  /*
@@ -2999,5 +3004,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().
+  }
+
+  public BLabel getHelpText() {
+    return helpText;
   }
 }

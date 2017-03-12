@@ -256,6 +256,11 @@ public class ArtOfIllusion
     return preferences;
   }
 
+  // Set application preferences. For unit testing purpose only!
+  public static void setPreferences(ApplicationPreferences preferences) 
+  {
+    ArtOfIllusion.preferences = preferences;
+  }
   /** Create a new Scene, and display it in a window. */
 
   public static void newWindow()

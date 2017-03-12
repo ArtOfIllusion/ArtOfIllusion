@@ -248,9 +248,10 @@ public class ToolWichClicksTest {
         assertEquals(EditingTool.ALL_CLICKS, click);         
     }
     
+    @Test
     public void testGenericToolCheckWhichClickValue() {
         EditingTool tool = new GenericTool(null, "", "Generic Tool");
         int click = tool.whichClicks();
-        assertEquals(EditingTool.ALL_CLICKS, click); 
+        assertEquals(EditingTool.HANDLE_CLICKS, click); 
     }
 }

@@ -275,6 +275,7 @@ public class TestToolsHints {
         assertEquals("Rotate Viewpoint", tip);           
     }
     
+    @Test
     public void testGenericToolHintText() {
         EditingTool tool = new GenericTool(null, "", "Generic Tool");
         String tip = tool.getToolTipText();

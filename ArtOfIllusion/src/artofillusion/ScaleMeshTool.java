@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,7 +30,10 @@ public class ScaleMeshTool extends MeshEditingTool
   private final NinePointManipulator manipulator;
 
   public static final int HANDLE_SIZE = 5;
-
+  
+  private static final String errorText = Translate.text("scaleMeshTool.errorText");
+  private static final String helpText = Translate.text("scaleMeshTool.helpText");
+  
   public ScaleMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
@@ -53,15 +57,16 @@ public class ScaleMeshTool extends MeshEditingTool
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
-    if (!dragInProgress)
+    if(dragInProgress) return;
+    
     {
-      if (selectionBounds != null)
+      if (selectionBounds == null)
+        theWindow.setHelpText(errorText);
+      else 
       {
         manipulator.draw(view, selectionBounds);
-        theWindow.setHelpText(Translate.text("scaleMeshTool.helpText"));
+        theWindow.setHelpText(helpText);
       }
-      else
-        theWindow.setHelpText(Translate.text("scaleMeshTool.errorText"));
     }
   }
 

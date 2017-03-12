@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes Copyright 2016 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +16,7 @@ import artofillusion.*;
 import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import buoy.widget.*;
+import artofillusion.tool.annotations.ActivatedToolText;
 
 /**
  * EditingTool is the superclass of tools for editing objects or scenes.  An EditingTool
@@ -55,6 +57,10 @@ public abstract class EditingTool
   private final Tooltip tooltip;
   {
       tooltip = this.getClass().getAnnotation(Tooltip.class);
+  }
+  private final ActivatedToolText helpText;
+  {
+      helpText = this.getClass().getAnnotation(ActivatedToolText.class);
   }
   
   public EditingTool(EditingWindow win)
@@ -170,6 +176,8 @@ public abstract class EditingTool
   {
     theWindow.setTool(this);
     button.setSelected(true);
+    if(helpText == null) return;
+    theWindow.setHelpText(Translate.text(helpText.value()));
   }
   
   public void deactivate()

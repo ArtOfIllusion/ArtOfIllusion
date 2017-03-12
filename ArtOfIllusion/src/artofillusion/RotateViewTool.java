@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Changes copyright (C) 2106-2017 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,9 +19,11 @@ import artofillusion.texture.UVMappingWindow;
 import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
+import artofillusion.tool.annotations.ActivatedToolText;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
 @Tooltip("rotateViewTool.tipText")
+@ActivatedToolText("rotateViewTool.helpText")
 public class RotateViewTool extends EditingTool
 {
   private static final double DRAG_SCALE = 0.01;
@@ -40,13 +43,6 @@ public class RotateViewTool extends EditingTool
   {
     super(fr);
     initButton("rotateView");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("rotateViewTool.helpText"));
   }
 
   @Override

@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,7 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ActivatedToolText;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -22,6 +24,7 @@ import java.awt.geom.*;
 
 /** CreateLightTool is an EditingTool used for creating PointLight objects. */
 @Tooltip(value = "createLightTool.tipText")
+@ActivatedToolText("createLightTool.helpText")
 public class CreateLightTool extends EditingTool
 {
   static int counter = 2;
@@ -32,13 +35,6 @@ public class CreateLightTool extends EditingTool
   {
     super(fr);
     initButton("light");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createLightTool.helpText"));
   }
 
   @Override

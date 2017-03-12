@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -41,13 +42,13 @@ public class SkeletonTool extends EditingTool
   private Mesh oldMesh, mesh;
   private UndoRecord undo;
   private boolean allowCreating;
-  private String helpText;
+  private final String helpText;
 
   public SkeletonTool(MeshEditorWindow fr, boolean allowCreating)
   {
     super(fr);
-    this.allowCreating = allowCreating;
     initButton("skeleton");
+    this.allowCreating = allowCreating;    
     clickedHandle = -1;
     helpText = Translate.text(allowCreating ? "skeletonTool.helpText" : "skeletonTool.helpTextNoCreate");
   }

@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyright 2016 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,7 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ActivatedToolText;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -22,6 +24,7 @@ import java.awt.*;
 
 /** CreateCubeTool is an EditingTool used for creating Cube objects. */
 @Tooltip("createCubeTool.tipText")
+@ActivatedToolText("createCubeTool.helpText")
 public class CreateCubeTool extends EditingTool
 {
   static int counter = 1;
@@ -33,13 +36,6 @@ public class CreateCubeTool extends EditingTool
   {
     super(fr);
     initButton("cube");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCubeTool.helpText"));
   }
 
   @Override

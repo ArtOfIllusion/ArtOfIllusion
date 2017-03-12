@@ -14,13 +14,14 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 
 /** CreateSplineMeshTool is an EditingTool used for creating SplineMesh objects. */
-
+@Tooltip("createSplineMeshTool.tipText")
 public class CreateSplineMeshTool extends EditingTool
 {
   static int counter = 1;
@@ -68,12 +69,6 @@ public class CreateSplineMeshTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createSplineMeshTool.tipText");
   }
 
   @Override

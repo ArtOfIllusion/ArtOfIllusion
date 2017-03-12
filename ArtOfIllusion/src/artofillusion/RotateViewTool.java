@@ -14,14 +14,13 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import artofillusion.view.*;
 import artofillusion.texture.UVMappingWindow;
+import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
-
+@Tooltip("rotateViewTool.tipText")
 public class RotateViewTool extends EditingTool
 {
   private static final double DRAG_SCALE = 0.01;
@@ -60,12 +59,6 @@ public class RotateViewTool extends EditingTool
   public boolean hilightSelection()
   {
       return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("rotateViewTool.tipText");
   }
 
   @Override

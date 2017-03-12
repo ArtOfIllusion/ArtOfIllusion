@@ -15,10 +15,12 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import artofillusion.texture.UVMappingWindow;
+import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
 
 /** MoveViewTool is an EditingTool used for moving the viewpoint. */
+@Tooltip("moveViewTool.tipText")
 public class MoveViewTool extends EditingTool
 {
   private Point clickPoint;
@@ -52,12 +54,6 @@ public class MoveViewTool extends EditingTool
   public boolean hilightSelection()
   {
       return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveViewTool.tipText");
   }
 
   @Override

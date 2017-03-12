@@ -14,13 +14,14 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 
 /** CreateCylinderTool is an EditingTool used for creating Cylinder objects. */
-
+@Tooltip("createCylinderTool.tipText")
 public class CreateCylinderTool extends EditingTool
 {
   static int counter = 1;
@@ -46,12 +47,6 @@ public class CreateCylinderTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCylinderTool.tipText");
   }
 
   @Override

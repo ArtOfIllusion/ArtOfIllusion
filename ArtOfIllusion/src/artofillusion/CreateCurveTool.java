@@ -19,6 +19,7 @@ import artofillusion.math.Mat4;
 import artofillusion.math.Vec2;
 import artofillusion.math.Vec3;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -31,7 +32,7 @@ import java.awt.geom.Point2D;
 import java.util.Vector;
 
 /** CreateCurveTool is an EditingTool used for creating Curve objects. */
-
+@Tooltip("createCurveTool.tipText")
 public class CreateCurveTool extends EditingTool
 {
   static int counter = 1;
@@ -68,12 +69,6 @@ public class CreateCurveTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCurveTool.tipText");
   }
 
   @Override

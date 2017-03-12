@@ -14,12 +14,13 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** CreateVertexTool is an EditingTool used for adding vertices to triangle meshes. */
-
+@Tooltip("createVertexTool.tipText")
 public class CreateVertexTool extends MeshEditingTool
 {
   private Point clickPoint;
@@ -59,12 +60,6 @@ public class CreateVertexTool extends MeshEditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createVertexTool.tipText");
   }
 
   @Override

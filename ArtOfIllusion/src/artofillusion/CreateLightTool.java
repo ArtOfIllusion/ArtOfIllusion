@@ -14,13 +14,14 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 import java.awt.geom.*;
 
 /** CreateLightTool is an EditingTool used for creating PointLight objects. */
-
+@Tooltip(value = "createLightTool.tipText")
 public class CreateLightTool extends EditingTool
 {
   static int counter = 2;
@@ -44,12 +45,6 @@ public class CreateLightTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createLightTool.tipText");
   }
 
   @Override

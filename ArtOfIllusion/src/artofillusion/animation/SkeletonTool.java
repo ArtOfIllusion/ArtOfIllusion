@@ -13,6 +13,7 @@ package artofillusion.animation;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -21,6 +22,7 @@ import java.text.*;
 
 /** SkeletonTool is an EditingTool used for manipulating the skeletons of objects. */
 
+@Tooltip("skeletonTool.tipText")
 public class SkeletonTool extends EditingTool
 {
   private static final int CLICK_TOL = 6;
@@ -61,12 +63,6 @@ public class SkeletonTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("skeletonTool.tipText");
   }
 
   /** Find the positions of all the degree-of-freedom handles. */

@@ -12,6 +12,7 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -19,7 +20,7 @@ import java.awt.*;
 import java.util.Vector;
 
 /** RotateObjectTool is an EditingTool used for rotating objects in a scene. */
-
+@Tooltip("rotateObjectTool.tipText")
 public class RotateObjectTool extends EditingTool
 {
   static final int X_ONLY = 1;
@@ -64,12 +65,6 @@ public class RotateObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("rotateObjectTool.tipText");
   }
 
   @Override

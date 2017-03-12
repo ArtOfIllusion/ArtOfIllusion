@@ -12,13 +12,14 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** RotateMeshTool is an EditingTool used for rotating the vertices of TriangleMesh objects. */
-
+@Tooltip("rotateMeshTool.tipText")
 public class RotateMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, selectionCanChange;
@@ -95,12 +96,6 @@ public class RotateMeshTool extends MeshEditingTool
       rotCenter = new Vec3((bounds.minx+bounds.maxx)/2.0, (bounds.miny+bounds.maxy)/2.0, (bounds.minz+bounds.maxz)/2.0);
       rotCenter = cam.getViewToWorld().times(rotCenter);
     }
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("rotateMeshTool.tipText");
   }
 
   @Override

@@ -12,6 +12,7 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
 import buoy.event.*;
@@ -20,7 +21,7 @@ import java.text.*;
 
 /** ThickenMeshTool is an EditingTool used for making pieces of TriangleMeshes thicker
     or thinner. */
-
+@Tooltip("thickenMeshTool.tipText")
 public class ThickenMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress;
@@ -43,12 +44,6 @@ public class ThickenMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("thickenMeshTool.tipText");
   }
 
   @Override

@@ -12,6 +12,7 @@
 package artofillusion.ui;
 
 import artofillusion.*;
+import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import buoy.widget.*;
 
@@ -21,7 +22,7 @@ import buoy.widget.*;
  * selected, the editing tool responds to events in the scene or object viewer.
  * <p>
  * An EditingTool specifies what types of mouse clicks it wants to receive by the value it
- * returns from its whichClicks() method.  This should be a sum of the contants OBJECT_CLICKS
+ * returns from its whichClicks() method.  This should be a sum of the contains OBJECT_CLICKS
  * (for mouse clicks on objects), HANDLE_CLICKS (for mouse clicks on handles), and ALL_CLICKS
  * (for all mouse clicks regardless of what they are on).  The exact definition of an "object"
  * or "handle" is not specified.  It is up to the ViewerCanvas generating the events to decide
@@ -51,11 +52,16 @@ public abstract class EditingTool
   protected BFrame theFrame;
   protected ToolButton button;
   
+  private Tooltip tooltip;
+  {
+      tooltip = this.getClass().getAnnotation(Tooltip.class);
+  }
+  
   public EditingTool(EditingWindow win)
   {
     theWindow = win;
-    if (win != null)
-      theFrame = win.getFrame();
+    if(null == theWindow) return;    
+    theFrame = theWindow.getFrame();
   }
   
   /** Get the EditingWindow to which this tool belongs. */
@@ -81,7 +87,7 @@ public abstract class EditingTool
   
   public String getToolTipText()
   {
-    return null;
+    return null == tooltip ? null : Translate.text(tooltip.value());
   }
   
   public static final int ALL_CLICKS = 1;

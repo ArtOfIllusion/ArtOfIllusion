@@ -14,13 +14,14 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 
 import java.awt.*;
 
 /** CreateCubeTool is an EditingTool used for creating Cube objects. */
-
+@Tooltip("createCubeTool.tipText")
 public class CreateCubeTool extends EditingTool
 {
   static int counter = 1;
@@ -45,12 +46,6 @@ public class CreateCubeTool extends EditingTool
   public int whichClicks()
   {
     return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCubeTool.tipText");
   }
 
   @Override

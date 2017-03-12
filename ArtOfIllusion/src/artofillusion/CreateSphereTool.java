@@ -14,12 +14,13 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** CreateSphereTool is an EditingTool used for creating Sphere objects. */
-
+@Tooltip("createSphereTool.tipText")
 public class CreateSphereTool extends EditingTool
 {
   static int counter = 1;
@@ -45,13 +46,7 @@ public class CreateSphereTool extends EditingTool
   {
     return ALL_CLICKS;
   }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createSphereTool.tipText");
-  }
-
+  
   @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {

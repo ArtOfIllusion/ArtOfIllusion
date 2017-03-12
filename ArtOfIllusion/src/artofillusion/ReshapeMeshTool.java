@@ -12,12 +12,13 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** ReshapeMeshTool is an EditingTool used for moving the vertices of TriangleMesh objects. */
-
+@Tooltip("reshapeMeshTool.tipText")
 public class ReshapeMeshTool extends MeshEditingTool
 {
   private Point clickPoint;
@@ -47,12 +48,6 @@ public class ReshapeMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("reshapeMeshTool.tipText");
   }
 
   @Override

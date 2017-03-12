@@ -40,12 +40,6 @@ public class MoveUVViewTool extends EditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean hilightSelection()
   {
     return true;

@@ -59,12 +59,6 @@ public class SkeletonTool extends EditingTool
     theWindow.setHelpText(helpText);
   }
 
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
   /** Find the positions of all the degree-of-freedom handles. */
 
   private void findHandlePositions(Mat4 objToScreen, Joint j, ViewerCanvas view)

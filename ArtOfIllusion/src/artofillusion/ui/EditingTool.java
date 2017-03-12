@@ -52,7 +52,7 @@ public abstract class EditingTool
   protected BFrame theFrame;
   protected ToolButton button;
   
-  private Tooltip tooltip;
+  private final Tooltip tooltip;
   {
       tooltip = this.getClass().getAnnotation(Tooltip.class);
   }

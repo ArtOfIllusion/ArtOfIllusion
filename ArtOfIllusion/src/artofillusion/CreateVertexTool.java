@@ -57,12 +57,6 @@ public class CreateVertexTool extends MeshEditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     TriMeshViewer tmv = (TriMeshViewer) view;

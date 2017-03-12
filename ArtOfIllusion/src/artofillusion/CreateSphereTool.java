@@ -40,12 +40,6 @@ public class CreateSphereTool extends EditingTool
     super.activate();
     theWindow.setHelpText(Translate.text("createSphereTool.helpText"));
   }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
   
   @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)

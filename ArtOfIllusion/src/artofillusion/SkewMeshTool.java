@@ -44,12 +44,6 @@ public class SkewMeshTool extends MeshEditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;

@@ -50,12 +50,6 @@ public class RotateViewTool extends EditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean hilightSelection()
   {
       return true;

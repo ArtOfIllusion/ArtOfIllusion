@@ -44,12 +44,6 @@ public class CreateCylinderTool extends EditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
     clickPoint = e.getPoint();

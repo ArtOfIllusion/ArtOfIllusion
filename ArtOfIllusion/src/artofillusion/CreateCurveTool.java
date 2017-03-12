@@ -66,12 +66,6 @@ public class CreateCurveTool extends EditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean hilightSelection()
   {
     return (clickPoint == null);

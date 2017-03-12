@@ -56,12 +56,6 @@ public class CreatePolygonTool extends EditingTool
     theWindow.setHelpText(Translate.text("createPolygonTool.helpText", Integer.toString(sides), Translate.text("createPolygonTool."+type)));
   }
 
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
   void tabulateSines()
   {
     int i;

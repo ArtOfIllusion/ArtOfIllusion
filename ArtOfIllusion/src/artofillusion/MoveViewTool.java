@@ -43,12 +43,6 @@ public class MoveViewTool extends EditingTool
     super.activate();
     theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
   }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
   
   @Override
   public boolean hilightSelection()

@@ -64,12 +64,6 @@ public class RotateMeshTool extends MeshEditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean allowSelectionChanges()
   {
     return selectionCanChange;

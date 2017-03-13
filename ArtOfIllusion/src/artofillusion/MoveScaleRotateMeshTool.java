@@ -15,6 +15,7 @@ import artofillusion.ui.*;
 import artofillusion.ui.Compound3DManipulator.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 
 import java.awt.event.*;
@@ -26,6 +27,7 @@ import buoy.widget.*;
  * This editing tool presents as a compound interface for move, scale, and rotating parts of
  * a mesh.
  */
+@ButtonImage("moveScaleRotate")
 @Tooltip("moveScaleRotateMeshTool.tipText")
 public class MoveScaleRotateMeshTool extends MeshEditingTool
 {
@@ -42,7 +44,6 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   public MoveScaleRotateMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("moveScaleRotate");
     manipulator = new Compound3DManipulator();
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");

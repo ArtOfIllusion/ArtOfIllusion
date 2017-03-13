@@ -14,6 +14,7 @@ package artofillusion.animation;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -22,7 +23,7 @@ import java.awt.*;
 import java.text.*;
 
 /** SkeletonTool is an EditingTool used for manipulating the skeletons of objects. */
-
+@ButtonImage("skeleton")
 @Tooltip("skeletonTool.tipText")
 public class SkeletonTool extends EditingTool
 {
@@ -41,13 +42,12 @@ public class SkeletonTool extends EditingTool
   private IKSolver ik;
   private Mesh oldMesh, mesh;
   private UndoRecord undo;
-  private boolean allowCreating;
+  private final boolean allowCreating;
   private final String helpText;
 
   public SkeletonTool(MeshEditorWindow fr, boolean allowCreating)
   {
     super(fr);
-    initButton("skeleton");
     this.allowCreating = allowCreating;    
     clickedHandle = -1;
     helpText = Translate.text(allowCreating ? "skeletonTool.helpText" : "skeletonTool.helpTextNoCreate");

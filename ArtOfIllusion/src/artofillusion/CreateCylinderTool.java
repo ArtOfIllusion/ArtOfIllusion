@@ -21,8 +21,10 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** CreateCylinderTool is an EditingTool used for creating Cylinder objects. */
+@ButtonImage("cylinder")
 @Tooltip("createCylinderTool.tipText")
 @ActivatedToolText("createCylinderTool.helpText")
 public class CreateCylinderTool extends EditingTool
@@ -36,7 +38,6 @@ public class CreateCylinderTool extends EditingTool
   public CreateCylinderTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("cylinder");
   }
 
   @Override

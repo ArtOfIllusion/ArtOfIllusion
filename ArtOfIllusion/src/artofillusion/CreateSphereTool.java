@@ -16,12 +16,14 @@ import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** CreateSphereTool is an EditingTool used for creating Sphere objects. */
+@ButtonImage("sphere")
 @Tooltip("createSphereTool.tipText")
 @ActivatedToolText("createSphereTool.helpText")
 public class CreateSphereTool extends EditingTool
@@ -34,7 +36,6 @@ public class CreateSphereTool extends EditingTool
   public CreateSphereTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("sphere");
   }
   
   @Override

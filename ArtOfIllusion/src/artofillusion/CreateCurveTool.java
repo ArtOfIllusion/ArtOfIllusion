@@ -31,8 +31,10 @@ import java.awt.geom.Point2D;
 
 import java.util.Vector;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** CreateCurveTool is an EditingTool used for creating Curve objects. */
+@ButtonImage("interpCurve")
 @Tooltip("createCurveTool.tipText")
 @ActivatedToolText("createCurveTool.helpText")
 public class CreateCurveTool extends EditingTool
@@ -49,7 +51,6 @@ public class CreateCurveTool extends EditingTool
   public CreateCurveTool(EditingWindow fr)
   {
     super(fr);
-    initButton("interpCurve");
     smoothing = Mesh.APPROXIMATING;
   }
 

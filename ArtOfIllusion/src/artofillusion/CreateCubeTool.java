@@ -16,6 +16,7 @@ import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -23,6 +24,7 @@ import buoy.event.*;
 import java.awt.*;
 
 /** CreateCubeTool is an EditingTool used for creating Cube objects. */
+@ButtonImage("cube")
 @Tooltip("createCubeTool.tipText")
 @ActivatedToolText("createCubeTool.helpText")
 public class CreateCubeTool extends EditingTool
@@ -35,7 +37,6 @@ public class CreateCubeTool extends EditingTool
   public CreateCubeTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("cube");
   }
 
   @Override

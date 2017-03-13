@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -22,6 +23,7 @@ import java.awt.*;
 import java.util.Vector;
 
 /** RotateObjectTool is an EditingTool used for rotating objects in a scene. */
+@ButtonImage("rotate")
 @Tooltip("rotateObjectTool.tipText")
 @ActivatedToolText("rotateObjectTool.helpText")
 public class RotateObjectTool extends EditingTool
@@ -48,7 +50,6 @@ public class RotateObjectTool extends EditingTool
   public RotateObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("rotate");
   }
 
   @Override

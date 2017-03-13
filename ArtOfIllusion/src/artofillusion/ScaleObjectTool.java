@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -23,6 +24,7 @@ import java.util.Vector;
 
 /** ScaleObjectTool is an EditingTool used for resizing objects in a scene.  For convenience, it also
     allows users to move objects by clicking on the object itself rather than on a handle.*/
+@ButtonImage("resize")
 @Tooltip("scaleObjectTool.tipText")
 @ActivatedToolText("scaleObjectTool.helpText")
 public class ScaleObjectTool extends EditingTool
@@ -54,7 +56,6 @@ public class ScaleObjectTool extends EditingTool
   public ScaleObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("resize");
   }
 
   @Override

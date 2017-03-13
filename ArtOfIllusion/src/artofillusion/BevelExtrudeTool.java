@@ -13,6 +13,7 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
@@ -21,6 +22,7 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** BevelExtrudeTool is an EditingTool used for beveling and extruding TriangleMesh objects. */
+@ButtonImage("bevel")
 @Tooltip("bevelExtrudeTool.tipText")
 public class BevelExtrudeTool extends MeshEditingTool
 {
@@ -35,7 +37,6 @@ public class BevelExtrudeTool extends MeshEditingTool
   public BevelExtrudeTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("bevel");
     manipulator = new NinePointManipulator(new Image[] {null, null, null, null, NinePointManipulator.ARROWS_ALL, null, null, null, null});
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");

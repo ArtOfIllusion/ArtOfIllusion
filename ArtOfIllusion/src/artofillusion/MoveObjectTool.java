@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -22,6 +23,7 @@ import java.awt.*;
 import java.util.Vector;
 
 /** MoveObjectTool is an EditingTool used for moving objects in a scene. */
+@ButtonImage("move")
 @Tooltip("moveObjectTool.tipText")
 @ActivatedToolText("moveObjectTool.helpText")
 public class MoveObjectTool extends EditingTool
@@ -35,7 +37,6 @@ public class MoveObjectTool extends EditingTool
   public MoveObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("move");
   }
 
   @Override

@@ -20,8 +20,10 @@ import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
+@ButtonImage("rotateView")
 @Tooltip("rotateViewTool.tipText")
 @ActivatedToolText("rotateViewTool.helpText")
 public class RotateViewTool extends EditingTool
@@ -42,7 +44,6 @@ public class RotateViewTool extends EditingTool
   public RotateViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("rotateView");
   }
 
   @Override

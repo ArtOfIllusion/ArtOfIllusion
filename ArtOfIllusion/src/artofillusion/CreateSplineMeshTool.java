@@ -15,6 +15,7 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -22,6 +23,7 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** CreateSplineMeshTool is an EditingTool used for creating SplineMesh objects. */
+@ButtonImage("splineMesh")
 @Tooltip("createSplineMeshTool.tipText")
 public class CreateSplineMeshTool extends EditingTool
 {
@@ -38,7 +40,6 @@ public class CreateSplineMeshTool extends EditingTool
   public CreateSplineMeshTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("splineMesh");
   }
 
   @Override

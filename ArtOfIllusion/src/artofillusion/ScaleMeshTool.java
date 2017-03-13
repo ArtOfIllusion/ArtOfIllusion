@@ -13,6 +13,7 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
@@ -20,6 +21,7 @@ import buoy.event.*;
 import java.awt.*;
 
 /** ScaleMeshTool is an EditingTool used for scaling the vertices of TriangleMesh objects. */
+@ButtonImage("scalePoints")
 @Tooltip("scaleMeshTool.tipText")
 public class ScaleMeshTool extends MeshEditingTool
 {
@@ -37,7 +39,6 @@ public class ScaleMeshTool extends MeshEditingTool
   public ScaleMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("scalePoints");
     manipulator = new NinePointManipulator(new Image[] {
       NinePointManipulator.ARROWS_NW_SE, NinePointManipulator.ARROWS_N_S, NinePointManipulator.ARROWS_NE_SW,
       NinePointManipulator.ARROWS_E_W, null, NinePointManipulator.ARROWS_E_W,

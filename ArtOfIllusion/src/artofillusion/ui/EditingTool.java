@@ -17,6 +17,7 @@ import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import buoy.widget.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /**
  * EditingTool is the superclass of tools for editing objects or scenes.  An EditingTool
@@ -54,13 +55,13 @@ public abstract class EditingTool
   protected BFrame theFrame;
   protected ToolButton button;
   
+  private final ButtonImage buttonImage;
   private final Tooltip tooltip;
-  {
-      tooltip = this.getClass().getAnnotation(Tooltip.class);
-  }
   private final ActivatedToolText helpText;
   {
-      helpText = this.getClass().getAnnotation(ActivatedToolText.class);
+    buttonImage = this.getClass().getAnnotation(ButtonImage.class);
+    tooltip = this.getClass().getAnnotation(Tooltip.class);
+    helpText = this.getClass().getAnnotation(ActivatedToolText.class);
   }
   
   public EditingTool(EditingWindow win)
@@ -68,6 +69,8 @@ public abstract class EditingTool
     theWindow = win;
     if(null == theWindow) return;    
     theFrame = theWindow.getFrame();
+    if(null == buttonImage) return;
+    initButton(buttonImage.value());
   }
   
   /** Get the EditingWindow to which this tool belongs. */

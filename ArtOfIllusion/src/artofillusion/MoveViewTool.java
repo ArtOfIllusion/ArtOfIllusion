@@ -20,8 +20,10 @@ import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** MoveViewTool is an EditingTool used for moving the viewpoint. */
+@ButtonImage("moveView")
 @Tooltip("moveViewTool.tipText")
 @ActivatedToolText("moveViewTool.helpText")
 public class MoveViewTool extends EditingTool
@@ -37,7 +39,6 @@ public class MoveViewTool extends EditingTool
   public MoveViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("moveView");
   }
   
   @Override

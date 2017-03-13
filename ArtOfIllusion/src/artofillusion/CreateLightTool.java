@@ -16,6 +16,7 @@ import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -23,6 +24,7 @@ import java.awt.*;
 import java.awt.geom.*;
 
 /** CreateLightTool is an EditingTool used for creating PointLight objects. */
+@ButtonImage("light")
 @Tooltip(value = "createLightTool.tipText")
 @ActivatedToolText("createLightTool.helpText")
 public class CreateLightTool extends EditingTool
@@ -34,7 +36,6 @@ public class CreateLightTool extends EditingTool
   public CreateLightTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("light");
   }
 
   @Override

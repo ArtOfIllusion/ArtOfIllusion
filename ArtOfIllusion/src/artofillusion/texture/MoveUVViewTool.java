@@ -17,9 +17,10 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** MoveUVViewTool is an EditingTool used for moving the viewpoint in the UV editing window. */
-
+@ButtonImage("moveView")
 @Tooltip("moveViewTool.tipText")
 @ActivatedToolText("moveViewTool.helpText")
 public class MoveUVViewTool extends EditingTool
@@ -32,7 +33,6 @@ public class MoveUVViewTool extends EditingTool
   public MoveUVViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("moveView");
   }
 
   @Override

@@ -20,8 +20,10 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** CreateCameraTool is an EditingTool used for creating SceneCamera objects. */
+@ButtonImage("camera")
 @Tooltip("createCameraTool.tipText")
 @ActivatedToolText("createCameraTool.helpText")
 public class CreateCameraTool extends EditingTool
@@ -32,7 +34,6 @@ public class CreateCameraTool extends EditingTool
   public CreateCameraTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("camera");
   }
 
   @Override

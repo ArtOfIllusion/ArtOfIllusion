@@ -13,6 +13,7 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
 import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
@@ -22,6 +23,7 @@ import java.text.*;
 
 /** ThickenMeshTool is an EditingTool used for making pieces of TriangleMeshes thicker
     or thinner. */
+@ButtonImage("outsetPoints")
 @Tooltip("thickenMeshTool.tipText")
 public class ThickenMeshTool extends MeshEditingTool
 {
@@ -34,7 +36,7 @@ public class ThickenMeshTool extends MeshEditingTool
   public ThickenMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("outsetPoints");
+
     manipulator = new NinePointManipulator(new Image[] {null, null, null, null, NinePointManipulator.ARROWS_N_S, null, null, null, null});
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");

@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,12 +12,17 @@
 package artofillusion.texture;
 
 import artofillusion.*;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
+import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** MoveUVViewTool is an EditingTool used for moving the viewpoint in the UV editing window. */
-
+@ButtonImage("moveView")
+@Tooltip("moveViewTool.tipText")
+@ActivatedToolText("moveViewTool.helpText")
 public class MoveUVViewTool extends EditingTool
 {
   private Point clickPoint;
@@ -27,32 +33,12 @@ public class MoveUVViewTool extends EditingTool
   public MoveUVViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("moveView");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override
   public boolean hilightSelection()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveViewTool.tipText");
   }
 
   @Override

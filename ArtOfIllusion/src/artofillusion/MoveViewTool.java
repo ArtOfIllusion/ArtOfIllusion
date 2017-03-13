@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes copyright (C) 2016-2017 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,10 +16,16 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import artofillusion.texture.UVMappingWindow;
+import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
+import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
 
 /** MoveViewTool is an EditingTool used for moving the viewpoint. */
+@ButtonImage("moveView")
+@Tooltip("moveViewTool.tipText")
+@ActivatedToolText("moveViewTool.helpText")
 public class MoveViewTool extends EditingTool
 {
   private Point clickPoint;
@@ -32,32 +39,12 @@ public class MoveViewTool extends EditingTool
   public MoveViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("moveView");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
   
   @Override
   public boolean hilightSelection()
   {
       return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveViewTool.tipText");
   }
 
   @Override
@@ -282,12 +269,5 @@ public class MoveViewTool extends EditingTool
 	  for (ViewerCanvas v : theWindow.getAllViews())
 		v.auxGraphs.wipe();
   }
-
-  @Override
-  public void drawOverlay(ViewerCanvas view)
-  {
-     if (view.moving){
-       //view.drawLine(new Point (0,0), new Point (100, 100), Color.MAGENTA);
-	 }
-  }
+  
 }

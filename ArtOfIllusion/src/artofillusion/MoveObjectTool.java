@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +13,9 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -19,7 +23,9 @@ import java.awt.*;
 import java.util.Vector;
 
 /** MoveObjectTool is an EditingTool used for moving objects in a scene. */
-
+@ButtonImage("move")
+@Tooltip("moveObjectTool.tipText")
+@ActivatedToolText("moveObjectTool.helpText")
 public class MoveObjectTool extends EditingTool
 {
   Point clickPoint;
@@ -31,14 +37,6 @@ public class MoveObjectTool extends EditingTool
   public MoveObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("move");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("moveObjectTool.helpText"));
   }
 
   @Override
@@ -51,12 +49,6 @@ public class MoveObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveObjectTool.tipText");
   }
 
   @Override

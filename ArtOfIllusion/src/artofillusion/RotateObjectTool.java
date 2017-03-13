@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +13,9 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -19,7 +23,9 @@ import java.awt.*;
 import java.util.Vector;
 
 /** RotateObjectTool is an EditingTool used for rotating objects in a scene. */
-
+@ButtonImage("rotate")
+@Tooltip("rotateObjectTool.tipText")
+@ActivatedToolText("rotateObjectTool.helpText")
 public class RotateObjectTool extends EditingTool
 {
   static final int X_ONLY = 1;
@@ -44,14 +50,6 @@ public class RotateObjectTool extends EditingTool
   public RotateObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("rotate");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("rotateObjectTool.helpText"));
   }
 
   @Override
@@ -64,12 +62,6 @@ public class RotateObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("rotateObjectTool.tipText");
   }
 
   @Override

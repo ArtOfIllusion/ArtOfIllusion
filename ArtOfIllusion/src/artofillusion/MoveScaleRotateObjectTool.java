@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,8 @@ import artofillusion.ui.*;
 import artofillusion.ui.Compound3DManipulator.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ButtonImage;
+import artofillusion.tool.annotations.Tooltip;
 
 import java.awt.event.*;
 import java.awt.*;
@@ -25,7 +28,8 @@ import buoy.widget.*;
 /**
  * This editing tool presents a compound interface for moving, scaling, and rotating objects.
  */
-
+@ButtonImage("moveScaleRotate")
+@Tooltip("moveScaleRotateObjectTool.tipText")
 public class MoveScaleRotateObjectTool extends EditingTool
 {
   private boolean dragInProgress, draggingObjects;
@@ -54,7 +58,6 @@ public class MoveScaleRotateObjectTool extends EditingTool
   public MoveScaleRotateObjectTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("moveScaleRotate");
     manipulator = new Compound3DManipulator();
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
@@ -71,12 +74,6 @@ public class MoveScaleRotateObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveScaleRotateObjectTool.tipText");
   }
 
   /** Get the LayoutWindow to which this tool belongs. */

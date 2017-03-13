@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,6 +13,9 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import artofillusion.tool.annotations.ActivatedToolText;
+import artofillusion.tool.annotations.ButtonImage;
+import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -20,7 +24,9 @@ import java.util.Vector;
 
 /** ScaleObjectTool is an EditingTool used for resizing objects in a scene.  For convenience, it also
     allows users to move objects by clicking on the object itself rather than on a handle.*/
-
+@ButtonImage("resize")
+@Tooltip("scaleObjectTool.tipText")
+@ActivatedToolText("scaleObjectTool.helpText")
 public class ScaleObjectTool extends EditingTool
 {
   static final int TOP = 1;
@@ -50,14 +56,6 @@ public class ScaleObjectTool extends EditingTool
   public ScaleObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("resize");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
 
   @Override
@@ -70,12 +68,6 @@ public class ScaleObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("scaleObjectTool.tipText");
   }
 
   @Override

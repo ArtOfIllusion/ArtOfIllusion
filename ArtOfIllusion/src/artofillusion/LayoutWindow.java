@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -3005,8 +3005,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().
   }
-
-  public BLabel getHelpText() {
+  
+  public BLabel getHelpText()
+  {
     return helpText;
   }
+  
 }

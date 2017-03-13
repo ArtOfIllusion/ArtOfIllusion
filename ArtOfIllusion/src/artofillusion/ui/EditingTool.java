@@ -24,8 +24,10 @@ import artofillusion.tool.annotations.ButtonImage;
  * has an image which appears in a tool palette, allowing the tool to be selected.  When
  * selected, the editing tool responds to events in the scene or object viewer.
  * <p>
+ * <p>Editing tool GUI properties can be set using Annotations from artofillusion.tool.annotations.* package
+ * or corresponding methods can be overrided
  * An EditingTool specifies what types of mouse clicks it wants to receive by the value it
- * returns from its whichClicks() method.  This should be a sum of the contains OBJECT_CLICKS
+ * returns from its whichClicks() method.  This should be a sum of the constants OBJECT_CLICKS
  * (for mouse clicks on objects), HANDLE_CLICKS (for mouse clicks on handles), and ALL_CLICKS
  * (for all mouse clicks regardless of what they are on).  The exact definition of an "object"
  * or "handle" is not specified.  It is up to the ViewerCanvas generating the events to decide

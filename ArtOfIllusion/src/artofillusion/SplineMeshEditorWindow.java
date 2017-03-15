@@ -102,14 +102,16 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   {
     editMenu = Translate.menu("edit");
     menubar.add(editMenu);
-    editMenuItem = new BMenuItem [3];
+    editMenuItem = new BMenuItem [4];
     editMenu.add(undoItem = Translate.menuItem("undo", this, "undoCommand"));
     editMenu.add(redoItem = Translate.menuItem("redo", this, "redoCommand"));
-    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.addSeparator();
     editMenu.add(editMenuItem[0] = Translate.menuItem("extendSelection", this, "extendSelectionCommand"));
     editMenu.add(editMenuItem[1] = Translate.menuItem("invertSelection", this, "invertSelectionCommand"));
-    editMenu.add(editMenuItem[2] = Translate.checkboxMenuItem("freehandSelection", this, "freehandModeChanged", false));
+    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.add(editMenuItem[2] = Translate.menuItem("deselectAll", this, "deselectAllCommand"));
     editMenu.addSeparator();
+    editMenu.add(editMenuItem[3] = Translate.checkboxMenuItem("freehandSelection", this, "freehandModeChanged", false));
     editMenu.add(Translate.menuItem("meshTension", this, "setTensionCommand"));
   }
 
@@ -386,7 +388,9 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         count++;
     if (count > 0)
     {
-      editMenuItem[0].setEnabled(true);
+      editMenuItem[0].setEnabled(true); // Extend
+      editMenuItem[1].setEnabled(true); // Invert
+      editMenuItem[2].setEnabled(true); // Deselect
       meshMenuItem[0].setEnabled(curvemode);
       meshMenuItem[1].setEnabled(curvemode);
       meshMenuItem[2].setEnabled(true);
@@ -398,7 +402,9 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     }
     else
     {
-      editMenuItem[0].setEnabled(false);
+      editMenuItem[0].setEnabled(false); // Extend
+      editMenuItem[1].setEnabled(false); // Invert
+      editMenuItem[2].setEnabled(false); // Deselect
       for (int i = 0; i < meshMenuItem.length; i++)
         meshMenuItem[i].setEnabled(false);
     }
@@ -539,7 +545,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   private void freehandModeChanged()
   {
-    setFreehand((((BCheckBoxMenuItem) editMenuItem[2]).getState()));
+    setFreehand((((BCheckBoxMenuItem) editMenuItem[3]).getState()));
   }
 
   private void smoothingChanged(CommandEvent ev)
@@ -601,6 +607,16 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
+    setSelection(selected);
+  }
+
+  /** Select nothing. */
+
+  public void deselectAllCommand()
+  {
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    for (int i = 0; i < selected.length; i++)
+      selected[i] = false;
     setSelection(selected);
   }
 

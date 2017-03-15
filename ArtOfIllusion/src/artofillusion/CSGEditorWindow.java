@@ -90,6 +90,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     undoItem.setEnabled(false);
     editMenu.addSeparator();
     editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.add(Translate.menuItem("deselectAll", this, "deselectAllCommand"));
+    editMenu.addSeparator();
     editMenu.add(Translate.menuItem("properties", this, "propertiesCommand"));
   }
 
@@ -216,6 +218,13 @@ public class CSGEditorWindow extends ObjectEditorWindow
   void selectAllCommand()
   {
     theScene.setSelection(new int [] {0, 1});
+    updateImage();
+    updateMenus();
+  }
+
+  void deselectAllCommand()
+  {
+    theScene.clearSelection();
     updateImage();
     updateMenus();
   }

@@ -496,9 +496,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenu.add(editMenuItem[3] = Translate.menuItem("copy", this, "copyCommand"));
     editMenu.add(editMenuItem[4] = Translate.menuItem("paste", this, "pasteCommand"));
     editMenu.add(editMenuItem[5] = Translate.menuItem("clear", this, "clearCommand"));
+    editMenu.addSeparator();
     editMenu.add(editMenuItem[6] = Translate.menuItem("selectChildren", this, "actionPerformed"));
     editMenu.add(editMenuItem[7] = Translate.menuItem("selectAll", this, "selectAllCommand"));
-    editMenu.add(editMenuItem[8] = Translate.menuItem("unselectAll", this, "clearSelection"));
+    editMenu.add(editMenuItem[8] = Translate.menuItem("deselectAll", this, "clearSelection"));
     editMenu.addSeparator();
     editMenu.add(editMenuItem[9] = Translate.menuItem("duplicate", this, "duplicateCommand"));
     editMenu.add(editMenuItem[10] = Translate.menuItem("sever", this, "severCommand"));
@@ -731,20 +732,20 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTextureAndMaterial", this, "setTextureCommand", null));
     popupMenu.add(popupMenuItem[3] = Translate.menuItem("renameObject", this, "renameObjectCommand", null));
     popupMenu.add(popupMenuItem[4] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand", null));
+    popupMenu.addSeparator();	
     popupMenu.add(popupMenuItem[5] = Translate.menuItem("selectChildren", this, "actionPerformed", null));
+    popupMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand", null));
+    popupMenu.add(popupMenuItem[6] = Translate.menuItem("deselectAll", this, "clearSelection", null));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[6] = Translate.menuItem("hideSelection", this, "actionPerformed", null));
-    popupMenu.add(popupMenuItem[7] = Translate.menuItem("showSelection", this, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[7] = Translate.menuItem("hideSelection", this, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[8] = Translate.menuItem("showSelection", this, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[9] = Translate.menuItem("lockSelection", this, "actionPerformed"));
+    popupMenu.add(popupMenuItem[10] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[8] = Translate.menuItem("lockSelection", this, "actionPerformed"));
-    popupMenu.add(popupMenuItem[9] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
-    popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[10] = Translate.menuItem("cut", this, "cutCommand", null));
-    popupMenu.add(popupMenuItem[11] = Translate.menuItem("copy", this, "copyCommand", null));
-    popupMenu.add(popupMenuItem[12] = Translate.menuItem("paste", this, "pasteCommand", null));
-    popupMenu.add(popupMenuItem[13] = Translate.menuItem("clear", this, "clearCommand", null));
-    popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[14] = Translate.menuItem("unselectAll", this, "clearSelection", null));
+    popupMenu.add(popupMenuItem[11] = Translate.menuItem("cut", this, "cutCommand", null));
+    popupMenu.add(popupMenuItem[12] = Translate.menuItem("copy", this, "copyCommand", null));
+    popupMenu.add(popupMenuItem[13] = Translate.menuItem("paste", this, "pasteCommand", null));
+    popupMenu.add(popupMenuItem[14] = Translate.menuItem("clear", this, "clearCommand", null));
   }
 
   /** Display the popup menu. */
@@ -791,17 +792,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         popupMenuItem[2].setEnabled(canSetTexture); // Set Texture
         popupMenuItem[3].setEnabled(sel.length == 1); // Rename Object
         popupMenuItem[4].setEnabled(canConvert); // Convert to Triangle Mesh
-        popupMenuItem[5].setEnabled(sel.length == 1 && hasChildren); // Select Children
-        popupMenuItem[6].setEnabled(canHide); // Hide Selection
-        popupMenuItem[7].setEnabled(canShow); // Show Selection
-        popupMenuItem[8].setEnabled(canLock); // Lock Selection
-        popupMenuItem[9].setEnabled(canUnlock); // Unlock Selection
-        popupMenuItem[10].setEnabled(sel.length > 0); // Cut
-        popupMenuItem[11].setEnabled(sel.length > 0); // Copy
-        popupMenuItem[13].setEnabled(sel.length > 0); // Clear
-        popupMenuItem[14].setEnabled(sel.length > 0); // Unselect All
-      }
-    popupMenuItem[12].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
+        popupMenuItem[5].setEnabled(sel.length == 1 && hasChildren); // Select Children, works if only one item is selected
+        popupMenuItem[6].setEnabled(sel.length > 0); // Deselect All
+        popupMenuItem[7].setEnabled(canHide); // Hide Selection
+        popupMenuItem[8].setEnabled(canShow); // Show Selection
+        popupMenuItem[9].setEnabled(canLock); // Lock Selection
+        popupMenuItem[10].setEnabled(canUnlock); // Unlock Selection
+        popupMenuItem[11].setEnabled(sel.length > 0); // Cut
+        popupMenuItem[12].setEnabled(sel.length > 0); // Copy
+        popupMenuItem[14].setEnabled(sel.length > 0); // Clear
+       }
+    popupMenuItem[13].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     popupMenu.show(w, x, y);
   }
 
@@ -1035,9 +1036,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     editMenuItem[4].setEnabled(ArtOfIllusion.getClipboardSize() > 0); // Paste
     editMenuItem[5].setEnabled(numSelObjects > 0); // Clear
     editMenuItem[6].setEnabled(hasChildren); // Select Children
-    editMenuItem[7].setEnabled(numSelObjects > 0); // Unselect All
-    editMenuItem[8].setEnabled(numSelObjects > 0); // Make Live Duplicates
-    editMenuItem[9].setEnabled(numSelObjects > 0); // Sever Duplicates
+    editMenuItem[8].setEnabled(numSelObjects > 0); // Deselect All
+    editMenuItem[9].setEnabled(numSelObjects > 0); // Make Live Duplicates
+    editMenuItem[10].setEnabled(numSelObjects > 0); // Sever Duplicates
     if (numSelObjects == 0)
     {
       for (i = 0; i < objectMenuItem.length; i++)

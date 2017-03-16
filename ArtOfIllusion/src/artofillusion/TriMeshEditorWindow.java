@@ -120,7 +120,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   {
     BMenu editMenu = Translate.menu("edit");
     menubar.add(editMenu);
-    editMenuItem = new BMenuItem [7];
+    editMenuItem = new BMenuItem [9];
     editMenu.add(undoItem = Translate.menuItem("undo", this, "undoCommand"));
     editMenu.add(redoItem = Translate.menuItem("redo", this, "redoCommand"));
     editMenu.addSeparator();
@@ -130,23 +130,25 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       editMenu.add(editMenuItem[0]);
       editMenu.addSeparator();
     }
-    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
     editMenu.add(editMenuItem[1] = Translate.menuItem("extendSelection", this, "extendSelectionCommand"));
-    editMenu.add(Translate.menuItem("invertSelection", this, "invertSelectionCommand"));
+    editMenu.add(editMenuItem[2] = Translate.menuItem("invertSelection", this, "invertSelectionCommand"));
     BMenu selectSpecialMenu = Translate.menu("selectSpecial");
-    selectMenuItem = new BMenuItem[4];
-    selectSpecialMenu.add(selectMenuItem[0] = Translate.menuItem("selectBoundary", this, "selectObjectBoundaryCommand"));
-    selectSpecialMenu.add(selectMenuItem[1] = Translate.menuItem("selectSelectionBoundary", this, "selectSelectionBoundaryCommand"));
-    selectSpecialMenu.add(selectMenuItem[2] = Translate.menuItem("selectEdgeLoop", this, "selectEdgeLoopCommand"));
-    selectSpecialMenu.add(selectMenuItem[3] = Translate.menuItem("selectEdgeStrip", this, "selectEdgeStripCommand"));
+      selectMenuItem = new BMenuItem[4];
+      selectSpecialMenu.add(selectMenuItem[0] = Translate.menuItem("selectBoundary", this, "selectObjectBoundaryCommand"));
+      selectSpecialMenu.add(selectMenuItem[1] = Translate.menuItem("selectSelectionBoundary", this, "selectSelectionBoundaryCommand"));
+      selectSpecialMenu.add(selectMenuItem[2] = Translate.menuItem("selectEdgeLoop", this, "selectEdgeLoopCommand"));
+      selectSpecialMenu.add(selectMenuItem[3] = Translate.menuItem("selectEdgeStrip", this, "selectEdgeStripCommand"));
+    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.add(editMenuItem[3] = Translate.menuItem("deselectAll", this, "deselectAllCommand"));
+    editMenu.addSeparator();
     editMenu.add(selectSpecialMenu);
     editMenu.addSeparator();
-    editMenu.add(editMenuItem[2] = Translate.checkboxMenuItem("tolerantSelection", this, "tolerantModeChanged", lastTolerant));
-    editMenu.add(editMenuItem[3] = Translate.checkboxMenuItem("freehandSelection", this, "freehandModeChanged", lastFreehand));
-    editMenu.add(editMenuItem[4] = Translate.checkboxMenuItem("displayAsQuads", this, "quadModeChanged", lastShowQuads));
-    editMenu.add(editMenuItem[5] = Translate.checkboxMenuItem("projectOntoSurface", this, "projectModeChanged", lastProjectOntoSurface));
+    editMenu.add(editMenuItem[4] = Translate.checkboxMenuItem("tolerantSelection", this, "tolerantModeChanged", lastTolerant));
+    editMenu.add(editMenuItem[5] = Translate.checkboxMenuItem("freehandSelection", this, "freehandModeChanged", lastFreehand));
+    editMenu.add(editMenuItem[6] = Translate.checkboxMenuItem("displayAsQuads", this, "quadModeChanged", lastShowQuads));
+    editMenu.add(editMenuItem[7] = Translate.checkboxMenuItem("projectOntoSurface", this, "projectModeChanged", lastProjectOntoSurface));
     editMenu.addSeparator();
-    editMenu.add(editMenuItem[6] = Translate.menuItem("hideSelection", this, "hideSelectionCommand"));
+    editMenu.add(editMenuItem[8] = Translate.menuItem("hideSelection", this, "hideSelectionCommand"));
     editMenu.add(Translate.menuItem("showAll", this, "showAllCommand"));
     editMenu.addSeparator();
     editMenu.add(Translate.menuItem("meshTension", this, "setTensionCommand"));
@@ -347,8 +349,10 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     {
       any = true;
       editMenuItem[0].setEnabled(true);
-      editMenuItem[1].setEnabled(true);
-      editMenuItem[6].setEnabled(true);
+      editMenuItem[1].setEnabled(true); // Extend
+      editMenuItem[2].setEnabled(true); // Invert
+      editMenuItem[3].setEnabled(true); // Deselect
+      editMenuItem[8].setEnabled(true); // Hide
       for (i = 0; i < 12; i++)
         meshMenuItem[i].setEnabled(true);
       if (selectMode == EDGE_MODE)
@@ -380,15 +384,17 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     }
     else
     {
-      editMenuItem[0].setEnabled(false);
-      editMenuItem[1].setEnabled(false);
-      editMenuItem[6].setEnabled(false);
+      editMenuItem[0].setEnabled(false); // 
+      editMenuItem[1].setEnabled(false); // Extend
+      editMenuItem[2].setEnabled(false); // Invert
+      editMenuItem[3].setEnabled(false); // Deselect
+      editMenuItem[8].setEnabled(false); // Hide
       meshMenuItem[0].setEnabled(false);
       for (i = 2; i < 12; i++)
         meshMenuItem[i].setEnabled(false);
       meshMenuItem[1].setText(Translate.text("menu.simplifyMesh"));
     }
-    editMenuItem[5].setEnabled(theMesh.getSmoothingMethod() == TriangleMesh.APPROXIMATING || theMesh.getSmoothingMethod() == TriangleMesh.INTERPOLATING);
+    editMenuItem[7].setEnabled(theMesh.getSmoothingMethod() == TriangleMesh.APPROXIMATING || theMesh.getSmoothingMethod() == TriangleMesh.INTERPOLATING);
     selectMenuItem[0].setEnabled(!objInfo.getObject().isClosed());
     selectMenuItem[1].setEnabled(any);
     selectMenuItem[2].setEnabled(any && selectMode == EDGE_MODE);
@@ -1087,23 +1093,23 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   private void tolerantModeChanged()
   {
-    setTolerant(((BCheckBoxMenuItem) editMenuItem[2]).getState());
+    setTolerant(((BCheckBoxMenuItem) editMenuItem[4]).getState());
   }
 
   private void freehandModeChanged()
   {
-    setFreehand(((BCheckBoxMenuItem) editMenuItem[3]).getState());
+    setFreehand(((BCheckBoxMenuItem) editMenuItem[5]).getState());
   }
 
   private void quadModeChanged()
   {
-    setQuadMode(((BCheckBoxMenuItem) editMenuItem[4]).getState());
+    setQuadMode(((BCheckBoxMenuItem) editMenuItem[6]).getState());
     updateImage();
   }
 
   private void projectModeChanged()
   {
-    setProjectOntoSurface(((BCheckBoxMenuItem) editMenuItem[5]).getState());
+    setProjectOntoSurface(((BCheckBoxMenuItem) editMenuItem[7]).getState());
     updateImage();
   }
 
@@ -1162,6 +1168,16 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       for (int i = 0; i < selected.length; i++)
         if (isEdgeHidden(i))
           selected[i] = false;
+    setSelection(selected);
+  }
+  
+  /** Select nothing. */
+
+  public void deselectAllCommand()
+  {
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    for (int i = 0; i < selected.length; i++)
+      selected[i] = false;
     setSelection(selected);
   }
 

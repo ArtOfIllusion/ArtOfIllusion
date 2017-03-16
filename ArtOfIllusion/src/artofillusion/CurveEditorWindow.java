@@ -93,14 +93,16 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   {
     editMenu = Translate.menu("edit");
     menubar.add(editMenu);
-    editMenuItem = new BMenuItem [3];
+    editMenuItem = new BMenuItem [4];
     editMenu.add(undoItem = Translate.menuItem("undo", this, "undoCommand"));
     editMenu.add(redoItem = Translate.menuItem("redo", this, "redoCommand"));
-    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.addSeparator();
     editMenu.add(editMenuItem[0] = Translate.menuItem("extendSelection", this, "extendSelectionCommand"));
     editMenu.add(editMenuItem[1] = Translate.menuItem("invertSelection", this, "invertSelectionCommand"));
-    editMenu.add(editMenuItem[2] = Translate.checkboxMenuItem("freehandSelection", this, "freehandModeChanged", false));
+    editMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand"));
+    editMenu.add(editMenuItem[2] = Translate.menuItem("deselectAll", this, "deselectAllCommand"));
     editMenu.addSeparator();
+    editMenu.add(editMenuItem[3] = Translate.checkboxMenuItem("freehandSelection", this, "freehandModeChanged", false));
     editMenu.add(Translate.menuItem("curveTension", this, "setTensionCommand"));
   }
 
@@ -255,12 +257,16 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     if (i < selected.length)
     {
       editMenuItem[0].setEnabled(true);
+      editMenuItem[1].setEnabled(true);
+      editMenuItem[2].setEnabled(true);
       for (i = 0; i < 6; i++)
         meshMenuItem[i].setEnabled(true);
     }
     else
     {
       editMenuItem[0].setEnabled(false);
+      editMenuItem[1].setEnabled(false);
+      editMenuItem[2].setEnabled(false);
       for (i = 0; i < 6; i++)
         meshMenuItem[i].setEnabled(false);
     }
@@ -293,7 +299,7 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
   protected void freehandModeChanged()
   {
     for (int i = 0; i < theView.length; i++)
-      ((CurveViewer) theView[i]).setFreehandSelection(((BCheckBoxMenuItem) editMenuItem[2]).getState());
+      ((CurveViewer) theView[i]).setFreehandSelection(((BCheckBoxMenuItem) editMenuItem[3]).getState());
   }
 
   private void smoothingChanged(CommandEvent ev)
@@ -314,6 +320,16 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected.clone()}));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
+    setSelection(selected);
+  }
+
+  /** Select nothing. */
+
+  public void deselectAllCommand()
+  {
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, 0, selected.clone()}));
+    for (int i = 0; i < selected.length; i++)
+      selected[i] = false;
     setSelection(selected);
   }
 

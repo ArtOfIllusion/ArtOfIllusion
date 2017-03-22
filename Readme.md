@@ -1,4 +1,4 @@
-###Art of Illusion###
+# Art of Illusion
 
 Art of Illusion is a free, multiplatform Modeling, Animation and
 Rendering suite written in the java language. It features a simple,
@@ -23,7 +23,7 @@ General questions or requests for help can be taken to our
 
 ----------------
 
-####Contributing####
+## Contributing
 
 Check out our [contributor guidelines](./Contributing.md) to see how you can help develop
 or maintain ArtOfIllusion.

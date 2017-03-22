@@ -70,7 +70,7 @@
         windowtitle="Art of Illusion Documentation"
 	public="true">
       <doctitle><![CDATA[<h1>Art of Illusion</h1>]]></doctitle>
-      <bottom><![CDATA[<i>Copyright &copy; 1999-2011 by Peter Eastman.</i>]]></bottom>
+      <bottom><![CDATA[<i>Copyright &copy; 1999-2017 by Peter Eastman.</i>]]></bottom>
     </javadoc>
   </target>
 

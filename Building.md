@@ -1,9 +1,9 @@
-###Building AOI from source###
+# Building AOI from source
 
 If you've never built AOI from source before, please follow the process
 below
 
-####Prerequisites####
+## Prerequisites
 
 Here's a list of the tools that you will need to work on the AOI
 source code: (If you are an experienced java developer, you probably
@@ -30,7 +30,7 @@ such as eclipse or Netbeans.
  * [JUnit 4.x](http://junit.org/junit4/) (optional) framework for
 running the automated test suite.
 
-####Obtaining and building the sources####
+## Obtaining and building the sources
 
 Create a new directory on your hard drive where you would like to
 keep your AOI development build, then access it from a command line:
@@ -52,7 +52,7 @@ Launching from the command line will allow you to see any console output
 which AOI generates. You can also add command line options to allow AOI
 to use more memory, etc.
 
-####Enabling OpenGL####
+### Enabling OpenGL
 
 AOI can use your graphics card to make rendering of scenes in the
 editor windows faster. To make this work in the development build,
@@ -60,7 +60,7 @@ you need to move some files around. Copy all .jar files from
 `InstallerSrc/jogl-<your platform>` to `lib`. Remember to restart
 AOI after doing this.
 
-####Installing Plugins####
+### Installing Plugins
 
 A standard Art of Illusion development build does not include the
 SPManager, which is developed as a separate project. You
@@ -74,7 +74,7 @@ If you choose to install plugins this way, you should only need to
 install them once. They will not be deleted when you re-build AOI.
 
 
-####Structure of a development build####
+### Structure of a development build
 
 If you've followed the above instructions, your working directory will
 contain the following directories and files:
@@ -110,7 +110,7 @@ is populated by the standard plugins, and these are overwritten when
 you rebuild. Any other plugins in this directory are not touched, and
 can continue to be used from build to build.
 
-####Building installers####
+### Building installers
 Right now, you can't really build a native installer for AOI yourself.
 The installer system depends on an old version of IZPack that is not
 supported, and that you cannot get an installer for. Some of the

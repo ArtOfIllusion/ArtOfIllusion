@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
+   A bug fix copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -646,7 +647,7 @@ public class MIPMappedImage extends ImageMap
     BufferedImage bi;
     if (getComponentCount() == 1)
     {
-      bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
       for (int i = 0; i < w; i++)
         for (int j = 0; j < h; j++)
         {
@@ -674,7 +675,7 @@ public class MIPMappedImage extends ImageMap
           bi.setRGB(i, j, ((255-(maps[0][3][index]&0xFF))<<24)+((maps[0][0][index]&0xFF)<<16)+((maps[0][1][index]&0xFF)<<8)+(maps[0][2][index]&0xFF));
         }
     }
-    out.writeShort(1);
+    out.writeShort(1); // version reference
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ImageIO.write(bi, "png", baos);
     out.writeInt(baos.size());

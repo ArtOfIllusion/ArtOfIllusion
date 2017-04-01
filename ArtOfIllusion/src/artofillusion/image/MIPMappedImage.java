@@ -615,24 +615,32 @@ public class MIPMappedImage extends ImageMap
     // Construct the mipmaps, preview image, etc.
 
     try
-      {
-        Frame fr = new Frame();
-        buildMipMaps(im);
-        fr.dispose();
-      }
+    {
+      Frame fr = new Frame();
+      buildMipMaps(im);
+      fr.dispose();
+    }
     catch (InterruptedException ex)
-      {
-        throw(new IOException());
-      }
+    {
+      throw(new IOException());
+    }
     if (w <= PREVIEW_WIDTH && h <= PREVIEW_HEIGHT)
       preview = im;
     else
+    {
+      if (w < h)
       {
-        if (w < h)
-          preview = im.getScaledInstance(-1, PREVIEW_HEIGHT, Image.SCALE_DEFAULT);
-        else
-          preview = im.getScaledInstance(PREVIEW_WIDTH, -1, Image.SCALE_DEFAULT);
+        preview = im.getScaledInstance(-1, PREVIEW_HEIGHT, Image.SCALE_DEFAULT);
+          if (preview.getWidth(null) == 0)
+            preview = im.getScaledInstance(1, PREVIEW_HEIGHT, Image.SCALE_DEFAULT);
       }
+      else
+      {
+        preview = im.getScaledInstance(PREVIEW_WIDTH, -1, Image.SCALE_DEFAULT);
+          if (preview.getHeight(null) == 0)
+            preview = im.getScaledInstance(PREVIEW_WIDTH, 1, Image.SCALE_DEFAULT);
+      }
+    }
     findAverage();
   }
 

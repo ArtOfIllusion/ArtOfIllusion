@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
+   Modifications copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -190,13 +191,13 @@ public class HDRImage extends ImageMap
       {
         if (width[0] < height[0])
           {
-            w = (int) (width[0]*PREVIEW_HEIGHT/(float) height[0]);
+            w = Math.max((int) (width[0]*PREVIEW_HEIGHT/(float) height[0]), 1);
             h = PREVIEW_HEIGHT;
           }
         else
           {
             w = PREVIEW_WIDTH;
-            h = (int) (height[0]*PREVIEW_WIDTH/(float) width[0]);
+            h = Math.max((int) (height[0]*PREVIEW_WIDTH/(float) width[0]), 1);
           }
       }
     int data[] = new int [w*h];

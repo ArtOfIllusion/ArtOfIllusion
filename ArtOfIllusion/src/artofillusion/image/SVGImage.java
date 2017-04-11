@@ -1,4 +1,5 @@
 /* Copyright (C) 2011-2012 by Peter Eastman
+   Modifications copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -58,11 +59,11 @@ public class SVGImage extends ImageMap
     if (aspectRatio >= 1)
     {
       previewWidth = PREVIEW_WIDTH;
-      previewHeight = (int) (PREVIEW_WIDTH/aspectRatio);
+      previewHeight = Math.max((int) (PREVIEW_WIDTH/aspectRatio), 1);
     }
     else
     {
-      previewWidth = (int) (PREVIEW_HEIGHT*aspectRatio);
+      previewWidth = Math.max((int) (PREVIEW_HEIGHT*aspectRatio), 1);
       previewHeight = PREVIEW_HEIGHT;
     }
     preview = new BufferedImage(previewWidth, previewHeight, BufferedImage.TYPE_INT_ARGB);

@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
+   Modifications copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +16,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.awt.image.*;
 import java.io.*;
 
 /** ImagesDialog is a dialog box for editing the list of ImageMaps used in a scene. */
@@ -27,10 +29,13 @@ public class ImagesDialog extends BDialog
   private BScrollPane sp;
   private ImagesCanvas ic;
   private BButton b[];
+  private BufferedImage bgImage;
+  private Color selectedColor;
 
   public ImagesDialog(BFrame fr, Scene sc, ImageMap selected)
   {
     super(fr, "Images", true);
+    createDisplayItems();
     BorderContainer content = new BorderContainer();
     setContent(content);
     parent = fr;
@@ -59,6 +64,35 @@ public class ImagesDialog extends BDialog
     setVisible(true);
   }
 
+  private void     createDisplayItems()
+  {
+    // creating the bgImage for preview images
+    
+    int midShade = 127+32+32+16;
+	int difference = 12;
+	int w = ImageMap.PREVIEW_WIDTH;
+	int h = ImageMap.PREVIEW_HEIGHT;
+	
+    Color bgColor1 = new Color(midShade-difference,midShade-difference,midShade-difference);
+    Color bgColor2 = new Color(midShade+difference,midShade+difference,midShade+difference);
+    int rgb1 = bgColor1.getRGB();
+    int rgb2 = bgColor2.getRGB();
+    bgImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+
+    for (int x = 0; x < w; x++)
+      for (int y = 0; y < h; y++)
+      {
+        if ((x%10 < 5 && y%10 < 5) || (x%10 >= 5 && y%10 >= 5)) // checkers
+          bgImage.setRGB(x, y, rgb1);
+        else
+          bgImage.setRGB(x, y, rgb2);
+      }
+      
+    // getting selectedColor
+    
+    selectedColor = ThemeManager.getSelectedColorSet().viewerHighlight;
+  }
+
   public ImageMap getSelection()
   {
     if (selection < 0)
@@ -71,7 +105,7 @@ public class ImagesDialog extends BDialog
     b[1].setEnabled(selection >= 0);
     b[2].setEnabled(selection >= 0);
   }
-  
+
   private void doLoad()
   {
     BFileChooser fc = new ImageFileChooser(Translate.text("selectImagesToLoad"));
@@ -100,7 +134,7 @@ public class ImagesDialog extends BDialog
     ic.scrollToSelection();
     hilightButtons();
   }
-  
+
   private void doDelete()
   {
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
@@ -170,14 +204,24 @@ public class ImagesDialog extends BDialog
     private void paint(RepaintEvent ev)
     {
       Graphics2D g = ev.getGraphics();
+
       for (int i = 0; i < theScene.getNumImages(); i++)
-	g.drawImage(theScene.getImage(i).getPreview(), (i%w)*gridw+5, (i/w)*gridh+5, getComponent());
+      {
+        Image pw = theScene.getImage(i).getPreview();
+        int xOffset = (50-pw.getWidth(null))/2;
+        int yOffset = (50-pw.getHeight(null))/2;
+        g.drawImage(bgImage, (i%w)*gridw+5, (i/w)*gridh+5, getComponent());      
+        g.drawImage(pw, (i%w)*gridw+5+xOffset, (i/w)*gridh+5+yOffset, getComponent());
+      }
       if (selection >= 0)
-	{
-	  int x = (selection%w)*gridw, y = (selection/w)*gridh;
-	  g.drawRect(x+1, y+1, gridw-2, gridh-2);
-	  g.drawRect(x+2, y+2, gridw-4, gridh-4);
-	}
+      {
+        int x = (selection%w)*gridw, y = (selection/w)*gridh;
+        g.setColor(selectedColor);
+        g.drawRect(x+1, y+1, gridw-3, gridh-3);
+        g.drawRect(x+2, y+2, gridw-5, gridh-5);
+        g.drawRect(x+3, y+3, gridw-7, gridh-7);
+        g.drawRect(x+4, y+4, gridw-9, gridh-9);
+      }
     }
 
     private void mouseClicked(MouseClickedEvent ev)
@@ -188,7 +232,7 @@ public class ImagesDialog extends BDialog
       i = (p.x/gridw);
       j = (p.y/gridh);
       if (i < 5 && i+j*w < theScene.getNumImages())
-	selection = i+j*w;
+      selection = i+j*w;
       else
         selection = -1;
       repaint();

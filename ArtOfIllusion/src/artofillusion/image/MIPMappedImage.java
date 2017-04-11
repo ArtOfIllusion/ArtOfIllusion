@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
+   Modifications copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -51,15 +52,7 @@ public class MIPMappedImage extends ImageMap
   private void init(Image im) throws InterruptedException
   {
     buildMipMaps(im);
-    if (width[0] <= PREVIEW_WIDTH && height[0] <= PREVIEW_HEIGHT)
-      preview = im;
-    else
-      {
-        if (width[0] < height[0])
-          preview = im.getScaledInstance(-1, PREVIEW_HEIGHT, Image.SCALE_DEFAULT);
-        else
-          preview = im.getScaledInstance(PREVIEW_WIDTH, -1, Image.SCALE_DEFAULT);
-      }
+    createPreview(im);
     findAverage();
   }
 
@@ -614,27 +607,49 @@ public class MIPMappedImage extends ImageMap
     // Construct the mipmaps, preview image, etc.
 
     try
-      {
-        Frame fr = new Frame();
-        buildMipMaps(im);
-        fr.dispose();
-      }
+    {
+      Frame fr = new Frame();
+      buildMipMaps(im);
+      fr.dispose();
+    }
     catch (InterruptedException ex)
-      {
-        throw(new IOException());
-      }
-    if (w <= PREVIEW_WIDTH && h <= PREVIEW_HEIGHT)
-      preview = im;
-    else
-      {
-        if (w < h)
-          preview = im.getScaledInstance(-1, PREVIEW_HEIGHT, Image.SCALE_DEFAULT);
-        else
-          preview = im.getScaledInstance(PREVIEW_WIDTH, -1, Image.SCALE_DEFAULT);
-      }
+    {
+      throw(new IOException());
+    }
+
+    createPreview(im);
     findAverage();
   }
 
+  private void createPreview(Image im)//, int w, int h)
+  {
+    int w = im.getWidth(null);
+    int h = im.getHeight(null);
+    
+    if (w <= PREVIEW_WIDTH && h <= PREVIEW_HEIGHT)
+      preview = im;
+    else
+    {
+      // At image load, the getWidth() and getHeight() of 'preview' returned '1'. Hence the precalulated pw and ph.
+      // It looked like a timimg issue: The image was not yet ready when the query was made.
+      // At loading AoI-file the returned dimensions would be the actual image dimensions. 
+      
+      int pw, ph;
+
+      if (w < h)
+      {
+        pw = Math.max(w*PREVIEW_WIDTH/h, 1);
+        ph = PREVIEW_HEIGHT;
+      }
+      else
+      {
+        pw = PREVIEW_WIDTH;
+        ph = Math.max(h*PREVIEW_HEIGHT/w, 1);
+      }
+      preview = im.getScaledInstance(pw, ph, Image.SCALE_DEFAULT);
+    }
+  }
+  
   /** Serialize an image to an output stream. */
 
   @Override
@@ -646,7 +661,7 @@ public class MIPMappedImage extends ImageMap
     BufferedImage bi;
     if (getComponentCount() == 1)
     {
-      bi = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
       for (int i = 0; i < w; i++)
         for (int j = 0; j < h; j++)
         {
@@ -674,7 +689,7 @@ public class MIPMappedImage extends ImageMap
           bi.setRGB(i, j, ((255-(maps[0][3][index]&0xFF))<<24)+((maps[0][0][index]&0xFF)<<16)+((maps[0][1][index]&0xFF)<<8)+(maps[0][2][index]&0xFF));
         }
     }
-    out.writeShort(1);
+    out.writeShort(1); // version reference
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ImageIO.write(bi, "png", baos);
     out.writeInt(baos.size());

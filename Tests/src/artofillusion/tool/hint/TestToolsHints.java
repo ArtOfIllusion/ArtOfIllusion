@@ -40,6 +40,8 @@ import artofillusion.texture.MoveUVViewTool;
 import artofillusion.ui.EditingTool;
 import artofillusion.ui.GenericTool;
 import artofillusion.ui.ThemeManager;
+import artofillusion.ui.Translate;
+import java.util.Locale;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -54,6 +56,7 @@ public class TestToolsHints {
 
     @BeforeClass
     public static void setUpClass() {
+        Translate.setLocale(Locale.ENGLISH);
         PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
         PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
         ThemeManager.initThemes();

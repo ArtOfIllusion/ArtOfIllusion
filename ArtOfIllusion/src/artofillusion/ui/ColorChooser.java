@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,7 +16,8 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.prefs.*;
 import javax.swing.*;
 
@@ -24,15 +26,20 @@ import javax.swing.*;
 
 public class ColorChooser extends BDialog
 {
+  private static final LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.WEST, 
+          LayoutInfo.HORIZONTAL, new Insets(5, 0, 0, 10), null);
+  private static final LayoutInfo sliderLayout = new LayoutInfo(LayoutInfo.WEST, 
+          LayoutInfo.HORIZONTAL, new Insets(0, 0, 0, 5), null);
+  
   private RGBColor oldColor, newColor;
   private ValueSlider slider1, slider2, slider3;
   private BLabel label1, label2, label3;
-  private Widget oldColorPatch, newColorPatch;
+  private Widget newColorPatch;
   private BComboBox modeC, rangeC;
   private boolean ok;
   
   private static final int RECENT_COLOR_COUNT = 15;
-  private static ArrayList<RGBColor> recentColors;
+  private static final List<RGBColor> recentColors;
   private static int mode;
   private static int rangeMode;
 
@@ -53,18 +60,18 @@ public class ColorChooser extends BDialog
       recentColors.add(new RGBColor(1.0, 1.0, 1.0));
   }
   
-  public ColorChooser(BFrame parent, String title, RGBColor c)
+  public ColorChooser(BFrame parent, String title, RGBColor iColor)
   {
-    this(parent, title, c, true);
+    this(parent, title, iColor, true);
   }
 
-  public ColorChooser(BFrame parent, String title, RGBColor c, boolean show)
+  public ColorChooser(BFrame parent, String title, RGBColor iColor, boolean show)
   {
     super(parent, title, true);
     BorderContainer content = new BorderContainer();
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
-    oldColor = c;
-    newColor = c.duplicate();
+    oldColor = iColor;
+    newColor = iColor.duplicate();
 
     // Add the buttons at the bottom.
 
@@ -78,11 +85,11 @@ public class ColorChooser extends BDialog
     FormContainer center = new FormContainer(new double [] {0, 1, 0}, new double [] {1, 1, 1, 1, 1, 1, 1, 1, 1});
     center.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, null, null));
     content.add(center, BorderContainer.CENTER);
-    LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(5, 0, 0, 10), null);
+    
     center.add(label1 = Translate.label("Red"), 0, 0, 2, 1, labelLayout);
     center.add(label2 = Translate.label("Green"), 0, 2, 2, 1, labelLayout);
     center.add(label3 = Translate.label("Blue"), 0, 4, 2, 1, labelLayout);
-    LayoutInfo sliderLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.HORIZONTAL, new Insets(0, 0, 0, 5), null);
+    
     double componentMax = (rangeMode == 0 ? 1.0 : 255.0);
     center.add(slider1 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getRed()), 0, 1, 2, 1, sliderLayout);
     center.add(slider2 = new ValueSlider(0.0, componentMax, 100, (double) newColor.getGreen()), 0, 3, 2, 1, sliderLayout);
@@ -108,15 +115,15 @@ public class ColorChooser extends BDialog
     rangeC.setSelectedIndex(rangeMode);
     LayoutInfo patchLayout = new LayoutInfo();
     center.add(Translate.label("originalColor"), 2, 0, patchLayout);
-    center.add(oldColorPatch = oldColor.getSample(50, 30), 2, 1, patchLayout);
+    center.add(oldColor.getSample(50, 30), 2, 1, patchLayout);
     center.add(Translate.label("newColor"), 2, 2, patchLayout);
     center.add(newColorPatch = newColor.getSample(50, 30), 2, 3, patchLayout);
     center.add(Translate.label("recentColors"), 0, 7, 3, 1);
     RowContainer recentColorRow = new RowContainer();
     center.add(recentColorRow, 0, 8, 3, 1);
-    for (int i = 0; i < recentColors.size(); i++)
+    for (RGBColor recentColor: recentColors)
     {
-      final RGBColor color = ((RGBColor) recentColors.get(i));
+      final RGBColor color = recentColor;
       Widget sample = color.getSample(16, 16);
       recentColorRow.add(sample);
       sample.addEventLink(MousePressedEvent.class, new Object() {
@@ -126,6 +133,7 @@ public class ColorChooser extends BDialog
         }
       });
     }
+    
     addAsListener(this);
     modeChanged();
     pack();

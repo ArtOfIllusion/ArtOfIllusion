@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,7 +18,8 @@ import java.util.*;
 
 public class UndoStack
 {
-  private LinkedList<UndoRecord> undoList, redoList;
+    private final LinkedList<UndoRecord> undoList;
+    private final LinkedList<UndoRecord> redoList;
 
   public UndoStack()
   {
@@ -69,7 +71,7 @@ public class UndoStack
   {
     if (undoList.isEmpty())
       return;
-    UndoRecord record = (UndoRecord) undoList.removeLast();
+    UndoRecord record = undoList.removeLast();
     redoList.add(record.execute());
   }
 
@@ -81,7 +83,7 @@ public class UndoStack
   {
     if (redoList.isEmpty())
       return;
-    UndoRecord record = (UndoRecord) redoList.removeLast();
+    UndoRecord record = redoList.removeLast();
     undoList.add(record.execute());
   }
 }

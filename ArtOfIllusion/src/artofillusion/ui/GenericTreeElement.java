@@ -71,14 +71,14 @@ public class GenericTreeElement extends TreeElement
 
     for (pos = 0; pos < children.size(); pos++)
       {
-        el = (TreeElement) children.get(pos);
+        el = children.get(pos);
         if (el.getObject() == object)
           break;
       }
     if (pos == children.size())
       {
         for (int i = 0; i < children.size(); i++)
-          ((TreeElement) children.get(i)).removeChild(object);
+          children.get(i).removeChild(object);
         return;
       }
     el.parent = null;

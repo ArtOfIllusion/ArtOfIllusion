@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,9 +21,12 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.ref.*;
-import java.util.*;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-/** The TriangleMesh class represents an aritrary surface defined by a mesh of triangular
+/** The TriangleMesh class represents an arbitrary surface defined by a mesh of triangular
     faces.  Depending on the selected smoothing method, the surface may simply consist of
     the triangular faces, or it may be a smooth subdivision surface which either interpolates
     or approximates the vertices of the control mesh. */
@@ -363,7 +367,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     // We now have two lists of edges: one for each direction of traversal.  Determine which
     // which ones are duplicates, and add any unique edges from edges2 into edges1.
 
-    Hashtable<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
+    Map<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
     for (i = 0; i < numEdges1; i++)
       edgeTable.put(new Point(edges1[i].v1, edges1[i].v2), i);
     for (i = 0; i < numEdges2; i++)
@@ -781,7 +785,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     TriangleMesh mesh = this;
     Vec3 vert[], normalArray[];
-    Vector<Vec3> norm;
+    List<Vec3> norm;
     Vertex v[];
     Edge e[];
     Face f[], tempFace;
@@ -864,7 +868,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
 
             if (v[i].smoothness < 1.0f)
               {
-                norm.addElement(null);
+                norm.add(null);
                 for (j = 0; j < ed.length; j++)
                   {
                     k = e[ed[j]].f1;
@@ -960,7 +964,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
                       }
                   }
                 temp.normalize();
-                norm.addElement(temp);
+                norm.add(temp);
                 normals++;
                 continue;
               }
@@ -1020,7 +1024,7 @@ groups:     do
                   } while (tempEdge.f2 != -1 && tempEdge.smoothness == 1.0f);
                 last = j;
                 temp.normalize();
-                norm.addElement(temp);
+                norm.add(temp);
                 normals++;
                 j = first = last;
                 tempEdge = e[ed[first]];
@@ -1031,7 +1035,7 @@ groups:     do
 
         normalArray = new Vec3 [norm.size()];
         for (i = 0; i < normalArray.length; i++)
-          normalArray[i] = (Vec3) norm.elementAt(i);
+          normalArray[i] = norm.get(i);
         for (i = 0; i < f.length; i++)
           {
             tempFace = mesh.face[i];
@@ -3539,7 +3543,7 @@ groups:     do
       {
         Vertex v = vertex[i];
         v.r.set(key.vertPos[i]);
-        v.smoothness = (float) key.vertSmoothness[i];
+        v.smoothness = key.vertSmoothness[i];
       }
     if (texParam != null && texParam.length > 0)
       for (int i = 0; i < texParam.length; i++)

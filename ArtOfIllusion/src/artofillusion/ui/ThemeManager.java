@@ -1,5 +1,6 @@
 /* Copyright (C) 2007 by François Guillet
    Some parts copyright 2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
  This program is free software; you can redistribute it and/or modify it under the
  terms of the GNU General Public License as published by the Free Software
@@ -251,7 +252,7 @@ public class ThemeManager {
 
       public ColorSet[] getColorSets()
       {
-        return (ColorSet[]) colorSets.clone();
+        return colorSets.clone();
       }
     }
 
@@ -270,7 +271,7 @@ public class ThemeManager {
         protected int width = -1;
         protected int height = -1;
 
-        protected HashMap<String, String> attributes = new HashMap<String, String>();
+        protected Map<String, String> attributes = new HashMap<String, String>();
         protected ButtonStyle next;
 
         /**
@@ -336,7 +337,7 @@ public class ThemeManager {
          *  get the named attribute value.
          */
         public String getAttribute(String name)
-        { return (String) attributes.get(name); }
+        { return attributes.get(name); }
     }
 
     private static ThemeInfo selectedTheme, defaultTheme;

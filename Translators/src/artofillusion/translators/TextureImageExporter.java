@@ -24,7 +24,7 @@ import java.util.*;
 
 public class TextureImageExporter
 {
-  private Hashtable textureTable;
+  private Hashtable<Texture,TextureImageInfo> textureTable;
   private File dir;
   private String baseFilename;
   private int quality, components, width, height;
@@ -48,7 +48,7 @@ public class TextureImageExporter
 
   public TextureImageExporter(File dir, String baseFilename, int quality, int components, int width, int height)
   {
-    textureTable = new Hashtable();
+    textureTable = new Hashtable<Texture,TextureImageInfo>();
     this.dir = dir;
     this.baseFilename = baseFilename;
     this.quality = quality;
@@ -65,7 +65,7 @@ public class TextureImageExporter
     Texture tex = obj.getObject().getTexture();
     if (tex == null)
       return;
-    TextureImageInfo info = (TextureImageInfo) textureTable.get(tex);
+    TextureImageInfo info = textureTable.get(tex);
     if (info == null)
       {
         // We haven't encountered this texture before, so create a new TextureImageInfo for it.
@@ -150,7 +150,7 @@ public class TextureImageExporter
 
   public TextureImageInfo getTextureInfo(Texture tex)
   {
-    return (tex != null ? (TextureImageInfo) textureTable.get(tex) : null);
+    return null == tex ? null : textureTable.get(tex);
   }
 
   /** Get an Enumeration of all TextureImageInfos. */
@@ -168,7 +168,7 @@ public class TextureImageExporter
     while (e.hasMoreElements())
       {
         Texture tex = (Texture) e.nextElement();
-        TextureImageInfo info = (TextureImageInfo) textureTable.get(tex);
+        TextureImageInfo info = textureTable.get(tex);
         if ((components&DIFFUSE) != 0)
           writeComponentImage(info, Texture2D.DIFFUSE_COLOR_COMPONENT, info.diffuseFilename);
         if ((components&SPECULAR) != 0)

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -115,7 +116,7 @@ public class Property
   public Property(String name, Object allowedValues[], Object defaultValue)
   {
     this.name = name;
-    this.allowedValues = (Object []) allowedValues.clone();
+    this.allowedValues = allowedValues.clone();
     this.defaultValue = defaultValue;
     type = ENUMERATION;
   }
@@ -174,7 +175,7 @@ public class Property
 
   public Object[] getAllowedValues()
   {
-    return (Object []) allowedValues.clone();
+    return allowedValues.clone();
   }
 
   /**

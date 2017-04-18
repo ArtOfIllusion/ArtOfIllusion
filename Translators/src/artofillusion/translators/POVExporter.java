@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2007 by Norbert Krieg and Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -297,7 +298,7 @@ public class POVExporter
 	if (!obj.isVisible()) return;
 	if (obj.getObject() instanceof SceneCamera) {
 	    write("// Camera settings",out,0);
-	    ObjectInfo info = (ObjectInfo)obj;
+	    ObjectInfo info = obj;
 	    CoordinateSystem coords = info.getCoords().duplicate();
 	    // nötig ???? obwohl KoSys linkshändig????
 	    //coords.setOrientation(coords.getZDirection().times(-1.0), coords.getUpDirection().times(1.0));
@@ -335,7 +336,7 @@ public class POVExporter
 	else if (obj.getObject() instanceof DirectionalLight) {
 	    write("// Directional light (simulated as far away point light distance="+DIRECTIONAL_LIGHT_DISTANCE+"units)",out,0);
 	    DirectionalLight light=(DirectionalLight) obj.getObject();
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    Vec3 zdir=coords.getZDirection();
 	    float intensity=light.getIntensity();
@@ -363,7 +364,7 @@ public class POVExporter
 	    write("// decay is different than in Art Of Illusion",out,0);
 	    write("// the point light source has actually no \"radius\"",out,0);
 	    PointLight light=(PointLight) obj.getObject();
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    Vec3 orig=coords.getOrigin();
 	    float intensity=light.getIntensity();
@@ -396,7 +397,7 @@ public class POVExporter
 	    write("// Spot light",out,0);
 	    write("// the spot light source has actually no \"radius\"",out,0);
 	    SpotLight light=(SpotLight) obj.getObject();
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    Vec3 zdir=coords.getZDirection();
 	    Vec3 orig=coords.getOrigin();
@@ -447,7 +448,7 @@ public class POVExporter
 	// Cube setting
 	else if (obj.getObject() instanceof Cube) {
 	    write("// Cube settings",out,0);
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    Vec3 size = info.getBounds().getSize(), orig=coords.getOrigin();
 	    String texName=cleanName(info.getObject().getTexture().getName());
@@ -476,7 +477,7 @@ public class POVExporter
 	else if (obj.getObject() instanceof Sphere) {
 	    write("// Sphere settings",out,0);
 	    Sphere sphere=(Sphere) obj.getObject();
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    //coords.setOrientation(coords.getZDirection().times(-1.0), coords.getUpDirection().times(1.0));
 	    Vec3 size = sphere.getRadii(), orig=coords.getOrigin();
@@ -508,7 +509,7 @@ public class POVExporter
 	else if (obj.getObject() instanceof Cylinder) {
 	    write("// Cylinder settings",out,0);
 	    Cylinder cyl=(Cylinder) obj.getObject();
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    Vec3 orig=coords.getOrigin();
 	    double ratio=cyl.getRatio();
@@ -541,7 +542,7 @@ public class POVExporter
 	else if ((obj.getObject() instanceof TriangleMesh) && (!smooth)) {
 	    write("// Triangle Mesh (mesh2) not smoothed",out,0);
 	    TriangleMesh trimesh=(TriangleMesh) obj.getObject();
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    CoordinateSystem coords = info.getCoords();
 	    Vec3 orig=coords.getOrigin();
 	    String texName=cleanName(info.getObject().getTexture().getName());
@@ -597,7 +598,7 @@ public class POVExporter
 	// any other object
 	else { /* if smoothed mesh or any other object */
 	    write("// smoothed object",out,0);
-	    ObjectInfo info=(ObjectInfo)obj.duplicate();
+	    ObjectInfo info = obj.duplicate();
 	    RenderingMesh mesh = info.getRenderingMesh(tolerance);
 	    write("// "+ info.getName(),out,0);
 	    if (mesh != null) {  // only if you can render the mesh

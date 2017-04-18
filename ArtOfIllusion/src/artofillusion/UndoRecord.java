@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
-
+   Changes copyright (C) 2017 by Maksim Khramov
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -27,9 +27,9 @@ import java.util.List;
 
 public class UndoRecord
 {
-  private ArrayList<Integer> command;
-  private ArrayList<Object[]> data;
-  private ArrayList<SoftReference[]> dataRef;
+  private List<Integer> command;
+  private List<Object[]> data;
+  private List<SoftReference[]> dataRef;
   private File cacheFile;
   private boolean redo;
   private EditingWindow theWindow;
@@ -145,7 +145,7 @@ public class UndoRecord
     for (int i = 0; i < command.size(); i++)
       {
         int c = command.get(i);
-        Object d[] = (Object []) data.get(i);
+        Object d[] = data.get(i);
         switch (c)
         {
           case COPY_OBJECT:

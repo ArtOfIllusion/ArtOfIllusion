@@ -1,5 +1,6 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
    Modifications Copyright 2016 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -326,7 +327,7 @@ public class SpotLight extends Light
   @Override
   public Property[] getProperties()
   {
-    return (Property []) PROPERTIES.clone();
+    return PROPERTIES.clone();
   }
 
   @Override

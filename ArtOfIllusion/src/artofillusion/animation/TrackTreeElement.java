@@ -1,6 +1,7 @@
 /* This class represents a Track in the TreeList which appears in the Score. */
 
 /* Copyright (C) 2001 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +28,7 @@ public class TrackTreeElement extends TreeElement
     children = new Vector();
     Track subtracks[] = tr.getSubtracks();
     for (int i = 0; i < subtracks.length; i++)
-      children.addElement(new TrackTreeElement(subtracks[i], this, tree));
+      children.add(new TrackTreeElement(subtracks[i], this, tree));
   }
 
   /* Get the label to display for this element. */
@@ -54,7 +55,7 @@ public class TrackTreeElement extends TreeElement
   @Override
   public void addChild(TreeElement el, int position)
   {
-    children.insertElementAt(el, position);
+    children.add(position, el);
     ((TrackTreeElement) el).parent = this;
   }
 

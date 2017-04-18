@@ -32,6 +32,7 @@ import java.awt.geom.Point2D;
 import java.util.Vector;
 import artofillusion.tool.annotations.ActivatedToolText;
 import artofillusion.tool.annotations.ButtonImage;
+import java.util.List;
 
 /** CreateCurveTool is an EditingTool used for creating Curve objects. */
 @ButtonImage("interpCurve")
@@ -40,7 +41,7 @@ import artofillusion.tool.annotations.ButtonImage;
 public class CreateCurveTool extends EditingTool
 {
   static int counter = 1;
-  private Vector<Vec3> clickPoint;
+  private List<Vec3> clickPoint;
   private Vector<Float> smoothness;
   private int smoothing;
   private Curve theCurve;
@@ -116,7 +117,7 @@ public class CreateCurveTool extends EditingTool
     }
     else
     {
-      Vec3 pos = (Vec3) clickPoint.lastElement();
+      Vec3 pos = clickPoint.get(clickPoint.size()-1);
       Vec2 screenPos = view.getCamera().getWorldToScreen().timesXY(pos);
       view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), e.getPoint()));
     }
@@ -128,7 +129,7 @@ public class CreateCurveTool extends EditingTool
     if (clickPoint.isEmpty())
       return;
     Point dragPoint = e.getPoint();
-    Vec3 pos = (Vec3) clickPoint.lastElement();
+    Vec3 pos = clickPoint.get(clickPoint.size()-1);
     Vec2 screenPos = view.getCamera().getWorldToScreen().timesXY(pos);
     view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), dragPoint));
   }
@@ -143,7 +144,7 @@ public class CreateCurveTool extends EditingTool
 
     if (e.getClickCount() != 2)
       {
-        clickPoint.addElement(cam.convertScreenToWorld(dragPoint, view.getDistToPlane()));
+        clickPoint.add(cam.convertScreenToWorld(dragPoint, view.getDistToPlane()));
         smoothness.addElement(e.isShiftDown() ? 0.0f : 1.0f);
       }
     if (clickPoint.size() > 1)
@@ -155,7 +156,7 @@ public class CreateCurveTool extends EditingTool
         orig = new Vec3();
         for (int i = 0; i < vertex.length; i++)
           {
-            vertex[i] = (Vec3) clickPoint.elementAt(i);
+            vertex[i] = clickPoint.get(i);
             s[i] = smoothness.elementAt(i);
             orig = orig.plus(vertex[i]);
           }

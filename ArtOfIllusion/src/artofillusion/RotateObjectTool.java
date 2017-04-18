@@ -20,6 +20,7 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.util.List;
 import java.util.Vector;
 
 /** RotateObjectTool is an EditingTool used for rotating objects in a scene. */
@@ -40,7 +41,7 @@ public class RotateObjectTool extends EditingTool
   static final double DRAG_SCALE = Math.PI/360.0;
 
   Point clickPoint;
-  Vector<ObjectInfo> toMove;
+  private List<ObjectInfo> toMove;
   ObjectInfo clickedObject;
   int whichAxes, rotateAround = PARENT_CENTER;
   boolean dragged, applyToChildren = true;
@@ -78,12 +79,12 @@ public class RotateObjectTool extends EditingTool
     else
       sel = theScene.getSelection();
     for (i = 0; i < sel.length; i++)
-      toMove.addElement(theScene.getObject(sel[i]));
+      toMove.add(theScene.getObject(sel[i]));
     objectCoords = new CoordinateSystem [toMove.size()];
     rotationCenter = new Vec3 [toMove.size()];
     for (i = 0; i < objectCoords.length; i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i), parent = info;
+        ObjectInfo info = toMove.get(i), parent = info;
         objectCoords[i] = info.getCoords().duplicate();
         if (rotateAround == SELECTION_CENTER)
           {
@@ -152,7 +153,7 @@ public class RotateObjectTool extends EditingTool
         theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
         for (i = 0; i < toMove.size(); i++)
           {
-            ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+            ObjectInfo info = toMove.get(i);
             c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
@@ -175,7 +176,7 @@ public class RotateObjectTool extends EditingTool
       {
         for (i = 0; i < toMove.size(); i++)
           {
-            ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+            ObjectInfo info = toMove.get(i);
             c = info.getCoords();
             origin = rotationCenter[i];
             rotMatrix = Mat4.translation(origin.x, origin.y, origin.z).times(Mat4.axisRotation(rotAxis, angle)).times(Mat4.translation(-origin.x, -origin.y, -origin.z));
@@ -241,11 +242,11 @@ public class RotateObjectTool extends EditingTool
       sel = theScene.getSelection();
     toMove = new Vector<ObjectInfo>();
     for (int i = 0; i < sel.length; i++)
-      toMove.addElement(theScene.getObject(sel[i]));
+      toMove.add(theScene.getObject(sel[i]));
     rotationCenter = new Vec3 [toMove.size()];
     for (int i = 0; i < rotationCenter.length; i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i), parent = info;
+        ObjectInfo info = toMove.get(i), parent = info;
         if (rotateAround == SELECTION_CENTER)
           {
             rotationCenter[i] = center;
@@ -276,7 +277,7 @@ public class RotateObjectTool extends EditingTool
       angle *= 10.0;
     for (int i = 0; i < toMove.size(); i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         c = info.getCoords();
         origin = rotationCenter[i];
         rotMatrix = Mat4.translation(origin.x, origin.y, origin.z).times(Mat4.axisRotation(rotAxis, angle)).times(Mat4.translation(-origin.x, -origin.y, -origin.z));

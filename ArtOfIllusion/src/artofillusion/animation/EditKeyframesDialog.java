@@ -107,7 +107,7 @@ public class EditKeyframesDialog
     
     if (whichTracks == 0)
       {
-        Vector tracks = new Vector();
+        List<Track> tracks = new Vector<Track>();
         for (int i = 0; i < theScene.getNumObjects(); i++)
           {
             ObjectInfo info = theScene.getObject(i);
@@ -116,12 +116,12 @@ public class EditKeyframesDialog
           }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
-          track[i] = (Track) tracks.elementAt(i);
+          track[i] = tracks.get(i);
       }
     else if (whichTracks == 1)
       {
         int sel[] = theScene.getSelection();
-        Vector tracks = new Vector();
+        List<Track> tracks = new Vector<Track>();
         for (int i = 0; i < sel.length; i++)
           {
             ObjectInfo info = theScene.getObject(sel[i]);
@@ -130,7 +130,7 @@ public class EditKeyframesDialog
           }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
-          track[i] = (Track) tracks.elementAt(i);
+          track[i] = tracks.get(i);
       }
     else
       track = window.getScore().getSelectedTracks();
@@ -257,13 +257,12 @@ public class EditKeyframesDialog
   
   /* Given a Track, add it and all of its subtracks to the specified vector. */
   
-  private void addToVector(Track tr, Vector v)
-  {
-    Track sub[] = tr.getSubtracks();
-    
-    v.addElement(tr);
-    for (int i = 0; i < sub.length; i++)
-      addToVector(sub[i], v);
+  private void addToVector(Track track, List<Track> v)
+  {    
+    v.add(track);
+    for (Track subTrack : track.getSubtracks()) {
+      addToVector(subTrack, v);
+    }
   }
   
   /* Round a time to the nearest frame. */

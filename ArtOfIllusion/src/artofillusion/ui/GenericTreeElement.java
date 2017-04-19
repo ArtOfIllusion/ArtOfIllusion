@@ -21,18 +21,20 @@ public class GenericTreeElement extends TreeElement
   Object obj;
   String label;
 
-  public GenericTreeElement(String label, Object obj, TreeElement parent, TreeList tree, List children)
+  public GenericTreeElement(String label, Object obj, TreeElement parent, TreeList tree, List<TreeElement> children)
   {
     this.label = label;
     this.obj = obj;
     this.parent = parent;
     this.tree = tree;
     this.children = children;
-    if (children == null)
-      this.children = new Vector();
+    if (null == children)
+      this.children = new Vector<TreeElement>();
     else
-      for (int i = 0; i < children.size(); i++)
-	((TreeElement) children.get(i)).parent = this;
+      for(TreeElement item: children)
+      {
+          item.parent = this;
+      }
   }
 
   /* Get the label to display for this element. */

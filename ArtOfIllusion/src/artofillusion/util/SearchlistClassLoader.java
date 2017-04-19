@@ -52,6 +52,7 @@ import java.net.URLClassLoader;
 
 import java.io.*;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  A class loader which loads classes using a searchlist of
@@ -119,7 +120,7 @@ public class SearchlistClassLoader extends ClassLoader
 {
     protected List<Loader> list;
     protected List<Loader> search;
-    protected Hashtable cache;
+    protected Map<String, Class> cache;
     protected Loader content = null;
     protected byte searchMode = SHARED;
     protected int divide = 0;
@@ -292,7 +293,7 @@ public class SearchlistClassLoader extends ClassLoader
 	if (content != null) {
 
 	    // try the cache first
-	    Class result = (cache != null ? (Class) cache.get(name) : null);
+	    Class result = (null == cache ?  null : cache.get(name));
 	    if (result != null) return result;
 
 	    // try loading the class data

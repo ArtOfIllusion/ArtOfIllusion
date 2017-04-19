@@ -27,7 +27,7 @@ public class ObjectRefTreeElement extends TreeElement
     ref = obj;
     this.parent = parent;
     this.tree = tree;
-    children = new Vector();
+    children = new Vector<TreeElement>();
     ObjectInfo info = ref.getObject();
     setEnabled(info != exclude);
     if (ref.getJoint() == null)

@@ -669,7 +669,7 @@ public class ExprModule extends Module
             debug.print ("No such function: " + name);
             return null;
         }
-        op = (OPort) Token.funMap.get (name);
+        op = Token.funMap.get (name);
         return new OPort(op.module.duplicate(), op.oport, op.args);
     }
 

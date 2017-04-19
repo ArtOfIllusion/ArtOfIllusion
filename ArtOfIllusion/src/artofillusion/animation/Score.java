@@ -128,7 +128,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     div = new BSplitPane(BSplitPane.HORIZONTAL, treeContainer, null);
     div.setResizeWeight(0.0);
     div.resetToPreferredSizes();
-    ((JSplitPane) div.getComponent()).setBorder(null);
+    div.getComponent().setBorder(null);
     layoutGraphs();
     add(div, BorderContainer.CENTER);
     FormContainer rightSide = new FormContainer(new double [] {1.0, 1.0}, new double [] {0.0, 0.0, 1.0});
@@ -990,7 +990,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     Scene theScene = window.getScene();
     UndoRecord undo = new UndoRecord(window, false);
-    Vector added = new Vector();
+    List<Track> added = new Vector<Track>();
     Object args[];
     if (extraArgs == null)
       args = new Object [1];
@@ -1028,7 +1028,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               args[0] = info;
               Track newtrack = (Track) con[which].newInstance(args);
               info.addTrack(newtrack, 0);
-              added.addElement(newtrack);
+              added.add(newtrack);
             }
       }
     catch (Exception ex)
@@ -1040,7 +1040,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       theList.deselectAll();
     rebuildList();
     for (int i = 0; i < added.size(); i++)
-      theList.setSelected(added.elementAt(i), true);
+      theList.setSelected(added.get(i), true);
     selectedTracksChanged();
     window.updateMenus();
   }

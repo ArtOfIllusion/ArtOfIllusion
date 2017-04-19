@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2003 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -163,11 +164,11 @@ public class IKSolver
     downstream = new int [joint.length][];
     for (int i = 0; i < joint.length; i++)
     {
-      Vector v = new Vector();
+      List<Joint> v = new Vector<Joint>();
       addDownstreamJoints(v, joint[i]);
       downstream[i] = new int [v.size()];
       for (int k = 0; k < downstream[i].length; k++)
-        downstream[i][k] = skeleton.findJointIndex(((Joint) v.elementAt(k)).id);
+        downstream[i][k] = skeleton.findJointIndex(v.get(k).id);
     }
   }
   
@@ -175,11 +176,13 @@ public class IKSolver
    * Recursively find every joint which is downstream from another one.
    */
   
-  private void addDownstreamJoints(Vector v, Joint j)
+  private void addDownstreamJoints(List<Joint> v, Joint j)
   {
-    v.addElement(j);
-    for (int k = 0; k < j.children.length; k++)
-      addDownstreamJoints(v, j.children[k]);
+    v.add(j);
+    for(Joint child: j.children)
+    {
+        addDownstreamJoints(v, child);
+    }
   }
   
   /**

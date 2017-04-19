@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +19,7 @@ import javax.swing.table.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.text.*;
 
 import artofillusion.ui.*;
@@ -28,7 +30,7 @@ import artofillusion.ui.*;
 
 public class KeystrokePreferencesPanel extends FormContainer
 {
-  private ArrayList<KeystrokeRecord> records;
+  private List<KeystrokeRecord> records;
   private BTable table;
   private BButton editButton, addButton, deleteButton;
   private boolean changed;
@@ -77,7 +79,7 @@ public class KeystrokePreferencesPanel extends FormContainer
   {
     if (!changed)
       return;
-    KeystrokeManager.setAllRecords((KeystrokeRecord []) records.toArray(new KeystrokeRecord [records.size()]));
+    KeystrokeManager.setAllRecords(records.toArray(new KeystrokeRecord [records.size()]));
     try
     {
       KeystrokeManager.saveRecords();
@@ -117,7 +119,7 @@ public class KeystrokePreferencesPanel extends FormContainer
   private void editRecord()
   {
     int row = table.getSelectedRows()[0];
-    KeystrokeRecord record = (KeystrokeRecord) records.get(row);
+    KeystrokeRecord record = records.get(row);
     KeystrokeRecord edited = KeystrokeEditor.showEditorDialog(record, UIUtilities.findWindow(this));
     if (edited == null)
       return;
@@ -219,7 +221,7 @@ public class KeystrokePreferencesPanel extends FormContainer
     @Override
     public Object getValueAt(int rowIndex, int columnIndex)
     {
-      KeystrokeRecord record = (KeystrokeRecord) records.get(rowIndex);
+      KeystrokeRecord record = records.get(rowIndex);
       if (columnIndex == 1)
         return record.getName();
       return getKeyDescription(record.getKeyCode(), record.getModifiers());

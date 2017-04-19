@@ -473,19 +473,24 @@ public class Tube extends Curve
     if (interactive && cachedMesh != null)
       return cachedMesh;
 
-    Vector vert = new Vector(), norm = new Vector(), face = new Vector(), param = new Vector();
+    List<MeshVertex> vert = new Vector<MeshVertex>();
+    List<Vec3> norm = new Vector<Vec3>();
+    List<int[]> face = new Vector<int[]>();
+    
+    Vector param = new Vector();
+    
     subdivideSurface(tol, vert, norm, face, param);
     Vec3 v[] = new Vec3 [vert.size()];
     for (int i = 0; i < v.length; i++)
-      v[i] = ((MeshVertex) vert.elementAt(i)).r;
-    Vec3 n[] = new Vec3 [vert.size()];
-    norm.copyInto(n);
+      v[i] = vert.get(i).r;
+    Vec3 n[] = norm.toArray(new Vec3 [vert.size()]);
+    
     int numnorm = norm.size();
     RenderingTriangle tri[] = new RenderingTriangle [face.size()];
 
     for (int i = 0; i < tri.length; i++)
       {
-        int f[] = (int []) face.elementAt(i);
+        int f[] = face.get(i);
         if (f[0] >= numnorm || f[1] >= numnorm || f[2] >= numnorm)
           tri[i] = texMapping.mapTriangle(f[0], f[1], f[2], numnorm, numnorm, numnorm, v);
         else
@@ -552,15 +557,18 @@ public class Tube extends Curve
   {
     // Subdivide the surface and create the triangle mesh.
 
-    Vector vert = new Vector(), norm = new Vector(), face = new Vector(), param = new Vector();
+    List<MeshVertex> vert = new Vector<MeshVertex>();
+    List<Vec3> norm = new Vector<Vec3>();
+    List<int[]> face = new Vector<int[]>();
+    
+    Vector param = new Vector();
+    
     subdivideSurface(tol, vert, norm, face, param);
     Vec3 v[] = new Vec3 [vert.size()];
     for (int i = 0; i < v.length; i++)
-      v[i] = ((MeshVertex) vert.elementAt(i)).r;
-    Vec3 n[] = new Vec3 [vert.size()];
-    norm.copyInto(n);
-    int f[][] = new int [face.size()][];
-    face.copyInto(f);
+      v[i] = vert.get(i).r;
+    Vec3 n[] = norm.toArray(new Vec3 [vert.size()]);
+    int f[][] = face.toArray(new int [face.size()][]);
     int numnorm = norm.size();
     TriangleMesh mesh = new TriangleMesh(v, f);
 
@@ -605,7 +613,7 @@ public class Tube extends Curve
       It subdivides the surface and fills in the vectors with lists of vertices, normals,
       faces, and parameter values. */
 
-  private void subdivideSurface(double tol, Vector vert, Vector norm, Vector face, Vector param)
+  private void subdivideSurface(double tol, List<MeshVertex> vert, List<Vec3> norm, List<int []> face, Vector param)
   {
     // Subdivide the central curve to the desired tolerance.
 
@@ -713,10 +721,10 @@ public class Tube extends Curve
           {
             double sin = Math.sin(theta), cos = Math.cos(theta);
             Vec3 normal = new Vec3(cos*z.x+sin*up.x, cos*z.y+sin*up.y, cos*z.z+sin*up.z);
-            norm.addElement(normal);
+            norm.add(normal);
             MeshVertex mv = new MeshVertex(new Vec3(orig.x+r*normal.x, orig.y+r*normal.y, orig.z+r*normal.z));
-            vert.addElement(mv);
-            param.addElement(tubeParamVal[i]);
+            vert.add(mv);
+            param.add(tubeParamVal[i]);
             theta += dtheta;
           }
       }
@@ -728,11 +736,11 @@ public class Tube extends Curve
         int k = i*n;
         for (int j = 0; j < n-1; j++)
           {
-            face.addElement(new int [] {k+j, k+j+1, k+j+n});
-            face.addElement(new int [] {k+j+1, k+j+n+1, k+j+n});
+            face.add(new int [] {k+j, k+j+1, k+j+n});
+            face.add(new int [] {k+j+1, k+j+n+1, k+j+n});
           }
-        face.addElement(new int [] {k+n-1, k, k+n+n-1});
-        face.addElement(new int [] {k, k+n, k+n+n-1});
+        face.add(new int [] {k+n-1, k, k+n+n-1});
+        face.add(new int [] {k, k+n, k+n+n-1});
       }
 
     // Handle the ends appropriately.
@@ -744,29 +752,29 @@ public class Tube extends Curve
         int k = (pathv.length-1)*n;
         for (int j = 0; j < n-1; j++)
           {
-            face.addElement(new int [] {k+j, k+j+1, j});
-            face.addElement(new int [] {k+j+1, j+1, j});
+            face.add(new int [] {k+j, k+j+1, j});
+            face.add(new int [] {k+j+1, j+1, j});
           }
-        face.addElement(new int [] {k+n-1, k, n-1});
-        face.addElement(new int [] {k, 0, n-1});
+        face.add(new int [] {k+n-1, k, n-1});
+        face.add(new int [] {k, 0, n-1});
       }
     else if (endsStyle == FLAT_ENDS)
       {
         // Create flat caps covering the ends.
 
         int k = vert.size();
-        vert.addElement(new MeshVertex(t.vertex[0]));
-        vert.addElement(new MeshVertex(t.vertex[t.vertex.length-1]));
-        param.addElement(tubeParamVal[0]);
-        param.addElement(tubeParamVal[t.vertex.length-1]);
+        vert.add(new MeshVertex(t.vertex[0]));
+        vert.add(new MeshVertex(t.vertex[t.vertex.length-1]));
+        param.add(tubeParamVal[0]);
+        param.add(tubeParamVal[t.vertex.length-1]);
         for (int i = 0; i < n-1; i++)
-          face.addElement(new int [] {i+1, i, k});
-        face.addElement(new int [] {0, n-1, k});
+          face.add(new int [] {i+1, i, k});
+        face.add(new int [] {0, n-1, k});
         k++;
         int j = n*(pathv.length-1);
         for (int i = 0; i < n-1; i++)
-          face.addElement(new int [] {j+i, j+i+1, k});
-        face.addElement(new int [] {j+n-1, j, k});
+          face.add(new int [] {j+i, j+i+1, k});
+        face.add(new int [] {j+n-1, j, k});
       }
   }
 

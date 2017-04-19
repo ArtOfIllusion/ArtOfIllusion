@@ -1,4 +1,5 @@
 /* Copyright (C) 2003 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -364,20 +365,21 @@ public class Actor extends ObjectWrapper
 
     // Construct the output pose.
 
-    Vector gestureList = new Vector();
-    Vector weightList = new Vector();
+    List<Gesture> gestureList = new Vector<Gesture>();
+    List<Double> weightList = new Vector<Double>();
+    
     for (int i = 0; i < weight.length; i++)
       if (weight[i] > 0.0)
       {
-        gestureList.addElement(gesture[i+1]);
-        weightList.addElement(weight[i]);
+        gestureList.add(gesture[i+1]);
+        weightList.add(weight[i]);
       }
     MeshGesture poseGesture[] = new MeshGesture [gestureList.size()];
     double poseWeight[] = new double [weightList.size()];
     for (int i = 0; i < poseGesture.length; i++)
     {
-      poseGesture[i] = (MeshGesture) gestureList.elementAt(i);
-      poseWeight[i] = ((Double) weightList.elementAt(i));
+      poseGesture[i] = (MeshGesture) gestureList.get(i);
+      poseWeight[i] = weightList.get(i);
     }
     MeshGesture average = (MeshGesture) obj.getPoseKeyframe();
     ((MeshGesture) gesture[0]).blendSurface(average, poseGesture, poseWeight);
@@ -763,23 +765,24 @@ public class Actor extends ObjectWrapper
 
     public Keyframe createObjectKeyframe(Actor actor)
     {
-      Vector poseVec = new Vector(), weightVec = new Vector();
+      List<Gesture> poseVec = new Vector<Gesture>();
+      List<Double> weightVec = new Vector<Double>();
 
       for (int i = 0; i < id.length; i++)
       {
         int which = actor.findPoseIndex(id[i]);
         if (which > -1)
         {
-          poseVec.addElement(actor.gesture[which]);
-          weightVec.addElement(weight[i]);
+          poseVec.add(actor.gesture[which]);
+          weightVec.add(weight[i]);
         }
       }
       Gesture blendPose[] = new Gesture [poseVec.size()];
       double blendWeight[] = new double [poseVec.size()];
       for (int i = 0; i < blendPose.length; i++)
       {
-        blendPose[i] = (Gesture) poseVec.elementAt(i);
-        blendWeight[i] = ((Double) weightVec.elementAt(i));
+        blendPose[i] = poseVec.get(i);
+        blendWeight[i] = weightVec.get(i);
       }
       return actor.gesture[0].blend(blendPose, blendWeight);
     }

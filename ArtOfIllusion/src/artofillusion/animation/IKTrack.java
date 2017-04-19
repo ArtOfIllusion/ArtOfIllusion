@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2013 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +26,7 @@ import java.util.*;
 public class IKTrack extends Track
 {
   private ObjectInfo info;
-  private Vector constraints;
+  private List<Constraint> constraints;
   private boolean useGestures;
   private WeightTrack theWeight;
 
@@ -34,7 +35,7 @@ public class IKTrack extends Track
     super("Inverse Kinematics");
     this.info = info;
     theWeight = new WeightTrack(this);
-    constraints = new Vector();
+    constraints = new Vector<Constraint>();
     useGestures = true;
   }
 
@@ -81,7 +82,7 @@ public class IKTrack extends Track
 
     for (int i = 0; i < constraints.size(); i++)
     {
-      Constraint c = (Constraint) constraints.elementAt(i);
+      Constraint c = constraints.get(i);
       int index = skeleton.findJointIndex(c.jointID);
       if (index == -1)
         continue;
@@ -110,11 +111,11 @@ public class IKTrack extends Track
     t.name = name;
     t.enabled = enabled;
     t.quantized = quantized;
-    t.constraints = new Vector();
+    t.constraints = new Vector<Constraint>();
     for (int i = 0; i < constraints.size(); i++)
     {
-      Constraint c = (Constraint) constraints.elementAt(i);
-      t.constraints.addElement(c.duplicate());
+      Constraint c = constraints.get(i);
+      t.constraints.add(c.duplicate());
     }
     t.theWeight = (WeightTrack) theWeight.duplicate(t);
     return t;
@@ -130,11 +131,11 @@ public class IKTrack extends Track
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
-    constraints = new Vector();
+    constraints = new Vector<Constraint>();
     for (int i = 0; i < t.constraints.size(); i++)
     {
-      Constraint c = (Constraint) t.constraints.elementAt(i);
-      constraints.addElement(c.duplicate());
+      Constraint c = t.constraints.get(i);
+      constraints.add(c.duplicate());
     }
     theWeight = (WeightTrack) t.theWeight.duplicate(t);
   }
@@ -167,10 +168,10 @@ public class IKTrack extends Track
   @Override
   public boolean isNullTrack()
   {
-    for (int i = 0; i < constraints.size(); i++)
-      if (((Constraint) constraints.elementAt(i)).target != null)
-        return false;
-    return true;
+      for (int i = 0; i < constraints.size(); i++) 
+      if (constraints.get(i).target != null)
+              return false;
+      return true;
   }
 
   /** This has a single child track. */
@@ -211,16 +212,14 @@ public class IKTrack extends Track
   @Override
   public ObjectInfo [] getDependencies()
   {
-    Vector v = new Vector();
+    List<ObjectInfo> v = new Vector<ObjectInfo>();
     for (int i = 0; i < constraints.size(); i++)
     {
-      Constraint c = (Constraint) constraints.elementAt(i);
+      Constraint c = constraints.get(i);
       if (c.target != null)
-        v.addElement(c.target.getObject());
+        v.add(c.target.getObject());
     }
-    ObjectInfo ref[] = new ObjectInfo [v.size()];
-    v.copyInto(ref);
-    return ref;
+    return v.toArray(new ObjectInfo[v.size()]);
   }
 
   /** Delete all references to the specified object from this track.  This is used when an
@@ -231,9 +230,9 @@ public class IKTrack extends Track
   {
     for (int i = constraints.size()-1; i >= 0; i--)
     {
-      Constraint c = (Constraint) constraints.elementAt(i);
+      Constraint c = constraints.get(i);
       if (c.target != null && c.target.getObject() == obj)
-        constraints.removeElementAt(i);
+        constraints.remove(i);
     }
   }
 
@@ -242,7 +241,7 @@ public class IKTrack extends Track
   {
     for (int i = constraints.size()-1; i >= 0; i--)
     {
-      Constraint c = (Constraint) constraints.elementAt(i);
+      Constraint c = constraints.get(i);
       if (c.target != null && objectMap.containsKey(c.target.getObject()))
       {
         ObjectInfo newObject = objectMap.get(c.target.getObject());
@@ -266,7 +265,7 @@ public class IKTrack extends Track
     out.writeInt(constraints.size());
     for (int i = 0; i < constraints.size(); i++)
     {
-      Constraint c = (Constraint) constraints.elementAt(i);
+      Constraint c = constraints.get(i);
       out.writeInt(c.jointID);
       out.writeBoolean(c.target != null);
       if (c.target != null)
@@ -289,11 +288,11 @@ public class IKTrack extends Track
     if (version > 0)
       useGestures = in.readBoolean();
     int numConstraints = in.readInt();
-    constraints = new Vector();
+    constraints = new Vector<Constraint>();
     for (int i = 0; i < numConstraints; i++)
     {
       Constraint c = new Constraint(in.readInt(), in.readBoolean() ? new ObjectRef(in, scene) : null);
-      constraints.addElement(c);
+      constraints.add(c);
     }
     theWeight.initFromStream(in, scene);
   }
@@ -327,7 +326,7 @@ public class IKTrack extends Track
     BList constraintList;
     BTextField nameField;
     BCheckBox gesturesBox;
-    Vector tempConstraints;
+    List<Constraint> tempConstraints;
     int tempJointID[];
     ObjectRef tempTarget[];
     BButton editButton, deleteButton;
@@ -336,9 +335,9 @@ public class IKTrack extends Track
     {
       super(win, Translate.text("ikTrackTitle"), true);
       window = win;
-      tempConstraints = new Vector();
+      tempConstraints = new Vector<Constraint>();
       for (int i = 0; i < constraints.size(); i++)
-        tempConstraints.addElement(((Constraint) constraints.elementAt(i)).duplicate());
+        tempConstraints.add(constraints.get(i).duplicate());
 
       // Layout the dialog.
 
@@ -384,7 +383,7 @@ public class IKTrack extends Track
       constraintList.setEnabled(true);
       for (int i = 0; i < tempConstraints.size(); i++)
       {
-        Constraint c = (Constraint) tempConstraints.elementAt(i);
+        Constraint c = tempConstraints.get(i);
         Joint j = skeleton.getJoint(c.jointID);
         if (c.target == null)
           constraintList.add(Translate.text("jointIsLocked", j.name));
@@ -398,7 +397,7 @@ public class IKTrack extends Track
       Constraint c = new Constraint(-1, null);
       if (editConstraint(c))
       {
-        tempConstraints.addElement(c);
+        tempConstraints.add(c);
         buildConstraintList();
       }
     }
@@ -407,7 +406,7 @@ public class IKTrack extends Track
     {
       if (constraintList.getSelectedIndex() > -1)
       {
-        Constraint c = (Constraint) tempConstraints.elementAt(constraintList.getSelectedIndex());
+        Constraint c = tempConstraints.get(constraintList.getSelectedIndex());
         if (editConstraint(c))
           buildConstraintList();
       }
@@ -416,7 +415,7 @@ public class IKTrack extends Track
     private void doDelete()
     {
       if (constraintList.getSelectedIndex() > -1)
-        tempConstraints.removeElementAt(constraintList.getSelectedIndex());
+        tempConstraints.remove(constraintList.getSelectedIndex());
       buildConstraintList();
     }
 

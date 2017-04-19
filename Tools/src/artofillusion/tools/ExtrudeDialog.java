@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,6 +21,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /** This dialog box allows the user to specify options for creating extruded objects. */
 
@@ -31,9 +33,10 @@ public class ExtrudeDialog extends BDialog
   private BRadioButton pathBox, xBox, yBox, zBox, vectorBox;
   private BCheckBox orientBox;
   private ValueField distField, xField, yField, zField, segField, angleField, tolField;
-  private BButton okButton, cancelButton;
+  private final BButton okButton;
   private ObjectPreviewCanvas preview;
-  private Vector objects, paths;
+  private List<ObjectInfo> objects;
+  private List<ObjectInfo> paths;
 
   private static int counter = 1;
 
@@ -47,23 +50,23 @@ public class ExtrudeDialog extends BDialog
     // Identify the objects that can be extruded, and the paths along which they can be
     // extruded.
 
-    objects = new Vector();
-    paths = new Vector();
+    objects = new Vector<ObjectInfo>();
+    paths = new Vector<ObjectInfo>();
     for (int i = 0; i < selection.length; i++)
     {
       ObjectInfo obj = scene.getObject(selection[i]);
       if (obj.getObject() instanceof Curve)
       {
-        objects.addElement(obj);
-        paths.addElement(obj);
+        objects.add(obj);
+        paths.add(obj);
       }
       else if ((obj.getObject() instanceof TriangleMesh ||
           obj.getObject().canConvertToTriangleMesh() != Object3D.CANT_CONVERT) &&
           !obj.getObject().isClosed())
-        objects.addElement(obj);
+        objects.add(obj);
     }
     if (objects.size() == 1)
-      paths.removeAllElements();
+      paths.clear();
 
     // Layout the window.
 
@@ -73,7 +76,7 @@ public class ExtrudeDialog extends BDialog
     content.add(new BLabel("Object to Extrude:"), 0, 0, 2, 1);
     content.add(objChoice = new BComboBox(), 0, 1, 2, 1);
     for (int i = 0; i < objects.size(); i++)
-      objChoice.add(((ObjectInfo) objects.elementAt(i)).getName());
+      objChoice.add(objects.get(i).getName());
     objChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
     content.add(new BLabel("Extrude Direction:"), 0, 2, 2, 1);
     pathGroup = new RadioButtonGroup();
@@ -92,7 +95,7 @@ public class ExtrudeDialog extends BDialog
     distField.addEventLink(ValueChangedEvent.class, this, "makeObject");
     content.add(pathChoice = new BComboBox(), 1, 6);
     for (int i = 0; i < paths.size(); i++)
-      pathChoice.add(((ObjectInfo) paths.elementAt(i)).getName());
+      pathChoice.add(paths.get(i).getName());
     pathChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
     RowContainer vectorRow = new RowContainer();
     content.add(vectorRow, 1, 7);
@@ -118,17 +121,17 @@ public class ExtrudeDialog extends BDialog
     tolField.addEventLink(ValueChangedEvent.class, this, "makeObject");
     if (paths.size() > 0)
       for (int i = 0; i < scene.getNumObjects(); i++)
-        if (scene.getObject(i) != paths.elementAt(0))
+        if (scene.getObject(i) != paths.get(0))
         {
           objChoice.setSelectedIndex(i);
           break;
         }
-    content.add(preview = new ObjectPreviewCanvas((ObjectInfo) objects.elementAt(0)), 2, 3, 2, 6,
+    content.add(preview = new ObjectPreviewCanvas(objects.get(0)), 2, 3, 2, 6,
         new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     RowContainer buttons = new RowContainer();
     content.add(buttons, 0, 9, 4, 1, new LayoutInfo());
     buttons.add(okButton = Translate.button("ok", this, "doOk"));
-    buttons.add(cancelButton = Translate.button("cancel", this, "dispose"));
+    buttons.add(Translate.button("cancel", this, "dispose"));
     makeObject();
     pack();
     UIUtilities.centerDialog(this, window);
@@ -155,17 +158,17 @@ public class ExtrudeDialog extends BDialog
     pathChoice.setEnabled(pathBox.getState());
     segField.setEnabled(!pathBox.getState());
     orientBox.setEnabled(pathBox.getState());
-    Object3D profile = ((ObjectInfo) objects.elementAt(objChoice.getSelectedIndex())).getObject();
+    Object3D profile = objects.get(objChoice.getSelectedIndex()).getObject();
     tolField.setEnabled(!(profile instanceof Curve || profile instanceof TriangleMesh));
     if (pathBox.getState())
-      okButton.setEnabled(objects.elementAt(objChoice.getSelectedIndex()) != paths.elementAt(pathChoice.getSelectedIndex()));
+      okButton.setEnabled(objects.get(objChoice.getSelectedIndex()) != paths.get(pathChoice.getSelectedIndex()));
     else
       okButton.setEnabled(true);
   }
 
   private void doOk()
   {
-    ObjectInfo profile = (ObjectInfo) objects.elementAt(objChoice.getSelectedIndex());
+    ObjectInfo profile = objects.get(objChoice.getSelectedIndex());
     CoordinateSystem coords = new CoordinateSystem(new Vec3(), Vec3.vz(), Vec3.vy());
     if (profile.getObject() instanceof Mesh)
     {
@@ -183,13 +186,13 @@ public class ExtrudeDialog extends BDialog
 
   private void makeObject()
   {
-    ObjectInfo profile = (ObjectInfo) objects.elementAt(objChoice.getSelectedIndex());
+    ObjectInfo profile = objects.get(objChoice.getSelectedIndex());
     Curve path;
     CoordinateSystem pathCoords;
 
     if (pathBox.getState())
       {
-        ObjectInfo info = (ObjectInfo) paths.elementAt(pathChoice.getSelectedIndex());
+        ObjectInfo info = paths.get(pathChoice.getSelectedIndex());
         path = (Curve) info.getObject();
         pathCoords = info.getCoords();
       }
@@ -596,7 +599,8 @@ public class ExtrudeDialog extends BDialog
       v = new Vec3 [numBoundaryPoints*pathv.length];
     else
       v = new Vec3 [2*profv.length+numBoundaryPoints*(pathv.length-2)];
-    Vector newEdge = new Vector(), newFace = new Vector();
+    List<EdgeInfo> newEdge = new Vector<EdgeInfo>();
+    List<int[]> newFace = new Vector<int[]>();
     boolean angled = (profile.getSmoothingMethod() == Mesh.NO_SMOOTHING && path.getSmoothingMethod() != Mesh.NO_SMOOTHING);
     if (!path.isClosed())
       {
@@ -624,14 +628,14 @@ public class ExtrudeDialog extends BDialog
             float smoothness = profEdge[i].smoothness;
             if (angled || profEdge[i].f2 == -1)
               smoothness = 0.0f;
-            newEdge.addElement(new EdgeInfo(profEdge[i].v1, profEdge[i].v2, smoothness));
-            newEdge.addElement(new EdgeInfo(profEdge[i].v1+profv.length, profEdge[i].v2+profv.length, smoothness));
+            newEdge.add(new EdgeInfo(profEdge[i].v1, profEdge[i].v2, smoothness));
+            newEdge.add(new EdgeInfo(profEdge[i].v1+profv.length, profEdge[i].v2+profv.length, smoothness));
           }
         for (i = 0; i < profFace.length; i++)
           {
             Face f = profFace[i];
-            newFace.addElement(new int [] {f.v1, f.v2, f.v3});
-            newFace.addElement(new int [] {f.v1+profv.length, f.v3+profv.length, f.v2+profv.length});
+            newFace.add(new int [] {f.v1, f.v2, f.v3});
+            newFace.add(new int [] {f.v1+profv.length, f.v3+profv.length, f.v2+profv.length});
           }
       }
     for (i = 0; i < pathv.length; i++)
@@ -654,18 +658,18 @@ public class ExtrudeDialog extends BDialog
                 v1 = edgeVertIndex[j][1];
                 v2 = edgeVertIndex[j][0];
               }
-            newFace.addElement(new int [] {index[i][v1], index[i+1][v1], index[i+1][v2]});
-            newFace.addElement(new int [] {index[i][v2], index[i][v1], index[i+1][v2]});
+            newFace.add(new int [] {index[i][v1], index[i+1][v1], index[i+1][v2]});
+            newFace.add(new int [] {index[i][v2], index[i][v1], index[i+1][v2]});
             EdgeInfo ed1 = new EdgeInfo(index[i][v1], index[i+1][v1], angled ? 0.0f : profVert[boundaryPoint[v1]].smoothness);
-            newEdge.addElement(ed1);
+            newEdge.add(ed1);
             ed1 = new EdgeInfo(index[i][v2], index[i+1][v2], angled ? 0.0f : profVert[boundaryPoint[v2]].smoothness);
-            newEdge.addElement(ed1);
+            newEdge.add(ed1);
             ed1 = new EdgeInfo(index[i][v1], index[i+1][v2], 1.0f);
-            newEdge.addElement(ed1);
+            newEdge.add(ed1);
             if (path.isClosed() || i > 0)
               {
                 ed1 = new EdgeInfo(index[i][v1], index[i][v2], pathSmooth[i]);
-                newEdge.addElement(ed1);
+                newEdge.add(ed1);
               }
           }
 
@@ -696,12 +700,12 @@ public class ExtrudeDialog extends BDialog
 
     int faces[][] = new int [newFace.size()][];
     for (i = 0; i < faces.length; i++)
-      faces[i] = (int []) newFace.elementAt(i);
+      faces[i] = newFace.get(i);
     TriangleMesh mesh = new TriangleMesh(v, faces);
     Edge meshEdge[] = mesh.getEdges();
     for (i = 0; i < newEdge.size(); i++)
       {
-        EdgeInfo info = (EdgeInfo) newEdge.elementAt(i);
+        EdgeInfo info = newEdge.get(i);
         if (info.smoothness == 1.0f)
           continue;
         for (j = 0; j < meshEdge.length; j++)

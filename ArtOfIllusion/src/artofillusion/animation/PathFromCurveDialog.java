@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2011 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,6 +20,7 @@ import buoy.widget.*;
 import java.awt.*;
 import java.text.*;
 import java.util.Vector;
+import java.util.List;
 
 /** PathFromCurveDialog is a dialog box for describing how to set an animation path from
     a Curve object. */
@@ -28,7 +30,8 @@ public class PathFromCurveDialog extends BDialog
   private LayoutWindow window;
   private Scene theScene;
   private BList objList, curveList;
-  private Vector objects, curves;
+  private List<ObjectInfo> objects;
+  private List<ObjectInfo> curves;
   private BCheckBox orientBox;
   private BComboBox spacingChoice;
   private ValueField startTimeField, endTimeField, startSpeedField, endSpeedField, accelField; 
@@ -45,8 +48,8 @@ public class PathFromCurveDialog extends BDialog
 
     // Find the object and curves.
     
-    objects = new Vector();
-    curves = new Vector();
+    objects = new Vector<ObjectInfo>();
+    curves = new Vector<ObjectInfo>();
     objList = new BList();
     curveList = new BList();
     for (int i = 0; i < sel.length; i++)
@@ -54,12 +57,12 @@ public class PathFromCurveDialog extends BDialog
       ObjectInfo info = (ObjectInfo) sel[i];
       if (info.getObject() instanceof Curve && !(info.getObject() instanceof Tube))
       {
-        curves.addElement(info);
+        curves.add(info);
         curveList.add(info.getName());
       }
       else
       {
-        objects.addElement(info);
+        objects.add(info);
         objList.add(info.getName());
       }
     }
@@ -154,7 +157,7 @@ public class PathFromCurveDialog extends BDialog
         (spacing == 0 || startTimeField.getValue() != endTimeField.getValue()));
     if (curveList.getSelectedIndex() > -1)
     {
-      ObjectInfo info = (ObjectInfo) curves.elementAt(curveList.getSelectedIndex());
+      ObjectInfo info = curves.get(curveList.getSelectedIndex());
       Curve cv = (Curve) info.getObject();
       MeshVertex vert[] = cv.getVertices();
       Vec3 v[] = new Vec3 [vert.length];
@@ -255,7 +258,7 @@ public class PathFromCurveDialog extends BDialog
   
   private void addTracks()
   {
-    ObjectInfo info = (ObjectInfo) curves.elementAt(curveList.getSelectedIndex());
+    ObjectInfo info = curves.get(curveList.getSelectedIndex());
     Mat4 trans = info.getCoords().fromLocal();
     Curve cv = (Curve) info.getObject();
     MeshVertex vert[] = cv.getVertices();
@@ -294,7 +297,7 @@ public class PathFromCurveDialog extends BDialog
     
     // Create the position track.
     
-    info = (ObjectInfo) objects.elementAt(objList.getSelectedIndex());
+    info = objects.get(objList.getSelectedIndex());
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()}));
     float smoothness[] = cv.getSmoothness();
     PositionTrack tr = new PositionTrack(info);

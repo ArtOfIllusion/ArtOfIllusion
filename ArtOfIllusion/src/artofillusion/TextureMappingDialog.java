@@ -1,4 +1,5 @@
 /* Copyright (C) 2000,2002-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,10 +28,9 @@ import java.util.List;
 
 public class TextureMappingDialog extends BDialog
 {
-  private BFrame fr;
   private FormContainer content;
   private Object3D origObj, editObj;
-  private Vector mappings;
+  private List<Class> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private TextureMapping map, oldMapping;
@@ -46,7 +46,6 @@ public class TextureMappingDialog extends BDialog
   {
     super(parent, "Texture Mapping", true);
 
-    fr = parent;
     editObj = obj.duplicate();
     origObj = obj;
     this.layer = layer;
@@ -58,18 +57,17 @@ public class TextureMappingDialog extends BDialog
 
     // Make a list of all texture mappings which can be used for this object and texture.
 
-    mappings = new Vector();
-    List<TextureMapping> allMappings = PluginRegistry.getPlugins(TextureMapping.class);
-    for (int i = 0; i < allMappings.size(); i++)
+    mappings = new Vector<Class>();
+    for (TextureMapping mapping: PluginRegistry.getPlugins(TextureMapping.class))
     {
       try
       {
-        Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Texture.class);
+        Method mtd = mapping.getClass().getMethod("legalMapping", Object3D.class, Texture.class);
         Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer)
             : editObj.getTexture();
         Boolean result = (Boolean) mtd.invoke(null, editObj, tex);
         if (result)
-          mappings.addElement(allMappings.get(i).getClass());
+          mappings.add(mapping.getClass());
       }
       catch (Exception ex)
       {
@@ -95,9 +93,9 @@ public class TextureMappingDialog extends BDialog
     {
       try
       {
-        Method mtd = ((Class) mappings.elementAt(i)).getMethod("getName", null);
+        Method mtd = mappings.get(i).getMethod("getName");
         mapChoice.add((String) mtd.invoke(null, null));
-        if (mappings.elementAt(i) == map.getClass())
+        if (mappings.get(i) == map.getClass())
           mapChoice.setSelectedIndex(i);
       }
       catch (Exception ex)
@@ -133,7 +131,7 @@ public class TextureMappingDialog extends BDialog
   {
     try
     {
-      Class cls = (Class) mappings.elementAt(mapChoice.getSelectedIndex());
+      Class cls = mappings.get(mapChoice.getSelectedIndex());
       if (cls == map.getClass())
         return;
       Constructor con = cls.getConstructor(new Class [] {Object3D.class, Texture.class});

@@ -13,6 +13,9 @@
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
 
+  <!-- set of all subproject build files -->
+  <fileset id="subproject.files" dir="." includes="*.xml" excludes="build.xml" />
+
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -30,21 +33,11 @@
     <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="1.5" source="1.5" />
   </target>
 
-  <target name="dist" depends="compile">
-    <!-- generate a Manifest classpath from the "libraries" fileset-->
-    <pathconvert pathsep=" " dirsep="/" property="libraries" refid="libraries">
-      <map from="${basedir}/" to="" />
-    </pathconvert>
-
-    <!-- jar all the required files -->
-    <jar destfile="${dist}/ArtOfIllusion.jar">
-      <fileset dir="${build}"/>
-      <fileset dir="${src}" includes="**/*.xml, **/*.properties, **/*.png, **/*.jpg, **/*.gif" />
-      <manifest>
-        <attribute name="Main-Class" value="artofillusion.ArtOfIllusion"/>
-        <attribute name="Class-Path" value="${libraries}"/>
-      </manifest>
-    </jar>
+  <target name="dist">
+    <!-- execute default target for all found Ant files -->
+    <subant target="" >
+      <fileset refid="subproject.files" />
+    </subant>
   </target>
 
   <target name="docs" depends="init">
@@ -65,9 +58,9 @@
   </target>
 
   <target name="clean">
-    <!-- Delete the ${build} and ${docs} directory trees -->
-    <delete dir="${build}" />
-    <delete dir="${docs}" />
-
+    <!-- execute the "clean" target for all found subproject ant files -->
+    <subant target="clean">
+      <fileset refid="subproject.files" />
+    </subant>
   </target>
 </project>

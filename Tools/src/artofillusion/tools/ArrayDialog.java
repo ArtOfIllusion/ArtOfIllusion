@@ -55,9 +55,9 @@ public class ArrayDialog extends BDialog
 
     // get available curves
     curvesVector = new Vector<ObjectInfo>(10,10);
-    for(ObjectInfo obj: window.getScene().getAllObjects())
+    for (ObjectInfo obj: window.getScene().getAllObjects())
     {
-        if(obj.getObject() instanceof Curve) curvesVector.add(obj);
+      if (obj.getObject() instanceof Curve) curvesVector.add(obj);
     }
 
     // layout dialog
@@ -118,11 +118,11 @@ public class ArrayDialog extends BDialog
     panel.add(curveBox = new BRadioButton("From Curve", (spec.method==ArraySpec.METHOD_CURVE), methodGroup), 0, 0);
     curveBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(curveChoice = new BComboBox(), 1, 0);
+    
     // put names of possible curves in choice
-
-    for(ObjectInfo info: curvesVector)
+    for (ObjectInfo info: curvesVector)
     {
-        curveChoice.add(info.getName());
+      curveChoice.add(info.getName());
     }
 
     if (spec.curve != null)

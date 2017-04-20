@@ -48,15 +48,15 @@ public class MaterialMappingDialog extends BDialog
     mappings = new Vector<Class>();
     Material mat = obj.getMaterial();
     
-    for(MaterialMapping mapping: PluginRegistry.getPlugins(MaterialMapping.class))
+    for (MaterialMapping mapping: PluginRegistry.getPlugins(MaterialMapping.class))
     {
         try
         {
             Method legalMappingMethod = mapping.getClass().getMethod("legalMapping", Object3D.class, Material.class);
             Boolean result = (Boolean) legalMappingMethod.invoke(null, obj, mat);
-            if(result)
+            if (result)
             {
-                mappings.add(mapping.getClass());
+              mappings.add(mapping.getClass());
             }
         }
         catch (Exception ex)

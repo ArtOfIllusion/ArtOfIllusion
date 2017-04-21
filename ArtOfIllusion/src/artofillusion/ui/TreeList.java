@@ -343,7 +343,7 @@ public class TreeList extends CustomWidget
     {
       TreeElement el = elements.get(i);
       showing.add(el);
-      indent.get(0);
+      indent.add(0);
       if (el.isSelected())
         selected.add(el);
       addChildrenToState(el, 1, el.isExpanded());

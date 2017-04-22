@@ -13,9 +13,6 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -23,9 +20,9 @@ import java.awt.*;
 import java.util.Vector;
 
 /** MoveObjectTool is an EditingTool used for moving objects in a scene. */
-@ButtonImage("move")
-@Tooltip("moveObjectTool.tipText")
-@ActivatedToolText("moveObjectTool.helpText")
+@EditingTool.ButtonImage("move")
+@EditingTool.Tooltip("moveObjectTool.tipText")
+@EditingTool.ActivatedToolText("moveObjectTool.helpText")
 public class MoveObjectTool extends EditingTool
 {
   Point clickPoint;

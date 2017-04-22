@@ -12,16 +12,14 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** SkewMeshTool is an EditingTool used for skewing the vertices of TriangleMesh objects. */
-@ButtonImage("skewPoints")
-@Tooltip("skewMeshTool.tipText")
+@EditingTool.ButtonImage("skewPoints")
+@EditingTool.Tooltip("skewMeshTool.tipText")
 public class SkewMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, skewX, skewY, skewAll;

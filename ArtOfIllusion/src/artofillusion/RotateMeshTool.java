@@ -13,16 +13,14 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** RotateMeshTool is an EditingTool used for rotating the vertices of TriangleMesh objects. */
-@ButtonImage("rotatePoints")
-@Tooltip("rotateMeshTool.tipText")
+@EditingTool.ButtonImage("rotatePoints")
+@EditingTool.Tooltip("rotateMeshTool.tipText")
 public class RotateMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, selectionCanChange;

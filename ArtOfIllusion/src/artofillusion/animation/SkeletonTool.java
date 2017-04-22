@@ -14,8 +14,6 @@ package artofillusion.animation;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -23,8 +21,8 @@ import java.awt.*;
 import java.text.*;
 
 /** SkeletonTool is an EditingTool used for manipulating the skeletons of objects. */
-@ButtonImage("skeleton")
-@Tooltip("skeletonTool.tipText")
+@EditingTool.ButtonImage("skeleton")
+@EditingTool.Tooltip("skeletonTool.tipText")
 public class SkeletonTool extends EditingTool
 {
   private static final int CLICK_TOL = 6;

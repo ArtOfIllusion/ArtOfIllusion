@@ -13,17 +13,14 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** ReshapeMeshTool is an EditingTool used for moving the vertices of TriangleMesh objects. */
-@ButtonImage("movePoints")
-@Tooltip("reshapeMeshTool.tipText")
-@ActivatedToolText("reshapeMeshTool.helpText")
+@EditingTool.ButtonImage("movePoints")
+@EditingTool.Tooltip("reshapeMeshTool.tipText")
+@EditingTool.ActivatedToolText("reshapeMeshTool.helpText")
 public class ReshapeMeshTool extends MeshEditingTool
 {
   private Point clickPoint;

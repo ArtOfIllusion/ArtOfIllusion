@@ -15,15 +15,13 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** CreateVertexTool is an EditingTool used for adding vertices to triangle meshes. */
-@ButtonImage("createVertex")
-@Tooltip("createVertexTool.tipText")
+@EditingTool.ButtonImage("createVertex")
+@EditingTool.Tooltip("createVertexTool.tipText")
 public class CreateVertexTool extends MeshEditingTool
 {
   private Point clickPoint;

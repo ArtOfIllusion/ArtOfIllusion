@@ -15,17 +15,14 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import java.awt.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
 
 /** CreateCameraTool is an EditingTool used for creating SceneCamera objects. */
-@ButtonImage("camera")
-@Tooltip("createCameraTool.tipText")
-@ActivatedToolText("createCameraTool.helpText")
+@EditingTool.ButtonImage("camera")
+@EditingTool.Tooltip("createCameraTool.tipText")
+@EditingTool.ActivatedToolText("createCameraTool.helpText")
 public class CreateCameraTool extends EditingTool
 {
   static int counter = 2;

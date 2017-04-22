@@ -13,16 +13,14 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
 import buoy.event.*;
 import java.awt.*;
 
 /** TaperMeshTool is an EditingTool used for tapering the vertices of TriangleMesh objects. */
-@ButtonImage("taperPoints")
-@Tooltip("taperMeshTool.tipText")
+@EditingTool.ButtonImage("taperPoints")
+@EditingTool.Tooltip("taperMeshTool.tipText")
 public class TaperMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, taperAll, towardCenter;

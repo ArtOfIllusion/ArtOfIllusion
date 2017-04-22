@@ -15,18 +15,15 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
 
 /** CreateCylinderTool is an EditingTool used for creating Cylinder objects. */
-@ButtonImage("cylinder")
-@Tooltip("createCylinderTool.tipText")
-@ActivatedToolText("createCylinderTool.helpText")
+@EditingTool.ButtonImage("cylinder")
+@EditingTool.Tooltip("createCylinderTool.tipText")
+@EditingTool.ActivatedToolText("createCylinderTool.helpText")
 public class CreateCylinderTool extends EditingTool
 {
   static int counter = 1;

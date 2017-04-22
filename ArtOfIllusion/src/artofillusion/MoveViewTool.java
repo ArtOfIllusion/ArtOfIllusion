@@ -16,16 +16,13 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import artofillusion.texture.UVMappingWindow;
-import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
 
 /** MoveViewTool is an EditingTool used for moving the viewpoint. */
-@ButtonImage("moveView")
-@Tooltip("moveViewTool.tipText")
-@ActivatedToolText("moveViewTool.helpText")
+@EditingTool.ButtonImage("moveView")
+@EditingTool.Tooltip("moveViewTool.tipText")
+@EditingTool.ActivatedToolText("moveViewTool.helpText")
 public class MoveViewTool extends EditingTool
 {
   private Point clickPoint;

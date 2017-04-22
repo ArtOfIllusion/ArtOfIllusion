@@ -13,8 +13,6 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import artofillusion.ui.NinePointManipulator.*;
 import buoy.event.*;
@@ -22,8 +20,8 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** BevelExtrudeTool is an EditingTool used for beveling and extruding TriangleMesh objects. */
-@ButtonImage("bevel")
-@Tooltip("bevelExtrudeTool.tipText")
+@EditingTool.ButtonImage("bevel")
+@EditingTool.Tooltip("bevelExtrudeTool.tipText")
 public class BevelExtrudeTool extends MeshEditingTool
 {
   private boolean dragInProgress, separateFaces;

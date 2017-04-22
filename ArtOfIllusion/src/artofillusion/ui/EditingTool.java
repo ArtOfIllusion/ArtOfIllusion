@@ -13,11 +13,12 @@
 package artofillusion.ui;
 
 import artofillusion.*;
-import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import buoy.widget.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * EditingTool is the superclass of tools for editing objects or scenes.  An EditingTool
@@ -203,4 +204,25 @@ public abstract class EditingTool
   public void iconDoubleClicked()
   {
   }
+
+    @Target(value = ElementType.TYPE)
+    @Retention(value = RetentionPolicy.RUNTIME)
+    public static @interface Tooltip {
+
+        String value();
+    }
+
+    @Target(value = ElementType.TYPE)
+    @Retention(value = RetentionPolicy.RUNTIME)
+    public static @interface ButtonImage {
+
+        String value();
+    }
+
+    @Target(value = ElementType.TYPE)
+    @Retention(value = RetentionPolicy.RUNTIME)
+    public static @interface ActivatedToolText {
+
+        String value();
+    }
 }

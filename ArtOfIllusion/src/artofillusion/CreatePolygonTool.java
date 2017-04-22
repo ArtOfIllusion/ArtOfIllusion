@@ -15,16 +15,14 @@ package artofillusion;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 
 /** CreatePolygonTool is an EditingTool used for creating polygon shaped Line objects. */
-@ButtonImage("polygon")
-@Tooltip("createPolygonTool.tipText")
+@EditingTool.ButtonImage("polygon")
+@EditingTool.Tooltip("createPolygonTool.tipText")
 public class CreatePolygonTool extends EditingTool
 {
   private static int counter = 1, sides = 3, shape = 0;

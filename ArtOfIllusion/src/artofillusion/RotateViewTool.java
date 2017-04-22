@@ -16,16 +16,13 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import artofillusion.texture.UVMappingWindow;
-import artofillusion.tool.annotations.Tooltip;
 import buoy.event.*;
 import java.awt.*;
-import artofillusion.tool.annotations.ActivatedToolText;
-import artofillusion.tool.annotations.ButtonImage;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
-@ButtonImage("rotateView")
-@Tooltip("rotateViewTool.tipText")
-@ActivatedToolText("rotateViewTool.helpText")
+@EditingTool.ButtonImage("rotateView")
+@EditingTool.Tooltip("rotateViewTool.tipText")
+@EditingTool.ActivatedToolText("rotateViewTool.helpText")
 public class RotateViewTool extends EditingTool
 {
   private static final double DRAG_SCALE = 0.01;

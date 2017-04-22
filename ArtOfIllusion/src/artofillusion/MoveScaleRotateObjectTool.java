@@ -15,8 +15,6 @@ import artofillusion.ui.*;
 import artofillusion.ui.Compound3DManipulator.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.tool.annotations.ButtonImage;
-import artofillusion.tool.annotations.Tooltip;
 
 import java.awt.event.*;
 import java.awt.*;
@@ -28,8 +26,8 @@ import buoy.widget.*;
 /**
  * This editing tool presents a compound interface for moving, scaling, and rotating objects.
  */
-@ButtonImage("moveScaleRotate")
-@Tooltip("moveScaleRotateObjectTool.tipText")
+@EditingTool.ButtonImage("moveScaleRotate")
+@EditingTool.Tooltip("moveScaleRotateObjectTool.tipText")
 public class MoveScaleRotateObjectTool extends EditingTool
 {
   private boolean dragInProgress, draggingObjects;

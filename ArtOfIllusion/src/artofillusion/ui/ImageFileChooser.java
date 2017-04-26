@@ -1,4 +1,5 @@
 /* Copyright (C) 2005 by Peter Eastman
+   Modification copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -51,12 +52,18 @@ public class ImageFileChooser extends BFileChooser
     // Set up filename filters.
 
     jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.images"),
-                     "jpg", "jpeg", "png", "tif", "tiff", "svg", "svgz", "hdr"));
-    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.jpeg"), "jpg", "jpeg"));
-    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.hdr"), "hdr"));
+                              "gif", 
+                              "hdr", "hdri", 
+                              "jpg", "jpeg", "jpe", "jif", "jfif", 
+                              "pic", 
+                              "png", 
+                              "svg"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.gif"), "gif"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.hdr"), "hdr", "hdri", "pic"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.jpeg"), "jpg", "jpeg", "jpe", "jif", "jfif"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.pic"), "pic"));
     jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.png"), "png"));
-    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.svg"), "svg", "svgz"));
-    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.tif"), "tif", "tiff"));
+    jfc.addChoosableFileFilter(new FileNameExtensionFilter(Translate.text("fileFilter.svg"), "svg"));
     jfc.setAcceptAllFileFilterUsed(true);
 
     // Read the saved filter Preference.

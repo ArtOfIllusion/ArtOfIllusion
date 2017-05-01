@@ -273,8 +273,7 @@ public class Tube extends Curve
                 news[i] = t.smoothness[j]*2.0f;
                 if (news[i] > 1.0f)
                   news[i] = 1.0f;
-                for (int k = 0; k < numParam; k++)
-                  newparam[i][k] = paramTemp[k];
+                System.arraycopy(paramTemp, 0, newparam[i], 0, numParam);
               }
             i++;
             if (!refine[p2] && !refine[p3])
@@ -393,8 +392,7 @@ public class Tube extends Curve
                 newvert[i] = SplineMesh.calcInterpPoint(t.vertex, t.smoothness, param, paramTemp, p1, p2, p3, p4);
                 newt[i] = calcInterpThickness(t.thickness, t.smoothness, p1, p2, p3, p4);
                 news[i] = 1.0f;
-                for (int k = 0; k < numParam; k++)
-                  newparam[i][k] = paramTemp[k];
+                System.arraycopy(paramTemp, 0, newparam[i], 0, numParam);
                 if (newvert[i].r.distance2(t.vertex[p2].r) > tol2 && newvert[i].r.distance2(t.vertex[p3].r) > tol2)
                   {
                     Vec3 temp = t.vertex[p2].r.plus(t.vertex[p3].r).times(0.5);

@@ -1332,8 +1332,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
     if (selectMode == POINT_MODE)
     {
-      for (int i = 0; i < deleteVert.length; i++)
-        deleteVert[i] = selected[i];
+        System.arraycopy(selected, 0, deleteVert, 0, deleteVert.length);
       for (int i = 0; i < deleteFace.length; i++)
         deleteFace[i] = (deleteVert[face[i].v1] || deleteVert[face[i].v2] || deleteVert[face[i].v3]);
     }
@@ -1349,8 +1348,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     }
     else
     {
-      for (int i = 0; i < deleteFace.length; i++)
-        deleteFace[i] = selected[i];
+        System.arraycopy(selected, 0, deleteFace, 0, deleteFace.length);
       for (int i = 0; i < deleteVert.length; i++)
         deleteVert[i] = true;
       for (int i = 0; i < deleteFace.length; i++)
@@ -1846,8 +1844,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       {
         double oldval[] = ((VertexParameterValue) oldParamVal[i]).getValue();
         double newval[] = new double [newvert.length];
-        for (int j = 0; j < oldval.length; j++)
-          newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         for (int j = oldval.length; j < newval.length; j++)
           newval[j] = param[i].defaultVal;
         newParamVal[i] = new VertexParameterValue(newval);
@@ -1856,8 +1853,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       {
         double oldval[] = ((FaceParameterValue) oldParamVal[i]).getValue();
         double newval[] = new double [newface.length];
-        for (int j = 0; j < oldval.length; j++)
-          newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         for (int j = oldval.length; j < newval.length; j++)
           newval[j] = param[i].defaultVal;
         newParamVal[i] = new FaceParameterValue(newval);
@@ -2151,8 +2147,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       {
         double oldval[] = ((FaceParameterValue) oldParamVal[i]).getValue();
         double newval[] = new double [newface.length];
-        for (int j = 0; j < oldval.length; j++)
-          newval[j] = oldval[j];
+          System.arraycopy(oldval, 0, newval, 0, oldval.length);
         if (param[i] == getFaceIndexParameter()) // The parameter added by the editor window to record face indices
           for (int j = oldval.length; j < newval.length; j++)
             newval[j] = j;

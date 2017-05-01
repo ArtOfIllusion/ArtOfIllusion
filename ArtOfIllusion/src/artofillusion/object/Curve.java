@@ -174,8 +174,7 @@ public class Curve extends Object3D implements Mesh
 
   public void setSmoothness(float s[])
   {
-    for (int i = 0; i < s.length; i++)
-      smoothness[i] = s[i];
+      System.arraycopy(s, 0, smoothness, 0, s.length);
     clearCachedMesh();
   }
 

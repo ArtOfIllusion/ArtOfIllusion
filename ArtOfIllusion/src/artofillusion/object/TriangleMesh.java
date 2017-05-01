@@ -3669,8 +3669,7 @@ groups:     do
           k.vertPos[i] = new Vec3(vertPos[i]);
           k.vertSmoothness[i] = vertSmoothness[i];
         }
-      for (int i = 0; i < edgeSmoothness.length; i++)
-        k.edgeSmoothness[i] = edgeSmoothness[i];
+        System.arraycopy(edgeSmoothness, 0, k.edgeSmoothness, 0, edgeSmoothness.length);
       k.paramValue = new ParameterValue [paramValue.length];
       for (int i = 0; i < paramValue.length; i++)
         k.paramValue[i] = paramValue[i].duplicate();

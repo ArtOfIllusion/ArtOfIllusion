@@ -171,6 +171,7 @@ public class PerlinNoise
 
   /** Add the gradient of the wavelet at node (i, j, k) for the point (u, v, w). */
 
+  @SuppressWarnings("UnnecessaryReturnStatement")
   private static void addWaveletGradient(Vec3 gradient, int i, int j, int k, double u, double v, double w)
   {
     double dropu, dropv, dropw, product, dot;

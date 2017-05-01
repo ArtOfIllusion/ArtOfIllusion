@@ -4,8 +4,8 @@
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful, but WITHOUT ANY 
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion;
@@ -33,14 +33,14 @@ public class ExternalObjectEditingWindow extends BDialog
   private String objectName;
   private int objectId;
   private Runnable onClose;
-  
+
   /** Display a window for editing an ExternalObject.
       @param parent     the parent window
       @param obj        the object to edit
       @param info       the ObjectInfo for the ExternalObject
       @param onClose    a callback to invoke when the user clicks OK (may be null)
   */
-  
+
   public ExternalObjectEditingWindow(EditingWindow parent, ExternalObject obj, ObjectInfo info, Runnable onClose)
   {
     super(parent.getFrame(), info.getName(), true);
@@ -80,9 +80,9 @@ public class ExternalObjectEditingWindow extends BDialog
     UIUtilities.centerDialog(this, parentWindow.getFrame());
     setVisible(true);
   }
-  
+
   /** Allow the user to select a file. */
-  
+
   private void doBrowseFile()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("externalObject.selectScene"));
@@ -124,8 +124,7 @@ public class ExternalObjectEditingWindow extends BDialog
       new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
     setCursor(Cursor.getDefaultCursor());
-    if (scene == null)
-      return;
+
   }
 
   /** Build the list of objects for the user to select from. */
@@ -170,7 +169,7 @@ public class ExternalObjectEditingWindow extends BDialog
   }
 
   /** Save the changes and reload the object. */
-  
+
   private void doOk()
   {
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -190,4 +189,3 @@ public class ExternalObjectEditingWindow extends BDialog
     parentWindow.updateMenus();
   }
 }
-

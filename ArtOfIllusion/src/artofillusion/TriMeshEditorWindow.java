@@ -25,7 +25,7 @@ import java.util.*;
 
 /** The TriMeshEditorWindow class represents the window for editing TriangleMesh objects. */
 
-public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWindow
+public class TriMeshEditorWindow extends MeshEditorWindow
 {
   private ToolPalette modes;
   private BMenuItem editMenuItem[], selectMenuItem[], meshMenuItem[], skeletonMenuItem[];

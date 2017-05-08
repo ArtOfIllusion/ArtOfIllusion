@@ -23,7 +23,7 @@ import java.awt.*;
 
 /** The SkeletonShapeEditorWindow class represents the window for editing SkeletonShapeKeyframes. */
 
-public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshEditController
+public class SkeletonShapeEditorWindow extends MeshEditorWindow
 {
   private SkeletonShapeTrack track;
   private SkeletonShapeKeyframe keyframe;

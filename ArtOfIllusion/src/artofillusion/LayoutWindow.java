@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -145,18 +145,20 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     dock[2] = new DockingContainer(dock[1], BTabbedPane.BOTTOM);
     dock[3] = new DockingContainer(dock[2], BTabbedPane.TOP);
     setContent(dock[3]);
-    for (int i = 0; i < dock.length; i++)
+    
+    for (DockingContainer currentDock : dock)
     {
-      dock[i].setHideSingleTab(true);
-      dock[i].addEventLink(DockingEvent.class, this, "dockableWidgetMoved");
-      BSplitPane split = dock[i].getSplitPane();
+      currentDock.setHideSingleTab(true);
+      currentDock.addEventLink(DockingEvent.class, this, "dockableWidgetMoved");
+      BSplitPane split = currentDock.getSplitPane();
       split.setContinuousLayout(true);
       split.setOneTouchExpandable(true);
-      BTabbedPane.TabPosition pos = dock[i].getTabPosition();
+      BTabbedPane.TabPosition pos = currentDock.getTabPosition();
       split.setResizeWeight(pos == BTabbedPane.TOP || pos == BTabbedPane.LEFT ? 1.0 : 0.0);
       split.addEventLink(ValueChangedEvent.class, this, "updateMenus");
       split.addEventLink(ValueChangedEvent.class, this, "updateMenus");
     }
+    
     ObjectPropertiesPanel propertiesPanel = new ObjectPropertiesPanel(this);
     BScrollPane propertiesScroller = new BScrollPane(propertiesPanel, BScrollPane.SCROLLBAR_NEVER, BScrollPane.SCROLLBAR_AS_NEEDED);
     propertiesScroller.getVerticalScrollBar().setUnitIncrement(10);
@@ -169,7 +171,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     tools = new ToolPalette(2, 7, this);
     EditingTool metaTool, altTool, defaultTool, compoundTool;
-	ScrollViewTool scrollTool;
+    ScrollViewTool scrollTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));
     tools.addTool(new ScaleObjectTool(this));
@@ -195,7 +197,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
+      theView[i].setAltTool(altTool);
+	  theView[i].setScrollTool(scrollTool);
     }
 
     // Fill in the left hand panel.
@@ -358,6 +361,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     StringBuilder config = new StringBuilder();
     for (int i = 0; i < dock.length; i++)
     {
+      
       for (int j = 0; j < dock[i].getTabCount(); j++)
       {
         for (int k = 0; k < dock[i].getTabChildCount(j); k++)
@@ -390,10 +394,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     // Make a table of all DockableWidgets.
 
-    HashMap<String, DockableWidget> widgets = new HashMap<String, DockableWidget>();
-    for (int i = 0; i < dock.length; i++)
+    HashMap<String, DockableWidget> widgets = new HashMap<String, DockableWidget>();    
+    for (DockingContainer currentDock : dock)
     {
-      for (Widget next : dock[i].getChildren())
+      for (Widget next : currentDock.getChildren())
       {
         if (next instanceof DockableWidget)
         {
@@ -582,18 +586,19 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     BMenu displayMenu, navigationMenu;
 
-    viewMenu = Translate.menu("view");	
-	menubar.add(viewMenu);
-	viewMenuItem = new BMenuItem [8];	
+    viewMenu = Translate.menu("view");
+    menubar.add(viewMenu);
+    viewMenuItem = new BMenuItem [8];
 
-	viewMenu.add(displayMenu = Translate.menu("displayMode"));
+    viewMenu.add(displayMenu = Translate.menu("displayMode"));
     displayItem = new BCheckBoxMenuItem [6];
-    displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
-    displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_FLAT));
-    displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
-    displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
-    displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_TEXTURED));
-    displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
+    int viewRenderMode = theView[0].getRenderMode();
+    displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", viewRenderMode == ViewerCanvas.RENDER_WIREFRAME));
+    displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", viewRenderMode == ViewerCanvas.RENDER_FLAT));
+    displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeCommand", viewRenderMode == ViewerCanvas.RENDER_SMOOTH));
+    displayMenu.add(displayItem[3] = Translate.checkboxMenuItem("texturedDisplay", this, "displayModeCommand", viewRenderMode == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[4] = Translate.checkboxMenuItem("transparentDisplay", this, "displayModeCommand", viewRenderMode == ViewerCanvas.RENDER_TEXTURED));
+    displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", viewRenderMode == ViewerCanvas.RENDER_RENDERED));
 
     viewMenu.add(viewMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
     viewMenu.add(viewMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
@@ -866,9 +871,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public DockingContainer getDockingContainer(BTabbedPane.TabPosition position)
   {
-    for (int i = 0; i < dock.length; i++)
-      if (dock[i].getTabPosition() == position)
-        return dock[i];
+    for (DockingContainer currentDock : dock)
+    {
+      if (currentDock.getTabPosition() == position)
+      {
+        return currentDock;
+      }
+    }
     return null; // should be impossible
   }
 
@@ -928,10 +937,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @Override
   public void setTool(EditingTool tool)
   {
-    for (int i = 0; i < theView.length; i++)
-	{
-      theView[i].setTool(tool);
-	}
+    for (SceneViewer currentView: theView)
+    {
+      currentView.setTool(tool);
+    }
   }
 
   /** When a tool gets selected in the tool palette, notify the UI.
@@ -939,14 +948,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void toolChanged(EditingTool tool)
   {
-    for (ViewerCanvas v:theView)
-	{
-		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
-			v.navigationTravelEnabled = false;
-		else
-			v.navigationTravelEnabled = true;
-		v.viewChanged(false); // This should do nothing now...
-	}
+    for (ViewerCanvas v: theView)
+    {
+      if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+      {
+        v.navigationTravelEnabled = false;
+      } else
+      {
+        v.navigationTravelEnabled = true;
+      }
+      v.viewChanged(false); // This should do nothing now...
+    }
   }
 
   /** Set the help text displayed at the bottom of the window. */
@@ -1075,19 +1087,23 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenuItem[12].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
     addTrackMenu.setEnabled(numSelObjects > 0);
     distortionMenu.setEnabled(sel.length > 0);
-	
-    viewMenuItem[1].setText(Translate.text(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0 ? "menu.showObjectList" : "menu.hideObjectList"));
+    
+    Rectangle itemTreeBounds = itemTreeScroller.getBounds();
+    String menuItem = itemTreeBounds.width == 0 || itemTreeBounds.height == 0 ? "menu.showObjectList" : "menu.hideObjectList";
+    viewMenuItem[1].setText(Translate.text(menuItem));
+    
     viewMenuItem[2].setText(Translate.text(view.getShowAxes() ? "menu.hideCoordinateAxes" : "menu.showCoordinateAxes"));
     viewMenuItem[3].setEnabled(view.getTemplateImage() != null); // Show template
     viewMenuItem[3].setText(Translate.text(view.getTemplateShown() ? "menu.hideTemplate" : "menu.showTemplate"));
     viewMenuItem[4].setEnabled(sel.length > 0); // Frame Selection With Camera
 	
-    displayItem[0].setState(view.getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
-    displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
-    displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
-    displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
-    displayItem[4].setState(view.getRenderMode() == ViewerCanvas.RENDER_TRANSPARENT);
-    displayItem[5].setState(view.getRenderMode() == ViewerCanvas.RENDER_RENDERED);
+    int viewRenderMode = view.getRenderMode();
+    displayItem[0].setState(viewRenderMode == ViewerCanvas.RENDER_WIREFRAME);
+    displayItem[1].setState(viewRenderMode == ViewerCanvas.RENDER_FLAT);
+    displayItem[2].setState(viewRenderMode == ViewerCanvas.RENDER_SMOOTH);
+    displayItem[3].setState(viewRenderMode == ViewerCanvas.RENDER_TEXTURED);
+    displayItem[4].setState(viewRenderMode == ViewerCanvas.RENDER_TRANSPARENT);
+    displayItem[5].setState(viewRenderMode == ViewerCanvas.RENDER_RENDERED);
   }
 
   /** Set the UndoRecord which will be executed if the user chooses Undo from the Edit menu. */
@@ -1220,7 +1236,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScore.repaint();
     itemTree.repaint();
     for (SceneViewer view : theView)
+    {
       view.viewChanged(false);
+    }
     updateImage();
     dispatchSceneChangedEvent();
   }
@@ -1263,12 +1281,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         theView[currentView].setDrawFocus(false);
         theView[i].setDrawFocus(true);
-        displayItem[0].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
-        displayItem[1].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_FLAT);
-        displayItem[2].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
-        displayItem[3].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
-        displayItem[4].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_TRANSPARENT);
-        displayItem[5].setState(theView[i].getRenderMode() == ViewerCanvas.RENDER_RENDERED);
+        int viewRenderMode = theView[i].getRenderMode();
+        displayItem[0].setState(viewRenderMode == ViewerCanvas.RENDER_WIREFRAME);
+        displayItem[1].setState(viewRenderMode == ViewerCanvas.RENDER_FLAT);
+        displayItem[2].setState(viewRenderMode == ViewerCanvas.RENDER_SMOOTH);
+        displayItem[3].setState(viewRenderMode == ViewerCanvas.RENDER_TEXTURED);
+        displayItem[4].setState(viewRenderMode == ViewerCanvas.RENDER_TRANSPARENT);
+        displayItem[5].setState(viewRenderMode == ViewerCanvas.RENDER_RENDERED);
         currentView = i;
         updateImage();
         updateMenus();
@@ -1362,8 +1381,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_TRANSPARENT);
     else if (source == displayItem[5])
       theView[currentView].setRenderMode(ViewerCanvas.RENDER_RENDERED);
-    for (int i = 0; i < displayItem.length; i++)
-      displayItem[i].setState(source == displayItem[i]);
+    
+    for (BCheckBoxMenuItem currentDisplayItem : displayItem)
+    {
+      currentDisplayItem.setState(source == currentDisplayItem);
+    }
     savePreferences();
   }
 
@@ -1639,7 +1661,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
+      }
+      else if (command.equals("fitToSelection"))
+		getView().fitToObjects(getSelectedObjects());
+      else if (command.equals("fitToAll"))
+		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
 	    getView().alignWithClosestAxis();
 	  /*
@@ -1674,24 +1700,26 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   void importCommand(String format)
   {
-    List<Translator> trans = PluginRegistry.getPlugins(Translator.class);
-    for (int i = 0; i < trans.size(); i++)
-      if (trans.get(i).canImport() && format.equals(trans.get(i).getName()))
-        {
-          trans.get(i).importFile(this);
-          return;
-        }
+    for (Translator translator: PluginRegistry.getPlugins(Translator.class))
+    {
+      if (translator.canImport() && format.equals(translator.getName()))
+      {
+        translator.importFile(this);
+        return;
+      }
+    }
   }
 
   void exportCommand(String format)
   {
-    List<Translator> trans = PluginRegistry.getPlugins(Translator.class);
-    for (int i = 0; i < trans.size(); i++)
-      if (trans.get(i).canExport() && format.equals(trans.get(i).getName()))
-        {
-          trans.get(i).exportFile(this, theScene);
-          return;
-        }
+    for (Translator translator: PluginRegistry.getPlugins(Translator.class))
+    {
+      if (translator.canExport() && format.equals(translator.getName()))
+      {
+        translator.exportFile(this, theScene);
+        return;
+      }
+    }
   }
 
   public void linkExternalCommand()

@@ -155,8 +155,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       split.setOneTouchExpandable(true);
       BTabbedPane.TabPosition pos = currentDock.getTabPosition();
       split.setResizeWeight(pos == BTabbedPane.TOP || pos == BTabbedPane.LEFT ? 1.0 : 0.0);
-      split.addEventLink(ValueChangedEvent.class, this, "updateMenus");
-      split.addEventLink(ValueChangedEvent.class, this, "updateMenus");
     }
     
     ObjectPropertiesPanel propertiesPanel = new ObjectPropertiesPanel(this);

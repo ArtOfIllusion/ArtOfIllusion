@@ -10,7 +10,6 @@
 
 package artofillusion.tool.help;
 
-import artofillusion.ApplicationPreferences;
 import artofillusion.ArtOfIllusion;
 
 import artofillusion.BevelExtrudeTool;
@@ -70,7 +69,7 @@ public class TestToolsHelp {
         PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
         PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
         ThemeManager.initThemes();
-        ArtOfIllusion.setPreferences(new ApplicationPreferences());
+
         layout = new LayoutWindow(new Scene());
     }
     

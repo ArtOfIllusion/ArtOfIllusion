@@ -49,7 +49,7 @@ public class ArtOfIllusion
   public static Font defaultFont;
 //  private static String currentDirectory;
   public static int standardDialogInsets = 0;
-  private static ApplicationPreferences preferences;
+
   private static ObjectInfo clipboardObject[];
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
@@ -198,7 +198,7 @@ public class ArtOfIllusion
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();
     ThemeManager.initThemes();
-    preferences = new ApplicationPreferences();
+    
     KeystrokeManager.loadRecords();
     ViewerCanvas.addViewerControl(new ViewerOrientationControl());
     ViewerCanvas.addViewerControl(new ViewerPerspectiveControl());
@@ -249,18 +249,18 @@ public class ArtOfIllusion
     return "3.0";
   }
 
+  private static class ApplicationPreferencesHolder
+  {
+    public static ApplicationPreferences INSTANCE = new ApplicationPreferences();
+  }
+  
   /** Get the application preferences object. */
 
   public static ApplicationPreferences getPreferences()
   {
-    return preferences;
+    return ApplicationPreferencesHolder.INSTANCE;
   }
 
-  // Set application preferences. For unit testing purpose only!
-  public static void setPreferences(ApplicationPreferences preferences) 
-  {
-    ArtOfIllusion.preferences = preferences;
-  }
   /** Create a new Scene, and display it in a window. */
 
   public static void newWindow()

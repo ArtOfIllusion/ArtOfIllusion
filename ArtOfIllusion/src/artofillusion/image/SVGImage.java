@@ -27,9 +27,10 @@ public class SVGImage extends ImageMap
 {
   private final byte xml[];
   private SVGDiagram svg;
-  private BufferedImage preview;
+  private SoftReference<BufferedImage> preview;
   private HashMap<TileKey, SoftReference<int[]>> tiles;
-  private float average[];
+  private float average[], aspectRatio;
+  private int previewSize = 0;
 
   private static final float SCALE = 1.0f/255.0f;
   private static final int TILE_SIZE = 64;
@@ -41,6 +42,7 @@ public class SVGImage extends ImageMap
   public SVGImage(File file) throws IOException, InterruptedException, SVGException
   {
     xml = ArtOfIllusion.loadFile(file).getBytes("UTF-8");
+    setDataCreated(file);
     initialize();
   }
 
@@ -52,43 +54,46 @@ public class SVGImage extends ImageMap
     svg.setIgnoringClipHeuristic(true);
     tiles = new HashMap<TileKey, SoftReference<int[]>>();
 
-    // Create the preview image.
-
-    float aspectRatio = svg.getWidth()/svg.getHeight();
-    int previewWidth, previewHeight;
-    if (aspectRatio >= 1)
-    {
-      previewWidth = PREVIEW_WIDTH;
-      previewHeight = Math.max((int) (PREVIEW_WIDTH/aspectRatio), 1);
-    }
-    else
-    {
-      previewWidth = Math.max((int) (PREVIEW_HEIGHT*aspectRatio), 1);
-      previewHeight = PREVIEW_HEIGHT;
-    }
-    preview = new BufferedImage(previewWidth, previewHeight, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D g = preview.createGraphics();
-    g.setClip(0, 0, (int) svg.getWidth(), (int) svg.getHeight());
-    g.setTransform(new AffineTransform(previewWidth/svg.getWidth(), 0, 0, previewHeight/svg.getHeight(), 0, 0));
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    svg.render(g);
-    g.dispose();
-
+    aspectRatio = svg.getWidth()/svg.getHeight();
+    createPreview(PREVIEW_SIZE_TEMPLATE);
+  
     // Compute the average components based on the preview image.
 
     average = new float[4];
-    for (int i = 0; i < previewWidth; i++)
-      for (int j = 0; j < previewHeight; j++)
+	
+	BufferedImage tempImage = preview.get();
+    int w = tempImage.getWidth();
+    int h = tempImage.getHeight();
+    for (int i = 0; i < w; i++)
+      for (int j = 0; j < h; j++)
       {
-        int argb = preview.getRGB(i, j);
+        int argb = tempImage.getRGB(i, j);
         average[0] += argb&0xFF;
         average[1] += (argb>>8)&0xFF;
         average[2] += (argb>>16)&0xFF;
         average[3] += (argb>>24)&0xFF;
       }
     for (int i = 0; i < 4; i++)
-      average[i] /= 255.0f*previewWidth*previewHeight;
+      average[i] /= 255.0f*w*h;
     average[3] = 1-average[3];
+	tempImage = null;
+  }
+
+  private void createPreview(int size) throws SVGException
+  {
+    float aspectRatio = svg.getWidth()/svg.getHeight();
+    int previewWidth, previewHeight;
+    previewWidth  = Math.max(Math.min(size, (int)Math.round(size*aspectRatio)),1);
+    previewHeight = Math.max(Math.min(size, (int)Math.round(size/aspectRatio)),1);
+    BufferedImage bi = new BufferedImage(previewWidth, previewHeight, BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = bi.createGraphics();
+    g.setClip(0, 0, (int) svg.getWidth(), (int) svg.getHeight());
+    g.setTransform(new AffineTransform(previewWidth/svg.getWidth(), 0, 0, previewHeight/svg.getHeight(), 0, 0));
+    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    svg.render(g);
+    g.dispose();
+    previewSize = size;
+    preview = new SoftReference(bi);
   }
 
   private BufferedImage createImage(int x, int y, int scale) throws SVGException
@@ -135,6 +140,13 @@ public class SVGImage extends ImageMap
     return tile;
   }
 
+  /** get the raw xml-data */
+  
+  public byte[] getXML()
+  {
+    return xml;
+  }
+  
   /** Get the width of the image. */
 
   @Override
@@ -151,6 +163,20 @@ public class SVGImage extends ImageMap
     return (int) svg.getHeight();
   }
 
+  /** Get the aspectRatio */
+
+  @Override
+  public float getAspectRatio()
+  {
+    return aspectRatio;
+  }
+
+  @Override
+  public String getType()
+  {
+    return "SVG";
+  }
+  
   /** Get the number of components in the image. */
 
   @Override
@@ -373,13 +399,42 @@ public class SVGImage extends ImageMap
     }
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
-      (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
+  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than  PREVIEW_WIDTH by PREVIEW_HEIGHT. */
+
+  @Override
+  public Image getMapImage(int size)
+  {
+    return getPreview(size);
+  }
 
   @Override
   public Image getPreview()
   {
-    return preview;
+    return getPreview(PREVIEW_SIZE_DEFAULT);
+  }
+
+  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than size. */
+
+  @Override
+  public Image getPreview(int size)
+  {
+    try
+    {
+        if (size == previewSize && preview.get() != null)
+            return preview.get();
+        else
+        {
+            createPreview(size);
+            return preview.get();
+        }
+    }
+    catch(SVGException se)
+    {
+        System.out.println(se);
+		return preview.get();
+    }
   }
 
   /** Reconstruct an image from its serialized representation. */
@@ -387,11 +442,33 @@ public class SVGImage extends ImageMap
   public SVGImage(DataInputStream in) throws IOException, SVGException
   {
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("Illegal version for SVGImage");
-    xml = new byte[in.readInt()];
-    in.readFully(xml);
-    initialize();
+
+    if (version == 0) // version = 0 up to AoI 3.0.3
+    {
+      xml = new byte[in.readInt()];
+      in.readFully(xml);
+      initialize();
+    }
+    else // newer than AoI 3.0.3
+    {
+      xml = new byte[in.readInt()];
+      in.readFully(xml);
+      imageName   = in.readUTF();
+      userCreated = in.readUTF();
+      zoneCreated = in.readUTF();
+      long milliC = in.readLong();
+      userEdited  = in.readUTF();
+      zoneEdited  = in.readUTF();
+      long milliE = in.readLong();
+      if (milliC > Long.MIN_VALUE)
+        dateCreated = new Date(milliC);
+      if (milliE > Long.MIN_VALUE)
+        dateEdited  = new Date(milliE);      
+      
+      initialize();    
+    }
   }
 
   /** Serialize an image to an output stream. */
@@ -399,9 +476,23 @@ public class SVGImage extends ImageMap
   @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
-    out.writeShort(0);
+    out.writeShort(1);
     out.writeInt(xml.length);
     out.write(xml);
+    
+    out.writeUTF(imageName);
+    out.writeUTF(userCreated);
+    out.writeUTF(zoneCreated);
+    if (dateCreated == null)
+      out.writeLong(Long.MIN_VALUE);
+    else
+      out.writeLong(dateCreated.getTime());
+    out.writeUTF(userEdited);
+    out.writeUTF(zoneEdited);
+    if (dateEdited == null)
+      out.writeLong(Long.MIN_VALUE);
+    else
+      out.writeLong(dateEdited.getTime());
   }
 
   private static class TileKey implements Cloneable

@@ -15,20 +15,23 @@ import artofillusion.math.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
+import java.util.Date;
 import javax.imageio.*;
 import javax.swing.*;
+import static java.lang.Math.*;
+import java.lang.ref.SoftReference;
 
-/** MIPMappedImage is an ImageMap subclass.  It stores 8 bits per color component, and uses MIP
-mapping to eliminate aliasing. */
+/** MIPMappedImage is an ImageMap subclass.  It stores 8 bits per color component, 
+    and uses MIP mapping to eliminate aliasing. */
 
 public class MIPMappedImage extends ImageMap
 {
-  private int width[], height[], components;
+  private int width[], height[], components, lastPreviewSize = 0, lastUsedMap = -1;
   private byte maps[][][];
-  private float average[];
+  private float average[], aspectRatio;
   private double xscale[], yscale[], scale[], scaleMult[], gradXScale[], gradYScale[];
-  private Image preview;
-
+  private SoftReference<Image> preview;
+  private SoftReference<BufferedImage> lastMapImage;
   private static final float SCALE = 1.0f/255.0f;
 
   /** Construct a MIPMappedImage from an Image object. */
@@ -43,8 +46,8 @@ public class MIPMappedImage extends ImageMap
   public MIPMappedImage(File file) throws InterruptedException
   {
     Image im = new ImageIcon(file.getAbsolutePath()).getImage();
-    maps = new byte [1][][];
     init(im);
+    setDataCreated(file);
   }
 
   /** Initialize a newly created MIPMappedImage. */
@@ -52,7 +55,6 @@ public class MIPMappedImage extends ImageMap
   private void init(Image im) throws InterruptedException
   {
     buildMipMaps(im);
-    createPreview(im);
     findAverage();
   }
 
@@ -62,10 +64,12 @@ public class MIPMappedImage extends ImageMap
   {
     byte map0[][] = findComponentMaps(im);
     int w = im.getWidth(null), h = im.getHeight(null);
+    aspectRatio = (float)w/(float)h;
     int w1, h1, num, i, j, k, m;
     float wratio, hratio;
     Image im1;
 
+    
     // Determine the size for the first reduced map.  Its width and height must both be
     // powers of 2.
 
@@ -229,6 +233,24 @@ public class MIPMappedImage extends ImageMap
     return height[0];
   }
 
+  @Override
+  public String getType()
+  {
+    if (components == 1)
+      return "GRAY_SCALE";
+    if (components == 3)
+      return "RGB";
+    if (components == 4)
+      return "RGBA";
+    return "";
+  }
+  
+  @Override
+  public float getAspectRatio()
+  {
+    return aspectRatio;
+  }
+  
   /** Get the number of components in the image. */
 
   @Override
@@ -326,7 +348,7 @@ public class MIPMappedImage extends ImageMap
     // Calculate the final value.
 
     return ((((int) map[ind1]) & 0xFF)*w1 + (((int) map[ind2]) & 0xFF)*w2 +
-                    (((int) map[ind3]) & 0xFF)*w3 + (((int) map[ind4]) & 0xFF)*w4)*SCALE;
+            (((int) map[ind3]) & 0xFF)*w3 + (((int) map[ind4]) & 0xFF)*w4)*SCALE;
   }
 
   /** Get the average value for a particular component, over the entire image. */
@@ -334,6 +356,8 @@ public class MIPMappedImage extends ImageMap
   @Override
   public float getAverageComponent(int component)
   {
+    if (components == 1 && component < 3) // Grayscale images need three components or the avrage appears red
+      return average[0]; 
     if (component >= components)
       return 0.0f;
     return average[component];
@@ -437,9 +461,9 @@ public class MIPMappedImage extends ImageMap
     else
       {
         green = ((((int) map[1][ind1]) & 0xFF)*w1 + (((int) map[1][ind2]) & 0xFF)*w2 +
-                    (((int) map[1][ind3]) & 0xFF)*w3 + (((int) map[1][ind4]) & 0xFF)*w4)*SCALE;
-        blue = ((((int) map[2][ind1]) & 0xFF)*w1 + (((int) map[2][ind2]) & 0xFF)*w2 +
-                    (((int) map[2][ind3]) & 0xFF)*w3 + (((int) map[2][ind4]) & 0xFF)*w4)*SCALE;
+                 (((int) map[1][ind3]) & 0xFF)*w3 + (((int) map[1][ind4]) & 0xFF)*w4)*SCALE;
+        blue  = ((((int) map[2][ind1]) & 0xFF)*w1 + (((int) map[2][ind2]) & 0xFF)*w2 +
+                 (((int) map[2][ind3]) & 0xFF)*w3 + (((int) map[2][ind4]) & 0xFF)*w4)*SCALE;
       }
     theColor.setRGB(red, green, blue);
   }
@@ -542,15 +566,126 @@ public class MIPMappedImage extends ImageMap
     grad.y = ((v2-v1)*(1.0-frac1) + (v4-v3)*frac1) * gradYScale[which];
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
-      (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
+  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than  PREVIEW_WIDTH by PREVIEW_HEIGHT. */
 
   @Override
   public Image getPreview()
   {
-    return preview;
+    return getPreview(PREVIEW_SIZE_DEFAULT);
   }
 
+  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than size. */
+
+  @Override
+  public Image getPreview(int size)
+  {
+    if (size == lastPreviewSize && preview.get() != null)
+	{
+      return preview.get();
+    }
+
+    preview = new SoftReference(createScaledImage(getImageOfClosestMap(size), size));
+    lastPreviewSize = size;
+    return preview.get();
+  }
+
+  @Override
+  public Image getMapImage(int size)
+  {
+      return getImageOfClosestMap(size);
+  }
+
+  /** Get an image that represents the colsesti MIP map in the giben size. The dimensions 
+      of the used map are larger or egual to the requested size with te aspect raetion 
+      taken to account. <p>
+
+      Note that the proportions of MIP-maps, except for 'map[0]' are always in powers of 2, 
+      like 4:1, 2:1, 1:1, 1:2...*/
+
+  private BufferedImage getImageOfClosestMap(int size)
+  {
+    if (maps.length == 1)
+      return getImage(0);
+    else
+    {
+      int n, pw, ph;
+      int w = getWidth();
+      int h = getHeight();
+	  
+	  pw = max(min(size, (int)round(size*aspectRatio)),1);
+      ph = max(min(size, (int)round(size/aspectRatio)),1);
+      for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
+      return getImage(n);
+    }
+  }
+  
+  /** Create a scaled image in the requested size. If size is larger than the original image 
+      a non-sclaed image is returned.*/
+
+  private Image createScaledImage(Image im, int size)
+  {    
+    if (getWidth() <= size && getHeight() <= size)
+      return im;    
+    int pw = max(min(size, (int)round(size*aspectRatio)),1);
+    int ph = max(min(size, (int)round(size/aspectRatio)),1);
+    return im.getScaledInstance(pw, ph, Image.SCALE_SMOOTH);
+  }
+
+  /** Get the image in it's original size */
+  
+  public BufferedImage getImage()
+  {
+    return getImage(0);
+  }
+  
+  /** This is used to <br>
+      <li> write the image to stream,
+      <li> create a preview image,
+      <li> export the image. */
+  
+  private BufferedImage getImage(int n)
+  {
+    if (n == lastUsedMap && lastMapImage.get() != null)
+      return lastMapImage.get();
+      
+    int w = width[n], h = height[n];
+    BufferedImage bi;
+    if (getComponentCount() == 1)
+    {
+      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+      for (int i = 0; i < w; i++)
+        for (int j = 0; j < h; j++)
+        {
+          int index = i+j*w;
+          bi.setRGB(i, j, 0xFF000000+(maps[n][0][index]&0xFF)*0x010101);
+        }
+    }
+    else if (getComponentCount() == 3)
+    {
+      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+      for (int i = 0; i < w; i++)
+        for (int j = 0; j < h; j++)
+        {
+          int index = i+j*w;
+          bi.setRGB(i, j, 0xFF000000+((maps[n][0][index]&0xFF)<<16)+((maps[n][1][index]&0xFF)<<8)+(maps[n][2][index]&0xFF));
+        }
+    }
+    else
+    {
+      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+      for (int i = 0; i < w; i++)
+        for (int j = 0; j < h; j++)
+        {
+          int index = i+j*w;
+          bi.setRGB(i, j, ((255-(maps[n][3][index]&0xFF))<<24)+((maps[n][0][index]&0xFF)<<16)+((maps[n][1][index]&0xFF)<<8)+(maps[n][2][index]&0xFF));
+        }
+    }
+    lastMapImage = new SoftReference(bi);
+    return lastMapImage.get();
+  }
+  
   /** Reconstruct an image from its serialized representation. */
 
   public MIPMappedImage(DataInputStream in) throws IOException, InvalidObjectException
@@ -564,7 +699,7 @@ public class MIPMappedImage extends ImageMap
 
   public MIPMappedImage(DataInputStream in, short version) throws IOException, InvalidObjectException
   {
-    if (version < 0 || version > 1)
+    if (version < 0 || version > 2)
       throw new InvalidObjectException("Illegal version for MIPMappedImage");
     int w, h;
     Image im;
@@ -595,10 +730,30 @@ public class MIPMappedImage extends ImageMap
         MemoryImageSource src = new MemoryImageSource(w, h, data, 0, w);
         im = Toolkit.getDefaultToolkit().createImage(src);
     }
+    else if (version == 1) // Up to AoI 3.0.3
+    {
+      byte imageData[] = new byte [in.readInt()];
+      in.readFully(imageData);
+      im = ImageIO.read(new ByteArrayInputStream(imageData));
+      w = im.getWidth(null);
+      h = im.getHeight(null);
+    }
     else
     {
       byte imageData[] = new byte [in.readInt()];
       in.readFully(imageData);
+      imageName   = in.readUTF();
+      userCreated = in.readUTF();
+      zoneCreated = in.readUTF();
+      long milliC = in.readLong();
+      userEdited  = in.readUTF();
+      zoneEdited  = in.readUTF();
+      long milliE = in.readLong();
+      if (milliC > Long.MIN_VALUE)
+        dateCreated = new Date(milliC);
+      if (milliE > Long.MIN_VALUE)
+        dateEdited  = new Date(milliE);      
+      
       im = ImageIO.read(new ByteArrayInputStream(imageData));
       w = im.getWidth(null);
       h = im.getHeight(null);
@@ -616,83 +771,33 @@ public class MIPMappedImage extends ImageMap
     {
       throw(new IOException());
     }
-
-    createPreview(im);
     findAverage();
   }
 
-  private void createPreview(Image im)//, int w, int h)
-  {
-    int w = im.getWidth(null);
-    int h = im.getHeight(null);
-    
-    if (w <= PREVIEW_WIDTH && h <= PREVIEW_HEIGHT)
-      preview = im;
-    else
-    {
-      // At image load, the getWidth() and getHeight() of 'preview' returned '1'. Hence the precalulated pw and ph.
-      // It looked like a timimg issue: The image was not yet ready when the query was made.
-      // At loading AoI-file the returned dimensions would be the actual image dimensions. 
-      
-      int pw, ph;
-
-      if (w < h)
-      {
-        pw = Math.max(w*PREVIEW_WIDTH/h, 1);
-        ph = PREVIEW_HEIGHT;
-      }
-      else
-      {
-        pw = PREVIEW_WIDTH;
-        ph = Math.max(h*PREVIEW_HEIGHT/w, 1);
-      }
-      preview = im.getScaledInstance(pw, ph, Image.SCALE_DEFAULT);
-    }
-  }
-  
   /** Serialize an image to an output stream. */
 
   @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
-    // Copy the image data into a BufferedImage.
-
-    int w = getWidth(), h = getHeight();
-    BufferedImage bi;
-    if (getComponentCount() == 1)
-    {
-      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-      for (int i = 0; i < w; i++)
-        for (int j = 0; j < h; j++)
-        {
-          int index = i+j*w;
-          bi.setRGB(i, j, 0xFF000000+(maps[0][0][index]&0xFF)*0x010101);
-        }
-    }
-    else if (getComponentCount() == 3)
-    {
-      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-      for (int i = 0; i < w; i++)
-        for (int j = 0; j < h; j++)
-        {
-          int index = i+j*w;
-          bi.setRGB(i, j, 0xFF000000+((maps[0][0][index]&0xFF)<<16)+((maps[0][1][index]&0xFF)<<8)+(maps[0][2][index]&0xFF));
-        }
-    }
-    else
-    {
-      bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-      for (int i = 0; i < w; i++)
-        for (int j = 0; j < h; j++)
-        {
-          int index = i+j*w;
-          bi.setRGB(i, j, ((255-(maps[0][3][index]&0xFF))<<24)+((maps[0][0][index]&0xFF)<<16)+((maps[0][1][index]&0xFF)<<8)+(maps[0][2][index]&0xFF));
-        }
-    }
-    out.writeShort(1); // version reference
+    BufferedImage bi = getImage(0);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     ImageIO.write(bi, "png", baos);
+    
+    out.writeShort(2); // version reference
     out.writeInt(baos.size());
     out.write(baos.toByteArray());
-  }
+    
+    out.writeUTF(imageName);
+    out.writeUTF(userCreated);
+    out.writeUTF(zoneCreated);
+    if (dateCreated == null)
+      out.writeLong(Long.MIN_VALUE);
+    else
+      out.writeLong(dateCreated.getTime());
+    out.writeUTF(userEdited);
+    out.writeUTF(zoneEdited);
+    if (dateEdited == null)
+      out.writeLong(Long.MIN_VALUE);
+    else
+      out.writeLong(dateEdited.getTime());  }
 }

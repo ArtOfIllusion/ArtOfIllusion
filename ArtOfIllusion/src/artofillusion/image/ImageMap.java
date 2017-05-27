@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2002 by Peter Eastman
+   Modifications copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +14,7 @@ package artofillusion.image;
 import artofillusion.math.*;
 import java.awt.*;
 import java.io.*;
+import java.util.Date;
 
 /** ImageMap represents an image which can be used for texturing an object.  The number of
 components can range from one (monochrome) to four (ARGB).  It also provides a scaled down
@@ -22,11 +24,24 @@ This is an abstract class.  Subclasses implement specific ways of storing images
 
 public abstract class ImageMap
 {
-  private int id;
+  protected String imageName = new String();
   
-  public static final int PREVIEW_WIDTH = 50;
-  public static final int PREVIEW_HEIGHT = 50;
+  protected String userCreated = new String();
+  protected String zoneCreated = new String();
+  protected Date   dateCreated;
+  protected String userEdited = new String();
+  protected String zoneEdited = new String();
+  protected Date   dateEdited;
 
+  /** @deprecated */
+  public static final int PREVIEW_WIDTH = 50;
+  /** @deprecated */
+  public static final int PREVIEW_HEIGHT = 50;
+  public static final int PREVIEW_SIZE_DEFAULT = 50;
+  public static final int PREVIEW_SIZE_TEMPLATE = 256;
+
+  
+  private int id;
   private static int nextID;
 
   public ImageMap()
@@ -39,22 +54,24 @@ public abstract class ImageMap
   public static ImageMap loadImage(File file) throws Exception
   {
     String name = file.getName().toLowerCase();
-    if (name.endsWith(".hdr") || name.endsWith(".pic"))
+    if (name.endsWith(".hdr") || name.endsWith(".hdri") || name.endsWith(".pic"))
       {
         try
-          {
-            return HDRDecoder.createImage(file);
-          }
+        {
+          ImageMap im = HDRDecoder.createImage(file);
+          im.setDataCreated(file);
+          return im;
+        }
         catch (Exception ex)
-          {
-            ex.printStackTrace();
-          }
+        {
+          ex.printStackTrace();
+        }
       }
     if (name.endsWith(".svg"))
       return new SVGImage(file);
     return new MIPMappedImage(file);
   }
-  
+ 
   /** Get the width of the image. */
   
   public abstract int getWidth();
@@ -62,6 +79,10 @@ public abstract class ImageMap
   /** Get the height of the image. */
   
   public abstract int getHeight();
+
+  /** Get the aspect ratio as width/height float number. */
+  
+  public abstract float getAspectRatio();
 
   /** Get the number of components in the image. */
   
@@ -101,16 +122,128 @@ public abstract class ImageMap
   
   public abstract void getGradient(Vec2 grad, int component, boolean wrapx, boolean wrapy, double x, double y, double xsize, double ysize);
 
-  /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
-      (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
+  /** Get a scaled down copy of the image, to use for previews. <p>
+      
+      If a preview image has been created already thst image will be returned<br>.
+      If there is no existing perview image a default size preview image will b returned. 
+      This Image will be no larger (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
   
   public abstract Image getPreview();
+
+  /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
+      (but may be smaller) than 'size' by 'size'. */
+  
+  public abstract Image getPreview(int size);
+
+  /** Get the image of the MIP-map that is larger than or equal to 'size'.<br>
+      If the dimensions of the image are smaller than size, map[0] representing 
+      the original image, is returned.  */
+  
+  public abstract Image getMapImage(int size);
 
   /** Get an ID number which is unique (within this session) for this image. */
   
   public int getID()
   {
     return id;
+  }
+
+  /** Set all creation time metadata */
+
+  protected void setDataCreated(File file)
+  {
+    String fileName = file.getName();
+    imageName = fileName.substring(0, fileName.lastIndexOf('.'));
+    
+    userCreated = System.getProperty("user.name");
+    zoneCreated = System.getProperty("user.timezone");
+    dateCreated = new Date();
+    
+    userEdited = userCreated;
+    zoneEdited = zoneCreated;
+    dateEdited = (Date)(dateCreated.clone());
+  }
+
+  /** Set all last edition time metadata */
+
+  protected void setDataEdited()
+  {
+    userEdited = System.getProperty("user.name");
+    zoneEdited = System.getProperty("user.timezone");
+    dateEdited = new Date();
+  }
+
+  /** Get the creation date of this image. */
+
+  public Date getDateCreated()
+  {
+    return dateCreated;
+  }
+
+  /** Get the timezone whre this image was created. */
+
+  public String getZoneCreated()
+  {
+    return zoneCreated;
+  }
+
+  /** Get the username who created this image. */
+
+  public String getUserCreated()
+  {
+    return userCreated;
+  }
+
+  /** Get the last editing date of this image. */
+
+  public Date getDateEdited()
+  {
+    return dateEdited;
+  }
+
+  /** Get the timezone where this image was last edited. */
+
+  public String getZoneEdited()
+  {
+    return zoneEdited;
+  }
+
+  /** Get the username who last edited this image. */
+
+  public String getUserEdited()
+  {
+    return userEdited;
+  }
+
+  /** Get the name of the image. */
+
+  public String getName()
+  {
+    return imageName;
+  }
+
+  /** Override this to get the linked file, if any. */
+
+  public File getFile()
+  {
+    return null;
+  }
+
+  /** Override this to get the image type string. <p>
+  
+      The type may be one of RGB, RGBA, GRAY_SCALE, SVG, HDR */
+
+  public String getType()
+  {
+    return "";
+  }
+
+  /** Set the name of the image and update editing time metadata. */
+
+  public void setName(String newName)
+  {
+    imageName = newName;
+    setDataEdited();
   }
 
   /** Write out the object's representation to an output stream.  Every ImageMap subclass must also

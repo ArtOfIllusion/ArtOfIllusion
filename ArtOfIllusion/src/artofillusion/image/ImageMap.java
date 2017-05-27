@@ -24,14 +24,13 @@ This is an abstract class.  Subclasses implement specific ways of storing images
 
 public abstract class ImageMap
 {
-  protected String imageName = new String();
-  
+  protected String imageName   = new String();
   protected String userCreated = new String();
-  protected String zoneCreated = new String();
   protected Date   dateCreated;
-  protected String userEdited = new String();
-  protected String zoneEdited = new String();
+  protected String zoneCreated = new String();
+  protected String userEdited  = new String();
   protected Date   dateEdited;
+  protected String zoneEdited  = new String();
 
   /** @deprecated */
   public static final int PREVIEW_WIDTH = 50;
@@ -40,6 +39,11 @@ public abstract class ImageMap
   public static final int PREVIEW_SIZE_DEFAULT = 50;
   public static final int PREVIEW_SIZE_TEMPLATE = 256;
 
+  public static final String IMAGE_TYPE_RGB  = "RGB";
+  public static final String IMAGE_TYPE_RGBA = "RGBA";
+  public static final String IMAGE_TYPE_GRAY = "GRAY";
+  public static final String IMAGE_TYPE_SVG  = "SVG";
+  public static final String IMAGE_TYPE_HDR  = "HDR";
   
   private int id;
   private static int nextID;
@@ -231,11 +235,11 @@ public abstract class ImageMap
 
   /** Override this to get the image type string. <p>
   
-      The type may be one of RGB, RGBA, GRAY_SCALE, SVG, HDR */
+      The type may be one of RGB, RGBA, GRAY, SVG, HDR */
 
   public String getType()
   {
-    return "";
+    return new String();
   }
 
   /** Set the name of the image and update editing time metadata. */

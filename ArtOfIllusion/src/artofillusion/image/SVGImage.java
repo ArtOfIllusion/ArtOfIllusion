@@ -60,8 +60,8 @@ public class SVGImage extends ImageMap
     // Compute the average components based on the preview image.
 
     average = new float[4];
-	
-	BufferedImage tempImage = preview.get();
+    
+    BufferedImage tempImage = preview.get();
     int w = tempImage.getWidth();
     int h = tempImage.getHeight();
     for (int i = 0; i < w; i++)
@@ -76,7 +76,7 @@ public class SVGImage extends ImageMap
     for (int i = 0; i < 4; i++)
       average[i] /= 255.0f*w*h;
     average[3] = 1-average[3];
-	tempImage = null;
+    tempImage = null;
   }
 
   private void createPreview(int size) throws SVGException
@@ -422,18 +422,18 @@ public class SVGImage extends ImageMap
   {
     try
     {
-        if (size == previewSize && preview.get() != null)
-            return preview.get();
-        else
-        {
-            createPreview(size);
-            return preview.get();
-        }
+      if (size == previewSize && preview.get() != null)
+        return preview.get();
+      else
+      {
+        createPreview(size);
+        return preview.get();
+      }
     }
     catch(SVGException se)
     {
-        System.out.println(se);
-		return preview.get();
+      System.out.println(se);
+      return preview.get(); // wrong size or null....
     }
   }
 
@@ -457,11 +457,12 @@ public class SVGImage extends ImageMap
       in.readFully(xml);
       imageName   = in.readUTF();
       userCreated = in.readUTF();
-      zoneCreated = in.readUTF();
       long milliC = in.readLong();
+      zoneCreated = in.readUTF();
       userEdited  = in.readUTF();
-      zoneEdited  = in.readUTF();
       long milliE = in.readLong();
+      zoneEdited  = in.readUTF();
+      
       if (milliC > Long.MIN_VALUE)
         dateCreated = new Date(milliC);
       if (milliE > Long.MIN_VALUE)
@@ -482,17 +483,17 @@ public class SVGImage extends ImageMap
     
     out.writeUTF(imageName);
     out.writeUTF(userCreated);
-    out.writeUTF(zoneCreated);
     if (dateCreated == null)
       out.writeLong(Long.MIN_VALUE);
     else
       out.writeLong(dateCreated.getTime());
+    out.writeUTF(zoneCreated);
     out.writeUTF(userEdited);
-    out.writeUTF(zoneEdited);
     if (dateEdited == null)
       out.writeLong(Long.MIN_VALUE);
     else
       out.writeLong(dateEdited.getTime());
+    out.writeUTF(zoneEdited);
   }
 
   private static class TileKey implements Cloneable

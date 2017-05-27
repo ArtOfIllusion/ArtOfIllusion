@@ -186,8 +186,6 @@ public class HDRImage extends ImageMap
   private void createPreview(int size)
   {
     int w, h;
-    System.out.println(height.length);
-    System.out.println(width.length);
     if (width[0] <= size && height[0] <= size) // "Tässä!" 
       {
         w = width[0];
@@ -217,6 +215,7 @@ public class HDRImage extends ImageMap
       }
     MemoryImageSource src = new MemoryImageSource(w, h, data, 0, w);
     preview = new SoftReference(Toolkit.getDefaultToolkit().createImage(src));
+    previewSize = size;
   }
 
   /** Get the width of the image. */
@@ -235,7 +234,7 @@ public class HDRImage extends ImageMap
     return height[0];
   }
 
-  /** Get the height of the image. */
+  /** Get the aspect ratio of the image. */
 
   @Override
   public float getAspectRatio()
@@ -581,21 +580,28 @@ public class HDRImage extends ImageMap
   public Image getPreview(int size)
   {
     if (previewSize == size && preview.get() != null)
-        return preview.get();
-    else
-    {
-        previewSize = size;
-        createPreview(previewSize);
-        return preview.get();
-    }
+      return preview.get();
+    createPreview(size);
+    return preview.get();
+
+    // if (preview == null)
+    //   createPreview(size);
+    // Image image = preview.get();
+    // if (previewSize == size && image != null)
+    //   return image;
+    // while (previewSize != size || image == null)
+    // {
+    //   createPreview(size);
+    //   image = preview.get();
+    // }
+    // return image;
   }
-    
+
   @Override
   public Image getMapImage(int size)
   {
     return getPreview(size);
   }
-
   
   /** Get the RGBE bytes that contain th eimage information */
   
@@ -635,11 +641,11 @@ public class HDRImage extends ImageMap
       }
       imageName   = in.readUTF();
       userCreated = in.readUTF();
-      zoneCreated = in.readUTF();
       long milliC = in.readLong();
+      zoneCreated = in.readUTF();
       userEdited  = in.readUTF();
-      zoneEdited  = in.readUTF();
       long milliE = in.readLong();
+      zoneEdited  = in.readUTF();
       if (milliC > Long.MIN_VALUE) // It is probabbly safe to assume, that the image was not created before 1970.
         dateCreated = new Date(milliC);
       if (milliE > Long.MIN_VALUE)
@@ -662,16 +668,16 @@ public class HDRImage extends ImageMap
       out.write(maps[0][i]);
     out.writeUTF(imageName);
     out.writeUTF(userCreated);
-    out.writeUTF(zoneCreated);
     if (dateCreated == null)
       out.writeLong(Long.MIN_VALUE);
     else
       out.writeLong(dateCreated.getTime());
+    out.writeUTF(zoneCreated);
     out.writeUTF(userEdited);
-    out.writeUTF(zoneEdited);
     if (dateEdited == null)
       out.writeLong(Long.MIN_VALUE);
     else
       out.writeLong(dateEdited.getTime());
+    out.writeUTF(zoneEdited);
   }
 }

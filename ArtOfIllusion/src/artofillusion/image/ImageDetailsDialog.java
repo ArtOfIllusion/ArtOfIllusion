@@ -39,7 +39,7 @@ public class ImageDetailsDialog extends BDialog
     private BufferedImage canvasImage;
     private BButton okButton, cancelButton, refreshButton, reconnectButton, convertButton, exportButton;
     private BLabel[] title, data; 
-    private Color defaultTextColor, errorTextColor;
+    private Color defaultTextColor, errorTextColor, hilightTextColor, currentTextColor;
 
     public ImageDetailsDialog(BFrame parent, Scene scene, ImageMap im)
     {
@@ -87,7 +87,7 @@ public class ImageDetailsDialog extends BDialog
         buttonField.add(reconnectButton = Translate.button("reconnectImage", "...", this, "reconnectImage")); 
         buttonField.add(convertButton = Translate.button("convertImage", this, "convertToLocal"));
         buttonField.add(exportButton = Translate.button("exportImage", "...", this, "exportImage"));
-        buttonField.add(okButton =  Translate.button("ok", this, "closeWindow"));
+        buttonField.add(okButton =  Translate.button("ok", this, "closeDetailsDialog"));
         
         if (im instanceof ExternalImage)
             exportButton.setEnabled(false);
@@ -97,13 +97,24 @@ public class ImageDetailsDialog extends BDialog
             reconnectButton.setEnabled(false);
             convertButton.setEnabled(false);
         }
-        addAsListener(this);
-        addEventLink(WindowClosingEvent.class, this, "closeWindow");
-        defaultTextColor = title[0].getComponent().getForeground();
+        
+        defaultTextColor = currentTextColor = title[0].getComponent().getForeground();
+        hilightTextColor = new Color(0, 191, 191);
         errorTextColor = new Color(143, 0, 0);
+        
+        data[0].addEventLink(MouseClickedEvent.class, this, "nameClicked");
+        data[0].addEventLink(MouseEnteredEvent.class, this, "nameEntered");
+        data[0].addEventLink(MouseExitedEvent.class,  this, "nameExited");
+        title[0].addEventLink(MouseClickedEvent.class, this, "nameClicked");
+        title[0].addEventLink(MouseEnteredEvent.class, this, "nameEntered");
+        title[0].addEventLink(MouseExitedEvent.class,  this, "nameExited");
+        
+        addAsListener(this);
+        addEventLink(WindowClosingEvent.class, this, "closeDetailsDialog");
         setDataTexts();
         pack();
         setResizable(false);
+
         UIUtilities.centerDialog(this, parent);
         setVisible(true);
     }
@@ -112,26 +123,24 @@ public class ImageDetailsDialog extends BDialog
     {
         
         for (int d = 0; d < 7; d++)
-            data[d].setText("");
-            
+        {
+            data[d].setText(new String());
+            if (im instanceof ExternalImage && !((ExternalImage)im).isConnected())
+                currentTextColor = errorTextColor;
+            else
+                 currentTextColor = defaultTextColor;
+            data[d].getComponent().setForeground(currentTextColor);
+        }
+    
         data[0].setText(im.getName());
         data[1].setText(im.getType());
         data[2].setText(im.getWidth() + " x " + im.getHeight());
         if (im instanceof ExternalImage)
-            if (((ExternalImage)im).isConnected())
-            {            
-                data[3].getComponent().setForeground(defaultTextColor);                
-                data[3].setText(((ExternalImage)im).getFile().getAbsolutePath());
-            }
-            else
-            {
-                data[3].getComponent().setForeground(errorTextColor);                
-                data[3].setText(((ExternalImage)im).getLastPath());
-            }
+            data[3].setText(((ExternalImage)im).getPath());
         if (!im.getUserCreated().isEmpty())
-            data[4].setText(im.getUserCreated() + " " + im.getDateCreated() + " " + im.getZoneCreated());
+            data[4].setText(im.getUserCreated() + " - " + im.getDateCreated() + " - " + im.getZoneCreated());
         if (!im.getUserEdited().isEmpty())            
-            data[5].setText(im.getUserEdited() + " " + im.getDateEdited() + " " + im.getZoneEdited());
+            data[5].setText(im.getUserEdited() + " - " + im.getDateEdited() + " - " + im.getZoneEdited());
     }
 
     private void createBackground()
@@ -175,9 +184,11 @@ public class ImageDetailsDialog extends BDialog
         {
             Graphics2D g = (Graphics2D)canvasImage.createGraphics();
             Image image = im.getPreview(600);
+			if (image == null)
+				return;
             int xOffset = (600-image.getWidth(null))/2;
             int yOffset = (600-image.getHeight(null))/2;
-            g.drawImage(image, xOffset, yOffset, null);        
+            g.drawImage(image, xOffset, yOffset, null);
             imageField.setIcon(new ImageIcon(canvasImage));
         }
         catch (Exception e)
@@ -188,7 +199,7 @@ public class ImageDetailsDialog extends BDialog
 
     private void refreshImage()
     {
-        if (! reconnectButton.isEnabled())
+        if (! refreshButton.isEnabled())
             return;
             
         ((ExternalImage)im).refreshImage();
@@ -212,7 +223,10 @@ public class ImageDetailsDialog extends BDialog
         
         try
         {
-            ((ExternalImage)im).reconnectImage(file);
+            Scene sc = null;
+            if (parent instanceof EditingWindow)
+                sc = ((EditingWindow)parent).getScene();
+            ((ExternalImage)im).reconnectImage(file, sc);
             createBackground();
             paintImage();
             setDataTexts();            
@@ -327,15 +341,15 @@ public class ImageDetailsDialog extends BDialog
     {
       String title    = Translate.text("confirmTitle");
       String question = (Translate.text("convertQuestionHEAD") + 
-	                     " '"+ name + "' " + 
-						 Translate.text("convertQuestionTAIL"));
+                         " '"+ name + "' " + 
+                         Translate.text("convertQuestionTAIL"));
 
       BStandardDialog confirm = new BStandardDialog(title, question, BStandardDialog.QUESTION);
       String[] options = new String[]{Translate.text("Yes"), Translate.text("No")};
       return (confirm.showOptionDialog(this, options, options[1]) == 0);
     }
 
-    private void closeWindow()
+    private void closeDetailsDialog()
     {
       dispose();
       removeAsListener(this);
@@ -348,7 +362,7 @@ public class ImageDetailsDialog extends BDialog
     {
         int code = ev.getKeyCode();
         if (code == KeyPressedEvent.VK_ESCAPE)
-            closeWindow();
+            closeDetailsDialog();
     }
   
     /** Add this as a listener to every Widget. */
@@ -374,6 +388,145 @@ public class ImageDetailsDialog extends BDialog
             Iterator iter = ((WidgetContainer) w).getChildren().iterator();
             while (iter.hasNext())
                 removeAsListener((Widget) iter.next());
+        }
+    }
+    
+    private void nameEntered()
+    {
+        title[0].getComponent().setForeground(hilightTextColor);
+        data[0].getComponent().setForeground(hilightTextColor);
+    }
+    
+    private void nameExited()
+    {        
+        title[0].getComponent().setForeground(defaultTextColor);
+        data[0].getComponent().setForeground(currentTextColor);
+    }
+    
+    private void nameClicked()
+    {
+        new ImageNameEditor(im, this);
+    }
+    
+    /** Dialog for setting the name of the image */
+    
+    private class ImageNameEditor extends BDialog
+    {
+        private ColumnContainer content;
+        private BTextField nameField;
+        private BCheckBox autoBox;
+        private BButton okButton, cancelButton;
+        private String autoText, userText;
+        private boolean automatic = false;
+        
+        private ImageNameEditor(ImageMap im, WindowWidget parent)
+        {
+            setTitle(Translate.text("nameDialogTitle"));
+            content = new ColumnContainer();
+            RowContainer buttons = new RowContainer();
+            setContent(content);
+            content.add(nameField = new BTextField(im.getName()));
+            autoText = userText = im.getName();
+            
+            if (im instanceof ExternalImage)
+            {
+                String fileName = im.getFile().getName();
+                autoText = fileName.substring(0, fileName.lastIndexOf('.'));
+                automatic = ((ExternalImage)im).isNameAutomatic();
+                content.add(autoBox = new BCheckBox(Translate.text("Automatic"), automatic));
+                autoBox.addEventLink(ValueChangedEvent.class, this , "autoChanged");
+                autoChanged();
+            }
+            nameField.setColumns(50);
+            nameField.addEventLink(ValueChangedEvent.class, this, "textChanged");
+            content.add(buttons);
+            buttons.add(okButton = Translate.button("ok", this, "okNameEditor"));
+            buttons.add(cancelButton = Translate.button("cancel", this, "cancelNameEditor"));
+            addEventLink(WindowClosingEvent.class, this, "cancelNameEditor");
+            addAsListener(this);
+            layoutChildren();            
+            pack();
+            setResizable(false);
+            setModal(true); // I wonder, why this dialog requres setModal() and the other don't.
+            
+            Rectangle pb = parent.getBounds();
+            Rectangle tb = getBounds();
+            getComponent().setLocation(pb.x + (pb.width-tb.width)/2, pb.y + (625-tb.height));
+            
+            setVisible(true);
+        }
+
+        private void textChanged()
+        {
+            if (!automatic)
+                userText = nameField.getText();
+        }
+        
+        private void autoChanged()
+        {
+            automatic = autoBox.getState();
+            nameField.setEnabled(! automatic);
+            if (automatic)
+                nameField.setText(autoText);
+            else
+                nameField.setText(userText);
+        }
+        
+        private void cancelNameEditor()
+        {
+            dispose();
+            removeAsListener(this);
+        }
+        
+        private void okNameEditor()
+        {
+            if (automatic)
+                im.setName(autoText);
+            else
+                im.setName(userText);
+            if (im instanceof ExternalImage)
+                ((ExternalImage)im).setNameAutomatic(automatic);
+            im.setDataEdited();
+            setDataTexts();
+            dispose();
+            removeAsListener(this);
+        }
+
+        /** Pressing Return and Escape are equivalent to clicking OK and Cancel. */
+        
+        private void keyPressed(KeyPressedEvent ev)
+        {
+            int code = ev.getKeyCode();
+            if (code == KeyPressedEvent.VK_ESCAPE)
+                cancelNameEditor();
+            if (code == KeyPressedEvent.VK_ENTER)
+                okNameEditor();
+        }
+    
+        /** Add this as a listener to every Widget. */
+        
+        private void addAsListener(Widget w)
+        {
+            w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+            if (w instanceof WidgetContainer)
+            {
+                Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+                while (iter.hasNext())
+                    addAsListener((Widget) iter.next());
+            }
+        }
+        
+        /** Remove this as a listener before returning. */
+        
+        private void removeAsListener(Widget w)
+        {
+            w.removeEventLink(KeyPressedEvent.class, this);
+            if (w instanceof WidgetContainer)
+            {
+                Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+                while (iter.hasNext())
+                    removeAsListener((Widget) iter.next());
+            }
         }
     }
 }

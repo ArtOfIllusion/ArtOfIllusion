@@ -133,7 +133,7 @@ public class MIPMappedImage extends ImageMap
           for (k = 0; k < w; k++)
             for (m = 0; m < h; m++)
               maps[i][j][k+w*m] = (byte) ((((int) maps[i-1][j][2*k+4*w*m]&0xFF) + ((int) maps[i-1][j][2*k+1+4*w*m]&0xFF) +
-                    ((int) maps[i-1][j][2*k+2*w*(2*m+1)]&0xFF) + ((int) maps[i-1][j][2*k+1+2*w*(2*m+1)]&0xFF)) >> 2);
+                                  ((int) maps[i-1][j][2*k+2*w*(2*m+1)]&0xFF) + ((int) maps[i-1][j][2*k+1+2*w*(2*m+1)]&0xFF)) >> 2);
       }
 
     // Precompute multipliers used for doing the mipmapping.
@@ -237,7 +237,7 @@ public class MIPMappedImage extends ImageMap
   public String getType()
   {
     if (components == 1)
-      return "GRAY_SCALE";
+      return "GRAY";
     if (components == 3)
       return "RGB";
     if (components == 4)
@@ -566,8 +566,8 @@ public class MIPMappedImage extends ImageMap
     grad.y = ((v2-v1)*(1.0-frac1) + (v4-v3)*frac1) * gradYScale[which];
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
-      Image will be no larger but may be smaller than  PREVIEW_WIDTH by PREVIEW_HEIGHT. */
+  /** Get a scaled down copy of the image, to use for previews. The dimensions of the 
+      Image will be no larger but may be smaller than PREVIEW_SIZE_DEFAULT. */
 
   @Override
   public Image getPreview()
@@ -575,17 +575,16 @@ public class MIPMappedImage extends ImageMap
     return getPreview(PREVIEW_SIZE_DEFAULT);
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+  /** Get a scaled down copy of the image, to use for previews. The dimensions of the 
       Image will be no larger but may be smaller than size. */
 
   @Override
   public Image getPreview(int size)
   {
     if (size == lastPreviewSize && preview.get() != null)
-	{
+    {
       return preview.get();
     }
-
     preview = new SoftReference(createScaledImage(getImageOfClosestMap(size), size));
     lastPreviewSize = size;
     return preview.get();
@@ -594,7 +593,7 @@ public class MIPMappedImage extends ImageMap
   @Override
   public Image getMapImage(int size)
   {
-      return getImageOfClosestMap(size);
+    return getImageOfClosestMap(size);
   }
 
   /** Get an image that represents the colsesti MIP map in the giben size. The dimensions 
@@ -613,8 +612,8 @@ public class MIPMappedImage extends ImageMap
       int n, pw, ph;
       int w = getWidth();
       int h = getHeight();
-	  
-	  pw = max(min(size, (int)round(size*aspectRatio)),1);
+
+      pw = max(min(size, (int)round(size*aspectRatio)),1);
       ph = max(min(size, (int)round(size/aspectRatio)),1);
       for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
       return getImage(n);
@@ -744,11 +743,11 @@ public class MIPMappedImage extends ImageMap
       in.readFully(imageData);
       imageName   = in.readUTF();
       userCreated = in.readUTF();
-      zoneCreated = in.readUTF();
       long milliC = in.readLong();
+      zoneCreated = in.readUTF();
       userEdited  = in.readUTF();
-      zoneEdited  = in.readUTF();
       long milliE = in.readLong();
+      zoneEdited  = in.readUTF();
       if (milliC > Long.MIN_VALUE)
         dateCreated = new Date(milliC);
       if (milliE > Long.MIN_VALUE)
@@ -789,15 +788,16 @@ public class MIPMappedImage extends ImageMap
     
     out.writeUTF(imageName);
     out.writeUTF(userCreated);
-    out.writeUTF(zoneCreated);
     if (dateCreated == null)
       out.writeLong(Long.MIN_VALUE);
     else
       out.writeLong(dateCreated.getTime());
+    out.writeUTF(zoneCreated);
     out.writeUTF(userEdited);
-    out.writeUTF(zoneEdited);
     if (dateEdited == null)
       out.writeLong(Long.MIN_VALUE);
     else
-      out.writeLong(dateEdited.getTime());  }
+      out.writeLong(dateEdited.getTime());
+    out.writeUTF(zoneEdited);
+  }
 }

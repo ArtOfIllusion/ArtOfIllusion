@@ -22,24 +22,29 @@ import javax.imageio.*;
 public class ExternalImage extends ImageMap
 {
   private File externalFile;
-  private String loadingError;
+  private String loadingError, imageType;
   private ImageMap imageMap;
   private int w, h;
   private String type, lastAbsolutePath, lastRelativePath;
   private File imageFile;
   private Image brokenImage;
-  private boolean connected, newLink;
+  private boolean connected, newLink, nameAutomatic = true;
 
-  // ** Create an external image out of a image file */
+  /** Create an external image out of a image file */
   
   public ExternalImage(String path) throws InterruptedException
   {
     this(new File(path));
   }
 
-  // ** Create an external image out of an image file */
-
   public ExternalImage(File file) throws InterruptedException
+  {
+    this(file, null);
+  }
+
+  /** Create an external image out of an image file */
+
+  public ExternalImage(File file, Scene scene) throws InterruptedException
   {
     newLink = true;
     try
@@ -51,11 +56,16 @@ public class ExternalImage extends ImageMap
       throw new InterruptedException();
     }
     imageFile = file;
+    imageType = imageMap.getType();
     setDataCreated(file);
     lastAbsolutePath = file.getAbsolutePath();
-    // lastRelativePath can not be created without the path to the scene.
+	if (scene == null)
+	  lastRelativePath = new String();
+	else
+	  lastRelativePath = findRelativePath(scene);
   }
 
+  // To be developed to a Thememanager thing
   private Image loadIcon(String iconName)
   {  
     try 
@@ -64,7 +74,7 @@ public class ExternalImage extends ImageMap
     }
     catch(IOException e)
     {
-        System.out.println(e);
+      System.out.println(e);
     }
     return null;
   }
@@ -77,17 +87,20 @@ public class ExternalImage extends ImageMap
     return imageFile;
   }
 
-  public String getLastPath()
+  public String getPath()
   {
-    return lastAbsolutePath;
+	if (connected)
+	  return imageFile.getAbsolutePath();
+	return lastAbsolutePath;
   }
 
   public String getType()
   {
-    return imageMap.getType();
+    if (connected)
+      return imageMap.getType();
+	return (imageType);
   }
 
-  
   @Override
   public int getWidth()
   {
@@ -159,6 +172,21 @@ public class ExternalImage extends ImageMap
   {
     return imageMap.getMapImage(size);
   }
+  
+  /** Check if the image name is updated automatically. */
+
+  public boolean isNameAutomatic()
+  {
+    return nameAutomatic;
+  }
+
+  
+  /** Set if the image name is updated automatically. */
+  
+  public void setNameAutomatic(boolean automatic)
+  {
+    nameAutomatic = automatic;
+  }
 
   /** Load an image file to create, refresh or reconnect an external image */
 
@@ -176,12 +204,13 @@ public class ExternalImage extends ImageMap
     w = imageMap.getWidth();
     h = imageMap.getHeight();
     imageFile = file;
+	imageType = imageMap.getType(); // The image type may change behind the same filename.
     connected = true;
   }
 
   private void createTemporaryImage()
   {
-    if (w == 0 || h == 0)
+    if (w <= 0 || h <= 0)
         w = h = 256;
     try
     {
@@ -194,30 +223,48 @@ public class ExternalImage extends ImageMap
     }
   }
 
-  public void refreshImage()
+  public void refreshImage() // Refresh image can be called only if and imageMap has been lodatd to this ExternalImage before.
   {
-    File rFile;
-    if (imageFile.isFile()) // the 'imageFile' is null if the scene file was opened with a broken link.
-      rFile = imageFile;
+    File file;
+	
+	System.out.println("@REFRESH " + imageFile);
+	System.out.println("@REFRESH " + lastAbsolutePath);
+	System.out.println("@REFRESH " + lastRelativePath);
+	
+    if (imageFile != null && imageFile.isFile()) // the 'imageFile' is null if the scene file was opened with a broken link.
+	{
+	  System.out.println("@REFRESH IFILE" + lastRelativePath);
+      file = imageFile;
+	}
     else
     {
-      rFile = new File(lastRelativePath);
-      if (! rFile.isFile())
-        rFile = new File(lastAbsolutePath);
-    }
+	  if (lastRelativePath.isEmpty() || ! (new File(lastRelativePath)).isFile()){
+	    System.out.println("@REFRESH ABSP" + lastRelativePath);
+        file = new File(lastAbsolutePath); // lastRealtivePath may not exist or be up to date
+	  }
+	  else
+	  {
+	    System.out.println("@REFRESH RELP" + lastRelativePath);
+        file = new File(lastRelativePath);
+	  }
+	}
 
     try
     {
-      loadExternalImage(rFile);
+	  System.out.println("@TRY " + file);
+      loadExternalImage(file);
     }
     catch(Exception e)
     {
+	  System.out.println("@CATCH " + e);
       createTemporaryImage();
     }
+	//lastAbsolutePath = imageFile.getAbsolutePath();
+	//lastRelativePath = new String(); // No scene available
     setDataEdited();
   }
 
-  public void reconnectImage(File file) throws Exception
+  public void reconnectImage(File file, Scene scene) throws Exception
   {
     try
     {
@@ -229,7 +276,11 @@ public class ExternalImage extends ImageMap
     }
     String fileName = file.getName();
     imageName = fileName.substring(0, fileName.lastIndexOf('.'));
-    setDataEdited();
+	lastAbsolutePath = file.getAbsolutePath();
+	if (scene == null)
+	  lastRelativePath = new String();
+	else
+      lastRelativePath = findRelativePath(scene);
   }
   
   public boolean isConnected()
@@ -262,13 +313,15 @@ public class ExternalImage extends ImageMap
     
     w = in.readInt();
     h = in.readInt();
-    imageName   = in.readUTF();
-    userCreated = in.readUTF();
-    zoneCreated = in.readUTF();
-    dateCreated = new Date(in.readLong());
-    userEdited  = in.readUTF();
-    zoneEdited  = in.readUTF();
-    dateEdited  = new Date(in.readLong());
+    imageType     = in.readUTF();
+    imageName     = in.readUTF();
+	nameAutomatic = in.readBoolean();
+    userCreated   = in.readUTF();
+    dateCreated   = new Date(in.readLong());
+    zoneCreated   = in.readUTF();
+    userEdited    = in.readUTF();
+    dateEdited    = new Date(in.readLong());
+    zoneEdited    = in.readUTF();
     try
     {
       loadExternalImage(imageFile); // At least 'w' and 'h' need to be read before attempting to load the image.
@@ -300,10 +353,11 @@ public class ExternalImage extends ImageMap
     if (connected)
     {
       out.writeUTF(imageFile.getAbsolutePath());
-      if (scene == null)
+      if (scene == null) // If used by the other writeToStream method.
         out.writeUTF(imageFile.getAbsolutePath());
       else
-        out.writeUTF(findRelativePath(scene));
+		lastRelativePath = findRelativePath(scene);
+        out.writeUTF(lastRelativePath);
     }
     else
     {
@@ -312,19 +366,20 @@ public class ExternalImage extends ImageMap
     }
     out.writeInt(w);
     out.writeInt(h);
+    out.writeUTF(imageType);
     out.writeUTF(imageName);
+	out.writeBoolean(nameAutomatic);
     out.writeUTF(userCreated);
-    out.writeUTF(zoneCreated);
     out.writeLong(dateCreated.getTime());
+    out.writeUTF(zoneCreated);
     out.writeUTF(userEdited);
-    out.writeUTF(zoneEdited);
     out.writeLong(dateEdited.getTime());
+    out.writeUTF(zoneEdited);
   }
-
+  
   /** Find the relative path from the scene file containing this object to the external scene. */
-  
+
   // This procedure is copied from ExternalObject almost as such
-  
   private String findRelativePath(Scene scene)
   {
     String scenePath = null, imagePath = null;

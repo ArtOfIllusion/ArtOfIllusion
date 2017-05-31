@@ -176,9 +176,9 @@ public class ApplicationPreferences
     else
     {
       String themeId = properties.getProperty("theme");
-      for(ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
+      for (ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
       {
-        if(theme.resource.getId().equals(themeId))
+        if (theme.resource.getId().equals(themeId))
         {
           ThemeManager.setSelectedTheme(theme);
           int colorSetIndex = parseIntProperty("themeColorSet", 0);

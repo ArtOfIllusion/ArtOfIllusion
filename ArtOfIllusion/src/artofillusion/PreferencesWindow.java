@@ -93,7 +93,7 @@ public class PreferencesWindow
   {
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     BComboBox c = new BComboBox();
-    
+
     for (Renderer r : renderers)
       c.add(r.getName());
     if (selected != null)

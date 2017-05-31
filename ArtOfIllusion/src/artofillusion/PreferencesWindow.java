@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
    Changes Copyright (C) 2016 by Petri Ihalainen
-   
+   Changes copyright (C) 2017 by Maksim Khramov
+
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -29,7 +30,7 @@ public class PreferencesWindow
   private BCheckBox glBox, backupBox, reverseZoomBox, useViewAnimationsBox;
   private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
-  private Object chageBox;
+  
   public PreferencesWindow(BFrame parent)
   {
     BTabbedPane tabs = new BTabbedPane();
@@ -92,7 +93,7 @@ public class PreferencesWindow
   {
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     BComboBox c = new BComboBox();
-
+    
     for (Renderer r : renderers)
       c.add(r.getName());
     if (selected != null)
@@ -117,20 +118,20 @@ public class PreferencesWindow
     backupBox = new BCheckBox(Translate.text("keepBackupFiles"), prefs.getKeepBackupFiles());
     reverseZoomBox  = new BCheckBox(Translate.text("reverseScrollWheelZooming"), prefs.getReverseZooming());
 
-	useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
-	animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
-	animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
+    useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
+    animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
+    animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
 
 	//useViewAnimationsBox.addEventLink(ValueChangedEvent.class, this, "useViewAnimationsChanged");
 	//animationDurationField.addEventLink(ValueChangedEvent.class, this, "animationDurationChanged");
 
-    List allThemes = ThemeManager.getThemes();
     themes = new ArrayList<ThemeManager.ThemeInfo>();
-    for (int i = 0; i < allThemes.size(); i++)
+    for (ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
     {
-      ThemeManager.ThemeInfo theme = (ThemeManager.ThemeInfo) allThemes.get(i);
       if (theme.selectable)
+      {
         themes.add(theme);
+      }
     }
     Collections.sort(themes, new Comparator<ThemeManager.ThemeInfo>()
     {
@@ -140,10 +141,13 @@ public class PreferencesWindow
         return o1.getName().compareTo(o2.getName());
       }
     });
-    String themeNames[] = new String[themes.size()];
-    for (int i = 0; i < themeNames.length; i++)
-      themeNames[i] = themes.get(i).getName();
-    themeChoice = new BComboBox(themeNames);
+    
+    themeChoice = new BComboBox();
+    for (ThemeManager.ThemeInfo theme: themes)
+    {
+      themeChoice.add(theme.getName());
+    }
+    
     ThemeManager.ThemeInfo selectedTheme = ThemeManager.getSelectedTheme();
     themeChoice.setSelectedValue(selectedTheme.getName());
     colorChoice = new BComboBox();

@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
    Changes Copyright (C) 2016 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -153,6 +154,7 @@ public class ApplicationPreferences
     objectPreviewRenderer = getNamedRenderer(properties.getProperty("objectPreviewRenderer"));
     texturePreviewRenderer = getNamedRenderer(properties.getProperty("texturePreviewRenderer"));
     defaultRenderer = getNamedRenderer(properties.getProperty("defaultRenderer"));
+    
     defaultDisplayMode = parseIntProperty("defaultDisplayMode", defaultDisplayMode);
     interactiveTol = parseDoubleProperty("interactiveSurfaceError", interactiveTol);
     undoLevels = parseIntProperty("undoLevels", undoLevels);
@@ -161,9 +163,9 @@ public class ApplicationPreferences
     useCompoundMeshTool = parseBooleanProperty("useCompoundMeshTool", useCompoundMeshTool);
     reverseZooming = parseBooleanProperty("reverseZooming", reverseZooming);
 	
-	useViewAnimations = parseBooleanProperty("useViewAnimations", useViewAnimations);
-	maxAnimationDuration = parseDoubleProperty("maxAnimationDuration", maxAnimationDuration);
-	animationFrameRate = parseDoubleProperty("animationFrameRate", animationFrameRate);
+    useViewAnimations = parseBooleanProperty("useViewAnimations", useViewAnimations);
+    maxAnimationDuration = parseDoubleProperty("maxAnimationDuration", maxAnimationDuration);
+    animationFrameRate = parseDoubleProperty("animationFrameRate", animationFrameRate);
 	
     Translate.setLocale(parseLocaleProperty("language"));
     if (properties.getProperty("theme") == null)
@@ -174,17 +176,17 @@ public class ApplicationPreferences
     else
     {
       String themeId = properties.getProperty("theme");
-      List themes = ThemeManager.getThemes();
-      for (int i = 0; i < themes.size(); i++)
+      for(ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
       {
-        ThemeManager.ThemeInfo theme = (ThemeManager.ThemeInfo) themes.get(i);
-        if (theme.resource.getId().equals(themeId))
+        if(theme.resource.getId().equals(themeId))
         {
           ThemeManager.setSelectedTheme(theme);
           int colorSetIndex = parseIntProperty("themeColorSet", 0);
           ThemeManager.ColorSet colorSets[] = theme.getColorSets();
           if (colorSetIndex > -1 && colorSetIndex < colorSets.length)
+          {
             ThemeManager.setSelectedColorSet(colorSets[colorSetIndex]);
+          }
           break;
         }
       }
@@ -199,7 +201,7 @@ public class ApplicationPreferences
       {
         return Integer.parseInt(properties.getProperty(name));
       }
-    catch (Exception ex)
+    catch (NumberFormatException ex)
       {
         return defaultVal;
       }
@@ -213,13 +215,13 @@ public class ApplicationPreferences
       {
         return Double.valueOf(properties.getProperty(name));
       }
-    catch (Exception ex)
+    catch (NumberFormatException ex)
       {
         return defaultVal;
       }
   }
 
-  /** Parse a boolea valued property. */
+  /** Parse a boolean valued property. */
 
   private boolean parseBooleanProperty(String name, boolean defaultVal)
   {

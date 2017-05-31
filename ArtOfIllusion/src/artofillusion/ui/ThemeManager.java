@@ -325,7 +325,7 @@ public class ThemeManager {
         }
 
         /**
-         *  get the ButtonStyle assocaited with <i>owner</i>
+         *  get the ButtonStyle associated with <i>owner</i>
          */
         public ButtonStyle getStyle(Object owner)
         {
@@ -414,7 +414,7 @@ public class ThemeManager {
      * Get a list of all available themes.
      */
 
-    public static List getThemes()
+    public static List<ThemeManager.ThemeInfo> getThemes()
     {
       return Collections.unmodifiableList(Arrays.asList(themeList));
     }
@@ -472,7 +472,7 @@ public class ThemeManager {
      */
     private static void applyButtonProperties()
     {
-        Class buttonClass = selectedTheme.buttonClass;
+        Class<?> buttonClass = selectedTheme.buttonClass;
         try {
             Method m = buttonClass.getMethod("setProperties", Object.class);
             m.invoke(buttonClass, selectedTheme.buttonProperties);
@@ -484,7 +484,7 @@ public class ThemeManager {
     }
 
     /**
-     * search for the named icon in the selected and default themes, retiurning
+     * search for the named icon in the selected and default themes, returning
      * the URL of the first found icon.
      *
      * @param name the name of the icon (without path or suffix)

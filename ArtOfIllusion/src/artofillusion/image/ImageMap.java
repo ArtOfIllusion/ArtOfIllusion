@@ -139,11 +139,11 @@ public abstract class ImageMap
   
   public abstract Image getPreview(int size);
 
-  /** Get the image of the MIP-map that is larger than or equal to 'size'.<br>
-      If the dimensions of the image are smaller than size, map[0] representing 
-      the original image, is returned.  */
-  
-  public abstract Image getMapImage(int size);
+  // /** Get the image of the MIP-map that is larger than or equal to 'size'.<br>
+  //     If the dimensions of the image are smaller than size, map[0] representing 
+  //     the original image, is returned.  */
+  // 
+  // public abstract Image getMapImage(int size);
 
   /** Get an ID number which is unique (within this session) for this image. */
   

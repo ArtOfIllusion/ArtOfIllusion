@@ -28,7 +28,7 @@ public class ExternalImage extends ImageMap
   private String type, lastAbsolutePath, lastRelativePath;
   private File imageFile;
   private Image brokenImage;
-  private boolean connected, newLink, nameAutomatic = true;
+  private boolean connected, nameAutomatic = true;
 
   /** Create an external image out of a image file */
   
@@ -46,23 +46,27 @@ public class ExternalImage extends ImageMap
 
   public ExternalImage(File file, Scene scene) throws InterruptedException
   {
-    newLink = true;
     try
     {
-      loadExternalImage(file);
+      imageFile = file;
+      loadExternalImage(imageFile);
+      setDataCreated(imageFile); // incl name
+      lastAbsolutePath = imageFile.getAbsolutePath();
+      if (scene == null)
+        lastRelativePath = new String();
+      else
+        lastRelativePath = findRelativePath(scene);
+      w = imageMap.getWidth();
+      h = imageMap.getHeight();
+      imageType = imageMap.getType();
+      connected = true;
+      brokenImage = null;
     }
     catch(Exception e)
     {
+       // ExternalImage will not be created, no values need to be set.
       throw new InterruptedException();
     }
-    imageFile = file;
-    imageType = imageMap.getType();
-    setDataCreated(file);
-    lastAbsolutePath = file.getAbsolutePath();
-	if (scene == null)
-	  lastRelativePath = new String();
-	else
-	  lastRelativePath = findRelativePath(scene);
   }
 
   // To be developed to a Thememanager thing
@@ -89,16 +93,16 @@ public class ExternalImage extends ImageMap
 
   public String getPath()
   {
-	if (connected)
-	  return imageFile.getAbsolutePath();
-	return lastAbsolutePath;
+    if (connected)
+      return imageFile.getAbsolutePath();
+    return lastAbsolutePath;
   }
 
   public String getType()
   {
     if (connected)
       return imageMap.getType();
-	return (imageType);
+    return (imageType);
   }
 
   @Override
@@ -167,11 +171,11 @@ public class ExternalImage extends ImageMap
         return brokenImage.getScaledInstance(size, size, Image.SCALE_SMOOTH);
   }
   
-  @Override
-  public Image getMapImage(int size)
-  {
-    return imageMap.getMapImage(size);
-  }
+  // @Override
+  // public Image getMapImage(int size)
+  // {
+  //   return imageMap.getMapImage(size);
+  // }
   
   /** Check if the image name is updated automatically. */
 
@@ -180,9 +184,8 @@ public class ExternalImage extends ImageMap
     return nameAutomatic;
   }
 
-  
   /** Set if the image name is updated automatically. */
-  
+
   public void setNameAutomatic(boolean automatic)
   {
     nameAutomatic = automatic;
@@ -198,91 +201,120 @@ public class ExternalImage extends ImageMap
     }
     catch (Exception e)
     {
-      connected = false;
       throw e;
     }
-    w = imageMap.getWidth();
-    h = imageMap.getHeight();
-    imageFile = file;
-	imageType = imageMap.getType(); // The image type may change behind the same filename.
-    connected = true;
   }
 
   private void createTemporaryImage()
   {
+    if (brokenImage != null)
+      return;
+  
+    // this should not be possible
     if (w <= 0 || h <= 0)
-        w = h = 256;
+      w = h = 256;
     try
     {
-      brokenImage = loadIcon("file_missing.png");
-      imageMap = new MIPMappedImage(brokenImage.getScaledInstance(w, h, Image.SCALE_SMOOTH));
+      brokenImage = loadIcon(imageType+ ".png");
+      int wto = brokenImage.getWidth(null);
+      int hto = brokenImage.getHeight(null);
+      
+      int nwm = (int)Math.ceil((float)w/(float)wto);
+      int nhm = (int)Math.ceil((float)h/(float)hto);
+      
+      float scale = Math.min((float)w/(float)nwm/(float)wto, (float)h/(float)nhm/(float)hto);
+      int tw = (int)(wto*scale);
+      int th = (int)(hto*scale);
+      
+      Image tile = brokenImage.getScaledInstance(tw, th, Image.SCALE_SMOOTH);
+      BufferedImage tempImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D g2 = tempImg.createGraphics();
+      
+      if (type == "RGB")
+        g2.setColor(new Color(223,223,223,255));
+      else
+        g2.setColor(new Color(223,223,223,63));
+      g2.fillRect(0,0,w,h);
+
+      int nw = w/tw;
+      int nh = h/th;
+      
+      for (int i = 0; i < nw; i++)
+        for (int j = 0; j < nh; j++)
+          g2.drawImage(tile, (w*i/nw), (h*j/nh), null);
+      g2.dispose();
+      imageMap = new MIPMappedImage(tempImg);
     }
     catch (Exception e)
     {
-        // This should never be needed if the icon image was in the compiled .jar
+      // This should never be needed if the icon image was in the compiled .jar
     }
   }
 
-  public void refreshImage() // Refresh image can be called only if and imageMap has been lodatd to this ExternalImage before.
+  public void refreshImage()
   {
     File file;
-	
-	System.out.println("@REFRESH " + imageFile);
-	System.out.println("@REFRESH " + lastAbsolutePath);
-	System.out.println("@REFRESH " + lastRelativePath);
-	
-    if (imageFile != null && imageFile.isFile()) // the 'imageFile' is null if the scene file was opened with a broken link.
-	{
-	  System.out.println("@REFRESH IFILE" + lastRelativePath);
+    if (imageFile != null && imageFile.isFile())
       file = imageFile;
-	}
     else
     {
-	  if (lastRelativePath.isEmpty() || ! (new File(lastRelativePath)).isFile()){
-	    System.out.println("@REFRESH ABSP" + lastRelativePath);
-        file = new File(lastAbsolutePath); // lastRealtivePath may not exist or be up to date
-	  }
-	  else
-	  {
-	    System.out.println("@REFRESH RELP" + lastRelativePath);
+      if (! lastRelativePath.isEmpty() && (new File(lastRelativePath)).isFile())
         file = new File(lastRelativePath);
-	  }
-	}
-
+      else
+        file = new File(lastAbsolutePath);
+    }
+    if (! file.isFile() && !connected) // Refresh, when the file has not been loaded during this session causes error at load.
+      return;
     try
     {
-	  System.out.println("@TRY " + file);
       loadExternalImage(file);
+      setDataEdited();
+      imageFile = file;
+      imageType = imageMap.getType();
+      w = imageMap.getWidth();
+      h = imageMap.getHeight();
+      brokenImage = null;
+      connected = true;
     }
     catch(Exception e)
     {
-	  System.out.println("@CATCH " + e);
+      if (!connected)
+        return;
+      connected = false;
       createTemporaryImage();
+      return;
     }
-	//lastAbsolutePath = imageFile.getAbsolutePath();
-	//lastRelativePath = new String(); // No scene available
-    setDataEdited();
   }
 
-  public void reconnectImage(File file, Scene scene) throws Exception
+  public void reconnectImage(File file, Scene scene)  throws Exception
   {
     try
     {
       loadExternalImage(file);
+      setDataEdited();
+      
+      if (nameAutomatic)
+        imageName = file.getName().substring(0, file.getName().lastIndexOf('.'));
+      lastAbsolutePath = imageFile.getAbsolutePath();
+      if (scene == null)
+        lastRelativePath = new String();
+      else
+        lastRelativePath = findRelativePath(scene);
+      w = imageMap.getWidth();
+      h = imageMap.getHeight();
+      imageFile = file;
+      imageType = imageMap.getType();
+      connected = true;
+      brokenImage = null;
     }
     catch(Exception e)
     {
+      connected = false;
+      createTemporaryImage();
       throw e;
     }
-    String fileName = file.getName();
-    imageName = fileName.substring(0, fileName.lastIndexOf('.'));
-	lastAbsolutePath = file.getAbsolutePath();
-	if (scene == null)
-	  lastRelativePath = new String();
-	else
-      lastRelativePath = findRelativePath(scene);
   }
-  
+
   public boolean isConnected()
   {
     // Connected is true if the last load from file was succesful
@@ -315,7 +347,7 @@ public class ExternalImage extends ImageMap
     h = in.readInt();
     imageType     = in.readUTF();
     imageName     = in.readUTF();
-	nameAutomatic = in.readBoolean();
+    nameAutomatic = in.readBoolean();
     userCreated   = in.readUTF();
     dateCreated   = new Date(in.readLong());
     zoneCreated   = in.readUTF();
@@ -325,11 +357,13 @@ public class ExternalImage extends ImageMap
     try
     {
       loadExternalImage(imageFile); // At least 'w' and 'h' need to be read before attempting to load the image.
+      connected = true;
+      brokenImage = null;
     }
     catch(Exception e)
     {
-        connected = false; // This is not use dvery much after all....
-        createTemporaryImage();
+      connected = false;
+      createTemporaryImage();
     }
   }
 
@@ -356,7 +390,7 @@ public class ExternalImage extends ImageMap
       if (scene == null) // If used by the other writeToStream method.
         out.writeUTF(imageFile.getAbsolutePath());
       else
-		lastRelativePath = findRelativePath(scene);
+        lastRelativePath = findRelativePath(scene);
         out.writeUTF(lastRelativePath);
     }
     else
@@ -364,11 +398,16 @@ public class ExternalImage extends ImageMap
       out.writeUTF(lastAbsolutePath);
       out.writeUTF(lastRelativePath);
     }
+    if (imageMap.getWidth() < 0 && imageMap.getHeight() < 0)
+    {
+      w = imageMap.getWidth();
+      h = imageMap.getHeight();
+    }
     out.writeInt(w);
     out.writeInt(h);
     out.writeUTF(imageType);
     out.writeUTF(imageName);
-	out.writeBoolean(nameAutomatic);
+    out.writeBoolean(nameAutomatic);
     out.writeUTF(userCreated);
     out.writeLong(dateCreated.getTime());
     out.writeUTF(zoneCreated);

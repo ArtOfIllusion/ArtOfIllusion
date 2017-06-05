@@ -26,12 +26,12 @@ import java.lang.ref.SoftReference;
 
 public class MIPMappedImage extends ImageMap
 {
-  private int width[], height[], components, lastPreviewSize = 0, lastUsedMap = -1;
+  private int width[], height[], components, lastPreviewSize = -1, lastMapNumber = -1;
   private byte maps[][][];
   private float average[], aspectRatio;
   private double xscale[], yscale[], scale[], scaleMult[], gradXScale[], gradYScale[];
   private SoftReference<Image> preview;
-  private SoftReference<BufferedImage> lastMapImage;
+  private SoftReference<BufferedImage> mapImage;
   private static final float SCALE = 1.0f/255.0f;
 
   /** Construct a MIPMappedImage from an Image object. */
@@ -48,6 +48,8 @@ public class MIPMappedImage extends ImageMap
     Image im = new ImageIcon(file.getAbsolutePath()).getImage();
     init(im);
     setDataCreated(file);
+    preview = new SoftReference(null);
+    mapImage = new SoftReference(null);
   }
 
   /** Initialize a newly created MIPMappedImage. */
@@ -581,44 +583,72 @@ public class MIPMappedImage extends ImageMap
   @Override
   public Image getPreview(int size)
   {
-    if (size == lastPreviewSize && preview.get() != null)
+    Image image = preview.get();
+    if (size == lastPreviewSize && image != null)
+      return image;
+
+    int n = getMapNumber(size);
+    Image map = mapImage.get();
+    if (n != lastMapNumber || map == null)
     {
-      return preview.get();
+      System.out.println("MIP N " + n);
+      map = getImage(n);
+      lastMapNumber = n;
+      //map = getImageOfClosestMap(size);
+      mapImage = new SoftReference(map);
     }
-    preview = new SoftReference(createScaledImage(getImageOfClosestMap(size), size));
     lastPreviewSize = size;
-    return preview.get();
+    image = createScaledImage(map, size);
+    preview = new SoftReference(image);
+
+    return image;
   }
 
-  @Override
-  public Image getMapImage(int size)
+  // @Override
+  // public Image getMapImage(int size)
+  // {
+  //   return getImageOfClosestMap(size);
+  // }
+
+  private int getMapNumber(int size)
   {
-    return getImageOfClosestMap(size);
+    //if (maps.length == 1)
+    //  return 0;
+
+    int n, pw, ph;
+    //int w = getWidth();
+    //int h = getHeight();
+
+    pw = max(min(size, (int)round(size*aspectRatio)),1);
+    ph = max(min(size, (int)round(size/aspectRatio)),1);
+    for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
+    
+    return n;
   }
-
-  /** Get an image that represents the colsesti MIP map in the giben size. The dimensions 
-      of the used map are larger or egual to the requested size with te aspect raetion 
-      taken to account. <p>
-
-      Note that the proportions of MIP-maps, except for 'map[0]' are always in powers of 2, 
-      like 4:1, 2:1, 1:1, 1:2...*/
-
-  private BufferedImage getImageOfClosestMap(int size)
-  {
-    if (maps.length == 1)
-      return getImage(0);
-    else
-    {
-      int n, pw, ph;
-      int w = getWidth();
-      int h = getHeight();
-
-      pw = max(min(size, (int)round(size*aspectRatio)),1);
-      ph = max(min(size, (int)round(size/aspectRatio)),1);
-      for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
-      return getImage(n);
-    }
-  }
+  
+  // Get an image that represents the colsesti MIP map in the giben size. The dimensions 
+  //    of the used map are larger or egual to the requested size with te aspect raetion 
+  //    taken to account. <p>
+  //
+  //    Note that the proportions of MIP-maps, except for 'map[0]' are always in powers of 2, 
+  //    like 4:1, 2:1, 1:1, 1:2...
+  //
+  //private BufferedImage getImageOfClosestMap(int size)
+  //{
+  //  if (maps.length == 1)
+  //    return getImage(0);
+  //  else
+  //  {
+  //    int n, pw, ph;
+  //    int w = getWidth();
+  //    int h = getHeight();
+  //
+  //    pw = max(min(size, (int)round(size*aspectRatio)),1);
+  //    ph = max(min(size, (int)round(size/aspectRatio)),1);
+  //    for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
+  //    return getImage(n);
+  //  }
+  //}
   
   /** Create a scaled image in the requested size. If size is larger than the original image 
       a non-sclaed image is returned.*/
@@ -646,10 +676,14 @@ public class MIPMappedImage extends ImageMap
   
   private BufferedImage getImage(int n)
   {
-    if (n == lastUsedMap && lastMapImage.get() != null)
-      return lastMapImage.get();
+    // if (n == lastMapNumber)
+    //   return mapImage.get();
       
     int w = width[n], h = height[n];
+    
+    if (w <= 0 || h <= 0)
+        return null;
+    
     BufferedImage bi;
     if (getComponentCount() == 1)
     {
@@ -681,10 +715,9 @@ public class MIPMappedImage extends ImageMap
           bi.setRGB(i, j, ((255-(maps[n][3][index]&0xFF))<<24)+((maps[n][0][index]&0xFF)<<16)+((maps[n][1][index]&0xFF)<<8)+(maps[n][2][index]&0xFF));
         }
     }
-    lastMapImage = new SoftReference(bi);
-    return lastMapImage.get();
+    return bi;
   }
-  
+
   /** Reconstruct an image from its serialized representation. */
 
   public MIPMappedImage(DataInputStream in) throws IOException, InvalidObjectException
@@ -734,8 +767,6 @@ public class MIPMappedImage extends ImageMap
       byte imageData[] = new byte [in.readInt()];
       in.readFully(imageData);
       im = ImageIO.read(new ByteArrayInputStream(imageData));
-      w = im.getWidth(null);
-      h = im.getHeight(null);
     }
     else
     {
@@ -754,9 +785,11 @@ public class MIPMappedImage extends ImageMap
         dateEdited  = new Date(milliE);      
       
       im = ImageIO.read(new ByteArrayInputStream(imageData));
-      w = im.getWidth(null);
-      h = im.getHeight(null);
     }
+    w = im.getWidth(null);
+    h = im.getHeight(null);
+    preview = new SoftReference(null);
+    mapImage = new SoftReference(null);
 
     // Construct the mipmaps, preview image, etc.
 

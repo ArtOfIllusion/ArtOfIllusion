@@ -184,8 +184,8 @@ public class ImageDetailsDialog extends BDialog
         {
             Graphics2D g = (Graphics2D)canvasImage.createGraphics();
             Image image = im.getPreview(600);
-			if (image == null)
-				return;
+            if (image == null)
+                return;
             int xOffset = (600-image.getWidth(null))/2;
             int yOffset = (600-image.getHeight(null))/2;
             g.drawImage(image, xOffset, yOffset, null);

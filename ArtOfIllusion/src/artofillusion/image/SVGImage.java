@@ -55,19 +55,18 @@ public class SVGImage extends ImageMap
     tiles = new HashMap<TileKey, SoftReference<int[]>>();
 
     aspectRatio = svg.getWidth()/svg.getHeight();
-    createPreview(PREVIEW_SIZE_TEMPLATE);
-  
+    BufferedImage pim = createPreview(PREVIEW_SIZE_TEMPLATE);
     // Compute the average components based on the preview image.
 
     average = new float[4];
     
-    BufferedImage tempImage = preview.get();
-    int w = tempImage.getWidth();
-    int h = tempImage.getHeight();
+    //BufferedImage tempImage = preview.get();
+    int w = pim.getWidth();
+    int h = pim.getHeight();
     for (int i = 0; i < w; i++)
       for (int j = 0; j < h; j++)
       {
-        int argb = tempImage.getRGB(i, j);
+        int argb = pim.getRGB(i, j);
         average[0] += argb&0xFF;
         average[1] += (argb>>8)&0xFF;
         average[2] += (argb>>16)&0xFF;
@@ -76,10 +75,10 @@ public class SVGImage extends ImageMap
     for (int i = 0; i < 4; i++)
       average[i] /= 255.0f*w*h;
     average[3] = 1-average[3];
-    tempImage = null;
+    preview = new SoftReference(null);
   }
 
-  private void createPreview(int size) throws SVGException
+  private BufferedImage createPreview(int size) throws SVGException
   {
     float aspectRatio = svg.getWidth()/svg.getHeight();
     int previewWidth, previewHeight;
@@ -93,7 +92,7 @@ public class SVGImage extends ImageMap
     svg.render(g);
     g.dispose();
     previewSize = size;
-    preview = new SoftReference(bi);
+    return bi;
   }
 
   private BufferedImage createImage(int x, int y, int scale) throws SVGException
@@ -399,14 +398,17 @@ public class SVGImage extends ImageMap
     }
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
-      Image will be no larger but may be smaller than  PREVIEW_WIDTH by PREVIEW_HEIGHT. */
 
-  @Override
-  public Image getMapImage(int size)
-  {
-    return getPreview(size);
-  }
+  // /** This is same as <pre>getPreview(int size)</pre> */
+  // 
+  // @Override
+  // public Image getMapImage(int size)
+  // {
+  //   return getPreview(size);
+  // }
+  // 
+  /** Get a scaled copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than PREVIEW_DEFAULT. */
 
   @Override
   public Image getPreview()
@@ -414,26 +416,25 @@ public class SVGImage extends ImageMap
     return getPreview(PREVIEW_SIZE_DEFAULT);
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+  /** Get a scaled copy of the image, to use for previews.  The dimensions of the 
       Image will be no larger but may be smaller than size. */
 
   @Override
   public Image getPreview(int size)
   {
+    Image pim = preview.get();
     try
     {
-      if (size == previewSize && preview.get() != null)
-        return preview.get();
-      else
-      {
-        createPreview(size);
-        return preview.get();
-      }
+      if (size == previewSize && pim != null)
+        return pim;
+      pim = createPreview(size);
+      preview = new SoftReference(pim);
+      return pim;
     }
     catch(SVGException se)
     {
       System.out.println(se);
-      return preview.get(); // wrong size or null....
+      return pim; // I wonder....
     }
   }
 

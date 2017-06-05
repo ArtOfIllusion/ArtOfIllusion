@@ -36,6 +36,7 @@ public class HDRImage extends ImageMap
   {
     buildMipMaps(r, g, b, e, xres, yres);
     findAverage();
+    preview = new SoftReference(null);
   }
 
   /** Given the r, g, b, and e arrays for an image, this method builds the full set of mipmaps for it. */
@@ -183,7 +184,7 @@ public class HDRImage extends ImageMap
 
   /** Construct the preview image. */
 
-  private void createPreview(int size)
+  private Image createPreview(int size)
   {
     int w, h;
     if (width[0] <= size && height[0] <= size) // "Tässä!" 
@@ -214,8 +215,8 @@ public class HDRImage extends ImageMap
           }
       }
     MemoryImageSource src = new MemoryImageSource(w, h, data, 0, w);
-    preview = new SoftReference(Toolkit.getDefaultToolkit().createImage(src));
     previewSize = size;
+    return Toolkit.getDefaultToolkit().createImage(src);
   }
 
   /** Get the width of the image. */
@@ -579,29 +580,19 @@ public class HDRImage extends ImageMap
   @Override
   public Image getPreview(int size)
   {
-    if (previewSize == size && preview.get() != null)
-      return preview.get();
-    createPreview(size);
-    return preview.get();
-
-    // if (preview == null)
-    //   createPreview(size);
-    // Image image = preview.get();
-    // if (previewSize == size && image != null)
-    //   return image;
-    // while (previewSize != size || image == null)
-    // {
-    //   createPreview(size);
-    //   image = preview.get();
-    // }
-    // return image;
+    Image image = preview.get();
+    if (previewSize == size && image != null)
+      return image;
+    image = createPreview(size);
+    preview = new SoftReference(image);
+    return image;
   }
 
-  @Override
-  public Image getMapImage(int size)
-  {
-    return getPreview(size);
-  }
+  // @Override
+  // public Image getMapImage(int size)
+  // {
+  //   return getPreview(size);
+  // }
   
   /** Get the RGBE bytes that contain th eimage information */
   
@@ -646,13 +637,14 @@ public class HDRImage extends ImageMap
       userEdited  = in.readUTF();
       long milliE = in.readLong();
       zoneEdited  = in.readUTF();
-      if (milliC > Long.MIN_VALUE) // It is probabbly safe to assume, that the image was not created before 1970.
+      if (milliC > Long.MIN_VALUE)
         dateCreated = new Date(milliC);
       if (milliE > Long.MIN_VALUE)
         dateEdited  = new Date(milliE);      
       
       buildMipMaps(map[0], map[1], map[2], map[3], w, h);
       findAverage();
+      preview = new SoftReference(null);
     }
   }
 

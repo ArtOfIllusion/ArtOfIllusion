@@ -179,7 +179,7 @@ public class Vec3
       }
   }
   
-  /** Crate a copy of this vector, scaled to the length of 1. If the length of this vector is 0, 
+  /** Create a copy of this vector, scaled to the length of 1. If the length of this vector is 0, 
       a new vector with length 0 will be returned. <p>
       
       This is like <pre>normalize()</pre>, but returns a new vector.*/

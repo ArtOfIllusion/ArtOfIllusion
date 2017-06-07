@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -82,7 +83,8 @@ public class UniformMapping extends TextureMapping
     return 0.0;
   }
 
-  public static boolean legalMapping(Object3D obj, Texture tex)
+  @Override
+  public boolean legalMapping(Object3D obj, Texture tex)
   {
     return (tex instanceof UniformTexture);
   }

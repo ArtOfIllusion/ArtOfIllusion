@@ -48,7 +48,8 @@ public class ImageMapTexture extends Texture2D
     name = "";
   }
 
-  public static String getTypeName()
+  @Override
+  public String getTypeName()
   {
     return "Image Mapped";
   }

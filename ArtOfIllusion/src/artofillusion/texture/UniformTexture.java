@@ -54,7 +54,8 @@ public class UniformTexture extends Texture
     return tex;
   }
 
-  public static String getTypeName()
+  @Override
+  public String getTypeName()
   {
     return "Uniform";
   }

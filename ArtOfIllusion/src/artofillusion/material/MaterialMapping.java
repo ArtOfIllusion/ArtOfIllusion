@@ -55,6 +55,11 @@ public abstract class MaterialMapping
     return "";
   }
 
+  public boolean legalMapping(Object3D obj, Material mat)
+  {
+    return false;
+  }
+  
   /** Get the index of refraction for this mapping's Material. */  
 
   public double indexOfRefraction()

@@ -37,7 +37,8 @@ public class UniformMaterialMapping extends MaterialMapping
     ((UniformMaterial) material).getMaterialSpec(spec);
   }
 
-  public static boolean legalMapping(Object3D obj, Material mat)
+  @Override
+  public boolean legalMapping(Object3D obj, Material mat)
   {
     return (mat instanceof UniformMaterial);
   }

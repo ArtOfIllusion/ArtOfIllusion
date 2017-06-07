@@ -58,7 +58,8 @@ public class UniformMaterial extends Material
     trueScat.scale(density*scattering);
   }
 
-  public static String getTypeName()
+  @Override
+  public String getTypeName()
   {
     return "Uniform";
   }

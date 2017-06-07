@@ -73,7 +73,8 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     };
   }
 
-  public static String getTypeName()
+  @Override
+  public String getTypeName()
   {
     return "Procedural";
   }

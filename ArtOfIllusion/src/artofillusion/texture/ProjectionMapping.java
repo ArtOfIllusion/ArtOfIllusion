@@ -41,7 +41,8 @@ public class ProjectionMapping extends Mapping2D
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Projection";
   }

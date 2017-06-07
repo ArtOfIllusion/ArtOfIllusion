@@ -35,7 +35,8 @@ public class ObjectPropertiesPanel extends ColumnContainer
   private LayoutWindow window;
   private BTextField nameField;
   private ValueField xPosField, yPosField, zPosField, xRotField, yRotField, zRotField;
-  private BComboBox textureChoice, materialChoice;
+  private final BComboBox textureChoice;
+  private final BComboBox materialChoice;
   private PropertyEditor propEditor[];
   private ObjectInfo objects[];
   private Property properties[];
@@ -154,6 +155,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     xRotField.setValue(angles[0]);
     yRotField.setValue(angles[1]);
     zRotField.setValue(angles[2]);
+    
     for (int i = 1; i < objects.length; i++)
     {
       origin = objects[i].getCoords().getOrigin();
@@ -198,20 +200,12 @@ public class ObjectPropertiesPanel extends ColumnContainer
         selected = names.size();
         names.add(Translate.text("layeredTexture"));
       }
-      List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
-      for (Texture texture : textureTypes)
+      
+      for (Texture texture : PluginRegistry.getPlugins(Texture.class))
       {
-        try
-        {
-          Method mtd = texture.getClass().getMethod("getTypeName", null);
-          names.add(Translate.text("newTextureOfType", mtd.invoke(null, null)));
-        }
-        catch (Exception ex)
-        {
-          ex.printStackTrace();
-        }
+        names.add(Translate.text("newTextureOfType", texture.getTypeName()));
       }
-      textureChoice.setModel(new DefaultComboBoxModel(names));
+      textureChoice.setModel(new DefaultComboBoxModel<String>(names));
       textureChoice.setSelectedIndex(selected);
     }
 
@@ -243,22 +237,17 @@ public class ObjectPropertiesPanel extends ColumnContainer
         names.add("");
       }
       else if (mat == null)
-        selected = names.size();
-      names.add(Translate.text("none"));
-      List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
-      for (Material material : materialTypes)
       {
-        try
-        {
-          Method mtd = material.getClass().getMethod("getTypeName", null);
-          names.add(Translate.text("newMaterialOfType", mtd.invoke(null, null)));
-        }
-        catch (Exception ex)
-        {
-          ex.printStackTrace();
-        }
+        selected = names.size();
       }
-      materialChoice.setModel(new DefaultComboBoxModel(names));
+      
+      names.add(Translate.text("none"));
+      
+      for (Material material : PluginRegistry.getPlugins(Material.class))
+      {
+        names.add(Translate.text("newMaterialOfType", material.getTypeName()));
+      }
+      materialChoice.setModel(new DefaultComboBoxModel<String>(names));
       materialChoice.setSelectedIndex(selected);
     }
 

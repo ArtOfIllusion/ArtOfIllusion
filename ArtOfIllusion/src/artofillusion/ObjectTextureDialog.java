@@ -19,7 +19,6 @@ import buoy.event.*;
 import buoy.widget.*;
 
 import java.awt.*;
-import java.lang.reflect.*;
 import java.util.List;
 
 /** This class implements the dialog box which is used to choose textures for objects.
@@ -145,15 +144,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     
     for (Texture texture : PluginRegistry.getPlugins(Texture.class))
     {
-      try
-      {
-        Method mtd = texture.getClass().getMethod("getTypeName", (Class<?>[])null);
-        newTextureChoice.add(mtd.invoke(null, (Object[])null));
-      }
-      catch (Exception ex)
-      {
-        ex.printStackTrace();
-      }
+      newTextureChoice.add(texture.getTypeName());
     }
     newTextureChoice.addEventLink(ValueChangedEvent.class, this, "doNewTexture");
     texListPanel.add(texButtonRow, 0, 1);
@@ -178,16 +169,9 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     
     for (Material material : PluginRegistry.getPlugins(Material.class))
     {
-      try
-      {
-        Method mtd = material.getClass().getMethod("getTypeName", (Class<?>[])null);
-        newMaterialChoice.add(mtd.invoke(null, (Object[])null));
-      }
-      catch (Exception ex)
-      {
-        ex.printStackTrace();
-      }
+      newMaterialChoice.add(material.getTypeName());
     }
+
     newMaterialChoice.addEventLink(ValueChangedEvent.class, this, "doNewMaterial");
     matListPanel.add(matButtonRow, 0, 2);
     materialsTab.add(matListPanel, BorderContainer.CENTER);

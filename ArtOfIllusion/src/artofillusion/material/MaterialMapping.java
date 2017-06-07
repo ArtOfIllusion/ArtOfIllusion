@@ -50,7 +50,7 @@ public abstract class MaterialMapping
   /** Get the name of this type of mapping.  Subclasses should override this method to return
       an appropriate name. */
   
-  public static String getName()
+  public String getName()
   {
     return "";
   }

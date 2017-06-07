@@ -38,7 +38,7 @@ public abstract class Texture
   /** Get the name of this type of texture.  Subclasses should override this method to return
      an appropriate name. */
   
-  public static String getTypeName()
+  public String getTypeName()
   {
     return "";
   }

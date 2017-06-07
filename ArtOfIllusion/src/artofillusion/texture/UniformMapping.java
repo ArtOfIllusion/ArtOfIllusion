@@ -82,7 +82,8 @@ public class UniformMapping extends TextureMapping
     return 0.0;
   }
 
-  public static boolean legalMapping(Object3D obj, Texture tex)
+  @Override
+  public boolean legalMapping(Object3D obj, Texture tex)
   {
     return (tex instanceof UniformTexture);
   }

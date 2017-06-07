@@ -45,7 +45,8 @@ public class LinearMaterialMapping extends MaterialMapping
     return "Linear";
   }
 
-  public static boolean legalMapping(Object3D obj, Material mat)
+  @Override
+  public boolean legalMapping(Object3D obj, Material mat)
   {
     return (mat instanceof Material3D);
   }

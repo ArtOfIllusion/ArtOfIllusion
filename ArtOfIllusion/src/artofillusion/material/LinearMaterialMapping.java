@@ -39,7 +39,8 @@ public class LinearMaterialMapping extends MaterialMapping
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Linear";
   }

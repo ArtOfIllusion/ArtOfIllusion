@@ -31,7 +31,8 @@ public class UVMapping extends Mapping2D
     super(theObject, theTexture);
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "UV";
   }

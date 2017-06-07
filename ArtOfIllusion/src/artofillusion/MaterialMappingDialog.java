@@ -104,7 +104,7 @@ public class MaterialMappingDialog extends BDialog
       {
         return;
       }
-      Constructor con = selection.getClass().getConstructor(new Class [] {Material.class});
+      Constructor con = selection.getClass().getConstructor(Material.class);
       Material mat =  obj.getMaterial();
       setMapping((MaterialMapping) con.newInstance(mat));
       FormContainer content = (FormContainer) getContent();

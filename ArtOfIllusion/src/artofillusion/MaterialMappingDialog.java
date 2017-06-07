@@ -27,7 +27,7 @@ public class MaterialMappingDialog extends BDialog
 {
   private BFrame fr;
   private Object3D obj;
-  private Vector mappings;
+  private Vector<MaterialMapping> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private MaterialMapping map, oldMapping;
@@ -47,20 +47,11 @@ public class MaterialMappingDialog extends BDialog
     // Make a list of all material mappings which can be used for this object and material.
 
     mappings = new Vector();
-    List<MaterialMapping> allMappings = PluginRegistry.getPlugins(MaterialMapping.class);
-    for (int i = 0; i < allMappings.size(); i++)
+    Material mat = obj.getMaterial();
+    
+    for (MaterialMapping mapping: PluginRegistry.getPlugins(MaterialMapping.class))
     {
-      try
-      {
-        Method mtd = allMappings.get(i).getClass().getMethod("legalMapping", Object3D.class, Material.class);
-        Material mat = obj.getMaterial();
-        Boolean result = (Boolean) mtd.invoke(null, obj, mat);
-        if (result)
-          mappings.addElement(allMappings.get(i).getClass());
-      }
-      catch (Exception ex)
-      {
-      }
+      if(mapping.legalMapping(obj, mat)) mappings.add(mapping);
     }
 
     // Add the various components to the dialog.
@@ -75,16 +66,11 @@ public class MaterialMappingDialog extends BDialog
     choiceRow.add(mapChoice = new BComboBox());
     for (int i = 0; i < mappings.size(); i++)
     {
-      try
+      MaterialMapping cmap = mappings.get(i);
+      mapChoice.add(cmap.getName());
+      if (cmap.getClass() == map.getClass())
       {
-        Method mtd = ((Class) mappings.elementAt(i)).getMethod("getName", null);
-        mapChoice.add((String) mtd.invoke(null, null));
-        if (mappings.elementAt(i) == map.getClass())
-          mapChoice.setSelectedIndex(i);
-      }
-      catch (Exception ex)
-      {
-        ex.printStackTrace();
+        mapChoice.setSelectedIndex(i);
       }
     }
     mapChoice.addEventLink(ValueChangedEvent.class, this, "mappingChanged");
@@ -114,10 +100,12 @@ public class MaterialMappingDialog extends BDialog
   {
     try
     {
-      Class cls = (Class) mappings.elementAt(mapChoice.getSelectedIndex());
-      if (cls == map.getClass())
+      MaterialMapping selection = mappings.get(mapChoice.getSelectedIndex());
+      if (selection.getClass() == map.getClass())
+      {
         return;
-      Constructor con = cls.getConstructor(new Class [] {Material.class});
+      }
+      Constructor con = selection.getClass().getConstructor(new Class [] {Material.class});
       Material mat =  obj.getMaterial();
       setMapping((MaterialMapping) con.newInstance(new Object [] {mat}));
       FormContainer content = (FormContainer) getContent();

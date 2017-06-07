@@ -371,7 +371,8 @@ public class LayeredMapping extends TextureMapping
     throw new IllegalStateException();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Layered";
   }

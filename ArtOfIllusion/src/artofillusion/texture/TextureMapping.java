@@ -39,9 +39,9 @@ public abstract class TextureMapping
       <p>
       public MappingSubclass(Object3D obj, Texture texture)
       <p>
-      In addition, every subclass must include a method of the form
+      In addition, every subclass must override
       <p>
-      public static boolean legalMapping(Object3D obj, Texture texture)
+      public legalMapping(Object3D obj, Texture texture)
       <p>
       which returns true if the mapping can be used with the specified object and Texture.  
       Finally, every subclass must include a constructor with the signature
@@ -67,6 +67,11 @@ public abstract class TextureMapping
   public String getName()
   {
     return "";
+  }
+  
+  public boolean legalMapping(Object3D obj, Texture tex)
+  {
+    return false;
   }
   
   /** Given the vertices to be mapped and their normal vectors, generate a RenderingTriangle.

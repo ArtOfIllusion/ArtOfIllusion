@@ -1,5 +1,5 @@
 /* Copyright (C) 2011 by Helge Hansen and Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software

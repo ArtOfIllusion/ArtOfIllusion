@@ -31,7 +31,7 @@ public abstract class Material
   /** Get the name of this type of material.  Subclasses should override this method to return
      an appropriate name. */
   
-  public static String getTypeName()
+  public String getTypeName()
   {
     return "";
   }

@@ -99,9 +99,9 @@ public class SceneEnvironmentDialog extends BDialog implements ActionListener, R
     FormContainer center = new FormContainer(new double [] {0.0, 1.0}, new double [6]);
     content.add(center, BorderContainer.CENTER);
     
-    ambientColor = new ColorSampleWidget(scene.getAmbientColor(), 50, 30);
-    envColor = new ColorSampleWidget(scene.getEnvironmentColor(), 50, 30);
-    fogColor = new ColorSampleWidget(scene.getFogColor(), 50, 30);
+    ambientColor = new ColorSampleWidget(scene.getAmbientColor(), Translate.text("ambientColor"), 50, 30);
+    envColor = new ColorSampleWidget(scene.getEnvironmentColor(),Translate.text("environment"), 50, 30);
+    fogColor = new ColorSampleWidget(scene.getFogColor(), Translate.text("fogColor"), 50, 30);
     
     center.add(ambientColorLabel, 0, 0, labelLayout);
     center.add(ambientColor, 1, 0, widgetLayout);
@@ -167,6 +167,7 @@ public class SceneEnvironmentDialog extends BDialog implements ActionListener, R
     
   }
   
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public static void show(WindowWidget frame, Scene scene)
   {
     new SceneEnvironmentDialog(frame, scene);

@@ -21,27 +21,31 @@ import static java.awt.event.MouseEvent.BUTTON1;
  * @author mkhramov
  */
 public class ColorSampleWidget extends Widget {
-
+    
     private RGBColor color;
+    private String title;
     
     public void setColor(RGBColor color) {
-        this.color = color;
-        this.component.setForeground(color.getColor());
+      this.color = color;
+      this.component.setForeground(color.getColor());
     }
 
     public RGBColor getColor() 
     {
-        return color;
+      return color;
     }
     
-    public ColorSampleWidget(RGBColor color, int width, int height) {
-        Dimension size = new Dimension(width, height);
-        this.component = new ColorSampleComponent();
-        this.color = color.duplicate();
-        this.component.setPreferredSize(size);
-        this.component.setMaximumSize(size);
-        this.component.setForeground(color.getColor());
-        
+    public ColorSampleWidget(RGBColor color, String title, int width, int height, boolean editable)
+    {
+      Dimension size = new Dimension(width, height);
+      this.component = new ColorSampleComponent();
+      this.color = color.duplicate();
+      this.component.setPreferredSize(size);
+      this.component.setMaximumSize(size);
+      this.component.setForeground(color.getColor());
+      if(editable) 
+      {
+        this.title = title;
         this.component.addMouseListener(new MouseAdapter() 
         {
             @Override
@@ -51,12 +55,20 @@ public class ColorSampleWidget extends Widget {
             }
             
         });
+      }
     }
     
+    public ColorSampleWidget(RGBColor color, String title, int width, int height)
+    {
+      this(color, title, width, height, true);
+    }
+    
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void mouseClicked(MouseEvent e)
     {
+        System.out.println("Mouse clicked");
         if(BUTTON1 != e.getButton()) return;
-        new ColorChooser(UIUtilities.findFrame(this), Translate.text("ambientColor"), color);
+        new ColorChooser(UIUtilities.findFrame(this), title, color);
         this.component.setForeground(color.getColor());
     }
     

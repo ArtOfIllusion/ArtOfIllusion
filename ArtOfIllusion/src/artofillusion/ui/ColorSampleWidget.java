@@ -66,7 +66,6 @@ public class ColorSampleWidget extends Widget {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void mouseClicked(MouseEvent e)
     {
-        System.out.println("Mouse clicked");
         if(BUTTON1 != e.getButton()) return;
         new ColorChooser(UIUtilities.findFrame(this), title, color);
         this.component.setForeground(color.getColor());

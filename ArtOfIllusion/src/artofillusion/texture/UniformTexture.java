@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -143,17 +144,18 @@ public class UniformTexture extends Texture
   @Override
   public void edit(final BFrame fr, Scene sc)
   {
+    final UniformTexture newTexture = (UniformTexture) duplicate();
     BTextField nameField = new BTextField(name, 15);
     final ValueSlider transSlider = new ValueSlider(0.0, 1.0, 100, (double) transparency);
     final ValueSlider specSlider = new ValueSlider(0.0, 1.0, 100, (double) specularity);
     final ValueSlider shinSlider = new ValueSlider(0.0, 1.0, 100, shininess);
     final ValueSlider roughSlider = new ValueSlider(0.0, 1.0, 100, roughness);
     final ValueSlider clearSlider = new ValueSlider(0.0, 1.0, 100, cloudiness);
-    final Widget diffPatch = diffuseColor.getSample(50, 30);
-    final Widget specPatch = specularColor.getSample(50, 30);
-    final Widget transPatch = transparentColor.getSample(50, 30);
-    final Widget emissPatch = emissiveColor.getSample(50, 30);
-    final UniformTexture newTexture = (UniformTexture) duplicate();
+    final ColorSampleWidget diffPatch = new ColorSampleWidget(newTexture.diffuseColor, Translate.text("DiffuseColor")); 
+    final ColorSampleWidget specPatch = new ColorSampleWidget(newTexture.specularColor, Translate.text("SpecularColor"));
+    final ColorSampleWidget transPatch = new ColorSampleWidget(newTexture.transparentColor, Translate.text("TransparentColor"));
+    final ColorSampleWidget emissPatch = new ColorSampleWidget(newTexture.emissiveColor, Translate.text("EmissiveColor"));
+    
     final MaterialPreviewer preview = new MaterialPreviewer(newTexture, null, 200, 160);
     final ActionProcessor process = new ActionProcessor();
     final Runnable renderCallback = new Runnable() {
@@ -166,32 +168,28 @@ public class UniformTexture extends Texture
     diffPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("DiffuseColor"), newTexture.diffuseColor);
-        diffPatch.setBackground(newTexture.diffuseColor.getColor());
+        newTexture.diffuseColor.copy(diffPatch.getColor());
         process.addEvent(renderCallback);
       }
     });
     specPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("SpecularColor"), newTexture.specularColor);
-        specPatch.setBackground(newTexture.specularColor.getColor());
+        newTexture.specularColor.copy(specPatch.getColor()); 
         process.addEvent(renderCallback);
       }
     });
     transPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("TransparentColor"), newTexture.transparentColor);
-        transPatch.setBackground(newTexture.transparentColor.getColor());
+        newTexture.transparentColor.copy(transPatch.getColor()); 
         process.addEvent(renderCallback);
       }
     });
     emissPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("EmissiveColor"), newTexture.emissiveColor);
-        emissPatch.setBackground(newTexture.emissiveColor.getColor());
+        newTexture.emissiveColor.copy(emissPatch.getColor()); 
         process.addEvent(renderCallback);
       }
     });
@@ -218,21 +216,25 @@ public class UniformTexture extends Texture
         Translate.text("EmissiveColor"), Translate.text("Transparency"), Translate.text("Specularity"),
         Translate.text("Shininess"), Translate.text("Roughness"), Translate.text("Cloudiness")});
     process.stopProcessing();
-    if (!dlg.clickedOk())
-      return;
-    transparency = (float) transSlider.getValue();
-    specularity = (float) specSlider.getValue();
-    shininess = (float) shinSlider.getValue();
-    roughness = roughSlider.getValue();
-    cloudiness = clearSlider.getValue();
-    UniformTexture.this.name = nameField.getText();
-    diffuseColor.copy(newTexture.diffuseColor);
-    specularColor.copy(newTexture.specularColor);
-    transparentColor.copy(newTexture.transparentColor);
-    emissiveColor.copy(newTexture.emissiveColor);
-    int index = sc.indexOf(this);
-    if (index > -1)
-      sc.changeTexture(index);
+    if (dlg.clickedOk())
+    {
+      transparency = (float) transSlider.getValue();
+      specularity = (float) specSlider.getValue();
+      shininess = (float) shinSlider.getValue();
+      roughness = roughSlider.getValue();
+      cloudiness = clearSlider.getValue();
+      UniformTexture.this.name = nameField.getText();
+      diffuseColor.copy(newTexture.diffuseColor);
+      specularColor.copy(newTexture.specularColor);
+      transparentColor.copy(newTexture.transparentColor);
+      emissiveColor.copy(newTexture.emissiveColor);
+      int index = sc.indexOf(this);
+      if (index > -1)
+      {
+        sc.changeTexture(index);
+      }
+    }
+
   }
 
   /** The following two methods are used for reading and writing files.  The first is a

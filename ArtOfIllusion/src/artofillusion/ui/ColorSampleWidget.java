@@ -63,6 +63,21 @@ public class ColorSampleWidget extends Widget {
       this(color, title, width, height, true);
     }
     
+    public ColorSampleWidget(RGBColor color, int width, int height)
+    {
+      this(color, "", width, height, false);
+    }    
+    
+    public ColorSampleWidget(RGBColor color, String title)
+    {
+      this(color,title,50,30);
+    }
+    
+    public ColorSampleWidget(RGBColor color)
+    {
+      this(color,"",50,30,false);
+    }
+    
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void mouseClicked(MouseEvent e)
     {

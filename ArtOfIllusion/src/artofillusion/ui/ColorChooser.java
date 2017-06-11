@@ -34,7 +34,7 @@ public class ColorChooser extends BDialog
   private RGBColor oldColor, newColor;
   private ValueSlider slider1, slider2, slider3;
   private BLabel label1, label2, label3;
-  private Widget newColorPatch;
+  private final ColorSampleWidget newColorPatch;
   private BComboBox modeC, rangeC;
   private boolean ok;
   
@@ -57,7 +57,9 @@ public class ColorChooser extends BDialog
     }
     recentColors = new ArrayList<RGBColor>();
     for (int i = 0; i < RECENT_COLOR_COUNT; i++)
+    {
       recentColors.add(new RGBColor(1.0, 1.0, 1.0));
+    }
   }
   
   public ColorChooser(BFrame parent, String title, RGBColor iColor)
@@ -115,21 +117,24 @@ public class ColorChooser extends BDialog
     rangeC.setSelectedIndex(rangeMode);
     LayoutInfo patchLayout = new LayoutInfo();
     center.add(Translate.label("originalColor"), 2, 0, patchLayout);
-    center.add(oldColor.getSample(50, 30), 2, 1, patchLayout);
+    final ColorSampleWidget oldColorPatch = new ColorSampleWidget(oldColor);
+    center.add(oldColorPatch, 2, 1, patchLayout);
     center.add(Translate.label("newColor"), 2, 2, patchLayout);
-    center.add(newColorPatch = newColor.getSample(50, 30), 2, 3, patchLayout);
+    newColorPatch = new ColorSampleWidget(newColor);
+    center.add(newColorPatch, 2, 3, patchLayout);
     center.add(Translate.label("recentColors"), 0, 7, 3, 1);
     RowContainer recentColorRow = new RowContainer();
     center.add(recentColorRow, 0, 8, 3, 1);
+    
     for (RGBColor recentColor: recentColors)
     {
       final RGBColor color = recentColor;
-      Widget sample = color.getSample(16, 16);
+      ColorSampleWidget sample = new ColorSampleWidget(color, 16, 16);
       recentColorRow.add(sample);
       sample.addEventLink(MousePressedEvent.class, new Object() {
         void processEvent()
         {
-          setColor(color);
+          setColor(sample.getColor());
         }
       });
     }
@@ -205,17 +210,15 @@ public class ColorChooser extends BDialog
       newColor.setHSV(values[0]*360.0f, values[1], values[2]);
     else
       newColor.setHLS(values[0]*360.0f, values[1], values[2]);
-    newColorPatch.setBackground(newColor.getColor());
-    newColorPatch.repaint();
+    newColorPatch.setColor(newColor);
     updateColorGradients();
     dispatchEvent(new ValueChangedEvent(this));
   }
 
   private void setColor(RGBColor color)
   {
+    newColorPatch.setColor(color);
     newColor.copy(color);
-    newColorPatch.setBackground(newColor.getColor());
-    newColorPatch.repaint();
     dispatchEvent(new ValueChangedEvent(this));
     modeChanged();
   }

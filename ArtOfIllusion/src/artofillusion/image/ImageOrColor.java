@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +26,7 @@ import java.io.*;
 public class ImageOrColor
 {
   private ImageMap map;
-  private RGBColor color;
+  private final RGBColor color;
   
   public ImageOrColor(RGBColor theColor)
   {
@@ -151,13 +152,11 @@ public class ImageOrColor
         row.dispatchEvent(new ValueChangedEvent(row));
       }
     });
-    final Widget colorPatch = color.getSample(ImageMap.PREVIEW_WIDTH, ImageMap.PREVIEW_HEIGHT);
+    final ColorSampleWidget colorPatch = new ColorSampleWidget(color, Translate.text("Color"), ImageMap.PREVIEW_WIDTH, ImageMap.PREVIEW_HEIGHT);
     colorPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent(MouseClickedEvent ev)
       {
-        new ColorChooser(parent, Translate.text("Color"), color);
-        colorPatch.setBackground(color.getColor());
-        colorPatch.repaint();
+        color.copy(colorPatch.getColor());
         row.dispatchEvent(new ValueChangedEvent(row));
       }
     });

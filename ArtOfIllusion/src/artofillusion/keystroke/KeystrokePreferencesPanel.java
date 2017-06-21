@@ -19,7 +19,6 @@ import javax.swing.table.*;
 import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.text.*;
 
 import artofillusion.ui.*;
@@ -30,7 +29,7 @@ import artofillusion.ui.*;
 
 public class KeystrokePreferencesPanel extends FormContainer
 {
-  private List<KeystrokeRecord> records;
+  private final ArrayList<KeystrokeRecord> records;
   private BTable table;
   private BButton editButton, addButton, deleteButton;
   private boolean changed;

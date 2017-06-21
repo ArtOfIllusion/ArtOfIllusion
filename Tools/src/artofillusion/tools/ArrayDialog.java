@@ -20,7 +20,6 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 /**
 This dialog box allows the user to specify options for creating array objects.
@@ -32,7 +31,7 @@ public class ArrayDialog extends BDialog
   private LayoutWindow window;
   private ArraySpec spec;
 
-  private List<ObjectInfo> curvesVector;
+  private Vector<ObjectInfo> curvesVector;
   private BButton okButton, cancelButton;
   private BLabel linearCopiesLabel, stepXLabel, stepYLabel, stepZLabel;
   private BRadioButton curveCopiesBox, curveStepBox, linearBox, curveBox;

@@ -17,7 +17,6 @@ import buoy.widget.*;
 import java.awt.*;
 import java.text.*;
 import java.util.*;
-import java.util.List;
 
 /** This is a Widget which displays a time axis. */
 
@@ -25,7 +24,7 @@ public class TimeAxis extends CustomWidget
 {
   double start, scale, origMarkerPos;
   Score theScore;
-  private List<Marker> markers;
+  private final Vector<Marker> markers;
   int subdivisions;
   Marker draggingMarker;
   Point clickPos;

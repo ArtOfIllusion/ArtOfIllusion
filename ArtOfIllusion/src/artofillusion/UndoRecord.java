@@ -27,9 +27,9 @@ import java.util.List;
 
 public class UndoRecord
 {
-  private List<Integer> command;
-  private List<Object[]> data;
-  private List<SoftReference[]> dataRef;
+  private ArrayList<Integer> command;
+  private ArrayList<Object[]> data;
+  private ArrayList<SoftReference[]> dataRef;
   private File cacheFile;
   private boolean redo;
   private EditingWindow theWindow;

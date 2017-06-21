@@ -35,8 +35,8 @@ public class ExtrudeDialog extends BDialog
   private ValueField distField, xField, yField, zField, segField, angleField, tolField;
   private final BButton okButton;
   private ObjectPreviewCanvas preview;
-  private List<ObjectInfo> objects;
-  private List<ObjectInfo> paths;
+  private Vector<ObjectInfo> objects;
+  private Vector<ObjectInfo> paths;
 
   private static int counter = 1;
 
@@ -599,8 +599,8 @@ public class ExtrudeDialog extends BDialog
       v = new Vec3 [numBoundaryPoints*pathv.length];
     else
       v = new Vec3 [2*profv.length+numBoundaryPoints*(pathv.length-2)];
-    List<EdgeInfo> newEdge = new Vector<EdgeInfo>();
-    List<int[]> newFace = new Vector<int[]>();
+    Vector<EdgeInfo> newEdge = new Vector<EdgeInfo>();
+    Vector<int[]> newFace = new Vector<int[]>();
     boolean angled = (profile.getSmoothingMethod() == Mesh.NO_SMOOTHING && path.getSmoothingMethod() != Mesh.NO_SMOOTHING);
     if (!path.isClosed())
       {

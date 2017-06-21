@@ -118,9 +118,9 @@ import java.util.Map;
  */
 public class SearchlistClassLoader extends ClassLoader
 {
-    protected List<Loader> list;
-    protected List<Loader> search;
-    protected Map<String, Class> cache;
+    protected Vector<Loader> list;
+    protected Vector<Loader> search;
+    protected Hashtable<String, Class> cache;
     protected Loader content = null;
     protected byte searchMode = SHARED;
     protected int divide = 0;
@@ -241,7 +241,7 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr;
 	URL[] url;
 	int j;
-	List<URL> path = new ArrayList<URL>(8);
+	ArrayList<URL> path = new ArrayList<URL>(8);
 
 	for (int i = 0; (ldr = getLoader(i++, searchMode)) != null; i++) {
 	    if (ldr.loader instanceof SearchlistClassLoader)

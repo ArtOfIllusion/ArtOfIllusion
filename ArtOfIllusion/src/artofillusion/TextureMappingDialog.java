@@ -20,7 +20,6 @@ import buoy.widget.*;
 import java.awt.*;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.List;
 
 /** This class implements the dialog box which is used to choose texture mappings for objects.
     It presents a list of all mappings which can be used with the current object and material,
@@ -30,7 +29,7 @@ public class TextureMappingDialog extends BDialog
 {
   private FormContainer content;
   private Object3D origObj, editObj;
-  private List<Class> mappings;
+  private Vector<Class> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private TextureMapping map, oldMapping;

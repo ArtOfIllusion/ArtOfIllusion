@@ -19,7 +19,6 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 /** The CSGEditorWindow class represents the window for editing CSGObjects. */
 
@@ -624,7 +623,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
 	if (selected.length == 0)
 		return;
 
-	List<ObjectInfo> selection = new ArrayList<ObjectInfo>();
+	ArrayList<ObjectInfo> selection = new ArrayList<ObjectInfo>();
 	
 	// This did not work if only object 1 was selected. Strange bug.
 	//for (int s : selected)

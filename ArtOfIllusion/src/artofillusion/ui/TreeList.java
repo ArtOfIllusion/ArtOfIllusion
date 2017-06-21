@@ -28,8 +28,8 @@ import java.util.Vector;
 public class TreeList extends CustomWidget
 {
   private EditingWindow window;
-  private List<TreeElement> elements, showing, selected;
-  private List<Integer> indent;
+  private Vector<TreeElement> elements, showing, selected;
+  private Vector<Integer> indent;
   private int yoffset, rowHeight, dragStart, lastDrag, lastClickRow, lastIndent, maxRowWidth;
   private boolean updateDisabled, moving, origSelected[], insertAbove, okToInsert, allowMultiple;
   private PopupMenuManager popupManager;
@@ -200,7 +200,7 @@ public class TreeList extends CustomWidget
 
   public TreeElement [] getElements()
   {
-    List<TreeElement> v = new Vector<TreeElement>();
+    Vector<TreeElement> v = new Vector<TreeElement>();
     TreeElement el;
 
     for (int i = 0; i < elements.size(); i++)

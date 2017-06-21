@@ -365,8 +365,8 @@ public class Actor extends ObjectWrapper
 
     // Construct the output pose.
 
-    List<Gesture> gestureList = new Vector<Gesture>();
-    List<Double> weightList = new Vector<Double>();
+    Vector<Gesture> gestureList = new Vector<Gesture>();
+    Vector<Double> weightList = new Vector<Double>();
     
     for (int i = 0; i < weight.length; i++)
       if (weight[i] > 0.0)

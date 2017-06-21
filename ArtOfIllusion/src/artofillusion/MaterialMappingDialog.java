@@ -27,7 +27,7 @@ import java.util.*;
 public class MaterialMappingDialog extends BDialog
 {
   private Object3D obj;
-  private List<Class> mappings;
+  private Vector<Class> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private MaterialMapping map, oldMapping;

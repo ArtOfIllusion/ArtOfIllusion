@@ -107,7 +107,7 @@ public class EditKeyframesDialog
     
     if (whichTracks == 0)
       {
-        List<Track> tracks = new Vector<Track>();
+        Vector<Track> tracks = new Vector<Track>();
         for (int i = 0; i < theScene.getNumObjects(); i++)
           {
             ObjectInfo info = theScene.getObject(i);
@@ -121,7 +121,7 @@ public class EditKeyframesDialog
     else if (whichTracks == 1)
       {
         int sel[] = theScene.getSelection();
-        List<Track> tracks = new Vector<Track>();
+        Vector<Track> tracks = new Vector<Track>();
         for (int i = 0; i < sel.length; i++)
           {
             ObjectInfo info = theScene.getObject(sel[i]);

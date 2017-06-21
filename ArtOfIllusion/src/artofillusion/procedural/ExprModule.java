@@ -108,12 +108,12 @@ class Token {
     public double numValue;
     public char ty;
 
-    static Map<String, OPort> funMap = createFunMap ();
+    static Hashtable<String, OPort> funMap = createFunMap ();
     //    static Hashtable portMap = createPortMap ();
 
 
-    static Map<String, OPort> createFunMap () {
-        Map<String, OPort> fm = new Hashtable<String, OPort> ();
+    static Hashtable<String, OPort> createFunMap () {
+        Hashtable<String, OPort> fm = new Hashtable<String, OPort> ();
         //For version two, pull these out of a config file
         fm.put ("sin",  new OPort (new SineModule (new Point ()), 0));
         fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0));
@@ -233,7 +233,7 @@ class ModuleLoader {
 public class ExprModule extends Module
 {
 
-    private Map<String, OPort> varTable;
+    private Hashtable<String, OPort> varTable;
     Module [] inputs;
     Module [] myModules;
     private List<Module> moduleVec;
@@ -244,7 +244,7 @@ public class ExprModule extends Module
     PointInfo point;
     Point zero = new Point (0,0);
     String expr;
-    private List<String> errors;
+    private Vector<String> errors;
 
     public ExprModule(Point position)
     {
@@ -631,7 +631,7 @@ public class ExprModule extends Module
 
         OPort func = getOPort (name);
 
-        List<OPort> s = new Vector<OPort> ();
+        Vector<OPort> s = new Vector<OPort> ();
         //get args
         while (currTok.ty != Token.RP && currTok.ty != Token.END) {
             s.add (expr (false));

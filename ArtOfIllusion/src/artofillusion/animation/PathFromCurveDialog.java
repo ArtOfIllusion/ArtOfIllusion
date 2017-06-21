@@ -20,7 +20,6 @@ import buoy.widget.*;
 import java.awt.*;
 import java.text.*;
 import java.util.Vector;
-import java.util.List;
 
 /** PathFromCurveDialog is a dialog box for describing how to set an animation path from
     a Curve object. */
@@ -30,8 +29,8 @@ public class PathFromCurveDialog extends BDialog
   private LayoutWindow window;
   private Scene theScene;
   private BList objList, curveList;
-  private List<ObjectInfo> objects;
-  private List<ObjectInfo> curves;
+  private Vector<ObjectInfo> objects;
+  private Vector<ObjectInfo> curves;
   private BCheckBox orientBox;
   private BComboBox spacingChoice;
   private ValueField startTimeField, endTimeField, startSpeedField, endSpeedField, accelField; 

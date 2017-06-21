@@ -990,7 +990,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     Scene theScene = window.getScene();
     UndoRecord undo = new UndoRecord(window, false);
-    List<Track> added = new Vector<Track>();
+    Vector<Track> added = new Vector<Track>();
     Object args[];
     if (extraArgs == null)
       args = new Object [1];

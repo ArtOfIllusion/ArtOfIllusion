@@ -59,10 +59,10 @@ public class ArraySpec
             Set to METHOD_CURVE to create an array along a curve. */
         public int method;
         /** the objects that should be copied to create an array */
-        public List<ObjectInfo> objectList;         // list of objectInfo's
+        public Vector<ObjectInfo> objectList;         // list of objectInfo's
 
         // linear paramters
-        /** Number of copies to make for a linar array. */
+        /** Number of copies to make for a linear array. */
         public int linearCopies;                        
         /** step size in X direction for a linear array. */
         public double stepX;
@@ -70,11 +70,11 @@ public class ArraySpec
         public double stepY;
         /** step size in Z direction for a linear array. */
         public double stepZ;
-        /** when set, stepX is multiplied by the objects boudingbox x size */
+        /** when set, stepX is multiplied by the objects boundingbox x size */
         public boolean intervalX;
-        /** when set, stepY is multiplied by the objects boudingbox y size */
+        /** when set, stepY is multiplied by the objects boundingbox y size */
         public boolean intervalY;
-        /** when set, stepZ is multiplied by the objects boudingbox z size */
+        /** when set, stepZ is multiplied by the objects boundingbox z size */
         public boolean intervalZ;
 
         // spline parameters
@@ -91,7 +91,7 @@ public class ArraySpec
         public double curveStep;
         /** When set, curveStep is multiplied by the size of the object. Not Used. */
         public boolean curveInterval;
-        /** When set, the orientationof the object(s) follow the curve.*/
+        /** When set, the orientation of the object(s) follow the curve.*/
         public boolean orientation;
         /** When set, the initial position of the object is ignored.
                 The object will pivot abouts its origin instead of about a point on the path curve */
@@ -104,7 +104,7 @@ public class ArraySpec
 
         /** If set, an instance of the object(s) will be created at
                 first position of the array (linear displacement 0 or the
-                beginning of the splien curve. */
+                beginning of the spline curve. */
         public boolean dupFirst;
         /** If set, group all the objects together as children of a null object. */
         public boolean group;

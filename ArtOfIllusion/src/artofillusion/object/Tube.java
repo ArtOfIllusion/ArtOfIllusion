@@ -473,9 +473,9 @@ public class Tube extends Curve
     if (interactive && cachedMesh != null)
       return cachedMesh;
 
-    List<MeshVertex> vert = new Vector<MeshVertex>();
-    List<Vec3> norm = new Vector<Vec3>();
-    List<int[]> face = new Vector<int[]>();
+    Vector<MeshVertex> vert = new Vector<MeshVertex>();
+    Vector<Vec3> norm = new Vector<Vec3>();
+    Vector<int[]> face = new Vector<int[]>();
     
     Vector param = new Vector();
     
@@ -557,9 +557,9 @@ public class Tube extends Curve
   {
     // Subdivide the surface and create the triangle mesh.
 
-    List<MeshVertex> vert = new Vector<MeshVertex>();
-    List<Vec3> norm = new Vector<Vec3>();
-    List<int[]> face = new Vector<int[]>();
+    Vector<MeshVertex> vert = new Vector<MeshVertex>();
+    Vector<Vec3> norm = new Vector<Vec3>();
+    Vector<int[]> face = new Vector<int[]>();
     
     Vector param = new Vector();
     
@@ -613,7 +613,7 @@ public class Tube extends Curve
       It subdivides the surface and fills in the vectors with lists of vertices, normals,
       faces, and parameter values. */
 
-  private void subdivideSurface(double tol, List<MeshVertex> vert, List<Vec3> norm, List<int []> face, Vector param)
+  private void subdivideSurface(double tol, Vector<MeshVertex> vert, Vector<Vec3> norm, Vector<int []> face, Vector param)
   {
     // Subdivide the central curve to the desired tolerance.
 

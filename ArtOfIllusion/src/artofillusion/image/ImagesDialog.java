@@ -510,7 +510,7 @@ public class ImagesDialog extends BDialog
       // of the canvas. .. Have to paint one full row more for tha scroll
       head = Math.max((scrollY/gridh*w-1), 0);
       tail = Math.min(theScene.getNumImages(),(scrollY+scrollH)/gridh*w+w+1);
-
+      boolean inUse = false;
       for (int i = head; i < tail; i++)
       {
         x = (i%w)*gridw+cOff;
@@ -545,7 +545,10 @@ public class ImagesDialog extends BDialog
             g.drawImage(linkBrokenIcon,(i%w)*gridw+1+cOff, (i/w)*gridh+9+previewSize-iconSize, getComponent());
         for (int t = 0; t < theScene.getNumTextures(); t++)
           if (theScene.getTexture(t).usesImage(currentImage))
-            g.drawImage(inUseIcon,(i%w)*gridw+9+cOff+previewSize-iconSize, (i/w)*gridh+9+previewSize-iconSize, getComponent());
+            inUse = true;
+        if (inUse)
+          g.drawImage(inUseIcon,(i%w)*gridw+9+cOff+previewSize-iconSize, (i/w)*gridh+9+previewSize-iconSize, getComponent());
+        inUse = false;
       }
     }
 

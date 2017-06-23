@@ -305,7 +305,7 @@ public class ImageDetailsDialog extends BDialog
         catch (Exception ex)
         {
             setCursor(Cursor.getDefaultCursor());
-            new BStandardDialog("", Translate.text("errorLExportingImage", im.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+            new BStandardDialog("", Translate.text("errorExportingImage_HEAD") + " " + im.getName() + " " + Translate.text("errorExportingImage_TAIL"), BStandardDialog.ERROR).showMessageDialog(this);
             ex.printStackTrace();
             return;
         }
@@ -430,8 +430,15 @@ public class ImageDetailsDialog extends BDialog
             
             if (im instanceof ExternalImage)
             {
-                String fileName = im.getFile().getName();
-                autoText = fileName.substring(0, fileName.lastIndexOf('.'));
+                try 
+                {
+                    String fileName = im.getFile().getName();
+                    autoText = fileName.substring(0, fileName.lastIndexOf('.'));
+                }
+                catch (Exception e)
+                {
+                    // Just display the saved name
+                }
                 automatic = ((ExternalImage)im).isNameAutomatic();
                 content.add(autoBox = new BCheckBox(Translate.text("Automatic"), automatic));
                 autoBox.addEventLink(ValueChangedEvent.class, this , "autoChanged");

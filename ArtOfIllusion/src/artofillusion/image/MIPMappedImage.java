@@ -591,10 +591,8 @@ public class MIPMappedImage extends ImageMap
     Image map = mapImage.get();
     if (n != lastMapNumber || map == null)
     {
-      System.out.println("MIP N " + n);
       map = getImage(n);
       lastMapNumber = n;
-      //map = getImageOfClosestMap(size);
       mapImage = new SoftReference(map);
     }
     lastPreviewSize = size;
@@ -612,13 +610,7 @@ public class MIPMappedImage extends ImageMap
 
   private int getMapNumber(int size)
   {
-    //if (maps.length == 1)
-    //  return 0;
-
     int n, pw, ph;
-    //int w = getWidth();
-    //int h = getHeight();
-
     pw = max(min(size, (int)round(size*aspectRatio)),1);
     ph = max(min(size, (int)round(size/aspectRatio)),1);
     for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);

@@ -420,14 +420,14 @@ public class ImagesDialog extends BDialog
         if ((scrollIncrement < 0 && bar.getValue()+scrollIncrement <= scrollFinalValue) ||
             (scrollIncrement > 0 && bar.getValue()+scrollIncrement >= scrollFinalValue) )
           {
-          timer.stop();
-               bar.setValue(scrollFinalValue);
+            timer.stop();
+              bar.setValue(scrollFinalValue);
           }
         else
           {
-               bar.setValue(bar.getValue()+scrollIncrement);
-               step++;
-               timer.restart();
+            bar.setValue(bar.getValue()+scrollIncrement);
+            step++;
+            timer.restart();
           }
       }
     });
@@ -490,7 +490,8 @@ public class ImagesDialog extends BDialog
       Font textFont = templateFont.deriveFont((float)(previewSize/40+7));
 
       textSize = (int)Math.round(textFont.getSize2D());
-      iconSize = textSize+13+previewSize/50;
+      iconSize = textSize+21+previewSize/50;
+      //iconSize = textSize+13+previewSize/50;
       if (iconSize != lastIconSize)
       {
         inUseIcon      = loadIcon("in_use.png").getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
@@ -519,35 +520,32 @@ public class ImagesDialog extends BDialog
         g.drawImage(bgImage, (i%w)*gridw+5+cOff, (i/w)*gridh+5, getComponent());
         
         currentImage = theScene.getImage(i);
-        //if (resizing)
-        //   quickPaint(g,i); // This doesn not eem to be much quicker, but just coarser.
-        //else
         smoothPaint(g, i);
+        // quickPaint(g,i); // This does not seem to be much quicker, but just coarser.
 
         x = (i%w)*gridw+cOff;
         y = (i/w)*gridh;
-        
+
+        if (selection == i)
+        {
+          x = (selection%w)*gridw+cOff;
+          y = (selection/w)*gridh;
+          g.setColor(selectedColor);
+          g.drawRect(x+1, y+1, gridw-3, gridh-3);
+          g.drawRect(x+2, y+2, gridw-5, gridh-5);
+          g.drawRect(x+3, y+3, gridw-7, gridh-7);
+          g.drawRect(x+4, y+4, gridw-9, gridh-9);
+        }
+
         drawName(g, textFont, i);
         if (currentImage instanceof ExternalImage)
           if (((ExternalImage)currentImage).isConnected())
-            g.drawImage(linkedIcon,(i%w)*gridw+5+cOff, (i/w)*gridh+5+previewSize-iconSize, getComponent());
+            g.drawImage(linkedIcon,(i%w)*gridw+1+cOff, (i/w)*gridh+9+previewSize-iconSize, getComponent());
           else
-            g.drawImage(linkBrokenIcon,(i%w)*gridw+5+cOff, (i/w)*gridh+5+previewSize-iconSize, getComponent());
+            g.drawImage(linkBrokenIcon,(i%w)*gridw+1+cOff, (i/w)*gridh+9+previewSize-iconSize, getComponent());
         for (int t = 0; t < theScene.getNumTextures(); t++)
           if (theScene.getTexture(t).usesImage(currentImage))
-          {
-            g.drawImage(inUseIcon,(i%w)*gridw+5+cOff+previewSize-iconSize, (i/w)*gridh+5+previewSize-iconSize, getComponent());
-          }
-      }
-      if (selection >= 0)
-      {
-        x = (selection%w)*gridw+cOff;
-        y = (selection/w)*gridh;
-        g.setColor(selectedColor);
-        g.drawRect(x+1, y+1, gridw-3, gridh-3);
-        g.drawRect(x+2, y+2, gridw-5, gridh-5);
-        g.drawRect(x+3, y+3, gridw-7, gridh-7);
-        g.drawRect(x+4, y+4, gridw-9, gridh-9);
+            g.drawImage(inUseIcon,(i%w)*gridw+9+cOff+previewSize-iconSize, (i/w)*gridh+9+previewSize-iconSize, getComponent());
       }
     }
 
@@ -806,7 +804,6 @@ public class ImagesDialog extends BDialog
     {
       String title   = Translate.text("confirmTitle");
       String warning = Translate.text("purgeWarningHEAD") + " " + count + " " +
-                       Translate.text("purgeWarningTAIL") + "\n" + 
                        Translate.text("purgeWarningTAIL") + "\n" + 
                        Translate.text("purgeConfirmQuestion");
 

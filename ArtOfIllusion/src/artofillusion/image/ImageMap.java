@@ -59,18 +59,18 @@ public abstract class ImageMap
   {
     String name = file.getName().toLowerCase();
     if (name.endsWith(".hdr") || name.endsWith(".hdri") || name.endsWith(".pic"))
+    {
+      try
       {
-        try
-        {
-          ImageMap im = HDRDecoder.createImage(file);
-          im.setDataCreated(file);
-          return im;
-        }
-        catch (Exception ex)
-        {
-          ex.printStackTrace();
-        }
+        ImageMap im = HDRDecoder.createImage(file);
+        im.setDataCreated(file);
+        return im;
       }
+      catch (Exception ex)
+      {
+        ex.printStackTrace();
+      }
+    }
     if (name.endsWith(".svg"))
       return new SVGImage(file);
     return new MIPMappedImage(file);

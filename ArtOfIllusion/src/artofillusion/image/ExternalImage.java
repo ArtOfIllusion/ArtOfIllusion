@@ -166,9 +166,10 @@ public class ExternalImage extends ImageMap
   public Image getPreview(int size)
   {
     if (connected)
-        return imageMap.getPreview(size);
-    else
-        return brokenImage.getScaledInstance(size, size, Image.SCALE_SMOOTH);
+      return imageMap.getPreview(size);
+    if (size <= 256)
+      return brokenImage.getScaledInstance(size, size, Image.SCALE_SMOOTH);
+    return createTemporaryImage(size, size); // The case of details dialog
   }
   
   // @Override
@@ -205,50 +206,71 @@ public class ExternalImage extends ImageMap
     }
   }
 
-  private void createTemporaryImage()
+  private void setTemporaryImage()
   {
-    if (brokenImage != null)
+    // This indicates, that also the temporary image has been created and set.
+    // The 'brokenImage' must be set null, when an image is succesfully loaded.
+    
+    if (brokenImage != null) 
       return;
-  
-    // this should not be possible
-    if (w <= 0 || h <= 0)
-      w = h = 256;
+
     try
     {
-      brokenImage = loadIcon(imageType+ ".png");
+      // This shoud not be possible
+      if (w <= 0 || h <= 0)
+        w = h = 256;
+      imageMap = new MIPMappedImage(createTemporaryImage(w, h));
+    }
+    catch (Exception e)
+    {
+       // This should not happen
+    }
+  }
+  
+  private BufferedImage createTemporaryImage(int imageW, int imageH)
+  {
+    BufferedImage tempImg;
+    try
+    {
+      brokenImage = loadIcon(imageType + ".png");
       int wto = brokenImage.getWidth(null);
       int hto = brokenImage.getHeight(null);
       
-      int nwm = (int)Math.ceil((float)w/(float)wto);
-      int nhm = (int)Math.ceil((float)h/(float)hto);
+      int nwm = (int)Math.ceil((float)imageW/(float)wto);
+      int nhm = (int)Math.ceil((float)imageH/(float)hto);
       
-      float scale = Math.min((float)w/(float)nwm/(float)wto, (float)h/(float)nhm/(float)hto);
+      float scale = Math.min((float)imageW/(float)nwm/(float)wto, (float)imageH/(float)nhm/(float)hto);
       int tw = (int)(wto*scale);
       int th = (int)(hto*scale);
       
       Image tile = brokenImage.getScaledInstance(tw, th, Image.SCALE_SMOOTH);
-      BufferedImage tempImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+      tempImg = new BufferedImage(imageW, imageH, BufferedImage.TYPE_INT_ARGB);
       Graphics2D g2 = tempImg.createGraphics();
       
-      if (type == "RGB")
-        g2.setColor(new Color(223,223,223,255));
+      if (type == "RGB" || type == "HDR" || type == "GRAY")
+        g2.setColor(new Color(127,127,127,255));
       else
-        g2.setColor(new Color(223,223,223,63));
-      g2.fillRect(0,0,w,h);
+        g2.setColor(new Color(255,255,255,0));
+      g2.fillRect(0,0,imageW,imageH);
 
-      int nw = w/tw;
-      int nh = h/th;
+      int nw = imageW/tw;
+      int nh = imageH/th;
       
       for (int i = 0; i < nw; i++)
         for (int j = 0; j < nh; j++)
-          g2.drawImage(tile, (w*i/nw), (h*j/nh), null);
+          g2.drawImage(tile, (imageW*i/nw), (imageH*j/nh), null);
       g2.dispose();
-      imageMap = new MIPMappedImage(tempImg);
     }
     catch (Exception e)
     {
-      // This should never be needed if the icon image was in the compiled .jar
+      // This should never be needed if the icon image is in the compiled .jar
+      tempImg = new BufferedImage(imageW, imageH, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D g2 = tempImg.createGraphics();
+      g2.setColor(new Color(127,63,63,127));
+      g2.fillRect(0,0,imageW,imageH);
+      g2.dispose();      
     }
+    return tempImg;
   }
 
   public void refreshImage()
@@ -281,7 +303,7 @@ public class ExternalImage extends ImageMap
       if (!connected)
         return;
       connected = false;
-      createTemporaryImage();
+      setTemporaryImage();
       return;
     }
   }
@@ -310,7 +332,7 @@ public class ExternalImage extends ImageMap
     catch(Exception e)
     {
       connected = false;
-      createTemporaryImage();
+      setTemporaryImage();
       throw e;
     }
   }
@@ -363,7 +385,7 @@ public class ExternalImage extends ImageMap
     catch(Exception e)
     {
       connected = false;
-      createTemporaryImage();
+      setTemporaryImage();
     }
   }
 

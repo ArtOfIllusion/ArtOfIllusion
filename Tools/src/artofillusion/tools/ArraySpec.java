@@ -2,6 +2,7 @@
    This also sets the default values in the dialog.*/
 
 /* Copyright 2001 Rick van der Meiden
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -58,10 +59,10 @@ public class ArraySpec
             Set to METHOD_CURVE to create an array along a curve. */
         public int method;
         /** the objects that should be copied to create an array */
-        public Vector objectList;         // list of objectInfo's
+        public Vector<ObjectInfo> objectList;         // list of objectInfo's
 
         // linear paramters
-        /** Number of copies to make for a linar array. */
+        /** Number of copies to make for a linear array. */
         public int linearCopies;                        
         /** step size in X direction for a linear array. */
         public double stepX;
@@ -69,11 +70,11 @@ public class ArraySpec
         public double stepY;
         /** step size in Z direction for a linear array. */
         public double stepZ;
-        /** when set, stepX is multiplied by the objects boudingbox x size */
+        /** when set, stepX is multiplied by the objects boundingbox x size */
         public boolean intervalX;
-        /** when set, stepY is multiplied by the objects boudingbox y size */
+        /** when set, stepY is multiplied by the objects boundingbox y size */
         public boolean intervalY;
-        /** when set, stepZ is multiplied by the objects boudingbox z size */
+        /** when set, stepZ is multiplied by the objects boundingbox z size */
         public boolean intervalZ;
 
         // spline parameters
@@ -90,7 +91,7 @@ public class ArraySpec
         public double curveStep;
         /** When set, curveStep is multiplied by the size of the object. Not Used. */
         public boolean curveInterval;
-        /** When set, the orientationof the object(s) follow the curve.*/
+        /** When set, the orientation of the object(s) follow the curve.*/
         public boolean orientation;
         /** When set, the initial position of the object is ignored.
                 The object will pivot abouts its origin instead of about a point on the path curve */
@@ -103,7 +104,7 @@ public class ArraySpec
 
         /** If set, an instance of the object(s) will be created at
                 first position of the array (linear displacement 0 or the
-                beginning of the splien curve. */
+                beginning of the spline curve. */
         public boolean dupFirst;
         /** If set, group all the objects together as children of a null object. */
         public boolean group;
@@ -125,11 +126,11 @@ public class ArraySpec
                 // set list of object to copy (all selected objects)
                 Scene scene = window.getScene();
                 int selection[] = window.getSelectedIndices();
-                objectList = new Vector();         // list of objectInfo's
+                objectList = new Vector<ObjectInfo>();         // list of objectInfo's
                 for (int sel=0; sel<selection.length;sel++)
                 {
                         ObjectInfo info = scene.getObject(selection[sel]);
-                        objectList.addElement(info);
+                        objectList.add(info);
                 }
 
                 // set paramters
@@ -157,14 +158,14 @@ public class ArraySpec
 
         }
         
-  /** create an array of objects with current paramter settings */ 
+  /** create an array of objects with current parameter settings */ 
      
   public void createArray ()
   {
         undo = new UndoRecord(window, false);
 
         // create a group object, even when not grouping
-        ObjectInfo info = (ObjectInfo)objectList.elementAt(0);
+        ObjectInfo info = objectList.get(0);
         String name = "Array of " + info.getName();
 
         CoordinateSystem coords = new CoordinateSystem(new Vec3(0,0,0), Vec3.vz(), Vec3.vy());
@@ -213,7 +214,7 @@ public class ArraySpec
         for (int i=0; i<objectList.size(); i++)
         {
                 // get object
-                ObjectInfo info = (ObjectInfo)objectList.elementAt(i);
+                ObjectInfo info = objectList.get(i);
 
                 // calculate displacement vector
                 Vec3 displacement = new Vec3(stepX, stepY, stepZ);
@@ -273,7 +274,7 @@ public class ArraySpec
         for (int i=0; i<objectList.size(); i++)
         {
                 // get object
-                ObjectInfo info = (ObjectInfo)objectList.elementAt(i);
+                ObjectInfo info = objectList.get(i);
 
                 for (int n=startCount; n<curveCopies; n++)
                 {
@@ -321,7 +322,7 @@ public class ArraySpec
   }
 
   /** create a copy (or live duplicate) of an object,
-      tranform its coordinate system and add it to the group object
+      transform its coordinate system and add it to the group object
   */
 
   private ObjectInfo createCopy (ObjectInfo info, Mat4 trans)
@@ -345,7 +346,7 @@ public class ArraySpec
         return newinfo;
   }
 
-  /** create a copy (or live diplicate) of an object, add it to  and tranform
+  /** create a copy (or live duplicate) of an object, add it to  and transform
         its coordinate system. */
 
   private ObjectInfo createChildCopy (ObjectInfo info, Mat4 trans)

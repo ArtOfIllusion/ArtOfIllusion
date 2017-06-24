@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -622,7 +623,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
 	if (selected.length == 0)
 		return;
 
-	ArrayList selection = new ArrayList<ObjectInfo>();
+	ArrayList<ObjectInfo> selection = new ArrayList<ObjectInfo>();
 	
 	// This did not work if only object 1 was selected. Strange bug.
 	//for (int s : selected)

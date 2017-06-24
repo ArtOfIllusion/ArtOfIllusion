@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
+   Changes copyright (C) 2017 by Maksim Khramov
 
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
 
@@ -17,8 +18,8 @@ package artofillusion.procedural;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.util.List;
 import java.util.*;
-import java.lang.*;
 import java.lang.reflect.*;
 import java.io.*;
 import artofillusion.*;
@@ -107,12 +108,12 @@ class Token {
     public double numValue;
     public char ty;
 
-    static Hashtable funMap = createFunMap ();
+    static Hashtable<String, OPort> funMap = createFunMap ();
     //    static Hashtable portMap = createPortMap ();
 
 
-    static Hashtable createFunMap () {
-        Hashtable fm = new Hashtable ();
+    static Hashtable<String, OPort> createFunMap () {
+        Hashtable<String, OPort> fm = new Hashtable<String, OPort> ();
         //For version two, pull these out of a config file
         fm.put ("sin",  new OPort (new SineModule (new Point ()), 0));
         fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0));
@@ -184,7 +185,7 @@ class ModuleLoader {
     }
     public static boolean moduleExists (String name) {
         try {
-            Class moduleClass = ArtOfIllusion.getClass (name);
+            ArtOfIllusion.getClass (name);
             return true;
         } catch (ClassNotFoundException e) {
             return false;
@@ -232,10 +233,10 @@ class ModuleLoader {
 public class ExprModule extends Module
 {
 
-    Hashtable varTable;
+    private Hashtable<String, OPort> varTable;
     Module [] inputs;
     Module [] myModules;
-    Vector moduleVec;
+    private Vector<Module> moduleVec;
     OPort compiled;
     Token [] tokens;
     Token currTok;
@@ -243,7 +244,7 @@ public class ExprModule extends Module
     PointInfo point;
     Point zero = new Point (0,0);
     String expr;
-    Vector errors;
+    private Vector<String> errors;
 
     public ExprModule(Point position)
     {
@@ -327,7 +328,7 @@ public class ExprModule extends Module
           new String [] {"Calculate:"});
         if (!dlg.clickedOk())
             return false;
-        errors = new Vector();
+        errors = new Vector<String>();
         try
         {
           setExpr (exprField.getText().toLowerCase ());
@@ -450,8 +451,8 @@ public class ExprModule extends Module
     }
 
     void initVarTable () {
-        varTable = new Hashtable ();
-        moduleVec = new Vector();
+        varTable = new Hashtable<String, OPort>();
+        moduleVec = new Vector<Module>();
 
         CoordinateModule x, y, z, t;
         x = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
@@ -490,8 +491,7 @@ public class ExprModule extends Module
         initVarTable ();
         getToken ();
         compiled = expr (false);
-        myModules = new Module [moduleVec.size()];
-        moduleVec.copyInto(myModules);
+        myModules = moduleVec.toArray(new Module[moduleVec.size()]);
         if (compiled == null)
           compiled = new OPort(new NumberModule(new Point (), 0.0), 0);
         debug.print ("Compiled form: " + compiled);
@@ -523,7 +523,7 @@ public class ExprModule extends Module
 
         } else if (!moduleVec.contains(m)) {
             debug.print ("Adding module " + m + " to the module list at position " + moduleVec.size());
-            moduleVec.addElement(m);
+            moduleVec.add(m);
         }
     }
 
@@ -592,7 +592,7 @@ public class ExprModule extends Module
                 debug.print ("No variable " + currTok.strValue);
                 return null;
             }
-            port = (OPort) varTable.get (currTok.strValue);
+            port = varTable.get (currTok.strValue);
             if (port == null) {
                 addError ("There was no value assigned variable " + currTok.strValue + ".");
                 port = createNumberPort (0.0f);
@@ -631,10 +631,10 @@ public class ExprModule extends Module
 
         OPort func = getOPort (name);
 
-        Vector s = new Vector ();
+        Vector<OPort> s = new Vector<OPort> ();
         //get args
         while (currTok.ty != Token.RP && currTok.ty != Token.END) {
-            s.addElement (expr (false));
+            s.add (expr (false));
             //skip comma
             if (currTok.ty == Token.COMMA) {
                 getToken ();
@@ -652,7 +652,7 @@ public class ExprModule extends Module
         }
 
         for (int i = 0; i < s.size(); i ++) {
-            OPort arg = (OPort) s.elementAt (i);
+            OPort arg = s.get (i);
             IOPort [] inp = func.module.getInputPorts();
             IOPort inport = inp [func.args [i].iport];
             func.module.setInput (inport, arg.getOPort ());
@@ -669,7 +669,7 @@ public class ExprModule extends Module
             debug.print ("No such function: " + name);
             return null;
         }
-        op = (OPort) Token.funMap.get (name);
+        op = Token.funMap.get (name);
         return new OPort(op.module.duplicate(), op.oport, op.args);
     }
 
@@ -713,7 +713,7 @@ public class ExprModule extends Module
       if (errors == null)
         System.err.println(msg);
       else
-        errors.addElement(msg);
+        errors.add(msg);
     }
 
     /* Display the error messages in a dialog. */
@@ -724,7 +724,7 @@ public class ExprModule extends Module
 
       msg[0] = "Your expression contains the following errors:";
       for (int i = 0; i < errors.size(); i++)
-        msg[i+1] = (String) errors.elementAt(i);
+        msg[i+1] = errors.get(i);
       new BStandardDialog("", msg, BStandardDialog.INFORMATION).showMessageDialog(fr);
     }
 }

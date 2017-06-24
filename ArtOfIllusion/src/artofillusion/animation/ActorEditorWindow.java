@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -115,13 +116,13 @@ public class ActorEditorWindow extends BDialog
     currentPoseTable = new BTable(tableModel);
     currentPoseTable.setMultipleSelectionEnabled(false);
     currentPoseTable.addEventLink(SelectionChangedEvent.class, this, "updateComponents");
-    TableColumn column = ((JTable) currentPoseTable.getComponent()).getColumnModel().getColumn(1);
+    TableColumn column = currentPoseTable.getComponent().getColumnModel().getColumn(1);
     column.setCellEditor(new ValueEditor());
     ValueRenderer renderer = new ValueRenderer();
     column.setCellRenderer(renderer);
     column.setMinWidth(renderer.getPreferredSize().width);
     column.setMaxWidth(renderer.getPreferredSize().width);
-    ((JTable) currentPoseTable.getComponent()).setRowHeight(renderer.getPreferredSize().height);
+    currentPoseTable.getComponent().setRowHeight(renderer.getPreferredSize().height);
     BScrollPane tableScrollPane = new BScrollPane(currentPoseTable, BScrollPane.SCROLLBAR_NEVER, BScrollPane.SCROLLBAR_ALWAYS);
     tableScrollPane.setPreferredViewSize(new Dimension(250, 5*renderer.getPreferredSize().height));
     content.add(BOutline.createBevelBorder(tableScrollPane, false), 2, 0);
@@ -458,7 +459,7 @@ public class ActorEditorWindow extends BDialog
           selector.layoutChildren();
         }
       };
-      selector.setBackground(((JTable) currentPoseTable.getComponent()).getSelectionBackground());
+      selector.setBackground(currentPoseTable.getComponent().getSelectionBackground());
       selector.addEventLink(ValueChangedEvent.class, new Object() {
         void processEvent()
         {

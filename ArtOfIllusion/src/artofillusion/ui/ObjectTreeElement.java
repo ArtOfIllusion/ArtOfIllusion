@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,7 +37,7 @@ public class ObjectTreeElement extends TreeElement
     children = new Vector<TreeElement>();
     if (addChildren)
       for (int i = 0; i < info.getChildren().length; i++)
-        children.addElement(new ObjectTreeElement(info.getChildren()[i], this, tree, true));
+        children.add(new ObjectTreeElement(info.getChildren()[i], this, tree, true));
   }
 
   /* Get the label to display for this element. */
@@ -86,7 +87,7 @@ public class ObjectTreeElement extends TreeElement
   @Override
   public void addChild(TreeElement el, int position)
   {
-    children.insertElementAt(el, position);
+    children.add(position, el);
     el.parent = this;
     if (el.getObject() instanceof ObjectInfo)
       {
@@ -114,18 +115,18 @@ public class ObjectTreeElement extends TreeElement
 
     for (pos = 0; pos < children.size(); pos++)
       {
-        el = (TreeElement) children.elementAt(pos);
+        el = children.get(pos);
         if (el.getObject() == object)
           break;
       }
     if (pos == children.size())
       {
         for (int i = 0; i < children.size(); i++)
-          ((TreeElement) children.elementAt(i)).removeChild(object);
+          children.get(i).removeChild(object);
         return;
       }
     el.parent = null;
-    children.removeElementAt(pos);
+    children.remove(pos);
     if (object instanceof Track)
       {
         info.removeTrack((Track) object);
@@ -160,7 +161,7 @@ public class ObjectTreeElement extends TreeElement
     for (int i = 0; i < info.getTracks().length; i++)
       {
         TreeElement el = new TrackTreeElement(info.getTracks()[i], this, tree);
-        children.insertElementAt(el, i);
+        children.add(i, el);
       }
   }
 }

@@ -434,7 +434,7 @@ public class Cylinder extends Object3D
   @Override
   public Property[] getProperties()
   {
-    return (Property []) PROPERTIES.clone();
+    return PROPERTIES.clone();
   }
 
   @Override

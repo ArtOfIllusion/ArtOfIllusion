@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,7 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.object.TriangleMesh.*;
 import artofillusion.texture.*;
+import java.util.List;
 import java.util.Vector;
 
 /** TriMeshBeveler defines methods for beveling/extruding a TriangleMesh. */
@@ -82,7 +84,8 @@ public class TriMeshBeveler
     Edge e[] = mesh.getEdges();
     Face f[] = mesh.getFaces();
     int i, j;
-    Vector face = new Vector(), vert = new Vector();
+    List<int[]> face = new Vector<int[]>();
+    List<Vertex> vert = new Vector<Vertex>();
 
     newIndex = new Vector();
     findVertexInsets(height, width);
@@ -90,7 +93,7 @@ public class TriMeshBeveler
     // All old vertices will be in the new mesh, so first copy them over.
 
     for (i = 0; i < v.length; i++)
-      vert.addElement(v[i]);
+      vert.add(v[i]);
 
     // Create the new list of faces.
 
@@ -99,20 +102,20 @@ public class TriMeshBeveler
 	if (selected[i])
 	  {
 	    j = vert.size();
-	    vert.addElement(offsetVertex(mesh, v[f[i].v1], faceInsets[i][0]));
-	    vert.addElement(offsetVertex(mesh, v[f[i].v2], faceInsets[i][1]));
-	    vert.addElement(offsetVertex(mesh, v[f[i].v3], faceInsets[i][2]));
+	    vert.add(offsetVertex(mesh, v[f[i].v1], faceInsets[i][0]));
+	    vert.add(offsetVertex(mesh, v[f[i].v2], faceInsets[i][1]));
+	    vert.add(offsetVertex(mesh, v[f[i].v3], faceInsets[i][2]));
 	    newIndex.addElement(face.size());
-	    face.addElement(new int [] {j, j+1, j+2, i});
-	    face.addElement(new int [] {f[i].v1, f[i].v2, j, i});
-	    face.addElement(new int [] {j, f[i].v2, j+1, i});
-	    face.addElement(new int [] {f[i].v2, f[i].v3, j+1, i});
-	    face.addElement(new int [] {j+1, f[i].v3, j+2, i});
-	    face.addElement(new int [] {f[i].v3, f[i].v1, j+2, i});
-	    face.addElement(new int [] {j+2, f[i].v1, j, i});
+	    face.add(new int [] {j, j+1, j+2, i});
+	    face.add(new int [] {f[i].v1, f[i].v2, j, i});
+	    face.add(new int [] {j, f[i].v2, j+1, i});
+	    face.add(new int [] {f[i].v2, f[i].v3, j+1, i});
+	    face.add(new int [] {j+1, f[i].v3, j+2, i});
+	    face.add(new int [] {f[i].v3, f[i].v1, j+2, i});
+	    face.add(new int [] {j+2, f[i].v1, j, i});
 	  }
 	else
-	  face.addElement(new int [] {f[i].v1, f[i].v2, f[i].v3, i});
+	  face.add(new int [] {f[i].v1, f[i].v2, f[i].v3, i});
       }
     prepareMesh(mesh, face, vert, null);
 
@@ -195,7 +198,11 @@ public class TriMeshBeveler
     int i, j, k, m, n, newface[][], vertFace[][], numVertFaces[], tempFace[], bev[];
     int group[], touchCount[], groupCount;
     Vec3 temp = new Vec3();
-    Vector face = new Vector(), vert = new Vector(), bevel = new Vector();
+    
+    List<int[]> face = new Vector<int[]>();
+    Vector<Vertex> vert = new Vector<Vertex>();
+    List<int[]> bevel = new Vector<int[]>();
+    
     boolean someSelected[] = new boolean [v.length], allSelected[] = new boolean [v.length];
     boolean touching[][], inGroup[], beveled[] = new boolean [e.length];
     double coeff[][] = new double [3][3], rhs[] = new double [3];
@@ -206,9 +213,9 @@ public class TriMeshBeveler
     // First copy over the old faces and vertices.  (Some of these will be modified later.)
 
     for (i = 0; i < v.length; i++)
-      vert.addElement(v[i]);
+      vert.add(v[i]);
     for (i = 0; i < f.length; i++)
-      face.addElement(new int [] {f[i].v1, f[i].v2, f[i].v3, i});
+      face.add(new int [] {f[i].v1, f[i].v2, f[i].v3, i});
 
     // Each vertex goes into one of three categories: NONE of the faces touching it are
     // selected, ALL of the faces touching it are selected, or (the complicated case) SOME
@@ -285,7 +292,8 @@ public class TriMeshBeveler
 	    coeff[2][1] = coeff[1][2];
 	    SVD.solve(coeff, rhs, 1e-3);
 	    temp.set(rhs[0], rhs[1], rhs[2]);
-	    vert.setElementAt(offsetVertex(mesh, (Vertex) vert.elementAt(i), temp), i);
+	    vert.setElementAt(offsetVertex(mesh, (Vertex) vert.get(i), temp), i);
+            
 	  }
         else if (someSelected[i])
 	  {
@@ -352,12 +360,12 @@ public class TriMeshBeveler
 		    m = n = -1;
 		    if (e[f1.e1].v1 == i || e[f1.e1].v2 == i)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[0]], f1.e1});
+			bevel.add(new int [] {vertFace[i][group[0]], f1.e1});
 			m = 0;
 		      }
 		    if (e[f1.e2].v1 == i || e[f1.e2].v2 == i)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[0]], f1.e2});
+			bevel.add(new int [] {vertFace[i][group[0]], f1.e2});
 			if (m == -1)
 			  m = 1;
 			else
@@ -365,7 +373,7 @@ public class TriMeshBeveler
 		      }
 		    if (e[f1.e3].v1 == i || e[f1.e3].v2 == i)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[0]], f1.e3});
+			bevel.add(new int [] {vertFace[i][group[0]], f1.e3});
 			n = 2;
 		      }
 		  }
@@ -378,17 +386,17 @@ public class TriMeshBeveler
 		    f2 = f[vertFace[i][group[1]]];
 		    if ((e[f1.e1].v1 == i || e[f1.e1].v2 == i) && f2.e1 != f1.e1 && f2.e2 != f1.e1 && f2.e3 != f1.e1)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[0]], f1.e1});
+			bevel.add(new int [] {vertFace[i][group[0]], f1.e1});
 			m = 0;
 		      }
 		    else if ((e[f1.e2].v1 == i || e[f1.e2].v2 == i) && f2.e1 != f1.e2 && f2.e2 != f1.e2 && f2.e3 != f1.e2)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[0]], f1.e2});
+			bevel.add(new int [] {vertFace[i][group[0]], f1.e2});
 			m = 1;
 		      }
 		    else
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[0]], f1.e3});
+			bevel.add(new int [] {vertFace[i][group[0]], f1.e3});
 			m = 2;
 		      }
 
@@ -398,17 +406,17 @@ public class TriMeshBeveler
 		    f2 = f[vertFace[i][group[groupCount-2]]];
 		    if ((e[f1.e1].v1 == i || e[f1.e1].v2 == i) && f2.e1 != f1.e1 && f2.e2 != f1.e1 && f2.e3 != f1.e1)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[groupCount-1]], f1.e1});
+			bevel.add(new int [] {vertFace[i][group[groupCount-1]], f1.e1});
 			n = 0;
 		      }
 		    else if ((e[f1.e2].v1 == i || e[f1.e2].v2 == i) && f2.e1 != f1.e2 && f2.e2 != f1.e2 && f2.e3 != f1.e2)
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[groupCount-1]], f1.e2});
+			bevel.add(new int [] {vertFace[i][group[groupCount-1]], f1.e2});
 			n = 1;
 		      }
 		    else
 		      {
-			bevel.addElement(new int [] {vertFace[i][group[groupCount-1]], f1.e3});
+			bevel.add(new int [] {vertFace[i][group[groupCount-1]], f1.e3});
 			n = 2;
 		      }
 		  }
@@ -432,14 +440,14 @@ public class TriMeshBeveler
 		rhs[2] = 2.0*height;
 		SVD.solve(coeff, rhs, 1e-3);
 		temp.set(rhs[0], rhs[1], rhs[2]);
-		vert.addElement(offsetVertex(mesh, (Vertex) vert.elementAt(i), temp));
+		vert.addElement(offsetVertex(mesh, vert.get(i), temp));
 
 		// Modify the faces to use the new vertex.
 
 		k = vert.size()-1;
 		for (j = 0; j < groupCount; j++)
 		  {
-		    tempFace = (int []) face.elementAt(vertFace[i][group[j]]);
+		    tempFace = face.get(vertFace[i][group[j]]);
 		    f1 = f[vertFace[i][group[j]]];
 		    if (f1.v1 == i)
 		      tempFace[0] = k;
@@ -458,7 +466,7 @@ public class TriMeshBeveler
 
     for (i = 0; i < bevel.size(); i++)
       {
-	bev = (int []) bevel.elementAt(i);
+	bev = bevel.get(i);
 	if (beveled[bev[1]])
 	  continue;
 	beveled[bev[1]] = true;
@@ -472,7 +480,7 @@ public class TriMeshBeveler
 	    j = k;
 	    k = m;
 	  }
-	tempFace = (int []) face.elementAt(bev[0]);
+	tempFace = face.get(bev[0]);
 	if (f[bev[0]].v1 == j)
 	  m = tempFace[0];
 	else if (f[bev[0]].v2 == j)
@@ -485,8 +493,8 @@ public class TriMeshBeveler
 	  n = tempFace[1];
 	else
 	  n = tempFace[2];
-	face.addElement(new int [] {j, k, m, bev[0]});
-	face.addElement(new int [] {m, k, n, bev[0]});
+	face.add(new int [] {j, k, m, bev[0]});
+	face.add(new int [] {m, k, n, bev[0]});
       }
 
     // There!  Nothing left to do but construct the new mesh.
@@ -589,7 +597,8 @@ public class TriMeshBeveler
     int vertIndex[] = new int [v.length];
     int extraVertIndex[][] = new int [v.length][], vertEdgeIndex[][] = new int [v.length][];
     boolean forward[] = new boolean [v.length];
-    Vector face = new Vector(), vert = new Vector();
+    List<int[]> face = new Vector<int[]>();
+    List<Vertex> vert = new Vector<Vertex>();
 
     // Create the vertices of the new mesh.
 
@@ -600,7 +609,7 @@ public class TriMeshBeveler
         // Just copy over this vertex.
 
         vertIndex[i] = vert.size();
-        vert.addElement(v[i]);
+        vert.add(v[i]);
         continue;
       }
 
@@ -630,14 +639,14 @@ public class TriMeshBeveler
       {
         extraVertIndex[i][j] = vert.size();
         double dist = (dot[j] == 0.0 ? width : bevelDist/dot[j]);
-        vert.addElement(offsetVertex(mesh, v[i], edgeDir[j].times(dist)));
+        vert.add(offsetVertex(mesh, v[i], edgeDir[j].times(dist)));
       }
 
       // Position the central vertex.
 
       boolean convex = (norm[i].dot(edgeDir[0]) < 0.0);
       vertIndex[i] = vert.size();
-      vert.addElement(offsetVertex(mesh, v[i], norm[i].times(convex ? height-bevelDist : height+bevelDist)));
+      vert.add(offsetVertex(mesh, v[i], norm[i].times(convex ? height-bevelDist : height+bevelDist)));
 
       // Determine which way the vertices are ordered.
 
@@ -683,20 +692,20 @@ public class TriMeshBeveler
       // We now need to triangulate the vertices and create new faces.
 
       if (numVert == 3)
-        face.addElement(new int [] {newVert[0], newVert[1], newVert[2], i});
+        face.add(new int [] {newVert[0], newVert[1], newVert[2], i});
       else if (numVert == 4)
       {
-        face.addElement(new int [] {newVert[0], newVert[1], newVert[2], i});
-        face.addElement(new int [] {newVert[0], newVert[2], newVert[3], i});
+        face.add(new int [] {newVert[0], newVert[1], newVert[2], i});
+        face.add(new int [] {newVert[0], newVert[2], newVert[3], i});
       }
       else
         for (int step = 1; 2*step < numVert; step *= 2)
           {
             int start;
             for (start = 0; start+2*step < numVert; start += 2*step)
-              face.addElement(new int [] {newVert[start], newVert[start+step], newVert[start+2*step], i});
+              face.add(new int [] {newVert[start], newVert[start+step], newVert[start+2*step], i});
             if (start+step < numVert)
-              face.addElement(new int [] {newVert[start], newVert[start+step], newVert[0], i});
+              face.add(new int [] {newVert[start], newVert[start+step], newVert[0], i});
           }
     }
 
@@ -710,9 +719,9 @@ public class TriMeshBeveler
       {
         int prev = (j == 0 ? vertEdgeIndex[i].length-1 : j-1);
         if (forward[i])
-          face.addElement(new int [] {extraVertIndex[i][j], extraVertIndex[i][prev], vertIndex[i], -1});
+          face.add(new int [] {extraVertIndex[i][j], extraVertIndex[i][prev], vertIndex[i], -1});
         else
-          face.addElement(new int [] {extraVertIndex[i][prev], extraVertIndex[i][j], vertIndex[i], -1});
+          face.add(new int [] {extraVertIndex[i][prev], extraVertIndex[i][j], vertIndex[i], -1});
       }
     }
 
@@ -768,7 +777,8 @@ public class TriMeshBeveler
     int extraVertIndex[][] = new int [v.length][];
     int faceVertIndex[][] = new int [v.length][];
     boolean forward[] = new boolean [v.length];
-    Vector face = new Vector(), vert = new Vector();
+    Vector<int []> face = new Vector<int []>();
+    Vector<Vertex> vert = new Vector<Vertex>();
 
     // Find the bevel and extrude directions for every edge.
 
@@ -828,7 +838,7 @@ public class TriMeshBeveler
         // Just copy over this vertex.
 
         vertIndex[i] = vert.size();
-        vert.addElement(v[i]);
+        vert.add(v[i]);
         continue;
       }
 
@@ -963,17 +973,17 @@ public class TriMeshBeveler
       {
         Vec3 delta;
         double d;
-        delta = ((Vertex) vert.elementAt(vi[0])).r.minus(v[e[i].v1].r);
+        delta = vert.get(vi[0]).r.minus(v[e[i].v1].r);
         d = delta.dot(extrudeDir[i]);
         idealEndPos[i][0] = v[e[i].v1].r.plus(extrudeDir[i].times(d));
-        delta = ((Vertex) vert.elementAt(vi[1])).r.minus(v[e[i].v2].r);
+        delta = vert.get(vi[1]).r.minus(v[e[i].v2].r);
         d = delta.dot(extrudeDir[i]);
         idealEndPos[i][1] = v[e[i].v2].r.plus(extrudeDir[i].times(d));
       }
       else
       {
-        idealEndPos[i][0] = ((Vertex) vert.elementAt(vi[0])).r.plus(((Vertex) vert.elementAt(vi[2])).r).times(0.5);
-        idealEndPos[i][1] = ((Vertex) vert.elementAt(vi[1])).r.plus(((Vertex) vert.elementAt(vi[3])).r).times(0.5);
+        idealEndPos[i][0] = vert.get(vi[0]).r.plus(vert.get(vi[2]).r).times(0.5);
+        idealEndPos[i][1] = vert.get(vi[1]).r.plus(vert.get(vi[3]).r).times(0.5);
       }
     }
 
@@ -1078,20 +1088,20 @@ public class TriMeshBeveler
       // We now need to triangulate the vertices and create new faces.
 
       if (numVert == 3)
-        face.addElement(new int [] {newVert[0], newVert[1], newVert[2], i});
+        face.add(new int [] {newVert[0], newVert[1], newVert[2], i});
       else if (numVert == 4)
       {
-        face.addElement(new int [] {newVert[0], newVert[1], newVert[2], i});
-        face.addElement(new int [] {newVert[0], newVert[2], newVert[3], i});
+        face.add(new int [] {newVert[0], newVert[1], newVert[2], i});
+        face.add(new int [] {newVert[0], newVert[2], newVert[3], i});
       }
       else
         for (int step = 1; 2*step < numVert; step *= 2)
           {
             int start;
             for (start = 0; start+2*step < numVert; start += 2*step)
-              face.addElement(new int [] {newVert[start], newVert[start+step], newVert[start+2*step], i});
+              face.add(new int [] {newVert[start], newVert[start+step], newVert[start+2*step], i});
             if (start+step < numVert)
-              face.addElement(new int [] {newVert[start], newVert[start+step], newVert[0], i});
+              face.add(new int [] {newVert[start], newVert[start+step], newVert[0], i});
           }
     }
 
@@ -1140,8 +1150,8 @@ public class TriMeshBeveler
         Face fc = f[faceList[j]];
         if ((fc.v1 == e[i].v1 && fc.v3 == e[i].v2) || (fc.v2 == e[i].v1 && fc.v1 == e[i].v2) || (fc.v3 == e[i].v1 && fc.v2 == e[i].v2))
         {
-          face.addElement(new int [] {v0, v1, v2, -1});
-          face.addElement(new int [] {v2, v3, v0, -1});
+          face.add(new int [] {v0, v1, v2, -1});
+          face.add(new int [] {v2, v3, v0, -1});
         }
         else
         {
@@ -1199,17 +1209,17 @@ public class TriMeshBeveler
 
   /** Setup the final mesh. */
 
-  private void prepareMesh(TriangleMesh mesh, Vector face, Vector vert, int vertIndex[])
+  private void prepareMesh(TriangleMesh mesh, List<int[]> face, List<Vertex> vert, int vertIndex[])
   {
     int newface[][] = new int [face.size()][];
     Vertex newvert[] = new Vertex [vert.size()];
     for (int i = 0; i < face.size(); i++)
     {
-      int f[] = (int []) face.elementAt(i);
+      int f[] = face.get(i);
       newface[i] = new int [] {f[0], f[1], f[2]};
     }
     for (int i = 0; i < vert.size(); i++)
-      newvert[i] = (Vertex) vert.elementAt(i);
+      newvert[i] = vert.get(i);
     mesh.setShape(newvert, newface);
     ParameterValue oldParam[] = mesh.getParameterValues();
     ParameterValue newParam[] = new ParameterValue [oldParam.length];
@@ -1237,7 +1247,7 @@ public class TriMeshBeveler
         double defaultVal = mesh.getParameters()[i].defaultVal;
         for (int j = 0; j < newval.length; j++)
         {
-          int f[] = (int []) face.elementAt(j);
+          int f[] = face.get(j);
           if (f[3] == -1)
             newval[j] = defaultVal;
           else
@@ -1252,7 +1262,7 @@ public class TriMeshBeveler
         double defaultVal = mesh.getParameters()[i].defaultVal;
         for (int j = 0; j < face.size(); j++)
         {
-          int f[] = (int []) face.elementAt(j);
+          int f[] = face.get(j);
           if (f[3] == -1)
           {
             newval[j][0] = defaultVal;

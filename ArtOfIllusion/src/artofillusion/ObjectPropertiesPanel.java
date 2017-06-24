@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -198,12 +199,12 @@ public class ObjectPropertiesPanel extends ColumnContainer
         selected = names.size();
         names.add(Translate.text("layeredTexture"));
       }
-      List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
-      for (Texture texture : textureTypes)
+      
+      for (Texture texture : PluginRegistry.getPlugins(Texture.class))
       {
         try
         {
-          Method mtd = texture.getClass().getMethod("getTypeName", null);
+          Method mtd = texture.getClass().getMethod("getTypeName");
           names.add(Translate.text("newTextureOfType", mtd.invoke(null, null)));
         }
         catch (Exception ex)
@@ -250,7 +251,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       {
         try
         {
-          Method mtd = material.getClass().getMethod("getTypeName", null);
+          Method mtd = material.getClass().getMethod("getTypeName");
           names.add(Translate.text("newMaterialOfType", mtd.invoke(null, null)));
         }
         catch (Exception ex)

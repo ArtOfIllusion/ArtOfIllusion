@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2002 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +27,7 @@ public class ObjectRefTreeElement extends TreeElement
     ref = obj;
     this.parent = parent;
     this.tree = tree;
-    children = new Vector();
+    children = new Vector<TreeElement>();
     ObjectInfo info = ref.getObject();
     setEnabled(info != exclude);
     if (ref.getJoint() == null)
@@ -36,10 +37,10 @@ public class ObjectRefTreeElement extends TreeElement
 	  {
 	    Joint j[] = s.getJoints();
 	    for (int i = 0; i < j.length; i++)
-	      children.addElement(new ObjectRefTreeElement(new ObjectRef(info, j[i]), this, tree, exclude));
+	      children.add(new ObjectRefTreeElement(new ObjectRef(info, j[i]), this, tree, exclude));
 	  }
 	for (int i = 0; i < info.getChildren().length; i++)
-	  children.addElement(new ObjectRefTreeElement(new ObjectRef(info.getChildren()[i]), this, tree, exclude));
+	  children.add(new ObjectRefTreeElement(new ObjectRef(info.getChildren()[i]), this, tree, exclude));
       }
   }
 
@@ -68,7 +69,7 @@ public class ObjectRefTreeElement extends TreeElement
   @Override
   public void addChild(TreeElement el, int position)
   {
-    children.insertElementAt(el, position);
+    children.add(position, el);
     ((ObjectRefTreeElement) el).parent = this;
   }
 

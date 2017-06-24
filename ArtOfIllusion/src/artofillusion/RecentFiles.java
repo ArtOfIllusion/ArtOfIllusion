@@ -1,4 +1,5 @@
 /* Copyright (C) 2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,7 +55,7 @@ public class RecentFiles
     String newPath = file.getAbsolutePath();
     Preferences pref = Preferences.userNodeForPackage(RecentFiles.class);
     String recent[] = pref.get("recentFiles", "").split(File.pathSeparator);
-    ArrayList newFiles = new ArrayList();
+    ArrayList<String> newFiles = new ArrayList<String>();
     newFiles.add(newPath);
     for (int i = 0; i < recent.length && newFiles.size() < MAX_RECENT; i++)
       if (!newPath.equals(recent[i]))
@@ -70,9 +71,11 @@ public class RecentFiles
 
     // Rebuild the menus in all open windows.
 
-    EditingWindow win[] = ArtOfIllusion.getWindows();
-    for (int i = 0; i < win.length; i++)
-      if (win[i] instanceof LayoutWindow)
-        createMenu(((LayoutWindow) win[i]).recentFilesMenu);
+    for (EditingWindow window : ArtOfIllusion.getWindows())
+    {
+        if (window instanceof LayoutWindow) {
+            createMenu(((LayoutWindow) window).recentFilesMenu);
+        }
+    }
   }
 }

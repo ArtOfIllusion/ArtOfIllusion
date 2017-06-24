@@ -1,4 +1,5 @@
 /* Copyright (C) 2007 by Fran�ois Guillet
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -124,13 +125,13 @@ public class DefaultToolButton extends ToolButton
    *  If the style defined no <code>type.icon</code> attribute, then
    *  a definition is generated using the <code>type.background</i> and
    *  <code>type.overlay</code> attributes. If no style definition can
-   *  be foudn or generated, the icon from <i>image</i> is returned.
+   *  be found or generated, the icon from <i>image</i> is returned.
    *
    *  @param style the ButtonStyle to apply
    *  @param type the type of icon to create. Current values are
    *        <em>normal</em> and <em>selected</em>.
    *        In theory <em>highlighted</em> can also be specified, but
-   *        currently no code recognises this type.
+   *        currently no code recognizes this type.
    *
    *  @param owner the owner of this style.
    *
@@ -154,7 +155,7 @@ public class DefaultToolButton extends ToolButton
               sb.append(att);
               sb.append("; {icon};");
 
-              att = (String) style.attributes.get(type + ".overlay");
+              att = style.attributes.get(type + ".overlay");
               if (att == null) att = style.attributes.get("overlay");
               if (att != null) sb.append(att);
 

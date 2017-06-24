@@ -6,7 +6,8 @@ package artofillusion.util;
  * IconGenerator: provide editing and compositing features for icon images
  *
  * Copyright (C) 2008 Nik Trevallyn-Jones, Sydney Australia
- *
+   Changes copyright (C) 2017 by Maksim Khramov
+
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
  *
@@ -1276,7 +1277,7 @@ public class IconGenerator
              *  get the various lookup strings that define the language
              */
 
-            this.delims = (delims != null ? (String[]) delims.clone() : DEFAULT_DELIMS);
+            this.delims = (delims == null ? DEFAULT_DELIMS : delims.clone());
 
             if (this.delims[OPS] == null)
                 this.delims[OPS] = DEFAULT_DELIMS[OPS];

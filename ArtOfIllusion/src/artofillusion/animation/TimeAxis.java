@@ -1,4 +1,5 @@
 /* Copyright (C) 2001,2003,2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,7 +24,7 @@ public class TimeAxis extends CustomWidget
 {
   double start, scale, origMarkerPos;
   Score theScore;
-  Vector markers;
+  private final Vector<Marker> markers;
   int subdivisions;
   Marker draggingMarker;
   Point clickPos;
@@ -43,7 +44,7 @@ public class TimeAxis extends CustomWidget
     theScore = sc;
     nf.setMinimumFractionDigits(1);
     nf.setMaximumFractionDigits(2);
-    markers = new Vector();
+    markers = new Vector<Marker>();
     addEventLink(MousePressedEvent.class, this, "mousePressed");
     addEventLink(MouseReleasedEvent.class, this, "mouseReleased");
     addEventLink(MouseDraggedEvent.class, this, "mouseDragged");
@@ -89,7 +90,7 @@ public class TimeAxis extends CustomWidget
 
   public void addMarker(Marker m)
   {
-    markers.addElement(m);
+    markers.add(m);
   }
 
   @Override
@@ -163,7 +164,7 @@ public class TimeAxis extends CustomWidget
 
     for (i = 0; i < markers.size(); i++)
     {
-      Marker m = (Marker) markers.elementAt(i);
+      Marker m = markers.get(i);
       x = (int) Math.round(scale*(m.position-start));
       g.setColor(m.color);
       g.fillRect(x-MARKER_SIZE/2, tickPos+2, MARKER_SIZE, TICK_HEIGHT-2);
@@ -177,7 +178,7 @@ public class TimeAxis extends CustomWidget
     process = new ActionProcessor();
     for (int i = 0; i < markers.size(); i++)
       {
-	Marker m = (Marker) markers.elementAt(i);
+	Marker m = markers.get(i);
 	int x = (int) (scale*(m.position-start));
 	if (clickPos.x < x-MARKER_SIZE/2-1 || clickPos.x > x+MARKER_SIZE/2+1)
 	  continue;
@@ -188,7 +189,7 @@ public class TimeAxis extends CustomWidget
       {
         // Snap the default marker to the click position.
 
-	draggingMarker = (Marker) markers.elementAt(0);
+	draggingMarker = markers.get(0);
         origMarkerPos = clickPos.x/scale+start;
         mouseDragged(ev);
       }

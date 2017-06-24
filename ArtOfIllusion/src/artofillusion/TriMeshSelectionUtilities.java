@@ -1,4 +1,5 @@
 /* Copyright (C) 2005 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -37,7 +38,7 @@ public class TriMeshSelectionUtilities
     boolean newSel[];
 
     if (newMode == oldMode)
-      return (boolean []) selection.clone();
+      return selection.clone();
     if (newMode == MeshEditController.POINT_MODE)
     {
       newSel = new boolean [v.length];

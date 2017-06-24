@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -553,7 +554,7 @@ public class FunctionModule extends Module
           miny = FastMath.floor(miny);
           maxy = miny+1.0;
         }
-      int decimals = (int) FastMath.floor(Math.log(maxy-miny)/Math.log(10.0));
+      int decimals = FastMath.floor(Math.log(maxy-miny)/Math.log(10.0));
       labelstep = FastMath.pow(10.0, decimals);
       vFormat.setMaximumFractionDigits(decimals < 0 ? -decimals : 1);
     }

@@ -1,4 +1,5 @@
 /* Copyright 2001-2004 by Rick van der Meiden and Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,7 +31,7 @@ public class ArrayDialog extends BDialog
   private LayoutWindow window;
   private ArraySpec spec;
 
-  private Vector curvesVector;
+  private Vector<ObjectInfo> curvesVector;
   private BButton okButton, cancelButton;
   private BLabel linearCopiesLabel, stepXLabel, stepYLabel, stepZLabel;
   private BRadioButton curveCopiesBox, curveStepBox, linearBox, curveBox;
@@ -52,12 +53,10 @@ public class ArrayDialog extends BDialog
     spec = new ArraySpec(window);
 
     // get available curves
-    curvesVector = new Vector(10,10);
-    for (int i=0; i<window.getScene().getNumObjects();i++)
+    curvesVector = new Vector<ObjectInfo>(10,10);
+    for (ObjectInfo obj: window.getScene().getAllObjects())
     {
-        ObjectInfo info = window.getScene().getObject(i);
-        if (info.getObject() instanceof Curve)
-                curvesVector.addElement(info);
+      if (obj.getObject() instanceof Curve) curvesVector.add(obj);
     }
 
     // layout dialog
@@ -118,12 +117,11 @@ public class ArrayDialog extends BDialog
     panel.add(curveBox = new BRadioButton("From Curve", (spec.method==ArraySpec.METHOD_CURVE), methodGroup), 0, 0);
     curveBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(curveChoice = new BComboBox(), 1, 0);
+    
     // put names of possible curves in choice
-
-    for (int k=0; k<curvesVector.size(); k++)
+    for (ObjectInfo info: curvesVector)
     {
-        ObjectInfo info = (ObjectInfo)(curvesVector.elementAt(k));
-        curveChoice.add(info.getName());
+      curveChoice.add(info.getName());
     }
 
     if (spec.curve != null)
@@ -195,7 +193,7 @@ public class ArrayDialog extends BDialog
         spec.intervalY = intervalYBox.getState();
         spec.intervalZ = intervalZBox.getState();
         if (curvesVector.size() > 0)
-                spec.curve = (ObjectInfo)(curvesVector.elementAt(curveChoice.getSelectedIndex()));
+                spec.curve = curvesVector.get(curveChoice.getSelectedIndex());
 
         if (curveCopiesBox.getState() == true)
                 spec.curveMode = ArraySpec.MODE_COPIES;

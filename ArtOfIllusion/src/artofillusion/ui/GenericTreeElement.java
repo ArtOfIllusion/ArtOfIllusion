@@ -2,6 +2,7 @@
    any special behavior. */
 
 /* Copyright (C) 2001 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,18 +21,24 @@ public class GenericTreeElement extends TreeElement
   Object obj;
   String label;
 
-  public GenericTreeElement(String label, Object obj, TreeElement parent, TreeList tree, Vector children)
+  public GenericTreeElement(String label,
+		  Object obj,
+		  TreeElement parent,
+		  TreeList tree,
+		  Vector<TreeElement> children)
   {
     this.label = label;
     this.obj = obj;
     this.parent = parent;
     this.tree = tree;
     this.children = children;
-    if (children == null)
-      this.children = new Vector();
+    if (null == children)
+      this.children = new Vector<TreeElement>();
     else
-      for (int i = 0; i < children.size(); i++)
-	((TreeElement) children.elementAt(i)).parent = this;
+      for(TreeElement item: children)
+      {
+          item.parent = this;
+      }
   }
 
   /* Get the label to display for this element. */
@@ -55,7 +62,7 @@ public class GenericTreeElement extends TreeElement
   @Override
   public void addChild(TreeElement el, int position)
   {
-    children.insertElementAt(el, position);
+    children.add(position, el);
     el.parent = this;
   }
 
@@ -70,18 +77,18 @@ public class GenericTreeElement extends TreeElement
 
     for (pos = 0; pos < children.size(); pos++)
       {
-        el = (TreeElement) children.elementAt(pos);
+        el = children.get(pos);
         if (el.getObject() == object)
           break;
       }
     if (pos == children.size())
       {
         for (int i = 0; i < children.size(); i++)
-          ((TreeElement) children.elementAt(i)).removeChild(object);
+          children.get(i).removeChild(object);
         return;
       }
     el.parent = null;
-    children.removeElementAt(pos);
+    children.remove(pos);
   }
 
   /* Get the object corresponding to this element. */

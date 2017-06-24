@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.*;
 import java.text.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Vector;
 
 /** This is a Widget which displays all the tracks for objects in a scene, and shows
     where their keyframes are. */
@@ -30,7 +35,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   LayoutWindow window;
   TreeList theList;
   TimeAxis theAxis;
-  Vector<TrackDisplay> graphs;
+  private final List<TrackDisplay> graphs;
   BScrollBar scroll;
   ToolPalette viewTools, modeTools;
   BLabel helpText;
@@ -38,7 +43,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   BPopupMenu popupMenu;
   BMenuItem popupMenuItem[];
   Marker timeMarker;
-  SelectionInfo selection[];
+  private SelectionInfo selection[];
   int scrollPos, mode, view;
   double startTime, timeScale;
   int yoffset;
@@ -123,7 +128,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     div = new BSplitPane(BSplitPane.HORIZONTAL, treeContainer, null);
     div.setResizeWeight(0.0);
     div.resetToPreferredSizes();
-    ((JSplitPane) div.getComponent()).setBorder(null);
+    div.getComponent().setBorder(null);
     layoutGraphs();
     add(div, BorderContainer.CENTER);
     FormContainer rightSide = new FormContainer(new double [] {1.0, 1.0}, new double [] {0.0, 0.0, 1.0});
@@ -217,7 +222,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     selection = sel;
     for (int i = 0; i < graphs.size(); i++)
-      ((Widget) graphs.elementAt(i)).repaint();
+      ((Widget) graphs.get(i)).repaint();
     window.updateMenus();
   }
 
@@ -225,11 +230,11 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
 
   public void addSelectedKeyframes(SelectionInfo newsel[])
   {
-    Vector v = new Vector();
+    List<SelectionInfo> v = new Vector<SelectionInfo>();
     int i, j;
 
     for (i = 0; i < selection.length; i++)
-      v.addElement(selection[i]);
+      v.add(selection[i]);
     for (i = 0; i < newsel.length; i++)
       {
         for (j = 0; j < selection.length; j++)
@@ -240,11 +245,11 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               break;
             }
         if (j == selection.length)
-          v.addElement(newsel[i]);
+          v.add(newsel[i]);
       }
     selection = new SelectionInfo [v.size()];
     for (i = 0; i < selection.length; i++)
-      selection[i] = (SelectionInfo) v.elementAt(i);
+      selection[i] = v.get(i);
     window.updateMenus();
   }
 
@@ -252,14 +257,14 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
 
   public void removeSelectedKeyframe(Keyframe key)
   {
-    Vector v = new Vector();
+    List<SelectionInfo> v = new Vector<SelectionInfo>();
 
     for (int i = 0; i < selection.length; i++)
       if (selection[i].key != key)
-        v.addElement(selection[i]);
+        v.add(selection[i]);
     selection = new SelectionInfo [v.size()];
     for (int i = 0; i < selection.length; i++)
-      selection[i] = (SelectionInfo) v.elementAt(i);
+      selection[i] = v.get(i);
     window.updateMenus();
   }
 
@@ -334,7 +339,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   private void layoutGraphs()
   {
     Track tr[] = getSelectedTracks();
-    graphs.removeAllElements();
+    graphs.clear();
     int divider = div.getDividerLocation();
     if (view == TRACKS_MODE)
     {
@@ -345,7 +350,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       theTracks.setMode(mode);
       graphContainer.add(theAxis, 0, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(0, 0, 2, 0), null));
       graphContainer.add(theTracks, 0, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
-      graphs.addElement(theTracks);
+      graphs.add(theTracks);
       div.add(graphContainer, 1);
       graphContainer.addEventLink(MouseScrolledEvent.class, this, "mouseScrolled");
     }
@@ -364,7 +369,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       graphContainer.add(theAxis, 1, 0, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(0, 0, 2, 0), null));
       graphContainer.add(gr.getAxis(), 0, 1);
       graphContainer.add(gr, 1, 1);
-      graphs.addElement(gr);
+      graphs.add(gr);
       div.add(graphContainer, 1);
       graphContainer.addEventLink(MouseScrolledEvent.class, this, "mouseScrolled");
     }
@@ -388,7 +393,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
         LayoutInfo layout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(i == 0 ? 0 : 4, 0, 0, 0), null);
         graphContainer.add(gr.getAxis(), 0, i+1, layout);
         graphContainer.add(gr, 1, i+1, layout);
-        graphs.addElement(gr);
+        graphs.add(gr);
       }
       div.add(graphContainer, 1);
       graphContainer.addEventLink(MouseScrolledEvent.class, this, "mouseScrolled");
@@ -414,7 +419,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     theAxis.setStartTime(time);
     for (int i = 0; i < graphs.size(); i++)
-      graphs.elementAt(i).setStartTime(time);
+      graphs.get(i).setStartTime(time);
     startTime = time;
     repaintGraphs();
   }
@@ -432,7 +437,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     theAxis.setScale(s);
     for (int i = 0; i < graphs.size(); i++)
-      ((TrackDisplay) graphs.elementAt(i)).setScale(s);
+      ((TrackDisplay) graphs.get(i)).setScale(s);
     timeScale = s;
     repaintGraphs();
   }
@@ -447,7 +452,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     NumberFormat nf = NumberFormat.getNumberInstance();
     nf.setMaximumFractionDigits(3);
     timeFrameLabel.setText(Translate.text("timeFrameLabel", nf.format(time), Integer.toString((int) Math.round(time*window.getScene().getFramesPerSecond()))));
-    int graphWidth = ((Widget) graphs.elementAt(0)).getBounds().width;
+    int graphWidth = ((Widget) graphs.get(0)).getBounds().width;
     if (time < startTime)
       setStartTime(time);
     else if (time > startTime+graphWidth/timeScale)
@@ -579,7 +584,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       selection[i] = (SelectionInfo) v.elementAt(i);
     if (view == SINGLE_GRAPH_MODE)
       {
-        ((TrackGraph) graphs.elementAt(0)).setTracks(sel);
+        ((TrackGraph) graphs.get(0)).setTracks(sel);
         repaintAll();
       }
     if (view == MULTI_GRAPH_MODE)
@@ -594,26 +599,26 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     for (int i = 0; i < graphs.size(); i++)
       {
-        if (graphs.elementAt(i) instanceof TrackGraph)
-          ((TrackGraph) graphs.elementAt(i)).tracksModified();
+        if (graphs.get(i) instanceof TrackGraph)
+          ((TrackGraph) graphs.get(i)).tracksModified();
         else
-          ((Widget) graphs.elementAt(i)).repaint();
+          ((Widget) graphs.get(i)).repaint();
       }
     if (!updateScene)
       return;
 
     // Find the list of tracks with selected keyframes.
 
-    Vector v = new Vector();
+    List<Track> v = new Vector<Track>();
     for (int i = 0; i < selection.length; i++)
       if (!v.contains(selection[i].track))
-        v.addElement(selection[i].track);
+        v.add(selection[i].track);
 
     // Now update them.
 
     for (int i = 0; i < v.size(); i++)
       {
-        Track tr = (Track) v.elementAt(i);
+        Track tr = v.get(i);
         Object parent = tr.getParent();
         while (parent != null && parent instanceof Track)
           parent = ((Track) parent).getParent();
@@ -629,7 +634,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     for (int i = 0; i < graphs.size(); i++)
       {
-        Widget gr = (Widget) graphs.elementAt(i);
+        Widget gr = (Widget) graphs.get(i);
         gr.repaint();
         if (gr instanceof TrackGraph)
           ((TrackGraph) gr).getAxis().repaint();
@@ -689,7 +694,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       return;
     theList.setYOffset(-pos);
     for (int i = 0; i < graphs.size(); i++)
-      graphs.elementAt(i).setYOffset(-pos);
+      graphs.get(i).setYOffset(-pos);
     yoffset = -pos;
     theList.repaint();
     repaintGraphs();
@@ -985,7 +990,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     Scene theScene = window.getScene();
     UndoRecord undo = new UndoRecord(window, false);
-    Vector added = new Vector();
+    Vector<Track> added = new Vector<Track>();
     Object args[];
     if (extraArgs == null)
       args = new Object [1];
@@ -1023,7 +1028,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               args[0] = info;
               Track newtrack = (Track) con[which].newInstance(args);
               info.addTrack(newtrack, 0);
-              added.addElement(newtrack);
+              added.add(newtrack);
             }
       }
     catch (Exception ex)
@@ -1035,7 +1040,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       theList.deselectAll();
     rebuildList();
     for (int i = 0; i < added.size(); i++)
-      theList.setSelected(added.elementAt(i), true);
+      theList.setSelected(added.get(i), true);
     selectedTracksChanged();
     window.updateMenus();
   }
@@ -1162,7 +1167,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
       {
         mode = modeTools.getSelection();
         for (int i = 0; i < graphs.size(); i++)
-          graphs.elementAt(i).setMode(mode);
+          graphs.get(i).setMode(mode);
         setHelpText(MODE_HELP_TEXT[mode]);
       }
   }

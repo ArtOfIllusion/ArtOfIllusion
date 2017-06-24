@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -689,7 +690,7 @@ public class Curve extends Object3D implements Mesh
   @Override
   public Property[] getProperties()
   {
-    return (Property []) PROPERTIES.clone();
+    return PROPERTIES.clone();
   }
 
   @Override

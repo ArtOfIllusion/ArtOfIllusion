@@ -7,6 +7,7 @@ package artofillusion.util;
  *
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
+ * Changes copyright (C) 2017 by Maksim Khramov
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -50,6 +51,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import java.io.*;
+import java.util.List;
+import java.util.Map;
 
 /**
  *  A class loader which loads classes using a searchlist of
@@ -115,8 +118,9 @@ import java.io.*;
  */
 public class SearchlistClassLoader extends ClassLoader
 {
-    protected Vector list, search;
-    protected Hashtable cache;
+    protected Vector<Loader> list;
+    protected Vector<Loader> search;
+    protected Hashtable<String, Class> cache;
     protected Loader content = null;
     protected byte searchMode = SHARED;
     protected int divide = 0;
@@ -186,11 +190,11 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr = new Loader(loader, true);
 
 	// store loaders in order in list
-	if (list == null) list = new Vector(16);
+	if (list == null) list = new Vector<Loader>(16);
 	list.add(ldr);
 
 	// store shared loaders in front of non-shared loaders in search.
-	if (search == null) search = new Vector(16);
+	if (search == null) search = new Vector<Loader>(16);
 	if (search.size() > divide) search.add(divide, ldr);
 	else search.add(ldr);
 
@@ -210,11 +214,11 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr = new Loader(new URLClassLoader(new URL[] { url }), false);
 
 	// store loaders in order in list
-	if (list == null) list = new Vector(16);
+	if (list == null) list = new Vector<Loader>(16);
 	list.add(ldr);
 
 	// store non-shared loaders after shared loaders in search
-	if (search == null) search = new Vector(16);
+	if (search == null) search = new Vector<Loader>(16);
 	search.add(ldr);
     }
 
@@ -237,7 +241,7 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr;
 	URL[] url;
 	int j;
-	ArrayList path = new ArrayList(8);
+	ArrayList<URL> path = new ArrayList<URL>(8);
 
 	for (int i = 0; (ldr = getLoader(i++, searchMode)) != null; i++) {
 	    if (ldr.loader instanceof SearchlistClassLoader)
@@ -289,7 +293,7 @@ public class SearchlistClassLoader extends ClassLoader
 	if (content != null) {
 
 	    // try the cache first
-	    Class result = (cache != null ? (Class) cache.get(name) : null);
+	    Class result = (cache == null ?  null : cache.get(name));
 	    if (result != null) return result;
 
 	    // try loading the class data

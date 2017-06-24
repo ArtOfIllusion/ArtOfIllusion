@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -116,7 +117,7 @@ public abstract class MeshGesture implements Gesture
     Vec3 temp1 = new Vec3(), temp2 = new Vec3();
     for (int i = 0; i < weight.length; i++)
     {
-      MeshGesture key = (MeshGesture) p[i];
+      MeshGesture key = p[i];
       Vec3 keyPos[] = key.getVertexPositions();
       for (int j = 0; j < vertPos.length; j++)
       {

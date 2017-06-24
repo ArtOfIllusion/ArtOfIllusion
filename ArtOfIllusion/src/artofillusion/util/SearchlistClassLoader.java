@@ -293,7 +293,7 @@ public class SearchlistClassLoader extends ClassLoader
 	if (content != null) {
 
 	    // try the cache first
-	    Class result = (null == cache ?  null : cache.get(name));
+	    Class result = (cache == null ?  null : cache.get(name));
 	    if (result != null) return result;
 
 	    // try loading the class data

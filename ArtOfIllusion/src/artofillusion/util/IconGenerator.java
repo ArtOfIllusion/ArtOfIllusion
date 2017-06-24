@@ -1277,7 +1277,7 @@ public class IconGenerator
              *  get the various lookup strings that define the language
              */
 
-            this.delims = (null == delims ? DEFAULT_DELIMS : delims.clone());
+            this.delims = (delims == null ? DEFAULT_DELIMS : delims.clone());
 
             if (this.delims[OPS] == null)
                 this.delims[OPS] = DEFAULT_DELIMS[OPS];

@@ -150,7 +150,7 @@ public class TextureImageExporter
 
   public TextureImageInfo getTextureInfo(Texture tex)
   {
-    return null == tex ? null : textureTable.get(tex);
+    return tex == null ? null : textureTable.get(tex);
   }
 
   /** Get an Enumeration of all TextureImageInfos. */

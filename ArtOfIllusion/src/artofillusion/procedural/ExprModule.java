@@ -236,7 +236,7 @@ public class ExprModule extends Module
     private Hashtable<String, OPort> varTable;
     Module [] inputs;
     Module [] myModules;
-    private List<Module> moduleVec;
+    private Vector<Module> moduleVec;
     OPort compiled;
     Token [] tokens;
     Token currTok;

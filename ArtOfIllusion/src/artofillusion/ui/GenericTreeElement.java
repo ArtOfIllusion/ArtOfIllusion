@@ -21,7 +21,11 @@ public class GenericTreeElement extends TreeElement
   Object obj;
   String label;
 
-  public GenericTreeElement(String label, Object obj, TreeElement parent, TreeList tree, List<TreeElement> children)
+  public GenericTreeElement(String label,
+		  Object obj,
+		  TreeElement parent,
+		  TreeList tree,
+		  Vector<TreeElement> children)
   {
     this.label = label;
     this.obj = obj;

@@ -364,10 +364,11 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     if (numEdges1 != numEdges2)
       closed = false;
 
-    // We now have two lists of edges: one for each direction of traversal.  Determine which
-    // which ones are duplicates, and add any unique edges from edges2 into edges1.
+    /* We now have two lists of edges: one for each direction of traversal.
+     * Determine which ones are duplicates, and add any unique edges from
+     * edges2 into edges1.*/
 
-    Map<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
+    Hashtable<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
     for (i = 0; i < numEdges1; i++)
       edgeTable.put(new Point(edges1[i].v1, edges1[i].v2), i);
     for (i = 0; i < numEdges2; i++)

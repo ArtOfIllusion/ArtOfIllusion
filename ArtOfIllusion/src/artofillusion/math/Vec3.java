@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
+   Additions copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -95,7 +96,6 @@ public class Vec3
     return new Vec3(x*d, y*d, z*d);
   }
 
-
   /** Determine whether two vectors are identical. */
 
   @Override
@@ -177,6 +177,20 @@ public class Vec3
         y /= len;
         z /= len;
       }
+  }
+  
+  /** Create a copy of this vector, scaled to the length of 1. If the length of this vector is 0, 
+      a new vector with length 0 will be returned. <p>
+      
+      This is like <pre>normalize()</pre>, but returns a new vector.*/
+
+  public final Vec3 unit()
+  {
+    double len = Math.sqrt(x*x+y*y+z*z);
+    
+    if (len > 0.0)
+      return new Vec3(x/len, y/len, z/len);
+    return new Vec3();
   }
 
   /** Calculate the Euclidean distance between this vector and another one. */

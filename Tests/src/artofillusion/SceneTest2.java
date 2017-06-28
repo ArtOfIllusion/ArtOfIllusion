@@ -46,7 +46,10 @@ public class SceneTest2
       scene = new Scene();
     }
     
-    @Test
+  /**
+   * Create scene and smoke check some scene defaults created
+   */
+  @Test
     public void testCreateScene()
     {
       
@@ -62,7 +65,11 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to add to scene new object
+   * Check that object created, added to scene and contains default tracks...
+   */
+  @Test
     public void testAddObject1() {
 
       int sceneObjects = scene.getNumObjects();
@@ -79,28 +86,49 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to add to scene new object other way
+   * Check that object created, added to scene and contains default tracks...
+   */
+  @Test
     public void testAddObject2() {
 
       int sceneObjects = scene.getNumObjects();
       scene.addObject(new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube"), (UndoRecord)null);
-
+      ObjectInfo so = scene.getObject("Cube");
+      
       assertEquals(++sceneObjects, scene.getNumObjects());
+      
+      assertNotNull(so);
+      assertEquals("Cube", so.getName());
+      assertEquals(2, so.getTracks().length);
 
     }
     
-    @Test
+  /**
+   * Test to add to scene new object other way
+   * Check that object created, added to scene and contains default tracks...
+   */
+  @Test
     public void testAddObject3() {
 
       int sceneObjects = scene.getNumObjects();
       scene.addObject(new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube"), scene.getNumObjects(), (UndoRecord)null);
-
+      ObjectInfo so = scene.getObject("Cube");
+      
       assertEquals(++sceneObjects, scene.getNumObjects());
+      
+      assertNotNull(so);
+      assertEquals("Cube", so.getName());
+      assertEquals(2, so.getTracks().length);
 
     }
     
-    
-    @Test
+  /**
+   * Test to add to scene new object with Undo info
+   * Check that Undo record contains proper data to revert operation
+   */    
+  @Test
     public void testAddObjectWithUndo()
     {
 
@@ -117,9 +145,13 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Add material to scene.
+   * Check that material listener event is triggered
+   */
+  @Test
     public void testAddMaterial(){
-;
+
       Material mat = new UniformMaterial();
       listenerFireCount = 0;
       
@@ -144,7 +176,12 @@ public class SceneTest2
       assertEquals(1, listenerFireCount);
     }
     
-    @Test
+  /**
+   * Add material to scene at given position.
+   * Check that material listener event is triggered
+   * Check that material is inserted at expected position
+   */
+  @Test
     public void testAddMaterialAtGivenPos()
     {
 
@@ -178,7 +215,12 @@ public class SceneTest2
       assertEquals(0, firedPositionIndex);
     }
     
-    @Test
+  /**
+   * Test to remove unused material from scene
+   * Check proper materials count
+   * Check that listener event is fired
+   */
+  @Test
     public void testRemoveUnassignedMatrial()
     {
 
@@ -189,7 +231,6 @@ public class SceneTest2
         @Override
         public void itemAdded(int index, Object obj)
         {
-          throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
@@ -201,7 +242,6 @@ public class SceneTest2
         @Override
         public void itemChanged(int index, Object obj)
         {
-          throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
       });
       
@@ -210,7 +250,13 @@ public class SceneTest2
       assertEquals(1, listenerFireCount);
     }
     
-    @Test
+  /**
+   * Test to remove assigned to object material from scene
+   * Check proper materials count
+   * Check that listener event is fired
+   * Check that material and mapping is unassigned from target object
+   */
+  @Test
     public void testRemoveAssignedMaterial()
     {
 
@@ -224,7 +270,6 @@ public class SceneTest2
         @Override
         public void itemAdded(int index, Object obj)
         {
-          throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
 
         @Override
@@ -236,7 +281,6 @@ public class SceneTest2
         @Override
         public void itemChanged(int index, Object obj)
         {
-          throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
       });
       
@@ -250,7 +294,10 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to check itemChanged event is fired on material change
+   */
+  @Test
     public void testChangeMaterialEventFired()
     {
 
@@ -283,7 +330,10 @@ public class SceneTest2
       
     }
 
-    @Test
+  /**
+   * Test to get added material by name
+   */
+  @Test
     public void testGetMaterialByName()
     {
     
@@ -295,23 +345,31 @@ public class SceneTest2
       assertNotNull(mat);
     }
     
-    @Test
+  /**
+   * Test not to get material by wrong name
+   */
+  @Test
     public void testGetUnknownMaterialByName()
     {
-      Scene scene = new Scene();
       Material mat = scene.getMaterial("Missing");
       assertNull(mat);
     }
     
-    @Test
+  /**
+   * Test not to get material by null name
+   */
+  @Test
     public void testGetMaterialByNullName()
     {
-      Scene scene = new Scene();
       Material mat = scene.getMaterial(null);
       assertNull(mat);
     }
     
-    @Test
+  /**
+   * Add texture to scene
+   * Check that texture listener event is triggered
+   */
+  @Test
     public void testAddTextureEventFired() {
 
       Texture tex = new UniformTexture();
@@ -334,12 +392,18 @@ public class SceneTest2
         {
         }
       });
+      
       scene.addTexture(tex);
       assertEquals(1, listenerFireCount);
       assertEquals(2, scene.getNumTextures());
     }
     
-    @Test
+  /**
+   * Add texture to scene at given position.
+   * Check that texture listener event is triggered
+   * Check that texture is inserted at expected position
+   */
+  @Test
     public void testAddTextureAtGivenPos()
     {
 
@@ -370,7 +434,10 @@ public class SceneTest2
       assertEquals(0, firedPositionIndex);
     }
     
-    @Test
+  /**
+   * Test checks that itemChanged event fired on default texture change
+   */
+  @Test
     public void testChangeDefaultTexture()
     {
       listenerFireCount = 0;
@@ -402,7 +469,10 @@ public class SceneTest2
       assertEquals(1, listenerFireCount);
     }
 
-    @Test
+  /**
+   * Test to get added texture by name
+   */
+  @Test
     public void testGetTextureByName()
     {
       Texture tex = new UniformTexture();
@@ -414,7 +484,10 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to not return texture by wrong name
+   */
+  @Test
     public void testGetUnknownTextureByName()
     {
       Texture tex = scene.getTexture("Missing");
@@ -422,7 +495,10 @@ public class SceneTest2
       
     }
 
-    @Test
+  /**
+   * Test to not return texture by null name
+   */
+  @Test
     public void testGetTextureByNullName()
     {
       Texture tex = scene.getTexture(null);
@@ -430,7 +506,12 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to remove single and one default texture from scene
+   * Check that itemRemoved event is fired
+   * Check that default texture is reconstructed for scene
+   */
+  @Test
     public void testRemoveSingleDefaultTexture()
     {
       scene.addTextureListener(new ListChangeListener()
@@ -460,7 +541,11 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to remove unused texture from scene
+   * Check that itemRemoved event is fired
+   */
+  @Test
     public void testRemoveUnassignedTexture()
     {
       Texture tex = new UniformTexture();
@@ -491,7 +576,10 @@ public class SceneTest2
       assertNotNull(scene.getDefaultTexture());
     }
     
-    @Test
+  /**
+   *
+   */
+  @Test
     public void testRemoveAssignedTexture()
     {
       Texture tex = new UniformTexture();
@@ -530,7 +618,12 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   *
+   * Test adds new Image to scene
+   * @throws InterruptedException
+   */
+  @Test
     public void testAddImage() throws InterruptedException
     {
       int SIZE = 50;      
@@ -546,7 +639,12 @@ public class SceneTest2
 
     }
     
-    @Test(expected = AssertionError.class)
+  /**
+   * Test adds new Texture to scene. Texture uses some image which is not added to scene.
+   * Test fails as image used by texture not added to scene implicitly
+   * @throws InterruptedException
+   */
+  @Test(expected = AssertionError.class)
     public void testAddImageFromTexture() throws InterruptedException
     {
       int SIZE = 50;
@@ -565,7 +663,12 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test adds new Texture to scene. Texture uses some image already added to scene.
+   * Test fails as image used by texture not added to scene implicitly
+   * @throws InterruptedException
+   */
+  @Test
     public void testAddImageBeforeTexture() throws InterruptedException
     {
       int SIZE = 50;
@@ -585,7 +688,11 @@ public class SceneTest2
       
     }    
     
-    @Test
+  /**
+   * Test to remove image from scene
+   * @throws InterruptedException
+   */
+  @Test
     public void testRemoveImage() throws InterruptedException
     {
       int SIZE = 50;
@@ -601,7 +708,12 @@ public class SceneTest2
 
     }
     
-    @Test
+  /**
+   * Test to remove image used through texture from scene
+   * Checks that image deletion is rejected
+   * @throws InterruptedException
+   */
+  @Test
     public void testAttemptRemoveImageUsedInTexture() throws InterruptedException
     {
       int SIZE = 50;
@@ -619,7 +731,13 @@ public class SceneTest2
       
     }
     
-    @Test
+  /**
+   * Test to remove image used through material from scene
+   * Checks that image deletion is rejected
+   * As no way to add image to Procedural Material as Image module programmatically test fails
+   * @throws InterruptedException
+   */
+  @Test
     public void testAttemptRemoveImageUsedInMaterial() throws InterruptedException
     {
       int SIZE = 50;
@@ -632,8 +750,11 @@ public class SceneTest2
       fail("No way to add image to material programmatically");
     }
     
-    
-    @Test(expected = NullPointerException.class) // This throws NPE due uninitialized AOI preferences 
+  /**
+   * Test to check scene objectModified(...) code. 
+   * Failed as not initialized AOI preferences system @ test time. Code is depends of interactive surface error value
+   */
+  @Test(expected = NullPointerException.class) // This throws NPE due uninitialized AOI preferences 
     public void testSceneObjectModified()
     {
       ObjectInfo target = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube");

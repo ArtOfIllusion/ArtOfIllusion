@@ -168,6 +168,20 @@ public class Vec2
       }
   }
 
+  /** Create a new copy of this vector scaled to the the length of 1.  If the length of this vector is 0, 
+      a new vector with length 0 will be returned. <p>
+      
+      This is like <pre>normalize()</pre>, but returns a new vector.*/
+
+  public final Vec2 unit()
+  {
+    double len = Math.sqrt(x*x+y*y);
+
+    if (len > 0.0)
+	  return new Vec2(x/len, y/len);
+    return new Vec2();
+  }
+
   @Override
   public String toString()
   {

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -292,12 +292,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     itemTree.addEventLink(TreeList.ElementMovedEvent.class, theScore, "rebuildList");
     itemTree.addEventLink(TreeList.ElementDoubleClickedEvent.class, this, "editObjectCommand");
     itemTree.setUpdateEnabled(false);
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      {
-        ObjectInfo info = theScene.getObject(i);
-        if (info.getParent() == null)
-          itemTree.addElement(new ObjectTreeElement(info, itemTree));
-      }
+    for (ObjectInfo info: theScene.getObjects())
+    {
+      if (info.getParent() == null)
+        itemTree.addElement(new ObjectTreeElement(info, itemTree));
+    }
     itemTree.setUpdateEnabled(true);
     itemTreeScroller = new BScrollPane(itemTree) {
       @Override
@@ -331,12 +330,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     itemTree.setUpdateEnabled(false);
     itemTree.removeAllElements();
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      {
-        ObjectInfo info = theScene.getObject(i);
-        if (info.getParent() == null)
-          itemTree.addElement(new ObjectTreeElement(info, itemTree));
-      }
+    for (ObjectInfo info: theScene.getObjects())
+    {
+      if (info.getParent() == null)
+        itemTree.addElement(new ObjectTreeElement(info, itemTree));
+    }
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         ObjectInfo info = theScene.getObject(i);
@@ -2441,9 +2439,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     }
     else
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for (ObjectInfo info: theScene.getObjects())
       {
-        ObjectInfo info = theScene.getObject(i);
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
         info.setVisible(visible);
       }
@@ -2466,9 +2463,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     }
     else
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for (ObjectInfo info: theScene.getObjects())
       {
-        ObjectInfo info = theScene.getObject(i);
         undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
         info.setLocked(locked);
       }
@@ -2812,9 +2808,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           bb = bb.merge(bounds);
       }
     else
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for (ObjectInfo info: theScene.getObjects())
       {
-        ObjectInfo info = theScene.getObject(i);
         BoundingBox bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
         if (bb == null)
           bb = bounds;

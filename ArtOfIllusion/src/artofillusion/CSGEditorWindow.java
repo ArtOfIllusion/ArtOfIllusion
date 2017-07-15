@@ -19,6 +19,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /** The CSGEditorWindow class represents the window for editing CSGObjects. */
 
@@ -230,6 +231,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     updateMenus();
   }
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   void propertiesCommand()
   {
     updateFromScene();
@@ -537,10 +539,9 @@ public class CSGEditorWindow extends ObjectEditorWindow
     BoundingBox bounds = null;
 
     // Determine the bounding box for all objects.
-
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    List<ObjectInfo> objects = theScene.getObjects();
+    for (ObjectInfo info: objects)
     {
-      ObjectInfo info = theScene.getObject(i);
       BoundingBox b = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
       if (bounds == null)
         bounds = b;
@@ -553,9 +554,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
 
     // Center the objects.
 
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    for (ObjectInfo info: objects)
     {
-      ObjectInfo info = theScene.getObject(i);
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.getCoords(), info.getCoords().duplicate()});
       info.getCoords().setOrigin(info.getCoords().getOrigin().minus(center));
     }

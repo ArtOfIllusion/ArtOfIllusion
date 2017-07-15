@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Some parts copyright (C) 2005 by Nik Trevallyn-Jones
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -97,12 +98,13 @@ public class VRMLExporter
         textureExporter = new TextureImageExporter(dir, baseName, (int) (100*qualitySlider.getValue()),
             TextureImageExporter.DIFFUSE, (int) widthField.getValue(), (int) heightField.getValue());
         boolean wholeScene = (exportChoice.getSelectedIndex() == 0);
-        for (int i = 0; i < theScene.getNumObjects(); i++)
+        for (ObjectInfo info: theScene.getObjects())
         {
-          ObjectInfo info = theScene.getObject(i);
-          if (!wholeScene && !info.selected)
-            continue;
-          textureExporter.addObject(info);
+          if (wholeScene || info.selected)
+          {
+            textureExporter.addObject(info);
+          }
+ 
         }
         textureExporter.saveImages();
       }
@@ -177,11 +179,15 @@ public class VRMLExporter
     // Write the objects in the scene.
 
     if (wholeScene)
-      for (i = 0; i < theScene.getNumObjects(); i++)
-        writeObject(theScene.getObject(i), null, out, tol, smooth, 0, theScene, textureExporter);
+      for (ObjectInfo item: theScene.getObjects())
+      {
+        writeObject(item, null, out, tol, smooth, 0, theScene, textureExporter);
+      }
     else
       for (i = 0; i < selected.length; i++)
+      {
         writeObject(theScene.getObject(selected[i]), null, out, tol, smooth, 0, theScene, textureExporter);
+      }
     out.flush();
   }
 

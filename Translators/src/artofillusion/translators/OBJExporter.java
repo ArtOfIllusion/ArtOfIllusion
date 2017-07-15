@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -338,13 +339,13 @@ public class OBJExporter
   {
     // Find all the textures.
     
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    for (ObjectInfo info: theScene.getObjects())
+    {
+      if (wholeScene || info.selected)
       {
-        ObjectInfo info = theScene.getObject(i);
-        if (!wholeScene && !info.selected)
-          continue;
         textureExporter.addObject(info);
       }
+    }
     
     // Write out the .mtl file.
     

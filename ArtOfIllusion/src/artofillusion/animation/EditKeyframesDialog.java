@@ -108,12 +108,11 @@ public class EditKeyframesDialog
     if (whichTracks == 0)
       {
         Vector<Track> tracks = new Vector<Track>();
-        for (int i = 0; i < theScene.getNumObjects(); i++)
-          {
-            ObjectInfo info = theScene.getObject(i);
-            for (int j = 0; j < info.getTracks().length; j++)
-              addToVector(info.getTracks()[j], tracks);
-          }
+        for (ObjectInfo info: theScene.getObjects())
+        {
+          for (int j = 0; j < info.getTracks().length; j++)
+            addToVector(info.getTracks()[j], tracks);
+        }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
           track[i] = tracks.get(i);

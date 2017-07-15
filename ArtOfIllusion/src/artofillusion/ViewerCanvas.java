@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes Copyrignt (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2016-2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,6 @@ import buoy.widget.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -250,7 +250,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-	Processing sccrollwheel events here. Subclasses may override.
+	Processing scrollwheel events here. Subclasses may override.
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {

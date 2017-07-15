@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2014 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -363,12 +364,13 @@ public class Raster implements Renderer, Runnable
     int i;
 
     positionNeeded = false;
-    for (i = 0; i < theScene.getNumObjects(); i++)
+    for (ObjectInfo info: theScene.getObjects())
+    {
+      if (info.getObject() instanceof Light && info.isVisible())
       {
-        ObjectInfo info = theScene.getObject(i);
-        if (info.getObject() instanceof Light && info.isVisible())
-          lt.addElement(info);
+        lt.addElement(info);
       }
+    }
     light = new ObjectInfo [lt.size()];
     for (i = 0; i < light.length; i++)
       {
@@ -492,9 +494,8 @@ public class Raster implements Renderer, Runnable
       }
     }
     ArrayList<SortRecord> objects = new ArrayList<SortRecord>();
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    for (ObjectInfo obj: theScene.getObjects())
     {
-      ObjectInfo obj = theScene.getObject(i);
       theCamera.setObjectTransform(obj.getCoords().fromLocal());
       objects.add(new SortRecord(obj));
     }

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -476,11 +477,12 @@ public class ProceduralDirectionalLight extends DirectionalLight
       BorderContainer content = new BorderContainer();
       final MaterialPreviewer preview = new MaterialPreviewer(new UniformTexture(), null, 200, 160);
       Scene scene = preview.getScene();
-      for (int i = 0; i < scene.getNumObjects(); i++)
-      {
-        ObjectInfo info = scene.getObject(i);
-        if (info.getObject() instanceof DirectionalLight)
-          info.setObject(ProceduralDirectionalLight.this);
+      for (ObjectInfo item: scene.getObjects())
+      {        
+        if (item.getObject() instanceof DirectionalLight)
+        {
+          item.setObject(ProceduralDirectionalLight.this);
+        }
       }
       content.add(preview, BorderContainer.CENTER);
       RowContainer row = new RowContainer();
@@ -494,7 +496,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
         {
           processor.addEvent(new Runnable()
           {
-                    @Override
+            @Override
             public void run()
             {
               preview.getScene().setTime(value.getValue());

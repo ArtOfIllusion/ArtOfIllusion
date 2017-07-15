@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -77,11 +77,13 @@ public class SceneViewer extends ViewerCanvas
     cameras.clear();
     cameras.addAll(theScene.getCameras());
     
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    for(ObjectInfo info: theScene.getAllObjects())
     {
-      ObjectInfo obj = theScene.getObject(i);
-      if (obj.getObject() instanceof DirectionalLight || obj.getObject() instanceof SpotLight)
-        cameras.addElement(obj);
+      Object3D obj = info.getObject();
+      if(obj instanceof DirectionalLight || obj instanceof SpotLight)
+      {
+        cameras.add(info);
+      }
     }
     for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
     {
@@ -157,14 +159,13 @@ public class SceneViewer extends ViewerCanvas
   {
     double min = Double.MAX_VALUE, max = -Double.MAX_VALUE;
     Mat4 toView = theCamera.getWorldToView();
-    for (int i = 0; i < theScene.getNumObjects(); i++)
+    for(ObjectInfo info: theScene.getObjects())
     {
-      ObjectInfo info = theScene.getObject(i);
-      BoundingBox bounds = info.getBounds().transformAndOutset(toView.times(info.coords.fromLocal()));
+      BoundingBox bounds = info.getBounds().transformAndOutset(toView.times(info.getCoords().fromLocal()));
       if (bounds.minz < min)
         min = bounds.minz;
       if (bounds.maxz > max)
-        max = bounds.maxz;
+        max = bounds.maxz;      
     }
     return new double [] {min, max};
   }
@@ -255,13 +256,11 @@ public class SceneViewer extends ViewerCanvas
       // Draw the objects.
 
       Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for(ObjectInfo obj: theScene.getObjects())
       {
-        ObjectInfo obj = theScene.getObject(i);
-        if (obj == boundCamera || !obj.isVisible())
-          continue;
+        if(obj == boundCamera || !obj.isVisible()) continue;
         theCamera.setObjectTransform(obj.getCoords().fromLocal());
-        obj.getObject().renderObject(obj, this, viewdir);
+        obj.getObject().renderObject(obj, this, viewdir);        
       }
     }
 
@@ -271,11 +270,11 @@ public class SceneViewer extends ViewerCanvas
     {
       ArrayList<Rectangle> selectedBoxes = new ArrayList<Rectangle>();
       ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<Rectangle>();
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for (ObjectInfo obj: theScene.getObjects())
       {
         int hsize;
         ArrayList<Rectangle> boxes;
-        ObjectInfo obj = theScene.getObject(i);
+
         if (obj.isLocked())
           continue;
         if (obj.selected)

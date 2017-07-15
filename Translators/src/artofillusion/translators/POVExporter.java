@@ -183,16 +183,22 @@ public class POVExporter
 
 	// Write declarations, camera, lights and objects into file
 	int selected[] = theScene.getSelection();
-	int maxIndex=0;
+        int maxIndex = 0;
+        List<ObjectInfo> items = theScene.getObjects();
 	// writing the declarations
 	write("// texture declarations",out2,0);
-	if (wholeScene) {
-	    maxIndex=theScene.getNumObjects();
-	    for (int i = 0; i < maxIndex; i++) writeTexture(theScene,theScene.getObject(i),out2,1);
-	} else {
-	    maxIndex=selected.length;
+	if (wholeScene) 
+        {
+          for (ObjectInfo item: items)
+          {
+            writeTexture(theScene, item, out2, 1);
+          }
+	} else 
+        {
+	    maxIndex = selected.length;
 	    for (int i = 0; i < maxIndex; i++) writeTexture(theScene,theScene.getObject(selected[i]),out2,1);
 	}
+        
 	out2.flush();
 	// write a language directive to include the texture declarations
 	if (bIncludeFile) {
@@ -201,9 +207,12 @@ public class POVExporter
 	// writing the objects
 	write("",out,0);
 	if (wholeScene) {
-	    maxIndex=theScene.getNumObjects();
-	    for (int i = 0; i < maxIndex; i++) writeObjects(theScene,theScene.getObject(i),out,smooth,tol);
-	} else {
+          for (ObjectInfo item: items)
+          {
+            writeObjects(theScene, item, out, smooth, tol);
+          }
+	} else
+        {
 	    maxIndex=selected.length;
 	    for (int i = 0; i < maxIndex; i++) writeObjects(theScene,theScene.getObject(selected[i]),out,smooth,tol);
 	}

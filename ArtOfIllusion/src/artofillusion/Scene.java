@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -46,7 +46,7 @@ public class Scene
   private double fogDist, gridSpacing, time;
   private boolean fog, showGrid, snapToGrid, errorsLoading;
   private String name, directory;
-  private TexturesAndMaterialsDialog texDlg;
+
   private ParameterValue environParamValue[];
   private StringBuffer loadingErrors;
 
@@ -920,7 +920,7 @@ public class Scene
   {
     return objects.size();
   }
-
+  
   /** Get the i'th object. */
 
   public ObjectInfo getObject(int i)
@@ -961,7 +961,15 @@ public class Scene
   {
     return Collections.unmodifiableList(objects);
   }
-
+  
+  /**
+   * Get all objects in the Scene in the form of a List. 
+   * 
+   */
+  public List<ObjectInfo> getObjects()
+  {
+    return Collections.unmodifiableList(objects);
+  }
   /** Get the index of the specified object. */
 
   public int indexOf(ObjectInfo info)

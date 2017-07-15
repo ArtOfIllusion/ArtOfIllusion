@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -446,7 +446,6 @@ public class Scene
   public void addObject(Object3D obj, CoordinateSystem coords, String name, UndoRecord undo)
   {
     addObject(new ObjectInfo(obj, coords, name), undo);
-    updateSelectionInfo();
   }
 
   /** Add a new object to the scene.  If undo is not null, appropriate commands will be
@@ -455,9 +454,16 @@ public class Scene
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
     addObject(info, objects.size(), undo);
-    updateSelectionInfo();
   }
 
+  /** 
+   * Add a new object to the scene.  No undo record is added
+   */
+  public void addObject(ObjectInfo info)
+  {
+    addObject(info, objects.size(), (UndoRecord)null);
+  }
+  
   /** Add a new object to the scene in the specified position.  If undo is not null,
       appropriate commands will be added to it to undo this operation. */
 
@@ -465,17 +471,19 @@ public class Scene
   {
     info.setId(nextID++);
     if (info.getTracks() == null)
-      {
-        info.addTrack(new PositionTrack(info), 0);
-        info.addTrack(new RotationTrack(info), 1);
-      }
+    {
+      info.addTrack(new PositionTrack(info), 0);
+      info.addTrack(new RotationTrack(info), 1);
+    }
     if (info.getObject().canSetTexture() && info.getObject().getTextureMapping() == null)
       info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping(info.getObject()));
     info.getObject().sceneChanged(info, this);
     objects.insertElementAt(info, index);
     objectIndexMap = null;
     if (undo != null)
-      undo.addCommandAtBeginning(UndoRecord.DELETE_OBJECT, new Object [] {index});
+    {
+      undo.addCommandAtBeginning(UndoRecord.DELETE_OBJECT, new Object[]{index});
+    }
     updateSelectionInfo();
   }
 

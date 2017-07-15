@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -46,16 +46,14 @@ public class ArtOfIllusion
   public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
   public static final ImageIcon APP_ICON;
-  public static Font defaultFont;
-//  private static String currentDirectory;
-  public static int standardDialogInsets = 0;
+
   private static ApplicationPreferences preferences;
   private static ObjectInfo clipboardObject[];
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
   private static ArrayList<EditingWindow> windows = new ArrayList<EditingWindow>();
-  private static HashMap<String, String> classTranslations = new HashMap<String, String>();
+  private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
   static
@@ -150,7 +148,7 @@ public class ArtOfIllusion
       // Due to the strange way PopupFactory is implemented, we need to use reflection to make sure
       // we *really* get heavyweight popups from the very start.
 
-      Class popup = PopupFactory.class;
+      Class<PopupFactory> popup = PopupFactory.class;
       Field heavyweight = popup.getDeclaredField("HEAVY_WEIGHT_POPUP");
       Method setPopupType = popup.getDeclaredMethod("setPopupType", Integer.TYPE);
       heavyweight.setAccessible(true);
@@ -263,13 +261,11 @@ public class ArtOfIllusion
     Scene theScene = new Scene();
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     ObjectInfo info = new ObjectInfo(new SceneCamera(), coords, "Camera 1");
-    info.addTrack(new PositionTrack(info), 0);
-    info.addTrack(new RotationTrack(info), 1);
-    theScene.addObject(info, null);
+    theScene.addObject(info);
+    
     info = new ObjectInfo(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), coords.duplicate(), "Light 1");
-    info.addTrack(new PositionTrack(info), 0);
-    info.addTrack(new RotationTrack(info), 1);
-    theScene.addObject(info, null);
+    theScene.addObject(info);
+    
     newWindow(theScene);
   }
 

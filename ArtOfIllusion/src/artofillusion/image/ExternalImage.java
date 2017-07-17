@@ -64,7 +64,7 @@ public class ExternalImage extends ImageMap
     }
     catch(Exception e)
     {
-       // ExternalImage will not be created, no values need to be set.
+      // ExternalImage will not be created, no values need to be set.
       throw new InterruptedException();
     }
   }
@@ -171,13 +171,7 @@ public class ExternalImage extends ImageMap
       return brokenImage.getScaledInstance(size, size, Image.SCALE_SMOOTH);
     return createTemporaryImage(size, size); // The case of details dialog
   }
-  
-  // @Override
-  // public Image getMapImage(int size)
-  // {
-  //   return imageMap.getMapImage(size);
-  // }
-  
+
   /** Check if the image name is updated automatically. */
 
   public boolean isNameAutomatic()

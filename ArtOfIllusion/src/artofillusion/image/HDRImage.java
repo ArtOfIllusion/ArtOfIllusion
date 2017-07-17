@@ -588,12 +588,6 @@ public class HDRImage extends ImageMap
     return image;
   }
 
-  // @Override
-  // public Image getMapImage(int size)
-  // {
-  //   return getPreview(size);
-  // }
-  
   /** Get the RGBE bytes that contain th eimage information */
   
   public byte[][] getBytes()

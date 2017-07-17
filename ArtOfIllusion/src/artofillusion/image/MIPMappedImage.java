@@ -602,12 +602,6 @@ public class MIPMappedImage extends ImageMap
     return image;
   }
 
-  // @Override
-  // public Image getMapImage(int size)
-  // {
-  //   return getImageOfClosestMap(size);
-  // }
-
   private int getMapNumber(int size)
   {
     int n, pw, ph;
@@ -617,31 +611,7 @@ public class MIPMappedImage extends ImageMap
     
     return n;
   }
-  
-  // Get an image that represents the colsesti MIP map in the giben size. The dimensions 
-  //    of the used map are larger or egual to the requested size with te aspect raetion 
-  //    taken to account. <p>
-  //
-  //    Note that the proportions of MIP-maps, except for 'map[0]' are always in powers of 2, 
-  //    like 4:1, 2:1, 1:1, 1:2...
-  //
-  //private BufferedImage getImageOfClosestMap(int size)
-  //{
-  //  if (maps.length == 1)
-  //    return getImage(0);
-  //  else
-  //  {
-  //    int n, pw, ph;
-  //    int w = getWidth();
-  //    int h = getHeight();
-  //
-  //    pw = max(min(size, (int)round(size*aspectRatio)),1);
-  //    ph = max(min(size, (int)round(size/aspectRatio)),1);
-  //    for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
-  //    return getImage(n);
-  //  }
-  //}
-  
+
   /** Create a scaled image in the requested size. If size is larger than the original image 
       a non-sclaed image is returned.*/
 
@@ -660,17 +630,14 @@ public class MIPMappedImage extends ImageMap
   {
     return getImage(0);
   }
-  
+
   /** This is used to <br>
       <li> write the image to stream,
       <li> create a preview image,
       <li> export the image. */
-  
+
   private BufferedImage getImage(int n)
   {
-    // if (n == lastMapNumber)
-    //   return mapImage.get();
-      
     int w = width[n], h = height[n];
     
     if (w <= 0 || h <= 0)

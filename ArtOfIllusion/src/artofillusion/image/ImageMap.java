@@ -139,12 +139,6 @@ public abstract class ImageMap
   
   public abstract Image getPreview(int size);
 
-  // /** Get the image of the MIP-map that is larger than or equal to 'size'.<br>
-  //     If the dimensions of the image are smaller than size, map[0] representing 
-  //     the original image, is returned.  */
-  // 
-  // public abstract Image getMapImage(int size);
-
   /** Get an ID number which is unique (within this session) for this image. */
   
   public int getID()
@@ -253,7 +247,7 @@ public abstract class ImageMap
   /** Write out the object's representation to an output stream.  Every ImageMap subclass must also
       define a constructor of the form
       
-      public ImageMapSubclass(DataInputStream in) throws IOException, InvalidObjectException
+      <pre>public ImageMapSubclass(DataInputStream in) throws IOException, InvalidObjectException</pre>
       
       which reconstructs an image from its serialized representation. */
 

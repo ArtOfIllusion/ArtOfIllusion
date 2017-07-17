@@ -398,15 +398,6 @@ public class SVGImage extends ImageMap
     }
   }
 
-
-  // /** This is same as <pre>getPreview(int size)</pre> */
-  // 
-  // @Override
-  // public Image getMapImage(int size)
-  // {
-  //   return getPreview(size);
-  // }
-  // 
   /** Get a scaled copy of the image, to use for previews.  The dimensions of the 
       Image will be no larger but may be smaller than PREVIEW_DEFAULT. */
 

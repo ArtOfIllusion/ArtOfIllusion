@@ -13,6 +13,7 @@ package artofillusion.image;
 
 import artofillusion.*;
 import artofillusion.ui.*;
+import artofillusion.procedural.ProcedureEditor;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -157,41 +158,36 @@ public class ImagesDialog extends BDialog
     }
     ic.imagesChanged();
     hilightButtons();
-    // Textured views are not updated after refresh.
-    // This did not help
-    if (parent instanceof LayoutWindow)
-      ((LayoutWindow)parent).updateImage();
-  }
+ }
 
   private void doLink()
   {
     BFileChooser fc = new ImageFileChooser(Translate.text("selectImageToLink"));
-    fc.setMultipleSelectionEnabled(false);
+    fc.setMultipleSelectionEnabled(true);
     if (!fc.showDialog(this))
       return;
-    File file = fc.getSelectedFile();
+    File files[] = fc.getSelectedFiles();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    try
+    for (File file: files)
     {
-      Scene sc = null;
-      if (parent instanceof EditingWindow)
-        sc = ((EditingWindow)parent).getScene();
-      theScene.addImage(new ExternalImage(file, sc));
-    }
-    catch (Exception ex)
-    {
-      setCursor(Cursor.getDefaultCursor());
-      new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
-      ex.printStackTrace();
-      return;
+      try
+      {
+        theScene.addImage(new ExternalImage(file, theScene));
+      }
+      catch (Exception ex)
+      {
+        setCursor(Cursor.getDefaultCursor());
+        new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+        ex.printStackTrace();
+        return;
+      }
     }
     setCursor(Cursor.getDefaultCursor());
     selection = theScene.getNumImages()-1;
     ic.imagesChanged();
     hilightButtons();
-    if (parent instanceof EditingWindow)
-        ((EditingWindow)parent).setModified();
-  }
+    setModified();
+ }
 
   private void doLoad()
   {
@@ -201,15 +197,15 @@ public class ImagesDialog extends BDialog
       return;
     File files[] = fc.getSelectedFiles();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    for (int i = 0; i < files.length; i++)
+    for (File file: files)
     {
       try
       {
-        theScene.addImage(ImageMap.loadImage(files[i]));
+        theScene.addImage(ImageMap.loadImage(file));
       }
       catch (Exception ex)
       {
-        new BStandardDialog("", Translate.text("errorLoadingImage", files[i].getName()), BStandardDialog.ERROR).showMessageDialog(this);
+        new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
         ex.printStackTrace();
         setCursor(Cursor.getDefaultCursor());
         return;
@@ -219,8 +215,7 @@ public class ImagesDialog extends BDialog
     selection = theScene.getNumImages()-1;
     ic.imagesChanged();
     hilightButtons();
-    if (parent instanceof EditingWindow)
-        ((EditingWindow)parent).setModified();
+    setModified();
   }
 
   private void doDelete()
@@ -242,8 +237,7 @@ public class ImagesDialog extends BDialog
     selection = -1;
     ic.imagesChanged();
     hilightButtons();
-    if (parent instanceof EditingWindow)
-        ((EditingWindow)parent).setModified();
+    setModified();
   }
 
   private void purge()
@@ -269,6 +263,7 @@ public class ImagesDialog extends BDialog
     dialogHeight = getBounds().height;
     ic.resized();
   }
+
   private void openDetailsDialog()
   {
     File oldFile = getSelection().getFile();
@@ -276,25 +271,14 @@ public class ImagesDialog extends BDialog
     ic.imagesChanged();
     ic.scrollToSelection();
     if (getSelection().getFile() != oldFile)
-      if (parent instanceof EditingWindow)
-        ((EditingWindow)parent).setModified();
+      setModified();
   }
 
   private Image loadIcon(String iconName)
-  { 
-    //ImageIcon icon;
-  //Image ici;
-    //icon = ThemeManager.getIcon(iconName);
-  //ici = icon.getImage();
-  //
-  //System.out.println(icon);
-  //System.out.println(ici);
-    //
-    //return ThemeManager.getIcon(iconName).getImage();
+  {
     try 
     {
-      Image ici = ImageIO.read(ExternalImage.class.getResource("/artofillusion/image/icons/" + iconName));
-      return ici; // ImageIO.read(ExternalImage.class.getResource("/artofillusion/image/icons/" + iconName));
+      return ImageIO.read(ExternalImage.class.getResource("/artofillusion/image/icons/" + iconName));
     }
     catch(IOException e)
     {
@@ -308,7 +292,7 @@ public class ImagesDialog extends BDialog
     dispose();
     removeAsListener(this);
   }
-  
+
   private void cancel()
   {
     // returning selection to, what is was at dialog open
@@ -317,9 +301,23 @@ public class ImagesDialog extends BDialog
     dispose();
     removeAsListener(this);
   }
-  
+
+  /** Set the parent window to modified state */
+
+  private void setModified()
+  { 
+    if (parent instanceof EditingWindow)
+    {
+      ((EditingWindow)parent).setModified();
+    }
+    else
+    {
+      // If the dialog is accessed through a ProcedureEditor, the scene is already marked modified.
+	}
+  } 
+
   /** Pressing Return and Escape are equivalent to clicking OK and Cancel. Arrow keys can be used to select. */
-  
+
   private void keyPressed(KeyPressedEvent ev)
   {
     int code = ev.getKeyCode();
@@ -357,7 +355,7 @@ public class ImagesDialog extends BDialog
   }
 
   /** Add this as a listener to every Widget. */
-  
+
   private void addAsListener(Widget w)
   {
     w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
@@ -368,9 +366,9 @@ public class ImagesDialog extends BDialog
         addAsListener((Widget) iter.next());
     }
   }
-  
+
   /** Remove this as a listener before returning. */
-  
+
   private void removeAsListener(Widget w)
   {
     w.removeEventLink(KeyPressedEvent.class, this);
@@ -382,10 +380,9 @@ public class ImagesDialog extends BDialog
     }
   }
 
-
   /** ImagesCanvas is an inner class which displays the loaded images and allows the user
       to select one by clicking on it. */
-  
+
   private class ImagesCanvas extends CustomWidget
   {
     private int w, h, gridw, gridh, iconSize, lastIconSize = -1, textSize;
@@ -476,7 +473,7 @@ public class ImagesDialog extends BDialog
       int vpLow = vpUp+vp.getExtentSize().height;
       int move = Math.min(Math.max(0, selLow-vpLow), selUp-vpUp);
       double scrollTime = 1.0*(1.0-1.0/(1.0+Math.abs((double)move)/(double)gridh*0.1));
-      double incs = scrollTime*60.0; // 60 Hz
+      double incs = scrollTime*ArtOfIllusion.getPreferences().getAnimationFrameRate();
       scrollIncrement = (int)((double)move/incs);
       scrollFinalValue = sp.getVerticalScrollBar().getValue() + move;
       step = 1;
@@ -491,7 +488,6 @@ public class ImagesDialog extends BDialog
 
       textSize = (int)Math.round(textFont.getSize2D());
       iconSize = textSize+21+previewSize/50;
-      //iconSize = textSize+13+previewSize/50;
       if (iconSize != lastIconSize)
       {
         inUseIcon      = loadIcon("in_use.png").getScaledInstance(iconSize, iconSize, Image.SCALE_SMOOTH);
@@ -521,7 +517,6 @@ public class ImagesDialog extends BDialog
         
         currentImage = theScene.getImage(i);
         smoothPaint(g, i);
-        // quickPaint(g,i); // This does not seem to be much quicker, but just coarser.
 
         x = (i%w)*gridw+cOff;
         y = (i/w)*gridh;
@@ -551,22 +546,6 @@ public class ImagesDialog extends BDialog
         inUse = false;
       }
     }
-
-    // private void quickPaint(Graphics2D g, int i)
-    // {
-    //     Image pim = currentImage.getMapImage(previewSize);
-    //     int pw = pim.getWidth(null);
-    //     int ph = pim.getHeight(null);
-    //     if (pw >= previewSize || ph >= previewSize)
-    //     {
-    //       float ar = currentImage.getAspectRatio();
-    //       pw = max(min(previewSize, (int)round(previewSize*ar)),1);
-    //       ph = max(min(previewSize, (int)round(previewSize/ar)),1);
-    //     }
-    //     int xOff = (previewSize-pw)/2;
-    //     int yOff = (previewSize-ph)/2;
-    //     g.drawImage(pim, (i%w)*gridw+5+xOff+cOff, (i/w)*gridh+5+yOff, pw, ph, getComponent());
-    // }
 
     private void smoothPaint(Graphics2D g, int i)
     {
@@ -604,11 +583,11 @@ public class ImagesDialog extends BDialog
       i = ((p.x-cOff)/gridw);
       j = (p.y/gridh);
       if (cOff-p.x < 0 &&  i < 5 && i+j*w < theScene.getNumImages())
-    {
+      {
         selection = i+j*w;
-    scrollToSelection();
-    // No need to repaint. The partially visible parts have been painted already.
-    }
+        scrollToSelection();
+        // No need to repaint. The partially visible parts have been painted already.
+      }
       else
         selection = -1;
       repaint();
@@ -822,8 +801,7 @@ public class ImagesDialog extends BDialog
           for (int i = 0; i < theScene.getNumImages(); i++)
             if (theScene.getImage(i) == unusedImages.get(d))
               theScene.removeImage(i);
-      if (parent instanceof EditingWindow)
-        ((EditingWindow)parent).setModified();
+      setModified();
     }
 
     private void close()
@@ -833,7 +811,7 @@ public class ImagesDialog extends BDialog
     }
 
     /** Pressing Return and Escape are equivalent to clicking OK and Cancel. */
-    
+
     private void keyPressed(KeyPressedEvent ev)
     {
       int code = ev.getKeyCode();
@@ -842,9 +820,9 @@ public class ImagesDialog extends BDialog
       if (code == KeyPressedEvent.VK_ENTER)
         deleteAndClose();
     }
-  
+
     /** Add this as a listener to every Widget. */
-    
+
     private void addAsListener(Widget w)
     {
       w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
@@ -855,7 +833,7 @@ public class ImagesDialog extends BDialog
           addAsListener((Widget) iter.next());
       }
     }
-    
+
     /** Remove this as a listener before returning. */
     
     private void removeAsListener(Widget w)

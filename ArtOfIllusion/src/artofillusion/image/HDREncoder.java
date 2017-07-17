@@ -23,6 +23,7 @@ public class HDREncoder
    * Write out the data for an image to a stream. <p>
    * This can be used to save a rendered image in HDR fromat.
    */
+
   public static void writeImage(ComplexImage img, OutputStream out) throws IOException
   {
     int rows = img.getHeight(), cols = img.getWidth();

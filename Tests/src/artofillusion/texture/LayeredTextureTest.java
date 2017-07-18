@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,17 +9,20 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.texture;
 
-import junit.framework.*;
-import artofillusion.texture.*;
+import artofillusion.TextureParameter;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 import artofillusion.object.*;
 import artofillusion.procedural.*;
 
 import java.awt.*;
 
-public class TestLayeredTexture extends TestCase
+public class LayeredTextureTest
 {
+  @Test
   public void testHasComponent()
   {
     // Create a layered texture.
@@ -52,6 +56,7 @@ public class TestLayeredTexture extends TestCase
     assertTrue(tex.hasComponent(Texture.TRANSPARENT_COLOR_COMPONENT));
   }
 
+  @Test
   public void testParameters()
   {
     // Create two textures, each with two parameters.

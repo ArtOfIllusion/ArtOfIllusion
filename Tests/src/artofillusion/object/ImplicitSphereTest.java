@@ -1,4 +1,5 @@
 /* Copyright (C) 2013 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,13 +9,12 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
-
+package artofillusion.object;
 import artofillusion.math.*;
-import artofillusion.object.*;
-import junit.framework.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-public class TestImplicitSphere extends TestCase
+public class ImplicitSphereTest
 {
   private void validateSphere(ImplicitSphere sphere)
   {
@@ -54,6 +54,7 @@ public class TestImplicitSphere extends TestCase
     }
   }
 
+  @Test
   public void testSphere()
   {
     for (int i = 0; i < 20; i++)

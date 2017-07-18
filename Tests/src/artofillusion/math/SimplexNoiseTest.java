@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,13 +9,13 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.math;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.*;
-import artofillusion.math.*;
-
-public class TestSimplexNoise extends TestCase
+public class SimplexNoiseTest
 {
+  @Test
   public void testRange()
   {
     for (int i = 0; i < 10000; i++)
@@ -32,6 +33,7 @@ public class TestSimplexNoise extends TestCase
     }
   }
 
+  @Test
   public void testGradient2D()
   {
     // Estimate the gradient by finite difference, and compare that to the value returned by
@@ -56,6 +58,7 @@ public class TestSimplexNoise extends TestCase
     assertTrue(badCount < 10);
   }
 
+  @Test
   public void testGradient3D()
   {
     // Estimate the gradient by finite difference, and compare that to the value returned by
@@ -82,6 +85,7 @@ public class TestSimplexNoise extends TestCase
     assertTrue(badCount < 10);
   }
 
+  @Test
   public void testVector()
   {
     Vec3 v = new Vec3();

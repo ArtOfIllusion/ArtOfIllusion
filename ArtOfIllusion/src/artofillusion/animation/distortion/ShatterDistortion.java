@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2012 by Peter Eastman
+   A modification copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -99,8 +100,14 @@ public class ShatterDistortion extends Distortion
               visible[i] = true;
               num++;
             }
-        if (num == 0)
-          return new TriangleMesh(new Vec3 [] {new Vec3()}, new int [0][0]);
+
+        // This was supposed to make updating the views faster, but because the new TriangeMesh
+        // has no texture, textured views can not be updated after the shattered object has 
+        // disappeared. The error occurs in the constructor of TexturedVertexShader.
+       
+        //if (num == 0)
+        //  return new TriangleMesh(new TriangleMesh.Vertex []{vert[0]}, new int [0][0]);
+
         TriangleMesh.Face shownface[] = new TriangleMesh.Face [num];
         seed = new int [num];
         num = 0;

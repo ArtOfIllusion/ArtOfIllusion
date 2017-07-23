@@ -1,6 +1,7 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2017 by Maksim Khramov
-
+   A modification copyright (C) 2017 Petri Ihalainen
+   
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -784,6 +785,13 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   @Override
   public RenderingMesh getRenderingMesh(double tol, boolean interactive, ObjectInfo info)
   {
+	// It is possible, that there are no faces on a TriangleMesh.
+	// In that case there is nothing to render. A null for RenderingMesh 
+	// is handled better than a RenderingMesh with no faces.
+	
+	if (face.length == 0)
+	  return null;
+
     TriangleMesh mesh = this;
     Vec3 vert[], normalArray[];
     List<Vec3> norm;

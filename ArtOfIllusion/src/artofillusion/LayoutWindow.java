@@ -34,13 +34,15 @@ import java.util.*;
 import java.util.List;
 
 import buoyx.docking.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.text.*;
 import javax.swing.*;
 
 /** The LayoutWindow class represents the main window for creating and laying out scenes. */
 
-public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuManager
+public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuManager, PropertyChangeListener
 {
   SceneViewer theView[];
   BorderContainer viewPanel[];
@@ -65,7 +67,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   UndoStack undoStack;
   int numViewsShown, currentView;
   private boolean modified, sceneChangePending;
-  private KeyEventPostProcessor keyEventHandler;
+  
+  private final KeyEventPostProcessor keyEventHandler;
   private SceneChangedEvent sceneChangedEvent;
   private List<ModellingTool> modellingTools;
   protected Preferences preferences;
@@ -120,8 +123,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(MousePressedEvent.class, listen);
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
-	  theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
-	  theView[i].setNavigationMode(1,false);
+      theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
+      theView[i].setNavigationMode(1,false);
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
@@ -195,7 +198,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
+      theView[i].setAltTool(altTool);
+	  theView[i].setScrollTool(scrollTool);
     }
 
     // Fill in the left hand panel.
@@ -215,7 +219,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     createViewMenu();
     createPopupMenu();
     preferences = Preferences.userNodeForPackage(getClass()).node("LayoutWindow");
+    
+    ArtOfIllusion.getPreferences().addPropertyChangeListener(this);
     loadPreferences();
+    
     numViewsShown = (numViewsShown == 1 ? 4 : 1);
     toggleViewsCommand();
     keyEventHandler = new KeyEventPostProcessor()
@@ -919,7 +926,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         return false;
     }
     dispose();
-    KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor(keyEventHandler);
+    
     return true;
   }
 
@@ -1639,7 +1646,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
+      }
+      else if (command.equals("fitToSelection"))
+		getView().fitToObjects(getSelectedObjects());
+      else if (command.equals("fitToAll"))
+		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
 	    getView().alignWithClosestAxis();
 	  /*
@@ -3001,4 +3012,27 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().
   }
+
+  @Override
+  public void propertyChange(PropertyChangeEvent event)
+  {
+    if(event.getPropertyName().equals("interactiveSurfaceError"))
+    {
+      for(ObjectInfo info: theScene.getAllObjects()) {
+        info.clearCachedMeshes();      
+      }
+      updateImage();
+    }
+  }
+
+  
+  @Override
+  public void dispose()
+  {
+    super.dispose();
+    KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor(keyEventHandler);
+    ArtOfIllusion.getPreferences().removePropertyChangeListener(this);
+  }
+  
+  
 }

@@ -12,9 +12,9 @@
 
 package artofillusion;
 
-import artofillusion.math.*;
-import artofillusion.object.*;
 import artofillusion.ui.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -23,12 +23,20 @@ import java.util.List;
 
 public class ApplicationPreferences
 {
+  private static final String userHome = System.getProperty("user.home");
+  
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
-  private double interactiveTol, maxAnimationDuration, animationFrameRate;
+  
+  private double interactiveSurfaceError;
+  private double maxAnimationDuration;
+  private double animationFrameRate;
+  
   private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming, useViewAnimations;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
 
+  private final ArrayList<PropertyChangeListener> subscribers = new ArrayList<PropertyChangeListener>();
+  
   /**
    * Create a new ApplicationPreferences object, loading the preferences from a
    * file in the default location.
@@ -41,7 +49,7 @@ public class ApplicationPreferences
     {
       // See if it exists in the old location.
 
-      File f2 = new File(System.getProperty("user.home"), ".aoiprefs");
+      File f2 = new File(userHome, ".aoiprefs");
       if (f2.exists())
         f2.renameTo(f);
     }
@@ -122,7 +130,7 @@ public class ApplicationPreferences
 
   public static File getPreferencesDirectory()
   {
-    File dir = new File(System.getProperty("user.home"), ".artofillusion");
+    File dir = new File(userHome, ".artofillusion");
     if (!dir.exists())
       dir.mkdirs();
     return dir;
@@ -136,7 +144,7 @@ public class ApplicationPreferences
     if (renderers.size() > 0)
       objectPreviewRenderer = texturePreviewRenderer = defaultRenderer = getNamedRenderer("Raytracer");
     defaultDisplayMode = ViewerCanvas.RENDER_SMOOTH;
-    interactiveTol = 0.05;
+    interactiveSurfaceError = 0.05;
     undoLevels = 6;
     useOpenGL = true;
     keepBackupFiles = false;
@@ -156,7 +164,7 @@ public class ApplicationPreferences
     defaultRenderer = getNamedRenderer(properties.getProperty("defaultRenderer"));
     
     defaultDisplayMode = parseIntProperty("defaultDisplayMode", defaultDisplayMode);
-    interactiveTol = parseDoubleProperty("interactiveSurfaceError", interactiveTol);
+    interactiveSurfaceError = parseDoubleProperty("interactiveSurfaceError", interactiveSurfaceError);
     undoLevels = parseIntProperty("undoLevels", undoLevels);
     useOpenGL = parseBooleanProperty("useOpenGL", useOpenGL);
     keepBackupFiles = parseBooleanProperty("keepBackupFiles", keepBackupFiles);
@@ -325,37 +333,24 @@ public class ApplicationPreferences
 
   public final double getInteractiveSurfaceError()
   {
-    return interactiveTol;
+    return interactiveSurfaceError;
   }
 
   /** Set the interactive surface error. */
 
-  public final void setInteractiveSurfaceError(double tol)
+  public final void setInteractiveSurfaceError(double tolerance)
   {
-    boolean changed = (interactiveTol != tol);
+    if(interactiveSurfaceError == tolerance) return;
 
-    interactiveTol = tol;
-    properties.put("interactiveSurfaceError", Double.toString(tol));
-    if (changed)
-      {
-        // Clear the cached meshes for objects in all windows.
+    PropertyChangeEvent event = new PropertyChangeEvent(this, "interactiveSurfaceError", interactiveSurfaceError, tolerance);
+    this.interactiveSurfaceError = tolerance;
+    properties.put("interactiveSurfaceError", Double.toString(interactiveSurfaceError));
 
-        EditingWindow windows[] = ArtOfIllusion.getWindows();
-        for (EditingWindow w : windows)
-          {
-            Scene sc = w.getScene();
-            if (sc == null)
-              continue;
-            for (int j = 0; j < sc.getNumObjects(); j++)
-              {
-                ObjectInfo info = sc.getObject(j);
-                Vec3 size = info.getBounds().getSize();
-                info.getObject().setSize(size.x, size.y, size.z);
-                info.clearCachedMeshes();
-              }
-            w.updateImage();
-          }
-      }
+    for(PropertyChangeListener subscriber: subscribers)
+    {
+      subscriber.propertyChange(event);
+    }
+
   }
 
   /** Get the locale for displaying text. */
@@ -475,7 +470,7 @@ public class ApplicationPreferences
   public final void setMaxAnimationDuration(double duration)
   {
     maxAnimationDuration = duration;
-	properties.put("maxAnimationDuration", Double.toString(duration));
+    properties.put("maxAnimationDuration", Double.toString(duration));
   }
   
   /** Get default framerate of view animations. */
@@ -490,6 +485,16 @@ public class ApplicationPreferences
   public final void setAnimationFrameRate(double rate)
   {
     animationFrameRate = rate;
-	properties.put("animationFrameRate", Double.toString(rate));
+    properties.put("animationFrameRate", Double.toString(rate));
+  }
+  
+  public final void addPropertyChangeListener(PropertyChangeListener subscriber)
+  {
+    subscribers.add(subscriber);
+  }
+  
+  public final void removePropertyChangeListener(PropertyChangeListener subscriber)
+  {
+    subscribers.remove(subscriber);;
   }
 }

@@ -364,8 +364,18 @@ public class ApplicationPreferences
 
   public final void setLocale(Locale locale)
   {
+    Locale current = Translate.getLocale();
+    if(current.equals(locale)) return;
+    
+    PropertyChangeEvent event = new PropertyChangeEvent(this, "language", current, locale);
     Translate.setLocale(locale);
-    properties.put("language", locale.getLanguage()+'_'+locale.getCountry());
+    properties.put("language", locale.getLanguage()+'_'+locale.getCountry());      
+    
+    for(PropertyChangeListener subscriber: subscribers)
+    {
+      subscriber.propertyChange(event);
+    }    
+
   }
 
   /** Get the number of levels of Undo to support. */

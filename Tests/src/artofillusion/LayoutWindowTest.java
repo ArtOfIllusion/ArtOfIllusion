@@ -24,7 +24,9 @@ import java.io.IOException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.text.MessageFormat;
 import java.util.Locale;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -34,7 +36,11 @@ import org.netbeans.jemmy.operators.JFrameOperator;
 import org.netbeans.jemmy.operators.*;
 
 import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.rules.TestName;
 import org.netbeans.jemmy.Bundle;
+import org.netbeans.jemmy.JemmyProperties;
+import org.netbeans.jemmy.TestOut;
 /**
  *
  * @author MaksK
@@ -50,13 +56,16 @@ public class LayoutWindowTest
   private LayoutWindow layout;
   
   private static final Bundle bundle = new Bundle();
-
+  
+  @Rule public TestName name = new TestName();
+  
   @BeforeClass
   public static void setupClass() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, URISyntaxException, IOException 
   {
     Locale.setDefault(Locale.ENGLISH);
     new ClassReference("artofillusion.ArtOfIllusion").startApplication();
     bundle.loadFromFile(ArtOfIllusion.class.getClassLoader().getResource("artofillusion.properties").toURI().getPath());
+    JemmyProperties.setCurrentOutput(TestOut.getNullOutput());
   }
   
   @Before
@@ -68,11 +77,20 @@ public class LayoutWindowTest
     layout = (LayoutWindow)ArtOfIllusion.getWindows()[0];
     scene = layout.getScene();
     
-    for(int i=2; i< scene.getNumObjects();i++)
+
+    System.out.println("Executing Test Name: " + name.getMethodName());
+  }
+  
+  @After
+  public void done()
+  {
+    int scc = scene.getNumObjects();
+    for(int i=2; i< scc;i++)
     {
       layout.removeObject(2, null);
     }
-    
+    layout.updateImage();
+    layout.updateMenus();
   }
   
   @Test
@@ -314,6 +332,9 @@ public class LayoutWindowTest
   
   private void executeTrackMenu(String path, Class clazz, int count) {
     
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Animation|Add Track To Selected Objects");
+    assertFalse(oto.isEnabled());
+    
     ObjectInfo test = new ObjectInfo(new Sphere(1d,1d,1d), new CoordinateSystem(), "Test-"+System.currentTimeMillis());
     
     layout.addObject(test, null);
@@ -341,10 +362,8 @@ public class LayoutWindowTest
     layout.addObject(path, null);
     layout.setSelection(new int[] {2,3});
     
-    System.out.println("pass1");
     appMainMenu.pushMenuNoBlock("Animation|Set Path From Curve...");
-    
-    System.out.println("pass2");    
+     
     JDialogOperator dialog = new JDialogOperator(appFrame, "Set Path From Curve");
 
     
@@ -401,5 +420,117 @@ public class LayoutWindowTest
     
   }
   
+  @Test
+  public void testInvokeLayoutbjectCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Object Layout...");
+    assertFalse(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeLayoutForSingleObjectCommand()
+  {
+    String objectName =  "Test-"+System.currentTimeMillis();
+    ObjectInfo test = new ObjectInfo(new Sphere(1d,1d,1d), new CoordinateSystem(),objectName);
+    layout.addObject(test, null);
+    layout.setSelection(2);
+    
+    appMainMenu.pushMenuNoBlock("Object|Object Layout...");
+    JDialogOperator dialog = new JDialogOperator(appFrame,MessageFormat.format(bundle.getResource("objectLayoutTitle"), objectName));
+    
+    JButtonOperator cancel = new JButtonOperator(dialog, bundle.getResource("button.cancel"));
+    cancel.clickMouse();  
+  }
+  
+  @Test
+  public void testInvokeTransformObjectCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Transform Object...");
+    assertFalse(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeTransformForSingleObjectCommand()
+  { 
+    String objectName =  "Test-"+System.currentTimeMillis();
+    ObjectInfo test = new ObjectInfo(new Sphere(1d,1d,1d), new CoordinateSystem(),objectName);
+    layout.addObject(test, null);
+    layout.setSelection(2);
+    
+    appMainMenu.pushMenuNoBlock("Object|Transform Object...");
+    JDialogOperator dialog = new JDialogOperator(appFrame,MessageFormat.format(bundle.getResource("transformObjectTitle"), objectName));
+    
+    JButtonOperator cancel = new JButtonOperator(dialog, bundle.getResource("button.cancel"));
+    cancel.clickMouse();    
+  }
+
+  @Test
+  public void testInvokeTransformForMultipleObjectsCommand()
+  {
+    String objectName =  "Test-"+System.currentTimeMillis();
+    ObjectInfo test = new ObjectInfo(new Sphere(1d,1d,1d), new CoordinateSystem(),objectName);
+    layout.addObject(test, null);
+    objectName =  "Test-"+System.currentTimeMillis();
+    test = new ObjectInfo(new Sphere(1d,1d,1d), new CoordinateSystem(),objectName);
+    layout.addObject(test, null);
+    
+    layout.setSelection(new int[] {2,3});
+    
+    appMainMenu.pushMenuNoBlock("Object|Transform Object...");
+    JDialogOperator dialog = new JDialogOperator(appFrame,MessageFormat.format(bundle.getResource("transformObjectTitleMultiple"), objectName));
+    
+    JButtonOperator cancel = new JButtonOperator(dialog, bundle.getResource("button.cancel"));
+    cancel.clickMouse();      
+  }
+  
+  @Test
+  public void testInvokeHideSelectionCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Hide Selection");
+    assertFalse(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeShowSelectionCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Show Selection");
+    assertFalse(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeShowSelectionAllCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Show All");
+    assertTrue(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeLockSelectionCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Lock Selection");
+    assertFalse(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeUnlockSelectionCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Unlock Selection");
+    assertFalse(oto.isEnabled());
+    
+  }
+  
+  @Test
+  public void testInvokeUnlockSelectionAllCommandNoSelection()
+  {
+    JMenuItemOperator oto = appMainMenu.showMenuItem("Object|Unlock All");
+    assertTrue(oto.isEnabled());
+    
+  }
   
 }

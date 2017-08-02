@@ -1877,17 +1877,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void preferencesCommand()
   {
-    Renderer previewRenderer = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
     new PreferencesWindow(this);
-    if (previewRenderer != ArtOfIllusion.getPreferences().getObjectPreviewRenderer())
-    {
-      previewRenderer.cancelRendering(theScene);
-      for (ViewerCanvas view : theView)
-        view.viewChanged(false);
-      updateImage();
-    }
   }
 
   public void duplicateCommand()
@@ -3016,12 +3009,22 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @Override
   public void propertyChange(PropertyChangeEvent event)
   {
-    if(event.getPropertyName().equals("interactiveSurfaceError"))
+    String propertyName = event.getPropertyName();
+    if(propertyName.equals("interactiveSurfaceError"))
     {
       for(ObjectInfo info: theScene.getAllObjects()) {
         info.clearCachedMeshes();      
       }
       updateImage();
+    } else if(propertyName.equals("objectPreviewRenderer"))
+    {
+      System.out.println("On Preview renderer changed event fired: " + event);
+      ((Renderer)event.getOldValue()).cancelRendering(theScene);
+      for (ViewerCanvas view : theView)
+      {
+        view.viewChanged(false);
+      }
+      updateImage();      
     }
   }
 

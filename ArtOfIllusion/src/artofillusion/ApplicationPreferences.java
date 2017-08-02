@@ -293,10 +293,16 @@ public class ApplicationPreferences
 
   /** Set the object preview renderer. */
 
-  public final void setObjectPreviewRenderer(Renderer rend)
+  public final void setObjectPreviewRenderer(Renderer renderer)
   {
-    objectPreviewRenderer = rend;
-    properties.put("objectPreviewRenderer", rend.getName());
+    if(renderer == objectPreviewRenderer) return;
+    PropertyChangeEvent event = new PropertyChangeEvent(this, "objectPreviewRenderer", objectPreviewRenderer, renderer);
+    objectPreviewRenderer = renderer;
+    properties.put("objectPreviewRenderer", renderer.getName());
+    for(PropertyChangeListener subscriber: subscribers)
+    {
+      subscriber.propertyChange(event);
+    }
   }
 
   /** Get the texture preview renderer. */

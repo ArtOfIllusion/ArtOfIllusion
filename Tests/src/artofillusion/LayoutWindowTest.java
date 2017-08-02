@@ -41,6 +41,7 @@ import org.junit.rules.TestName;
 import org.netbeans.jemmy.Bundle;
 import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.TestOut;
+
 /**
  *
  * @author MaksK
@@ -63,8 +64,8 @@ public class LayoutWindowTest
   public static void setupClass() throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, URISyntaxException, IOException 
   {
     Locale.setDefault(Locale.ENGLISH);
-    new ClassReference("artofillusion.ArtOfIllusion").startApplication();
-    bundle.loadFromFile(ArtOfIllusion.class.getClassLoader().getResource("artofillusion.properties").toURI().getPath());
+    new ClassReference("artofillusion.ArtOfIllusion").startApplication();  
+    bundle.load(ArtOfIllusion.class.getClassLoader().getResourceAsStream("artofillusion.properties"));
     JemmyProperties.setCurrentOutput(TestOut.getNullOutput());
   }
   
@@ -209,6 +210,7 @@ public class LayoutWindowTest
     assertEquals(scene.getTime(), sceneTime-timeStep, timeStep*0.01);    
   }
   
+  @Test
   public void testInvokeJumpToTimeCommand()
   {
     appMainMenu.pushMenuNoBlock("Animation|Jump To Time...");

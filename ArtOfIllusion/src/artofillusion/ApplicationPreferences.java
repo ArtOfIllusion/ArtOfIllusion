@@ -201,7 +201,7 @@ public class ApplicationPreferences
       {
         return Integer.parseInt(properties.getProperty(name));
       }
-    catch (NumberFormatException ex)
+    catch (Exception ex)
       {
         return defaultVal;
       }
@@ -215,7 +215,7 @@ public class ApplicationPreferences
       {
         return Double.valueOf(properties.getProperty(name));
       }
-    catch (NumberFormatException ex)
+    catch (Exception ex)
       {
         return defaultVal;
       }

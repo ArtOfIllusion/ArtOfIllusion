@@ -101,13 +101,6 @@ public class ShatterDistortion extends Distortion
               num++;
             }
 
-        // This was supposed to make updating the views faster, but because the new TriangeMesh
-        // has no texture, textured views can not be updated after the shattered object has 
-        // disappeared. The error occurs in the constructor of TexturedVertexShader.
-       
-        //if (num == 0)
-        //  return new TriangleMesh(new TriangleMesh.Vertex []{vert[0]}, new int [0][0]);
-
         TriangleMesh.Face shownface[] = new TriangleMesh.Face [num];
         seed = new int [num];
         num = 0;

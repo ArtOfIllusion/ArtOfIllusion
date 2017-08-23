@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+
+<project name="Tests" default="main" basedir=".">
+
+  <!-- set global properties for this build -->
+  <property name="tests.src.dir" value="Tests/src" />
+  <property name="tests.build.dir" value="Tests/build" />
+  <property name="tests.result.dir" value="Tests/results" />
+
+  <property name="aoijar" value="ArtOfIllusion.jar" />
+  <property name="lib-test" value="lib-test" />    
+
+  <path id="class.path">
+    <fileset id="lib-test" dir="${lib-test}" includes="*.jar" />
+    <fileset id="plugins" dir="Plugins" includes="*.jar" />
+  </path>
+
+  <target name="pre-init">
+     <available file="Textures and Materials" property="materials.folder.found"/> 
+  </target>
+
+  <target name="init" depends="pre-init">
+
+    <!-- Create the build directory structure used by compile -->
+    <mkdir dir="${tests.build.dir}" />
+
+    <delete dir="${tests.result.dir}"/>
+    <mkdir dir="${tests.result.dir}" />
+    <!-- Create the Textures And Materials folder for tests purpose. Do nothing if it already exist -->
+    <mkdir dir="Textures and Materials" />
+
+  </target>
+
+  <target name="compile" depends="init">
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${tests.src.dir}" destdir="${tests.build.dir}" debug="on" target="1.5" source="1.5">
+      <classpath>
+        <pathelement path="${aoijar}"/>
+        <path refid = "class.path" />
+      </classpath>
+    </javac> 
+  </target>
+
+  <target name="post-test" if="materials.folder.found">
+     <delete dir="Textures and Materials"/>
+  </target>
+
+  <target name="test" depends="compile">
+	<junit printsummary="yes" haltonfailure="no" showoutput="true" fork="yes">
+      <formatter type="xml"/>
+      <classpath>
+        <pathelement path="${aoijar}"/>
+        <path refid = "class.path" />
+        <pathelement location="${tests.build.dir}"/>
+      </classpath>
+            <batchtest>
+                <fileset dir="${tests.build.dir}" includes="**/*Test.class" />
+            </batchtest>
+        </junit>
+<junitreport todir="${tests.result.dir}">
+    <fileset dir=".">
+        <include name="TEST-*.xml"/>
+    </fileset>
+    <report todir="${tests.result.dir}/html" format="noframes"/>
+</junitreport>
+     <delete>
+       <fileset dir=".">
+          <include name="TEST-*.xml"/>
+       </fileset>
+     </delete>
+  </target>
+
+  <target name="main" depends="test, post-test"/>
+
+  <target name="clean">
+    <!-- Delete the ${build} and ${docs} directory trees -->
+    
+    <delete dir="${tests.build.dir}" />
+  </target>
+</project>
+

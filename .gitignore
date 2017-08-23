@@ -5,6 +5,9 @@
 #Javadoc output
 **/docs/
 
+#Test results
+**/results/
+
 #Windows and Mac image thumbnail stores and directory caches
 Thumbs.db
 **/.xvpics/

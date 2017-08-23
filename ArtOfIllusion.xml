@@ -14,7 +14,10 @@
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
 
   <!-- set of all subproject build files -->
-  <fileset id="subproject.files" dir="." includes="*.xml" excludes="${ant.project.name}.xml" />
+  <fileset id="subproject.files" dir="." includes="*.xml">
+    <exclude name="${ant.project.name}.xml"/>
+    <exclude name="Tests.xml"/>
+  </fileset> 
 
   <target name="init">
     <!-- Create the time stamp -->

@@ -456,13 +456,6 @@ public class Scene
     addObject(info, objects.size(), undo);
   }
 
-  /** 
-   * Add a new object to the scene.  No undo record is added
-   */
-  public void addObject(ObjectInfo info)
-  {
-    addObject(info, objects.size(), (UndoRecord)null);
-  }
   
   /** Add a new object to the scene in the specified position.  If undo is not null,
       appropriate commands will be added to it to undo this operation. */

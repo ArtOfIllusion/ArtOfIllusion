@@ -261,10 +261,10 @@ public class ArtOfIllusion
     Scene theScene = new Scene();
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     ObjectInfo info = new ObjectInfo(new SceneCamera(), coords, "Camera 1");
-    theScene.addObject(info);
+    theScene.addObject(info, (UndoRecord)null);
     
     info = new ObjectInfo(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), coords.duplicate(), "Light 1");
-    theScene.addObject(info);
+    theScene.addObject(info, (UndoRecord)null);
     
     newWindow(theScene);
   }

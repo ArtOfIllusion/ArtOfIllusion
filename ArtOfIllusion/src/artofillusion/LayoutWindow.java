@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -195,7 +195,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
+      theView[i].setAltTool(altTool);
+	  theView[i].setScrollTool(scrollTool);
     }
 
     // Fill in the left hand panel.
@@ -1639,7 +1640,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
+      }
+      else if (command.equals("fitToSelection"))
+		getView().fitToObjects(getSelectedObjects());
+      else if (command.equals("fitToAll"))
+		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
 	    getView().alignWithClosestAxis();
 	  /*
@@ -2853,117 +2858,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   
   public void environmentCommand()
   {
-    final RGBColor ambColor = theScene.getAmbientColor(), envColor = theScene.getEnvironmentColor(), fogColor = theScene.getFogColor();
-    final RGBColor oldAmbColor = ambColor.duplicate(), oldEnvColor = envColor.duplicate(), oldFogColor = fogColor.duplicate();
-    final Widget ambPatch = ambColor.getSample(50, 30), envPatch = envColor.getSample(50, 30), fogPatch = fogColor.getSample(50, 30);
-    final BCheckBox fogBox = new BCheckBox("Environment Fog", theScene.getFogState());
-    final ValueField fogField = new ValueField(theScene.getFogDistance(), ValueField.POSITIVE);
-    final OverlayContainer envPanel = new OverlayContainer();
-    final BComboBox envChoice;
-    final BButton envButton = new BButton(Translate.text("Choose")+":");
-    final BLabel envLabel = new BLabel();
-    final Sphere envSphere = new Sphere(1.0, 1.0, 1.0);
-    final ObjectInfo envInfo = new ObjectInfo(envSphere, new CoordinateSystem(), "Environment");
-
-    envChoice = new BComboBox(new String [] {
-      Translate.text("solidColor"),
-      Translate.text("textureDiffuse"),
-      Translate.text("textureEmissive")
-    });
-    envChoice.setSelectedIndex(theScene.getEnvironmentMode());
-    RowContainer row = new RowContainer();
-    row.add(envButton);
-    row.add(envLabel);
-    envPanel.add(envPatch, 0);
-    envPanel.add(row, 1);
-    if (theScene.getEnvironmentMode() == Scene.ENVIRON_SOLID)
-      envPanel.setVisibleChild(0);
-    else
-      envPanel.setVisibleChild(1);
-    envInfo.setTexture(theScene.getEnvironmentTexture(), theScene.getEnvironmentMapping());
-    envSphere.setParameterValues(theScene.getEnvironmentParameterValues());
-    envLabel.setText(envSphere.getTexture().getName());
-    envChoice.addEventLink(ValueChangedEvent.class, new Object()
-    {
-      void processEvent()
-      {
-        if (envChoice.getSelectedIndex() == Scene.ENVIRON_SOLID)
-          envPanel.setVisibleChild(0);
-        else
-          envPanel.setVisibleChild(1);
-        envPanel.getParent().layoutChildren();
-      }
-    });
-    final Runnable envTextureCallback = new Runnable() {
-      @Override
-      public void run()
-      {
-        envLabel.setText(envSphere.getTexture().getName());
-        envPanel.getParent().layoutChildren();
-      }
-    };
-    envButton.addEventLink(CommandEvent.class, new Object()
-    {
-      void processEvent()
-      {
-        envPanel.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        ObjectTextureDialog otd = new ObjectTextureDialog(LayoutWindow.this, new ObjectInfo [] {envInfo}, true, false);
-        otd.setCallback(envTextureCallback);
-        envPanel.getParent().setCursor(Cursor.getDefaultCursor());
-      }
-    });
-    ambPatch.addEventLink(MouseClickedEvent.class, new Object()
-    {
-      void processEvent()
-      {
-        new ColorChooser(LayoutWindow.this, Translate.text("ambientColor"), ambColor);
-        ambPatch.setBackground(ambColor.getColor());
-        ambPatch.repaint();
-      }
-    });
-    envPatch.addEventLink(MouseClickedEvent.class, new Object()
-    {
-      void processEvent()
-      {
-        new ColorChooser(LayoutWindow.this, Translate.text("environmentColor"), envColor);
-        envPatch.setBackground(envColor.getColor());
-        envPatch.repaint();
-      }
-    });
-    fogPatch.addEventLink(MouseClickedEvent.class, new Object()
-    {
-      void processEvent()
-      {
-        new ColorChooser(LayoutWindow.this, Translate.text("fogColor"), fogColor);
-        fogPatch.setBackground(fogColor.getColor());
-        fogPatch.repaint();
-      }
-    });
-    Runnable okCallback = new Runnable() {
-      @Override
-      public void run()
-      {
-        theScene.setFog(fogBox.getState(), fogField.getValue());
-        theScene.setEnvironmentMode(envChoice.getSelectedIndex());
-        theScene.setEnvironmentTexture(envSphere.getTexture());
-        theScene.setEnvironmentMapping(envSphere.getTextureMapping());
-        theScene.setEnvironmentParameterValues(envSphere.getParameterValues());
-        setModified();
-      }
-    };
-    Runnable cancelCallback = new Runnable() {
-      @Override
-      public void run()
-      {
-        ambColor.copy(oldAmbColor);
-        envColor.copy(oldEnvColor);
-        fogColor.copy(oldFogColor);
-      }
-    };
-    new ComponentsDialog(LayoutWindow.this, Translate.text("environmentTitle"),
-        new Widget [] {ambPatch, envChoice, envPanel, fogBox, fogPatch, fogField},
-        new String [] {Translate.text("ambientColor"), Translate.text("environment"), "", "", Translate.text("fogColor"), Translate.text("fogDistance")},
-        okCallback, cancelCallback);
+    SceneEnvironmentDialog.show(this, theScene);
   }
 
   private void executeScriptCommand(CommandEvent ev)

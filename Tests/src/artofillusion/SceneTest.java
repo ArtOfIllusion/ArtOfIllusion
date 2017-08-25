@@ -83,7 +83,6 @@ public class SceneTest {
       
       assertEquals(++sceneObjects, scene.getNumObjects());
 
-      assertEquals("Cube", so.getName());
       assertEquals(2, so.getTracks().length);
       
       
@@ -102,7 +101,6 @@ public class SceneTest {
       
       assertEquals(++sceneObjects, scene.getNumObjects());
 
-      assertEquals("Cube", so.getName());
       assertEquals(2, so.getTracks().length);
 
     }
@@ -119,8 +117,7 @@ public class SceneTest {
       ObjectInfo so = scene.getObject("Cube");
       
       assertEquals(++sceneObjects, scene.getNumObjects());
-      
-      assertEquals("Cube", so.getName());
+
       assertEquals(2, so.getTracks().length);
 
     }

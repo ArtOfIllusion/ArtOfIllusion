@@ -74,7 +74,7 @@ public class SceneTest {
    * Check that object created, added to scene and contains default tracks...
    */
   @Test
-    public void testAddObject1() {
+    public void testAddObjectAsNewObject3DAndCoordinates() {
 
       int sceneObjects = scene.getNumObjects();
 
@@ -82,8 +82,7 @@ public class SceneTest {
       ObjectInfo so = scene.getObject("Cube");
       
       assertEquals(++sceneObjects, scene.getNumObjects());
-      
-      assertNotNull(so);
+
       assertEquals("Cube", so.getName());
       assertEquals(2, so.getTracks().length);
       
@@ -95,15 +94,14 @@ public class SceneTest {
    * Check that object created, added to scene and contains default tracks...
    */
   @Test
-    public void testAddObject2() {
+    public void testAddObjectAsNewObjectInfo() {
 
       int sceneObjects = scene.getNumObjects();
       scene.addObject(new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube"), (UndoRecord)null);
       ObjectInfo so = scene.getObject("Cube");
       
       assertEquals(++sceneObjects, scene.getNumObjects());
-      
-      assertNotNull(so);
+
       assertEquals("Cube", so.getName());
       assertEquals(2, so.getTracks().length);
 
@@ -114,7 +112,7 @@ public class SceneTest {
    * Check that object created, added to scene and contains default tracks...
    */
   @Test
-    public void testAddObject3() {
+    public void testAddObjectAsNewObjectInfoToGovenPos() {
 
       int sceneObjects = scene.getNumObjects();
       scene.addObject(new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube"), scene.getNumObjects(), (UndoRecord)null);
@@ -122,7 +120,6 @@ public class SceneTest {
       
       assertEquals(++sceneObjects, scene.getNumObjects());
       
-      assertNotNull(so);
       assertEquals("Cube", so.getName());
       assertEquals(2, so.getTracks().length);
 
@@ -777,7 +774,7 @@ public class SceneTest {
     @Test
     public void testGetSceneHasNoCamerasList() 
     {
-      Scene scene = new Scene();
+
       List<ObjectInfo> cameras = scene.getCameras();
       assertNotNull(cameras);
       assertTrue(cameras.isEmpty());
@@ -786,7 +783,7 @@ public class SceneTest {
     @Test
     public void testGetSceneHasSingleCameraOnly()
     {
-      Scene scene = new Scene();
+
       CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
       ObjectInfo info = new ObjectInfo(new SceneCamera(), coords, "Camera 1");
 
@@ -801,7 +798,7 @@ public class SceneTest {
     @Test
     public void testGetSceneHasCamerasOnly()
     {
-      Scene scene = new Scene();
+
       CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
       ObjectInfo info = new ObjectInfo(new SceneCamera(), coords, "Camera 1");
 
@@ -824,7 +821,6 @@ public class SceneTest {
     @Test
     public void testSceneHasCameraAndOther()
     {
-      Scene scene = new Scene();
       
       CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
       ObjectInfo info = new ObjectInfo(new NullObject(), coords, "Null Object");

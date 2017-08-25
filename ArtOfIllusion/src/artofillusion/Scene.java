@@ -955,8 +955,11 @@ public class Scene
     return null;
   }
 
-  /** Get all objects in the Scene in the form of a List. */
+  /** Get all objects in the Scene in the form of a List.
+   * @deprecated use {@link #getObjects()} instead. 
+   * */
 
+  @Deprecated
   public List<ObjectInfo> getAllObjects()
   {
     return Collections.unmodifiableList(objects);
@@ -964,8 +967,8 @@ public class Scene
   
   /**
    * Get all objects in the Scene in the form of a List. 
-   * 
    */
+
   public List<ObjectInfo> getObjects()
   {
     return Collections.unmodifiableList(objects);

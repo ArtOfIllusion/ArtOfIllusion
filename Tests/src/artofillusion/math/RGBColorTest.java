@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,26 +9,28 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.math;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
-import junit.framework.*;
-import artofillusion.math.*;
-
-public class TestRGBColor extends TestCase
+public class RGBColorTest
 {
   /**
    * Test converting to and from ERGB format.
    */
 
+  @Test
   public void testERGB()
   {
     RGBColor c1 = new RGBColor(), c2 = new RGBColor();
     c1.setRGB(0.0f, 0.0f, 0.0f);
     c2.setERGB(c1.getERGB());
     assertColorsEquals(c1, c2, 0.0f);
+    
     c1.setRGB(1.0f, 1.0f, 1.0f);
     c2.setERGB(c1.getERGB());
     assertColorsEquals(c1, c2, 0.0f);
+    
     for (int i = 0; i < 1000; i++)
     {
       c1.setRGB(Math.random(), Math.random(), Math.random());

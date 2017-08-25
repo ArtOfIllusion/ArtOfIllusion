@@ -138,12 +138,8 @@ public class ExternalObjectEditingWindow extends BDialog
     itemTree.setUpdateEnabled(false);
     
     for(ObjectInfo item: scene.getObjects())
-    {
-      if (item.getParent() == null)
-      {
-        itemTree.addElement(new ObjectTreeElement(item, itemTree));
-      }
-    }
+        if (item.getParent() == null)
+            itemTree.addElement(new ObjectTreeElement(item, itemTree));
     
     itemTree.setUpdateEnabled(true);
     ObjectInfo oldSelection = scene.getObjectById(objectId);

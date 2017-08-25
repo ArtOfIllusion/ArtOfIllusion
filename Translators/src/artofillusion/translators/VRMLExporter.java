@@ -101,10 +101,7 @@ public class VRMLExporter
         for (ObjectInfo info: theScene.getObjects())
         {
           if (wholeScene || info.selected)
-          {
             textureExporter.addObject(info);
-          }
- 
         }
         textureExporter.saveImages();
       }
@@ -179,15 +176,16 @@ public class VRMLExporter
     // Write the objects in the scene.
 
     if (wholeScene)
+    {
       for (ObjectInfo item: theScene.getObjects())
-      {
-        writeObject(item, null, out, tol, smooth, 0, theScene, textureExporter);
-      }
+	writeObject(item, null, out, tol, smooth, 0, theScene, textureExporter);
+    }
     else
+    {
       for (i = 0; i < selected.length; i++)
-      {
-        writeObject(theScene.getObject(selected[i]), null, out, tol, smooth, 0, theScene, textureExporter);
-      }
+        writeObject(theScene.getObject(selected[i]), null, out, tol, smooth,
+                       0, theScene, textureExporter);
+    }
     out.flush();
   }
 

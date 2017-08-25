@@ -367,9 +367,7 @@ public class Raster implements Renderer, Runnable
     for (ObjectInfo info: theScene.getObjects())
     {
       if (info.getObject() instanceof Light && info.isVisible())
-      {
         lt.addElement(info);
-      }
     }
     light = new ObjectInfo [lt.size()];
     for (i = 0; i < light.length; i++)

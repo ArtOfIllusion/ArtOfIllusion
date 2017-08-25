@@ -190,32 +190,34 @@ public class POVExporter
 	if (wholeScene) 
         {
           for (ObjectInfo item: items)
-          {
             writeTexture(theScene, item, out2, 1);
-          }
-	} else 
+        }
+        else 
         {
-	    maxIndex = selected.length;
-	    for (int i = 0; i < maxIndex; i++) writeTexture(theScene,theScene.getObject(selected[i]),out2,1);
+	  maxIndex = selected.length;
+	    for (int i = 0; i < maxIndex; i++)
+                writeTexture(theScene,theScene.getObject(selected[i]),out2,1);
 	}
         
 	out2.flush();
 	// write a language directive to include the texture declarations
-	if (bIncludeFile) {
-	    write("#include \""+includeFileName+"\"",out,0);
-	}
+	if (bIncludeFile)
+           write("#include \""+includeFileName+"\"",out,0);
+
 	// writing the objects
 	write("",out,0);
-	if (wholeScene) {
+	if (wholeScene)
+	{
           for (ObjectInfo item: items)
-          {
-            writeObjects(theScene, item, out, smooth, tol);
-          }
-	} else
+               writeObjects(theScene, item, out, smooth, tol);
+        }
+        else
         {
-	    maxIndex=selected.length;
-	    for (int i = 0; i < maxIndex; i++) writeObjects(theScene,theScene.getObject(selected[i]),out,smooth,tol);
-	}
+	  maxIndex=selected.length;
+            for (int i = 0; i < maxIndex; i++)
+                 writeObjects(theScene,theScene.getObject(selected[i]),
+                              out,smooth,tol);
+        }
 
 	out.flush();
     }

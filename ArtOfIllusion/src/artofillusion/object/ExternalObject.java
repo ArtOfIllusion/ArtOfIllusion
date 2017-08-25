@@ -217,7 +217,6 @@ public class ExternalObject extends ObjectWrapper
   }
 
   @Override
-  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ExternalObjectEditingWindow(parent, this, info, cb);

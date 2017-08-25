@@ -81,9 +81,7 @@ public class SceneViewer extends ViewerCanvas
     {
       Object3D obj = info.getObject();
       if(obj instanceof DirectionalLight || obj instanceof SpotLight)
-      {
-        cameras.add(info);
-      }
+         cameras.add(info);
     }
     for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
     {
@@ -258,7 +256,8 @@ public class SceneViewer extends ViewerCanvas
       Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
       for(ObjectInfo obj: theScene.getObjects())
       {
-        if(obj == boundCamera || !obj.isVisible()) continue;
+        if(obj == boundCamera || !obj.isVisible())
+           continue;
         theCamera.setObjectTransform(obj.getCoords().fromLocal());
         obj.getObject().renderObject(obj, this, viewdir);        
       }

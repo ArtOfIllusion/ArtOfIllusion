@@ -340,12 +340,8 @@ public class OBJExporter
     // Find all the textures.
     
     for (ObjectInfo info: theScene.getObjects())
-    {
-      if (wholeScene || info.selected)
-      {
-        textureExporter.addObject(info);
-      }
-    }
+        if (wholeScene || info.selected)
+            textureExporter.addObject(info);
     
     // Write out the .mtl file.
     

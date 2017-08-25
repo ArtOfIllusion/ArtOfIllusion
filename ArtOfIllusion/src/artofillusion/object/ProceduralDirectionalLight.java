@@ -475,15 +475,13 @@ public class ProceduralDirectionalLight extends DirectionalLight
     {
       BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
       BorderContainer content = new BorderContainer();
-      final MaterialPreviewer preview = new MaterialPreviewer(new UniformTexture(), null, 200, 160);
+      final MaterialPreviewer preview = new MaterialPreviewer(new UniformTexture(),
+                                                              null, 200, 160);
       Scene scene = preview.getScene();
       for (ObjectInfo item: scene.getObjects())
-      {        
-        if (item.getObject() instanceof DirectionalLight)
-        {
-          item.setObject(ProceduralDirectionalLight.this);
-        }
-      }
+           if (item.getObject() instanceof DirectionalLight)
+               item.setObject(ProceduralDirectionalLight.this);
+
       content.add(preview, BorderContainer.CENTER);
       RowContainer row = new RowContainer();
       content.add(row, BorderContainer.SOUTH, new LayoutInfo());

@@ -1487,9 +1487,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     for (ObjectInfo info: theScene.getObjects())
     {
       if (info.getParent() == null)
-      {
         tree.addElement(new TreeElem(info, null, tree));
-      }
     }
     tree.setUpdateEnabled(true);
     tree.setBackground(Color.white);

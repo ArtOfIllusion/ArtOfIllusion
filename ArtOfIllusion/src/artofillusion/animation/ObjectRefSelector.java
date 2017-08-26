@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,7 @@ import java.awt.*;
 
 public class ObjectRefSelector extends RowContainer
 {
-  private BLabel nameLabel;
+  private final BLabel nameLabel;
   private BButton setButton;
   private ObjectRef ref;
   private LayoutWindow window;
@@ -77,9 +78,8 @@ public class ObjectRefSelector extends RowContainer
     TreeList tree = new TreeList(window);
     Scene sc = window.getScene();
     tree.setUpdateEnabled(false);
-    for (int i = 0; i < sc.getNumObjects(); i++)
+    for (ObjectInfo info: sc.getObjects())
     {
-      ObjectInfo info = sc.getObject(i);
       if (info.getParent() == null)
         tree.addElement(new ObjectRefTreeElement(new ObjectRef(info), null, tree, exclude));
     }

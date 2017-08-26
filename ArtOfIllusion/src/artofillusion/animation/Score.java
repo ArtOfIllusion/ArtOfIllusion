@@ -297,24 +297,24 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
 
     theList.setUpdateEnabled(false);
     theList.removeAllElements();
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      {
-        ObjectInfo info = theScene.getObject(i);
-        if (info.selected)
-          {
-            TreeElement el = new ObjectTreeElement(info, null, theList, false);
-            theList.addElement(el);
-            el.setExpanded(true);
-          }
-      }
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      {
-        ObjectInfo info = theScene.getObject(i);
-        if (!info.selected || info.getTracks().length == 0)
-          continue;
-        ObjectTreeElement el = (ObjectTreeElement) theList.findElement(info);
-        el.addTracks();
-      }
+    
+    for (ObjectInfo info: theScene.getObjects())
+    {
+      if (info.selected)
+        {
+          TreeElement el = new ObjectTreeElement(info, null, theList, false);
+          theList.addElement(el);
+          el.setExpanded(true);
+        }
+    }
+    for (ObjectInfo info: theScene.getObjects())
+    {
+      if (!info.selected || info.getTracks().length == 0)
+        continue;
+      ObjectTreeElement el = (ObjectTreeElement) theList.findElement(info);
+      el.addTracks();
+    }
+    
     for (int i = 0; i < allEl.length; i++)
       {
         TreeElement el = theList.findElement(allEl[i].getObject());

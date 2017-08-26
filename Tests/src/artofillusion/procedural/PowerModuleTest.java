@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,24 +9,28 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.procedural;
 
-import junit.framework.*;
-import artofillusion.procedural.*;
 import artofillusion.ui.*;
 import artofillusion.math.*;
 
 import java.awt.*;
 import java.util.*;
+import org.junit.BeforeClass;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-public class TestPowerModule extends TestCase
+public class PowerModuleTest
 {
-  @Override
-  protected void setUp() throws Exception
+  
+  @BeforeClass
+  public static void setUpClass()
   {
     Translate.setLocale(Locale.US);
   }
 
+
+  @Test
   public void testValue()
   {
     ExprModule module = new ExprModule(new Point());
@@ -63,6 +68,7 @@ public class TestPowerModule extends TestCase
     assertEquals(expected, module.getAverageValue(0, 0.0), 1e-4);
   }
 
+  @Test
   public void testGradient()
   {
     ExprModule module = new ExprModule(new Point());

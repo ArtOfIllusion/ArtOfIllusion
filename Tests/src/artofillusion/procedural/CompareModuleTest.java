@@ -1,4 +1,5 @@
 /* Copyright (C) 2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,15 +9,14 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
-
-import junit.framework.*;
-import artofillusion.procedural.*;
-
+package artofillusion.procedural;
+import org.junit.Test;
+import static org.junit.Assert.*;
 import java.awt.*;
 
-public class TestCompareModule extends TestCase
+public class CompareModuleTest
 {
+  @Test
   public void testCompare()
   {
     CompareModule module = new CompareModule(new Point());

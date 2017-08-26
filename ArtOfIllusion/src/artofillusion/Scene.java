@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -793,6 +794,13 @@ public class Scene
     images.removeElementAt(which);
     return true;
   }
+  
+  /** Replace an ImageMap with another one */
+  
+  public void replaceImage(int which, ImageMap im)
+  {
+    images.set(which, im);
+  }
 
   /** Replace every instance of one object in the scene with another one.  If undo is not
       null, commands will be added to it to undo this operation. */
@@ -1229,26 +1237,26 @@ public class Scene
     count = in.readInt();
     images = new Vector<ImageMap>(count);
     for (int i = 0; i < count; i++)
-      {
+    {
         if (version == 0)
-          {
+        {
             images.addElement(new MIPMappedImage(in, (short) 0));
             continue;
-          }
+        }
         String classname = in.readUTF();
         try
-          {
+        {
             cls = ArtOfIllusion.getClass(classname);
             if (cls == null)
-              throw new IOException("Unknown class: "+classname);
+                throw new IOException("Unknown class: "+classname);
             con = cls.getConstructor(DataInputStream.class);
             images.addElement((ImageMap) con.newInstance(in));
-          }
+        }
         catch (Exception ex)
-          {
+        {
             throw new IOException("Error loading image: "+ex.getMessage());
-          }
-      }
+        }
+    }
 
     // Read the materials.
 
@@ -1568,7 +1576,12 @@ public class Scene
       {
         ImageMap img = images.elementAt(i);
         out.writeUTF(img.getClass().getName());
-        img.writeToStream(out);
+        if (img.getClass() == ExternalImage.class)
+        {
+          ((ExternalImage)img).writeToStream(out, this);
+        }
+        else
+          img.writeToStream(out);
       }
 
     // Save the materials.

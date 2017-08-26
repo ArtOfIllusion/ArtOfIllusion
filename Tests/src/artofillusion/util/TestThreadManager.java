@@ -1,4 +1,5 @@
 /* Copyright (C) 2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,16 +9,19 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.util;
 
-import junit.framework.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 
 import java.util.concurrent.atomic.*;
 
-import artofillusion.util.ThreadManager;
 
-public class TestThreadManager extends TestCase
+
+public class TestThreadManager
 {
+  @Test
   public void testRun()
   {
     final AtomicBoolean flags[] = new AtomicBoolean[1000];
@@ -50,6 +54,7 @@ public class TestThreadManager extends TestCase
     }
   }
 
+  @Test
   public void testCancel()
   {
     final AtomicBoolean canceled = new AtomicBoolean();

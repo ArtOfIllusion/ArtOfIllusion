@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,24 +9,25 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.procedural;
 
-import junit.framework.*;
 import artofillusion.image.*;
 import artofillusion.math.*;
-import artofillusion.procedural.*;
 import artofillusion.ui.*;
 
 import java.awt.image.*;
 import java.awt.*;
 import java.util.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
-public class TestImageModule extends TestCase
+public class ImageModuleTest
 {
   private static final int SIZE = 100;
 
-  @Override
-  protected void setUp() throws Exception
+  @BeforeClass
+  public static void setUpClass()
   {
     Translate.setLocale(Locale.US);
   }
@@ -34,6 +36,7 @@ public class TestImageModule extends TestCase
    * Test values and gradients in RGB mode.
    */
 
+  @Test
   public void testRGB() throws InterruptedException
   {
     testColorModel(ImageModule.RGB_MODEL);
@@ -42,7 +45,7 @@ public class TestImageModule extends TestCase
   /**
    * Test values and gradients in HSV mode.
    */
-
+  @Test
   public void testHSV() throws InterruptedException
   {
     testColorModel(ImageModule.HSV_MODEL);
@@ -51,12 +54,13 @@ public class TestImageModule extends TestCase
   /**
    * Test values and gradients in HLS mode.
    */
-
+  @Test
   public void testHLS() throws InterruptedException
   {
     testColorModel(ImageModule.HLS_MODEL);
   }
-
+  
+  
   private void testColorModel(int colorModel) throws InterruptedException
   {
     ImageModule module = buildModule(colorModel);

@@ -155,7 +155,7 @@ public class ExternalObject extends ObjectWrapper
           theObject = foundObject.getObject();
       }
     }
-    catch (IOException ex)
+    catch (Exception ex)
     {
       // If anything goes wrong, use a null object and return an error message.
 

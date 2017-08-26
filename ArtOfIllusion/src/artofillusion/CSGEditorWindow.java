@@ -231,7 +231,6 @@ public class CSGEditorWindow extends ObjectEditorWindow
     updateMenus();
   }
 
-  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   void propertiesCommand()
   {
     updateFromScene();

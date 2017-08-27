@@ -469,14 +469,16 @@ public class Scene
       info.addTrack(new RotationTrack(info), 1);
     }
     if (info.getObject().canSetTexture() && info.getObject().getTextureMapping() == null)
-      info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping(info.getObject()));
+        info.setTexture(getDefaultTexture(),
+			getDefaultTexture().getDefaultMapping(info.getObject()));
+
     info.getObject().sceneChanged(info, this);
     objects.insertElementAt(info, index);
     objectIndexMap = null;
+    
     if (undo != null)
-    {
-      undo.addCommandAtBeginning(UndoRecord.DELETE_OBJECT, new Object[]{index});
-    }
+        undo.addCommandAtBeginning(UndoRecord.DELETE_OBJECT, new Object[]{index});
+
     updateSelectionInfo();
   }
 

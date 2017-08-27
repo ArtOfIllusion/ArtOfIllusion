@@ -1,4 +1,5 @@
 /* Copyright (C) 2003 by Peter Eastman
+   Modifications copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,10 @@ import java.io.*;
 
 public class HDREncoder
 {
-  /** Write out the data for an image to a stream. */
+  /** 
+   * Write out the data for an image to a stream. <p>
+   * This can be used to save a rendered image in HDR fromat.
+   */
 
   public static void writeImage(ComplexImage img, OutputStream out) throws IOException
   {
@@ -53,6 +57,37 @@ public class HDREncoder
 		  out.write(ergb&0xFF);
 		  out.write((ergb>>24)&0xFF);
         }
+    out.flush();
+  }
+  
+  
+  /** 
+   * Write out the data for an image to a stream. <p>
+   * This can be used to export a HDR image.
+   */
+
+  public static void writeImage(HDRImage img, OutputStream out) throws IOException
+  {
+    int rows = img.getHeight(), cols = img.getWidth();
+	byte[][] bytes = img.getBytes();
+    RGBColor color = new RGBColor();
+    PrintWriter pw = new PrintWriter(new OutputStreamWriter(out));
+
+    pw.print("#?RADIANCE\n");
+    pw.print("# Saved by Art of Illusion "+ArtOfIllusion.getVersion()+"\n");
+    pw.print("FORMAT=32-bit_rle_rgbe\n");
+    pw.print("\n");
+    pw.print("-Y "+rows+" +X "+cols+"\n");
+    pw.flush();
+	
+	int pixels = rows*cols;
+    for (int p = 0; p < pixels; p++)
+	{
+		out.write(bytes[0][p]);
+		out.write(bytes[1][p]);
+		out.write(bytes[2][p]);
+		out.write(bytes[3][p]);
+	}
     out.flush();
   }
 }

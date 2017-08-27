@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -481,13 +482,12 @@ public class ProceduralPointLight extends PointLight
       BorderContainer content = new BorderContainer();
       final MaterialPreviewer preview = new MaterialPreviewer(new UniformTexture(), null, 200, 160);
       Scene scene = preview.getScene();
-      for (int i = 0; i < scene.getNumObjects(); i++)
+      for (ObjectInfo item: scene.getObjects())
       {
-        ObjectInfo info = scene.getObject(i);
-        if (info.getObject() instanceof DirectionalLight)
+        if (item.getObject() instanceof DirectionalLight)
         {
-          info.setObject(ProceduralPointLight.this);
-          info.getCoords().setOrigin(new Vec3(1.0, 0.8, 2.0));
+          item.setObject(ProceduralPointLight.this);
+          item.getCoords().setOrigin(new Vec3(1.0, 0.8, 2.0));
         }
       }
       content.add(preview, BorderContainer.CENTER);

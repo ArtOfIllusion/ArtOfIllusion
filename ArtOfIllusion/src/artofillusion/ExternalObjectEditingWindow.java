@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -124,8 +125,7 @@ public class ExternalObjectEditingWindow extends BDialog
       new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
     setCursor(Cursor.getDefaultCursor());
-    if (scene == null)
-      return;
+
   }
 
   /** Build the list of objects for the user to select from. */
@@ -136,12 +136,11 @@ public class ExternalObjectEditingWindow extends BDialog
     if (scene == null)
       return;
     itemTree.setUpdateEnabled(false);
-    for (int i = 0; i < scene.getNumObjects(); i++)
-    {
-      ObjectInfo info = scene.getObject(i);
-      if (info.getParent() == null)
-        itemTree.addElement(new ObjectTreeElement(info, itemTree));
-    }
+    
+    for(ObjectInfo item: scene.getObjects())
+        if (item.getParent() == null)
+            itemTree.addElement(new ObjectTreeElement(item, itemTree));
+    
     itemTree.setUpdateEnabled(true);
     ObjectInfo oldSelection = scene.getObjectById(objectId);
     if (oldSelection == null || !oldSelection.getName().equals(objectName))

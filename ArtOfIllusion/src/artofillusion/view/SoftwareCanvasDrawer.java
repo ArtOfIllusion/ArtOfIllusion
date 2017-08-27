@@ -168,7 +168,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       if (drawFocus){
         //pixel[i+bounds.width] = pixel[index1+i-bounds.width] = line;
         pixel[i+bounds.width] = pixel[index1+i-bounds.width] = Color.GRAY.getRGB();
-	  }
+      }
     }
   }
 
@@ -286,79 +286,89 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       return;
     dx = x2 - x1;
     dy = y2 - y1;
+
     if (dx == 0 && dy == 0)
       return;
+
+    // These are to prevent overflow in Math.abs() in the case that dx or dy is Integer.MIN_VALUE.
+    // Math.abs(Integer.MIN_VALUE) would return Integer.MIN_VALUE, which lets dx = 0 through, 
+    // resulting division by 0 on line 315. Same with dy, further down.
+    // Math.abs(Integer.MIN_VALUE+1) returns Integer.MAX_VALUE.
+
+    dx = Math.max(dx, Integer.MIN_VALUE+1);
+    dy = Math.max(dy, Integer.MIN_VALUE+1);
+
     if (Math.abs(dx) > Math.abs(dy))
-      {
+    {
         // x is the major axis.
 
         if (dx > 0)
-          {
+        {
             x = x1;
-			
             y = y1<<16+32768;
             dy = (dy<<16)/dx;
             end = x2 < bounds.width ? x2 : bounds.width;
-          }
+        }
         else
-          {
+        {
             x = x2;
             y = y2<<16+32768;
             dy = (dy<<16)/dx;
             end = x1 < bounds.width ? x1 : bounds.width;
-          }
+        }
+
         if (x < 0)
-          {
+        {
             y -= dy*x;
             x = 0;
-          }
+        }
         edge = bounds.height<<16;
         while (x < end)
-          {
+        {
             if (y >= 0 && y < edge)
-              {
+            {
                 index = bounds.width*(y>>16)+x;
                 pixel[index] = col;
-              }
+            }
             x++;
             y += dy;
-          }
-      }
+        }
+    }
     else
-      {
+    {
         // y is the major axis.
 
         if (dy > 0)
-          {
+        {
             x = x1<<16+32768;
             y = y1;
             dx = (dx<<16)/dy;
             end = y2 < bounds.height ? y2 : bounds.height;
-          }
+        }
         else
-          {
+        {
             x = x2<<16+32768;
             y = y2;
             dx = (dx<<16)/dy;
             end = y1 < bounds.height ? y1 : bounds.height;
-          }
+        }
         if (y < 0)
-          {
+        {
             x -= dx*y;
             y = 0;
-          }
+        }
         edge = bounds.width<<16;
         while (y < end)
-          {
+        {
             if (x >= 0 && x < edge)
-              {
+            {
                 index = y*bounds.width+(x>>16);
                 pixel[index] = col;
-              }
+            }
             x += dx;
             y++;
-          }
-      }
+        }
+    }
   }
 
   /** Render a line into the image.
@@ -437,6 +447,10 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     dz = z2 - z1;
     if (dx == 0 && dy == 0)
       return;
+
+    dx = Math.max(dx, Integer.MIN_VALUE+1);
+    dy = Math.max(dy, Integer.MIN_VALUE+1);
+
     if (Math.abs(dx) > Math.abs(dy))
       {
         // x is the major axis.

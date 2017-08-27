@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -46,7 +47,7 @@ public class Scene
   private double fogDist, gridSpacing, time;
   private boolean fog, showGrid, snapToGrid, errorsLoading;
   private String name, directory;
-  private TexturesAndMaterialsDialog texDlg;
+
   private ParameterValue environParamValue[];
   private StringBuffer loadingErrors;
 
@@ -796,6 +797,13 @@ public class Scene
     images.removeElementAt(which);
     return true;
   }
+  
+  /** Replace an ImageMap with another one */
+  
+  public void replaceImage(int which, ImageMap im)
+  {
+    images.set(which, im);
+  }
 
   /** Replace every instance of one object in the scene with another one.  If undo is not
       null, commands will be added to it to undo this operation. */
@@ -923,7 +931,7 @@ public class Scene
   {
     return objects.size();
   }
-
+  
   /** Get the i'th object. */
 
   public ObjectInfo getObject(int i)
@@ -958,13 +966,24 @@ public class Scene
     return null;
   }
 
-  /** Get all objects in the Scene in the form of a List. */
+  /** Get all objects in the Scene in the form of a List.
+   * @deprecated use {@link #getObjects()} instead. 
+   * */
 
+  @Deprecated
   public List<ObjectInfo> getAllObjects()
   {
     return Collections.unmodifiableList(objects);
   }
+  
+  /**
+   * Get all objects in the Scene in the form of a List. 
+   */
 
+  public List<ObjectInfo> getObjects()
+  {
+    return Collections.unmodifiableList(objects);
+  }
   /** Get the index of the specified object. */
 
   public int indexOf(ObjectInfo info)
@@ -1221,26 +1240,26 @@ public class Scene
     count = in.readInt();
     images = new Vector<ImageMap>(count);
     for (int i = 0; i < count; i++)
-      {
+    {
         if (version == 0)
-          {
+        {
             images.addElement(new MIPMappedImage(in, (short) 0));
             continue;
-          }
+        }
         String classname = in.readUTF();
         try
-          {
+        {
             cls = ArtOfIllusion.getClass(classname);
             if (cls == null)
-              throw new IOException("Unknown class: "+classname);
+                throw new IOException("Unknown class: "+classname);
             con = cls.getConstructor(DataInputStream.class);
             images.addElement((ImageMap) con.newInstance(in));
-          }
+        }
         catch (Exception ex)
-          {
+        {
             throw new IOException("Error loading image: "+ex.getMessage());
-          }
-      }
+        }
+    }
 
     // Read the materials.
 
@@ -1560,7 +1579,12 @@ public class Scene
       {
         ImageMap img = images.elementAt(i);
         out.writeUTF(img.getClass().getName());
-        img.writeToStream(out);
+        if (img.getClass() == ExternalImage.class)
+        {
+          ((ExternalImage)img).writeToStream(out, this);
+        }
+        else
+          img.writeToStream(out);
       }
 
     // Save the materials.

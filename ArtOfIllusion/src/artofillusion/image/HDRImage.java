@@ -15,6 +15,8 @@ import artofillusion.math.*;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
+import java.util.Date;
+import java.lang.ref.SoftReference;
 
 /** HDRImage is an ImageMap subclass.  It represents a high dynamic range image stored in
     Greg Ward's RGBE format, as described in "Graphics Gems IV", edited by James Arvo,
@@ -22,11 +24,11 @@ import java.io.*;
 
 public class HDRImage extends ImageMap
 {
-  private int width[], height[];
+  private int width[], height[], previewSize = 0;
   private byte maps[][][];
-  private float average[];
+  private float average[], aspectRatio;
   private double xscale[], yscale[], scale[], scaleMult[];
-  private Image preview;
+  private SoftReference<Image> preview;
 
   /** Create an HDRImage from the r, g, b, and e components. */
 
@@ -34,7 +36,7 @@ public class HDRImage extends ImageMap
   {
     buildMipMaps(r, g, b, e, xres, yres);
     findAverage();
-    createPreview();
+    preview = new SoftReference(null);
   }
 
   /** Given the r, g, b, and e arrays for an image, this method builds the full set of mipmaps for it. */
@@ -65,6 +67,10 @@ public class HDRImage extends ImageMap
         hratio *= 0.5;
       }
 
+    // aspectRatio is needed for scaling
+    
+    aspectRatio = (float)w/(float)h;
+    
     // Determine the total number of mipmaps we will need, and allocate the arrays.
 
     for (num = 0; (1<<num) < w1 && (1<<num) < h1; num++);
@@ -178,27 +184,18 @@ public class HDRImage extends ImageMap
 
   /** Construct the preview image. */
 
-  private void createPreview()
+  private Image createPreview(int size)
   {
     int w, h;
-
-    if (width[0] <= PREVIEW_WIDTH && height[0] <= PREVIEW_HEIGHT)
+    if (width[0] <= size && height[0] <= size) // "Tässä!" 
       {
         w = width[0];
         h = height[0];
       }
     else
       {
-        if (width[0] < height[0])
-          {
-            w = Math.max((int) (width[0]*PREVIEW_HEIGHT/(float) height[0]), 1);
-            h = PREVIEW_HEIGHT;
-          }
-        else
-          {
-            w = PREVIEW_WIDTH;
-            h = Math.max((int) (height[0]*PREVIEW_WIDTH/(float) width[0]), 1);
-          }
+        w = Math.max(Math.min(size, (int)Math.round(size*aspectRatio)),1);
+        h = Math.max(Math.min(size, (int)Math.round(size/aspectRatio)),1);
       }
     int data[] = new int [w*h];
     float xstep = width[0]/(float) w;
@@ -218,7 +215,8 @@ public class HDRImage extends ImageMap
           }
       }
     MemoryImageSource src = new MemoryImageSource(w, h, data, 0, w);
-    preview = Toolkit.getDefaultToolkit().createImage(src);
+    previewSize = size;
+    return Toolkit.getDefaultToolkit().createImage(src);
   }
 
   /** Get the width of the image. */
@@ -237,6 +235,20 @@ public class HDRImage extends ImageMap
     return height[0];
   }
 
+  /** Get the aspect ratio of the image. */
+
+  @Override
+  public float getAspectRatio()
+  {
+    return aspectRatio;
+  }
+
+  @Override
+  public String getType()
+  {
+    return "HDR";
+  }
+  
   /** Get the number of components in the image. */
 
   @Override
@@ -553,32 +565,81 @@ public class HDRImage extends ImageMap
     grad.y = ((v2-v1)*(1.0-frac1) + (v4-v3)*frac1) * yscale[which];
   }
 
-  /** Get a scaled down copy of the image, to use for previews.  This Image will be no larger
-      (but may be smaller) than PREVIEW_WIDTH by PREVIEW_HEIGHT. */
+  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than  PREVIEW_WIDTH by PREVIEW_HEIGHT. */
 
   @Override
   public Image getPreview()
   {
-    return preview;
+    return getPreview(PREVIEW_SIZE_DEFAULT);
   }
 
+  /** Get a scaled down copy of the image, to use for previews.  The dimensions of the 
+      Image will be no larger but may be smaller than size. */
+
+  @Override
+  public Image getPreview(int size)
+  {
+    Image image = preview.get();
+    if (previewSize == size && image != null)
+      return image;
+    image = createPreview(size);
+    preview = new SoftReference(image);
+    return image;
+  }
+
+  /** Get the RGBE bytes that contain th eimage information */
+  
+  public byte[][] getBytes()
+  {
+    return maps[0];
+  }
+  
   /** Reconstruct an image from its serialized representation. */
 
   public HDRImage(DataInputStream in) throws IOException, InvalidObjectException
   {
     short version = in.readShort();
-    if (version != 0)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("Illegal version for HDRImage");
-    int w = in.readInt(), h = in.readInt();
-    byte map[][] = new byte [4][];
-    for (int i = 0; i < 4; i++)
+    if (version == 0)  // 0 up to AoI 3.0.3
+    {
+      int w = in.readInt(), h = in.readInt();
+      byte map[][] = new byte [4][];
+      for (int i = 0; i < 4; i++)
       {
         map[i] = new byte [w*h];
         in.readFully(map[i]);
       }
-    buildMipMaps(map[0], map[1], map[2], map[3], w, h);
-    findAverage();
-    createPreview();
+      buildMipMaps(map[0], map[1], map[2], map[3], w, h);
+      findAverage();
+    }
+    else // 1 for newer than AoI 3.0.3
+    {
+      int w = in.readInt();
+      int h = in.readInt();
+      byte map[][] = new byte [4][];
+      for (int i = 0; i < 4; i++)
+      {
+        map[i] = new byte [w*h];
+        in.readFully(map[i]);
+      }
+      imageName   = in.readUTF();
+      userCreated = in.readUTF();
+      long milliC = in.readLong();
+      zoneCreated = in.readUTF();
+      userEdited  = in.readUTF();
+      long milliE = in.readLong();
+      zoneEdited  = in.readUTF();
+      if (milliC > Long.MIN_VALUE)
+        dateCreated = new Date(milliC);
+      if (milliE > Long.MIN_VALUE)
+        dateEdited  = new Date(milliE);      
+      
+      buildMipMaps(map[0], map[1], map[2], map[3], w, h);
+      findAverage();
+      preview = new SoftReference(null);
+    }
   }
 
   /** Serialize an image to an output stream. */
@@ -586,10 +647,23 @@ public class HDRImage extends ImageMap
   @Override
   public void writeToStream(DataOutputStream out) throws IOException
   {
-    out.writeShort(0);
+    out.writeShort(1); // version number
     out.writeInt(width[0]);
     out.writeInt(height[0]);
     for (int i = 0; i < 4; i++)
       out.write(maps[0][i]);
+    out.writeUTF(imageName);
+    out.writeUTF(userCreated);
+    if (dateCreated == null)
+      out.writeLong(Long.MIN_VALUE);
+    else
+      out.writeLong(dateCreated.getTime());
+    out.writeUTF(zoneCreated);
+    out.writeUTF(userEdited);
+    if (dateEdited == null)
+      out.writeLong(Long.MIN_VALUE);
+    else
+      out.writeLong(dateEdited.getTime());
+    out.writeUTF(zoneEdited);
   }
 }

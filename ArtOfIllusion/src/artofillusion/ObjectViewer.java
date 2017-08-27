@@ -1,6 +1,7 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications copyright (C) 2017 Petri Ihalainen
-   
+   Changes copyright (C) 2017 by Maksim Khramov
+
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -15,7 +16,6 @@ import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import artofillusion.view.ClickedPointFinder;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -60,9 +60,8 @@ public abstract class ObjectViewer extends ViewerCanvas
     Mat4 toView = theCamera.getWorldToView();
 
     // Find the depth range for the object being edited.
-
-    ObjectInfo info = getController().getObject();
-    BoundingBox bounds = info.getBounds();
+    
+    BoundingBox bounds = controller.getObject().getBounds();
     double dx = bounds.maxx-bounds.minx;
     double dy = bounds.maxy-bounds.miny;
     double dz = bounds.maxz-bounds.minz;
@@ -75,11 +74,10 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     if (showScene)
     {
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for(ObjectInfo info: theScene.getAllObjects())
       {
-        info = theScene.getObject(i);
-        if (info == thisObjectInScene)
-          continue;
+        if (info == thisObjectInScene) continue;
+          
         bounds = info.getBounds();
         dx = bounds.maxx-bounds.minx;
         dy = bounds.maxy-bounds.miny;
@@ -122,9 +120,8 @@ public abstract class ObjectViewer extends ViewerCanvas
         sc.setEnvironmentMode(theScene.getEnvironmentMode());
         sc.setAmbientColor(theScene.getAmbientColor());
         Object3D thisObject = (thisObjectInScene == null ? null : thisObjectInScene.getObject());
-        for (int i = 0; i < theScene.getNumObjects(); i++)
+        for (ObjectInfo obj: theScene.getObjects())
         {
-          ObjectInfo obj = theScene.getObject(i);
           if (obj.getObject() == thisObject)
             sc.addObject(obj.duplicate(controller.getObject().getObject()), null);
           else
@@ -208,9 +205,8 @@ public abstract class ObjectViewer extends ViewerCanvas
     if (showScene && theScene != null)
     {
       Vec3 viewdir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
-      for (int i = 0; i < theScene.getNumObjects(); i++)
+      for (ObjectInfo obj: theScene.getObjects())
       {
-        ObjectInfo obj = theScene.getObject(i);
         if (!obj.isVisible() || obj == thisObjectInScene)
           continue;
         Mat4 objectTransform = obj.getCoords().fromLocal();

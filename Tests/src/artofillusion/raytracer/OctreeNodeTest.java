@@ -1,4 +1,5 @@
 /* Copyright (C) 2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -8,23 +9,25 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion;
+package artofillusion.raytracer;
 
-import junit.framework.*;
 
 import java.util.*;
 
-import artofillusion.raytracer.*;
+
 import artofillusion.object.*;
 import artofillusion.math.*;
 import artofillusion.texture.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 
-public class TestOctreeNode extends TestCase
+public class OctreeNodeTest
 {
-  private OctreeNode rootNode;
+  private static OctreeNode rootNode;
 
-  @Override
-  protected void setUp() throws Exception
+  @BeforeClass
+  public static void setUpClass() throws Exception
   {
     // Create a scene for testing.
 
@@ -72,7 +75,7 @@ public class TestOctreeNode extends TestCase
     rootNode = new OctreeNode((float) minx, (float) maxx, (float) miny, (float) maxy, (float) minz, (float) maxz, objects, objBounds, null);
   }
 
-  private RTSphere createSphere(Vec3 pos, Texture tex)
+  private static RTSphere createSphere(Vec3 pos, Texture tex)
   {
     Sphere sphere = new Sphere(0.5, 0.5, 0.5);
     sphere.setTexture(tex, tex.getDefaultMapping(sphere));
@@ -83,6 +86,7 @@ public class TestOctreeNode extends TestCase
    * Test the findNode() method.
    */
 
+  @Test
   public void testFindNode()
   {
     for (int i = 0; i < 1000; i++)
@@ -104,7 +108,7 @@ public class TestOctreeNode extends TestCase
   /**
    * Test tracing a ray through the octree, and make sure it hits all the right nodes.
    */
-
+  @Test
   public void testTraceRay()
   {
     Ray r = new Ray(null);
@@ -139,6 +143,7 @@ public class TestOctreeNode extends TestCase
     }
   }
 
+  
   private void findIntersectingNodes(OctreeNode node, Ray ray, Set<OctreeNode> intersections)
   {
     if (!ray.intersects(node.getBounds()))

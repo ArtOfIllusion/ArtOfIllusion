@@ -108,5 +108,6 @@ public abstract class TreeElement
   public abstract Object getObject();
   
   /** Get whether this element should be drawn in gray (i.e. to indicate it is deactivated). */
-  public abstract boolean isGray();}
+  public abstract boolean isGray();
+}
 

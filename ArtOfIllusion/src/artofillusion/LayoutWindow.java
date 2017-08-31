@@ -195,7 +195,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     for (int i = 0; i < theView.length; i++)
     {
       theView[i].setMetaTool(metaTool);
-      theView[i].setAltTool(altTool);	  theView[i].setScrollTool(scrollTool);
+      theView[i].setAltTool(altTool);
+      theView[i].setScrollTool(scrollTool);
     }
 
     // Fill in the left hand panel.
@@ -1637,7 +1638,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theView[currentView].setShowTemplate(!wasShown);
         updateImage();
         updateMenus();
-      }      else if (command.equals("fitToSelection"))		getView().fitToObjects(getSelectedObjects());      else if (command.equals("fitToAll"))		getView().fitToObjects(getScene().getAllObjects());
+      }
+      else if (command.equals("fitToSelection"))
+		getView().fitToObjects(getSelectedObjects());
+      else if (command.equals("fitToAll"))
+		getView().fitToObjects(getScene().getAllObjects());
 	  else if (command.equals("alignWithClosestAxis"))
 	    getView().alignWithClosestAxis();
 	  /*

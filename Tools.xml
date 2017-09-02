@@ -2,12 +2,14 @@
 
 <project name="Tools" default="dist" basedir=".">
 
+	
   <!-- set global properties for this build -->
   <property name="src" value="Tools/src" />
   <property name="build" value="Tools/build" />
   <property name="docs" value="Tools/docs" />
-  <property name="dist" value="Plugins" />
-  <property name="aoijar" value="ArtOfIllusion.jar" />
+  <property name="dist" value="Live_Application" />
+  <property name="assemble" value="${dist}/Plugins" />
+  <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -27,7 +29,7 @@
 
   <target name="dist" depends="compile">
     <!-- Copy all necessary files into ${build}, then create the jar file -->
-    <jar jarfile="${dist}/Tools.jar" basedir="${build}" >
+    <jar jarfile="${assemble}/Tools.jar" basedir="${build}" >
       <fileset dir="${src}" includes="*.xml" />
     </jar>
   </target>

@@ -1,14 +1,11 @@
 <?xml version="1.0"?>
 
-<project name="ArtOfIllusion" default="dist" basedir=".">
+<project name="ArtOfIllusion Full Suite" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
-  <property name="src" value="ArtOfIllusion/src" />
-  <property name="build" value="ArtOfIllusion/build" />
-  <property name="docs" value="ArtOfIllusion/docs" />
   <property name="lib" value="lib" />
-  <property name="dist" value="." />
-<!--  <property name="build.compiler" value="classic" /> -->
+  <property name="dist" value="Live_Application" />
+  <property name="docs" value="docs/Javadoc" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
@@ -19,29 +16,33 @@
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
-    <!-- Create the build directory structure used by compile -->
-    <mkdir dir="${build}" />
-    <!-- Create the docs directory structure used by documentation -->
-    <mkdir dir="${docs}" />
+    <!-- Create the build directory structure used by build -->
+    <mkdir dir="${dist}" />
+    <mkdir dir="${dist}/Plugins"/>
+    <mkdir dir="${dist}/Scripts/Startup"/>
+    <mkdir dir="${dist}/Scripts/Objects"/>
+    <mkdir dir="${dist}/Scripts/Tools"/>
+    <mkdir dir="${dist}/Textures and Materials" />
+
   </target>
 
-  <target name="compile" depends="init">
-    <!-- generate a classpath from the "libraries" fileset -->
-    <pathconvert property="classpath" refid="libraries" />
+  <!-- Generate working application artifacts -->
+  <target name="dist" depends="init">
+    <copy todir="${dist}/lib">
+      <fileset dir="${lib}" includes="*"/>
+    </copy>
 
-    <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="1.5" source="1.5" />
-  </target>
-
-  <target name="dist">
     <!-- execute default target for all found Ant files -->
     <subant target="" >
+      <property name="dist" value="${dist}" />
+      <property name="lib" value="${lib}"/>
       <fileset refid="subproject.files" />
     </subant>
   </target>
 
-  <target name="docs" depends="init">
-    <javadoc packagenames="artofillusion.*"
+  <target name="docs">
+   <mkdir dir="${docs}" />
+   <javadoc packagenames="artofillusion.*"
         sourcepath="${src}"
         classpath="${lib}/*.jar"
         source="1.5"

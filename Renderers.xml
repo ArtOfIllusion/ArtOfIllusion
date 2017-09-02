@@ -6,8 +6,9 @@
   <property name="src" value="Renderers/src" />
   <property name="build" value="Renderers/build" />
   <property name="docs" value="Renderers/docs" />
-  <property name="dist" value="Plugins" />
-  <property name="aoijar" value="ArtOfIllusion.jar" />
+  <property name="dist" value="Live_Application" />
+  <property name="assemble" value="${dist}/Plugins" />
+  <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -17,7 +18,7 @@
     <!-- Create the docs directory structure used by documentation -->
     <mkdir dir="${docs}" />
     <!-- create the dist directory -->
-    <mkdir dir="${dist}" />
+    <mkdir dir="${assemble}" />
   </target>
 
   <target name="compile" depends="init">
@@ -26,7 +27,7 @@
   </target>
 
   <target name="dist" depends="compile">
-    <jar jarfile="${dist}/Renderers.jar" basedir="${build}" >
+    <jar jarfile="${assemble}/Renderers.jar" basedir="${build}" >
       <fileset dir="${src}" includes="*.xml" />
     </jar>
   </target>

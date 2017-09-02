@@ -6,8 +6,9 @@
   <property name="src" value="Translators/src" />
   <property name="build" value="Translators/build" />
   <property name="docs" value="Translators/docs" />
-  <property name="dist" value="Plugins" />
-  <property name="aoijar" value="ArtOfIllusion.jar" />
+  <property name="dist" value="Live_Application" />
+  <property name="assemble" value="${dist}/Plugins" />
+  <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -26,7 +27,7 @@
   </target>
 
   <target name="dist" depends="compile">
-    <jar jarfile="${dist}/Translators.jar" basedir="${build}" >
+    <jar jarfile="${assemble}/Translators.jar" basedir="${build}" >
       <fileset dir="${src}" includes="*.xml" />
     </jar>
   </target>

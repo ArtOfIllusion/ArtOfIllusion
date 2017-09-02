@@ -6,18 +6,18 @@
   <property name="src" value="OSSpecific/src" />
   <property name="build" value="OSSpecific/build" />
   <property name="docs" value="OSSpecific/docs" />
-  <property name="dist" value="Plugins" />
-  <property name="aoijar" value="ArtOfIllusion.jar" />
+  <property name="dist" value="Live_Application" />
+  <property name="assemble" value="${dist}/Plugins" />
+  <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}" />
-    <!-- Create the docs directory structure used by documentation -->
-    <mkdir dir="${docs}" />
     <!-- create the dist directory -->
     <mkdir dir="${dist}" />
+    <mkdir dir="${assemble}" />
   </target>
 
   <target name="compile" depends="init">
@@ -26,7 +26,7 @@
   </target>
 
   <target name="dist" depends="compile">
-    <jar jarfile="${dist}/OSSpecific.jar" basedir="${build}" >
+    <jar jarfile="${assemble}/OSSpecific.jar" basedir="${build}" >
       <fileset dir="${src}" includes="*.xml" />
     </jar>
   </target>
@@ -36,7 +36,7 @@
         sourcepath="${src}"
         classpath="${aoijar}"
         defaultexcludes="yes"
-        destdir="${docs}"
+	destdir="${docs}/${ant.project.name}"
         author="true"
         version="true"
         use="true"

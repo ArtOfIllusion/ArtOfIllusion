@@ -28,7 +28,7 @@
   </target>
 
   <!-- Generate working application artifacts -->
-  <target name="dist" depends="init">
+  <target name="dist" depends="init" description="Generate a working full-project application">
     <copy todir="${dist}/lib">
       <fileset dir="${lib}" includes="*"/>
     </copy>
@@ -43,7 +43,7 @@
 
   <!-- Build project-wide javadoc -->
   <!-- Hacky, cannot call subant tasks, as Javadoc is not incremental -->
- <target name="docs">
+ <target name="docs" description="Generate project-wide javadoc">
    <mkdir dir="${docs}" />
    <javadoc packagenames="artofillusion.*"
      sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src"
@@ -61,10 +61,39 @@
    </javadoc>
   </target>
 
-  <target name="clean">
+  <target name="clean" description="Delete all interim build artifacts. Working application left intact.">
     <!-- execute the "clean" target for all found subproject ant files -->
     <subant target="clean">
       <fileset refid="subproject.files" />
     </subant>
   </target>
+
+  <target name="help" description="Display advanced build options">
+    <echo>
+      If you just want to build the application, simply type 'ant' into your console.
+      
+      For more build control, The Art Of Illusion build scripts provide the following targets:
+    </echo>
+    <java classname="org.apache.tools.ant.Main">
+      <arg value="-projecthelp" />
+      <arg value="-buildfile" />
+      <arg value="${ant.file}" />
+    </java>
+    <echo>
+      The 'dist' and 'docs' targets accept the following properties as options:
+
+      dist: directory at which to base the live build. Defaults to ${dist}.
+
+      docs: directory in wish to place the Javadoc. Defaults to ${docs}.
+
+      JavaVersion: which version of the java language and runtime to target.
+      Defaults to ${JavaVersion}.
+
+      To override any of these properties for a one time build, pass them to ant in the following form:
+
+      ant [target] -D[property]=[value]
+    </echo>
+
+  </target>
+
 </project>

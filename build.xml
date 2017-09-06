@@ -40,22 +40,24 @@
     </subant>
   </target>
 
-  <target name="docs">
+  <!-- Build project-wide javadoc -->
+  <!-- Hacky, cannot call subant tasks, as Javadoc is not incremental -->
+ <target name="docs">
    <mkdir dir="${docs}" />
    <javadoc packagenames="artofillusion.*"
-        sourcepath="${src}"
-        classpath="${lib}/*.jar"
-        source="1.5"
-        defaultexcludes="yes"
-        destdir="${docs}"
-        author="true"
-        version="true"
-        use="true"
-        windowtitle="Art of Illusion Documentation"
-	public="true">
-      <doctitle><![CDATA[<h1>Art of Illusion</h1>]]></doctitle>
-      <bottom><![CDATA[<i>Copyright &copy; 1999-2011 by Peter Eastman.</i>]]></bottom>
-    </javadoc>
+     sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src"
+     classpath="${lib}/*.jar"
+     source="1.5"
+     defaultexcludes="yes"
+     destdir="${docs}"
+     author="true"
+     version="true"
+     use="true"
+     windowtitle="Art of Illusion Documentation"
+     public="true">
+     <doctitle><![CDATA[<h1>Art of Illusion</h1>]]></doctitle>
+     <bottom><![CDATA[<i>Copyright &copy; 1999-2011 by Peter Eastman.</i>]]></bottom>
+   </javadoc>
   </target>
 
   <target name="clean">

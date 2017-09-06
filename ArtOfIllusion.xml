@@ -66,7 +66,7 @@
   <target name="clean">
     <!-- Delete the ${build} and ${docs} directory trees -->
     <delete dir="${build}" />
-    <delete dir="${docs}/${ant.project.name}" />
+    <delete dir="${docs}" />
   </target>
 
 </project>

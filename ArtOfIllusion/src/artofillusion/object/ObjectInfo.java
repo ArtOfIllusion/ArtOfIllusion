@@ -133,9 +133,13 @@ public class ObjectInfo
         for (int i = 0; i < getTracks().length; i++)
           getTracks()[i] = info.getTracks()[i].duplicate(this);
       }
-    if (info.distortion != null)
+    if (info.distortion == null) 
+      distortion = null;
+    else 
       distortion = info.distortion.duplicate();
-    if (info.prevDistortion != null)
+    if (info.prevDistortion == null) 
+      prevDistortion = null;
+    else 
       prevDistortion = info.prevDistortion.duplicate();
   }
   

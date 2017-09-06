@@ -6,6 +6,7 @@
   <property name="lib" value="lib" />
   <property name="dist" value="Live_Application" />
   <property name="docs" value="docs/Javadoc" />
+  <property name="JavaVersion" value="1.5" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
@@ -47,7 +48,7 @@
    <javadoc packagenames="artofillusion.*"
      sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src"
      classpath="${lib}/*.jar"
-     source="1.5"
+     source="${JavaVersion}"
      defaultexcludes="yes"
      destdir="${docs}"
      author="true"

@@ -8,7 +8,7 @@
   <property name="docs" value="ArtOfIllusion/docs" />
   <property name="lib" value="lib" />
   <property name="dist" value="${basedir}/Live_Application" />
-<!--  <property name="build.compiler" value="classic" /> -->
+  <property name="JavaVersion" value="1.5" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
@@ -25,7 +25,7 @@
     <pathconvert property="classpath" refid="libraries" />
 
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="1.5" source="1.5" />
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
   </target>
 
   <target name="dist" depends="compile">
@@ -50,7 +50,7 @@
     <javadoc packagenames="artofillusion.*"
         sourcepath="${src}"
         classpath="${lib}/*.jar"
-        source="1.5"
+	source="${JavaVersion}"
         defaultexcludes="yes"
 	destdir="${docs}/${ant.project.name}"
         author="true"

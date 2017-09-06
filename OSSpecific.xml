@@ -9,6 +9,7 @@
   <property name="dist" value="Live_Application" />
   <property name="assemble" value="${dist}/Plugins" />
   <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
+  <property name="JavaVersion" value="1.5" />
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -22,7 +23,7 @@
 
   <target name="compile" depends="init">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="1.5" source="1.5" />
+    <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
   </target>
 
   <target name="dist" depends="compile">
@@ -34,7 +35,8 @@
   <target name="docs" depends="init">
     <javadoc packagenames="artofillusion.*"
         sourcepath="${src}"
-        classpath="${aoijar}"
+	classpath="${aoijar}"
+	source="${JavaVersion}"
         defaultexcludes="yes"
 	destdir="${docs}/${ant.project.name}"
         author="true"

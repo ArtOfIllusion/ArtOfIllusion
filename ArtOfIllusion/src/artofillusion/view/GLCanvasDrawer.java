@@ -32,7 +32,7 @@ import buoy.event.*;
 public class GLCanvasDrawer implements CanvasDrawer
 {
   private ViewerCanvas view;
-  private GLCanvas canvas;
+  private GLJPanel canvas;
   private GL2 gl;
   private Rectangle bounds;
   private Mat4 lastObjectTransform;
@@ -57,7 +57,7 @@ public class GLCanvasDrawer implements CanvasDrawer
   {
     this.view = view;
     GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
-    canvas = new GLCanvas(caps);
+    canvas = new GLJPanel(caps);
     canvas.addGLEventListener(new CanvasListener());
   }
 

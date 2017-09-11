@@ -246,6 +246,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (ArtOfIllusion.APP_ICON != null)
       setIcon(ArtOfIllusion.APP_ICON);
     Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+    String os = System.getProperties().getProperty("os.name").toLowerCase();
+    if (os.startsWith("mac os"))
+      screenBounds.height -= 11; // Workaround for bug in Java on Mac.
     setBounds(screenBounds);
     tools.requestFocus();
     setTime(theScene.getTime());

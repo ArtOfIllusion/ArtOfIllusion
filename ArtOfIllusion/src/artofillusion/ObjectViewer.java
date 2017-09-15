@@ -225,9 +225,9 @@ public abstract class ObjectViewer extends ViewerCanvas
     // Finish up.
 
     drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
     drawBorder();
@@ -311,12 +311,12 @@ public abstract class ObjectViewer extends ViewerCanvas
   public void setOrientation (int which)
   {
     if (which < 6)
-	  super.setOrientation(which);
-	else
-	{
-	  orientation = VIEW_OTHER;
-	  viewChanged(false);
-	}
+      super.setOrientation(which);
+    else
+    {
+      orientation = VIEW_OTHER;
+      viewChanged(false);
+    }
   }
 
   /** Begin dragging a selection region.  The variable square determines whether
@@ -349,7 +349,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       selectBounds = createPolygonFromSelection();
     else
       selectBounds = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
-		Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
+        Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
   }
 
   /** Create a Polygon from the selection bounds. */
@@ -503,13 +503,13 @@ public abstract class ObjectViewer extends ViewerCanvas
     theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
-  
-   	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		((EditingWindow)controller).updateImage();
-	}
+
+       @Override
+    protected void mouseMoved(MouseMovedEvent e)
+    {
+        mouseMoving = true;
+        mousePoint = e.getPoint();
+        mouseMoveTimer.restart();
+        repaint();
+    }
 }

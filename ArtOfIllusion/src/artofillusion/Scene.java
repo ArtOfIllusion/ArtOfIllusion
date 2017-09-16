@@ -858,8 +858,12 @@ public class Scene
   public void setSelection(int which[])
   {
     clearSelection();
-    for (int i = 0; i < which.length; i++)
-      addToSelection(which[i]);
+    for (int index : which) {
+      ObjectInfo info = objects.elementAt(index);
+      if (!info.selected)
+        selection.addElement(index);
+      info.selected = true;
+    }
     updateSelectionInfo();
   }
 
@@ -884,6 +888,8 @@ public class Scene
 
   public void clearSelection()
   {
+    if (selection.size() == 0)
+      return;
     selection.removeAllElements();
     for (int i = 0; i < objects.size(); i++)
       objects.elementAt(i).selected = false;

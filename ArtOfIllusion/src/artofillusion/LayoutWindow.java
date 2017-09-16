@@ -64,6 +64,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   BPopupMenu popupMenu;
   UndoStack undoStack;
   int numViewsShown, currentView;
+  private ActionProcessor uiEventProcessor;
   private boolean modified, sceneChangePending;
   private KeyEventPostProcessor keyEventHandler;
   private SceneChangedEvent sceneChangedEvent;
@@ -81,6 +82,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScore = new Score(this);
     undoStack = new UndoStack();
     sceneChangedEvent = new SceneChangedEvent(this);
+    uiEventProcessor = new ActionProcessor();
     createItemList();
 
     // Create the four SceneViewer panels.
@@ -1158,11 +1160,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
-    theScene.addObject(info, undo);
-    itemTree.addElement(new ObjectTreeElement(info, itemTree));
-    for (int i = 0; i < theView.length ; i++)
-      theView[i].rebuildCameraList();
-    theScore.rebuildList();
+    addObject(info, theScene.getNumObjects(), undo);
   }
 
   /** Add a new object to the scene.  If undo is not null,
@@ -1171,10 +1169,18 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {
     theScene.addObject(info, index, undo);
+    itemTree.setUpdateEnabled(false);
     itemTree.addElement(new ObjectTreeElement(info, itemTree), index);
-    for (int i = 0; i < theView.length ; i++)
-      theView[i].rebuildCameraList();
-    theScore.rebuildList();
+    uiEventProcessor.addEvent(new Runnable()
+    {
+      public void run()
+      {
+        itemTree.setUpdateEnabled(true);
+        for (int i = 0; i < theView.length ; i++)
+          theView[i].rebuildCameraList();
+        theScore.rebuildList();
+      }
+    });
   }
 
   /** Remove an object from the scene.  If undo is not null,
@@ -1182,7 +1188,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void removeObject(int which, UndoRecord undo)
   {
-    ObjectInfo info = theScene.getObject(which);
+    itemTree.setUpdateEnabled(false);
+    final ObjectInfo info = theScene.getObject(which);
     ObjectInfo parent = info.getParent();
     int childIndex = -1;
     if (parent != null)
@@ -1193,13 +1200,20 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (childIndex > -1 && info.getParent() == null)
       undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object [] {parent, info, childIndex});
     theScene.removeObject(which, undo);
-    for (int i = 0; i < theView.length ; i++)
+    uiEventProcessor.addEvent(new Runnable()
     {
-      if (theView[i].getBoundCamera() == info)
-        theView[i].setOrientation(ViewerCanvas.VIEW_OTHER);
-      theView[i].rebuildCameraList();
-    }
-    theScore.rebuildList();
+      public void run()
+      {
+        itemTree.setUpdateEnabled(true);
+        for (int i = 0; i < theView.length ; i++)
+        {
+          if (theView[i].getBoundCamera() == info)
+            theView[i].setOrientation(ViewerCanvas.VIEW_OTHER);
+          theView[i].rebuildCameraList();
+        }
+        theScore.rebuildList();
+      }
+    });
   }
 
   /** Set the name of an object in the scene. */
@@ -1857,10 +1871,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
-  public void clearSelectionCommand()
-  {
-  }
-  
   public void selectAllCommand()
   {
     int i, which[] = new int [theScene.getNumObjects()];

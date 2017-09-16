@@ -6,7 +6,7 @@
   <property name="lib" value="lib" />
   <property name="dist" value="Live_Application" />
   <property name="docs" value="docs/Javadoc" />
-  <property name="JavaVersion" value="1.5" />
+  <property name="JavaVersion" value="1.6" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />

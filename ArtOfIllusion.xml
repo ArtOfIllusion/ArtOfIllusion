@@ -8,7 +8,7 @@
   <property name="docs" value="ArtOfIllusion/docs" />
   <property name="lib" value="lib" />
   <property name="dist" value="${basedir}/Live_Application" />
-  <property name="JavaVersion" value="1.5" />
+  <property name="JavaVersion" value="1.6" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />

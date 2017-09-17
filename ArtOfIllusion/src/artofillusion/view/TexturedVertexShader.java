@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2014 by Peter Eastman
+/* Copyright (C) 2004-2017 by Peter Eastman
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,9 +25,10 @@ public class TexturedVertexShader implements VertexShader
   private TextureSpec spec;
   private RenderingMesh mesh;
   private Vec3 viewDir;
+  private RGBColor diffuse, emissive, hilight;
   private double time, roughnessCache[];
-  private RGBColor diffuseCache[], emissiveCache[], hilightCache[];
-  private boolean cache;
+  private float diffuseCache[], emissiveCache[], hilightCache[];
+  private boolean cachePerFace;
   private int textureID;
 
   private static final WeakHashMap<RenderingMesh, SoftReference<TexturedVertexShader>> cachedShaderMap = new WeakHashMap<RenderingMesh, SoftReference<TexturedVertexShader>>();
@@ -45,16 +46,18 @@ public class TexturedVertexShader implements VertexShader
     this.time = time;
     this.viewDir = viewDir;
     spec = new TextureSpec();
+    diffuse = new RGBColor();
+    emissive = new RGBColor();
+    hilight = new RGBColor();
     textureID = mesh.mapping.getTexture().getID();
 
     // Determine whether we can cache the color components for each vertex.
 
-    cache = true;
     ParameterValue value[] = object.getParameterValues();
     for (int i = 0; i < value.length; i++)
       if (!(value[i] instanceof ConstantParameterValue || value[i] instanceof VertexParameterValue))
       {
-        cache = false;
+        cachePerFace = true;
         return;
       }
   }
@@ -77,23 +80,21 @@ public class TexturedVertexShader implements VertexShader
       color.clip();
       return new SmoothVertexShader(mesh, color, viewDir);
     }
-    if (cache)
-    {
-      // See if we already have a cached shader for this mesh.  To ensure that we never tie up memory with this
-      // cache, the key is stored behind a weak reference and the value behind a soft reference.
 
-      SoftReference<TexturedVertexShader> ref = cachedShaderMap.get(mesh);
-      if (ref != null)
+    // See if we already have a cached shader for this mesh.  To ensure that we never tie up memory with this
+    // cache, the key is stored behind a weak reference and the value behind a soft reference.
+
+    SoftReference<TexturedVertexShader> ref = cachedShaderMap.get(mesh);
+    if (ref != null)
+    {
+      TexturedVertexShader shader = ref.get();
+      if (shader != null && shader.textureID == textureID)
       {
-        TexturedVertexShader shader = ref.get();
-        if (shader != null && shader.textureID == textureID)
-        {
-          shader.viewDir = viewDir;
-          return shader;
-        }
+        shader.viewDir = viewDir;
+        return shader;
       }
-      cachedShaderMap.put(mesh, new SoftReference<TexturedVertexShader>(this));
     }
+    cachedShaderMap.put(mesh, new SoftReference<TexturedVertexShader>(this));
     return this;
   }
 
@@ -106,86 +107,103 @@ public class TexturedVertexShader implements VertexShader
   @Override
   public void getColor(int face, int vertex, RGBColor color)
   {
-    RenderingTriangle tri = mesh.triangle[face];
-    RGBColor diffuse, emissive, hilight;
     double dot, roughness;
-    if (cache)
+    if (cachePerFace)
     {
-      // Use cached texture information.
-
       if (diffuseCache == null)
       {
-        diffuseCache = new RGBColor [mesh.vert.length];
-        emissiveCache = new RGBColor [mesh.vert.length];
-        hilightCache = new RGBColor [mesh.vert.length];
-        roughnessCache = new double [mesh.vert.length];
+        diffuseCache = new float[9*mesh.triangle.length];
+        emissiveCache = new float[9*mesh.triangle.length];
+        hilightCache = new float[9*mesh.triangle.length];
+        roughnessCache = new double[9*mesh.triangle.length];
+        Arrays.fill(roughnessCache, -1.0);
       }
+      RenderingTriangle tri = mesh.triangle[face];
+      switch (vertex)
+      {
+        case 0:
+          dot = viewDir.dot(mesh.norm[tri.n1]);
+          if (roughnessCache[3*face] == -1.0)
+            tri.getTextureSpec(spec, -dot, 1.0, 0.0, 0.0, 0.1, time);
+          break;
+        case 1:
+          dot = viewDir.dot(mesh.norm[tri.n2]);
+          if (roughnessCache[3*face+1] == -1.0)
+            tri.getTextureSpec(spec, -dot, 0.0, 1.0, 0.0, 0.1, time);
+          break;
+        default:
+          dot = viewDir.dot(mesh.norm[tri.n3]);
+          if (roughnessCache[3*face+2] == -1.0)
+            tri.getTextureSpec(spec, -dot, 0.0, 0.0, 1.0, 0.1, time);
+      }
+      int cacheIndex = 9*face+3*vertex;
+      if (roughnessCache[3*face+vertex] == -1.0)
+      {
+        diffuseCache[cacheIndex] = spec.diffuse.getRed();
+        diffuseCache[cacheIndex+1] = spec.diffuse.getGreen();
+        diffuseCache[cacheIndex+2] = spec.diffuse.getBlue();
+        emissiveCache[cacheIndex] = spec.emissive.getRed();
+        emissiveCache[cacheIndex+1] = spec.emissive.getGreen();
+        emissiveCache[cacheIndex+2] = spec.emissive.getBlue();
+        hilightCache[cacheIndex] = spec.hilight.getRed();
+        hilightCache[cacheIndex+1] = spec.hilight.getGreen();
+        hilightCache[cacheIndex+2] = spec.hilight.getBlue();
+        roughnessCache[3*face+vertex] = spec.roughness;
+      }
+      diffuse.setRGB(diffuseCache[cacheIndex], diffuseCache[cacheIndex+1], diffuseCache[cacheIndex+2]);
+      emissive.setRGB(emissiveCache[cacheIndex], emissiveCache[cacheIndex+1], emissiveCache[cacheIndex+2]);
+      hilight.setRGB(hilightCache[cacheIndex], hilightCache[cacheIndex+1], hilightCache[cacheIndex+2]);
+      roughness = roughnessCache[3*face+vertex];
+    }
+    else
+    {
+      if (diffuseCache == null)
+      {
+        diffuseCache = new float[3*mesh.vert.length];
+        emissiveCache = new float[3*mesh.vert.length];
+        hilightCache = new float[3*mesh.vert.length];
+        roughnessCache = new double[mesh.vert.length];
+        Arrays.fill(roughnessCache, -1.0);
+      }
+      RenderingTriangle tri = mesh.triangle[face];
       int vert;
       switch (vertex)
       {
         case 0:
           vert = tri.v1;
           dot = viewDir.dot(mesh.norm[tri.n1]);
-          if (diffuseCache[vert] == null)
-          {
+          if (roughnessCache[vert] == -1.0)
             tri.getTextureSpec(spec, -dot, 1.0, 0.0, 0.0, 0.1, time);
-            diffuseCache[vert] = spec.diffuse.duplicate();
-            emissiveCache[vert] = spec.emissive.duplicate();
-            hilightCache[vert] = spec.hilight.duplicate();
-            roughnessCache[vert] = spec.roughness;
-          }
           break;
         case 1:
           vert = tri.v2;
           dot = viewDir.dot(mesh.norm[tri.n2]);
-          if (diffuseCache[vert] == null)
-          {
+          if (roughnessCache[vert] == -1.0)
             tri.getTextureSpec(spec, -dot, 0.0, 1.0, 0.0, 0.1, time);
-            diffuseCache[vert] = spec.diffuse.duplicate();
-            emissiveCache[vert] = spec.emissive.duplicate();
-            hilightCache[vert] = spec.hilight.duplicate();
-            roughnessCache[vert] = spec.roughness;
-          }
           break;
         default:
           vert = tri.v3;
           dot = viewDir.dot(mesh.norm[tri.n3]);
-          if (diffuseCache[vert] == null)
-          {
+          if (roughnessCache[vert] == -1.0)
             tri.getTextureSpec(spec, -dot, 0.0, 0.0, 1.0, 0.1, time);
-            diffuseCache[vert] = spec.diffuse.duplicate();
-            emissiveCache[vert] = spec.emissive.duplicate();
-            hilightCache[vert] = spec.hilight.duplicate();
-            roughnessCache[vert] = spec.roughness;
-          }
       }
-      diffuse = diffuseCache[vert];
-      emissive = emissiveCache[vert];
-      hilight = hilightCache[vert];
-      roughness = roughnessCache[vert];
-    }
-    else
-    {
-      // The texture needs to be recalculated for every face that uses a vertex.
-
-      switch (vertex)
+      if (roughnessCache[vert] == -1.0)
       {
-        case 0:
-          dot = viewDir.dot(mesh.norm[tri.n1]);
-          tri.getTextureSpec(spec, -dot, 1.0, 0.0, 0.0, 0.01, time);
-          break;
-        case 1:
-          dot = viewDir.dot(mesh.norm[tri.n2]);
-          tri.getTextureSpec(spec, -dot, 0.0, 1.0, 0.0, 0.01, time);
-          break;
-        default:
-          dot = viewDir.dot(mesh.norm[tri.n3]);
-          tri.getTextureSpec(spec, -dot, 0.0, 0.0, 1.0, 0.01, time);
+        diffuseCache[3*vert] = spec.diffuse.getRed();
+        diffuseCache[3*vert+1] = spec.diffuse.getGreen();
+        diffuseCache[3*vert+2] = spec.diffuse.getBlue();
+        emissiveCache[3*vert] = spec.emissive.getRed();
+        emissiveCache[3*vert+1] = spec.emissive.getGreen();
+        emissiveCache[3*vert+2] = spec.emissive.getBlue();
+        hilightCache[3*vert] = spec.hilight.getRed();
+        hilightCache[3*vert+1] = spec.hilight.getGreen();
+        hilightCache[3*vert+2] = spec.hilight.getBlue();
+        roughnessCache[vert] = spec.roughness;
       }
-      diffuse = spec.diffuse;
-      emissive = spec.emissive;
-      hilight = spec.hilight;
-      roughness = spec.roughness;
+      diffuse.setRGB(diffuseCache[3*vert], diffuseCache[3*vert+1], diffuseCache[3*vert+2]);
+      emissive.setRGB(emissiveCache[3*vert], emissiveCache[3*vert+1], emissiveCache[3*vert+2]);
+      hilight.setRGB(hilightCache[3*vert], hilightCache[3*vert+1], hilightCache[3*vert+2]);
+      roughness = roughnessCache[vert];
     }
 
     // Select the color.

@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2012 by Peter Eastman
+/* Copyright (C) 2005-2017 by Peter Eastman
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -211,6 +211,7 @@ public class GLCanvasDrawer implements CanvasDrawer
       normBuffer = Buffers.newDirectFloatBuffer(requiredSize);
       gl.glVertexPointer(3, GL.GL_FLOAT, 0, vertBuffer);
       gl.glNormalPointer(GL.GL_FLOAT, 0, normBuffer);
+      gl.glColorPointer(3, GL.GL_FLOAT, 0, normBuffer);
     }
   }
 
@@ -624,37 +625,63 @@ public class GLCanvasDrawer implements CanvasDrawer
     }
     else
     {
-      // We will need to calculate the color of each face/vertex ourselves.
+      // We will need to calculate the color of each face/vertex ourselves.  Since we aren't asking OpenGL
+      // to do the shading, we can reuse the normal buffer to store colors instead.
 
       prepareShading(false);
-      gl.glBegin(GL.GL_TRIANGLES);
+      prepareBuffers(mesh.triangle.length*9);
+      vertBuffer.clear();
+      normBuffer.clear();
+      int faceCount = 0;
       RGBColor surfaceColor = new RGBColor();
       for (int i = 0; i < mesh.triangle.length; i++)
       {
         if (hideFace != null && hideFace[i])
           continue;
+        faceCount++;
         RenderingTriangle tri = mesh.triangle[i];
-        Vec3 vert1 = mesh.vert[tri.v1];
-        Vec3 vert2 = mesh.vert[tri.v2];
-        Vec3 vert3 = mesh.vert[tri.v3];
+        Vec3 v = mesh.vert[tri.v1];
+        vertBuffer.put((float) v.x);
+        vertBuffer.put((float) v.y);
+        vertBuffer.put((float) v.z);
+        v = mesh.vert[tri.v2];
+        vertBuffer.put((float) v.x);
+        vertBuffer.put((float) v.y);
+        vertBuffer.put((float) v.z);
+        v = mesh.vert[tri.v3];
+        vertBuffer.put((float) v.x);
+        vertBuffer.put((float) v.y);
+        vertBuffer.put((float) v.z);
         shader.getColor(i, 0, surfaceColor);
-        gl.glColor3f(surfaceColor.getRed(), surfaceColor.getGreen(), surfaceColor.getBlue());
-        gl.glVertex3d(vert1.x, vert1.y, vert1.z);
+        normBuffer.put(surfaceColor.getRed());
+        normBuffer.put(surfaceColor.getGreen());
+        normBuffer.put(surfaceColor.getBlue());
         if (shader.isUniformFace(i))
         {
-          gl.glVertex3d(vert2.x, vert2.y, vert2.z);
-          gl.glVertex3d(vert3.x, vert3.y, vert3.z);
+          normBuffer.put(surfaceColor.getRed());
+          normBuffer.put(surfaceColor.getGreen());
+          normBuffer.put(surfaceColor.getBlue());
+          normBuffer.put(surfaceColor.getRed());
+          normBuffer.put(surfaceColor.getGreen());
+          normBuffer.put(surfaceColor.getBlue());
         }
         else
         {
           shader.getColor(i, 1, surfaceColor);
-          gl.glColor3f(surfaceColor.getRed(), surfaceColor.getGreen(), surfaceColor.getBlue());
-          gl.glVertex3d(vert2.x, vert2.y, vert2.z);
+          normBuffer.put(surfaceColor.getRed());
+          normBuffer.put(surfaceColor.getGreen());
+          normBuffer.put(surfaceColor.getBlue());
           shader.getColor(i, 2, surfaceColor);
-          gl.glColor3f(surfaceColor.getRed(), surfaceColor.getGreen(), surfaceColor.getBlue());
-          gl.glVertex3d(vert3.x, vert3.y, vert3.z);
+          normBuffer.put(surfaceColor.getRed());
+          normBuffer.put(surfaceColor.getGreen());
+          normBuffer.put(surfaceColor.getBlue());
         }
       }
+      gl.glDisableClientState(GL2.GL_NORMAL_ARRAY);
+      gl.glEnableClientState(GL2.GL_COLOR_ARRAY);
+      gl.glDrawArrays(GL.GL_TRIANGLES, 0, faceCount*3);
+      gl.glDisableClientState(GL2.GL_COLOR_ARRAY);
+      gl.glEnableClientState(GL2.GL_NORMAL_ARRAY);
       gl.glEnd();
     }
   }

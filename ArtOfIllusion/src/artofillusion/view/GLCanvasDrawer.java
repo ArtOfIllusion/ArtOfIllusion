@@ -365,20 +365,24 @@ public class GLCanvasDrawer implements CanvasDrawer
     for (int i = 0; i < box.size(); i++)
     {
       Rectangle r = box.get(i);
-      float y1 = bounds.height-r.y;
+      float y1 = bounds.height-r.y;      
       float d = -depth.get(i).floatValue();
       float scale = (float) (view.isPerspective() ? -d/minDepth : 1.0);
-      vertBuffer.put(r.x*scale);
-      vertBuffer.put(y1*scale);
+      float y1Scale = y1*scale;
+      float rxScale = r.x*scale;
+      float y1HeightScale = (y1-r.height)*scale;
+      float rxWidthScale = (r.x+r.width)*scale;
+      vertBuffer.put(rxScale);
+      vertBuffer.put(y1Scale);
       vertBuffer.put(d);
-      vertBuffer.put(r.x*scale);
-      vertBuffer.put((y1-r.height)*scale);
+      vertBuffer.put(rxScale);
+      vertBuffer.put(y1HeightScale);
       vertBuffer.put(d);
-      vertBuffer.put((r.x+r.width)*scale);
-      vertBuffer.put((y1-r.height)*scale);
+      vertBuffer.put(rxWidthScale);
+      vertBuffer.put(y1HeightScale);
       vertBuffer.put(d);
-      vertBuffer.put((r.x+r.width)*scale);
-      vertBuffer.put(y1*scale);
+      vertBuffer.put(rxWidthScale);
+      vertBuffer.put(y1Scale);
       vertBuffer.put(d);
     }
     gl.glDrawArrays(GL2.GL_QUADS, 0, box.size()*4);

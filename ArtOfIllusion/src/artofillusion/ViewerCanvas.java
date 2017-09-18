@@ -38,7 +38,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected EditingTool currentTool, activeTool, metaTool, altTool;
   protected ScrollViewTool scrollTool;
   protected PopupMenuManager popupManager;
-  protected int renderMode, gridSubdivisions, orientation, navigation;
+  protected int renderMode, gridSubdivisions, orientation, navigation, axisLength;
   protected double gridSpacing, scale, distToPlane, scrollRadius, scrollX, scrollY, scrollBlend, scrollBlendX, scrollBlendY;
   protected boolean perspective, perspectiveSwitch, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected boolean lastModelPerspective;
@@ -174,6 +174,7 @@ public abstract class ViewerCanvas extends CustomWidget
       {
       }
     });
+	axisLength = 30;
     orientation = 0;
     perspective = false;
     scale = 100.0;
@@ -1279,20 +1280,38 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
+  
+  /** Get the size of the coordinate axis symbol */
+  public int getAxisLength()
+  {
+    return axisLength;
+  }
+  
+  /** Set the size of the coordinate axis symbol.
+      @param pixels = the legnt of an axis on the screen as pixels */  
+  public void setAxisLength(int pixels)
+  {
+    axisLength = pixels;
+  }
+  
+  
   /** Draw the coordinate axes into the view. */
 
   protected void drawCoordinateAxes()
   {
-    // Select a size for the coordinate axes.
-	// drawLine(new Point(200,1), new Point (100,100), Color.ORANGE);
-
     Rectangle bounds = getBounds();
-    int axisLength = 50;
     if (axisLength*5 > bounds.width)
       axisLength = bounds.width/5;
     if (axisLength*5 > bounds.height)
       axisLength = bounds.height/5;
     double len = axisLength/getScale();
+
+	if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+	{
+	   double f2 = Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()/2.0);
+	   len *= Camera.DEFAULT_DISTANCE_TO_SCREEN*Math.tan(f2); // The different 'distToScreen' compensated. 
+	   len *= 2.0*getScale()/(double)getBounds().height; // Field of View driving on-screen scaling compensatied.
+	}
 
     // Calculate the screen positions of the axis ends.
 
@@ -1309,12 +1328,19 @@ public abstract class ViewerCanvas extends CustomWidget
 
     // Draw the axes.
 
-    Point centerPoint = new Point((int) Math.round(screenCenter.x), (int) Math.round(screenCenter.y));
+	//This should tame down the flickering, but is was not enough. 
+	//Using just (int) instead of Math.round() did not help either
+	
+	Point centerPoint = new Point(bounds.width-(int)axisLength-15, (bounds.height-(int)axisLength-15));
+    //Point centerPoint = new Point((int) Math.round(screenCenter.x), (int) Math.round(screenCenter.y));
+	
     drawLine(centerPoint, new Point((int) screenX.x, (int) screenX.y), lineColor);
     drawLine(centerPoint, new Point((int) screenY.x, (int) screenY.y), lineColor);
     drawLine(centerPoint, new Point((int) screenZ.x, (int) screenZ.y), lineColor);
 
     // Draw the labels.
+	// The normal adding and subtracting rules don't quite seem apply, 
+	// when calculating the points for the labels. 
 
     if (screenX.minus(screenCenter).length() > 2.0)
     {
@@ -1322,8 +1348,8 @@ public abstract class ViewerCanvas extends CustomWidget
       Vec2 labelPos = screenX.plus(dir.times(8.0/dir.length()));
       int x = (int) labelPos.x;
       int y = (int) labelPos.y;
-      drawLine(new Point(x-4, y-4), new Point(x+4, y+4), lineColor);
-      drawLine(new Point(x-4, y+4), new Point(x+4, y-4), lineColor);
+      drawLine(new Point(x-3, y-3), new Point(x+4, y+4), lineColor);
+      drawLine(new Point(x-3, y+3), new Point(x+4, y-3), lineColor);
     }
     if (screenY.minus(screenCenter).length() > 2.0)
     {
@@ -1331,8 +1357,8 @@ public abstract class ViewerCanvas extends CustomWidget
       Vec2 labelPos = screenY.plus(dir.times(8.0/dir.length()));
       int x = (int) labelPos.x;
       int y = (int) labelPos.y;
-      drawLine(new Point(x-4, y-4), new Point(x, y), lineColor);
-      drawLine(new Point(x+4, y-4), new Point(x, y), lineColor);
+      drawLine(new Point(x-3, y-3), new Point(x, y), lineColor);
+      drawLine(new Point(x+3, y-3), new Point(x, y), lineColor);
       drawLine(new Point(x, y), new Point(x, y+4), lineColor);
     }
     if (screenZ.minus(screenCenter).length() > 2.0)
@@ -1341,9 +1367,9 @@ public abstract class ViewerCanvas extends CustomWidget
       Vec2 labelPos = screenZ.plus(dir.times(8.0/dir.length()));
       int x = (int) labelPos.x;
       int y = (int) labelPos.y;
-      drawLine(new Point(x-4, y-4), new Point(x+4, y-4), lineColor);
-      drawLine(new Point(x+4, y-4), new Point(x-4, y+4), lineColor);
-      drawLine(new Point(x-4, y+4), new Point(x+4, y+4), lineColor);
+      drawLine(new Point(x-3, y-3), new Point(x+4, y-3), lineColor);
+      drawLine(new Point(x+3, y-3), new Point(x-4, y+4), lineColor);
+      drawLine(new Point(x-3, y+3), new Point(x+4, y+4), lineColor);
     }
   }
 

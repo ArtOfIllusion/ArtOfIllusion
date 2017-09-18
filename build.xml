@@ -61,11 +61,39 @@
    </javadoc>
   </target>
 
+  <target name="test" description="Build and run the JUnit test suite.">
+    <subant target="compile">
+      <fileset refid="subproject.files" />
+    </subant>
+    <mkdir dir="Tests/build" />
+    <path id="bin_paths">
+      <pathelement location="ArtOfIllusion/build" />
+      <pathelement location="OSSpecific/build" />
+      <pathelement location="Tools/build" />
+      <pathelement location="Translators/build" />
+      <pathelement location="Renderers/build" />
+      <fileset refid="libraries" />
+    </path>
+    <javac srcdir="Tests/src" destdir="Tests/build" classpathref="bin_paths" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
+    <junit printsummary="on" haltonfailure="yes" fork="false">
+      <classpath>
+        <path refid="bin_paths"/>
+	<pathelement location="Tests/build"/>
+      </classpath>
+      <formatter type="plain" usefile="false" />
+      <batchtest>
+	<fileset dir="Tests/build" includes="**/*Test.class" />
+      </batchtest>
+    </junit>
+
+  </target>
+
   <target name="clean" description="Delete all interim build artifacts. Working application left intact.">
     <!-- execute the "clean" target for all found subproject ant files -->
     <subant target="clean">
       <fileset refid="subproject.files" />
     </subant>
+    <delete dir="Tests/build" />
   </target>
 
   <target name="help" description="Display advanced build options">

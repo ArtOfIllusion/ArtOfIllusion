@@ -25,5 +25,10 @@ General questions or requests for help can be taken to our
 
 ## Contributing
 
-Check out our [contributor guidelines](./Contributing.md) to see how you can help develop
+Check out our [contributor guidelines](./docs/Contributing.md) to see how you can help develop
 or maintain ArtOfIllusion.
+
+## License
+
+The application code is licensed under GPL version 2. Please see the
+[full text](./License.md) for details.

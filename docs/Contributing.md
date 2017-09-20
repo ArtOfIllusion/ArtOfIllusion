@@ -12,7 +12,10 @@ any programing ability.
  * If you speak a language other than English, you can contribute,
 review, or update a translation
  * Create a tutorial
- * Help update the website, www.artofillusion.org
+ * Help update the website, www.artofillusion.org. We're currently in
+the middle of re-designing the site. Please see the
+[github project](https://github.com/ArtOfIllusion/AOI-website) for
+details.
 
 If you would like to help with any of these, please drop in to
 the [discussion forums.](https://sourecforge.net/p/aoi/discussion)
@@ -55,6 +58,7 @@ request.
  * If you change three files to fix one bug, that is one pull request.
  * If you change a file to fix a bug and then change the same file to
 add a new feature, that is two pull requests.
+ * If you are not sure about the scope of an idea, please ask.
 
 ### Code Style
 
@@ -68,15 +72,17 @@ public class Example
   public static String Braces = "Left, new line to start a block";
   public static int indentSpaces = 2;
 
-  public void longParameterLists(
-    boolean areStacked,
-    String toPrevent,
-    int theLength,
-    String fromRunningInto,
-    int wrappingIssues)
+  public void longParameterLists(boolean areStacked,
+                                 String toPrevent,
+				 int theLength,
+				 String fromRunningInto,
+				 int wrappingIssues)
   {
     if(youUseAConditionalWithAOneLiner)
-      System.out.println("Just indent the statement to be executed!");
+       System.out.println("Just indent the statement to be executed!");
+
+    for (Object obj: Collection group)
+         obj.indent("One space past opening Parenthesis");
   }
 }
 ```

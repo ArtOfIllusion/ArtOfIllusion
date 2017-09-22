@@ -1280,21 +1280,21 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
-  
   /** Get the size of the coordinate axis symbol */
+
   public int getAxisLength()
   {
     return axisLength;
   }
-  
+
   /** Set the size of the coordinate axis symbol.
-      @param pixels = the legnt of an axis on the screen as pixels */  
+      @param pixels The length of an axis on the screen in pixels */  
+
   public void setAxisLength(int pixels)
   {
     axisLength = pixels;
   }
-  
-  
+
   /** Draw the coordinate axes into the view. */
 
   protected void drawCoordinateAxes()
@@ -1310,7 +1310,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	{
 	   double f2 = Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()/2.0);
 	   len *= Camera.DEFAULT_DISTANCE_TO_SCREEN*Math.tan(f2); // The different 'distToScreen' compensated. 
-	   len *= 2.0*getScale()/(double)getBounds().height; // Field of View driving on-screen scaling compensatied.
+	   len *= 2.0*getScale()/(double)getBounds().height; // Scaling depending of view size compensated.
 	}
 
     // Calculate the screen positions of the axis ends.
@@ -1328,35 +1328,30 @@ public abstract class ViewerCanvas extends CustomWidget
 
     // Draw the axes.
 
-	//This should tame down the flickering, but is was not enough. 
-	//Using just (int) instead of Math.round() did not help either
-	
-	Point centerPoint = new Point(bounds.width-(int)axisLength-15, (bounds.height-(int)axisLength-15));
-    //Point centerPoint = new Point((int) Math.round(screenCenter.x), (int) Math.round(screenCenter.y));
-	
-    drawLine(centerPoint, new Point((int) screenX.x, (int) screenX.y), lineColor);
-    drawLine(centerPoint, new Point((int) screenY.x, (int) screenY.y), lineColor);
-    drawLine(centerPoint, new Point((int) screenZ.x, (int) screenZ.y), lineColor);
+    Point centerPoint = new Point((int) Math.round(screenCenter.x), (int) Math.round(screenCenter.y));	
+    drawLine(centerPoint, new Point((int) Math.round(screenX.x), (int) Math.round(screenX.y)), lineColor);
+    drawLine(centerPoint, new Point((int) Math.round(screenY.x), (int) Math.round(screenY.y)), lineColor);
+    drawLine(centerPoint, new Point((int) Math.round(screenZ.x), (int) Math.round(screenZ.y)), lineColor);
 
     // Draw the labels.
-	// The normal adding and subtracting rules don't quite seem apply, 
-	// when calculating the points for the labels. 
 
     if (screenX.minus(screenCenter).length() > 2.0)
     {
       Vec2 dir = screenX.minus(screenCenter);
       Vec2 labelPos = screenX.plus(dir.times(8.0/dir.length()));
-      int x = (int) labelPos.x;
-      int y = (int) labelPos.y;
-      drawLine(new Point(x-3, y-3), new Point(x+4, y+4), lineColor);
-      drawLine(new Point(x-3, y+3), new Point(x+4, y-3), lineColor);
+      int x = (int) Math.round(labelPos.x);
+      int y = (int) Math.round(labelPos.y);
+      drawLine(new Point(x-3, y-3), new Point(x, y), lineColor);
+      drawLine(new Point(x+3, y-3), new Point(x, y), lineColor);
+      drawLine(new Point(x-4, y+4), new Point(x, y), lineColor);
+      drawLine(new Point(x+4, y+4), new Point(x, y), lineColor);
     }
     if (screenY.minus(screenCenter).length() > 2.0)
     {
       Vec2 dir = screenY.minus(screenCenter);
       Vec2 labelPos = screenY.plus(dir.times(8.0/dir.length()));
-      int x = (int) labelPos.x;
-      int y = (int) labelPos.y;
+      int x = (int) Math.round(labelPos.x);
+      int y = (int) Math.round(labelPos.y);
       drawLine(new Point(x-3, y-3), new Point(x, y), lineColor);
       drawLine(new Point(x+3, y-3), new Point(x, y), lineColor);
       drawLine(new Point(x, y), new Point(x, y+4), lineColor);
@@ -1365,10 +1360,10 @@ public abstract class ViewerCanvas extends CustomWidget
     {
       Vec2 dir = screenZ.minus(screenCenter);
       Vec2 labelPos = screenZ.plus(dir.times(8.0/dir.length()));
-      int x = (int) labelPos.x;
-      int y = (int) labelPos.y;
+      int x = (int) Math.round(labelPos.x);
+      int y = (int) Math.round(labelPos.y);
       drawLine(new Point(x-3, y-3), new Point(x+4, y-3), lineColor);
-      drawLine(new Point(x+3, y-3), new Point(x-4, y+4), lineColor);
+      drawLine(new Point(x+3, y-2), new Point(x-3, y+3), lineColor);
       drawLine(new Point(x-3, y+3), new Point(x+4, y+4), lineColor);
     }
   }

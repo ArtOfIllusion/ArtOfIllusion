@@ -1334,17 +1334,26 @@ public abstract class ViewerCanvas extends CustomWidget
     drawLine(centerPoint, new Point((int) Math.round(screenZ.x), (int) Math.round(screenZ.y)), lineColor);
 
     // Draw the labels.
+	// The drawers handle the 'drawline' with minor differences.
 
+	boolean isGL = (drawer instanceof GLCanvasDrawer);
+	
     if (screenX.minus(screenCenter).length() > 2.0)
     {
       Vec2 dir = screenX.minus(screenCenter);
       Vec2 labelPos = screenX.plus(dir.times(8.0/dir.length()));
       int x = (int) Math.round(labelPos.x);
       int y = (int) Math.round(labelPos.y);
-      drawLine(new Point(x-3, y-3), new Point(x, y), lineColor);
-      drawLine(new Point(x+3, y-3), new Point(x, y), lineColor);
-      drawLine(new Point(x-4, y+4), new Point(x, y), lineColor);
-      drawLine(new Point(x+4, y+4), new Point(x, y), lineColor);
+	  if (isGL)
+	  {
+        drawLine(new Point(x-4, y-3), new Point(x+3, y+4), lineColor);
+        drawLine(new Point(x+3, y-3), new Point(x-4, y+4), lineColor);
+	  }
+	  else
+	  {
+        drawLine(new Point(x-3, y-3), new Point(x+4, y+4), lineColor);
+        drawLine(new Point(x-4, y+4), new Point(x+3, y-3), lineColor);
+	  }
     }
     if (screenY.minus(screenCenter).length() > 2.0)
     {
@@ -1352,7 +1361,10 @@ public abstract class ViewerCanvas extends CustomWidget
       Vec2 labelPos = screenY.plus(dir.times(8.0/dir.length()));
       int x = (int) Math.round(labelPos.x);
       int y = (int) Math.round(labelPos.y);
-      drawLine(new Point(x-3, y-3), new Point(x, y), lineColor);
+	  if (isGL)
+        drawLine(new Point(x-4, y-3), new Point(x, y+1), lineColor);
+	  else
+	    drawLine(new Point(x-3, y-3), new Point(x, y), lineColor);
       drawLine(new Point(x+3, y-3), new Point(x, y), lineColor);
       drawLine(new Point(x, y), new Point(x, y+4), lineColor);
     }
@@ -1362,9 +1374,18 @@ public abstract class ViewerCanvas extends CustomWidget
       Vec2 labelPos = screenZ.plus(dir.times(8.0/dir.length()));
       int x = (int) Math.round(labelPos.x);
       int y = (int) Math.round(labelPos.y);
-      drawLine(new Point(x-3, y-3), new Point(x+4, y-3), lineColor);
-      drawLine(new Point(x+3, y-2), new Point(x-3, y+3), lineColor);
-      drawLine(new Point(x-3, y+3), new Point(x+4, y+4), lineColor);
+	  if (isGL)
+	  {
+        drawLine(new Point(x-4, y-3), new Point(x+3, y-3), lineColor);
+        drawLine(new Point(x+3, y-3), new Point(x-4, y+4), lineColor);
+        drawLine(new Point(x-4, y+3), new Point(x+3, y+3), lineColor);
+	  }
+	  else
+	  {
+        drawLine(new Point(x-3, y-3), new Point(x+4, y-3), lineColor);
+        drawLine(new Point(x+3, y-2), new Point(x-3, y+3), lineColor);
+        drawLine(new Point(x-3, y+3), new Point(x+4, y+4), lineColor);	  
+	  }
     }
   }
 

@@ -28,7 +28,7 @@ import java.util.*;
 public abstract class ObjectViewer extends ViewerCanvas
 {
   protected MeshEditController controller;
-  protected boolean showScene, useWorldCoords, freehandSelection, draggingBox, squareBox, sentClick;
+  protected boolean showScene, useWorldCoords, freehandSelection, draggingBox, squareBox, sentClick, overlaysOnly;
   protected Point clickPoint, dragPoint;
   protected Vector<Point> selectBoundsPoints;
   protected Shape selectBounds;
@@ -40,6 +40,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
     this.controller = controller;
     buildChoices(p);
+    overlaysOnly = false;
   }
 
   /** Get the controller which maintains the state for this viewer. */
@@ -196,38 +197,47 @@ public abstract class ObjectViewer extends ViewerCanvas
       return;
     }
 
-    super.updateImage();
-    if (controller.getObject() == null)
-      return;
-
-    // Draw the rest of the objects in the scene.
-
-    if (showScene && theScene != null)
+    if (overlaysOnly)
     {
-      Vec3 viewdir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
-      for (ObjectInfo obj: theScene.getObjects())
-      {
-        if (!obj.isVisible() || obj == thisObjectInScene)
-          continue;
-        Mat4 objectTransform = obj.getCoords().fromLocal();
-        if (!useWorldCoords && thisObjectInScene != null)
-          objectTransform = thisObjectInScene.getCoords().toLocal().times(objectTransform);
-        theCamera.setObjectTransform(objectTransform);
-        obj.getObject().renderObject(obj, this, thisObjectInScene.getCoords().fromLocal().timesDirection(viewdir));
-      }
+      drawer.applyCachedSnapShot();
     }
-
-    // Draw the object being edited.
-
-    theCamera.setObjectTransform(getDisplayCoordinates().fromLocal());
-    drawObject();
+    else
+    {
+      super.updateImage();
+      if (controller.getObject() == null)
+        return;
+      
+      // Draw the rest of the objects in the scene.
+      
+      if (showScene && theScene != null)
+      {
+        Vec3 viewdir = getDisplayCoordinates().toLocal().timesDirection(theCamera.getViewToWorld().timesDirection(Vec3.vz()));
+        for (ObjectInfo obj: theScene.getObjects())
+        {
+          if (!obj.isVisible() || obj == thisObjectInScene)
+            continue;
+          Mat4 objectTransform = obj.getCoords().fromLocal();
+          if (!useWorldCoords && thisObjectInScene != null)
+            objectTransform = thisObjectInScene.getCoords().toLocal().times(objectTransform);
+          theCamera.setObjectTransform(objectTransform);
+          obj.getObject().renderObject(obj, this, thisObjectInScene.getCoords().fromLocal().timesDirection(viewdir));
+        }
+      }
+      
+      // Draw the object being edited.
+      
+      theCamera.setObjectTransform(getDisplayCoordinates().fromLocal());
+      drawObject();
+      drawer.cacheSnapShot();
+    }
+    overlaysOnly = false;
 
     // Finish up.
 
     drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+      activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
     drawBorder();
@@ -311,12 +321,12 @@ public abstract class ObjectViewer extends ViewerCanvas
   public void setOrientation (int which)
   {
     if (which < 6)
-	  super.setOrientation(which);
-	else
-	{
-	  orientation = VIEW_OTHER;
-	  viewChanged(false);
-	}
+      super.setOrientation(which);
+    else
+    {
+      orientation = VIEW_OTHER;
+      viewChanged(false);
+    }
   }
 
   /** Begin dragging a selection region.  The variable square determines whether
@@ -349,7 +359,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       selectBounds = createPolygonFromSelection();
     else
       selectBounds = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
-		Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
+        Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
   }
 
   /** Create a Polygon from the selection bounds. */
@@ -503,13 +513,15 @@ public abstract class ObjectViewer extends ViewerCanvas
     theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
-  
-   	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		((EditingWindow)controller).updateImage();
-	}
+
+  @Override
+  protected void mouseMoved(MouseMovedEvent e)
+  {
+    mouseMoving = true;
+    mousePoint = e.getPoint();
+    mouseMoveTimer.restart();
+    currentTool.mouseMoved(e, this);
+    updateOverlays();
+    ((ObjectEditorWindow)controller).updateOverlays(this);
+  }
 }

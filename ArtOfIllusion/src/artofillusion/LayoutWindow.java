@@ -989,6 +989,16 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
   }
 
+  /** Update the overlays displayed in all of the viewport. 
+      @param view The view whose overlays don't need updating. If null, update all. */
+
+  public void updateOverlays(ViewerCanvas view)
+  {
+    for (int i = 0; i < numViewsShown; i++)
+      if (theView[i] != view)
+        theView[i].updateOverlays();
+  }
+
   /** Update the state of all menu items. */
 
   @Override
@@ -1162,6 +1172,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
     theScene.addObject(info, undo);
+<<<<<<< HEAD
     itemTree.setUpdateEnabled(false);
     itemTree.addElement(new ObjectTreeElement(info, itemTree));
     uiEventProcessor.addEvent(new Runnable()
@@ -1174,6 +1185,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theScore.rebuildList();
       }
     });
+=======
+    itemTree.addElement(new ObjectTreeElement(info, itemTree));
+    for (int i = 0; i < theView.length ; i++)
+      theView[i].rebuildCameraList();
+    theScore.rebuildList();
+>>>>>>> 09dd8fd... Drawig overlays independent of 3D-repaint made possible
   }
 
   /** Add a new object to the scene.  If undo is not null,
@@ -1375,7 +1392,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       which[i] = theScene.indexOf((ObjectInfo) sel[i]);
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
     setSelection(which);
-    updateImage();
+    updateOverlays(null);
   }
 
   private void displayModeCommand(CommandEvent ev)
@@ -1481,7 +1498,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.clearSelection();
     itemTree.deselectAll();
     theScore.rebuildList();
-    updateImage();
     updateMenus();
   }
 
@@ -1893,7 +1909,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       which[i] = i;
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
     setSelection(which);
-    updateImage();
+    updateOverlays(null);
   }
 
   public void preferencesCommand()
@@ -2501,7 +2517,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         info.setLocked(locked);
       }
     setUndoRecord(undo);
-    updateImage();
+    updateImage(); // Does something really change?
     itemTree.repaint();
   }
 

@@ -106,28 +106,28 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-		ObjectInfo nextCamera = cameras.elementAt(which-6);
-		CoordinateSystem coords = nextCamera.coords.duplicate();
+        ObjectInfo nextCamera = cameras.elementAt(which-6);
+        CoordinateSystem coords = nextCamera.coords.duplicate();
 
-		if (nextCamera.getObject() instanceof SceneCamera){
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
-		}
-		else if (nextCamera.getObject() instanceof SpotLight)
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
-		else if (nextCamera.getObject() instanceof DirectionalLight)
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
-		else
-			return;
+        if (nextCamera.getObject() instanceof SceneCamera){
+            nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
+        }
+        else if (nextCamera.getObject() instanceof SpotLight)
+            nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
+        else if (nextCamera.getObject() instanceof DirectionalLight)
+            nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
+        else
+            return;
 
-		animation.start(coords, rotationCenter, 100.0, which, navigation);
+        animation.start(coords, rotationCenter, 100.0, which, navigation);
     }
     else
     {
       boundCamera = null;
-	  if (which > 5) // Would have thought that the super takes care of this but not always.
-		orientation = VIEW_OTHER;
+      if (which > 5) // Would have thought that the super takes care of this but not always.
+        orientation = VIEW_OTHER;
       viewChanged(false);
-	  //repaint();
+      //repaint();
     }
   }
 
@@ -139,12 +139,12 @@ public class SceneViewer extends ViewerCanvas
   public void finishAnimation(int which, boolean persp, int navi)
   {
     if (which > 5  && which < 6+cameras.size())
-		boundCamera = cameras.elementAt(which-6);
+        boundCamera = cameras.elementAt(which-6);
     orientation = which;
-	perspective = persp;
-	navigation = navi;
-	viewChanged(false);
-	repaint();
+    perspective = persp;
+    navigation = navi;
+    viewChanged(false);
+    repaint();
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -240,32 +240,42 @@ public class SceneViewer extends ViewerCanvas
   @Override
   public synchronized void updateImage()
   {
-    if (renderMode == RENDER_RENDERED)
+  
+    if (overlaysOnly)
     {
-      if (renderedImage != null && renderedImage.getWidth(null) > 0)
-        drawImage(renderedImage, 0, 0);
-      else
-        viewChanged(false);
+      drawer.applyCachedSnapShot();
     }
     else
     {
-      super.updateImage();
-
-      // Draw the objects.
-
-      Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
-      for(ObjectInfo obj: theScene.getObjects())
+      if (renderMode == RENDER_RENDERED)
       {
-        if(obj == boundCamera || !obj.isVisible())
-           continue;
-        theCamera.setObjectTransform(obj.getCoords().fromLocal());
-        obj.getObject().renderObject(obj, this, viewdir);        
+        if (renderedImage != null && renderedImage.getWidth(null) > 0)
+          drawImage(renderedImage, 0, 0);
+        else
+          viewChanged(false);
       }
+      else
+      {
+        super.updateImage();
+      
+        // Draw the objects.
+      
+        Vec3 viewdir = theCamera.getViewToWorld().timesDirection(Vec3.vz());
+        for(ObjectInfo obj: theScene.getObjects())
+        {
+          if(obj == boundCamera || !obj.isVisible())
+             continue;
+          theCamera.setObjectTransform(obj.getCoords().fromLocal());
+          obj.getObject().renderObject(obj, this, viewdir);        
+        }
+      }
+      drawer.cacheSnapShot();
     }
+    overlaysOnly = false;
+    
+    // Draw tool hadles to selected objects.
 
-    // Hilight the selection.
-
-    if (currentTool.hilightSelection())// && !animation.changingPerspective())
+    if (currentTool.hilightSelection())
     {
       ArrayList<Rectangle> selectedBoxes = new ArrayList<Rectangle>();
       ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<Rectangle>();
@@ -308,10 +318,10 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
-	drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    drawOverlay();
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
     drawBorder();
@@ -334,6 +344,8 @@ public class SceneViewer extends ViewerCanvas
   @Override
   protected void mousePressed(WidgetMouseEvent e)
   {
+    mouseMoving = false;
+    dragging = true;
     int i, j, k, sel[], minarea;
     Rectangle bounds = null;
     ObjectInfo info;
@@ -342,7 +354,7 @@ public class SceneViewer extends ViewerCanvas
     requestFocus();
     sentClick = false;
     deselect = -1;
-    dragging = true;
+
     clickPoint = e.getPoint();
     clickedObject = null;
 
@@ -531,8 +543,8 @@ public class SceneViewer extends ViewerCanvas
   @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
-	mousePoint = e.getPoint();
-	drawOverlay();
+    mousePoint = e.getPoint();
+    drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {
@@ -540,8 +552,8 @@ public class SceneViewer extends ViewerCanvas
       if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
         return;
     }
-	
-	
+    
+    
     dragging = true;
     deselect = -1;
     if (draggingBox)
@@ -674,7 +686,7 @@ public class SceneViewer extends ViewerCanvas
       changed = (oldSelection[i] != newSelection[i]);
     if (changed)
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
-	dragging = false;
+    dragging = false;
   }
 
   /** 
@@ -683,33 +695,37 @@ public class SceneViewer extends ViewerCanvas
 
   public void mouseClicked(MouseClickedEvent e)
   {
-	//super.mouseClicked(e);
-	
+    //super.mouseClicked(e);
+    
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
         @Override
-	    public void run()
-	    {
-	      theScene.objectModified(obj);
-	      parentFrame.updateImage();
-	      parentFrame.updateMenus();
-	    }
-	});
+        public void run()
+        {
+          theScene.objectModified(obj);
+          parentFrame.updateImage();
+          parentFrame.updateMenus();
+        }
+    });
     }
   }
 
- 	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		parentFrame.updateImage(); // I wonder why, but that's how it works
-	}
-	
+  /** Check if there are any real-time graphics that need updating */
+  
+  @Override
+  protected void mouseMoved(MouseMovedEvent e)
+  {
+    mouseMoving = true;
+    mousePoint = e.getPoint();
+    mouseMoveTimer.restart();
+    currentTool.mouseMoved(e, this);
+    updateOverlays();
+    ((LayoutWindow)parentFrame).updateOverlays(this);
+  }
+
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)

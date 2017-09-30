@@ -26,7 +26,7 @@ import java.lang.ref.*;
 public class SoftwareCanvasDrawer implements CanvasDrawer
 {
   protected ViewerCanvas view;
-  protected BufferedImage theImage;
+  protected BufferedImage theImage, cachedSnapShot;
   protected Graphics2D imageGraphics;
   protected int pixel[], zbuffer[];
   protected boolean hideBackfaces;
@@ -1755,6 +1755,25 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       {
       }
     }, camera, false, null);
+  }
+
+  /** Take a snapshot of the current state of the drawn view and cache it */
+
+  @Override
+  public void cacheSnapShot()
+  {
+    cachedSnapShot = new BufferedImage(theImage.getWidth(null), theImage.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+    Graphics2D g = cachedSnapShot.createGraphics();
+    g.drawImage(theImage, 0, 0, null);
+    g.dispose();
+  }
+
+  /** Draw the chached snapShot */
+
+  @Override
+  public void applyCachedSnapShot()
+  {
+    drawImage(cachedSnapShot, 0, 0);
   }
 
   @Override

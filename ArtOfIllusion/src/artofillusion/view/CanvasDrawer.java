@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2009 by Peter Eastman
+   Modifications Copyright (C) 2016-2017 Petri Ihalainen
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -127,6 +128,14 @@ public interface CanvasDrawer
   /** Draw a filled Shape onto the canvas. */
 
   public void fillShape(Shape shape, Color color);
+
+  /** Take a snapshot of the current state of the drawn view and cache it */
+
+  public void cacheSnapShot();
+
+  /** Draw the chached snapShot */
+
+  public void applyCachedSnapShot();
 
   /**
    * This should be called to indicate that a previously drawn image has changed, and cached information

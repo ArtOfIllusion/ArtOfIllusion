@@ -1,4 +1,5 @@
 /* Copyright (C) 2005-2017 by Peter Eastman
+   Modifications Copyright (C) 2016-2017 Petri Ihalainen
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -42,6 +43,7 @@ public class GLCanvasDrawer implements CanvasDrawer
   private FloatBuffer vertBuffer, normBuffer;
   private Shape draggedShape;
   private GLImage template;
+  private ByteBuffer snapShotBuffer;
   private WeakHashMap<Image, GLTexture> textureMap = new WeakHashMap<Image, GLTexture>();
   private ReferenceQueue textureCleanupQueue = new ReferenceQueue();
   private HashSet<TextureReference> textureReferences = new HashSet<TextureReference>();
@@ -110,13 +112,13 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glLoadIdentity();
     if (view.isPerspective()){
-	  double scale = -1.0/camera.getViewToScreen().m11*camera.getDistToScreen()/20.0;
+      double scale = -1.0/camera.getViewToScreen().m11*camera.getDistToScreen()/20.0;
       gl.glFrustum(-0.5*bounds.width*scale, 0.5*bounds.width*scale, -0.5*bounds.height*scale, 0.5*bounds.height*scale, minDepth, maxDepth);
-	}
+    }
     else{
-	  double scale = -1.0/camera.getViewToScreen().m11;
+      double scale = -1.0/camera.getViewToScreen().m11;
       gl.glOrtho(-0.5*bounds.width*scale, 0.5*bounds.width*scale, -0.5*bounds.height*scale, 0.5*bounds.height*scale, minDepth, maxDepth);
-	}
+    }
     Mat4 toView = lastObjectTransform;
     gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glLoadMatrixd(new double [] {
@@ -788,6 +790,32 @@ public class GLCanvasDrawer implements CanvasDrawer
     gl.glTexCoord2d(0.0, 0.0);
     gl.glEnd();
     gl.glDisable(imageRenderMode);
+  }
+
+  /** Take a snapshot of the current state of the drawn view and cache it */
+
+  @Override
+  public void cacheSnapShot()
+  {
+    int width = view.getBounds().width;
+    int height = view.getBounds().height;
+    byte cachedImageData[] = new byte [width*height*4];
+    snapShotBuffer = ByteBuffer.wrap(cachedImageData);
+    gl.glReadPixels(0, 0, width, height, GL2.GL_RGBA, GL2.GL_UNSIGNED_BYTE, snapShotBuffer);
+  }
+
+  /** Draw the chached snapShot */
+
+  @Override
+  public void applyCachedSnapShot()
+  {
+    // This is like 'drawImage(GLImage)';
+    prepareView2D();
+    prepareDepthTest(false);
+    gl.glEnable(GL2.GL_ALPHA_TEST);
+    gl.glRasterPos3d(0,0, -(minDepth+0.001));
+    gl.glDrawPixels( view.getBounds().width, view.getBounds().height, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, snapShotBuffer);
+    gl.glDisable(GL2.GL_ALPHA_TEST);
   }
 
   @Override

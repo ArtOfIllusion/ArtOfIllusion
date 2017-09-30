@@ -1160,7 +1160,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
-    addObject(info, theScene.getNumObjects(), undo);
+    theScene.addObject(info, undo);
+    itemTree.addElement(new ObjectTreeElement(info, itemTree));
+    for (int i = 0; i < theView.length ; i++)
+      theView[i].rebuildCameraList();
+    theScore.rebuildList();
   }
 
   /** Add a new object to the scene.  If undo is not null,

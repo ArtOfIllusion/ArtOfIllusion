@@ -1007,7 +1007,6 @@ public class GLCanvasDrawer implements CanvasDrawer
         drawImage(template, 0, 0);
       gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
       view.updateImage();
-      view.getCurrentTool().drawOverlay(view);
       if (draggedShape != null)
         drawShape(draggedShape, ViewerCanvas.lineColor);
       draggedShape = null;

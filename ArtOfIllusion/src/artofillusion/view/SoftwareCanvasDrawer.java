@@ -98,7 +98,6 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     bounds = view.getBounds();
     prepareToRender();
     view.updateImage();
-    view.getCurrentTool().drawOverlay(view);
     ev.getGraphics().drawImage(theImage, 0, 0, null);
   }
 

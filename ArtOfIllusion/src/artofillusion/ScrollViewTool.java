@@ -266,14 +266,6 @@ public class ScrollViewTool
         }  
     }
 
-    private void repaintAllViews(ViewerCanvas view)
-    {
-        if (window == null || window instanceof UVMappingWindow)
-            view.repaint();
-        else
-            window.updateImage();
-    }
-
     private void setAuxGraphs(ViewerCanvas view)
     {
         if (window != null)
@@ -281,7 +273,7 @@ public class ScrollViewTool
                 if (v != view)
                     v.auxGraphs.set(view, true);
     }
-
+    
     private void wipeAuxGraphs()
     {
         if (window != null)

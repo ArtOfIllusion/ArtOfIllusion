@@ -235,11 +235,11 @@ public abstract class ObjectViewer extends ViewerCanvas
     // Finish up.
 
     drawOverlay();
-    currentTool.drawOverlay(this);
     if (activeTool != null)
       activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
+    currentTool.drawOverlay(this);
     drawBorder();
   }
 
@@ -517,6 +517,11 @@ public abstract class ObjectViewer extends ViewerCanvas
   @Override
   protected void mouseMoved(MouseMovedEvent e)
   {
+    if (dragging)
+    {
+      mouseMoving = false;
+      return;
+    }
     mouseMoving = true;
     mousePoint = e.getPoint();
     mouseMoveTimer.restart();

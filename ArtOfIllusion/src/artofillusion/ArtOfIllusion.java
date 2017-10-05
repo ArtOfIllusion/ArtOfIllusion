@@ -269,17 +269,17 @@ public class ArtOfIllusion
     newWindow(theScene);
   }
 
-  /** Create a new window for editing the specified scene. */
-  public static void newWindow(final Scene theScene)
+  /** Create a new window for editing the specified scene and set window modified. */
+  public static void newWindow(final Scene scene, final boolean modified)
   {
     // New windows should always be created on the event thread.
-
+    
     numNewWindows++;
     SwingUtilities.invokeLater(new Runnable() {
       @Override
       public void run()
       {
-        LayoutWindow fr = new LayoutWindow(theScene);
+        LayoutWindow fr = new LayoutWindow(scene);        
         windows.add(fr);
         
         for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
@@ -296,6 +296,7 @@ public class ArtOfIllusion
         }
         fr.setVisible(true);
         fr.arrangeDockableWidgets();
+        if(modified) fr.setModified();
 
         // If the user opens a file immediately after running the program, close the empty
         // scene window.
@@ -308,7 +309,14 @@ public class ArtOfIllusion
               closeWindow(win);
           }
       }
-    });
+    });    
+  }
+  
+  /** Create a new window for editing the specified scene. */
+  public static void newWindow(final Scene scene)
+  {
+    boolean modified = false;
+    newWindow(scene, modified);
   }
 
   /** Add a window to the list of open windows. */

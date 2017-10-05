@@ -467,7 +467,8 @@ public class OBJImporter
     ArtOfIllusion.setCurrentDirectory(bfc.getDirectory().getAbsolutePath());
     try
     {
-      ArtOfIllusion.newWindow(importFile(bfc.getSelectedFile()));
+      Scene scene = importFile(bfc.getSelectedFile());
+      ArtOfIllusion.newWindow(scene, true);
     }
     catch (Exception ex)
     {

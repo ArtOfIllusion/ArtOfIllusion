@@ -94,8 +94,11 @@ public class LayoutWindowTest
   {
     appFrame = new JFrameOperator("Untitled");
     appMainMenu = new JMenuBarOperator(appFrame);
-
+    appMainMenu.closeSubmenus();
+    
     layout = (LayoutWindow) ArtOfIllusion.getWindows()[0];
+    layout.updateImage();
+    layout.updateMenus();
     scene = layout.getScene();
 
     System.out.print("Executing Test Name: " + name.getMethodName());
@@ -357,7 +360,7 @@ public class LayoutWindowTest
 
   private void executeTrackMenu(String path, Class clazz, int count)
   {
-
+    
     JMenuItemOperator oto = appMainMenu.showMenuItem("Animation|" + bundle.getResource("menu.addTrack"));
     assertFalse(oto.isEnabled());
 

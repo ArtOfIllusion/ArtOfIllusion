@@ -468,7 +468,8 @@ public class OBJImporter
     try
     {
       Scene scene = importFile(bfc.getSelectedFile());
-      ArtOfIllusion.newWindow(scene, true);
+      scene.setName("Untitled");
+      ArtOfIllusion.newWindow(scene);
     }
     catch (Exception ex)
     {

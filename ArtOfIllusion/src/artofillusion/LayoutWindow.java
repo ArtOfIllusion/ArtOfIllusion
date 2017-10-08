@@ -1167,10 +1167,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       public void run()
       {
-	    System.out.println("@run");
         itemTree.setUpdateEnabled(true);
         for (int i = 0; i < theView.length ; i++)
-          theView[i].rebuildCameraList();
+             theView[i].rebuildCameraList();
         theScore.rebuildList();
       }
     });
@@ -1190,10 +1189,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       public void run()
       {
-	    System.out.println("@run");
         itemTree.setUpdateEnabled(true);
         for (int i = 0; i < theView.length ; i++)
-          theView[i].rebuildCameraList();
+             theView[i].rebuildCameraList();
         theScore.rebuildList();
       }
     });

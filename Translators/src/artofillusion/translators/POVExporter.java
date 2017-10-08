@@ -16,6 +16,7 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
+import artofillusion.util.FileUtils;
 import buoy.widget.*;
 import java.io.*;
 import java.util.*;
@@ -31,7 +32,7 @@ public class POVExporter
     static char CHAR_REPLACE='_';
     static final String TEXTURE_NAME_PREFIX="AOI";  //  prefix of the texture declaration for povray files
     static final char REPLACEMENT_CHARACTER='_';   // replacement for non allowed characters in names
-    static final String FIX_SEPARATOR=".";   // The separator in file names of suffices and prefices
+
 
     static String exportFileName="Untitled";
 
@@ -69,9 +70,8 @@ public class POVExporter
 	if (!fc.showDialog(parent))
 	    return;
         File path = fc.getDirectory();
-	int endpos=fc.getSelectedFile().getName().indexOf(FIX_SEPARATOR);
-	if (endpos==-1) endpos=fc.getSelectedFile().getName().length();
-	exportFileName=fc.getSelectedFile().getName().substring(0,endpos);
+
+	exportFileName = FileUtils.getNameNoExtension(fc.getSelectedFile());
 	ArtOfIllusion.setCurrentDirectory(fc.getDirectory().getAbsolutePath());
 
 	// Check whether file/s exist/s

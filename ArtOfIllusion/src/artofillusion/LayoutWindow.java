@@ -1704,11 +1704,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   void importCommand(String format)
   {
-    List<Translator> trans = PluginRegistry.getPlugins(Translator.class);
-    for (int i = 0; i < trans.size(); i++)
-      if (trans.get(i).canImport() && format.equals(trans.get(i).getName()))
+    for (Translator importer: PluginRegistry.getPlugins(Translator.class))
+      if (importer.canImport() && format.equals(importer.getName()))
         {
-          trans.get(i).importFile(this);
+          importer.importFile(this);
           return;
         }
   }

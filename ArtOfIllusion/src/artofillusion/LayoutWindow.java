@@ -122,8 +122,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(MousePressedEvent.class, listen);
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
-	  theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
-	  theView[i].setNavigationMode(1,false);
+      theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
+      theView[i].setNavigationMode(1,false);
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
@@ -171,7 +171,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     tools = new ToolPalette(2, 7, this);
     EditingTool metaTool, altTool, defaultTool, compoundTool;
-	ScrollViewTool scrollTool;
+    ScrollViewTool scrollTool;
     tools.addTool(defaultTool = new MoveObjectTool(this));
     tools.addTool(new RotateObjectTool(this));
     tools.addTool(new ScaleObjectTool(this));
@@ -187,7 +187,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     tools.addTool(metaTool = new MoveViewTool(this));
     tools.addTool(altTool = new RotateViewTool(this));
 
-	// Scroll tool does not go to the pallette.
+    // Scroll tool does not go to the pallette.
     scrollTool = new ScrollViewTool(this);
 
     if (ArtOfIllusion.getPreferences().getUseCompoundMeshTool())
@@ -560,9 +560,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         return (o1.getName().compareTo(o2.getName()));
       }
     });
-	
+    
     toolsMenu = Translate.menu("tools");
-    menubar.add(toolsMenu);	
+    menubar.add(toolsMenu);    
     toolsMenuItem = new BMenuItem [modellingTools.size()];
     for (int i = 0; i < modellingTools.size(); i++)
       {
@@ -586,11 +586,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     BMenu displayMenu, navigationMenu;
 
-    viewMenu = Translate.menu("view");	
-	menubar.add(viewMenu);
-	viewMenuItem = new BMenuItem [8];	
+    viewMenu = Translate.menu("view");    
+    menubar.add(viewMenu);
+    viewMenuItem = new BMenuItem [8];    
 
-	viewMenu.add(displayMenu = Translate.menu("displayMode"));
+    viewMenu.add(displayMenu = Translate.menu("displayMode"));
     displayItem = new BCheckBoxMenuItem [6];
     displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
     displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_FLAT));
@@ -736,7 +736,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("setTextureAndMaterial", this, "setTextureCommand", null));
     popupMenu.add(popupMenuItem[3] = Translate.menuItem("renameObject", this, "renameObjectCommand", null));
     popupMenu.add(popupMenuItem[4] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand", null));
-    popupMenu.addSeparator();	
+    popupMenu.addSeparator();    
     popupMenu.add(popupMenuItem[5] = Translate.menuItem("selectChildren", this, "actionPerformed", null));
     popupMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand", null));
     popupMenu.add(popupMenuItem[6] = Translate.menuItem("deselectAll", this, "clearSelection", null));
@@ -933,9 +933,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setTool(EditingTool tool)
   {
     for (int i = 0; i < theView.length; i++)
-	{
+    {
       theView[i].setTool(tool);
-	}
+    }
   }
 
   /** When a tool gets selected in the tool palette, notify the UI.
@@ -944,13 +944,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void toolChanged(EditingTool tool)
   {
     for (ViewerCanvas v:theView)
-	{
-		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
-			v.navigationTravelEnabled = false;
-		else
-			v.navigationTravelEnabled = true;
-		v.viewChanged(false); // This should do nothing now...
-	}
+    {
+        if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+            v.navigationTravelEnabled = false;
+        else
+            v.navigationTravelEnabled = true;
+        v.viewChanged(false); // This should do nothing now...
+    }
   }
 
   /** Set the help text displayed at the bottom of the window. */
@@ -1079,13 +1079,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenuItem[12].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
     addTrackMenu.setEnabled(numSelObjects > 0);
     distortionMenu.setEnabled(sel.length > 0);
-	
+    
     viewMenuItem[1].setText(Translate.text(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0 ? "menu.showObjectList" : "menu.hideObjectList"));
     viewMenuItem[2].setText(Translate.text(view.getShowAxes() ? "menu.hideCoordinateAxes" : "menu.showCoordinateAxes"));
     viewMenuItem[3].setEnabled(view.getTemplateImage() != null); // Show template
     viewMenuItem[3].setText(Translate.text(view.getTemplateShown() ? "menu.hideTemplate" : "menu.showTemplate"));
     viewMenuItem[4].setEnabled(sel.length > 0); // Frame Selection With Camera
-	
+    
     displayItem[0].setState(view.getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
     displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
     displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
@@ -1160,11 +1160,25 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
-    addObject(info, theScene.getNumObjects(), undo);
+    theScene.addObject(info, undo);
+    itemTree.setUpdateEnabled(false);
+    itemTree.addElement(new ObjectTreeElement(info, itemTree));
+    uiEventProcessor.addEvent(new Runnable()
+    {
+      public void run()
+      {
+        itemTree.setUpdateEnabled(true);
+        for (int i = 0; i < theView.length ; i++)
+             theView[i].rebuildCameraList();
+        theScore.rebuildList();
+      }
+    });
   }
 
   /** Add a new object to the scene.  If undo is not null,
-      appropriate commands will be added to it to undo this operation. */
+      appropriate commands will be added to it to undo this operation. <P>
+	  
+	  NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
 
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {
@@ -1177,7 +1191,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       {
         itemTree.setUpdateEnabled(true);
         for (int i = 0; i < theView.length ; i++)
-          theView[i].rebuildCameraList();
+             theView[i].rebuildCameraList();
         theScore.rebuildList();
       }
     });
@@ -1466,7 +1480,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.clearSelection();
     itemTree.deselectAll();
     theScore.rebuildList();
-	updateImage();
+    updateImage();
     updateMenus();
   }
 
@@ -1637,10 +1651,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         else if (command.equals("images"))
           new ImagesDialog(this, theScene, null);
       }
-	 
-	else if (menu == viewMenu)
-	{
-	  if (command.equals("showCoordinateAxes"))
+     
+    else if (menu == viewMenu)
+    {
+      if (command.equals("showCoordinateAxes"))
       {
         boolean wasShown = theView[currentView].getShowAxes();
         for (int i = 0; i < theView.length; i++)
@@ -1657,19 +1671,19 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         updateMenus();
       }
       else if (command.equals("fitToSelection"))
-		getView().fitToObjects(getSelectedObjects());
+        getView().fitToObjects(getSelectedObjects());
       else if (command.equals("fitToAll"))
-		getView().fitToObjects(getScene().getAllObjects());
-	  else if (command.equals("alignWithClosestAxis"))
-	    getView().alignWithClosestAxis();
-	  /*
-	  // Place holder for a view settings menuitem
-	  // to launch an options window settings window
-	  else if (command.equals("viewSettings"))
-	  {
-		new ViewSettingsWindow(this);
-	  }
-	  */
+        getView().fitToObjects(getScene().getAllObjects());
+      else if (command.equals("alignWithClosestAxis"))
+        getView().alignWithClosestAxis();
+      /*
+      // Place holder for a view settings menuitem
+      // to launch an options window settings window
+      else if (command.equals("viewSettings"))
+      {
+        new ViewSettingsWindow(this);
+      }
+      */
     }
 
     else if (menu == popupMenu)

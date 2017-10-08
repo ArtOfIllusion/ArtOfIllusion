@@ -1172,7 +1172,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
     theScene.addObject(info, undo);
-<<<<<<< HEAD
     itemTree.setUpdateEnabled(false);
     itemTree.addElement(new ObjectTreeElement(info, itemTree));
     uiEventProcessor.addEvent(new Runnable()
@@ -1185,18 +1184,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         theScore.rebuildList();
       }
     });
-=======
-    itemTree.addElement(new ObjectTreeElement(info, itemTree));
-    for (int i = 0; i < theView.length ; i++)
-      theView[i].rebuildCameraList();
-    theScore.rebuildList();
->>>>>>> 09dd8fd... Drawig overlays independent of 3D-repaint made possible
   }
 
   /** Add a new object to the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. <P>
-	  
-	  NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
+
+      NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
 
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {

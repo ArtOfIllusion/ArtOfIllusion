@@ -11,10 +11,8 @@
 
 package artofillusion.math;
 
-import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import javax.swing.*;
 
 /** The RGBColor class is used to represent a color.  This class uses floating point numbers
     (usually between 0 and 1) to store the red, green, and blue components, in contrast to java.awt.Color
@@ -143,27 +141,6 @@ public class RGBColor
     if (b < 0.0f) b = 0.0f;
     if (b > 1.0f) b = 1.0f;
     return new Color(r, g, b);
-  }
-
-  /** Get a Widget which displays this color.    
-   *
-   * @deprecated use ColorSampleWidget instead
-   */
-  @Deprecated
-  public Widget getSample(int width, int height)
-  {
-    final CustomWidget w = new CustomWidget();
-    w.setPreferredSize(new Dimension(width, height));
-    w.setMaximumSize(new Dimension(width, height));
-    w.setBackground(getColor());
-    BOutline outline = new BOutline(w, BorderFactory.createLoweredBevelBorder()) {
-      @Override
-      public void setBackground(Color c)
-      {
-        w.setBackground(c);
-      }
-    };
-    return outline;
   }
 
   /** Get a representation of this color in the default Java color model. */

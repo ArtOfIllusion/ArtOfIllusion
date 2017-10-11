@@ -167,7 +167,6 @@ public class SceneEnvironmentDialog extends BDialog implements ActionListener, R
     
   }
   
-  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public static void show(WindowWidget frame, Scene scene)
   {
     new SceneEnvironmentDialog(frame, scene);

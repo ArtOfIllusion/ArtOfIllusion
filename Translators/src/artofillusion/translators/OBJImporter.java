@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2015 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -42,13 +43,11 @@ public class OBJImporter
     Scene theScene = new Scene();
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     ObjectInfo info = new ObjectInfo(new SceneCamera(), coords, "Camera 1");
-    info.addTrack(new PositionTrack(info), 0);
-    info.addTrack(new RotationTrack(info), 1);
-    theScene.addObject(info, null);
+
+    theScene.addObject(info, (UndoRecord)null);
     info = new ObjectInfo(new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 0.8f), coords.duplicate(), "Light 1");
-    info.addTrack(new PositionTrack(info), 0);
-    info.addTrack(new RotationTrack(info), 1);
-    theScene.addObject(info, null);
+
+    theScene.addObject(info, (UndoRecord)null);
 
     // Open the file and read the contents.
 
@@ -467,7 +466,9 @@ public class OBJImporter
     ArtOfIllusion.setCurrentDirectory(bfc.getDirectory().getAbsolutePath());
     try
     {
-      ArtOfIllusion.newWindow(importFile(bfc.getSelectedFile()));
+      Scene scene = importFile(bfc.getSelectedFile());
+      scene.setName(bfc.getSelectedFile().getName());
+      ArtOfIllusion.newWindow(scene);
     }
     catch (Exception ex)
     {

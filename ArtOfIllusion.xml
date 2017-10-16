@@ -7,22 +7,17 @@
   <property name="build" value="ArtOfIllusion/build" />
   <property name="docs" value="ArtOfIllusion/docs" />
   <property name="lib" value="lib" />
-  <property name="dist" value="." />
-<!--  <property name="build.compiler" value="classic" /> -->
+  <property name="dist" value="${basedir}/Live_Application" />
+  <property name="JavaVersion" value="1.6" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
-
-  <!-- set of all subproject build files -->
-  <fileset id="subproject.files" dir="." includes="*.xml" excludes="${ant.project.name}.xml" />
 
   <target name="init">
     <!-- Create the time stamp -->
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}" />
-    <!-- Create the docs directory structure used by documentation -->
-    <mkdir dir="${docs}" />
   </target>
 
   <target name="compile" depends="init">
@@ -30,10 +25,10 @@
     <pathconvert property="classpath" refid="libraries" />
 
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="1.5" source="1.5" />
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
   </target>
 
-  <target name="core" depends="compile">
+  <target name="dist" depends="compile">
     <!-- generate a Manifest classpath from the "libraries" fileset-->
     <pathconvert pathsep=" " dirsep="/" property="libraries" refid="libraries">
       <map from="${basedir}/" to="" />
@@ -45,25 +40,19 @@
       <fileset dir="${src}" includes="**/*.xml, **/*.properties, **/*.png, **/*.jpg, **/*.gif" />
       <manifest>
         <attribute name="Main-Class" value="artofillusion.ArtOfIllusion"/>
-        <attribute name="Class-Path" value="${libraries} jmf.jar"/>
+        <attribute name="Class-Path" value="${libraries}"/>
       </manifest>
     </jar>
   </target>
 
-  <target name="dist" depends="core" >
-    <!-- execute default target for all found Ant files -->
-    <subant target="" >
-      <fileset refid="subproject.files" />
-    </subant>
-  </target>
-
-  <target name="docs" depends="init">
+  <target name="docs">
+    <mkdir dir="${docs}" />
     <javadoc packagenames="artofillusion.*"
         sourcepath="${src}"
         classpath="${lib}/*.jar"
-        source="1.5"
+	source="${JavaVersion}"
         defaultexcludes="yes"
-        destdir="${docs}"
+	destdir="${docs}/${ant.project.name}"
         author="true"
         version="true"
         use="true"
@@ -78,10 +67,6 @@
     <!-- Delete the ${build} and ${docs} directory trees -->
     <delete dir="${build}" />
     <delete dir="${docs}" />
-
-    <!-- execute the "clean" target for all found subproject ant files -->
-    <subant target="clean">
-      <fileset refid="subproject.files" />
-    </subant>
   </target>
+
 </project>

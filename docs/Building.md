@@ -1,13 +1,15 @@
 # Building AOI from source
 
-If you've never built AOI from source before, please follow the process
-below
+If you are an experienced developer, just run `ant` in the main
+directory. Build artifacts are located in `Live_Application`.
+
+If you're new to building java programs, please follow the detailed
+process and explanation below:
 
 ## Prerequisites
 
 Here's a list of the tools that you will need to work on the AOI
-source code: (If you are an experienced java developer, you probably
-have all of these already!)
+source code:
 
  * A Java Developer Kit, java 6 or higher. This is a compiler that
 turns the java text files into something that the Java runtime can
@@ -20,7 +22,7 @@ package manager.
 A simple tool to automate compiling and packaging a large number of
 java files. Again, Linux users can probably get this through their
 package manager.
- * [Git,](https://git-scm.com/downloads) for tracking changes that
+ * [Git.](https://git-scm.com/downloads) for tracking changes that
 you have made to the code, and coordinating with other people.
  * An editor suitable for use with program source code. This means
 __something other than notepad or Microsoft Word.__ One good, free
@@ -43,10 +45,13 @@ keep your AOI development build, then access it from a command line:
 This will access the repository on github and make a copy in your
 directory. This may take a few minutes.
 
-To build AOI, type: `ant -f ArtOfIllusion.xml`. This will create a working
-AOI build, suitable for testing and experimentation.
+To build AOI, type: `ant`. This will create a working AOI application
+in the subdirectory `Live_Application`. This application is suitable
+for testing and experimentation, but will not have desktop integration
+and filetype association.
 
-To launch AOI, Double-click the `ArtOfIllusion.jar` file. You may also
+To launch AOI, Double-click the `ArtOfIllusion.jar` file in your
+installation directory. You may also
 launch from the command line with `java -jar ArtOfIllusion.jar`.
 Launching from the command line will allow you to see any console output
 which AOI generates. You can also add command line options to allow AOI
@@ -57,7 +62,7 @@ to use more memory, etc.
 AOI can use your graphics card to make rendering of scenes in the
 editor windows faster. To make this work in the development build,
 you need to move some files around. Copy all .jar files from
-`InstallerSrc/jogl-<your platform>` to `lib`. Remember to restart
+`InstallerSrc/jogl-<your platform>` to `Live_Application/lib`. Remember to restart
 AOI after doing this.
 
 ### Installing Plugins
@@ -76,43 +81,31 @@ install them once. They will not be deleted when you re-build AOI.
 
 ### Structure of a development build
 
-If you've followed the above instructions, your working directory will
+If you've followed the above instructions, your `Live_Application` directory will
 contain the following directories and files:
 
- * _ArtOfIllusion_ (source for the main application)
- * _InstallerSrc_ (Files for creating the automated installers)
- * __*lib*__ (Binary dependencies in jar form)
- * _OSSpecific_ (source for a plugin that improves integration
-into mac environments)
- * __Plugins__ (Instalation directory where AOI looks for installed
+ * __Plugins__ Instalation directory where AOI looks for installed
 plugins. These include the standard modeling tools and file
-translators)
- * _Renderers_ (source for the standard rendering package plugin)
- * __Scripts__ (Installation directory where beanshell and groovy
-scripts live)
- * _Tests_ (source for automated JUnit tests. Not present in AOI when
-installed using the installer packages
- * __Textures and Materials__ (Installation directory that holds a library
-of .aoi files that contain re-usable textures and materials)
- * _Tools_ (source for the standard modeling tools plugin)
- * _Translators_ (source for the standard file importer/exporter plugin)
- * __ArtOfIllusion.jar__ (the compiled main application)
- * _ArtOfIllusion.xml_, _OSSpecific.xml_, _Renderers.xml_, _Tools.xml_
-and _Translators.xml_ (ant build files for the various parts of the
-package.)
-
-The files and directories marked by _italics_ have contents that are
-managed by the version control sytem. This includes all of the source
-code files that make up AOI, and some smaller libraries that we depend
-on. The directories in __bold__ are required for AOI to run properly.
-They are generally created by the build process. The plugins directory
-is populated by the standard plugins, and these are overwritten when
+translators. The standard plugins are overwritten when
 you rebuild. Any other plugins in this directory are not touched, and
 can continue to be used from build to build.
+ * __Scripts__ Installation directory where beanshell and groovy
+scripts live
+ * __Textures and Materials__ Installation directory that holds a library
+of .aoi files that contain re-usable textures and materials
+ * __ArtOfIllusion.jar__ the compiled main application
+
+
+If you built AOI sometime before 09/19/2017, you probably have copies
+the above items in your main source directory. It is safe to delete
+them from the source tree. (These old copies will _not_ be updated by
+new rebuilds!)
+
 
 ### Building installers
-Right now, you can't really build a native installer for AOI yourself.
-The installer system depends on an old version of IZPack that is not
-supported, and that you cannot get an installer for. Some of the
-packaging scripts use absolute paths that are unique to one specific
-computer. This is an area that we intend to improve soon.
+AOI installers for Linux and Windows are built using IZPack. The
+templates are found in `InstallerSrc` Apple OS mountable .dmg files
+are built by hand.
+
+Building any of these yourself should not be neccessary, and is not
+recommended.

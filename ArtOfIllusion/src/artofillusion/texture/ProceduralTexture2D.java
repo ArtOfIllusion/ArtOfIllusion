@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,9 +17,6 @@ import artofillusion.math.*;
 import artofillusion.procedural.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import buoy.event.*;
-
-import java.awt.*;
 import java.io.*;
 
 /** This is a Texture2D which uses a Procedure to calculate its properties. */
@@ -27,33 +25,13 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
 {
   private Procedure proc;
   private double antialiasing;
-  private ThreadLocal renderingProc;
+  private ThreadLocal<Procedure> renderingProc;
 
   public ProceduralTexture2D()
   {
-    proc = createProcedure();
+    proc = ProceduralTextureCommon.createProcedure();
     antialiasing = 1.0;
     initThreadLocal();
-  }
-
-  /**
-   * Create a Procedure object for this texture.
-   */
-
-  private Procedure createProcedure()
-  {
-    return new Procedure(new OutputModule [] {
-      new OutputModule(Translate.text("Diffuse"), Translate.text("white"), 0.0, new RGBColor(1.0f, 1.0f, 1.0f), IOPort.COLOR),
-      new OutputModule(Translate.text("Specular"), Translate.text("white"), 0.0, new RGBColor(1.0f, 1.0f, 1.0f), IOPort.COLOR),
-      new OutputModule(Translate.text("Transparent"), Translate.text("white"), 0.0, new RGBColor(1.0f, 1.0f, 1.0f), IOPort.COLOR),
-      new OutputModule(Translate.text("Emissive"), Translate.text("black"), 0.0, new RGBColor(0.0f, 0.0f, 0.0f), IOPort.COLOR),
-      new OutputModule(Translate.text("Transparency"), "0", 0.0, null, IOPort.NUMBER),
-      new OutputModule(Translate.text("Specularity"), "0", 0.0, null, IOPort.NUMBER),
-      new OutputModule(Translate.text("Shininess"), "0", 0.0, null, IOPort.NUMBER),
-      new OutputModule(Translate.text("Roughness"), "0", 0.0, null, IOPort.NUMBER),
-      new OutputModule(Translate.text("Cloudiness"), "0", 0.0, null, IOPort.NUMBER),
-      new OutputModule(Translate.text("BumpHeight"), "0", 0.0, null, IOPort.NUMBER),
-      new OutputModule(Translate.text("Displacement"), "0", 0.0, null, IOPort.NUMBER)});
   }
 
   /**
@@ -62,11 +40,11 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal() {
+    renderingProc = new ThreadLocal<Procedure>() {
       @Override
-      protected Object initialValue()
+      protected Procedure initialValue()
       {
-        Procedure localProc = createProcedure();
+        Procedure localProc = ProceduralTextureCommon.createProcedure();
         localProc.copy(proc);
         return localProc;
       }
@@ -175,12 +153,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public boolean usesImage(ImageMap image)
   {
-    Module modules[] = proc.getModules();
-
-    for (int i = 0; i < modules.length; i++)
-      if (modules[i] instanceof ImageModule && ((ImageModule) modules[i]).getMap() == image)
-        return true;
-    return false;
+    return ProceduralTextureCommon.procedureUsesImage(proc, image);
   }
 
   @Override
@@ -218,21 +191,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public TextureParameter[] getParameters()
   {
-    Module module[] = proc.getModules();
-    int count = 0;
-
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        count++;
-    TextureParameter params[] = new TextureParameter [count];
-    count = 0;
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        {
-          params[count] = ((ParameterModule) module[i]).getParameter(this);
-          ((ParameterModule) module[i]).setIndex(count++);
-        }
-    return params;
+    return ProceduralTextureCommon.getTextureParameters(this, proc);
   }
 
   /** Determine whether this texture has a non-zero value anywhere for a particular component.
@@ -242,25 +201,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public boolean hasComponent(int component)
   {
-    OutputModule output[] = proc.getOutputModules();
-    switch (component)
-      {
-        case DIFFUSE_COLOR_COMPONENT:
-          return true;
-        case SPECULAR_COLOR_COMPONENT:
-          return output[5].inputConnected(0);
-        case TRANSPARENT_COLOR_COMPONENT:
-          return output[4].inputConnected(0);
-        case HILIGHT_COLOR_COMPONENT:
-          return output[6].inputConnected(0);
-        case EMISSIVE_COLOR_COMPONENT:
-          return output[3].inputConnected(0);
-        case BUMP_COMPONENT:
-          return output[9].inputConnected(0);
-        case DISPLACEMENT_COMPONENT:
-          return output[10].inputConnected(0);
-      }
-    return false;
+    return ProceduralTextureCommon.hasTextureComponent(proc, component);
   }
 
   @Override
@@ -275,9 +216,9 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
 
     if (version < 0 || version > 1)
       throw new InvalidObjectException("");
-    setName(in.readUTF());
+    name = in.readUTF();
     antialiasing = in.readDouble();
-    proc = createProcedure();
+    proc = ProceduralTextureCommon.createProcedure();
     proc.readFromStream(in, theScene);
     if (version == 0)
     {
@@ -333,39 +274,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public Object getPreview(ProcedureEditor editor)
   {
-    BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
-    BorderContainer content = new BorderContainer();
-    final MaterialPreviewer preview = new MaterialPreviewer(this, null, 200, 160);
-    content.add(preview, BorderContainer.CENTER);
-    RowContainer row = new RowContainer();
-    content.add(row, BorderContainer.SOUTH, new LayoutInfo());
-    row.add(Translate.label("Time", ":"));
-    final ValueSelector value = new ValueSelector(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 0.01);
-    final ActionProcessor processor = new ActionProcessor();
-    row.add(value);
-    value.addEventLink(ValueChangedEvent.class, new Object() {
-      void processEvent()
-      {
-        processor.addEvent(new Runnable()
-        {
-                  @Override
-          public void run()
-          {
-            preview.getScene().setTime(value.getValue());
-            preview.render();
-          }
-        });
-      }
-    });
-    dlg.setContent(content);
-    dlg.pack();
-    Rectangle parentBounds = editor.getParentFrame().getBounds();
-    Rectangle location = dlg.getBounds();
-    location.y = parentBounds.y;
-    location.x = parentBounds.x+parentBounds.width;
-    dlg.setBounds(location);
-    dlg.setVisible(true);
-    return preview;
+    return ProceduralTextureCommon.getPreview(editor, this);
   }
 
   /** Update the display of the preview. */
@@ -385,14 +294,6 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
   }
 
-  /** Determine whether the procedure may contain Parameter modules. */
-
-  @Override
-  public boolean allowParameters()
-  {
-    return true;
-  }
-
   /** Determine whether the procedure may contain View Angle modules. */
 
   @Override
@@ -401,6 +302,14 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     return true;
   }
 
+  /** Determine whether the procedure may contain Parameter modules. */
+
+  @Override
+  public boolean allowParameters()
+  {
+    return true;
+  }
+  
   /** Determine whether the procedure may be renamed. */
 
   @Override
@@ -416,8 +325,8 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   {
     initThreadLocal();
     int i = editor.getScene().indexOf(this);
-    if (i > -1)
-      editor.getScene().changeTexture(i);
+    if (i == -1) return;
+    editor.getScene().changeTexture(i);
   }
 
   /** Display the Properties dialog. */
@@ -427,12 +336,13 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   {
     ValueField aliasField = new ValueField(antialiasing, ValueField.POSITIVE);
     ComponentsDialog dlg = new ComponentsDialog(editor.getParentFrame(), Translate.text("editTextureTitle"),
-      new Widget [] {aliasField,},
+      new Widget [] {aliasField},
       new String [] {Translate.text("Antialiasing")});
-    if (!dlg.clickedOk())
-      return;
+    if (dlg.clickedOk())
+    {
     editor.saveState(false);
     antialiasing = aliasField.getValue();
-    editor.updatePreview();
+
+    }
   }
 }

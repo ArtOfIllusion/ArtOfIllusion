@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,10 +15,9 @@ import artofillusion.*;
 import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.procedural.*;
+import artofillusion.texture.ProceduralTextureCommon;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import buoy.event.*;
-
 import java.awt.*;
 import java.io.*;
 
@@ -28,7 +28,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   private Procedure proc;
   private boolean shadows;
   private double stepSize, antialiasing;
-  private ThreadLocal renderingProc;
+  private ThreadLocal<Procedure> renderingProc;
 
   public ProceduralMaterial3D()
   {
@@ -61,9 +61,9 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal() {
+    renderingProc = new ThreadLocal<Procedure>() {
       @Override
-      protected Object initialValue()
+      protected Procedure initialValue()
       {
         Procedure localProc = createProcedure();
         localProc.copy(proc);
@@ -145,12 +145,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   @Override
   public boolean usesImage(ImageMap image)
   {
-    Module modules[] = proc.getModules();
-
-    for (int i = 0; i < modules.length; i++)
-      if (modules[i] instanceof ImageModule && ((ImageModule) modules[i]).getMap() == image)
-        return true;
-    return false;
+    return ProceduralTextureCommon.procedureUsesImage(proc, image);
   }
 
   /** The material scatters light if there is anything connected to the scattering output. */
@@ -194,9 +189,9 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
 
     if (version < 0 || version > 1)
       throw new InvalidObjectException("");
-    setName(in.readUTF());
-    proc = createProcedure();
-    setIndexOfRefraction(in.readDouble());
+    name = in.readUTF();
+    proc = createProcedure();    
+    refraction = in.readDouble();
     shadows = in.readBoolean();
     antialiasing = in.readDouble();
     stepSize = in.readDouble();
@@ -278,39 +273,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   @Override
   public Object getPreview(ProcedureEditor editor)
   {
-    BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
-    BorderContainer content = new BorderContainer();
-    final MaterialPreviewer preview = new MaterialPreviewer(null, this, 200, 160);
-    content.add(preview, BorderContainer.CENTER);
-    RowContainer row = new RowContainer();
-    content.add(row, BorderContainer.SOUTH, new LayoutInfo());
-    row.add(Translate.label("Time", ":"));
-    final ValueSelector value = new ValueSelector(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 0.01);
-    final ActionProcessor processor = new ActionProcessor();
-    row.add(value);
-    value.addEventLink(ValueChangedEvent.class, new Object() {
-      void processEvent()
-      {
-        processor.addEvent(new Runnable()
-        {
-                  @Override
-          public void run()
-          {
-            preview.getScene().setTime(value.getValue());
-            preview.render();
-          }
-        });
-      }
-    });
-    dlg.setContent(content);
-    dlg.pack();
-    Rectangle parentBounds = editor.getParentFrame().getBounds();
-    Rectangle location = dlg.getBounds();
-    location.y = parentBounds.y;
-    location.x = parentBounds.x+parentBounds.width;
-    dlg.setBounds(location);
-    dlg.setVisible(true);
-    return preview;
+    return ProceduralTextureCommon.getPreview(editor, null);
   }
 
   /** Update the display of the preview. */
@@ -361,8 +324,8 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   {
     initThreadLocal();
     int i = editor.getScene().indexOf(this);
-    if (i > -1)
-      editor.getScene().changeMaterial(i);
+    if(i == -1) return;
+    editor.getScene().changeMaterial(i);
   }
 
   /** Display the Properties dialog. */

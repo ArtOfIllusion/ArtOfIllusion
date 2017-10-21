@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,7 @@ import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.object.*;
 import artofillusion.procedural.*;
+import artofillusion.texture.ProceduralTextureCommon;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -275,21 +277,7 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
 
   private TextureParameter[] findParameters()
   {
-    Module module[] = proc.getModules();
-    int count = 0;
-
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        count++;
-    TextureParameter params[] = new TextureParameter [count];
-    count = 0;
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        {
-          params[count] = ((ParameterModule) module[i]).getParameter(this);
-          ((ParameterModule) module[i]).setIndex(count++);
-        }
-    return params;
+    return ProceduralTextureCommon.getTextureParameters(this, proc);
   }
 
   /* Write a serialized representation of this track to a stream. */

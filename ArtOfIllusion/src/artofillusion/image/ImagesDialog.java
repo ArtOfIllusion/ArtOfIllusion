@@ -207,7 +207,12 @@ public class ImagesDialog extends BDialog
         new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
         ex.printStackTrace();
         setCursor(Cursor.getDefaultCursor());
-        return;
+        
+        // Return if any of the files can not be loaded. 
+        // This should not be the case but currently there is no way of interrupting the load 
+        // deliberately otherwise. 
+
+        return; 
       }
     }
     setCursor(Cursor.getDefaultCursor());
@@ -243,8 +248,9 @@ public class ImagesDialog extends BDialog
   {
     new PurgeDialog(true);
     ic.imagesChanged();
+    hilightButtons();
   }
-  
+
   private void doSelectNone()
   {
     selection = -1;
@@ -312,7 +318,7 @@ public class ImagesDialog extends BDialog
     else
     {
       // If the dialog is accessed through a ProcedureEditor, the scene is already marked modified.
-	}
+    }
   } 
 
   /** Pressing Return and Escape are equivalent to clicking OK and Cancel. Arrow keys can be used to select. */
@@ -754,11 +760,10 @@ public class ImagesDialog extends BDialog
       int count = 0;
       for (int r = 0; r < removeBox.length; r++)
         if (removeBox[r].getState())
-           count++;
+          count++;
            
       if (count > 0 && confirmRemoval(count))
       {
-        selection = -1;
         deleteSelectedImages();
         ic.imagesChanged();
         dispose();
@@ -774,7 +779,6 @@ public class ImagesDialog extends BDialog
            count++;
       if (count > 0 && confirmRemoval(count))
       {
-        selection = -1;
         deleteSelectedImages();
         close();
       }
@@ -799,7 +803,13 @@ public class ImagesDialog extends BDialog
         if (removeBox[d].getState())
           for (int i = 0; i < theScene.getNumImages(); i++)
             if (theScene.getImage(i) == unusedImages.get(d))
+            {
               theScene.removeImage(i);
+              if (selection > i)
+                selection--;
+              else if (selection == i)
+                selection = -1;
+            }
       setModified();
     }
 

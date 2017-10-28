@@ -61,23 +61,17 @@ public class ProceduralTextureCommon
     int count = 0;
 
     for (Module module1 : modules)
-    {
       if (module1 instanceof ParameterModule)
-      {
         count++;
-      }
-    }
     
     TextureParameter params[] = new TextureParameter [count];
     count = 0;
     for (Module module : modules)
-    {
       if (module instanceof ParameterModule)
       {
         params[count] = ((ParameterModule) module).getParameter(texture);
         ((ParameterModule) module).setIndex(count++);
       }
-    }
     return params;
     
   }

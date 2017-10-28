@@ -324,8 +324,8 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   {
     initThreadLocal();
     int i = editor.getScene().indexOf(this);
-    if(i == -1) return;
-    editor.getScene().changeMaterial(i);
+    if (i > -1)
+      editor.getScene().changeMaterial(i);
   }
 
   /** Display the Properties dialog. */

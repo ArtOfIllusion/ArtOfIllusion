@@ -326,8 +326,8 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   {
     initThreadLocal();
     int i = editor.getScene().indexOf(this);
-    if (i == -1) return;
-    editor.getScene().changeTexture(i);
+    if (i > -1)
+      editor.getScene().changeTexture(i);
   }
 
   /** Display the Properties dialog. */

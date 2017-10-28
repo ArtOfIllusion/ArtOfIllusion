@@ -39,7 +39,7 @@ public class ProceduralTextureCommon
    * Create a Procedure object for texture.
    */
 
-  public static Procedure createProcedure()
+  public static Procedure createTextureProcedure()
   {
     return new Procedure(new OutputModule [] {
       new OutputModule(Translate.text("Diffuse"), Translate.text("white"), 0.0, new RGBColor(1.0f, 1.0f, 1.0f), IOPort.COLOR),

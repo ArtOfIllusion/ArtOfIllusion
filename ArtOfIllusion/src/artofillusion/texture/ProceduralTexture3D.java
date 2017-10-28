@@ -30,7 +30,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
 
   public ProceduralTexture3D()
   {
-    proc = ProceduralTextureCommon.createProcedure();
+    proc = ProceduralTextureCommon.createTextureProcedure();
     antialiasing = 1.0;
     initThreadLocal();
   }
@@ -45,7 +45,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
       @Override
       protected Procedure initialValue()
       {
-        Procedure localProc = ProceduralTextureCommon.createProcedure();
+        Procedure localProc = ProceduralTextureCommon.createTextureProcedure();
         localProc.copy(proc);
         return localProc;
       }
@@ -219,7 +219,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
       throw new InvalidObjectException("");
     name = in.readUTF();
     antialiasing = in.readDouble();
-    proc = ProceduralTextureCommon.createProcedure();
+    proc = ProceduralTextureCommon.createTextureProcedure();
     proc.readFromStream(in, theScene);
     if (version == 0)
     {

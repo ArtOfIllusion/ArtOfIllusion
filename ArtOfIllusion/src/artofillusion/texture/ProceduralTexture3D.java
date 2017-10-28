@@ -11,6 +11,7 @@
 
 package artofillusion.texture;
 
+import artofillusion.procedural.ProceduralTextureCommon;
 import artofillusion.*;
 import artofillusion.image.*;
 import artofillusion.math.*;

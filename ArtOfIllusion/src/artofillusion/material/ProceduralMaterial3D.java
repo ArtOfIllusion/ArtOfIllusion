@@ -15,7 +15,7 @@ import artofillusion.*;
 import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.procedural.*;
-import artofillusion.texture.ProceduralTextureCommon;
+import artofillusion.procedural.ProceduralTextureCommon;
 import artofillusion.ui.*;
 import buoy.widget.*;
 import java.awt.*;

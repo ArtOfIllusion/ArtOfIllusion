@@ -7,19 +7,13 @@
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
-package artofillusion.texture;
+package artofillusion.procedural;
 
 import artofillusion.MaterialPreviewer;
 import artofillusion.TextureParameter;
 import artofillusion.image.ImageMap;
 import artofillusion.math.RGBColor;
-import artofillusion.procedural.IOPort;
-import artofillusion.procedural.ImageModule;
-import artofillusion.procedural.Module;
-import artofillusion.procedural.OutputModule;
-import artofillusion.procedural.ParameterModule;
-import artofillusion.procedural.Procedure;
-import artofillusion.procedural.ProcedureEditor;
+import artofillusion.texture.Texture;
 import static artofillusion.texture.Texture.*;
 import artofillusion.ui.ActionProcessor;
 import artofillusion.ui.Translate;

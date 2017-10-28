@@ -15,7 +15,7 @@ import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.procedural.*;
-import artofillusion.texture.ProceduralTextureCommon;
+import artofillusion.procedural.ProceduralTextureCommon;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;

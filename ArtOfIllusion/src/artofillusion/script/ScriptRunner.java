@@ -27,7 +27,7 @@ public class ScriptRunner
   private static final HashMap<String, ScriptEngine> engines = new HashMap<String, ScriptEngine>();
   private static final String IMPORTS[] = {"artofillusion.*", "artofillusion.image.*", "artofillusion.material.*",
       "artofillusion.math.*", "artofillusion.object.*", "artofillusion.script.*", "artofillusion.texture.*",
-      "artofillusion.ui.*", "buoy.event.*", "buoy.widget.*"};
+      "artofillusion.procedural.*", "artofillusion.ui.*", "buoy.event.*", "buoy.widget.*"};
 
   /** Get the ScriptEngine for running scripts written in a particular language. */
   

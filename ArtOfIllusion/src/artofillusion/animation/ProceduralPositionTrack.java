@@ -15,7 +15,6 @@ import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.procedural.*;
-import artofillusion.procedural.ProceduralTextureCommon;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -434,7 +433,7 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
 
   private TextureParameter[] findParameters()
   {
-    return ProceduralTextureCommon.getTextureParameters(this, proc);
+    return Procedure.getTextureParameters(proc, this);
   }
 
   /** Write a serialized representation of this track to a stream. */

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +12,9 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
+import artofillusion.image.ImageMap;
 import artofillusion.math.*;
+import artofillusion.texture.Texture;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
@@ -21,6 +24,69 @@ import java.lang.reflect.*;
 
 public class Procedure
 {
+
+  public static TextureParameter[] getTextureParameters(Procedure proc, Object texture)
+  {
+    Module[] modules = proc.getModules();
+    int count = 0;
+    for (Module module1 : modules)
+    {
+      if (module1 instanceof ParameterModule)
+      {
+        count++;
+      }
+    }
+    TextureParameter[] params = new TextureParameter[count];
+    count = 0;
+    for (Module module : modules)
+    {
+      if (module instanceof ParameterModule)
+      {
+        params[count] = ((ParameterModule) module).getParameter(texture);
+        ((ParameterModule) module).setIndex(count++);
+      }
+    }
+    return params;
+  }
+
+  /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
+   *  @param proc the Procedure to check
+  @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
+   */
+  public static boolean hasTextureComponent(Procedure proc, int component)
+  {
+    OutputModule[] output = proc.getOutputModules();
+    switch (component)
+    {
+      case Texture.DIFFUSE_COLOR_COMPONENT:
+        return true;
+      case Texture.SPECULAR_COLOR_COMPONENT:
+        return output[5].inputConnected(0);
+      case Texture.TRANSPARENT_COLOR_COMPONENT:
+        return output[4].inputConnected(0);
+      case Texture.HILIGHT_COLOR_COMPONENT:
+        return output[6].inputConnected(0);
+      case Texture.EMISSIVE_COLOR_COMPONENT:
+        return output[3].inputConnected(0);
+      case Texture.BUMP_COMPONENT:
+        return output[9].inputConnected(0);
+      case Texture.DISPLACEMENT_COMPONENT:
+        return output[10].inputConnected(0);
+    }
+    return false;
+  }
+
+  public static boolean procedureUsesImage(Procedure proc, ImageMap image)
+  {
+    for (Module module : proc.getModules())
+    {
+      if (module instanceof ImageModule && ((ImageModule) module).getMap() == image)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
   OutputModule output[];
   Module module[];
   Link link[];

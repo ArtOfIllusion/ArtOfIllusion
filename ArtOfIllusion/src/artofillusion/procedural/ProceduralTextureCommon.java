@@ -10,11 +10,8 @@
 package artofillusion.procedural;
 
 import artofillusion.MaterialPreviewer;
-import artofillusion.TextureParameter;
-import artofillusion.image.ImageMap;
 import artofillusion.math.RGBColor;
 import artofillusion.texture.Texture;
-import static artofillusion.texture.Texture.*;
 import artofillusion.ui.ActionProcessor;
 import artofillusion.ui.Translate;
 import artofillusion.ui.ValueSelector;
@@ -55,61 +52,6 @@ public class ProceduralTextureCommon
       new OutputModule(Translate.text("Displacement"), "0", 0.0, null, IOPort.NUMBER)});
   }
   
-  public static TextureParameter[] getTextureParameters(Object texture, Procedure proc)
-  {
-    Module modules[] = proc.getModules();
-    int count = 0;
-
-    for (Module module1 : modules)
-      if (module1 instanceof ParameterModule)
-        count++;
-    
-    TextureParameter params[] = new TextureParameter [count];
-    count = 0;
-    for (Module module : modules)
-      if (module instanceof ParameterModule)
-      {
-        params[count] = ((ParameterModule) module).getParameter(texture);
-        ((ParameterModule) module).setIndex(count++);
-      }
-    return params;
-    
-  }
-  
-  /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
-   *  @param proc the Procedure to check 
-      @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
-  */  
-  public static boolean hasTextureComponent(Procedure proc, int component)
-  {
-    OutputModule output[] = proc.getOutputModules();
-    switch (component)
-      {
-        case DIFFUSE_COLOR_COMPONENT:
-          return true;
-        case SPECULAR_COLOR_COMPONENT:
-          return output[5].inputConnected(0);
-        case TRANSPARENT_COLOR_COMPONENT:
-          return output[4].inputConnected(0);
-        case HILIGHT_COLOR_COMPONENT:
-          return output[6].inputConnected(0);
-        case EMISSIVE_COLOR_COMPONENT:
-          return output[3].inputConnected(0);
-        case BUMP_COMPONENT:
-          return output[9].inputConnected(0);
-        case DISPLACEMENT_COMPONENT:
-          return output[10].inputConnected(0);
-      }
-    return false;
-  }
-  
-  public static boolean procedureUsesImage(Procedure proc, ImageMap image)
-  {
-    for (Module module: proc.getModules())
-      if (module instanceof ImageModule && ((ImageModule) module).getMap() == image)
-          return true;
-    return false;
-  }
   
   public static MaterialPreviewer getPreview(ProcedureEditor editor, Texture texture)
   {

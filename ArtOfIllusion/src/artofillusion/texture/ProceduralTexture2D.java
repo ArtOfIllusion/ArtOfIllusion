@@ -295,18 +295,18 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
     UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
   }
 
+    /** Determine whether the procedure may contain Parameter modules. */
+
+  @Override
+  public boolean allowParameters()
+  {
+    return true;
+  }
+  
   /** Determine whether the procedure may contain View Angle modules. */
 
   @Override
   public boolean allowViewAngle()
-  {
-    return true;
-  }
-
-  /** Determine whether the procedure may contain Parameter modules. */
-
-  @Override
-  public boolean allowParameters()
   {
     return true;
   }

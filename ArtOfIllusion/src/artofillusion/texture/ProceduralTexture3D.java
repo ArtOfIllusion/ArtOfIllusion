@@ -176,6 +176,14 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
     return output[10].getAverageValue(0, 0.0);
   }
 
+  /** Get the list of parameters for this texture. */
+
+  @Override
+  public TextureParameter[] getParameters()
+  {
+    return Procedure.getTextureParameters(proc, this);
+  }
+  
   @Override
   public Texture duplicate()
   {
@@ -185,14 +193,6 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
     tex.setName(getName());
     tex.antialiasing = antialiasing;
     return tex;
-  }
-  
-  /** Get the list of parameters for this texture. */
-
-  @Override
-  public TextureParameter[] getParameters()
-  {
-    return Procedure.getTextureParameters(proc, this);
   }
 
   /** Determine whether this texture has a non-zero value anywhere for a particular component.

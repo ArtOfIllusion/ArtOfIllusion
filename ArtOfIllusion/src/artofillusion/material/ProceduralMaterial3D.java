@@ -15,7 +15,6 @@ import artofillusion.*;
 import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.procedural.*;
-import artofillusion.procedural.ProceduralTextureCommon;
 import artofillusion.ui.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -273,7 +272,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   @Override
   public Object getPreview(ProcedureEditor editor)
   {
-    return ProceduralTextureCommon.getPreview(editor, null);
+    return ProcedureEditor.getPreview(editor, null);
   }
 
   /** Update the display of the preview. */

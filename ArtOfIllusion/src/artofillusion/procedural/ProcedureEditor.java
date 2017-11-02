@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2012 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +12,7 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
+import artofillusion.texture.Texture;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -24,7 +26,7 @@ import java.util.*;
     to that. */
 
 public class ProcedureEditor extends CustomWidget
-{
+{ 
   private BFrame parent;
   private Procedure proc;
   private ProcedureOwner owner;
@@ -1026,5 +1028,43 @@ public class ProcedureEditor extends CustomWidget
         editor.selectedLink[i] = (i >= numLinks);
       editor.updateMenus();
     }
+  }
+  
+  public static MaterialPreviewer getPreview(ProcedureEditor editor, Texture texture)
+  {
+    final BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
+    BorderContainer content = new BorderContainer();
+    final MaterialPreviewer preview = new MaterialPreviewer(texture, null, 200, 160);
+    content.add(preview, BorderContainer.CENTER);
+    RowContainer row = new RowContainer();
+    content.add(row, BorderContainer.SOUTH, new LayoutInfo());
+    row.add(Translate.label("Time", ":"));
+    final ValueSelector value = new ValueSelector(0.0, -Double.MAX_VALUE, Double.MAX_VALUE, 0.01);
+    final ActionProcessor processor = new ActionProcessor();
+    row.add(value);
+    value.addEventLink(ValueChangedEvent.class, new Object()
+    {
+      void processEvent()
+      {
+        processor.addEvent(new Runnable()
+        {
+          @Override
+          public void run()
+          {
+            preview.getScene().setTime(value.getValue());
+            preview.render();
+          }
+        });
+      }
+    });
+    dlg.setContent(content);
+    dlg.pack();
+    Rectangle parentBounds = editor.getParentFrame().getBounds();
+    Rectangle location = dlg.getBounds();
+    location.y = parentBounds.y;
+    location.x = parentBounds.x + parentBounds.width;
+    dlg.setBounds(location);
+    dlg.setVisible(true);
+    return preview;
   }
 }

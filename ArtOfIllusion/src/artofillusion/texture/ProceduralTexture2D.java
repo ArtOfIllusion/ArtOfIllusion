@@ -11,7 +11,6 @@
 
 package artofillusion.texture;
 
-import artofillusion.procedural.ProceduralTextureCommon;
 import artofillusion.*;
 import artofillusion.image.*;
 import artofillusion.math.*;
@@ -275,7 +274,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public Object getPreview(ProcedureEditor editor)
   {
-    return ProceduralTextureCommon.getPreview(editor, this);
+    return ProcedureEditor.getPreview(editor, this);
   }
 
   /** Update the display of the preview. */

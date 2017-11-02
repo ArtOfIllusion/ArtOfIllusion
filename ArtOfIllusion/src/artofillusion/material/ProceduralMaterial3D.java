@@ -272,7 +272,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   @Override
   public Object getPreview(ProcedureEditor editor)
   {
-    return ProcedureEditor.getPreview(editor, null);
+    return ProcedureEditor.getPreview(editor, null, this);
   }
 
   /** Update the display of the preview. */

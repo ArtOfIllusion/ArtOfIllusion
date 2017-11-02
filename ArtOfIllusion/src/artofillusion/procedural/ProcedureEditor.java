@@ -12,6 +12,7 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
+import artofillusion.material.Material;
 import artofillusion.texture.Texture;
 import artofillusion.ui.*;
 import buoy.event.*;
@@ -1030,11 +1031,11 @@ public class ProcedureEditor extends CustomWidget
     }
   }
   
-  public static MaterialPreviewer getPreview(ProcedureEditor editor, Texture texture)
+  public static MaterialPreviewer getPreview(ProcedureEditor editor, Texture texture, Material material)
   {
     final BDialog dlg = new BDialog(editor.getParentFrame(), "Preview", false);
     BorderContainer content = new BorderContainer();
-    final MaterialPreviewer preview = new MaterialPreviewer(texture, null, 200, 160);
+    final MaterialPreviewer preview = new MaterialPreviewer(texture, material, 200, 160);
     content.add(preview, BorderContainer.CENTER);
     RowContainer row = new RowContainer();
     content.add(row, BorderContainer.SOUTH, new LayoutInfo());

@@ -274,7 +274,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public Object getPreview(ProcedureEditor editor)
   {
-    return ProcedureEditor.getPreview(editor, this);
+    return ProcedureEditor.getPreview(editor, this, null);
   }
 
   /** Update the display of the preview. */

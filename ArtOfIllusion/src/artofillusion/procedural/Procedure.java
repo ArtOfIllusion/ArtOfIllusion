@@ -15,6 +15,7 @@ import artofillusion.*;
 import artofillusion.image.ImageMap;
 import artofillusion.math.*;
 import artofillusion.texture.Texture;
+import artofillusion.ui.Translate;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
@@ -86,6 +87,14 @@ public class Procedure
       }
     }
     return false;
+  }
+
+  /**
+   * Create a Procedure object for texture.
+   */
+  public static Procedure createTextureProcedure()
+  {
+    return new Procedure(new OutputModule[]{new OutputModule(Translate.text("Diffuse"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR), new OutputModule(Translate.text("Specular"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR), new OutputModule(Translate.text("Transparent"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR), new OutputModule(Translate.text("Emissive"), Translate.text("black"), 0.0, new RGBColor(0.0F, 0.0F, 0.0F), IOPort.COLOR), new OutputModule(Translate.text("Transparency"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Specularity"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Shininess"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Roughness"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Cloudiness"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("BumpHeight"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Displacement"), "0", 0.0, null, IOPort.NUMBER)});
   }
   OutputModule output[];
   Module module[];

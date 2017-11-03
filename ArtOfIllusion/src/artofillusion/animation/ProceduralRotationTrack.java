@@ -418,7 +418,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
 
   private TextureParameter[] findParameters()
   {
-    return Procedure.getTextureParameters(proc, this);
+    return proc.getTextureParameters(this);
   }
 
   /* Write a serialized representation of this track to a stream. */

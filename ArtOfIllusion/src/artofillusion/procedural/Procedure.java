@@ -279,33 +279,27 @@ public class Procedure
       }
   }
   
-  public static TextureParameter[] getTextureParameters(Procedure proc, Object texture)
+  public TextureParameter[] getTextureParameters(Object texture)
   {
-    Module[] modules = proc.getModules();
     int count = 0;
-    for (Module module1 : modules)
-    {
-      if (module1 instanceof ParameterModule)
-      {
+    for (Module mod : module)
+      if (mod instanceof ParameterModule)
         count++;
-      }
-    }
+    
     TextureParameter[] params = new TextureParameter[count];
     count = 0;
-    for (Module module : modules)
-    {
-      if (module instanceof ParameterModule)
+    for (Module mod : module)
+      if (mod instanceof ParameterModule)
       {
-        params[count] = ((ParameterModule) module).getParameter(texture);
-        ((ParameterModule) module).setIndex(count++);
+        params[count] = ((ParameterModule) mod).getParameter(texture);
+        ((ParameterModule) mod).setIndex(count++);
       }
-    }
     return params;
   }
 
   /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
    *  @param proc the Procedure to check
-  @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
+      @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
    */
   public static boolean hasTextureComponent(Procedure proc, int component)
   {
@@ -330,15 +324,11 @@ public class Procedure
     return false;
   }
 
-  public static boolean procedureUsesImage(Procedure proc, ImageMap image)
+  public boolean usesImage(ImageMap image)
   {
-    for (Module module : proc.getModules())
-    {
-      if (module instanceof ImageModule && ((ImageModule) module).getMap() == image)
-      {
+    for (Module mod : module)
+      if (mod instanceof ImageModule && ((ImageModule) mod).getMap() == image)
         return true;
-      }
-    }
     return false;
   }
 

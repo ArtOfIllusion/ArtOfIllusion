@@ -153,7 +153,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public boolean usesImage(ImageMap image)
   {
-    return Procedure.procedureUsesImage(proc, image);
+    return proc.usesImage(image);
   }
 
   @Override
@@ -180,7 +180,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public TextureParameter[] getParameters()
   {
-    return Procedure.getTextureParameters(proc, this);
+    return proc.getTextureParameters(this);
   }
   
   @Override

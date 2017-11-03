@@ -144,7 +144,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   @Override
   public boolean usesImage(ImageMap image)
   {
-    return Procedure.procedureUsesImage(proc, image);
+    return proc.usesImage(image);
   }
 
   /** The material scatters light if there is anything connected to the scattering output. */

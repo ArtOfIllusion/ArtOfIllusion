@@ -153,7 +153,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public boolean usesImage(ImageMap image)
   {
-    return Procedure.procedureUsesImage(proc, image);
+    return proc.usesImage(image);
   }
 
   @Override
@@ -191,7 +191,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public TextureParameter[] getParameters()
   {
-    return Procedure.getTextureParameters(proc, this);
+    return proc.getTextureParameters(this);
   }
 
   /** Determine whether this texture has a non-zero value anywhere for a particular component.

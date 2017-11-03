@@ -25,77 +25,6 @@ import java.lang.reflect.*;
 
 public class Procedure
 {
-
-  public static TextureParameter[] getTextureParameters(Procedure proc, Object texture)
-  {
-    Module[] modules = proc.getModules();
-    int count = 0;
-    for (Module module1 : modules)
-    {
-      if (module1 instanceof ParameterModule)
-      {
-        count++;
-      }
-    }
-    TextureParameter[] params = new TextureParameter[count];
-    count = 0;
-    for (Module module : modules)
-    {
-      if (module instanceof ParameterModule)
-      {
-        params[count] = ((ParameterModule) module).getParameter(texture);
-        ((ParameterModule) module).setIndex(count++);
-      }
-    }
-    return params;
-  }
-
-  /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
-   *  @param proc the Procedure to check
-  @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
-   */
-  public static boolean hasTextureComponent(Procedure proc, int component)
-  {
-    OutputModule[] output = proc.getOutputModules();
-    switch (component)
-    {
-      case Texture.DIFFUSE_COLOR_COMPONENT:
-        return true;
-      case Texture.SPECULAR_COLOR_COMPONENT:
-        return output[5].inputConnected(0);
-      case Texture.TRANSPARENT_COLOR_COMPONENT:
-        return output[4].inputConnected(0);
-      case Texture.HILIGHT_COLOR_COMPONENT:
-        return output[6].inputConnected(0);
-      case Texture.EMISSIVE_COLOR_COMPONENT:
-        return output[3].inputConnected(0);
-      case Texture.BUMP_COMPONENT:
-        return output[9].inputConnected(0);
-      case Texture.DISPLACEMENT_COMPONENT:
-        return output[10].inputConnected(0);
-    }
-    return false;
-  }
-
-  public static boolean procedureUsesImage(Procedure proc, ImageMap image)
-  {
-    for (Module module : proc.getModules())
-    {
-      if (module instanceof ImageModule && ((ImageModule) module).getMap() == image)
-      {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Create a Procedure object for texture.
-   */
-  public static Procedure createTextureProcedure()
-  {
-    return new Procedure(new OutputModule[]{new OutputModule(Translate.text("Diffuse"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR), new OutputModule(Translate.text("Specular"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR), new OutputModule(Translate.text("Transparent"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR), new OutputModule(Translate.text("Emissive"), Translate.text("black"), 0.0, new RGBColor(0.0F, 0.0F, 0.0F), IOPort.COLOR), new OutputModule(Translate.text("Transparency"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Specularity"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Shininess"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Roughness"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Cloudiness"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("BumpHeight"), "0", 0.0, null, IOPort.NUMBER), new OutputModule(Translate.text("Displacement"), "0", 0.0, null, IOPort.NUMBER)});
-  }
   OutputModule output[];
   Module module[];
   Link link[];
@@ -349,4 +278,86 @@ public class Procedure
         to.getModule().setInput(to, from);
       }
   }
+  
+  public static TextureParameter[] getTextureParameters(Procedure proc, Object texture)
+  {
+    Module[] modules = proc.getModules();
+    int count = 0;
+    for (Module module1 : modules)
+    {
+      if (module1 instanceof ParameterModule)
+      {
+        count++;
+      }
+    }
+    TextureParameter[] params = new TextureParameter[count];
+    count = 0;
+    for (Module module : modules)
+    {
+      if (module instanceof ParameterModule)
+      {
+        params[count] = ((ParameterModule) module).getParameter(texture);
+        ((ParameterModule) module).setIndex(count++);
+      }
+    }
+    return params;
+  }
+
+  /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
+   *  @param proc the Procedure to check
+  @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
+   */
+  public static boolean hasTextureComponent(Procedure proc, int component)
+  {
+    OutputModule[] output = proc.getOutputModules();
+    switch (component)
+    {
+      case Texture.DIFFUSE_COLOR_COMPONENT:
+        return true;
+      case Texture.SPECULAR_COLOR_COMPONENT:
+        return output[5].inputConnected(0);
+      case Texture.TRANSPARENT_COLOR_COMPONENT:
+        return output[4].inputConnected(0);
+      case Texture.HILIGHT_COLOR_COMPONENT:
+        return output[6].inputConnected(0);
+      case Texture.EMISSIVE_COLOR_COMPONENT:
+        return output[3].inputConnected(0);
+      case Texture.BUMP_COMPONENT:
+        return output[9].inputConnected(0);
+      case Texture.DISPLACEMENT_COMPONENT:
+        return output[10].inputConnected(0);
+    }
+    return false;
+  }
+
+  public static boolean procedureUsesImage(Procedure proc, ImageMap image)
+  {
+    for (Module module : proc.getModules())
+    {
+      if (module instanceof ImageModule && ((ImageModule) module).getMap() == image)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Create a Procedure object for texture.
+   */
+  public static Procedure createTextureProcedure()
+  {
+    return new Procedure(new OutputModule[]{new OutputModule(Translate.text("Diffuse"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Specular"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Transparent"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Emissive"), Translate.text("black"), 0.0, new RGBColor(0.0F, 0.0F, 0.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Transparency"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Specularity"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Shininess"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Roughness"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Cloudiness"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("BumpHeight"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Displacement"), "0", 0.0, null, IOPort.NUMBER)});
+  }
+  
 }

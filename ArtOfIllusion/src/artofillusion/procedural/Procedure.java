@@ -298,12 +298,10 @@ public class Procedure
   }
 
   /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
-   *  @param proc the Procedure to check
       @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
    */
-  public static boolean hasTextureComponent(Procedure proc, int component)
+  public boolean hasTextureComponent(int component)
   {
-    OutputModule[] output = proc.getOutputModules();
     switch (component)
     {
       case Texture.DIFFUSE_COLOR_COMPONENT:

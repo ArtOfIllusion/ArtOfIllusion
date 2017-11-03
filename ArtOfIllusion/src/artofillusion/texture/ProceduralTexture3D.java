@@ -201,7 +201,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public boolean hasComponent(int component)
   {
-    return Procedure.hasTextureComponent(proc, component);
+    return proc.hasTextureComponent(component);
   }
 
   @Override

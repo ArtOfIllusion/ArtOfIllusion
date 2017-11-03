@@ -201,7 +201,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
   @Override
   public boolean hasComponent(int component)
   {
-    return Procedure.hasTextureComponent(proc, component);
+    return proc.hasTextureComponent(component);
   }
 
   @Override

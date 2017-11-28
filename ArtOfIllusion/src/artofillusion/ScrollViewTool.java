@@ -44,7 +44,7 @@ public class ScrollViewTool
 
     protected void mouseScrolled(MouseScrolledEvent e, ViewerCanvas v)
     {
-	    scrollSteps = v.scrollBuffer;
+        scrollSteps = v.scrollBuffer;
         v.scrollBuffer = 0;
         v.mouseMoving = false;
         view = v;
@@ -83,7 +83,7 @@ public class ScrollViewTool
 
         setAuxGraphs(view);
         repaintAllViews(view);
-		//view.repaint
+        //view.repaint
         view.viewChanged(false);
     }
 
@@ -222,7 +222,7 @@ public class ScrollViewTool
 
     public void mouseStoppedScrolling()
     {
-	    if (window != null && boundCamera != null)
+        if (window != null && boundCamera != null)
         {
             boundCamera.getCoords().copyCoords(camera.getCameraCoordinates());
             if (boundCamera.getObject() instanceof SceneCamera) ((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);

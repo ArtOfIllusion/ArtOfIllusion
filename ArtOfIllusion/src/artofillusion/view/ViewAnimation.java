@@ -45,7 +45,8 @@ public class ViewAnimation
     CoordinateSystem startCoords, endCoords, aniCoords;
     Vec3 endRotationCenter, rotStart, rotAni, aniZ, aniOrigin;
     ViewerCanvas view;
-    Camera camera;
+    Camera   camera;
+    boolean  viewHasCamera;
     double[] startAngles, endAngles;
     double   startDist, endDist, aniDist, distanceFactor, moveDist; 
     double   startWeightLin, endWeightLin, startWeightExp, endWeightExp;
@@ -163,6 +164,7 @@ public class ViewAnimation
 
         step = 1;
         changingPerspective = true;
+        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
         timer.restart();
     }
 
@@ -184,8 +186,13 @@ public class ViewAnimation
             view.preparePerspectiveAnimation();
         }
         view.repaint();
+        if (viewHasCamera)
+            window.setModified();
+        else
+
         // auxGraphs shows up wrong. Possibly numerical accuaracy issue.
         // setAuxGraphs();
+
         step++;
     }
 
@@ -195,7 +202,7 @@ public class ViewAnimation
     public void start(CoordinateSystem endCoords, Vec3 endRotationCenter, double endScale, int endOrientation, int nextNavigation)
     {
         if (changingPerspective) return;
-        
+
         this.endCoords = endCoords;
         this.endRotationCenter = endRotationCenter;        
         this.endScale = endScale;
@@ -208,7 +215,7 @@ public class ViewAnimation
         this.endShowGrid = view.getShowGrid();
         camera = view.getCamera();
         endDistToScreen = camera.getDistToScreen();
-        
+
         checkPreferences(); // This only works for the 'animate'
         if (! animate){
             endAnimation(); // Go directly to the last frame
@@ -239,7 +246,7 @@ public class ViewAnimation
         // These are here because the logic in angles of Bottom view differs from Top and Front
         // Helps in most cases to make the turn cleaner but does not always find the shortest
         // possible rotation.
-    
+
         if (startAngles[0] == 90.0 && startAngles[1] == 0.0 && startAngles[2] == 180.0)
         {
             startAngles[1] = 180.0;
@@ -263,7 +270,7 @@ public class ViewAnimation
         angleMax = Math.abs(endAngles[0]-startAngles[0]);
         if (Math.abs(endAngles[1]-startAngles[1]) > angleMax) angleMax = Math.abs(endAngles[1]-startAngles[1]);
         if (Math.abs(endAngles[2]-startAngles[2]) > angleMax) angleMax = Math.abs(endAngles[2]-startAngles[2]);
-        
+
         timeRot = maxDuration*((1.0-1.0/(1.0+angleMax/180.0*rotSlope)));
 
         timeScale = 0.0;
@@ -277,7 +284,7 @@ public class ViewAnimation
             timeDist = maxDuration*(1.0-startDist/(startDist+distSlope*(endDist-startDist)));
         if (startDist > endDist)
             timeDist = maxDuration*(1.0-endDist/(endDist+distSlope*(startDist-endDist)));
-            
+
         timeMove = 0.0;
         if (view.isPerspective())
         {
@@ -296,13 +303,13 @@ public class ViewAnimation
 
         // Finding maximum time of the candidates
         timeAni = 0.0;
-        
+
         if (timeAni < timeRot) timeAni = timeRot;
         if (timeAni < timeScale) timeAni = timeScale;
         if (timeAni < timeDist) timeAni = timeDist;
         //if (timeRot == 0.0) // this must be a remnant from something else
         if (timeAni < timeMove) timeAni = timeMove;
-                
+
         if (timeAni == 0.0) // zero for time = nothing moves & division by zero next --> Blank view.
         {
             endAnimation();
@@ -318,10 +325,11 @@ public class ViewAnimation
             view.setOrientation(ViewerCanvas.VIEW_OTHER); // in case the move is interrupted
             view.viewChanged(false);
         }
-        
+
         // Now we  know all we need to know to launch the animation sequence.
         // Restart because the previous move could still be running.
         animatingMove = true;
+        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
         timer.restart();
     }
 
@@ -330,7 +338,7 @@ public class ViewAnimation
     {
         startWeightLin = (double)(steps-step)/(double)steps;
         endWeightLin = (double)step/(double)steps;
-        
+
         if(view.isPerspective())
         {
             if (distanceFactor == 1.0 || steps <= 1){
@@ -370,6 +378,8 @@ public class ViewAnimation
         camera.setCameraCoordinates(aniCoords);
         view.setScale(view.getScale()*scalingFactor);
         view.repaint();
+        if (viewHasCamera)
+            window.setModified(); // Could just dispatch a SceneChangedEvent. Would need to cange the method in LayoutWinode public.
         setAuxGraphs();
         step++;
     }
@@ -389,7 +399,10 @@ public class ViewAnimation
 
         wipeAuxGraphs();
         view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
-        view.viewChanged(false);
+        if (viewHasCamera)
+            window.setModified();
+        else
+            view.viewChanged(false);
         view.repaint();
     }
 

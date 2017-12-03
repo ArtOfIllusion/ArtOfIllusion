@@ -1247,6 +1247,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setTime(double time)
   {
     theScene.setTime(time);
+    theScore.setTime(time);
     theScore.repaint();
     itemTree.repaint();
     for (SceneViewer view : theView)

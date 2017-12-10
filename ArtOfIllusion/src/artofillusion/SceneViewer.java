@@ -106,28 +106,27 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-		ObjectInfo nextCamera = cameras.elementAt(which-6);
-		CoordinateSystem coords = nextCamera.coords.duplicate();
+        ObjectInfo nextCamera = cameras.elementAt(which-6);
+        CoordinateSystem coords = nextCamera.coords.duplicate();
 
-		if (nextCamera.getObject() instanceof SceneCamera){
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
-		}
-		else if (nextCamera.getObject() instanceof SpotLight)
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
-		else if (nextCamera.getObject() instanceof DirectionalLight)
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
-		else
-			return;
+        if (nextCamera.getObject() instanceof SceneCamera){
+            nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
+        }
+        else if (nextCamera.getObject() instanceof SpotLight)
+            nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
+        else if (nextCamera.getObject() instanceof DirectionalLight)
+            nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
+        else
+            return;
 
-		animation.start(coords, rotationCenter, 100.0, which, navigation);
+        animation.start(coords, rotationCenter, 100.0, which, navigation);
     }
     else
     {
       boundCamera = null;
-	  if (which > 5) // Would have thought that the super takes care of this but not always.
-		orientation = VIEW_OTHER;
+      if (which > 5) // Would have thought that the super takes care of this but not always.
+        orientation = VIEW_OTHER;
       viewChanged(false);
-	  //repaint();
     }
   }
 
@@ -139,12 +138,13 @@ public class SceneViewer extends ViewerCanvas
   public void finishAnimation(int which, boolean persp, int navi)
   {
     if (which > 5  && which < 6+cameras.size())
-		boundCamera = cameras.elementAt(which-6);
+        boundCamera = cameras.elementAt(which-6);
     orientation = which;
-	perspective = persp;
-	navigation = navi;
-	viewChanged(false);
-	repaint();
+    perspective = persp;
+    navigation = navi;
+
+    if (boundCamera != null)
+        boundCamera.setCoords(theCamera.getCameraCoordinates().duplicate());
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -308,10 +308,10 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
-	drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    drawOverlay();
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
     if (showAxes)
       drawCoordinateAxes();
     drawBorder();
@@ -531,8 +531,8 @@ public class SceneViewer extends ViewerCanvas
   @Override
   protected void mouseDragged(WidgetMouseEvent e)
   {
-	mousePoint = e.getPoint();
-	drawOverlay();
+    mousePoint = e.getPoint();
+    drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {
@@ -540,8 +540,8 @@ public class SceneViewer extends ViewerCanvas
       if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
         return;
     }
-	
-	
+    
+    
     dragging = true;
     deselect = -1;
     if (draggingBox)
@@ -674,7 +674,7 @@ public class SceneViewer extends ViewerCanvas
       changed = (oldSelection[i] != newSelection[i]);
     if (changed)
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
-	dragging = false;
+    dragging = false;
   }
 
   /** 
@@ -683,33 +683,33 @@ public class SceneViewer extends ViewerCanvas
 
   public void mouseClicked(MouseClickedEvent e)
   {
-	//super.mouseClicked(e);
-	
+    //super.mouseClicked(e);
+    
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
         @Override
-	    public void run()
-	    {
-	      theScene.objectModified(obj);
-	      parentFrame.updateImage();
-	      parentFrame.updateMenus();
-	    }
-	});
+        public void run()
+        {
+          theScene.objectModified(obj);
+          parentFrame.updateImage();
+          parentFrame.updateMenus();
+        }
+    });
     }
   }
 
- 	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		parentFrame.updateImage(); // I wonder why, but that's how it works
-	}
-	
+     @Override
+    protected void mouseMoved(MouseMovedEvent e)
+    {
+        mouseMoving = true;
+        mousePoint = e.getPoint();
+        mouseMoveTimer.restart();
+        parentFrame.updateImage(); // I wonder why, but that's how it works
+    }
+    
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)

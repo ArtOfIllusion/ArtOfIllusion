@@ -123,12 +123,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
       theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
+      theView[i].lastSetNavigation = 1;
       theView[i].setNavigationMode(1,false);
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    //theView[3].setPerspective(true);
-    theView[3].setOrientation(6); // This shiuld be mde to take care of the perspectivebusiness...
+    theView[3].setOrientation(6);
 
     theView[currentView].setDrawFocus(true);
     viewsContainer = new FormContainer(new double [] {1, 1}, new double [] {1, 1});
@@ -563,7 +563,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     
     toolsMenu = Translate.menu("tools");
     menubar.add(toolsMenu);
-	
+    
     for (ModellingTool tool: modellingTools)
     {
       BMenuItem item = new BMenuItem(tool.getName());
@@ -1178,8 +1178,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Add a new object to the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. <P>
-	  
-	  NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
+      
+      NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
 
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {

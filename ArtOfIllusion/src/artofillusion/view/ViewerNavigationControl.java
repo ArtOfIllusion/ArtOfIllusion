@@ -22,62 +22,57 @@ import artofillusion.ui.*;
 
 public class ViewerNavigationControl implements ViewerControl
 { 
-	@Override
-	public Widget createWidget(final ViewerCanvas view)
-	{
-		return new NavigationChoice(view);
-	}
-	
-	@Override
-	public String getName()
-	{
-		return Translate.text("Navigation");
-	}
-	
-	public Object getItem(int index)
-	{
-		return this.getItem(index);
-	}
-	
-	public static class NavigationChoice extends BComboBox
-	{
-		private final ViewerCanvas view;
-		private boolean viewChangedByThis = false;
-		
-		private NavigationChoice(ViewerCanvas view)
-		{
-			super(new String [] {
-				Translate.text("ModelSpace"),
-				Translate.text("ModelLandscape"),
-				Translate.text("TravelSpace"),
-				Translate.text("TravelLandscape")
-			});
-			this.view = view;
-			setSelectedIndex(0);
-			addEventLink(ValueChangedEvent.class, this, "valueChanged");
-			view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
-			setPreferredVisibleRows(4);
-		}
-		
-		private void valueChanged()
-		{
-			view.setNavigationMode(getSelectedIndex());
-			if (getSelectedIndex() > 1) 
-				view.perspectiveEnabled = false;
-			else
-				view.perspectiveEnabled = true;
-			viewChangedByThis = true;
-			view.viewChanged(false); // This sending 'viewChaged' loops this control back to itself. Hence the 'viewChangedByThis'.
-		}
+    @Override
+    public Widget createWidget(final ViewerCanvas view)
+    {
+        return new NavigationChoice(view);
+    }
+    
+    @Override
+    public String getName()
+    {
+        return Translate.text("Navigation");
+    }
+    
+    public Object getItem(int index)
+    {
+        return this.getItem(index);
+    }
+    
+    public static class NavigationChoice extends BComboBox
+    {
+        private final ViewerCanvas view;
+        
+        private NavigationChoice(ViewerCanvas view)
+        {
+            super(new String [] {
+                Translate.text("ModelSpace"),
+                Translate.text("ModelLandscape"),
+                Translate.text("TravelSpace"),
+                Translate.text("TravelLandscape")
+            });
+            this.view = view;
+            setSelectedIndex(0);
+            addEventLink(ValueChangedEvent.class, this, "valueChanged");
+            view.addEventLink(ViewChangedEvent.class, this, "viewChanged");
+            setPreferredVisibleRows(4);
+        }
 
-		private void viewChanged()
-		{
-			if (viewChangedByThis){
-				viewChangedByThis = false;
-				return;
-			}
-			if (view.getNavigationMode() != getSelectedIndex())
-				setSelectedIndex(view.getNavigationMode());
-		}
-	}
+        private void valueChanged()
+        {
+            int selectedValue = getSelectedIndex();
+            if (selectedValue > 1) 
+                view.perspectiveControEnabled = false;
+            else
+                view.perspectiveControEnabled = true;        
+            view.lastSetNavigation = selectedValue;
+            view.setNavigationMode(selectedValue);
+        }
+
+        private void viewChanged()
+        {
+            if (view.getNavigationMode() != getSelectedIndex())
+                setSelectedIndex(view.getNavigationMode());
+        }
+    }
 }

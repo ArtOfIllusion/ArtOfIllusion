@@ -182,6 +182,7 @@ public class ViewAnimation
 
         // This has to be the last thing before repaint.
         // The view will react to it immediately.
+
         if (step == 1){
             view.preparePerspectiveAnimation();
         }
@@ -217,7 +218,8 @@ public class ViewAnimation
         endDistToScreen = camera.getDistToScreen();
 
         checkPreferences(); // This only works for the 'animate'
-        if (! animate){
+        if (! animate)
+        {
             endAnimation(); // Go directly to the last frame
             return;
         }
@@ -379,7 +381,7 @@ public class ViewAnimation
         view.setScale(view.getScale()*scalingFactor);
         view.repaint();
         if (viewHasCamera)
-            window.setModified(); // Could just dispatch a SceneChangedEvent. Would need to cange the method in LayoutWinode public.
+            window.setModified();
         setAuxGraphs();
         step++;
     }
@@ -400,10 +402,15 @@ public class ViewAnimation
         wipeAuxGraphs();
         view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
         if (viewHasCamera)
+        {
+            window.updateImage();
             window.setModified();
+        }
         else
+        {
             view.viewChanged(false);
-        view.repaint();
+            view.repaint();
+        }
     }
 
     /** 

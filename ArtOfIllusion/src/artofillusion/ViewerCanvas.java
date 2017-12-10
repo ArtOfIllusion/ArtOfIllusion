@@ -49,15 +49,16 @@ public abstract class ViewerCanvas extends CustomWidget
   protected Map<ViewerControl,Widget> controlMap;
   protected Vec3 rotationCenter;
   protected ViewAnimation animation;
-  protected    ClickedPointFinder finder;
+  protected ClickedPointFinder finder;
 
   protected final ViewChangedEvent viewChangedEvent;
 
   public static Color gray, ghost, red, green, blue, yellow, cone, teal, TEAL;
   public Point mousePoint;
   public AuxiliaryGraphics auxGraphs = new AuxiliaryGraphics();
-  public boolean perspectiveEnabled = true;
+  public boolean perspectiveControEnabled = true;
   public boolean navigationTravelEnabled = true;
+  public int lastSetNavigation = 0; // To get the mode right during animation preview
   public boolean showViewCone = true;
   
   private static boolean openGLAvailable;
@@ -653,7 +654,7 @@ public abstract class ViewerCanvas extends CustomWidget
       return;
 
     if (nextNavigation < 2)
-       setNavigationMode(nextNavigation, perspectiveSwitch);
+      setNavigationMode(nextNavigation, perspectiveSwitch);
     else
       setNavigationMode(nextNavigation, true);
   }
@@ -682,10 +683,10 @@ public abstract class ViewerCanvas extends CustomWidget
     else
       perspective = true;
     
-    repaint(); 
+    //repaint(); 
 
     //if (nextNavigation > 1)
-      nextPerspective = true; // Just to be sure
+    //  nextPerspective = true; // Just to be sure
     //
     // Turn y up for landscape modes. Animated
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
@@ -714,23 +715,22 @@ public abstract class ViewerCanvas extends CustomWidget
             // The system uses only the projection of the y-direction, that is needed.
             coords.setOrientation(z, new Vec3(0,1,0)); // new coords
             animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
-            //animation.start(nextPerspective, nextNavigation, coords);
         }
     }
     else
     {
         navigation = nextNavigation;
         viewChanged(false);
-        repaint();
     }
   }
+
+  /* Changing perspective without animation */
   
-  /* changing perspective without animation */
   private void flipPerspectiveSwitch(boolean nextPerspective)
   {
     if (perspective == nextPerspective || perspectiveSwitch == nextPerspective)
         return;
-    
+
     if(nextPerspective)
     {
         // converting scale to distance
@@ -1188,6 +1188,16 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public void viewChanged(boolean selectionOnly)
   {
+    // Animation tracks may tilt the camera and the y-up navigation modes may not be 
+    // appropriate. This check tries to use the user's last selection if possible -- Otherwise selects the 
+    // correcponding 3D-mode
+
+    if (boundCamera != null && (lastSetNavigation == 1 || lastSetNavigation == 3))
+      if (theCamera.getCameraCoordinates().getRotationAngles()[2] == 0.0) // The rotation angles of the boundCamera are checked elsewhere
+        navigation = lastSetNavigation;
+      else
+        navigation = lastSetNavigation-1;
+
     dispatchEvent(viewChangedEvent);
   }
 

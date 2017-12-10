@@ -123,12 +123,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
       theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
+      theView[i].lastSetNavigation = 1;
       theView[i].setNavigationMode(1,false);
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
-    //theView[3].setPerspective(true);
-    theView[3].setOrientation(6); // This shiuld be mde to take care of the perspectivebusiness...
+    theView[3].setOrientation(6);
 
     theView[currentView].setDrawFocus(true);
     viewsContainer = new FormContainer(new double [] {1, 1}, new double [] {1, 1});

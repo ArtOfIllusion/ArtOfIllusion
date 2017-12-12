@@ -16,13 +16,31 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /** This class keeps track of program-wide user preferences. */
 
 public class ApplicationPreferences
 {
+  private static final Logger logger = Logger.getLogger(ApplicationPreferences.class.getName());
+  
+  private static Path path;
+  static {
+    try
+    {
+      path = Files.createDirectories(Paths.get(System.getProperty("user.home"), ".artofillusion"));
+    } catch (IOException ex)
+    {
+      logger.log(Level.SEVERE, "Create preferences path error:", ex);
+    }
+  }
+  
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol, maxAnimationDuration, animationFrameRate;
@@ -35,8 +53,8 @@ public class ApplicationPreferences
    */
 
   public ApplicationPreferences()
-  {
-    File f = new File(getPreferencesDirectory(), "aoiprefs");
+  {    
+    File f = new File(path.toFile(), "aoiprefs");
     if (!f.exists())
     {
       // See if it exists in the old location.
@@ -104,28 +122,28 @@ public class ApplicationPreferences
         properties.put("themeColorSet", Integer.toString(i));
 
     // Write the preferences to a file.
-
-    File f = new File(getPreferencesDirectory(), "aoiprefs");
-    try
-      {
-        OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-        properties.store(out, "Art of Illusion Preferences File");
-        out.close();
-      }
-    catch (IOException ex)
-      {
-        ex.printStackTrace();
-      }
+    
+    try(OutputStream out = Files.newOutputStream(path)) {
+      properties.store(out, "Art of Illusion Preferences File");
+    } catch(IOException ioe) {
+      ioe.printStackTrace();
+    }
   }
-
-  /** Get the directory in which preferences files are saved. */
-
+  
+  /** Get the folder path in which preferences files are saved. */
+  public static Path getPreferencesPath()
+  {
+    return path;
+  }
+  
+  /** Get the directory in which preferences files are saved. 
+   * @deprecated Use getPreferencesPath().toFile();
+   */
+  
+  @Deprecated
   public static File getPreferencesDirectory()
   {
-    File dir = new File(System.getProperty("user.home"), ".artofillusion");
-    if (!dir.exists())
-      dir.mkdirs();
-    return dir;
+    return path.toFile();
   }
 
   /** Initialize internal variables to reasonable defaults. */

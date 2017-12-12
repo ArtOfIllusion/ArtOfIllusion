@@ -1,4 +1,6 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
+   Changes Copyright (C) 2016 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -139,8 +141,7 @@ public class KeystrokeManager
   {
     try
     {
-      File dir = ApplicationPreferences.getPreferencesDirectory();
-      File inputFile = new File(dir, KEYSTROKE_FILENAME);
+      File inputFile = new File(ApplicationPreferences.getPreferencesPath().toFile(), KEYSTROKE_FILENAME);
       InputStream in;
       if (inputFile.exists())
         in = new BufferedInputStream(new FileInputStream(inputFile));
@@ -216,8 +217,7 @@ public class KeystrokeManager
 
     // Save it to disk.
 
-    File dir = ApplicationPreferences.getPreferencesDirectory();
-    File outFile = new File(dir, KEYSTROKE_FILENAME);
+    File outFile = new File(ApplicationPreferences.getPreferencesPath().toFile(), KEYSTROKE_FILENAME);
     OutputStream out = new BufferedOutputStream(new SafeFileOutputStream(outFile, SafeFileOutputStream.OVERWRITE));
     DOMSource source = new DOMSource(doc);
     StreamResult result = new StreamResult(out);
@@ -226,5 +226,5 @@ public class KeystrokeManager
     transformer.setOutputProperty(OutputKeys.INDENT, "yes");
     transformer.transform(source, result);
     out.close();
+    }
   }
-}

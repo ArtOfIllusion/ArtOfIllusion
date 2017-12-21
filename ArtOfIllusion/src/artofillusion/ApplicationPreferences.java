@@ -55,23 +55,27 @@ public class ApplicationPreferences
   public ApplicationPreferences()
   {    
     File f = new File(path.toFile(), "aoiprefs");
-    if (!f.exists())
+    if (f.exists())
     {
-      // See if it exists in the old location.
-
+      // new preferences file found...
+    } else {
+      // new preferences file not found...
+      // Check that file .aoiprefs exist under user.home path
+      // in that case move it to new location
+      
       File f2 = new File(System.getProperty("user.home"), ".aoiprefs");
       if (f2.exists())
         f2.renameTo(f);
     }
     initDefaultPreferences();
     if (!f.exists())
-      {
-        properties = new Properties();
-        Translate.setLocale(Locale.getDefault());
-        return;
-      }
+    {
+      properties = new Properties();
+      Translate.setLocale(Locale.getDefault());
+      return;
+    }
     try
-      {
+      {        
         InputStream in = new BufferedInputStream(new FileInputStream(f));
         loadPreferences(in);
         in.close();

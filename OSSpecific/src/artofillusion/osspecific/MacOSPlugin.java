@@ -19,8 +19,6 @@ import com.apple.eawt.Application;
 import com.apple.eawt.ApplicationEvent;
 import java.awt.*;
 import java.io.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.prefs.*;
 
 /** This is a plugin to make Art of Illusion behave more like a standard Macintosh
@@ -28,7 +26,6 @@ import java.util.prefs.*;
 
 public class MacOSPlugin implements Plugin, com.apple.eawt.ApplicationListener
 {
-  private static final Logger logger = Logger.getLogger(MacOSPlugin.class.getName());
   
   private boolean usingAppMenu;
 
@@ -139,7 +136,7 @@ public class MacOSPlugin implements Plugin, com.apple.eawt.ApplicationListener
       ArtOfIllusion.newWindow(new Scene(new File(event.getFilename()), true));
     } catch (IOException ex)
     {
-      logger.log(Level.SEVERE, null, ex);
+      ex.printStackTrace();
     }
   }
 

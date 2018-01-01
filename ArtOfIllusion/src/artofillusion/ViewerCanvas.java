@@ -38,7 +38,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected EditingTool currentTool, activeTool, metaTool, altTool;
   protected ScrollViewTool scrollTool;
   protected PopupMenuManager popupManager;
-  protected int renderMode, gridSubdivisions, orientation, navigation;
+  protected int renderMode, gridSubdivisions, orientation, navigation, scrollBuffer;
   protected double gridSpacing, scale, distToPlane, scrollRadius, scrollX, scrollY, scrollBlend, scrollBlendX, scrollBlendY;
   protected boolean perspective, perspectiveSwitch, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected boolean lastModelPerspective;
@@ -254,9 +254,29 @@ public abstract class ViewerCanvas extends CustomWidget
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
-    // Should there be an ActionProcessor just in case?
-	if (scrollTool != null)
-	  scrollTool.mouseScrolled(e, this);
+    if (scrollTool == null)
+      return;
+
+    if (mouseProcessor != null)
+      mouseProcessor.stopProcessing();
+
+    mouseProcessor = new ActionProcessor();
+    if (e.isAltDown())
+        scrollBuffer += e.getWheelRotation();
+    else
+        scrollBuffer += e.getWheelRotation()*10;
+    final ViewerCanvas viewToProcess = this;
+    final MouseScrolledEvent scrollEvent = e;
+    mouseProcessor.addEvent(new Runnable() {
+      @Override
+      public void run()
+      {
+        scrollTool.mouseScrolled(scrollEvent, viewToProcess);
+      }
+    });
+    //// Should there be an ActionProcessor just in case?
+	//if (scrollTool != null)
+	//  scrollTool.mouseScrolled(e, this);
   }
 
   /** Subclasses should override this to handle events. */

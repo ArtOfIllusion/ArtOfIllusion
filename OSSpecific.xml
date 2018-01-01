@@ -3,10 +3,10 @@
 <project name="OSSpecific" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
-  <property name="src" value="${ant.project.name}/src" />
-  <property name="build" value="${ant.project.name}/build" />
-  <property name="docs" value="${ant.project.name}/docs" />
-  <property name="lib" value="${ant.project.name}/lib" />
+  <property name="src" value="OSSpecific/src" />
+  <property name="build" value="OSSpecific/build" />
+  <property name="docs" value="OSSpecific/docs" />
+  <property name="lib" value="OSSpecific/lib" />
   <property name="dist" value="Live_Application" />
   <property name="assemble" value="${dist}/Plugins" />
   <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />

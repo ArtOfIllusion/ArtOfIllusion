@@ -30,7 +30,8 @@ public class ScrollViewTool
 	private Camera camera;
 	private double distToPlane;
 	private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY; // for graphics
-    private int navigationMode, scrollSteps;
+    private int navigationMode, scrollSteps, startOrientation;
+    private Vec3 startZ, startUp;
 	private Rectangle bounds;
 	private Point mousePoint;
 	private CoordinateSystem startCoords;
@@ -62,8 +63,9 @@ public class ScrollViewTool
         // Any bound should have a 'distToPlane' that should be saved with the object.
 
 		CoordinateSystem coords = camera.getCameraCoordinates();
+        startZ  = new Vec3(coords.getZDirection());
+        startUp = new Vec3(coords.getUpDirection());
 		view.setRotationCenter(coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane())));
-	
 		mousePoint = view.mousePoint = e.getPoint();
 		scrollTimer.restart(); // The timer takes case of teh graphics and updating the children of a camera object
 
@@ -216,6 +218,9 @@ public class ScrollViewTool
 		else 
 			return;
 		
+		if(boundCamera == null)
+            if(!coords.getZDirection().equals(startZ) || !coords.getUpDirection().equals(startUp))
+                view.setOrientation(ViewerCanvas.VIEW_OTHER);
 		camera.setCameraCoordinates(coords);
 		view.setRotationCenter(newPos.plus(coords.getZDirection().times(distToPlane)));
 	}

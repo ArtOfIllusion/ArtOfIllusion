@@ -53,7 +53,7 @@ public class ViewerPerspectiveControl implements ViewerControl
           perspectiveChoice.setEnabled(true);
           perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
         }
-		perspectiveChoice.setEnabled(view.perspectiveEnabled);
+		perspectiveChoice.setEnabled(view.perspectiveControlEnabled);
       }
     });
 

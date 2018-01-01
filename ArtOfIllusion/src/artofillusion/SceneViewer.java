@@ -127,7 +127,6 @@ public class SceneViewer extends ViewerCanvas
 	  if (which > 5) // Would have thought that the super takes care of this but not always.
 		orientation = VIEW_OTHER;
       viewChanged(false);
-	  //repaint();
     }
   }
 
@@ -143,8 +142,9 @@ public class SceneViewer extends ViewerCanvas
     orientation = which;
 	perspective = persp;
 	navigation = navi;
-	viewChanged(false);
-	repaint();
+
+    if (boundCamera != null)
+        boundCamera.setCoords(theCamera.getCameraCoordinates().duplicate());
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,

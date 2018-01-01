@@ -46,6 +46,7 @@ public class ViewAnimation
 	Vec3 endRotationCenter, rotStart, rotAni, aniZ, aniOrigin;
 	ViewerCanvas view;
 	Camera camera;
+    boolean  viewHasCamera;
 	double[] startAngles, endAngles;
 	double   startDist, endDist, aniDist, distanceFactor, moveDist; 
 	double   startWeightLin, endWeightLin, startWeightExp, endWeightExp;
@@ -163,6 +164,7 @@ public class ViewAnimation
 
 		step = 1;
 		changingPerspective = true;
+        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
 		timer.restart();
 	}
 
@@ -184,8 +186,13 @@ public class ViewAnimation
 			view.preparePerspectiveAnimation();
 		}
 		view.repaint();
+        if (viewHasCamera)
+            window.setModified();
+        else
+
 		// auxGraphs shows up wrong. Possibly numerical accuaracy issue.
 		// setAuxGraphs();
+
 		step++;
 	}
 
@@ -322,6 +329,7 @@ public class ViewAnimation
 		// Now we  know all we need to know to launch the animation sequence.
 		// Restart because the previous move could still be running.
 		animatingMove = true;
+        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
 		timer.restart();
 	}
 
@@ -370,6 +378,8 @@ public class ViewAnimation
 		camera.setCameraCoordinates(aniCoords);
 		view.setScale(view.getScale()*scalingFactor);
 		view.repaint();
+        if (viewHasCamera)
+            window.setModified(); // Could just dispatch a SceneChangedEvent. Would need to cange the method in LayoutWinode public.
 		setAuxGraphs();
 		step++;
 	}
@@ -389,6 +399,9 @@ public class ViewAnimation
 
 		wipeAuxGraphs();
 		view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
+        if (viewHasCamera)
+            window.setModified();
+        else
 		view.viewChanged(false);
 		view.repaint();
 	}
@@ -409,10 +422,10 @@ public class ViewAnimation
 		return true;
 	}
 
-	/* Check how the user has congigured the animation engine  */
+    /* Check how the user has configured the animation engine  */
 	private void checkPreferences()
 	{
-		// This only works for the boolean to take effect immediately
+        // This only works for the 'animate' boolean to take effect immediately
 		// Don't know why?
 		animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	}

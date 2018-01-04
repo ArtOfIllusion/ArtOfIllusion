@@ -21,6 +21,9 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.xml.parsers.*;
 
@@ -42,8 +45,8 @@ public class PluginRegistry
 
   public static void scanPlugins()
   {
-    File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
-    if (!dir.exists())
+    Path path = Paths.get(ArtOfIllusion.PLUGIN_DIRECTORY);
+    if(Files.notExists(path))
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
       return;
@@ -52,21 +55,17 @@ public class PluginRegistry
     // Scan the plugins directory, and parse the index in every jar file.
 
     HashSet<JarInfo> jars = new HashSet<JarInfo>();
-    for (String file : dir.list())
+    try
     {
-      try
+      for(Path plug: Files.newDirectoryStream(path))
       {
-        jars.add(new JarInfo(new File(dir, file)));
+        jars.add(new JarInfo(plug));
       }
-      catch (IOException ex)
-      {
-        // Not a zip file.
-      }
-      catch (Exception ex)
-      {
-        System.err.println("*** Exception loading plugin file "+file);
-        ex.printStackTrace(System.err);
-      }
+    } catch (IOException ex)
+    {
+      //Not a zip archive or other IO Error
+    } catch (Exception ue) {
+      System.err.println("*** Exception loading plugin file " + ue);
     }
     processPlugins(jars);
   }
@@ -451,7 +450,12 @@ public class PluginRegistry
     ArrayList<ResourceInfo> resources;
     ArrayList<ExportInfo> exports;
     ClassLoader loader;
-
+    
+    JarInfo(Path path) throws IOException
+    {
+      this(path.toFile());
+    }
+    
     JarInfo(File file) throws IOException
     {
       this.file = file;

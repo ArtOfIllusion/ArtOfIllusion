@@ -38,7 +38,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected EditingTool currentTool, activeTool, metaTool, altTool;
   protected ScrollViewTool scrollTool;
   protected PopupMenuManager popupManager;
-  protected int renderMode, gridSubdivisions, orientation, navigation;
+  protected int renderMode, gridSubdivisions, orientation, navigation, scrollBuffer;
   protected double gridSpacing, scale, distToPlane, scrollRadius, scrollX, scrollY, scrollBlend, scrollBlendX, scrollBlendY;
   protected boolean perspective, perspectiveSwitch, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected boolean lastModelPerspective;
@@ -56,8 +56,9 @@ public abstract class ViewerCanvas extends CustomWidget
   public static Color gray, ghost, red, green, blue, yellow, cone, teal, TEAL;
   public Point mousePoint;
   public AuxiliaryGraphics auxGraphs = new AuxiliaryGraphics();
-  public boolean perspectiveEnabled = true;
+  public boolean perspectiveControlEnabled = true;
   public boolean navigationTravelEnabled = true;
+  public int lastSetNavigation = 0; // To get the mode right during animation preview
   public boolean showViewCone = true;
   
   private static boolean openGLAvailable;
@@ -254,9 +255,29 @@ public abstract class ViewerCanvas extends CustomWidget
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
-    // Should there be an ActionProcessor just in case?
-	if (scrollTool != null)
-	  scrollTool.mouseScrolled(e, this);
+    if (scrollTool == null)
+      return;
+
+    if (mouseProcessor != null)
+      mouseProcessor.stopProcessing();
+
+    mouseProcessor = new ActionProcessor();
+    if (e.isAltDown())
+        scrollBuffer += e.getWheelRotation();
+    else
+        scrollBuffer += e.getWheelRotation()*10;
+    final ViewerCanvas viewToProcess = this;
+    final MouseScrolledEvent scrollEvent = e;
+    mouseProcessor.addEvent(new Runnable() {
+      @Override
+      public void run()
+      {
+        scrollTool.mouseScrolled(scrollEvent, viewToProcess);
+      }
+    });
+    //// Should there be an ActionProcessor just in case?
+	//if (scrollTool != null)
+	//  scrollTool.mouseScrolled(e, this);
   }
 
   /** Subclasses should override this to handle events. */
@@ -662,10 +683,10 @@ public abstract class ViewerCanvas extends CustomWidget
     else
 	  perspective = true;
 	
-	repaint(); 
+    //repaint(); 
 
 	//if (nextNavigation > 1)
-	  nextPerspective = true; // Just to be sure
+    //  nextPerspective = true; // Just to be sure
 	//
     // Turn y up for landscape modes. Animated
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
@@ -694,18 +715,17 @@ public abstract class ViewerCanvas extends CustomWidget
 			// The system uses only the projection of the y-direction, that is needed.
 			coords.setOrientation(z, new Vec3(0,1,0)); // new coords
 			animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
-			//animation.start(nextPerspective, nextNavigation, coords);
 		}
     }
 	else
     {
 		navigation = nextNavigation;
 		viewChanged(false);
-		repaint();
 	}
   }
   
-  /* changing perspective without animation */
+  /* Changing perspective without animation */
+  
   private void flipPerspectiveSwitch(boolean nextPerspective)
   {
 	if (perspective == nextPerspective || perspectiveSwitch == nextPerspective)
@@ -1168,6 +1188,16 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public void viewChanged(boolean selectionOnly)
   {
+    // Animation tracks may tilt the camera and the y-up navigation modes may not be 
+    // appropriate. This check tries to use the user's last selection if possible -- Otherwise selects the 
+    // correcponding 3D-mode
+
+    if (boundCamera != null && (lastSetNavigation == 1 || lastSetNavigation == 3))
+      if (theCamera.getCameraCoordinates().getRotationAngles()[2] == 0.0) // The rotation angles of the boundCamera are checked elsewhere
+        navigation = lastSetNavigation;
+      else
+        navigation = lastSetNavigation-1;
+
     dispatchEvent(viewChangedEvent);
   }
 

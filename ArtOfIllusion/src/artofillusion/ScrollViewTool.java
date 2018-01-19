@@ -20,15 +20,18 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.Timer;
 
+/** ScrollViewTool is a tool to handle mouse scroll wheel events in scene and object views. 
+    It moves the viewpoint in view z-directi and/or in some cases changes view orientation. */
+
 public class ScrollViewTool
 {
 	private EditingWindow window;
-	private MouseScrolledEvent event;
 	private ViewerCanvas view;
 	private Camera camera;
 	private double distToPlane;
 	private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY; // for graphics
-	private int navigationMode;
+    private int navigationMode, scrollSteps, startOrientation;
+    private Vec3 startZ, startUp;
 	private Rectangle bounds;
 	private Point mousePoint;
 	private CoordinateSystem startCoords;
@@ -42,7 +45,9 @@ public class ScrollViewTool
 
 	protected void mouseScrolled(MouseScrolledEvent e, ViewerCanvas v)
 	{
-		event = e;
+	    scrollSteps = v.scrollBuffer;
+        v.scrollBuffer = 0;
+        v.mouseMoving = false;
 		view = v;
 		view.scrolling = true;
 		distToPlane = view.getDistToPlane();
@@ -50,16 +55,17 @@ public class ScrollViewTool
 		bounds = view.getBounds();
 		camera = view.getCamera();
 		boundCamera = view.getBoundCamera();
-		if (boundCamera != null)
-			startCoords = boundCamera.getCoords().duplicate();
+        if (!scrollTimer.isRunning())
+            startCoords = camera.getCameraCoordinates().duplicate();
 		
 		// Make sure that the rotation Center is on Camera Z-axis.
 		// After a SceneCamera is read from a file, that may not be the case.
-		// A SceneCamera should have a 'distToPlane' that should be saved with the camera.
-		// Makin it saveable will cause version incompatibility.
+        // Any bound should have a 'distToPlane' that should be saved with the object.
+
 		CoordinateSystem coords = camera.getCameraCoordinates();
+        startZ  = new Vec3(coords.getZDirection());
+        startUp = new Vec3(coords.getUpDirection());
 		view.setRotationCenter(coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane())));
-	
 		mousePoint = view.mousePoint = e.getPoint();
 		scrollTimer.restart(); // The timer takes case of teh graphics and updating the children of a camera object
 
@@ -77,15 +83,9 @@ public class ScrollViewTool
 				break;
 		}
 		
-		if (boundCamera != null && window != null) // wonder why the window is here...
-		{
-			boundCamera.setCoords(camera.getCameraCoordinates().duplicate());
-			((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);
-			moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()));
-
-		}
 		setAuxGraphs(view);
 		repaintAllViews(view);
+		//view.repaint
 		view.viewChanged(false);
 	}
 
@@ -100,7 +100,7 @@ public class ScrollViewTool
 		{
 			CoordinateSystem coords = camera.getCameraCoordinates();
 			double oldDist = distToPlane;
-			//double newDist = oldDist*Math.pow(1.0/1.01, amount); // This woud reverse the action
+            //double newDist = oldDist*Math.pow(1.0/1.01, amount); // This would reverse the action
 			double newDist = oldDist*Math.pow(1.01, amount);
 			Vec3 oldPos = new Vec3(coords.getOrigin());
 			Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
@@ -218,14 +218,26 @@ public class ScrollViewTool
 		else 
 			return;
 		
+		if(boundCamera == null)
+            if(!coords.getZDirection().equals(startZ) || !coords.getUpDirection().equals(startUp))
+                view.setOrientation(ViewerCanvas.VIEW_OTHER);
 		camera.setCameraCoordinates(coords);
 		view.setRotationCenter(newPos.plus(coords.getZDirection().times(distToPlane)));
 	}
 
 	public void mouseStoppedScrolling()
 	{
-		// This should set an undorecord if a camera moved
+	    if (window != null && boundCamera != null)
+        {
+            boundCamera.getCoords().copyCoords(camera.getCameraCoordinates());
+            if (boundCamera.getObject() instanceof SceneCamera) ((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);
+
+            UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, new Object [] {boundCamera.getCoords(), startCoords});
+            moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
+            window.setUndoRecord(undo);
+        }
 		wipeAuxGraphs();
+        window.updateImage();
 	}
 
 	private Timer scrollTimer = new Timer(500, new ActionListener() 
@@ -250,15 +262,16 @@ public class ScrollViewTool
 
 	/** 
 	    This is called recursively to move any children of a bound camera. 
-		This does not set an undo record.
 	*/
-	private void moveCameraChildren(ObjectInfo parent, Mat4 transform)
+    private void moveCameraChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
 	{	
 		for (int i = 0; i < parent.getChildren().length; i++)
 		{
 			CoordinateSystem coords = parent.getChildren()[i].getCoords();
+            CoordinateSystem previousCoords = coords.duplicate();
 			coords.transformCoordinates(transform);
-			moveCameraChildren(parent.getChildren()[i], transform);
+            undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, previousCoords});
+            moveCameraChildren(parent.getChildren()[i], transform, undo);
 		}  
 	}
 
@@ -273,7 +286,6 @@ public class ScrollViewTool
 
   private void setAuxGraphs(ViewerCanvas view)
   {
-
 	if (window != null)
 	  for (ViewerCanvas v : window.getAllViews())
         if (v != view)
@@ -287,7 +299,8 @@ public class ScrollViewTool
 		v.auxGraphs.wipe();
   }
 
-	/** Maybe some day? */
 	public void drawOverlay()
-	{}
+    {
+        // This could draw a "ghost" of the bound camera and it's children during scroll
+    }
 }

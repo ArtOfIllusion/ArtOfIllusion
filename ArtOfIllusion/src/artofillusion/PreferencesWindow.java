@@ -168,11 +168,11 @@ public class PreferencesWindow
     });
     toolChoice.setSelectedIndex(prefs.getUseCompoundMeshTool() ? 1 : 0);
     localeChoice = new BComboBox();
-    Locale defaultLocale = Locale.getDefault();
+    Locale currentLocale = prefs.getLocale();
     Locale languages[] = Translate.getAvailableLocales();
     for (int i = 0; i < languages.length; i++)
     {
-      localeChoice.add(languages[i].getDisplayName(defaultLocale));
+      localeChoice.add(languages[i].getDisplayName(currentLocale));
       if (prefs.getLocale().equals(languages[i]))
         localeChoice.setSelectedIndex(i);
     }

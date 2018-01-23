@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -47,14 +48,33 @@ import artofillusion.*;
 
 public class Translate
 {
-  private static Locale locale = Locale.getDefault();
-  private static Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
+  private static final Set<Locale> availableLocales = new LinkedHashSet<Locale>();
+  static {
+    availableLocales.add(new Locale("af", "ZA"));
+    availableLocales.add(Locale.SIMPLIFIED_CHINESE);
+    availableLocales.add(new Locale("da", "DK"));
+    availableLocales.add(new Locale("nl", "NL"));
+    availableLocales.add(Locale.US);
+    availableLocales.add(new Locale("fi", "FI"));
+    availableLocales.add(Locale.FRENCH);
+    availableLocales.add(Locale.GERMAN);
+    availableLocales.add(Locale.ITALIAN);
+    availableLocales.add(Locale.JAPANESE);
+    availableLocales.add(new Locale("pt", "BR"));
+    availableLocales.add(new Locale("es", "ES"));
+    availableLocales.add(new Locale("sv", "SE"));
+    availableLocales.add(new Locale("vi", "VN"));
+  }
+  
+  private static Locale locale = availableLocales.contains(Locale.getDefault()) ? Locale.getDefault() : Locale.US;
+  
+  private static final Map<String, ResourceBundle> bundles = new HashMap<String, ResourceBundle>();
   
   /** Set the locale to be used for generating text. */
   
   public static void setLocale(Locale l)
   {
-    locale = l;
+    locale = availableLocales.contains(l) ? l : Locale.US;
     bundles.clear();
   }
   
@@ -69,22 +89,7 @@ public class Translate
   
   public static Locale [] getAvailableLocales()
   {
-    return new Locale [] {
-      new Locale("af", "ZA"),
-      Locale.SIMPLIFIED_CHINESE,
-      new Locale("da", "DK"),
-      new Locale("nl", "NL"),
-      Locale.US,
-      new Locale("fi", "FI"),
-      Locale.FRENCH,
-      Locale.GERMAN,
-      Locale.ITALIAN,
-      Locale.JAPANESE,
-      new Locale("pt", "BR"),
-      new Locale("es", "ES"),
-      new Locale("sv", "SE"),
-      new Locale("vi", "VN")
-    };
+    return availableLocales.toArray(new Locale[availableLocales.size()]);
   }
 
   /**

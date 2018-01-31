@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
+
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -19,6 +20,7 @@ import java.awt.*;
 import java.io.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
 
@@ -27,8 +29,10 @@ import java.util.List;
 
 public class UndoRecord
 {
-  private ArrayList<Integer> command;
-  private ArrayList<Object[]> data;
+  private String name;
+  
+  private final LinkedList<UndoAction> commands = new LinkedList<UndoAction>();
+  
   private ArrayList<SoftReference[]> dataRef;
   private File cacheFile;
   private boolean redo;
@@ -53,7 +57,34 @@ public class UndoRecord
   public static final int SET_SCENE_SELECTION = 16;
 
   private static final List<Integer> commandsToCache = Arrays.asList(COPY_OBJECT, COPY_VERTEX_POSITIONS);
+  
+  private class UndoAction
+  {
+    private final Integer command;
+    private final Object[] data;
+    
+    public Integer getCommand()
+    {
+      return command;
+    }
 
+    public Object[] getData()
+    {
+      return data;
+    }
+
+    public boolean isCacheable()
+    {
+      return commandsToCache.contains(command);
+    }
+    
+    public UndoAction(Integer command, Object[] data)
+    {
+      this.command = command;
+      this.data = data;
+    }
+  }
+  
   /**
    * Create a new UndoRecord.  Initially it represents an empty script.  Commands can be added by calling
    * {@link #addCommand addCommand()} or {@link #addCommandAtBeginning addCommandAtBeginning()}.
@@ -65,8 +96,6 @@ public class UndoRecord
   {
     theWindow = win;
     redo = isRedo;
-    command = new ArrayList<Integer>();
-    data = new ArrayList<Object[]>();
   }
 
   /**
@@ -81,7 +110,7 @@ public class UndoRecord
   public UndoRecord(EditingWindow win, boolean isRedo, int theCommand, Object commandData[])
   {
     this(win, isRedo);
-    addCommand(theCommand, commandData);
+    commands.add(new UndoAction(theCommand, commandData));    
   }
 
   /**
@@ -92,24 +121,26 @@ public class UndoRecord
     return redo;
   }
 
-  /**
-   * Get the list of commands in this record's script.
-   */
-  public List<Integer> getCommands()
+  public Boolean isCommandChangesSelectionOnly()
   {
-    return Collections.unmodifiableList(command);
+    boolean result = true;
+    for(UndoAction action: commands)
+    {
+      if(action.getCommand() == UndoRecord.SET_SCENE_SELECTION) continue;
+      result = false;
+    }    
+    return result;
   }
-
+  
   /**
    * Add a command to the end of this record's script.
    *
    * @param theCommand  the command to add to the script
    * @param commandData data to include as arguments to the command
    */
-  public void addCommand(int theCommand, Object commandData[])
+  public final void addCommand(int theCommand, Object commandData[])
   {
-    command.add(theCommand);
-    data.add(commandData);
+    commands.add(new UndoAction(theCommand, commandData));
   }
 
   /**
@@ -120,8 +151,7 @@ public class UndoRecord
    */
   public void addCommandAtBeginning(int theCommand, Object commandData[])
   {
-    command.add(0, theCommand);
-    data.add(0, commandData);
+    commands.addFirst(new UndoAction(theCommand, commandData));
   }
 
   /**
@@ -142,11 +172,11 @@ public class UndoRecord
       ex.printStackTrace();
       return redoRecord;
     }
-    for (int i = 0; i < command.size(); i++)
-      {
-        int c = command.get(i);
-        Object d[] = data.get(i);
-        switch (c)
+    for (UndoAction action: commands)
+    {
+
+        Object d[] = action.getData();
+        switch (action.getCommand())
         {
           case COPY_OBJECT:
             {
@@ -313,6 +343,9 @@ public class UndoRecord
   /**
    * Cache the data in this record to disk, allowing it to potentially be unloaded from memory.
    */
+  /**
+   * Cache the data in this record to disk, allowing it to potentially be unloaded from memory.
+   */
   protected void cacheToDisk()
   {
     // We need to make sure the caching gets done 1) after we're certain no more commands will be added, and 2) on a
@@ -342,9 +375,10 @@ public class UndoRecord
   private synchronized void writeCache()
   {
     boolean anyToCache = false;
-    for (Integer c : command)
-      if (commandsToCache.contains(c))
+    for (UndoAction action: commands)
+      if(action.isCacheable())
         anyToCache = true;
+    
     if (!anyToCache)
       return;
 
@@ -353,31 +387,33 @@ public class UndoRecord
       dataRef = new ArrayList<SoftReference[]>();
       cacheFile = File.createTempFile("undoCache", "dat");
       cacheFile.deleteOnExit();
-      DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(cacheFile)));
-      for (int i = 0; i < command.size(); i++)
+      
+      try (DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(cacheFile))))
       {
-        Object d[] = data.get(i);
-        SoftReference ref[] = new SoftReference[d.length];
-        dataRef.add(ref);
-        int c = command.get(i);
-        if (c == COPY_OBJECT && theWindow.getScene() != null)
+        for (UndoAction action: commands)
         {
-          out.writeUTF(d[1].getClass().getName());
-          ((Object3D) d[1]).writeToFile(out, theWindow.getScene());
-          ref[1] = new SoftReference<Object>(d[1]);
-          d[1] = null;
-        }
-        else if (c == COPY_VERTEX_POSITIONS)
-        {
-          Vec3 positions[] = (Vec3[]) d[1];
-          out.writeInt(positions.length);
-          for (Vec3 v : positions)
-            v.writeToFile(out);
-          ref[1] = new SoftReference<Object>(d[1]);
-          d[1] = null;
+          Object d[] = action.getData();
+          SoftReference ref[] = new SoftReference[d.length];
+          dataRef.add(ref);
+          int c = action.getCommand();
+          if (c == COPY_OBJECT && theWindow.getScene() != null)
+          {
+            out.writeUTF(d[1].getClass().getName());
+            ((Object3D) d[1]).writeToFile(out, theWindow.getScene());
+            ref[1] = new SoftReference<Object>(d[1]);
+            d[1] = null;
+          }
+          else if (c == COPY_VERTEX_POSITIONS)
+          {
+            Vec3 positions[] = (Vec3[]) d[1];
+            out.writeInt(positions.length);
+            for (Vec3 v : positions)
+              v.writeToFile(out);
+            ref[1] = new SoftReference<Object>(d[1]);
+            d[1] = null;
+          }
         }
       }
-      out.close();
     }
     catch (Exception ex)
     {
@@ -397,7 +433,7 @@ public class UndoRecord
     boolean anyToLoad = false;
     for (int i = 0; i < dataRef.size(); i++)
     {
-      Object d[] = data.get(i);
+      Object d[] = commands.get(i).getData();
       SoftReference ref[] = dataRef.get(i);
       if (ref != null)
       {
@@ -415,26 +451,26 @@ public class UndoRecord
 
     if (anyToLoad)
     {
-      DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(cacheFile)));
-      for (int i = 0; i < command.size(); i++)
-      {
-        Object d[] = data.get(i);
-        int c = command.get(i);
-        if (c == COPY_OBJECT && theWindow.getScene() != null)
+      try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(cacheFile)))) {
+        for (UndoAction action: commands)
         {
-          Class cls = ArtOfIllusion.getClass(in.readUTF());
-          Constructor con = cls.getDeclaredConstructor(DataInputStream.class, Scene.class);
-          d[1] = con.newInstance(in, theWindow.getScene());
-        }
-        else if (c == COPY_VERTEX_POSITIONS)
-        {
-          Vec3 positions[] = new Vec3[in.readInt()];
-          for (int j = 0; j < positions.length; j++)
-            positions[j] = new Vec3(in);
-          d[1] = positions;
+          Object d[] = action.getData();
+          int c = action.getCommand();
+          if (c == COPY_OBJECT && theWindow.getScene() != null)
+          {
+            Class cls = ArtOfIllusion.getClass(in.readUTF());
+            Constructor con = cls.getDeclaredConstructor(DataInputStream.class, Scene.class);
+            d[1] = con.newInstance(in, theWindow.getScene());
+          }
+          else if (c == COPY_VERTEX_POSITIONS)
+          {
+            Vec3 positions[] = new Vec3[in.readInt()];
+            for (int j = 0; j < positions.length; j++)
+              positions[j] = new Vec3(in);
+            d[1] = positions;
+          }
         }
       }
-      in.close();
     }
     cacheFile.delete();
     dataRef = null;

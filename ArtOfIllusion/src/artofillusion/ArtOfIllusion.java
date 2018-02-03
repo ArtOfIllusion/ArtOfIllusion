@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,6 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
 import artofillusion.image.filter.*;
 import artofillusion.material.*;
@@ -27,7 +26,6 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -130,7 +128,7 @@ public class ArtOfIllusion
     classTranslations.put("artofillusion.tools.tapDesigner.TapObject", "artofillusion.tapDesigner.TapObject");
     classTranslations.put("artofillusion.tools.tapDesigner.TapLeaf", "artofillusion.tapDesigner.TapLeaf");
   }
-
+  
   public static void main(String args[])
   {
     Translate.setLocale(Locale.getDefault());
@@ -361,20 +359,6 @@ public class ArtOfIllusion
       if (windows.contains(win))
         return;
     }
-    
-    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-    {
-      try
-      {
-        plugin.processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
-      }
-      catch (Throwable tx)
-      {
-        tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-      }
-    }
-    System.exit(0);
   }
 
   /** Execute all startup scripts. */

@@ -100,7 +100,7 @@ public class ArtOfIllusion
     }
     
   }
-
+  
   public static void main(String args[])
   {
     Translate.setLocale(Locale.getDefault());
@@ -356,20 +356,6 @@ public class ArtOfIllusion
       if (windows.contains(win))
         return;
     }
-    
-    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-    {
-      try
-      {
-        plugin.processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
-      }
-      catch (Throwable tx)
-      {
-        tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-      }
-    }
-    System.exit(0);
   }
 
   /** Execute all startup scripts. */

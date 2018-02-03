@@ -22,7 +22,6 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
-
 import javax.xml.parsers.*;
 
 import org.w3c.dom.*;
@@ -36,6 +35,36 @@ public class PluginRegistry
   private static final HashMap<String, ExportInfo> exports = new HashMap<String, ExportInfo>();
   private static final HashMap<String, Object> classMap = new HashMap<String, Object>();
 
+  static {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run()
+      {
+        Object[] pso = new Object [0];
+        PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STOPPING, pso);
+      }
+    }, "Plugin shutdown thread"));
+  }
+  
+  
+  public static <T> void notifyPlugins(Class<T> category, int message, Object... args)
+  {
+    if(categoryClasses.containsKey(category))
+    {
+        for(Object plugin: categoryClasses.get(category))
+        {
+          try 
+          {
+            ((Plugin)plugin).processMessage(message, args);
+          } 
+          catch(Throwable tx)
+          {
+            tx.printStackTrace();
+          }
+        }        
+    }
+  }
+  
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
    * contained in them.

@@ -489,9 +489,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;
-      List<Plugin> plugins = PluginRegistry.getPlugins(Plugin.class);
-      for (int i = 0; i < plugins.size(); i++)
-        plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
+      PluginRegistry.notifyPlugins(Plugin.class, Plugin.OBJECT_WINDOW_CREATED, this);
     }
     super.setVisible(visible);
   }
@@ -504,8 +502,6 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public void dispose()
   {
     super.dispose();
-    List<Plugin> plugins = PluginRegistry.getPlugins(Plugin.class);
-    for (int i = 0; i < plugins.size(); i++)
-      plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
+    PluginRegistry.notifyPlugins(Plugin.class, Plugin.OBJECT_WINDOW_CLOSING, this);
   }
 }

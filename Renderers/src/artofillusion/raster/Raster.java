@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2014 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,12 +18,24 @@ import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
-import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
-import java.awt.*;
-import java.awt.image.*;
-import java.util.*;
+import artofillusion.ui.ValueField;
+import buoy.widget.BCheckBox;
+import buoy.widget.BComboBox;
+import buoy.widget.BTabbedPane;
+import buoy.widget.Widget;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.MemoryImageSource;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** Raster is a Renderer which generates images with a scanline algorithm. */
 
@@ -168,55 +180,66 @@ public class Raster implements Renderer, Runnable
   @Override
   public Widget getConfigPanel()
   {
-    if (configPanel == null)
-    {
-      // General options panel.
-
-      FormContainer generalPanel = new FormContainer(3, 4);
-      LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
-      LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
-      generalPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
-      generalPanel.add(Translate.label("shadingMethod"), 0, 1, leftLayout);
-      generalPanel.add(Translate.label("supersampling"), 0, 2, leftLayout);
-      generalPanel.add(errorField = new ValueField(surfaceError, ValueField.POSITIVE, 6), 1, 0, rightLayout);
-      generalPanel.add(shadeChoice = new BComboBox(new String[]{
-          Translate.text("gouraud"),
-          Translate.text("hybrid"),
-          Translate.text("phong")
-      }), 1, 1, rightLayout);
-      generalPanel.add(aliasChoice = new BComboBox(new String[]{
-          Translate.text("none"),
-          Translate.text("Edges"),
-          Translate.text("Everything")
-      }), 1, 2, rightLayout);
-      generalPanel.add(sampleChoice = new BComboBox(new String[]{"2x2", "3x3"}), 2, 2, rightLayout);
-      sampleChoice.setEnabled(false);
-      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
-      aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
-        void processEvent()
-        {
-          sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
-        }
-      });
-
-      // Advanced options panel.
-
-      FormContainer advancedPanel = new FormContainer(new double [] {0.0, 1.0}, new double [4]);
-      advancedPanel.add(Translate.label("texSmoothing"), 0, 0, leftLayout);
-      advancedPanel.add(smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE), 1, 0, rightLayout);
-      advancedPanel.add(adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive), 0, 1, 2, 1, rightLayout);
-      advancedPanel.add(hideBackfaceBox = new BCheckBox(Translate.text("eliminateBackfaces"), hideBackfaces), 0, 2, 2, 1, rightLayout);
-      advancedPanel.add(hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR), 0, 3, 2, 1, rightLayout);
-
-      // Create the tabbed pane.
-
-      configPanel = new BTabbedPane();
-      configPanel.add(generalPanel, Translate.text("general"));
-      configPanel.add(advancedPanel, Translate.text("advanced"));
-    }
-    if (needCopyToUI)
-      copyConfigurationToUI();
-    return configPanel;
+//    if (configPanel == null)
+//    {
+//      // General options panel.
+//
+//      
+//      
+//      
+//
+//      FormContainer generalPanel = new FormContainer(3, 4);
+//      LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
+//      LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
+//      generalPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
+//      generalPanel.add(Translate.label("shadingMethod"), 0, 1, leftLayout);
+//      generalPanel.add(Translate.label("supersampling"), 0, 2, leftLayout);
+//      generalPanel.add(errorField = new ValueField(surfaceError, ValueField.POSITIVE, 6), 1, 0, rightLayout);
+//      generalPanel.add(shadeChoice = new BComboBox(new String[]{
+//          Translate.text("gouraud"),
+//          Translate.text("hybrid"),
+//          Translate.text("phong")
+//      }), 1, 1, rightLayout);
+//      generalPanel.add(aliasChoice = new BComboBox(new String[]{
+//          Translate.text("none"),
+//          Translate.text("Edges"),
+//          Translate.text("Everything")
+//      }), 1, 2, rightLayout);
+//      generalPanel.add(sampleChoice = new BComboBox(new String[]{"2x2", "3x3"}), 2, 2, rightLayout);
+//      sampleChoice.setEnabled(false);
+//      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
+//      aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
+//        void processEvent()
+//        {
+//          sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
+//        }
+//      });
+//      sampleChoice.setEnabled(false);
+//      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
+//      aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
+//        void processEvent()
+//        {
+//          sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
+//        }
+//      });
+//
+//      // Advanced options panel.
+//
+//      
+//      advancedPanel.add(Translate.label("texSmoothing"), 0, 0, leftLayout);
+//      advancedPanel.add(smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE), 1, 0, rightLayout);
+//      advancedPanel.add(adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive), 0, 1, 2, 1, rightLayout);
+//      advancedPanel.add(hideBackfaceBox = new BCheckBox(Translate.text("eliminateBackfaces"), hideBackfaces), 0, 2, 2, 1, rightLayout);
+//      advancedPanel.add(hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR), 0, 3, 2, 1, rightLayout);
+//
+//      // Create the tabbed pane.
+//
+//      configPanel = new BTabbedPane();
+//
+//    }
+//    if (needCopyToUI)
+//      copyConfigurationToUI();
+    return RasterRenderConfigPanelWidget.build();
   }
 
   /** Copy the current configuration to the user interface. */
@@ -850,19 +873,19 @@ public class Raster implements Renderer, Runnable
     while (theObject instanceof ObjectWrapper)
       theObject = ((ObjectWrapper) theObject).getWrappedObject();
     if (theObject instanceof ObjectCollection)
-      {
+    {
         Enumeration objects = ((ObjectCollection) theObject).getObjects(obj, false, theScene);
-        Mat4 fromLocal = context.camera.getObjectToWorld();
+      Mat4 fromLocal = context.camera.getObjectToWorld();
         while (objects.hasMoreElements())
-          {
+      {
             ObjectInfo elem = (ObjectInfo) objects.nextElement();
             CoordinateSystem coords = elem.getCoords().duplicate();
-            coords.transformCoordinates(fromLocal);
-            context.camera.setObjectTransform(coords.fromLocal());
+        coords.transformCoordinates(fromLocal);
+        context.camera.setObjectTransform(coords.fromLocal());
             renderObject(elem, orig, viewdir, coords.toLocal(), context, mainThread);
-          }
-        return;
       }
+      return;
+    }
     if (adaptive)
       {
         double dist = obj.getBounds().distanceToPoint(toLocal.times(orig));

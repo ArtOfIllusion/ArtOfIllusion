@@ -1,4 +1,5 @@
 /* Copyright (C) 2007-2015 by Peter Eastman
+   Changes copyright (C) 2018 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -86,7 +87,7 @@ public class ViewerOrientationControl implements ViewerControl
       ObjectInfo cameras[] = ((SceneViewer) view).getCameras();
       for (i = 0; i < cameras.length; i++)
       {
-        add(getItemCount()-1, cameras[i].getName());
+        add(getItemCount()-1, new listName(cameras[i].getName()));
         if (cameras[i] == view.getBoundCamera())
           selected = getItemCount()-2;
         else if (selected == getItemCount()-2)
@@ -98,6 +99,27 @@ public class ViewerOrientationControl implements ViewerControl
         setSelectedIndex(getItemCount()-1);
       if (getParent() != null)
         getParent().layoutChildren();
+    }
+
+    /** 
+        This is needed because several view cameras may have the same name. 
+        Using just Strings in the ComboBox results selecting always the first 
+        occurrence of a name. 
+    */
+
+    private class listName
+    {
+      private final String name;
+
+      private listName(String name)
+      {
+        this.name = name;
+      }
+      @Override
+      public String toString()
+      {
+        return name;
+      }
     }
   }
 }

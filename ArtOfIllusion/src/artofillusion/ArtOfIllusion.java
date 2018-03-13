@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,6 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
 import artofillusion.image.filter.*;
 import artofillusion.material.*;
@@ -27,7 +26,6 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -67,6 +65,9 @@ public class ArtOfIllusion
     try
       {
         URL url = ArtOfIllusion.class.getResource("/artofillusion/ArtOfIllusion.class");
+          System.out.println(url);
+        URL url2 = ArtOfIllusion.class.getProtectionDomain().getCodeSource().getLocation();
+          System.out.println(url2);
         if (url.toString().startsWith("jar:"))
           {
             String furl = url.getFile();
@@ -91,7 +92,8 @@ public class ArtOfIllusion
 
     // Load the application's icon.
 
-    ImageIcon icon = new IconResource("artofillusion/Icons/appIcon.png");
+    ImageIcon icon = new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("artofillusion/Icons/appIcon.png"));
+    
     APP_ICON = (icon.getIconWidth() == -1 ? null : icon);
 
     // Build a table of classes which have moved.

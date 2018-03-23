@@ -338,7 +338,7 @@ public class Camera implements Cloneable
   
   public Vec3 findDragVector(Vec3 p, double dx, double dy)
   {
-    Vec3 v1, v2;
+    Vec3 v1, v2, v;
     Vec2 v3, v4, p1;
     double a, b;
     
@@ -363,7 +363,10 @@ public class Camera implements Cloneable
         a = Math.floor(a/gridSpacing + 0.5) * gridSpacing;
         b = Math.floor(b/gridSpacing + 0.5) * gridSpacing;
       }
-    return (v1.times(a)).plus(v2.times(b));
+    v = (v1.times(a)).plus(v2.times(b));
+    if (Double.isNaN(v.x) || Double.isNaN(v.y) || Double.isNaN(v.z))
+      v = new Vec3();
+    return v;
   }
   
   /** Given a bounding box (specified in object coordinates), return a rectangle which

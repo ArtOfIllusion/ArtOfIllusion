@@ -541,7 +541,6 @@ public class SceneViewer extends ViewerCanvas
     {
       Vec3 difference = info.getCoords().getOrigin().minus(cameraPosition);
       double projectionDist = difference.dot(cameraAxis);
-      System.out.println("Z-projection "  + projectionDist);
       return (projectionDist > 0.0);
     }
     else

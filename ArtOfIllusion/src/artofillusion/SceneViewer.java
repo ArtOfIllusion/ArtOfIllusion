@@ -463,10 +463,12 @@ public class SceneViewer extends ViewerCanvas
 
     j = -1;
     minarea = Integer.MAX_VALUE;
+    Vec3 cameraPosition = theCamera.getCameraCoordinates().getOrigin();
+    Vec3 cameraAxis = theCamera.getCameraCoordinates().getZDirection();
     for (i = 0; i < theScene.getNumObjects(); i++)
     {
       info = theScene.getObject(i);
-      if (info.isVisible() && !info.isLocked())
+      if (info.isVisible() && !info.isLocked() && inFront(info, cameraPosition, cameraAxis))
       {
         theCamera.setObjectTransform(info.getCoords().fromLocal());
         bounds = theCamera.findScreenBounds(info.getBounds());
@@ -526,6 +528,24 @@ public class SceneViewer extends ViewerCanvas
   private boolean pointInRectangle(Point p, Rectangle r)
   {
     return (r.x-1 <= p.x && r.y-1 <= p.y && r.x+r.width+1 >= p.x && r.y+r.height+1 >= p.y);
+  }
+
+  /** 
+   * Check if an object can be selected in perspective mode. An object, whose origin is on the "camera plane"
+   * or behid it, should not be selected, when the view is set to perspective.
+   */
+
+  private boolean inFront(ObjectInfo info, Vec3 cameraPosition, Vec3 cameraAxis)
+  {
+    if (isPerspective())
+    {
+      Vec3 difference = info.getCoords().getOrigin().minus(cameraPosition);
+      double projectionDist = difference.dot(cameraAxis);
+      System.out.println("Z-projection "  + projectionDist);
+      return (projectionDist > 0.0);
+    }
+    else
+      return true;
   }
 
   @Override
@@ -616,10 +636,12 @@ public class SceneViewer extends ViewerCanvas
           theScene.clearSelection();
         parentFrame.updateMenus();
       }
+	  Vec3 cameraPosition = theCamera.getCameraCoordinates().getOrigin();
+      Vec3 cameraAxis = theCamera.getCameraCoordinates().getZDirection();
       for (int i = 0; i < theScene.getNumObjects(); i++)
       {
         info = theScene.getObject(i);
-        if (info.isVisible() && !info.isLocked())
+        if (info.isVisible() && !info.isLocked() && inFront(info, cameraPosition, cameraAxis))
         {
           theCamera.setObjectTransform(info.getCoords().fromLocal());
           b = theCamera.findScreenBounds(info.getBounds());

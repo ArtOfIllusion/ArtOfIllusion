@@ -27,7 +27,8 @@ public class PreferencesWindow
 {
   private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, localeChoice, themeChoice, colorChoice, toolChoice;
   private ValueField interactiveTolField, undoField, animationDurationField, animationFrameRateField;
-  private BCheckBox glBox, backupBox, reverseZoomBox, useViewAnimationsBox;
+  private BCheckBox glBox, backupBox, reverseZoomBox; 
+  private BCheckBox useViewAnimationsBox, updateImmediatelyBox, showActiveViewBox, showNavigationCuesBox;
   private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
   
@@ -79,6 +80,11 @@ public class PreferencesWindow
     prefs.setUseViewAnimations(useViewAnimationsBox.getState());
 	prefs.setMaxAnimationDuration(animationDurationField.getValue());
 	prefs.setAnimationFrameRate(animationFrameRateField.getValue());
+
+    prefs.setUpdateImmediately(updateImmediatelyBox.getState());
+    prefs.setShowActiveView(showActiveViewBox.getState());
+    prefs.setShowNavigationCues(showNavigationCuesBox.getState());
+
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
 	
     ThemeManager.setSelectedTheme(themes.get(themeChoice.getSelectedIndex()));
@@ -121,9 +127,9 @@ public class PreferencesWindow
     useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
     animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
     animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
-
-	//useViewAnimationsBox.addEventLink(ValueChangedEvent.class, this, "useViewAnimationsChanged");
-	//animationDurationField.addEventLink(ValueChangedEvent.class, this, "animationDurationChanged");
+    updateImmediatelyBox = new BCheckBox(Translate.text("updateImmediately"), prefs.getUpdateImmediately());
+    showActiveViewBox = new BCheckBox(Translate.text("showActiveView"), prefs.getShowActiveView());
+    showNavigationCuesBox = new BCheckBox(Translate.text("showNavigationCues"), prefs.getShowNavigationCues());
 
     themes = new ArrayList<ThemeManager.ThemeInfo>();
     for (ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
@@ -179,7 +185,7 @@ public class PreferencesWindow
 
     // Layout the panel.
 
-    FormContainer panel = new FormContainer(2, 16);
+    FormContainer panel = new FormContainer(2, 19);
     panel.setColumnWeight(1, 1.0);
     LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null);
     LayoutInfo widgetLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null);
@@ -211,8 +217,17 @@ public class PreferencesWindow
 	panel.add(Translate.label("animationFrameRate"), 0, 15, labelLayout);
 	panel.add(animationDurationField, 1, 14, widgetLayout);
 	panel.add(animationFrameRateField, 1, 15, widgetLayout);
-	//animationDurationField.setEnabled(false);
-	//animationFrameRateField.setEnabled(false);
+    panel.add(updateImmediatelyBox, 1, 16, widgetLayout);
+    panel.add(showActiveViewBox, 1, 17, widgetLayout);
+    panel.add(showNavigationCuesBox, 1, 18, widgetLayout);
+
+    updateImmediatelyBox.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        showActiveViewBox.setEnabled(updateImmediatelyBox.getState());
+      }
+    });
+
     return panel;
   }
 

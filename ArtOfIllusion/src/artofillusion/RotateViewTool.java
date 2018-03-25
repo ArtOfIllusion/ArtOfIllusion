@@ -31,11 +31,11 @@ public class RotateViewTool extends EditingTool
   private boolean controlDown;
   private CoordinateSystem oldCoords;
   private Vec3 rotationCenter;
-  private double angle, distToRot, xAngle, yAngle, r, fwMax, fwMin;
+  private double angle, distToRot, xAngle, yAngle,fwMax, fwMin;
   private Camera camera;
   private int selectedNavigation;
  
-  private Point viewCenter, p0, p1;
+  private Point viewCenter;
  
   public RotateViewTool(EditingWindow fr)
   {
@@ -138,9 +138,13 @@ public class RotateViewTool extends EditingTool
 					break;
 			}
 		}
-		setAuxGraphs(view);
-		repaintAllViews(view);
-		view.viewChanged(false);	
+		updateBoundCamera(view);
+		view.drawingPlane.update();
+		if (theWindow != null && ArtOfIllusion.getPreferences().getUpdateImmediately())
+			theWindow.updateImage();
+		else
+			view.repaint();
+		view.viewChanged(false);
 	}
 	
 	private void dragRotateTravelSpace(WidgetMouseEvent e, ViewerCanvas view)
@@ -374,30 +378,50 @@ public class RotateViewTool extends EditingTool
 	view.rotating = false;
 	view.setNavigationMode(selectedNavigation);
 
-    Point dragPoint = e.getPoint();
     if (theWindow != null)
     {
 		ObjectInfo bound = view.getBoundCamera();
         if (bound != null)
         {
-            // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
-            // the camera.
+            // Create an undo record, and move any children of the camera.
 			bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates()); // for precise action.
             UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
             moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
             theWindow.setUndoRecord(undo);
+            view.repaint();
         }
         theWindow.updateImage();
     }
 	
 	// If the mouse was not dragged then center to the given point
 	// This shouls be directly in the ViewerCanvas but it had a side-effect.
+
+	Point dragPoint = e.getPoint();
 	if (dragPoint.x == clickPoint.x && dragPoint.y == clickPoint.y)
 	    view.centerToPoint(dragPoint);
-	wipeAuxGraphs();
 	view.viewChanged(false);
   }
 
+  // Have the bound object follow the view camera.
+  // The view is redrawn based on the location of the bound object, when one is present. 
+
+  private void updateBoundCamera(ViewerCanvas view)
+  {
+    ObjectInfo bound = view.getBoundCamera();
+    if (bound == null)
+        return;
+    if (bound.getObject() instanceof SceneCamera)
+        bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+    else
+    {
+        double objDist = 100.0*view.getCamera().getDistToScreen()/view.getScale();
+        view.setDistToPlane(objDist);
+        Vec3 objCenter = rotationCenter.minus(view.getCamera().getCameraCoordinates().getZDirection().times(objDist));
+        bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+        bound.getCoords().setOrigin(objCenter);
+    }
+  }
+  
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
@@ -414,18 +438,14 @@ public class RotateViewTool extends EditingTool
   
   private void tilt(WidgetMouseEvent e, ViewerCanvas view, Point clickPoint)
   {
-	int d = Math.min(view.getBounds().width, view.getBounds().height);
-	r = d*0.45;
 	int cx = view.getBounds().width/2;
 	int cy = view.getBounds().height/2;
 	viewCenter = new Point(cx, cy);
 	
 	double aClick = Math.atan2(clickPoint.y-cy, clickPoint.x-cx);
-	p0 = new Point((int)(r*Math.cos(aClick)+cx), (int)(r*Math.sin(aClick))+cy);
 	
 	Point dragPoint = e.getPoint();
 	double aDrag = Math.atan2(dragPoint.y-cy, dragPoint.x-cx);
-	p1 = new Point((int)(r*Math.cos(aDrag))+cx, (int)(r*Math.sin(aDrag))+cy);
 	
 	Vec3 axis = viewToWorld.timesDirection(Vec3.vz());
 	
@@ -536,6 +556,8 @@ public class RotateViewTool extends EditingTool
     
 	if (!rotation.equals(Mat4.identity()))
 	{
+		int d = Math.min(view.getBounds().width, view.getBounds().height);
+
 		CoordinateSystem c = oldCoords.duplicate();
 		c.transformCoordinates(Mat4.translation(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z));
 		c.transformCoordinates(rotation);
@@ -562,51 +584,30 @@ public class RotateViewTool extends EditingTool
 	}
   }
 
-  private void repaintAllViews(ViewerCanvas view)
-  {
-    if (theWindow == null || theWindow instanceof UVMappingWindow)
-	  view.repaint();
-    else
-	  for (ViewerCanvas v : theWindow.getAllViews())
-	  	v.repaint();
-  }
-
-  private void setAuxGraphs(ViewerCanvas view)
-  {
-
-	if (theWindow != null)
-	  for (ViewerCanvas v : theWindow.getAllViews())
-        if (v != view)
-	      v.auxGraphs.set(view, true);
-  }
-  
-  private void wipeAuxGraphs()
-  {
-    if (theWindow != null)
-	  for (ViewerCanvas v : theWindow.getAllViews())
-		v.auxGraphs.wipe();
-  }
-
   @Override
   public void drawOverlay(ViewerCanvas view)
   {
+	if (! ArtOfIllusion.getPreferences().getShowNavigationCues())
+		return;
+
     if (theWindow != null && view.tilting)
 	{
-	  view.repaint();
+	  //view.repaint();
+	  int d = Math.min(view.getBounds().width, view.getBounds().height);
+	  double r = d*0.4;
+	  // The tilting crosshairs
 	  for (int i=0; i<4; i++)
-		view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.teal);
-	  
+		view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.cueBlue);
+	  // draw dial markers
+	  for (int i=0; i<24; i++)
+		view.drawLine(viewCenter, Math.PI/12.0*i+angle, r*0.98, r, view.cueBlue);
+		
+	  // The stationery crosshairs
 	  view.drawLine(viewCenter, -Math.PI/2.0, r*0.1, r, view.red);
 	  view.drawLine(viewCenter, Math.PI/2.0, r*0.1, r, view.red);
 	  view.drawLine(viewCenter, Math.PI, r*0.1, r, view.blue);
 	  view.drawLine(viewCenter, 0.0, r*0.1, r, view.blue);
-	  
-	  // draw dial lines
-	  for (int i=0; i<24; i++)
-		view.drawLine(viewCenter, Math.PI/12.0*i+angle, r/.45*.4, r, view.ghost);
-		
-	  view.drawCircle(viewCenter, r, 48, view.ghost);
-      view.drawCircle(viewCenter, r/.45*.4, 48, view.teal);
+	  view.drawCircle(viewCenter, r, 48, view.cueBlue);
 	}
   }
 }

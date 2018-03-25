@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Petri Ihalainen
+   Changes copyright (C) 2016-2018 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -108,9 +108,13 @@ public class MoveViewTool extends EditingTool
 					break;
 			}
 		}
-		setAuxGraphs(view);
-		repaintAllViews(view);
-		view.viewChanged(false);	
+		updateBoundCamera(view);
+		view.drawingPlane.update();
+		if (ArtOfIllusion.getPreferences().getUpdateImmediately())
+			theWindow.updateImage();
+		else
+			view.repaint();
+		view.viewChanged(false);
 	}
 
 	/* The view must be set to Perspective for travel modes! */
@@ -227,6 +231,7 @@ public class MoveViewTool extends EditingTool
 	view.mouseDown = false;
 	view.moving = false;
 	view.setNavigationMode(selectedNavigation);
+	view.drawingPlane.update();
     if (theWindow != null)
       {
         ObjectInfo bound = view.getBoundCamera();
@@ -241,10 +246,28 @@ public class MoveViewTool extends EditingTool
         }
         theWindow.updateImage();
       }
-	wipeAuxGraphs();
 	view.viewChanged(false);
   }
 
+  // Have the bound object follow the view camera.
+  // The view is redrawn based on the location of the bound object, when one is present. 
+
+  private void updateBoundCamera(ViewerCanvas view)
+  {
+    ObjectInfo bound = view.getBoundCamera();
+    if (bound == null)
+        return;
+    if (bound.getObject() instanceof SceneCamera)
+        bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+	{
+		double objDist = 100.0*view.getCamera().getDistToScreen()/view.getScale();
+		view.setDistToPlane(objDist);
+		Vec3 objCenter = view.getRotationCenter().minus(view.getCamera().getCameraCoordinates().getZDirection().times(objDist));
+		bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+		bound.getCoords().setOrigin(objCenter);
+	}
+  }
+  
   /** This is called recursively to move any children of a bound camera. */
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
   {
@@ -256,31 +279,6 @@ public class MoveViewTool extends EditingTool
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
       moveChildren(parent.getChildren()[i], transform, undo);
     }  
-  }
-
-  private void repaintAllViews(ViewerCanvas view)
-  {
-    if (theWindow == null || theWindow instanceof UVMappingWindow)
-	  view.repaint();
-    else
-	  for (ViewerCanvas v : theWindow.getAllViews())
-	  	v.repaint();
-  }
-
-  private void setAuxGraphs(ViewerCanvas view)
-  {
-
-	if (theWindow != null)
-	  for (ViewerCanvas v : theWindow.getAllViews())
-        if (v != view)
-	      v.auxGraphs.set(view, true);
-  }
-  
-  private void wipeAuxGraphs()
-  {
-    if (theWindow != null)
-	  for (ViewerCanvas v : theWindow.getAllViews())
-		v.auxGraphs.wipe();
   }
 
   @Override

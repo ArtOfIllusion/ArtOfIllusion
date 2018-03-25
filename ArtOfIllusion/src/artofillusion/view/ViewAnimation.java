@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2017 by Petri Ihalainen
+/* Copyright (C) 2016 - 2018 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -164,7 +164,7 @@ public class ViewAnimation
 
 		step = 1;
 		changingPerspective = true;
-        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
+		viewHasCamera = (view.getBoundCamera() != null);
 		timer.restart();
 	}
 
@@ -187,13 +187,6 @@ public class ViewAnimation
 			view.preparePerspectiveAnimation();
 		}
 		view.repaint();
-        if (viewHasCamera)
-            window.setModified();
-        else
-
-		// auxGraphs shows up wrong. Possibly numerical accuaracy issue.
-		// setAuxGraphs();
-
 		step++;
 	}
 
@@ -380,9 +373,6 @@ public class ViewAnimation
 		camera.setCameraCoordinates(aniCoords);
 		view.setScale(view.getScale()*scalingFactor);
 		view.repaint();
-        if (viewHasCamera)
-            window.setModified();
-		setAuxGraphs();
 		step++;
 	}
 
@@ -399,19 +389,30 @@ public class ViewAnimation
 		changingPerspective = false;
 		animatingMove = false;
 
-		wipeAuxGraphs();
 		view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
-        if (viewHasCamera)
-        {
-            window.updateImage();
-            window.setModified();
-        }
-        else
-        {
-		view.viewChanged(false);
-		view.repaint();
+		if (viewHasCamera)
+		{
+			ObjectInfo bound = view.getBoundCamera();
+			if (view.isPerspective())
+				bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+			else
+			{
+				double objDist = 100.0*view.getCamera().getDistToScreen()/view.getScale();
+				view.setDistToPlane(objDist);
+				Vec3 objCenter = view.getRotationCenter().minus(view.getCamera().getCameraCoordinates().getZDirection().times(objDist));
+				bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+				bound.getCoords().setOrigin(objCenter);
+				view.setScale(100.0*endDistToScreen/objDist);
+			}
+			window.updateImage();
+			window.setModified();
+		}
+		else
+		{
+			view.viewChanged(false);
+			view.repaint();
+		}
 	}
-    }
 
 	/** 
 	 * Check if there is anything that should move. 
@@ -435,19 +436,5 @@ public class ViewAnimation
         // This only works for the 'animate' boolean to take effect immediately
 		// Don't know why?
 		animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
-	}
-
-	/* Set view cone craphis */
-	public void setAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			if (v != view)
-				v.auxGraphs.set(view, true);
-	}
-
-	public void wipeAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			v.auxGraphs.wipe();
 	}
 }

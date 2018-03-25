@@ -96,6 +96,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         setCurrentView((ViewerCanvas) ev.getWidget());
       }
     };
+    Object listenScroll = new Object() {
+      void processEvent(MouseScrolledEvent ev)
+      {
+        setCurrentView((ViewerCanvas) ev.getWidget());
+      }
+    };
     Object keyListener = new Object() {
       public void processEvent(KeyPressedEvent ev)
       {
@@ -120,6 +126,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       viewPanel[i].add(theView[i] = new SceneViewer(theScene, row, this), BorderContainer.CENTER);
       theView[i].setGrid(theScene.getGridSpacing(), theScene.getGridSubdivisions(), theScene.getShowGrid(), theScene.getSnapToGrid());
       theView[i].addEventLink(MousePressedEvent.class, listen);
+      theView[i].addEventLink(MouseScrolledEvent.class, listenScroll);
       theView[i].addEventLink(KeyPressedEvent.class, keyListener);
       theView[i].setPopupMenuManager(this);
       theView[i].setViewAnimation(new ViewAnimation(this, theView[i]));
@@ -1289,6 +1296,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void setCurrentView(ViewerCanvas view)
   {
+    if (theView[currentView] == view) // This is necessary for the scroll wheel activation
+        return;
+        
     for (int i = 0; i < theView.length; i++)
       if (currentView != i && view == theView[i])
       {

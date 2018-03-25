@@ -168,6 +168,11 @@ public class SceneViewer extends ViewerCanvas
     return new double [] {min, max};
   }
 
+  /*
+      The rotation center should always be known. This method should 
+      be removed, when we can be sure, that nothing uses it any more.
+  */
+
   @Override
   public Vec3 getDefaultRotationCenter()
   {
@@ -308,10 +313,11 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
-	drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
+    parentFrame.getView().drawOverlay(this);
+    drawCues();
     if (showAxes)
       drawCoordinateAxes();
     drawBorder();
@@ -551,7 +557,6 @@ public class SceneViewer extends ViewerCanvas
   protected void mouseDragged(WidgetMouseEvent e)
   {
 	mousePoint = e.getPoint();
-	drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {
@@ -704,8 +709,6 @@ public class SceneViewer extends ViewerCanvas
 
   public void mouseClicked(MouseClickedEvent e)
   {
-	//super.mouseClicked(e);
-	
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
@@ -722,15 +725,6 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
- 	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		parentFrame.updateImage(); // I wonder why, but that's how it works
-	}
-	
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)

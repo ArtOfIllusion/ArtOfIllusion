@@ -1,5 +1,5 @@
-/* Copyright (C) 2002-2009 by Peter Eastman
-   Changes Copyright (C) 2016 by Petri Ihalainen
+/* Copyright (C) 2002 - 2009 by Peter Eastman
+   Changes Copyright (C) 2016 - 2018 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -26,7 +26,8 @@ public class ApplicationPreferences
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol, maxAnimationDuration, animationFrameRate;
-  private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming, useViewAnimations;
+  private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming;
+  private boolean useViewAnimations, updateImmediately, showActiveView, showNavigationCues;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
 
   /**
@@ -142,9 +143,12 @@ public class ApplicationPreferences
     keepBackupFiles = false;
     useCompoundMeshTool = false;
     reverseZooming = false;
-	useViewAnimations = true;
-	maxAnimationDuration = 1.0;
-	animationFrameRate = 60.0;
+    useViewAnimations = true;
+    maxAnimationDuration = 1.0;
+    animationFrameRate = 60.0;
+    updateImmediately = true;
+    showActiveView = true;
+    showNavigationCues = true;
   }
 
   /** Parse the properties loaded from the preferences file. */
@@ -166,7 +170,11 @@ public class ApplicationPreferences
     useViewAnimations = parseBooleanProperty("useViewAnimations", useViewAnimations);
     maxAnimationDuration = parseDoubleProperty("maxAnimationDuration", maxAnimationDuration);
     animationFrameRate = parseDoubleProperty("animationFrameRate", animationFrameRate);
-	
+
+    updateImmediately = parseBooleanProperty("updateImmediately", updateImmediately);
+    showActiveView = parseBooleanProperty("showActiveView", showActiveView);
+    showNavigationCues = parseBooleanProperty("showNavigationCues", showNavigationCues);
+
     Translate.setLocale(parseLocaleProperty("language"));
     if (properties.getProperty("theme") == null)
     {
@@ -491,5 +499,52 @@ public class ApplicationPreferences
   {
     animationFrameRate = rate;
 	properties.put("animationFrameRate", Double.toString(rate));
+  }
+  
+  /** Get whether inactive views should be update immediately, 
+      when a bound camera moves. */
+
+  public final boolean getUpdateImmediately()
+  {
+    return updateImmediately;
+  }
+
+  /** Set whether inactive views should be update immediately, 
+      when a bound camera moves. */
+
+  public final void setUpdateImmediately(boolean now)
+  {
+    updateImmediately = now;
+    properties.put("updateImmediately", Boolean.toString(now));
+  }
+  
+  /** Get whether to animate view moves. */
+
+  public final boolean getShowActiveView()
+  {
+    return showActiveView;
+  }
+
+  /** Set whether to animate views moves. */
+
+  public final void setShowActiveView(boolean show)
+  {
+    showActiveView = show;
+    properties.put("showActiveView", Boolean.toString(show));
+  }
+  
+  /** Get whether to animate view moves. */
+
+  public final boolean getShowNavigationCues()
+  {
+    return showNavigationCues;
+  }
+
+  /** Set whether to animate views moves. */
+
+  public final void setShowNavigationCues(boolean show)
+  {
+    showNavigationCues = show;
+    properties.put("showNavigationCues", Boolean.toString(show));
   }
 }

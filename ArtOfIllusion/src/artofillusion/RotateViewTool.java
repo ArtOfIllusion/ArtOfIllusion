@@ -409,19 +409,21 @@ public class RotateViewTool extends EditingTool
   {
     ObjectInfo bound = view.getBoundCamera();
     if (bound == null)
-        return;
-    if (bound.getObject() instanceof SceneCamera)
+        return; 
+    if (view.isPerspective())
+    {
         bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+    }
     else
     {
         double objDist = 100.0*view.getCamera().getDistToScreen()/view.getScale();
         view.setDistToPlane(objDist);
-        Vec3 objCenter = rotationCenter.minus(view.getCamera().getCameraCoordinates().getZDirection().times(objDist));
+        Vec3 objCenter = view.getRotationCenter().minus(view.getCamera().getCameraCoordinates().getZDirection().times(objDist));
         bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
         bound.getCoords().setOrigin(objCenter);
     }
   }
-  
+
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)

@@ -245,8 +245,10 @@ public class ScrollViewTool
 		ObjectInfo bound = view.getBoundCamera();
 		if (bound == null)
 			return;
-		if (bound.getObject() instanceof SceneCamera)
+		if (view.isPerspective())
+		{
 			bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+		}
 		else
 		{
 			double objDist = 100.0*view.getCamera().getDistToScreen()/view.getScale();

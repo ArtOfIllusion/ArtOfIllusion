@@ -676,7 +676,7 @@ public abstract class ViewerCanvas extends CustomWidget
 			Vec3 yonz = z.times(y.dot(z));
 			Vec3 newUp = y.minus(yonz);
 			newUp.normalize();
-			coords.setOrientation(z, up); // new coords
+			coords.setOrientation(z, newUp);
 			animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
 		}
     }

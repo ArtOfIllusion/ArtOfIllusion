@@ -64,7 +64,16 @@ public class PluginParserTest
   public void testListImports() throws IOException, JAXBException {
     PluginRegistry.Extension ext = (PluginRegistry.Extension)umt.unmarshal(PluginParserTest.class.getResource("imports.xml").openStream());
     Assert.assertFalse(ext.imports.isEmpty());
-    System.out.println(ext.imports);
+    
     
   }
+  
+  @Test
+  public void testListCategories() throws IOException, JAXBException {
+    PluginRegistry.Extension ext = (PluginRegistry.Extension)umt.unmarshal(PluginParserTest.class.getResource("category.xml").openStream());
+    Assert.assertFalse(ext.categories.isEmpty());
+    for(PluginRegistry.ExportInfo ei: ext.categories) 
+      System.out.println(ei.className);
+    
+  }  
 }

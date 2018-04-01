@@ -553,17 +553,20 @@ public class PluginRegistry
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(in);
         Element extensions = doc.getDocumentElement();
+        
         if (!"extension".equals(extensions.getNodeName()))
           throw new Exception("The root element must be <extension>");
         Node nameNode = extensions.getAttributes().getNamedItem("name");
         if (nameNode != null)
           name = nameNode.getNodeValue();
+        
         NodeList categoryList = doc.getElementsByTagName("category");
         for (int i = 0; i < categoryList.getLength(); i++)
         {
           Node category = categoryList.item(i);
           categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
         }
+        
         NodeList pluginList = doc.getElementsByTagName("plugin");
         for (int i = 0; i < pluginList.getLength(); i++)
         {
@@ -587,6 +590,7 @@ public class PluginRegistry
             }
           }
         }
+        
         // NTJ import may name a plugin or point to a file
         NodeList importList = doc.getElementsByTagName("import");
         for (int i = 0; i < importList.getLength(); i++)
@@ -625,7 +629,7 @@ public class PluginRegistry
       }
       catch (Exception ex)
       {
-        System.err.println("*** Exception while parsing extensions.xml for plugin "+file.getName()+":");
+        System.err.println("*** Exception while parsing extensions.xml for plugin " + file.getName() + ":");
         ex.printStackTrace();
         throw new IOException();
       }
@@ -778,6 +782,9 @@ public class PluginRegistry
     @XmlAttribute public String name;
     @XmlAttribute public String version;
     
+    @XmlElement(name="category")
+    public List<ExportInfo> categories = new ArrayList<ExportInfo>();
+    
     @XmlElement(name="import")
     public List<ClassImportInfo> imports = new ArrayList<ClassImportInfo>();
     
@@ -788,11 +795,11 @@ public class PluginRegistry
   /**
    * This class is used to store information about an "export" record in an XML file.
    */
-  private static class ExportInfo
+  public static class ExportInfo
   {
     private String method;
     private String id;
-    private String className;
+    @XmlAttribute(name = "class") String className;
     
     Object plugin;
   }

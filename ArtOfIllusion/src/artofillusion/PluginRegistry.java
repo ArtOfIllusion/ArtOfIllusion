@@ -1,5 +1,6 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,13 +22,26 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
-
-import javax.xml.parsers.*;
-
-import org.w3c.dom.*;
+import java.util.regex.Pattern;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.*;
 
 public class PluginRegistry
 {
+  private static Unmarshaller um = null;
+  
+  static {
+    try
+    {
+      um =  javax.xml.bind.JAXBContext.newInstance(PluginRegistry.Extension.class).createUnmarshaller();
+    } catch (JAXBException ex)
+    {
+      System.out.println("Error creating XML unmarshaller: " + ex);
+    }
+
+  }
+  
   private static final ArrayList<ClassLoader> pluginLoaders = new ArrayList<ClassLoader>();
   private static final HashSet<Class> categories = new HashSet<Class>();
   private static final HashMap<Class, List<Object>> categoryClasses = new HashMap<Class, List<Object>>();
@@ -200,13 +214,19 @@ public class PluginRegistry
       }
       for (ResourceInfo info : jar.resources)
       {
-        registerResource(info.type, info.id, jar.loader, info.name, info.locale);
+        registerResource(info.type, info.id, jar.loader, info.name, info.getLocale());
       }
+    }
+    catch(NoClassDefFoundError ncdfe)
+    {
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
+      System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");
+      ncdfe.printStackTrace();
     }
     catch (Exception ex)
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
+      System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");
       ex.printStackTrace();
     }
   }
@@ -413,7 +433,7 @@ public class PluginRegistry
   {
     ExportInfo info = exports.get(id);
     if (info == null)
-      throw new NoSuchMethodException("There is no exported method with id="+id);
+      throw new NoSuchMethodException("There is no exported method with id=" + id);
 
     // Try to find a method to invoke.
 
@@ -467,6 +487,7 @@ public class PluginRegistry
         ZipEntry ze = zf.getEntry("extensions.xml");
         if (ze != null)
         {
+          
           InputStream in = new BufferedInputStream(zf.getInputStream(ze));
           loadExtensionsFile(in);
           return;
@@ -513,83 +534,42 @@ public class PluginRegistry
 
     private void loadExtensionsFile(InputStream in) throws IOException
     {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+      Extension extension = null;
       try
       {
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(in);
-        Element extensions = doc.getDocumentElement();
-        if (!"extension".equals(extensions.getNodeName()))
-          throw new Exception("The root element must be <extension>");
-        Node nameNode = extensions.getAttributes().getNamedItem("name");
-        if (nameNode != null)
-          name = nameNode.getNodeValue();
-        NodeList categoryList = doc.getElementsByTagName("category");
-        for (int i = 0; i < categoryList.getLength(); i++)
-        {
-          Node category = categoryList.item(i);
-          categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
-        }
-        NodeList pluginList = doc.getElementsByTagName("plugin");
-        for (int i = 0; i < pluginList.getLength(); i++)
-        {
-          Node plugin = pluginList.item(i);
-
-          // Check for <export> tags inside the <plugin> tag.
-
-          String className = plugin.getAttributes().getNamedItem("class").getNodeValue();
-          plugins.add(className);
-          NodeList children = plugin.getChildNodes();
-          for (int k = 0; k < children.getLength(); k++)
-          {
-            Node childNode = children.item(k);
-            if ("export".equals(childNode.getNodeName()))
-            {
-              ExportInfo export = new ExportInfo();
-              export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
-              export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
-              export.className = className;
-              exports.add(export);
-            }
-          }
-        }
-        // NTJ import may name a plugin or point to a file
-        NodeList importList = doc.getElementsByTagName("import");
-        for (int i = 0; i < importList.getLength(); i++)
-        {
-          NamedNodeMap importMap = importList.item(i).getAttributes();
-          if (importMap.getNamedItem("name") != null)
-            imports.add(importMap.getNamedItem("name").getNodeValue());
-          else if (importMap.getNamedItem("url") != null)
-            searchpath.add(importMap.getNamedItem("url").getNodeValue());
-        }
-        NodeList resourceList = doc.getElementsByTagName("resource");
-        for (int i = 0; i < resourceList.getLength(); i++)
-        {
-          Node resourceNode = resourceList.item(i);
-          ResourceInfo resource = new ResourceInfo();
-          resource.type = resourceNode.getAttributes().getNamedItem("type").getNodeValue();
-          resource.id = resourceNode.getAttributes().getNamedItem("id").getNodeValue();
-          resource.name = resourceNode.getAttributes().getNamedItem("name").getNodeValue();
-          Node localeNode = resourceNode.getAttributes().getNamedItem("locale");
-          if (localeNode != null)
-          {
-            String[] parts = localeNode.getNodeValue().split("_");
-            if (parts.length == 1)
-              resource.locale = new Locale(parts[0]);
-            else if (parts.length == 2)
-              resource.locale = new Locale(parts[0], parts[1]);
-            else if (parts.length == 3)
-              resource.locale = new Locale(parts[0], parts[1], parts[2]);
-          }
-          resources.add(resource);
-        }
-      }
-      catch (Exception ex)
+        extension = (Extension)um.unmarshal(in);
+      } catch (JAXBException ex)
       {
-        System.err.println("*** Exception while parsing extensions.xml for plugin "+file.getName()+":");
+        System.err.print("*** Exception while parsing extensions.xml for plugin " + file.getName() + ":");
         ex.printStackTrace();
         throw new IOException();
+      }
+      
+      name = extension.name;
+      
+      for(ExportInfo ei: extension.categories)
+        categories.add(ei.className);   
+      
+      resources.addAll(extension.resources);
+      
+      for(ClassImportInfo ci: extension.imports)
+      {
+        if (ci.name != null) 
+          imports.add(ci.name);
+        else if (ci.url != null)
+          searchpath.add(ci.url);
+      }
+
+      for(ExportInfo ei: extension.plugins)
+      {
+          plugins.add(ei.className);
+          if(ei.export.isEmpty()) continue;
+          for(ExportInfo ex: ei.export)
+          {
+              ex.className = ei.className;
+              exports.add(ex);
+          }
       }
     }
 
@@ -635,7 +615,7 @@ public class PluginRegistry
     private void addResource(String name, ClassLoader loader, Locale locale) throws IllegalArgumentException
     {
       if (locales.contains(locale))
-        throw new IllegalArgumentException("Multiple resource definitions for type="+type+", name="+ id +", locale="+locale);
+        throw new IllegalArgumentException("Multiple resource definitions for type=" + type + ", name=" + id + ", locale=" + locale);
       names.add(name);
       loaders.add(loader);
       locales.add(locale);
@@ -734,23 +714,73 @@ public class PluginRegistry
     }
   }
 
+  @XmlRootElement(name = "extension")
+  public static class Extension
+  {
+    @XmlAttribute public String name;
+    @XmlAttribute public String version;
+    
+    @XmlElement(name="plugin")
+    public List<ExportInfo> plugins = new ArrayList<ExportInfo>();
+    
+    @XmlElement(name="category")
+    public List<ExportInfo> categories = new ArrayList<ExportInfo>();
+    
+    @XmlElement(name="import")
+    public List<ClassImportInfo> imports = new ArrayList<ClassImportInfo>();
+    
+    @XmlElement(name="resource")
+    public final List<ResourceInfo> resources = new ArrayList<ResourceInfo>();
+  }
+  
   /**
    * This class is used to store information about an "export" record in an XML file.
    */
-
-  private static class ExportInfo
+  public static class ExportInfo
   {
-    String method, id, className;
+    @XmlAttribute private String method;
+    @XmlAttribute private String id;
+    @XmlAttribute(name = "class") private String className;
+    @XmlElement(name="export") private List<ExportInfo> export = new ArrayList<ExportInfo>();
     Object plugin;
   }
 
   /**
+   * This class is used to store information about an "import" record in an XML file.
+   */
+  private static class ClassImportInfo
+  {
+    @XmlAttribute private String name;
+    @XmlAttribute private String url;
+  }
+  
+  /**
    * This class is used to store information about a "resource" record in an XML file.
    */
-
   private static class ResourceInfo
   {
-    String type, id, name;
-    Locale locale;
+    private static final Pattern pattern = Pattern.compile("_");
+    
+    @XmlAttribute private String id;
+    @XmlAttribute private String type;
+    @XmlAttribute private String name;
+    @XmlAttribute(name = "locale") private String xmlLocale;
+    
+    public Locale getLocale()
+    {
+      if(xmlLocale == null) return null;
+      String[] parts = pattern.split(xmlLocale);
+      if(parts.length == 1) return new Locale(parts[0]);
+      if(parts.length == 2) return new Locale(parts[0], parts[1]);
+      return new Locale(parts[0], parts[1], parts[2]);
+    }
+
+    @Override
+    public String toString()
+    {
+      return "Resource: {" + "id : " + id + ", type : " + type + ", name : " + name + ", locale : "  + this.getLocale() + '}';
+    }
+  
   }
+  
 }

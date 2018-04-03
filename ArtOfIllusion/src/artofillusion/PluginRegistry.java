@@ -551,11 +551,12 @@ public class PluginRegistry
       }
       
       name = extension.name;
-      for(ExportInfo ei: extension.categories) {
-          categories.add(ei.className);
-      }      
+      for(ExportInfo ei: extension.categories)
+        categories.add(ei.className);   
+      
       resources.addAll(extension.resources);
-
+      for(ClassImportInfo ci: extension.imports)
+        System.out.println("Import:: name: " + ci.name + " url: " + ci.url);
       
       in.reset();
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -601,7 +602,7 @@ public class PluginRegistry
           if (importMap.getNamedItem("name") != null)
             imports.add(importMap.getNamedItem("name").getNodeValue());
           else if (importMap.getNamedItem("url") != null)
-            searchpath.add(importMap.getNamedItem("url").getNodeValue());
+              searchpath.add(importMap.getNamedItem("url").getNodeValue());
         }
       
       }
@@ -808,7 +809,7 @@ public class PluginRegistry
       String[] parts = sLocale.split("_");
       if(parts.length == 1) return new Locale(parts[0]);
       if(parts.length == 2) return new Locale(parts[0], parts[1]);
-      return new Locale(parts[0], parts[1], parts[3]);
+      return new Locale(parts[0], parts[1], parts[2]);
     }
 
     @Override

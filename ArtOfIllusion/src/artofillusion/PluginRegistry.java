@@ -550,7 +550,12 @@ public class PluginRegistry
         throw new IOException();
       }
       
+      name = extension.name;
+      for(ExportInfo ei: extension.categories) {
+          categories.add(ei.className);
+      }      
       resources.addAll(extension.resources);
+
       
       in.reset();
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -562,16 +567,7 @@ public class PluginRegistry
         
         if (!"extension".equals(extensions.getNodeName()))
           throw new Exception("The root element must be <extension>");
-        Node nameNode = extensions.getAttributes().getNamedItem("name");
-        if (nameNode != null)
-          name = nameNode.getNodeValue();
-        
-        NodeList categoryList = doc.getElementsByTagName("category");
-        for (int i = 0; i < categoryList.getLength(); i++)
-        {
-          Node category = categoryList.item(i);
-          categories.add(category.getAttributes().getNamedItem("class").getNodeValue());
-        }
+
         
         NodeList pluginList = doc.getElementsByTagName("plugin");
         for (int i = 0; i < pluginList.getLength(); i++)

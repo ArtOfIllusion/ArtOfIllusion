@@ -5,9 +5,12 @@
  */
 package artofillusion;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.helpers.AbstractUnmarshallerImpl;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,16 +67,14 @@ public class PluginParserTest
   public void testListImports() throws IOException, JAXBException {
     PluginRegistry.Extension ext = (PluginRegistry.Extension)umt.unmarshal(PluginParserTest.class.getResource("imports.xml").openStream());
     Assert.assertFalse(ext.imports.isEmpty());
-    
-    
+
   }
   
   @Test
   public void testListCategories() throws IOException, JAXBException {
     PluginRegistry.Extension ext = (PluginRegistry.Extension)umt.unmarshal(PluginParserTest.class.getResource("category.xml").openStream());
     Assert.assertFalse(ext.categories.isEmpty());
-    for(PluginRegistry.ExportInfo ei: ext.categories) 
-      System.out.println(ei.className);
     
-  }  
+  }
+  
 }

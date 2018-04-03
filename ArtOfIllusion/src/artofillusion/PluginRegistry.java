@@ -529,24 +529,30 @@ public class PluginRegistry
       throw new IOException(); // No index found
     }
 
-    private void loadExtensionsFile(InputStream in) throws IOException
+    private void loadExtensionsFile(InputStream ino) throws IOException
     {
-      
-//      Extension exx = null;
-//      try
-//      {
-//        exx = (Extension)um.unmarshal(in);
-//      } catch (JAXBException ex)
-//      {
-//        System.err.print("*** Exception while parsing extensions.xml for plugin " + file.getName() + ":");
-//        ex.printStackTrace();
-//        throw new IOException();
-//      }
-//      
-//      for(ResourceInfo resource: exx.resources) {
-//        System.out.println(resource);
-//      }
+      FilterInputStream in = new FilterInputStream(ino) {
+        @Override
+        public void close() throws IOException {
+        }   
+      };
 
+    
+      in.mark(10000);
+      Extension extension = null;
+      try
+      {
+        extension = (Extension)um.unmarshal(in);
+      } catch (JAXBException ex)
+      {
+        System.err.print("*** Exception while parsing extensions.xml for plugin " + file.getName() + ":");
+        ex.printStackTrace();
+        throw new IOException();
+      }
+      
+      resources.addAll(extension.resources);
+      
+      in.reset();
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       try
       {
@@ -601,31 +607,7 @@ public class PluginRegistry
           else if (importMap.getNamedItem("url") != null)
             searchpath.add(importMap.getNamedItem("url").getNodeValue());
         }
-        
-        NodeList resourceList = doc.getElementsByTagName("resource");
-        for (int i = 0; i < resourceList.getLength(); i++)
-        {
-          Node resourceNode = resourceList.item(i);
-          ResourceInfo resource = new ResourceInfo();
-          resource.type = resourceNode.getAttributes().getNamedItem("type").getNodeValue();
-          resource.id = resourceNode.getAttributes().getNamedItem("id").getNodeValue();
-          resource.name = resourceNode.getAttributes().getNamedItem("name").getNodeValue();
-          
-          System.out.print(resource);
-          Node localeNode = resourceNode.getAttributes().getNamedItem("locale");
-          System.out.println(localeNode);
-          if (localeNode != null)
-          {
-            String[] parts = localeNode.getNodeValue().split("_");
-            if (parts.length == 1)
-              resource.locale = new Locale(parts[0]);
-            else if (parts.length == 2)
-              resource.locale = new Locale(parts[0], parts[1]);
-            else if (parts.length == 3)
-              resource.locale = new Locale(parts[0], parts[1], parts[2]);
-          }
-          resources.add(resource);
-        }
+      
       }
       catch (Exception ex)
       {

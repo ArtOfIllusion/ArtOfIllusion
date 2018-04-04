@@ -655,6 +655,7 @@ public class PluginRegistry
 
     private void addResource(String name, ClassLoader loader, Locale locale) throws IllegalArgumentException
     {
+            System.out.println("Add resource: "+ name + " locale: " + locale + " type: " + type + " id: " + id);
       if (locales.contains(locale))
         throw new IllegalArgumentException("Multiple resource definitions for type=" + type + ", name=" + id + ", locale=" + locale);
       names.add(name);

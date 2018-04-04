@@ -22,9 +22,11 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import java.util.regex.Pattern;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
+import sun.misc.Regexp;
 
 public class PluginRegistry
 {
@@ -758,15 +760,17 @@ public class PluginRegistry
    */
   private static class ResourceInfo
   {
+    private static final Pattern pattern = Pattern.compile("_");
+    
     @XmlAttribute private String id;
     @XmlAttribute private String type;
     @XmlAttribute private String name;
-    @XmlAttribute(name = "locale") private String locale;
+    @XmlAttribute(name = "locale") private String xmlLocale;
     
     public Locale getLocale()
     {
-      if(locale == null) return null;
-      String[] parts = locale.split("_");
+      if(xmlLocale == null) return null;
+      String[] parts = pattern.split(xmlLocale);
       if(parts.length == 1) return new Locale(parts[0]);
       if(parts.length == 2) return new Locale(parts[0], parts[1]);
       return new Locale(parts[0], parts[1], parts[2]);
@@ -775,7 +779,7 @@ public class PluginRegistry
     @Override
     public String toString()
     {
-      return "Resource: {" + "id : " + id + ", type : " + type + ", name : " + name + ", locale : "  + locale + '}';
+      return "Resource: {" + "id : " + id + ", type : " + type + ", name : " + name + ", locale : "  + this.getLocale() + '}';
     }
   
   }

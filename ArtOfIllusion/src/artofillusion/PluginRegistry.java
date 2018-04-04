@@ -26,10 +26,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 
-import javax.xml.parsers.*;
-
-import org.w3c.dom.*;
-
 public class PluginRegistry
 {
   public static Unmarshaller um = null;
@@ -220,10 +216,16 @@ public class PluginRegistry
         registerResource(info.type, info.id, jar.loader, info.name, info.getLocale());
       }
     }
-    catch (NoClassDefFoundError | Exception ex)
+    catch(NoClassDefFoundError ncdfe)
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
+      System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");
+      ncdfe.printStackTrace();
+    }
+    catch (Exception ex)
+    {
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
+      System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");
       ex.printStackTrace();
     }
   }
@@ -529,16 +531,9 @@ public class PluginRegistry
       throw new IOException(); // No index found
     }
 
-    private void loadExtensionsFile(InputStream ino) throws IOException
+    private void loadExtensionsFile(InputStream in) throws IOException
     {
-      FilterInputStream in = new FilterInputStream(ino) {
-        @Override
-        public void close() throws IOException {
-        }   
-      };
 
-    
-      in.mark(10000);
       Extension extension = null;
       try
       {
@@ -551,66 +546,29 @@ public class PluginRegistry
       }
       
       name = extension.name;
+      
       for(ExportInfo ei: extension.categories)
         categories.add(ei.className);   
       
       resources.addAll(extension.resources);
+      
       for(ClassImportInfo ci: extension.imports)
-        System.out.println("Import:: name: " + ci.name + " url: " + ci.url);
-      
-      in.reset();
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      try
       {
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document doc = builder.parse(in);
-        Element extensions = doc.getDocumentElement();
-        
-        if (!"extension".equals(extensions.getNodeName()))
-          throw new Exception("The root element must be <extension>");
-
-        
-        NodeList pluginList = doc.getElementsByTagName("plugin");
-        for (int i = 0; i < pluginList.getLength(); i++)
-        {
-          Node plugin = pluginList.item(i);
-
-          // Check for <export> tags inside the <plugin> tag.
-
-          String className = plugin.getAttributes().getNamedItem("class").getNodeValue();
-          plugins.add(className);
-          NodeList children = plugin.getChildNodes();
-          for (int k = 0; k < children.getLength(); k++)
-          {
-            Node childNode = children.item(k);
-            if ("export".equals(childNode.getNodeName()))
-            {
-              ExportInfo export = new ExportInfo();
-              export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
-              export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
-              export.className = className;
-              exports.add(export);
-            }
-          }
-        }
-        
-        // NTJ import may name a plugin or point to a file
-        NodeList importList = doc.getElementsByTagName("import");
-        for (int i = 0; i < importList.getLength(); i++)
-        {
-          NamedNodeMap importMap = importList.item(i).getAttributes();
-          if (importMap.getNamedItem("name") != null)
-            imports.add(importMap.getNamedItem("name").getNodeValue());
-          else if (importMap.getNamedItem("url") != null)
-              searchpath.add(importMap.getNamedItem("url").getNodeValue());
-        }
-      
+        if (ci.name != null) 
+          imports.add(ci.name);
+        else if (ci.url != null)
+          searchpath.add(ci.url);
       }
-      catch (Exception ex)
+
+      for(ExportInfo ei: extension.plugins)
       {
-        System.err.println("*** Exception while parsing extensions.xml for plugin " + file.getName() + ":");
-        ex.printStackTrace();
-        throw new IOException();
+          plugins.add(ei.className);
+          if(ei.export.isEmpty()) continue;
+          for(ExportInfo ex: ei.export)
+          {
+              ex.className = ei.className;
+              exports.add(ex);
+          }
       }
     }
 
@@ -655,7 +613,6 @@ public class PluginRegistry
 
     private void addResource(String name, ClassLoader loader, Locale locale) throws IllegalArgumentException
     {
-            System.out.println("Add resource: "+ name + " locale: " + locale + " type: " + type + " id: " + id);
       if (locales.contains(locale))
         throw new IllegalArgumentException("Multiple resource definitions for type=" + type + ", name=" + id + ", locale=" + locale);
       names.add(name);
@@ -762,6 +719,9 @@ public class PluginRegistry
     @XmlAttribute public String name;
     @XmlAttribute public String version;
     
+    @XmlElement(name="plugin")
+    public List<ExportInfo> plugins = new ArrayList<ExportInfo>();
+    
     @XmlElement(name="category")
     public List<ExportInfo> categories = new ArrayList<ExportInfo>();
     
@@ -777,10 +737,10 @@ public class PluginRegistry
    */
   public static class ExportInfo
   {
-    private String method;
-    private String id;
-    @XmlAttribute(name = "class") String className;
-    
+    @XmlAttribute private String method;
+    @XmlAttribute private String id;
+    @XmlAttribute(name = "class") private String className;
+    @XmlElement(name="export") private List<ExportInfo> export = new ArrayList<ExportInfo>();
     Object plugin;
   }
 
@@ -802,7 +762,7 @@ public class PluginRegistry
     @XmlAttribute private String type;
     @XmlAttribute private String name;
     @XmlAttribute(name = "locale") private String locale;
-
+    
     public Locale getLocale()
     {
       if(locale == null) return null;

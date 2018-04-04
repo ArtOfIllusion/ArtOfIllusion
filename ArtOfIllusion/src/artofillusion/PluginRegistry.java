@@ -217,7 +217,7 @@ public class PluginRegistry
       }
       for (ResourceInfo info : jar.resources)
       {
-        registerResource(info.type, info.id, jar.loader, info.name, info.locale);
+        registerResource(info.type, info.id, jar.loader, info.name, info.getLocale());
       }
     }
     catch (NoClassDefFoundError | Exception ex)
@@ -801,13 +801,12 @@ public class PluginRegistry
     @XmlAttribute private String id;
     @XmlAttribute private String type;
     @XmlAttribute private String name;
-    @XmlAttribute(name = "locale") private String sLocale;
-    @XmlTransient private Locale locale;
+    @XmlAttribute(name = "locale") private String locale;
 
     public Locale getLocale()
     {
-      if(sLocale == null) return null;
-      String[] parts = sLocale.split("_");
+      if(locale == null) return null;
+      String[] parts = locale.split("_");
       if(parts.length == 1) return new Locale(parts[0]);
       if(parts.length == 2) return new Locale(parts[0], parts[1]);
       return new Locale(parts[0], parts[1], parts[2]);
@@ -816,7 +815,7 @@ public class PluginRegistry
     @Override
     public String toString()
     {
-      return "Resource: {" + "id : " + id + ", type : " + type + ", name : " + name + ", locale : "  + sLocale + '}';
+      return "Resource: {" + "id : " + id + ", type : " + type + ", name : " + name + ", locale : "  + locale + '}';
     }
   
   }

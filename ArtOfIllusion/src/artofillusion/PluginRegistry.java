@@ -26,11 +26,10 @@ import java.util.regex.Pattern;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
-import sun.misc.Regexp;
 
 public class PluginRegistry
 {
-  public static Unmarshaller um = null;
+  private static Unmarshaller um = null;
   
   static {
     try

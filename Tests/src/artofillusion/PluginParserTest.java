@@ -5,12 +5,10 @@
  */
 package artofillusion;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.lang.reflect.Field;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.helpers.AbstractUnmarshallerImpl;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,11 +19,15 @@ import org.junit.Test;
  */
 public class PluginParserTest
 {
-  private Unmarshaller umt = PluginRegistry.um;
+  private static Unmarshaller umt = null;
   
   @BeforeClass
-  public static void setUpClass()
+  public static void setUpClass() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException
   {
+      Field umf = PluginRegistry.class.getDeclaredField("um");
+      umf.setAccessible(true);
+      umt = (Unmarshaller)umf.get(null);
+
   }
   
   @Test(expected = javax.xml.bind.UnmarshalException.class)
@@ -53,7 +55,8 @@ public class PluginParserTest
   
   
   @Test
-  public void testExtensionResource() throws IOException, JAXBException {
+  public void testExtensionResource() throws IOException, JAXBException 
+  {
     PluginRegistry.Extension ext = (PluginRegistry.Extension)umt.unmarshal(PluginParserTest.class.getResource("locale.xml").openStream());
     Assert.assertEquals("Test", ext.name);
     Assert.assertEquals("1.0", ext.version);
@@ -61,6 +64,9 @@ public class PluginParserTest
     Assert.assertTrue(ext.imports.isEmpty());
     Assert.assertFalse(ext.resources.isEmpty());
     
+    
+    for(Object resource: ext.resources)
+      System.out.println("Resource:" + resource);
   }
   
   @Test

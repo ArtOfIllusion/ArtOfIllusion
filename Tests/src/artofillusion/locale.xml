@@ -8,4 +8,6 @@ and open the template in the editor.
 
 <extension name="Test" version="1.0">
     <resource type="help" id="AdvancedCurves" name="manual_de/HelpSet_de.hs" locale="DE" />
+    <resource type="help" id="AdvancedCurves" name="manual_us/HelpSet_us.hs" locale="en_US" />
+    <resource type="help" id="AdvancedCurves" name="manual_us/HelpSet_us.hs" locale="en_US_SiliconValley" />
 </extension>

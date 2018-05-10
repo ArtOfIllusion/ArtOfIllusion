@@ -1,0 +1,19 @@
+<?xml version="1.0" standalone="yes"?>
+<extension name="Image Filters" version="3.0">
+    <author>Maksim Khramov</author>
+    <date>2013</date>
+    <description>
+        This plugin contains the standard Image Filters which are included with Art of Illusion.
+    </description>
+    <category class="artofillusion.image.filter.ImageFilter"/>
+    <plugin class="artofillusion.image.filter.BlurFilter"/>
+    <plugin class="artofillusion.image.filter.BrightnessFilter"/>
+    <plugin class="artofillusion.image.filter.DepthOfFieldFilter"/>
+    <plugin class="artofillusion.image.filter.ExpoureFilter"/>
+    <plugin class="artofillusion.image.filter.GlowFilter"/>
+    <plugin class="artofillusion.image.filter.NoiseReductionFilter"/>
+    <plugin class="artofillusion.image.filter.OutlineFilter"/>
+    <plugin class="artofillusion.image.filter.SaturationFilter"/>
+    <plugin class="artofillusion.image.filter.TintFilter"/>
+</extension>
+

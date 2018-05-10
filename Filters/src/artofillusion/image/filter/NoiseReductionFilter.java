@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2009 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,9 +27,7 @@ import java.io.*;
 
 public class NoiseReductionFilter extends ImageFilter
 {
-  public NoiseReductionFilter()
-  {
-  }
+
 
   /** Get the name of this filter.*/
 

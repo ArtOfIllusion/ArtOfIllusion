@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,9 +12,7 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
-import artofillusion.image.filter.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
@@ -27,7 +25,6 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -168,7 +165,6 @@ public class ArtOfIllusion
     PluginRegistry.addCategory(Material.class);
     PluginRegistry.addCategory(TextureMapping.class);
     PluginRegistry.addCategory(MaterialMapping.class);
-    PluginRegistry.addCategory(ImageFilter.class);
     PluginRegistry.addCategory(Module.class);
     PluginRegistry.registerPlugin(new UniformTexture());
     PluginRegistry.registerPlugin(new ImageMapTexture());
@@ -183,15 +179,6 @@ public class ArtOfIllusion
     PluginRegistry.registerPlugin(new UVMapping(null, null));
     PluginRegistry.registerPlugin(new LinearMapping3D(null, null));
     PluginRegistry.registerPlugin(new LinearMaterialMapping(null, null));
-    PluginRegistry.registerPlugin(new BrightnessFilter());
-    PluginRegistry.registerPlugin(new SaturationFilter());
-    PluginRegistry.registerPlugin(new ExposureFilter());
-    PluginRegistry.registerPlugin(new TintFilter());
-    PluginRegistry.registerPlugin(new BlurFilter());
-    PluginRegistry.registerPlugin(new GlowFilter());
-    PluginRegistry.registerPlugin(new OutlineFilter());
-    PluginRegistry.registerPlugin(new NoiseReductionFilter());
-    PluginRegistry.registerPlugin(new DepthOfFieldFilter());
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();

@@ -9,7 +9,7 @@
     <plugin class="artofillusion.image.filter.BlurFilter"/>
     <plugin class="artofillusion.image.filter.BrightnessFilter"/>
     <plugin class="artofillusion.image.filter.DepthOfFieldFilter"/>
-    <plugin class="artofillusion.image.filter.ExpoureFilter"/>
+    <plugin class="artofillusion.image.filter.ExposureFilter"/>
     <plugin class="artofillusion.image.filter.GlowFilter"/>
     <plugin class="artofillusion.image.filter.NoiseReductionFilter"/>
     <plugin class="artofillusion.image.filter.OutlineFilter"/>

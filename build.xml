@@ -72,6 +72,7 @@
       <pathelement location="Tools/build" />
       <pathelement location="Translators/build" />
       <pathelement location="Renderers/build" />
+      <pathelement location="Filters/build" />
       <fileset refid="libraries" />
     </path>
     <javac srcdir="Tests/src" destdir="Tests/build" classpathref="bin_paths" debug="on" target="${JavaVersion}" source="${JavaVersion}" />

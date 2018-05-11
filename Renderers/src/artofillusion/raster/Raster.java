@@ -165,7 +165,12 @@ public class Raster implements Renderer, Runnable
     finish(null);
     rl.renderingCanceled();
   }
-
+  
+  public Widget getConfigPanelNew()
+  {
+    return new RasterRendererConfigPanel();
+  }
+  
   @Override
   public Widget getConfigPanel()
   {
@@ -3381,7 +3386,7 @@ public class Raster implements Renderer, Runnable
       }
   }
 
-  /** Render a displacement mapeed triangle by recursively subdividing it. */
+  /** Render a displacement mapped triangle by recursively subdividing it. */
 
   private void renderDisplacedTriangle(RenderingTriangle tri, DisplacedVertex dv1,
                                        double dist1, DisplacedVertex dv2, double dist2, DisplacedVertex dv3, double dist3,
@@ -3542,6 +3547,12 @@ public class Raster implements Renderer, Runnable
         dv3.pos, dv3.z, dv3.dispvert, dv3.dispnorm, dv3.u, dv3.v,
         tri, viewdir, closestNorm, clip, bumpMap, backface, material, context);
   }
+
+    private static class RasterRendererConfigPanel extends BTabbedPane {
+
+        public RasterRendererConfigPanel() {
+        }
+    }
 
   /** This is an inner class for keeping track of information about vertices when
      doing displacement mapping. */

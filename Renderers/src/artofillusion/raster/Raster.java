@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2014 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -46,7 +46,8 @@ public class Raster implements Renderer, Runnable
   private Thread renderThread;
   private RGBColor ambColor, envColor, fogColor;
   private TextureMapping envMapping;
-  private ThreadLocal threadRasterContext, threadCompositingContext;
+  private ThreadLocal<RasterContext> threadRasterContext;
+  private final ThreadLocal<CompositingContext> threadCompositingContext;
   private RowLock lock[];
   private double envParamValue[];
   private double time, smoothing = 1.0, smoothScale, focalDist, surfaceError = 0.02, fogDist;
@@ -65,16 +66,16 @@ public class Raster implements Renderer, Runnable
 
   public Raster()
   {
-    threadRasterContext = new ThreadLocal() {
+    threadRasterContext = new ThreadLocal<RasterContext>() {
       @Override
-      protected Object initialValue()
+      protected RasterContext initialValue()
       {
         return new RasterContext(theCamera, width);
       }
     };
-    threadCompositingContext = new ThreadLocal() {
+    threadCompositingContext = new ThreadLocal<CompositingContext>() {
       @Override
-      protected Object initialValue()
+      protected CompositingContext initialValue()
       {
         return new CompositingContext(theCamera);
       }

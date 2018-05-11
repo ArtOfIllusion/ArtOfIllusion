@@ -427,10 +427,10 @@ public class Raster implements Renderer, Runnable
 
     final ObjectInfo sortedObjects[] = sortObjects();
     ThreadManager threads = new ThreadManager(sortedObjects.length, new ThreadManager.Task() {
-          @Override
+      @Override
       public void execute(int index)
       {
-        RasterContext context = (RasterContext) threadRasterContext.get();
+        RasterContext context = threadRasterContext.get();
         ObjectInfo obj = sortedObjects[index];
         context.camera.setObjectTransform(obj.getCoords().fromLocal());
         renderObject(obj, orig, viewdir, obj.getCoords().toLocal(), context, thisThread);
@@ -439,10 +439,10 @@ public class Raster implements Renderer, Runnable
         if (System.currentTimeMillis()-updateTime > 5000)
           updateImage();
       }
-          @Override
+      @Override
       public void cleanup()
       {
-        ((RasterContext) threadRasterContext.get()).cleanup();
+        threadRasterContext.get().cleanup();
       }
     });
     threads.run();
@@ -547,7 +547,7 @@ public class Raster implements Renderer, Runnable
       @Override
       public void execute(int i1)
       {
-        CompositingContext context = (CompositingContext) threadCompositingContext.get();
+        CompositingContext context = threadCompositingContext.get();
         Vec3 dir = context.tempVec[1];
         RGBColor totalColor = context.totalColor;
         RGBColor totalTransparency = context.totalTransparency;
@@ -663,7 +663,7 @@ public class Raster implements Renderer, Runnable
       @Override
       public void cleanup()
       {
-        ((CompositingContext) threadCompositingContext.get()).cleanup();
+        threadCompositingContext.get().cleanup();
       }
     });
     threads.run();

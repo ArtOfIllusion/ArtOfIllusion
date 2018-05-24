@@ -176,7 +176,7 @@ public class ImagesDialog extends BDialog
       catch (Exception ex)
       {
         setCursor(Cursor.getDefaultCursor());
-        new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorLoadingImage", file.getName()), this.getComponent());
         ex.printStackTrace();
         return;
       }

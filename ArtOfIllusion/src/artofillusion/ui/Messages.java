@@ -10,6 +10,6 @@ package artofillusion.ui;
  *
  * @author maksim.khramov
  */
-public class MessageBox {
-    
+public final class Messages {
+    public static void error()
 }

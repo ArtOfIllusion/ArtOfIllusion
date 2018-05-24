@@ -211,8 +211,8 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
-        tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+        tx.printStackTrace();        
+        Messages.error(UIUtilities.breakString(Translate.text("pluginInitError", plugin.getClass().getSimpleName())));
       }
     }
     
@@ -291,7 +291,7 @@ public class ArtOfIllusion
           catch (Throwable tx)
           {
             tx.printStackTrace();
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+            Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
           }
         }
         fr.setVisible(true);
@@ -335,7 +335,7 @@ public class ArtOfIllusion
             catch (Throwable tx)
             {
               tx.printStackTrace();
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+              Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
             }
           }
         }
@@ -371,7 +371,7 @@ public class ArtOfIllusion
       catch (Throwable tx)
       {
         tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+        Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
       }
     }
     System.exit(0);
@@ -491,7 +491,7 @@ public class ArtOfIllusion
         catch (Throwable tx)
         {
           tx.printStackTrace();
-          new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+          Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
         }
       }
       RecentFiles.addRecentFile(f);

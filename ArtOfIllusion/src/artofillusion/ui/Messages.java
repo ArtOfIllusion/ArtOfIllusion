@@ -32,5 +32,13 @@ public final class Messages {
         error(message, (Component)null);
     }
     
+    
+    public static void information(Object message) {
+        information(message, (Component) null);
+    }
+    
+    public static void information(Object message, Component owner) {
+        JOptionPane.showMessageDialog(owner, message, TITLE, JOptionPane.INFORMATION_MESSAGE);
+    }
 
 }

@@ -725,7 +725,7 @@ public class ExprModule extends Module
       msg[0] = "Your expression contains the following errors:";
       for (int i = 0; i < errors.size(); i++)
         msg[i+1] = errors.get(i);
-      new BStandardDialog("", msg, BStandardDialog.INFORMATION).showMessageDialog(fr);
+      Messages.information(msg, fr.getComponent());
     }
 }
 

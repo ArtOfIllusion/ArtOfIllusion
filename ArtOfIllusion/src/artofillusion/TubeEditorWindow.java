@@ -206,12 +206,12 @@ public class TubeEditorWindow extends CurveEditorWindow
       return;
     if (theTube.getEndsStyle() != Tube.CLOSED_ENDS && selected.length-num < 2)
     {
-      new BStandardDialog("", Translate.text("tubeNeeds2Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("tubeNeeds2Points"), this.getComponent());
       return;
     }
     if (theTube.getEndsStyle() == Tube.CLOSED_ENDS && selected.length-num < 3)
     {
-      new BStandardDialog("", Translate.text("tubeNeeds3Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("tubeNeeds3Points"), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theTube, theTube.duplicate()}));

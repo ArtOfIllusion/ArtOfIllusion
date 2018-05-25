@@ -568,7 +568,7 @@ public abstract class Object3D
   
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
-    new BStandardDialog("", Translate.text("noParamsForKeyframe"), BStandardDialog.INFORMATION).showMessageDialog((Widget) parent);
+    Messages.information(Translate.text("noParamsForKeyframe"), ((Widget)parent).getComponent());
   }
   
   /** Determine whether the user should be allowed to convert this object to an Actor. */

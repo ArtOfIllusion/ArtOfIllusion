@@ -56,7 +56,7 @@ public class AnimationPreviewer implements Runnable
     
     if (cameras.isEmpty())
     {
-      new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.INFORMATION).showMessageDialog(window);
+      Messages.information(Translate.text("noCameraError"), window.getComponent());
       return;
     }
     if (cameras.size() <= currentCamera)

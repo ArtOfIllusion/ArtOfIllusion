@@ -752,7 +752,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     }
     if (paramIndex == null || paramIndex.length == 0)
     {
-      new BStandardDialog("", Translate.text("noPerVertexParams"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("noPerVertexParams"), this.getComponent());
       return;
     }
     value = new double [paramIndex.length];
@@ -1024,7 +1024,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     }
     if (paramIndex == null || paramIndex.length == 0)
     {
-      new BStandardDialog("", Translate.text("noPerFaceParams"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("noPerFaceParams"), this.getComponent());
       return;
     }
     value = new double [paramIndex.length][];

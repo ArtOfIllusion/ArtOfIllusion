@@ -45,7 +45,7 @@ public class PluginRegistry
     File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
     if (!dir.exists())
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
+      Messages.error(UIUtilities.breakString(Translate.text("cannotLocatePlugins")));
       return;
     }
 
@@ -205,7 +205,7 @@ public class PluginRegistry
     }
     catch (Exception ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
+      Messages.error(UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())));
       System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
       ex.printStackTrace();
     }

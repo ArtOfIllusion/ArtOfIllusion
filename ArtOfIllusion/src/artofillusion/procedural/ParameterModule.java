@@ -153,12 +153,12 @@ public class ParameterModule extends Module
     defaultVal = defaultField.getValue();
     if (minVal > maxVal)
       {
-        new BStandardDialog("", Translate.text("minimumAboveMaxError"), BStandardDialog.ERROR).showMessageDialog(editor.getParentFrame());
+        Messages.error(Translate.text("minimumAboveMaxError"), editor.getParentFrame().getComponent());
         return edit(editor, theScene);
       }
     if (minVal > defaultVal || maxVal < defaultVal)
       {
-        new BStandardDialog("", Translate.text("defaultOutOfRangeError"), BStandardDialog.ERROR).showMessageDialog(editor.getParentFrame());
+        Messages.error(Translate.text("defaultOutOfRangeError"), editor.getParentFrame().getComponent());
         return edit(editor, theScene);
       }
     layout();

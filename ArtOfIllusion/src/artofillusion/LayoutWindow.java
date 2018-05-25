@@ -2416,7 +2416,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     if (mesh == null)
     {
-      new BStandardDialog("", Translate.text("cannotTriangulate"), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("cannotTriangulate"), this.getComponent());
       return;
     }
     if (hasPose)

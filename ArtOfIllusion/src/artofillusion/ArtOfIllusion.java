@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,6 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
 import artofillusion.image.filter.*;
 import artofillusion.material.*;
@@ -27,7 +26,6 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;

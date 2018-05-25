@@ -1,5 +1,6 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +12,6 @@
 
 package artofillusion;
 
-import buoy.widget.*;
 
 import java.io.*;
 import java.util.zip.*;

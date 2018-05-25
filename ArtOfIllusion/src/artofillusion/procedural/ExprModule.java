@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
 

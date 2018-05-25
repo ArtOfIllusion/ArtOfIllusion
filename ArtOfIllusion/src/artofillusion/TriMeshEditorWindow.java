@@ -1263,7 +1263,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     boolean newSel[] = TriMeshSelectionUtilities.findEdgeLoops(mesh, selected);
     if (newSel == null)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotFindEdgeLoop")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("cannotFindEdgeLoop")), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
@@ -1277,7 +1277,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     boolean newSel[] = TriMeshSelectionUtilities.findEdgeStrips(mesh, selected);
     if (newSel == null)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotFindEdgeStrip")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("cannotFindEdgeStrip")), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
@@ -1389,7 +1389,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
           strayVert = true;
       if (breaks > 1 || strayVert)
       {
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("illegalDelete")), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(UIUtilities.breakString(Translate.text("illegalDelete")), this.getComponent());
         return;
       }
     }
@@ -2251,7 +2251,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     {
       if (vertexEdgeCount[i] != 0 && vertexEdgeCount[i] != 2)
       {
-        new BStandardDialog("", Translate.text("illegalExtract"), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(UIUtilities.breakString(Translate.text("illegalExtract")), this.getComponent());
         return;
       }
     }

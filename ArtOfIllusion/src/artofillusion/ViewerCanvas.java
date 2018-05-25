@@ -1389,7 +1389,7 @@ public abstract class ViewerCanvas extends CustomWidget
       for (ViewerCanvas view : currentTool.getWindow().getAllViews())
         if (view != this && view.getRenderMode() == RENDER_RENDERED)
         {
-          new BStandardDialog("", Translate.text("renderedModeMultipleViews"), BStandardDialog.ERROR).showMessageDialog(UIUtilities.findWindow(this));
+          Messages.error(Translate.text("renderedModeMultipleViews"), this.getComponent());
           return;
         }
     }

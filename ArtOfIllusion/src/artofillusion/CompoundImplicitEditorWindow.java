@@ -564,7 +564,7 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
     }
     if (mesh == null)
     {
-      new BStandardDialog("", Translate.text("cannotTriangulate"), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("cannotTriangulate"), this.component);
       return;
     }
     mesh.setTexture(obj.getTexture(), obj.getTextureMapping());

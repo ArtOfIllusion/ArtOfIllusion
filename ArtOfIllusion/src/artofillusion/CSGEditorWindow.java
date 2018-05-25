@@ -587,7 +587,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     }
     if (mesh == null)
     {
-      new BStandardDialog("", Translate.text("cannotTriangulate"), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("cannotTriangulate"), this.getComponent());
       return;
     }
     mesh.setTexture(obj.getTexture(), obj.getTextureMapping());

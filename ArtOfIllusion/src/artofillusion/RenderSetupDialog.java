@@ -56,7 +56,7 @@ public class RenderSetupDialog
     cameras = theScene.getCameras();
     if (cameras.isEmpty())
     {
-      new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("noCameraError"), parent.getComponent());
       return;
     }
     if(cameras.size() <= currentCamera)
@@ -164,7 +164,7 @@ public class RenderSetupDialog
     List<ObjectInfo> cameras = theScene.getCameras();
     if (cameras.isEmpty())
     {
-      new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("noCameraError"), parent.getComponent());
       return;
     }
     if (cameras.size() <= currentCamera)

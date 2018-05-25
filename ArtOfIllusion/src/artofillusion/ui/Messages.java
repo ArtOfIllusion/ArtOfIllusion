@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 by Maksim Khramov
+/* Copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,6 +34,14 @@ public final class Messages {
     
     public static void error(Object message) {
         error(message, (Component)null);
+    }
+    
+    public static void warning(Object message, Component owner) {
+        JOptionPane.showMessageDialog(owner, message, TITLE, JOptionPane.WARNING_MESSAGE);
+    }
+    
+    public static void warning(Object message) {
+      warning(message, (Component)null);
     }
     
     

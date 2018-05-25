@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 by Maksim Khramov
+/* Copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,6 +10,7 @@
 
 package artofillusion.ui;
 
+import javax.swing.JOptionPane;
 import org.junit.Test;
 
 /**
@@ -20,7 +21,22 @@ public class MessagesTest {
 
     
     @Test
-    public void testHello() {
+    public void testError() {
         Messages.error("Hello Errors");
+    }
+    
+    @Test
+    public void testWarning() {
+        Messages.warning("This is warning");
+    }
+    
+    @Test
+    public void testInformation() {
+      Messages.information("Information message");
+    }
+    
+    @Test
+    public void testPlain() {
+      JOptionPane.showMessageDialog(null, "Plain message", "", JOptionPane.PLAIN_MESSAGE);
     }
 }

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
    Changes Copyright (C) 2016 by Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -67,11 +67,11 @@ public class PreferencesWindow
     prefs.setInteractiveSurfaceError(interactiveTolField.getValue());
     prefs.setUndoLevels((int) undoField.getValue());
     if (!prefs.getLocale().equals(languages[localeChoice.getSelectedIndex()]))
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("languageChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
+      Messages.information(UIUtilities.breakString(Translate.text("languageChangedWarning")), parent.getComponent());
     if (prefs.getUseOpenGL() != glBox.getState())
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("glChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
+      Messages.information(UIUtilities.breakString(Translate.text("glChangedWarning")), parent.getComponent());
     if (!ThemeManager.getSelectedTheme().getName().equals(themeChoice.getSelectedValue()))
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("themeChangedWarning")), BStandardDialog.INFORMATION).showMessageDialog(parent);
+      Messages.information(UIUtilities.breakString(Translate.text("themeChangedWarning")), parent.getComponent());
     prefs.setLocale(languages[localeChoice.getSelectedIndex()]);
     prefs.setUseOpenGL(glBox.getState());
     prefs.setKeepBackupFiles(backupBox.getState());

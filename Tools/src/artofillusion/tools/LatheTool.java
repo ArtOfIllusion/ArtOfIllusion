@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +14,6 @@ package artofillusion.tools;
 import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
 
 /** The lathe tool creates new objects by rotating a curve around an axis. */
 
@@ -54,7 +54,8 @@ public class LatheTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", "You must select a single curve to lathe.", BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    //TODO: Localize message
+    Messages.information("You must select a single curve to lathe.", window.getFrame().getComponent());
   }
 
   /**

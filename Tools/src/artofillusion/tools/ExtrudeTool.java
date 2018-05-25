@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +15,6 @@ import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
 
 /** The extrude tool creates new objects by extruding a curve or surface along a path. */
 
@@ -51,7 +51,8 @@ public class ExtrudeTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", UIUtilities.breakString("You must select a curve or open surface to extrude and, optionally, a curve along which to extrude it."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    //TODO: Localize message
+    Messages.information(UIUtilities.breakString("You must select a curve or open surface to extrude and, optionally, a curve along which to extrude it."), window.getFrame().getComponent());
   }
 
   /** Extrude a curve into a spline mesh.

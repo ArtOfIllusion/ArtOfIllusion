@@ -670,8 +670,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       else
       {
-        BStandardDialog d = new BStandardDialog("", Translate.text("fileAlreadyExists"), BStandardDialog.ERROR);
-        d.showMessageDialog(this);
+        Messages.error(Translate.text("fileAlreadyExists"), this.getComponent());
       }
     }
   }

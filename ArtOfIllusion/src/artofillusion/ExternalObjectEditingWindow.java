@@ -118,7 +118,7 @@ public class ExternalObjectEditingWindow extends BDialog
     }
     catch (InvalidObjectException ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), this.getComponent());
     }
     catch (IOException ex)
     {

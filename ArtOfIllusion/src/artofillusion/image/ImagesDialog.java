@@ -205,7 +205,7 @@ public class ImagesDialog extends BDialog
       }
       catch (Exception ex)
       {
-        new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorLoadingImage", file.getName()), this.getComponent());
         ex.printStackTrace();
         setCursor(Cursor.getDefaultCursor());
         
@@ -236,7 +236,7 @@ public class ImagesDialog extends BDialog
     boolean success = theScene.removeImage(selection);
     if (!success)
     {
-      new BStandardDialog(null, UIUtilities.breakString(Translate.text("imageInUse")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("imageInUse")), this.getComponent());
       return;
     }
     selection = -1;

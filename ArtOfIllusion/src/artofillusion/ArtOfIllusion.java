@@ -541,7 +541,7 @@ public class ArtOfIllusion
     }
     catch (InvalidObjectException ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), BStandardDialog.ERROR).showMessageDialog(fr);
+      Messages.error(UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), fr.getComponent());
     }
     catch (IOException ex)
     {

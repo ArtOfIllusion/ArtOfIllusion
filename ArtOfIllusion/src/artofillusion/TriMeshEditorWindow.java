@@ -1910,7 +1910,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     boolean closed = isBoundaryClosed(boundaryList[0]);
     if (closed != isBoundaryClosed(boundaryList[1]))
     {
-      new BStandardDialog("", Translate.text("cannotJoinOpenAndClosed"), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("cannotJoinOpenAndClosed"), this.getComponent());
       return;
     }
 
@@ -2364,7 +2364,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       }
       if (i == edges.size())
       {
-        new BStandardDialog("", Translate.text("edgesNotContinuous"), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("edgesNotContinuous"), this.getComponent());
         return;
       }
       edges.removeElementAt(i);

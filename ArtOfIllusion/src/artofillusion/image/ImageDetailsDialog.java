@@ -305,7 +305,8 @@ public class ImageDetailsDialog extends BDialog
         catch (Exception ex)
         {
             setCursor(Cursor.getDefaultCursor());
-            new BStandardDialog("", Translate.text("errorExportingImage_HEAD") + " " + im.getName() + " " + Translate.text("errorExportingImage_TAIL"), BStandardDialog.ERROR).showMessageDialog(this);
+            //TODO: Localize message
+            Messages.error(Translate.text("Error exporting image: {0}", im.getName()), this.getComponent());
             ex.printStackTrace();
             return;
         }

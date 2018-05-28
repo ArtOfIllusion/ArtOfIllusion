@@ -465,8 +465,8 @@ public class ProcedureEditor extends CustomWidget
       {
         proc.deleteLink(proc.getLinks().length-1);
         selectedLink = new boolean [proc.getLinks().length];
-        new BStandardDialog(null, new String [] {"The link you have selected cannot be created,",
-          "as it would result in a feedback loop."}, BStandardDialog.ERROR).showMessageDialog(parent);
+        //TODO: Localize message
+        Messages.error(UIUtilities.breakString(Translate.text("The link you have selected cannot be created, as it would result in a feedback loop.")), parent.getComponent());
       }
     updateMenus();
   }

@@ -2570,7 +2570,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       Image image = new ImageIcon(f.getAbsolutePath()).getImage();
       if (image == null || image.getWidth(null) <= 0 || image.getHeight(null) <= 0)
       {
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), this.getComponent());
         return;
       }
       obj = new ReferenceImage(image);
@@ -2796,7 +2796,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     catch (InterruptedException ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), this.getComponent());
     }
     theView[currentView].setShowTemplate(true);
     updateImage();

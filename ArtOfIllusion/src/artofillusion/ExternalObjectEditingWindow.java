@@ -1,5 +1,5 @@
 /* Copyright (C) 2004-2007 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -107,8 +107,7 @@ public class ExternalObjectEditingWindow extends BDialog
     scene = null;
     if (!f.isFile())
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("externalObject.sceneNotFound",
-          theObject.getExternalSceneFile().getAbsolutePath())), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("externalObject.sceneNotFound", theObject.getExternalSceneFile().getAbsolutePath())), this.getComponent());
       return;
     }
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -179,7 +178,7 @@ public class ExternalObjectEditingWindow extends BDialog
     theObject.setIncludeChildren(includeChildrenBox.getState());
     theObject.reloadObject();
     if (theObject.getLoadingError() != null)
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("externalObject.loadingError", theObject.getLoadingError())), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("externalObject.loadingError", theObject.getLoadingError())), this.getComponent());
     info.clearCachedMeshes();
     theObject.sceneChanged(info, parentWindow.getScene());
     dispose();

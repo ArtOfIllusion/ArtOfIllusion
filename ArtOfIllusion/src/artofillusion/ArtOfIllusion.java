@@ -535,7 +535,7 @@ public class ArtOfIllusion
     {
       Scene sc = new Scene(f, true);
       if (sc.errorsOccurredInLoading())
-        new BStandardDialog("", new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new BScrollPane(new BTextArea(sc.getLoadingErrors()))}, BStandardDialog.ERROR).showMessageDialog(fr);
+        Messages.error(new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new JScrollPane(new JTextArea(sc.getLoadingErrors()))}, fr.getComponent());
       newWindow(sc);
       RecentFiles.addRecentFile(f);
     }

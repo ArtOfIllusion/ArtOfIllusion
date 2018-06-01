@@ -131,7 +131,7 @@ public class RenderingDialog extends BDialog implements RenderListener
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+        Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
       }
     }
     dispose();
@@ -156,7 +156,7 @@ public class RenderingDialog extends BDialog implements RenderListener
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+        Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
       }
     }
     setCursor(Cursor.getDefaultCursor());
@@ -338,10 +338,10 @@ public class RenderingDialog extends BDialog implements RenderListener
           catch (final IOException ex)
           {
             EventQueue.invokeLater(new Runnable() {
-                          @Override
+              @Override
               public void run()
               {
-                new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+                Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
                 doCancel();
               }
             });

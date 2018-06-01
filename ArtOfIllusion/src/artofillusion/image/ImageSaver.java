@@ -220,7 +220,7 @@ public class ImageSaver
     catch (Exception ex)
     {
       ex.printStackTrace();
-      new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
     }
     return false;
   }

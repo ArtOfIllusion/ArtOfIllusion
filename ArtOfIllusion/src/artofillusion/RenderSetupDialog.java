@@ -147,7 +147,7 @@ public class RenderSetupDialog
         }
         catch (IOException ex)
         {
-          new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+          Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
         }
       }
       else

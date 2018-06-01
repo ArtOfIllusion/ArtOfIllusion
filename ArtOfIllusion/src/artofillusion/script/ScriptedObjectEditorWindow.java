@@ -96,8 +96,7 @@ public class ScriptedObjectEditorWindow extends BFrame
       }
     catch (Exception ex)
       {
-      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
       }
     String filename = fc.getSelectedFile().getName();
     try
@@ -136,8 +135,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     }
     catch (Exception ex)
     {
-      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
     setScriptNameFromFile(fc.getSelectedFile().getName());
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

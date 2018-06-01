@@ -545,7 +545,7 @@ public class ArtOfIllusion
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(fr);
+      Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), fr.getComponent());
     }
   }
 

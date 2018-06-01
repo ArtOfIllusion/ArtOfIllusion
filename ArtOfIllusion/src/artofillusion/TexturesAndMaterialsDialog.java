@@ -273,7 +273,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", Translate.text("errorLoadingFile")+": "+ex.getLocalizedMessage(), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), this.getComponent());
       }
     }
     if (selectedTexture == null && selectedMaterial == null)

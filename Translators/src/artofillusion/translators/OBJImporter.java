@@ -472,7 +472,7 @@ public class OBJImporter
     }
     catch (Exception ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), parent.getComponent());
     }
   }
 

@@ -116,7 +116,7 @@ public class POVExporter
 	    }
 	catch (IOException ex)
 	    {
-              new BStandardDialog("", new String [] {Translate.text("errorExportingScene"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
+              Messages.error(Translate.text("errorExportingScene", ex.getLocalizedMessage()), parent.getComponent());
 	    }
     }
 

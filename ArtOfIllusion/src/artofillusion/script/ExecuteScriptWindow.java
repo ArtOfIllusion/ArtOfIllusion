@@ -93,8 +93,7 @@ public class ExecuteScriptWindow extends BFrame
     }
     catch (Exception ex)
     {
-      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("errorReadingScript", ex.getLocalizedMessage()), this.getComponent());
     }
     String filename = fc.getSelectedFile().getName();
     try
@@ -133,8 +132,7 @@ public class ExecuteScriptWindow extends BFrame
     }
     catch (Exception ex)
     {
-      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
     }
     setScriptNameFromFile(fc.getSelectedFile().getName());
 

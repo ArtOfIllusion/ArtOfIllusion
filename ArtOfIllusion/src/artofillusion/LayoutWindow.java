@@ -2676,7 +2676,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorReadingScript", ex.getLocalizedMessage()), this.getComponent());
         return;
       }
     }
@@ -3017,7 +3017,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("errorReadingScript", ex.getLocalizedMessage()), this.getComponent());
       return;
     }
     try

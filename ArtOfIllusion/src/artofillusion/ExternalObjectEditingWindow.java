@@ -121,7 +121,7 @@ public class ExternalObjectEditingWindow extends BDialog
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), this.getComponent());
     }
     setCursor(Cursor.getDefaultCursor());
 

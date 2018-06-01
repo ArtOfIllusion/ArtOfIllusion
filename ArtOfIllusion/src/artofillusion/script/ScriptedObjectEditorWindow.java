@@ -95,9 +95,9 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptText.setText(buf.toString());
       }
     catch (Exception ex)
-      {
-      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-      }
+    {
+      Messages.error(Translate.text("errorReadingScript", ex.getLocalizedMessage()), this.getComponent());
+    }
     String filename = fc.getSelectedFile().getName();
     try
     {

@@ -135,7 +135,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     }
     catch (Exception ex)
     {
-      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("errorWritingScript", ex.getLocalizedMessage()), this.getComponent());
     }
     setScriptNameFromFile(fc.getSelectedFile().getName());
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

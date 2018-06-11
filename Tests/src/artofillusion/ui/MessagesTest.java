@@ -65,4 +65,11 @@ public class MessagesTest {
         BStandardDialog dlg = new BStandardDialog("Art Of Illusion", Translate.text("savePoseAsGesture"), BStandardDialog.PLAIN);
         String name = dlg.showInputDialog(new BDialog(), null, "New Gesture");
     }
+    
+    @Test
+    public void testMessageString() {
+        String name = "namme";
+        String question = Translate.text("deleteSelectedImage", name);
+        System.out.println(question);
+    }
 }

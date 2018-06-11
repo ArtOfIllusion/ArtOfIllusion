@@ -230,8 +230,7 @@ public class ImagesDialog extends BDialog
     if (name.equals(""))
         name = Translate.text("unNamed");
     String question = Translate.text("deleteSelectedImage") + ", \"" + name + "\" ?";
-    BStandardDialog dlg = new BStandardDialog(null, question , BStandardDialog.QUESTION);
-    if (dlg.showOptionDialog(this, options, options[1]) == 1)
+    if (new BStandardDialog(null, question , BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]) == 1)
       return;
     boolean success = theScene.removeImage(selection);
     if (!success)
@@ -793,9 +792,8 @@ public class ImagesDialog extends BDialog
                        Translate.text("purgeWarningTAIL") + "\n" + 
                        Translate.text("purgeConfirmQuestion");
 
-      BStandardDialog confirm = new BStandardDialog(title, warning, BStandardDialog.QUESTION);
       String[] options = new String[]{Translate.text("Yes"), Translate.text("No")};
-      return (confirm.showOptionDialog(this, options, options[1]) == 0);
+      return (new BStandardDialog(title, warning, BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]) == 0);
     }
 
     private void deleteSelectedImages()

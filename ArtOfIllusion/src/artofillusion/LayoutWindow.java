@@ -911,9 +911,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       String name = theScene.getName();
       if (name == null)
         name = "Untitled";
-      BStandardDialog dlg = new BStandardDialog("", Translate.text("checkSaveChanges", name), BStandardDialog.QUESTION);
       String options[] = new String [] {Translate.text("button.save"), Translate.text("button.dontSave"), Translate.text("button.cancel")};
-      int choice = dlg.showOptionDialog(this, options, options[0]);
+      int choice = new BStandardDialog("", Translate.text("checkSaveChanges", name), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]);
       if (choice == 0)
       {
         saveCommand();
@@ -2351,8 +2350,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (sel.length != 1)
       return;
     info = theScene.getObject(sel[0]);
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("renameObjectTitle"), BStandardDialog.PLAIN);
-    String val = dlg.showInputDialog(this, null, info.getName());
+    String val = new BStandardDialog("", Translate.text("renameObjectTitle"), BStandardDialog.PLAIN).showInputDialog(this, null, info.getName());
     if (val == null)
       return;
     setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {sel[0], info.getName()}));
@@ -2381,9 +2379,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         hasPose = true;
         if (!confirmed && !info.getTracks()[i].isNullTrack())
         {
-          BStandardDialog dlg = new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.getName()), BStandardDialog.QUESTION);
           String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-          if (dlg.showOptionDialog(this, options, options[0]) == 1)
+          if (new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.getName()), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
             return;
           confirmed = true;
         }
@@ -2398,9 +2395,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       if (!confirmed)
       {
-        BStandardDialog dlg = new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.getName()), BStandardDialog.QUESTION);
         String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        if (dlg.showOptionDialog(this, options, options[0]) == 1)
+        if (new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.getName()), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
           return;
       }
       mesh = obj.convertToTriangleMesh(0.0);
@@ -2445,9 +2441,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Object3D posable = obj.getPosableObject();
     if (posable == null)
       return;
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.getName())), BStandardDialog.QUESTION);
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    if (new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.getName())), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
     theScene.replaceObject(obj, posable, undo);
@@ -2708,9 +2703,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void bindToParentCommand()
   {
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmBindParent")), BStandardDialog.QUESTION);
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    if (new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmBindParent")), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     int sel[] = getSelectedIndices();
 

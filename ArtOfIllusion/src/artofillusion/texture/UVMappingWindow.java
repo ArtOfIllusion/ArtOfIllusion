@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2012 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -410,9 +411,8 @@ public class UVMappingWindow extends BDialog implements MeshEditController, Edit
       if (!consistent)
       {
         String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        int choice = new BStandardDialog("",
-            UIUtilities.breakString("Disabling per-face mapping will cause some mapping information to be lost.  Are you sure you want to do this?"),
-            BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]);
+        //TODO: Localize message
+        int choice = new BStandardDialog("",UIUtilities.breakString("Disabling per-face mapping will cause some mapping information to be lost.  Are you sure you want to do this?"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]);
         if (choice == 1)
         {
           faceBox.setState(true);

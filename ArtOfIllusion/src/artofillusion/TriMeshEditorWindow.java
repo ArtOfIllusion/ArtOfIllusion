@@ -741,8 +741,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       if (!theMesh.isClosed())
       {
         String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING);
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         theMesh.setMaterial(null, null);
@@ -1596,9 +1595,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void optimizeCommand()
   {
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("optimizeMeshTitle")), BStandardDialog.QUESTION);
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    if (new BStandardDialog("", UIUtilities.breakString(Translate.text("optimizeMeshTitle")), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));

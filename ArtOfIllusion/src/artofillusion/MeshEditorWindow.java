@@ -803,9 +803,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
       private void processEvent()
       {
-        BStandardDialog dlg = new BStandardDialog("", Translate.text("resetCoordsToPos"), BStandardDialog.QUESTION);
         String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        int choice = new BStandardDialog("", Translate.text("resetCoordsToPos"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         double xval = Double.NaN, yval = Double.NaN, zval = Double.NaN;
@@ -1420,10 +1419,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       return;
 
     // Get confirmation from the user.
-
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("unbindPointsFromBone"), BStandardDialog.QUESTION);
     String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    if (new BStandardDialog("", Translate.text("unbindPointsFromBone"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
 
     // Detach the vertices.

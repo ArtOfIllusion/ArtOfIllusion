@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1017,8 +1017,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
                   if (posable != info.getObject())
                     {
                       String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
-                      BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("mustConvertToActor", info.getName())), BStandardDialog.QUESTION);
-                      int choice = dlg.showOptionDialog(window, options, options[0]);
+                      int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("mustConvertToActor", info.getName())), BStandardDialog.QUESTION).showOptionDialog(window, options, options[0]);
                       if (choice == 1)
                         continue;
                       theScene.replaceObject(info.getObject(), posable, undo);

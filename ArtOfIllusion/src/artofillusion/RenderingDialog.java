@@ -137,8 +137,8 @@ public class RenderingDialog extends BDialog implements RenderListener
     dispose();
     if (hasModifiedFilters)
     {
-      String values[] = new String[] {Translate.text("button.save"), Translate.text("button.dontSave")};
-      int choice = new BStandardDialog("", Translate.text("saveModifiedFilters", sceneCamera.getName()), BStandardDialog.QUESTION).showOptionDialog(parent, values, values[0]);
+      String options[] = new String[] {Translate.text("button.save"), Translate.text("button.dontSave")};
+      int choice = new BStandardDialog("", Translate.text("saveModifiedFilters", sceneCamera.getName()), BStandardDialog.QUESTION).showOptionDialog(parent, options, options[0]);
       if (choice == 0)
         ((SceneCamera) sceneCamera.getObject()).setImageFilters(cameraForFilters.getImageFilters());
     }

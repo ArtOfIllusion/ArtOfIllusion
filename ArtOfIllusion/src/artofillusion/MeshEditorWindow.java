@@ -1180,7 +1180,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     Joint j = s.getJoint(view.getSelectedJoint());
     if (j == null)
       return;
-    String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+    String options[] = Messages.optionsYesNo();
     BStandardDialog dlg = new BStandardDialog("", Translate.text(j.children.length == 0 ? "deleteBone" : "deleteBoneAndChildren", j.name), BStandardDialog.QUESTION);
     if (dlg.showOptionDialog(this, options, options[1]) == 1)
       return;

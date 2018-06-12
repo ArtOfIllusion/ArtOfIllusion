@@ -1779,7 +1779,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     File file = new File(fc.getDirectory(), name);
     if (file.isFile())
     {
-      String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+      String options[] = Messages.optionsYesNo();
       int choice = new BStandardDialog("", Translate.text("overwriteFile", name), BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]);
       if (choice == 1)
         return;

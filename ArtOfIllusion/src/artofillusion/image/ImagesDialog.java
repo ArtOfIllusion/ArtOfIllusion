@@ -225,7 +225,7 @@ public class ImagesDialog extends BDialog
 
   private void doDelete()
   {
-    String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+    String options[] = Messages.optionsYesNo();
     String name = theScene.getImage(selection).getName();
     if (name.equals(""))
         name = Translate.text("unNamed");

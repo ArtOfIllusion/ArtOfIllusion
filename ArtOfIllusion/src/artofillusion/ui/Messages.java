@@ -56,8 +56,11 @@ public final class Messages {
     public static String[] optionsOkCancel() {
         return new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
     }
+    public static String[] optionsYesNo() {
+        return new String [] {Translate.text("Yes"), Translate.text("No")};
+    }
     
     public void questionOkCancel() {
-        final String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+        final String options[] = Messages.optionsOkCancel();
     }
 }

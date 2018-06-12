@@ -164,8 +164,7 @@ public class TubeEditorWindow extends CurveEditorWindow
       if (!theMesh.isClosed())
       {
         String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING);
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         theMesh.setMaterial(null, null);

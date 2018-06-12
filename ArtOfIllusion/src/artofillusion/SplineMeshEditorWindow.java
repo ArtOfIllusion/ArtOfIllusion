@@ -519,7 +519,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     {
       if (!theMesh.isClosed())
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};        
+        String options[] = Messages.optionsOkCancel();
         int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;

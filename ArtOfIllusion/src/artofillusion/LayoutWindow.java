@@ -2379,7 +2379,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         hasPose = true;
         if (!confirmed && !info.getTracks()[i].isNullTrack())
         {
-          String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+          String options[] = Messages.optionsOkCancel();
           if (new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.getName()), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
             return;
           confirmed = true;
@@ -2395,7 +2395,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       if (!confirmed)
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+        String options[] = Messages.optionsOkCancel();
         if (new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.getName()), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
           return;
       }
@@ -2441,7 +2441,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Object3D posable = obj.getPosableObject();
     if (posable == null)
       return;
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+    String options[] = Messages.optionsOkCancel();
     if (new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.getName())), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
@@ -2703,7 +2703,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void bindToParentCommand()
   {
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+    String options[] = Messages.optionsOkCancel();
     if (new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmBindParent")), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     int sel[] = getSelectedIndices();

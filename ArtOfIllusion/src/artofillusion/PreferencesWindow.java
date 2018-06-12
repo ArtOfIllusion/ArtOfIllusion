@@ -49,7 +49,7 @@ public class PreferencesWindow
       done = true;
       if (interactiveTolField.getValue() < 0.01)
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+        String options[] = Messages.optionsOkCancel();
         int choice = new BStandardDialog("", Translate.text("lowSurfErrorWarning"), BStandardDialog.WARNING).showOptionDialog(parent, options, options[0]);
         if (choice == 1)
           done = false;

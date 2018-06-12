@@ -53,6 +53,9 @@ public final class Messages {
         JOptionPane.showMessageDialog(owner, message, TITLE, JOptionPane.INFORMATION_MESSAGE);
     }
 
+    public static String[] optionsOkCancel() {
+        return new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+    }
     
     public void questionOkCancel() {
         final String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};

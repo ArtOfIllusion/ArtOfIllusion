@@ -803,7 +803,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
       private void processEvent()
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+        String options[] = Messages.optionsOkCancel();
         int choice = new BStandardDialog("", Translate.text("resetCoordsToPos"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
@@ -1419,7 +1419,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       return;
 
     // Get confirmation from the user.
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
+    String options[] = Messages.optionsOkCancel();
     if (new BStandardDialog("", Translate.text("unbindPointsFromBone"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
 

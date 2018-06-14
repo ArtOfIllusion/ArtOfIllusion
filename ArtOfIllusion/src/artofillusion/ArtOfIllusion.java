@@ -24,7 +24,6 @@ import artofillusion.ui.*;
 import artofillusion.keystroke.*;
 import artofillusion.view.*;
 import buoy.widget.*;
-import buoy.xml.*;
 
 import java.io.*;
 import java.net.*;
@@ -65,9 +64,6 @@ public class ArtOfIllusion
     try
       {
         URL url = ArtOfIllusion.class.getResource("/artofillusion/ArtOfIllusion.class");
-          System.out.println(url);
-        URL url2 = ArtOfIllusion.class.getProtectionDomain().getCodeSource().getLocation();
-          System.out.println(url2);
         if (url.toString().startsWith("jar:"))
           {
             String furl = url.getFile();

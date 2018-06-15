@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,8 @@ import java.text.*;
 
 /** ThickenMeshTool is an EditingTool used for making pieces of TriangleMeshes thicker
     or thinner. */
-
+@EditingTool.ButtonImage("outsetPoints")
+@EditingTool.Tooltip("thickenMeshTool.tipText")
 public class ThickenMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress;
@@ -32,7 +34,7 @@ public class ThickenMeshTool extends MeshEditingTool
   public ThickenMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("outsetPoints");
+
     manipulator = new NinePointManipulator(new Image[] {null, null, null, null, NinePointManipulator.ARROWS_N_S, null, null, null, null});
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
@@ -43,12 +45,6 @@ public class ThickenMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("thickenMeshTool.tipText");
   }
 
   @Override

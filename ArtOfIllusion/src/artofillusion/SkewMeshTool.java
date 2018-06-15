@@ -18,7 +18,8 @@ import buoy.event.*;
 import java.awt.*;
 
 /** SkewMeshTool is an EditingTool used for skewing the vertices of TriangleMesh objects. */
-
+@EditingTool.ButtonImage("skewPoints")
+@EditingTool.Tooltip("skewMeshTool.tipText")
 public class SkewMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, skewX, skewY, skewAll;
@@ -32,7 +33,6 @@ public class SkewMeshTool extends MeshEditingTool
   public SkewMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("skewPoints");
     manipulator = new NinePointManipulator(new Image[] {
       NinePointManipulator.ARROWS_S_E, NinePointManipulator.ARROWS_E_W, NinePointManipulator.ARROWS_S_W,
       NinePointManipulator.ARROWS_N_S, null, NinePointManipulator.ARROWS_N_S,
@@ -43,21 +43,9 @@ public class SkewMeshTool extends MeshEditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("skewMeshTool.tipText");
   }
 
   @Override

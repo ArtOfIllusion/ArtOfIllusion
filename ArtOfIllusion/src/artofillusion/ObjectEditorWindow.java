@@ -508,4 +508,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     for (int i = 0; i < plugins.size(); i++)
       plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
   }
+  
+  public BLabel getHelpText() {
+    return helpText;
+  }
 }

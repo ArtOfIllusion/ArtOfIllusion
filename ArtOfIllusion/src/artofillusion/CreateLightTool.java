@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,9 @@ import java.awt.*;
 import java.awt.geom.*;
 
 /** CreateLightTool is an EditingTool used for creating PointLight objects. */
-
+@EditingTool.ButtonImage("light")
+@EditingTool.Tooltip(value = "createLightTool.tipText")
+@EditingTool.ActivatedToolText("createLightTool.helpText")
 public class CreateLightTool extends EditingTool
 {
   static int counter = 2;
@@ -30,26 +33,6 @@ public class CreateLightTool extends EditingTool
   public CreateLightTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("light");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createLightTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createLightTool.tipText");
   }
 
   @Override

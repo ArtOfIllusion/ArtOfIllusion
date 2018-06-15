@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,9 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** CreateCylinderTool is an EditingTool used for creating Cylinder objects. */
-
+@EditingTool.ButtonImage("cylinder")
+@EditingTool.Tooltip("createCylinderTool.tipText")
+@EditingTool.ActivatedToolText("createCylinderTool.helpText")
 public class CreateCylinderTool extends EditingTool
 {
   static int counter = 1;
@@ -32,26 +35,6 @@ public class CreateCylinderTool extends EditingTool
   public CreateCylinderTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("cylinder");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCylinderTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCylinderTool.tipText");
   }
 
   @Override

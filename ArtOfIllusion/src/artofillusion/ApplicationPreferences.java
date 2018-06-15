@@ -23,6 +23,7 @@ import java.util.List;
 
 public class ApplicationPreferences
 {
+  private static final String userHomePath = System.getProperty("user.home");
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol, maxAnimationDuration, animationFrameRate;
@@ -41,7 +42,7 @@ public class ApplicationPreferences
     {
       // See if it exists in the old location.
 
-      File f2 = new File(System.getProperty("user.home"), ".aoiprefs");
+      File f2 = new File(userHomePath, ".aoiprefs");
       if (f2.exists())
         f2.renameTo(f);
     }
@@ -122,7 +123,7 @@ public class ApplicationPreferences
 
   public static File getPreferencesDirectory()
   {
-    File dir = new File(System.getProperty("user.home"), ".artofillusion");
+    File dir = new File(userHomePath, ".artofillusion");
     if (!dir.exists())
       dir.mkdirs();
     return dir;

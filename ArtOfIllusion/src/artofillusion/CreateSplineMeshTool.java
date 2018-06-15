@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,8 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** CreateSplineMeshTool is an EditingTool used for creating SplineMesh objects. */
-
+@EditingTool.ButtonImage("splineMesh")
+@EditingTool.Tooltip("createSplineMeshTool.tipText")
 public class CreateSplineMeshTool extends EditingTool
 {
   static int counter = 1;
@@ -36,7 +38,6 @@ public class CreateSplineMeshTool extends EditingTool
   public CreateSplineMeshTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("splineMesh");
   }
 
   @Override
@@ -62,18 +63,6 @@ public class CreateSplineMeshTool extends EditingTool
     theWindow.setHelpText(Translate.text("createSplineMeshTool.helpText",
       new Object [] {Integer.toString(usize), Integer.toString(vsize),
       Translate.text("createSplineMeshTool."+shapeDesc).toLowerCase(), Translate.text("menu."+smoothingDesc).toLowerCase()}));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createSplineMeshTool.tipText");
   }
 
   @Override

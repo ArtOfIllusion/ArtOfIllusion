@@ -1,5 +1,6 @@
 /* Copyright (C) 2003-2007 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,7 +20,8 @@ import buoy.event.*;
 import java.awt.*;
 
 /** CreateVertexTool is an EditingTool used for adding vertices to triangle meshes. */
-
+@EditingTool.ButtonImage("createVertex")
+@EditingTool.Tooltip("createVertexTool.tipText")
 public class CreateVertexTool extends MeshEditingTool
 {
   private Point clickPoint;
@@ -30,7 +32,6 @@ public class CreateVertexTool extends MeshEditingTool
   public CreateVertexTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("createVertex");
   }
 
   @Override
@@ -53,18 +54,6 @@ public class CreateVertexTool extends MeshEditingTool
       theWindow.setHelpText(Translate.text("createVertexTool.helpText.edge"));
     else
       theWindow.setHelpText(Translate.text("createVertexTool.helpText.face"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createVertexTool.tipText");
   }
 
   @Override

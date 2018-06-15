@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,8 @@ import buoy.event.*;
 import java.awt.*;
 
 /** TaperMeshTool is an EditingTool used for tapering the vertices of TriangleMesh objects. */
-
+@EditingTool.ButtonImage("taperPoints")
+@EditingTool.Tooltip("taperMeshTool.tipText")
 public class TaperMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, taperAll, towardCenter;
@@ -34,7 +36,7 @@ public class TaperMeshTool extends MeshEditingTool
   public TaperMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("taperPoints");
+
     manipulator = new NinePointManipulator(new Image[] {
       NinePointManipulator.ARROWS_S_E, null, NinePointManipulator.ARROWS_S_W,
       null, null, null,
@@ -45,21 +47,9 @@ public class TaperMeshTool extends MeshEditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("taperMeshTool.tipText");
   }
 
   @Override

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
+   Changes copyright (C) 2016-2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -203,7 +203,7 @@ public class ArtOfIllusion
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();
     ThemeManager.initThemes();
-    preferences = new ApplicationPreferences();
+    
     KeystrokeManager.loadRecords();
     ViewerCanvas.addViewerControl(new ViewerOrientationControl());
     ViewerCanvas.addViewerControl(new ViewerPerspectiveControl());
@@ -251,11 +251,16 @@ public class ArtOfIllusion
     return "3.0";
   }
 
+  private static class ApplicationPreferencesHolder
+  {
+    public static ApplicationPreferences INSTANCE = new ApplicationPreferences();
+  }
+  
   /** Get the application preferences object. */
 
   public static ApplicationPreferences getPreferences()
   {
-    return preferences;
+    return ApplicationPreferencesHolder.INSTANCE;
   }
 
   /** Create a new Scene, and display it in a window. */

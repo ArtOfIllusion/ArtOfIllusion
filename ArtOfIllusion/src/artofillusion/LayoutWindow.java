@@ -51,7 +51,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   Score theScore;
   ToolPalette tools;
   private TexturesAndMaterialsDialog assetsDialog;
-  BLabel helpText;
+  private BLabel helpText;
   TreeList itemTree;
   Scene theScene;
   BMenuBar menubar;
@@ -248,9 +248,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (ArtOfIllusion.APP_ICON != null)
       setIcon(ArtOfIllusion.APP_ICON);
     Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-    String os = System.getProperties().getProperty("os.name").toLowerCase();
-    if (os.startsWith("mac os"))
-      screenBounds.height -= 11; // Workaround for bug in Java on Mac.
     setBounds(screenBounds);
     tools.requestFocus();
     setTime(theScene.getTime());
@@ -3032,4 +3029,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().
   }
+
+    public BLabel getHelpText() {
+        return helpText;
+    }
 }

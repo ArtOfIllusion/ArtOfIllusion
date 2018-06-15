@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,10 +18,13 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.Vector;
+import java.util.List;
 
 /** ScaleObjectTool is an EditingTool used for resizing objects in a scene.  For convenience, it also
     allows users to move objects by clicking on the object itself rather than on a handle.*/
-
+@EditingTool.ButtonImage("resize")
+@EditingTool.Tooltip("scaleObjectTool.tipText")
+@EditingTool.ActivatedToolText("scaleObjectTool.helpText")
 public class ScaleObjectTool extends EditingTool
 {
   static final int TOP = 1;
@@ -39,7 +43,7 @@ public class ScaleObjectTool extends EditingTool
   private Vec3 objectPos[], scaleCenter[];
   private Object3D oldObj[];
   private CoordinateSystem oldCoords[];
-  private Vector<ObjectInfo> toMove;
+  private List<ObjectInfo> toMove;
   private double halfx, halfy, centerx, centery;
   private ObjectInfo clickedObject;
   private int whichSides;
@@ -50,14 +54,6 @@ public class ScaleObjectTool extends EditingTool
   public ScaleObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("resize");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
 
   @Override
@@ -70,12 +66,6 @@ public class ScaleObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("scaleObjectTool.tipText");
   }
 
   @Override
@@ -95,7 +85,7 @@ public class ScaleObjectTool extends EditingTool
     else
       sel = theScene.getSelection();
     for (i = 0; i < sel.length; i++)
-      toMove.addElement(theScene.getObject(sel[i]));
+      toMove.add(theScene.getObject(sel[i]));
     bounds = new BoundingBox [toMove.size()];
     scaleCenter = new Vec3 [toMove.size()];
     haxis = new int [toMove.size()];
@@ -105,7 +95,7 @@ public class ScaleObjectTool extends EditingTool
     objectPos = new Vec3 [toMove.size()];
     for (i = 0; i < objectPos.length; i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         objectPos[i] = info.getCoords().getOrigin();
       }
 
@@ -114,8 +104,8 @@ public class ScaleObjectTool extends EditingTool
 
     for (i = 0; i < bounds.length; i++)
       {
-        bounds[i] = ((ObjectInfo) toMove.elementAt(i)).getBounds();
-        cam.setObjectTransform(((ObjectInfo) toMove.elementAt(i)).getCoords().fromLocal());
+        bounds[i] = toMove.get(i).getBounds();
+        cam.setObjectTransform(toMove.get(i).getCoords().fromLocal());
         screenx = cam.getObjectToView().timesDirection(Vec3.vx());
         screeny = cam.getObjectToView().timesDirection(Vec3.vy());
         screenz = cam.getObjectToView().timesDirection(Vec3.vz());
@@ -160,12 +150,12 @@ public class ScaleObjectTool extends EditingTool
       {
         if (scaleAround == POSITIONS_FIXED)
           for (i = 0; i < scaleCenter.length; i++)
-            scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).getCoords().getOrigin();
+            scaleCenter[i] = toMove.get(i).getCoords().getOrigin();
         else
           for (i = 0; i < scaleCenter.length; i++)
             scaleCenter[i] = clickedObject.getCoords().getOrigin();
         for (i = 0; i < scaleCenter.length; i++)
-          scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).getCoords().toLocal().times(scaleCenter[i]);
+          scaleCenter[i] = toMove.get(i).getCoords().toLocal().times(scaleCenter[i]);
         cam.setObjectTransform(clickedObject.getCoords().fromLocal());
         r = cam.findScreenBounds(clickedObject.getBounds());
         halfx = r.width/2.0;
@@ -178,18 +168,18 @@ public class ScaleObjectTool extends EditingTool
         if (scaleAround == POSITIONS_FIXED)
           for (i = 0; i < scaleCenter.length; i++)
             {
-              ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+              ObjectInfo info = toMove.get(i);
               scaleCenter[i] = findBorderPos(info.getBounds(),
                 info.getCoords().getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
             }
         else
           {
-            for (i = 0; toMove.elementAt(i) != clickedObject; i++);
+            for (i = 0; toMove.get(i) != clickedObject; i++);
             Vec3 center = findBorderPos(clickedObject.getBounds(),
                 clickedObject.getCoords().getOrigin(), haxis[i], vaxis[i], haxisDir[i], vaxisDir[i], handle);
             center = clickedObject.getCoords().fromLocal().times(center);
             for (i = 0; i < scaleCenter.length; i++)
-              scaleCenter[i] = ((ObjectInfo) toMove.elementAt(i)).getCoords().toLocal().times(center);
+              scaleCenter[i] = toMove.get(i).getCoords().toLocal().times(center);
           }
         cam.setObjectTransform(clickedObject.getCoords().fromLocal());
         r = cam.findScreenBounds(clickedObject.getBounds());
@@ -237,11 +227,11 @@ public class ScaleObjectTool extends EditingTool
     else
       sel = theScene.getSelection();
     for (i = 0; i < sel.length; i++)
-      toMove.addElement(theScene.getObject(sel[i]));
+      toMove.add(theScene.getObject(sel[i]));
     objectPos = new Vec3 [toMove.size()];
     for (i = 0; i < objectPos.length; i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         objectPos[i] = info.getCoords().getOrigin();
       }
     clickPoint = e.getPoint();
@@ -354,7 +344,7 @@ public class ScaleObjectTool extends EditingTool
         theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
         for (i = 0; i < toMove.size(); i++)
           {
-            ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+            ObjectInfo info = toMove.get(i);
             c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
@@ -375,7 +365,7 @@ public class ScaleObjectTool extends EditingTool
       v = cam.findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
     for (i = 0; i < toMove.size(); i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
@@ -399,7 +389,7 @@ public class ScaleObjectTool extends EditingTool
       theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
       for (int i = 0; i < toMove.size(); i++)
       {
-        ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         oldObj[i] = info.getObject().duplicate();
         oldCoords[i] = info.getCoords().duplicate();
         undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.getCoords(), oldCoords[i]});
@@ -450,7 +440,7 @@ public class ScaleObjectTool extends EditingTool
         scale[vaxis[i]] = vscale;
       }
       Vec3 oldsize = bounds[i].getSize();
-      ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
+      ObjectInfo info = toMove.get(i);
       Object3D obj = info.getObject();
       obj.copyObject(oldObj[i]);
       obj.setSize(scale[0]*oldsize.x, scale[1]*oldsize.y, scale[2]*oldsize.z);

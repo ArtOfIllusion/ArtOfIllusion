@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,6 +34,11 @@ public class LinearMapping3D extends Mapping3D
   protected int numTextureParams;
   protected TextureParameter xparam, yparam, zparam;
 
+  public LinearMapping3D()
+  {
+    this(null,null);
+  }
+  
   public LinearMapping3D(Object3D obj, Texture theTexture)
   {
     super(obj, theTexture);

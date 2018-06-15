@@ -52,8 +52,8 @@ public class ArtOfIllusion
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
-  private static ArrayList<EditingWindow> windows = new ArrayList<EditingWindow>();
-  private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
+  private static List<EditingWindow> windows = new ArrayList<EditingWindow>();
+  private static Map<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
   static
@@ -76,7 +76,7 @@ public class ArtOfIllusion
               dir = System.getProperty("user.dir");
           }
       }
-      catch (Exception ex)
+      catch (MalformedURLException ex)
       {
       }
 
@@ -97,6 +97,7 @@ public class ArtOfIllusion
     // Build a table of classes which have moved.
 
     classTranslations.put("artofillusion.tools.CSGObject", "artofillusion.object.CSGObject");
+    
     classTranslations.put("artofillusion.Cube", "artofillusion.object.Cube");
     classTranslations.put("artofillusion.Curve", "artofillusion.object.Curve");
     classTranslations.put("artofillusion.Cylinder", "artofillusion.object.Cylinder");
@@ -124,6 +125,7 @@ public class ArtOfIllusion
     classTranslations.put("artofillusion.procedural.ProceduralMaterial3D", "artofillusion.material.ProceduralMaterial3D");
     classTranslations.put("artofillusion.UniformMaterial", "artofillusion.material.UniformMaterial");
     classTranslations.put("artofillusion.UniformMaterialMapping", "artofillusion.material.UniformMaterialMapping");
+    
     classTranslations.put("artofillusion.tools.tapDesigner.TapDesignerObjectCollection", "artofillusion.tapDesigner.TapDesignerObjectCollection");
     classTranslations.put("artofillusion.tools.tapDesigner.TapTube", "artofillusion.tapDesigner.TapTube");
     classTranslations.put("artofillusion.tools.tapDesigner.TapSplineMesh", "artofillusion.tapDesigner.TapSplineMesh");
@@ -160,6 +162,7 @@ public class ArtOfIllusion
       // Don't worry about it.
     }
     TitleWindow title = new TitleWindow();
+    
     PluginRegistry.addCategory(Plugin.class);
     PluginRegistry.addCategory(Renderer.class);
     PluginRegistry.addCategory(Translator.class);
@@ -169,20 +172,24 @@ public class ArtOfIllusion
     PluginRegistry.addCategory(TextureMapping.class);
     PluginRegistry.addCategory(MaterialMapping.class);
     PluginRegistry.addCategory(ImageFilter.class);
-    PluginRegistry.addCategory(Module.class);
+    PluginRegistry.addCategory(Module.class);    
+    
     PluginRegistry.registerPlugin(new UniformTexture());
     PluginRegistry.registerPlugin(new ImageMapTexture());
     PluginRegistry.registerPlugin(new ProceduralTexture2D());
     PluginRegistry.registerPlugin(new ProceduralTexture3D());
     PluginRegistry.registerPlugin(new UniformMaterial());
     PluginRegistry.registerPlugin(new ProceduralMaterial3D());
-    PluginRegistry.registerPlugin(new UniformMapping(null, null));
-    PluginRegistry.registerPlugin(new ProjectionMapping(null, null));
-    PluginRegistry.registerPlugin(new CylindricalMapping(null, null));
-    PluginRegistry.registerPlugin(new SphericalMapping(null, null));
-    PluginRegistry.registerPlugin(new UVMapping(null, null));
-    PluginRegistry.registerPlugin(new LinearMapping3D(null, null));
-    PluginRegistry.registerPlugin(new LinearMaterialMapping(null, null));
+
+    PluginRegistry.registerPlugin(new UniformMapping());
+    PluginRegistry.registerPlugin(new ProjectionMapping());
+    PluginRegistry.registerPlugin(new CylindricalMapping());
+    PluginRegistry.registerPlugin(new SphericalMapping());
+    PluginRegistry.registerPlugin(new UVMapping());
+    
+    PluginRegistry.registerPlugin(new LinearMapping3D());
+    PluginRegistry.registerPlugin(new LinearMaterialMapping());
+    
     PluginRegistry.registerPlugin(new BrightnessFilter());
     PluginRegistry.registerPlugin(new SaturationFilter());
     PluginRegistry.registerPlugin(new ExposureFilter());
@@ -216,13 +223,10 @@ public class ArtOfIllusion
       }
     }
     
-    for (int i = 0; i < args.length; i++)
-    {
-      try
-      {
-        newWindow(new Scene(new File(args[i]), true));
-      }
-      catch (Exception ex)
+    for (String arg : args) {
+      try {
+        newWindow(new Scene(new File(arg), true));
+      }catch (IOException ex)
       {
         ex.printStackTrace();
       }

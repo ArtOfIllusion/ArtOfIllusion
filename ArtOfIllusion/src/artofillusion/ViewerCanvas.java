@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes Copyrignt (C) 2016-2017 Petri Ihalainen
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1389,7 +1389,7 @@ public abstract class ViewerCanvas extends CustomWidget
       for (ViewerCanvas view : currentTool.getWindow().getAllViews())
         if (view != this && view.getRenderMode() == RENDER_RENDERED)
         {
-          new BStandardDialog("", Translate.text("renderedModeMultipleViews"), BStandardDialog.ERROR).showMessageDialog(UIUtilities.findWindow(this));
+          Messages.error(Translate.text("renderedModeMultipleViews"), this.getComponent());
           return;
         }
     }

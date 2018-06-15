@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2008 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +14,6 @@ package artofillusion.tools;
 import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
 
 /** The tube tool creates Tube objects from Curves. */
 
@@ -49,6 +49,7 @@ public class TubeTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", UIUtilities.breakString("You must select a single curve from which to make a tube."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    //TODO: Localize message
+    Messages.information(UIUtilities.breakString("You must select a single curve from which to make a tube."), window.getFrame().getComponent());
   }
 }

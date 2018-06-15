@@ -1,5 +1,6 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -176,7 +177,7 @@ public class ImagesDialog extends BDialog
       catch (Exception ex)
       {
         setCursor(Cursor.getDefaultCursor());
-        new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorLoadingImage", file.getName()), this.getComponent());
         ex.printStackTrace();
         return;
       }
@@ -204,7 +205,7 @@ public class ImagesDialog extends BDialog
       }
       catch (Exception ex)
       {
-        new BStandardDialog("", Translate.text("errorLoadingImage", file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorLoadingImage", file.getName()), this.getComponent());
         ex.printStackTrace();
         setCursor(Cursor.getDefaultCursor());
         
@@ -224,18 +225,17 @@ public class ImagesDialog extends BDialog
 
   private void doDelete()
   {
-    String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+    String options[] = Messages.optionsYesNo();
     String name = theScene.getImage(selection).getName();
     if (name.equals(""))
         name = Translate.text("unNamed");
     String question = Translate.text("deleteSelectedImage") + ", \"" + name + "\" ?";
-    BStandardDialog dlg = new BStandardDialog(null, question , BStandardDialog.QUESTION);
-    if (dlg.showOptionDialog(this, options, options[1]) == 1)
+    if (new BStandardDialog(null, question , BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]) == 1)
       return;
     boolean success = theScene.removeImage(selection);
     if (!success)
     {
-      new BStandardDialog(null, UIUtilities.breakString(Translate.text("imageInUse")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("imageInUse")), this.getComponent());
       return;
     }
     selection = -1;
@@ -792,9 +792,8 @@ public class ImagesDialog extends BDialog
                        Translate.text("purgeWarningTAIL") + "\n" + 
                        Translate.text("purgeConfirmQuestion");
 
-      BStandardDialog confirm = new BStandardDialog(title, warning, BStandardDialog.QUESTION);
       String[] options = new String[]{Translate.text("Yes"), Translate.text("No")};
-      return (confirm.showOptionDialog(this, options, options[1]) == 0);
+      return (new BStandardDialog(title, warning, BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]) == 0);
     }
 
     private void deleteSelectedImages()

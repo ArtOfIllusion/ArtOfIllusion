@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Modifications copyright (C) 2016 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -752,7 +752,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     }
     if (paramIndex == null || paramIndex.length == 0)
     {
-      new BStandardDialog("", Translate.text("noPerVertexParams"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("noPerVertexParams"), this.getComponent());
       return;
     }
     value = new double [paramIndex.length];
@@ -803,9 +803,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
 
       private void processEvent()
       {
-        BStandardDialog dlg = new BStandardDialog("", Translate.text("resetCoordsToPos"), BStandardDialog.QUESTION);
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        String options[] = Messages.optionsOkCancel();
+        int choice = new BStandardDialog("", Translate.text("resetCoordsToPos"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         double xval = Double.NaN, yval = Double.NaN, zval = Double.NaN;
@@ -1024,7 +1023,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     }
     if (paramIndex == null || paramIndex.length == 0)
     {
-      new BStandardDialog("", Translate.text("noPerFaceParams"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("noPerFaceParams"), this.getComponent());
       return;
     }
     value = new double [paramIndex.length][];
@@ -1181,7 +1180,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     Joint j = s.getJoint(view.getSelectedJoint());
     if (j == null)
       return;
-    String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+    String options[] = Messages.optionsYesNo();
     BStandardDialog dlg = new BStandardDialog("", Translate.text(j.children.length == 0 ? "deleteBone" : "deleteBoneAndChildren", j.name), BStandardDialog.QUESTION);
     if (dlg.showOptionDialog(this, options, options[1]) == 1)
       return;
@@ -1420,10 +1419,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
       return;
 
     // Get confirmation from the user.
-
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("unbindPointsFromBone"), BStandardDialog.QUESTION);
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    String options[] = Messages.optionsOkCancel();
+    if (new BStandardDialog("", Translate.text("unbindPointsFromBone"), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
 
     // Detach the vertices.

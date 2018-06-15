@@ -472,7 +472,7 @@ public class OBJImporter
     }
     catch (Exception ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), parent.getComponent());
     }
   }
 
@@ -549,7 +549,8 @@ public class OBJImporter
       f = new File(file);
     if (!f.isFile())
     {
-      new BStandardDialog("Error Importing File", "Cannot locate material file '"+file+"'.", BStandardDialog.ERROR).showMessageDialog(null);
+      //TODO: Localize message
+      Messages.error(Translate.text("Error Importing file. Cannot locate material file: '{0}'.", file));
       return;
     }
     BufferedReader in = new BufferedReader(new FileReader(f));

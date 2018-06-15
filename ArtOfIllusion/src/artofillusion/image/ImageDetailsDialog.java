@@ -1,5 +1,6 @@
 /* Copyright (C) 2017 by Petri Ihalainen
    Some methods copyright (C) by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -235,7 +236,7 @@ public class ImageDetailsDialog extends BDialog
         }
         catch(Exception e)
         {
-            new BStandardDialog("", Translate.text("errorLoadingImage " + file.getName()), BStandardDialog.ERROR).showMessageDialog(this);
+            Messages.error(Translate.text("errorLoadingImage", file.getName()), this.getComponent());
         }
     }
 
@@ -270,7 +271,7 @@ public class ImageDetailsDialog extends BDialog
         
         if (imageFile.isFile())
         {
-            String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+            String options[] = Messages.optionsYesNo();
             int choice = new BStandardDialog("", Translate.text("overwriteFile", fileName), BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]);
             if (choice == 1)
             return;
@@ -305,7 +306,8 @@ public class ImageDetailsDialog extends BDialog
         catch (Exception ex)
         {
             setCursor(Cursor.getDefaultCursor());
-            new BStandardDialog("", Translate.text("errorExportingImage_HEAD") + " " + im.getName() + " " + Translate.text("errorExportingImage_TAIL"), BStandardDialog.ERROR).showMessageDialog(this);
+            //TODO: Localize message
+            Messages.error(Translate.text("Error exporting image: {0}", im.getName()), this.getComponent());
             ex.printStackTrace();
             return;
         }

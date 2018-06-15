@@ -216,8 +216,8 @@ public class ArtOfIllusion
       }
       catch (Throwable tx)
       {
-        tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+        tx.printStackTrace();        
+        Messages.error(UIUtilities.breakString(Translate.text("pluginInitError", plugin.getClass().getSimpleName())));
       }
     }
     
@@ -298,7 +298,7 @@ public class ArtOfIllusion
           catch (Throwable tx)
           {
             tx.printStackTrace();
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+            Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
           }
         }
         fr.setVisible(true);
@@ -342,7 +342,7 @@ public class ArtOfIllusion
             catch (Throwable tx)
             {
               tx.printStackTrace();
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+              Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
             }
           }
         }
@@ -378,7 +378,7 @@ public class ArtOfIllusion
       catch (Throwable tx)
       {
         tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+        Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
       }
     }
     System.exit(0);
@@ -498,14 +498,14 @@ public class ArtOfIllusion
         catch (Throwable tx)
         {
           tx.printStackTrace();
-          new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+          Messages.error(UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())));
         }
       }
       RecentFiles.addRecentFile(f);
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorSavingScene"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(fr);
+      Messages.error(Translate.text("errorSavingScene", ex.getLocalizedMessage()), fr.getComponent());
       return false;
     }
     return true;
@@ -544,17 +544,17 @@ public class ArtOfIllusion
     {
       Scene sc = new Scene(f, true);
       if (sc.errorsOccurredInLoading())
-        new BStandardDialog("", new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new BScrollPane(new BTextArea(sc.getLoadingErrors()))}, BStandardDialog.ERROR).showMessageDialog(fr);
+        Messages.error(new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new JScrollPane(new JTextArea(sc.getLoadingErrors()))}, fr.getComponent());
       newWindow(sc);
       RecentFiles.addRecentFile(f);
     }
     catch (InvalidObjectException ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), BStandardDialog.ERROR).showMessageDialog(fr);
+      Messages.error(UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), fr.getComponent());
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(fr);
+      Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), fr.getComponent());
     }
   }
 

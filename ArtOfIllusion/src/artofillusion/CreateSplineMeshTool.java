@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -225,12 +225,12 @@ public class CreateSplineMeshTool extends EditingTool
     minv = shapeChoice.getSelectedIndex() == 2 ? 3 : 2;
     if (usizeField.getValue() < minu)
     {
-      new BStandardDialog("", Translate.text("uSizeTooSmall", Integer.toString(minu)), BStandardDialog.ERROR).showMessageDialog(theFrame);
+      Messages.error(Translate.text("uSizeTooSmall", Integer.toString(minu)), theFrame.getComponent());      
       return;
     }
     if (vsizeField.getValue() < minv)
     {
-      new BStandardDialog("", Translate.text("vSizeTooSmall", Integer.toString(minv)), BStandardDialog.ERROR).showMessageDialog(theFrame);
+      Messages.error(Translate.text("vSizeTooSmall", Integer.toString(minv)), theFrame.getComponent());
       return;
     }
     usize = (int) usizeField.getValue();

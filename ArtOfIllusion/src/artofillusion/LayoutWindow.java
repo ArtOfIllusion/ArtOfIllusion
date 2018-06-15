@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -908,9 +908,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       String name = theScene.getName();
       if (name == null)
         name = "Untitled";
-      BStandardDialog dlg = new BStandardDialog("", Translate.text("checkSaveChanges", name), BStandardDialog.QUESTION);
       String options[] = new String [] {Translate.text("button.save"), Translate.text("button.dontSave"), Translate.text("button.cancel")};
-      int choice = dlg.showOptionDialog(this, options, options[0]);
+      int choice = new BStandardDialog("", Translate.text("checkSaveChanges", name), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]);
       if (choice == 0)
       {
         saveCommand();
@@ -1777,7 +1776,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     File file = new File(fc.getDirectory(), name);
     if (file.isFile())
     {
-      String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+      String options[] = Messages.optionsYesNo();
       int choice = new BStandardDialog("", Translate.text("overwriteFile", name), BStandardDialog.QUESTION).showOptionDialog(this, options, options[1]);
       if (choice == 1)
         return;
@@ -2348,8 +2347,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (sel.length != 1)
       return;
     info = theScene.getObject(sel[0]);
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("renameObjectTitle"), BStandardDialog.PLAIN);
-    String val = dlg.showInputDialog(this, null, info.getName());
+    String val = new BStandardDialog("", Translate.text("renameObjectTitle"), BStandardDialog.PLAIN).showInputDialog(this, null, info.getName());
     if (val == null)
       return;
     setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {sel[0], info.getName()}));
@@ -2378,9 +2376,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         hasPose = true;
         if (!confirmed && !info.getTracks()[i].isNullTrack())
         {
-          BStandardDialog dlg = new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.getName()), BStandardDialog.QUESTION);
-          String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-          if (dlg.showOptionDialog(this, options, options[0]) == 1)
+          String options[] = Messages.optionsOkCancel();
+          if (new BStandardDialog("", Translate.text("convertLosesPosesWarning", info.getName()), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
             return;
           confirmed = true;
         }
@@ -2395,9 +2392,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       if (!confirmed)
       {
-        BStandardDialog dlg = new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.getName()), BStandardDialog.QUESTION);
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        if (dlg.showOptionDialog(this, options, options[0]) == 1)
+        String options[] = Messages.optionsOkCancel();
+        if (new BStandardDialog("", Translate.text("confirmConvertToTriangle", info.getName()), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
           return;
       }
       mesh = obj.convertToTriangleMesh(0.0);
@@ -2413,7 +2409,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     if (mesh == null)
     {
-      new BStandardDialog("", Translate.text("cannotTriangulate"), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("cannotTriangulate"), this.getComponent());
       return;
     }
     if (hasPose)
@@ -2442,9 +2438,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Object3D posable = obj.getPosableObject();
     if (posable == null)
       return;
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.getName())), BStandardDialog.QUESTION);
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    String options[] = Messages.optionsOkCancel();
+    if (new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmConvertToActor", info.getName())), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()});
     theScene.replaceObject(obj, posable, undo);
@@ -2567,7 +2562,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       Image image = new ImageIcon(f.getAbsolutePath()).getImage();
       if (image == null || image.getWidth(null) <= 0 || image.getHeight(null) <= 0)
       {
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), this.getComponent());
         return;
       }
       obj = new ReferenceImage(image);
@@ -2673,7 +2668,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorReadingScript", ex.getLocalizedMessage()), this.getComponent());
         return;
       }
     }
@@ -2705,9 +2700,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void bindToParentCommand()
   {
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmBindParent")), BStandardDialog.QUESTION);
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    String options[] = Messages.optionsOkCancel();
+    if (new BStandardDialog("", UIUtilities.breakString(Translate.text("confirmBindParent")), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     int sel[] = getSelectedIndices();
 
@@ -2793,7 +2787,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     catch (InterruptedException ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("errorLoadingImage", f.getName())), this.getComponent());
     }
     theView[currentView].setShowTemplate(true);
     updateImage();
@@ -3014,7 +3008,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("errorReadingScript", ex.getLocalizedMessage()), this.getComponent());
       return;
     }
     try

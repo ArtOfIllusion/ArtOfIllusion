@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -211,7 +211,7 @@ public class CreatePolygonTool extends EditingTool
     i = (int) sidesField.getValue();
     if (i < 3)
     {
-      new BStandardDialog("", Translate.text("threeSidesRequired"), BStandardDialog.ERROR).showMessageDialog(theFrame);
+      Messages.error(Translate.text("threeSidesRequired"), theFrame.getComponent());
       return;
     }
     sides = i;

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -130,14 +131,14 @@ public class RenderingDialog extends BDialog implements RenderListener
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+        Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
       }
     }
     dispose();
     if (hasModifiedFilters)
     {
-      String values[] = new String[] {Translate.text("button.save"), Translate.text("button.dontSave")};
-      int choice = new BStandardDialog("", Translate.text("saveModifiedFilters", sceneCamera.getName()), BStandardDialog.QUESTION).showOptionDialog(parent, values, values[0]);
+      String options[] = new String[] {Translate.text("button.save"), Translate.text("button.dontSave")};
+      int choice = new BStandardDialog("", Translate.text("saveModifiedFilters", sceneCamera.getName()), BStandardDialog.QUESTION).showOptionDialog(parent, options, options[0]);
       if (choice == 0)
         ((SceneCamera) sceneCamera.getObject()).setImageFilters(cameraForFilters.getImageFilters());
     }
@@ -155,7 +156,7 @@ public class RenderingDialog extends BDialog implements RenderListener
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+        Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
       }
     }
     setCursor(Cursor.getDefaultCursor());
@@ -247,8 +248,8 @@ public class RenderingDialog extends BDialog implements RenderListener
       {
         int component = required - (required&(required-1));
         if (!originalImage.hasFloatData(component))
-        {
-          new BStandardDialog("", UIUtilities.breakString(Translate.text("missingComponentsForFilters")), BStandardDialog.WARNING).showMessageDialog(parent);
+        {          
+          Messages.warning(UIUtilities.breakString(Translate.text("missingComponentsForFilters")), parent.getComponent());
           return;
         }
         required -= component;
@@ -337,10 +338,10 @@ public class RenderingDialog extends BDialog implements RenderListener
           catch (final IOException ex)
           {
             EventQueue.invokeLater(new Runnable() {
-                          @Override
+              @Override
               public void run()
               {
-                new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+                Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
                 doCancel();
               }
             });

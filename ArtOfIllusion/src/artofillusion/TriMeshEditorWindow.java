@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -739,9 +740,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow
     {
       if (!theMesh.isClosed())
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING);
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        String options[] = Messages.optionsOkCancel();
+        int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         theMesh.setMaterial(null, null);
@@ -1263,7 +1263,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow
     boolean newSel[] = TriMeshSelectionUtilities.findEdgeLoops(mesh, selected);
     if (newSel == null)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotFindEdgeLoop")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("cannotFindEdgeLoop")), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
@@ -1277,7 +1277,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow
     boolean newSel[] = TriMeshSelectionUtilities.findEdgeStrips(mesh, selected);
     if (newSel == null)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotFindEdgeStrip")), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(UIUtilities.breakString(Translate.text("cannotFindEdgeStrip")), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
@@ -1389,7 +1389,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow
           strayVert = true;
       if (breaks > 1 || strayVert)
       {
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("illegalDelete")), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(UIUtilities.breakString(Translate.text("illegalDelete")), this.getComponent());
         return;
       }
     }
@@ -1595,9 +1595,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow
 
   public void optimizeCommand()
   {
-    BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("optimizeMeshTitle")), BStandardDialog.QUESTION);
-    String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-    if (dlg.showOptionDialog(this, options, options[0]) == 1)
+    String options[] = Messages.optionsOkCancel();
+    if (new BStandardDialog("", UIUtilities.breakString(Translate.text("optimizeMeshTitle")), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]) == 1)
       return;
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
@@ -1909,7 +1908,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow
     boolean closed = isBoundaryClosed(boundaryList[0]);
     if (closed != isBoundaryClosed(boundaryList[1]))
     {
-      new BStandardDialog("", Translate.text("cannotJoinOpenAndClosed"), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("cannotJoinOpenAndClosed"), this.getComponent());
       return;
     }
 
@@ -2251,7 +2250,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow
     {
       if (vertexEdgeCount[i] != 0 && vertexEdgeCount[i] != 2)
       {
-        new BStandardDialog("", Translate.text("illegalExtract"), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(UIUtilities.breakString(Translate.text("illegalExtract")), this.getComponent());
         return;
       }
     }
@@ -2363,7 +2362,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow
       }
       if (i == edges.size())
       {
-        new BStandardDialog("", Translate.text("edgesNotContinuous"), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("edgesNotContinuous"), this.getComponent());
         return;
       }
       edges.removeElementAt(i);

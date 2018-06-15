@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2007 by Norbert Krieg and Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -79,7 +79,7 @@ public class POVExporter
 	f=new File(path, exportFileName+suffix);
 	if (f.exists()) {
 	    //overwrite dialog
-            String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+            String options[] = Messages.optionsYesNo();
             int choice = new BStandardDialog("", Translate.text("overwriteFile", exportFileName+suffix), BStandardDialog.QUESTION).showOptionDialog(parent, options, options[1]);
 	    if (choice==1)
               return;
@@ -90,7 +90,7 @@ public class POVExporter
 	    f=new File(path, exportFileName+suffix2);
 	    if (f.exists()) {
 		// overwrite dialog, if not then write a single pov file and inform the user
-                String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+                String options[] = Messages.optionsYesNo();
                 int choice = new BStandardDialog("", Translate.text("overwriteFile", exportFileName+suffix2), BStandardDialog.QUESTION).showOptionDialog(parent, options, options[1]);
                 if (choice==1)
 		    bIncludeFile=false; // Write to the povray file
@@ -116,7 +116,7 @@ public class POVExporter
 	    }
 	catch (IOException ex)
 	    {
-              new BStandardDialog("", new String [] {Translate.text("errorExportingScene"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(parent);
+              Messages.error(Translate.text("errorExportingScene", ex.getLocalizedMessage()), parent.getComponent());
 	    }
     }
 

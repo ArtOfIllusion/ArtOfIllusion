@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -191,7 +191,7 @@ public class EditKeyframesDialog
       {
         NumberFormat nf = NumberFormat.getNumberInstance();
         nf.setMaximumFractionDigits(3);
-        String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+        String options[] = Messages.optionsYesNo();
         int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("existingKeyframesError", nf.format(targetStart), nf.format(targetEnd))), BStandardDialog.QUESTION).showOptionDialog(window, options, options[0]);
         if (choice == 1)
           return false;

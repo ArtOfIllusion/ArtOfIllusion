@@ -1,5 +1,5 @@
 /* Copyright (C) 2011 by Helge Hansen and Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -243,7 +243,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       catch (IOException ex)
       {
-        new BStandardDialog("", Translate.text("errorLoadingFile")+": "+ex.getLocalizedMessage(), BStandardDialog.ERROR).showMessageDialog(this);
+        Messages.error(Translate.text("errorLoadingFile", ex.getLocalizedMessage()), this.getComponent());
       }
     }
     if (selectedTexture == null && selectedMaterial == null)
@@ -437,7 +437,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   {
     if (selectedTexture != null)
     {
-      String[] options = new String[]{Translate.text("button.ok"), Translate.text("button.cancel")};
+      String options[] = Messages.optionsOkCancel();
       int choice = new BStandardDialog("", Translate.text("deleteTexture", selectedTexture.getName()), BStandardDialog.PLAIN).showOptionDialog(this, options, options[1]);
       if (choice == 0)
       {
@@ -448,7 +448,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     }
     else if (selectedMaterial != null)
     {
-      String[] options = new String[]{Translate.text("button.ok"), Translate.text("button.cancel")};
+      String options[] = Messages.optionsOkCancel();
       int choice = new BStandardDialog("", Translate.text("deleteMaterial", selectedMaterial.getName()), BStandardDialog.PLAIN).showOptionDialog(this, options, options[1]);
       if (choice == 0)
       {
@@ -589,7 +589,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     {
       if (selectedTexture != null)
       {
-        String[] options = new String[]{Translate.text("button.ok"), Translate.text("button.cancel")};
+        String options[] = Messages.optionsOkCancel();
         int choice = new BStandardDialog("", Translate.text("deleteTexture", selectedTexture.getName()), BStandardDialog.PLAIN).showOptionDialog(this, options, options[1]);
         if (choice == 0)
         {
@@ -602,7 +602,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       else if (selectedMaterial != null)
       {
-        String[] options = new String[]{Translate.text("button.ok"), Translate.text("button.cancel")};
+        String options[] = Messages.optionsOkCancel();
         int choice = new BStandardDialog("", Translate.text("deleteMaterial", selectedMaterial.getName()), BStandardDialog.PLAIN).showOptionDialog(this, options, options[1]);
         if (choice == 0)
         {
@@ -640,8 +640,7 @@ public class TexturesAndMaterialsDialog extends BDialog
       }
       else
       {
-        BStandardDialog d = new BStandardDialog("", Translate.text("fileAlreadyExists"), BStandardDialog.ERROR);
-        d.showMessageDialog(this);
+        Messages.error(Translate.text("fileAlreadyExists"), this.getComponent());
       }
     }
   }

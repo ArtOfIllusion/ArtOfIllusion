@@ -48,7 +48,8 @@ public class LinearMapping3D extends Mapping3D
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Linear";
   }

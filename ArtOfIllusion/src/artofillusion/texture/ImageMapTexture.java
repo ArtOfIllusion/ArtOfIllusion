@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -48,7 +49,8 @@ public class ImageMapTexture extends Texture2D
     name = "";
   }
 
-  public static String getTypeName()
+  @Override
+  public String getTypeName()
   {
     return "Image Mapped";
   }

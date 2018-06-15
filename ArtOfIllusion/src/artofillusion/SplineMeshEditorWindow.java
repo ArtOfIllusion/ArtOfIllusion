@@ -23,7 +23,7 @@ import java.awt.*;
 
 /** The SplineMeshEditorWindow class represents the window for editing SplineMesh objects. */
 
-public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingWindow
+public class SplineMeshEditorWindow extends MeshEditorWindow
 {
   private ToolPalette modes;
   private BMenu editMenu, meshMenu, skeletonMenu;

@@ -447,7 +447,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     updateImage();
   }
   
-  /** Align the view with the closest main axix directions */
+  /** Align the view with the closest main axis directions */
   public void closestAxisCommand()
   {
     getView().alignWithClosestAxis();
@@ -489,9 +489,9 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;
-      List<Plugin> plugins = PluginRegistry.getPlugins(Plugin.class);
-      for (int i = 0; i < plugins.size(); i++)
-        plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
+      for(Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
+        plugin.processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
+
     }
     super.setVisible(visible);
   }
@@ -504,9 +504,8 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public void dispose()
   {
     super.dispose();
-    List<Plugin> plugins = PluginRegistry.getPlugins(Plugin.class);
-    for (int i = 0; i < plugins.size(); i++)
-      plugins.get(i).processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
+    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
+      plugin.processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
   }
   
   public BLabel getHelpText() {

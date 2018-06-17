@@ -13,7 +13,6 @@
 package artofillusion;
 
 import artofillusion.image.*;
-import artofillusion.image.filter.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
@@ -169,34 +168,20 @@ public class ArtOfIllusion
     PluginRegistry.addCategory(Material.class);
     PluginRegistry.addCategory(TextureMapping.class);
     PluginRegistry.addCategory(MaterialMapping.class);
-    PluginRegistry.addCategory(ImageFilter.class);
-    PluginRegistry.addCategory(Module.class);    
-    
+    PluginRegistry.addCategory(Module.class);
     PluginRegistry.registerPlugin(new UniformTexture());
     PluginRegistry.registerPlugin(new ImageMapTexture());
     PluginRegistry.registerPlugin(new ProceduralTexture2D());
     PluginRegistry.registerPlugin(new ProceduralTexture3D());
     PluginRegistry.registerPlugin(new UniformMaterial());
     PluginRegistry.registerPlugin(new ProceduralMaterial3D());
-
     PluginRegistry.registerPlugin(new UniformMapping());
     PluginRegistry.registerPlugin(new ProjectionMapping());
     PluginRegistry.registerPlugin(new CylindricalMapping());
     PluginRegistry.registerPlugin(new SphericalMapping());
     PluginRegistry.registerPlugin(new UVMapping());
-    
     PluginRegistry.registerPlugin(new LinearMapping3D());
     PluginRegistry.registerPlugin(new LinearMaterialMapping());
-    
-    PluginRegistry.registerPlugin(new BrightnessFilter());
-    PluginRegistry.registerPlugin(new SaturationFilter());
-    PluginRegistry.registerPlugin(new ExposureFilter());
-    PluginRegistry.registerPlugin(new TintFilter());
-    PluginRegistry.registerPlugin(new BlurFilter());
-    PluginRegistry.registerPlugin(new GlowFilter());
-    PluginRegistry.registerPlugin(new OutlineFilter());
-    PluginRegistry.registerPlugin(new NoiseReductionFilter());
-    PluginRegistry.registerPlugin(new DepthOfFieldFilter());
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();

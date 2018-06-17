@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2014 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,12 +18,24 @@ import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
-import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
-import java.awt.*;
-import java.awt.image.*;
-import java.util.*;
+import artofillusion.ui.ValueField;
+import buoy.widget.BCheckBox;
+import buoy.widget.BComboBox;
+import buoy.widget.BTabbedPane;
+import buoy.widget.Widget;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.MemoryImageSource;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /** Raster is a Renderer which generates images with a scanline algorithm. */
 
@@ -46,7 +58,8 @@ public class Raster implements Renderer, Runnable
   private Thread renderThread;
   private RGBColor ambColor, envColor, fogColor;
   private TextureMapping envMapping;
-  private ThreadLocal threadRasterContext, threadCompositingContext;
+  private ThreadLocal<RasterContext> threadRasterContext;
+  private final ThreadLocal<CompositingContext> threadCompositingContext;
   private RowLock lock[];
   private double envParamValue[];
   private double time, smoothing = 1.0, smoothScale, focalDist, surfaceError = 0.02, fogDist;
@@ -65,16 +78,16 @@ public class Raster implements Renderer, Runnable
 
   public Raster()
   {
-    threadRasterContext = new ThreadLocal() {
+    threadRasterContext = new ThreadLocal<RasterContext>() {
       @Override
-      protected Object initialValue()
+      protected RasterContext initialValue()
       {
         return new RasterContext(theCamera, width);
       }
     };
-    threadCompositingContext = new ThreadLocal() {
+    threadCompositingContext = new ThreadLocal<CompositingContext>() {
       @Override
-      protected Object initialValue()
+      protected CompositingContext initialValue()
       {
         return new CompositingContext(theCamera);
       }
@@ -164,59 +177,75 @@ public class Raster implements Renderer, Runnable
     finish(null);
     rl.renderingCanceled();
   }
-
+  
+  public Widget getConfigPanelNew()
+  {
+    return new RasterRendererConfigPanel();
+  }
+  
   @Override
   public Widget getConfigPanel()
   {
-    if (configPanel == null)
-    {
-      // General options panel.
-
-      FormContainer generalPanel = new FormContainer(3, 4);
-      LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
-      LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
-      generalPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
-      generalPanel.add(Translate.label("shadingMethod"), 0, 1, leftLayout);
-      generalPanel.add(Translate.label("supersampling"), 0, 2, leftLayout);
-      generalPanel.add(errorField = new ValueField(surfaceError, ValueField.POSITIVE, 6), 1, 0, rightLayout);
-      generalPanel.add(shadeChoice = new BComboBox(new String[]{
-          Translate.text("gouraud"),
-          Translate.text("hybrid"),
-          Translate.text("phong")
-      }), 1, 1, rightLayout);
-      generalPanel.add(aliasChoice = new BComboBox(new String[]{
-          Translate.text("none"),
-          Translate.text("Edges"),
-          Translate.text("Everything")
-      }), 1, 2, rightLayout);
-      generalPanel.add(sampleChoice = new BComboBox(new String[]{"2x2", "3x3"}), 2, 2, rightLayout);
-      sampleChoice.setEnabled(false);
-      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
-      aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
-        void processEvent()
-        {
-          sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
-        }
-      });
-
-      // Advanced options panel.
-
-      FormContainer advancedPanel = new FormContainer(new double [] {0.0, 1.0}, new double [4]);
-      advancedPanel.add(Translate.label("texSmoothing"), 0, 0, leftLayout);
-      advancedPanel.add(smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE), 1, 0, rightLayout);
-      advancedPanel.add(adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive), 0, 1, 2, 1, rightLayout);
-      advancedPanel.add(hideBackfaceBox = new BCheckBox(Translate.text("eliminateBackfaces"), hideBackfaces), 0, 2, 2, 1, rightLayout);
-      advancedPanel.add(hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR), 0, 3, 2, 1, rightLayout);
-
-      // Create the tabbed pane.
-
-      configPanel = new BTabbedPane();
-      configPanel.add(generalPanel, Translate.text("general"));
-      configPanel.add(advancedPanel, Translate.text("advanced"));
-    }
-    if (needCopyToUI)
-      copyConfigurationToUI();
-    return configPanel;
+//    if (configPanel == null)
+//    {
+//      // General options panel.
+//
+//      
+//      
+//      
+//
+//      FormContainer generalPanel = new FormContainer(3, 4);
+//      LayoutInfo leftLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null);
+//      LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
+//      generalPanel.add(Translate.label("surfaceAccuracy"), 0, 0, leftLayout);
+//      generalPanel.add(Translate.label("shadingMethod"), 0, 1, leftLayout);
+//      generalPanel.add(Translate.label("supersampling"), 0, 2, leftLayout);
+//      generalPanel.add(errorField = new ValueField(surfaceError, ValueField.POSITIVE, 6), 1, 0, rightLayout);
+//      generalPanel.add(shadeChoice = new BComboBox(new String[]{
+//          Translate.text("gouraud"),
+//          Translate.text("hybrid"),
+//          Translate.text("phong")
+//      }), 1, 1, rightLayout);
+//      generalPanel.add(aliasChoice = new BComboBox(new String[]{
+//          Translate.text("none"),
+//          Translate.text("Edges"),
+//          Translate.text("Everything")
+//      }), 1, 2, rightLayout);
+//      generalPanel.add(sampleChoice = new BComboBox(new String[]{"2x2", "3x3"}), 2, 2, rightLayout);
+//      sampleChoice.setEnabled(false);
+//      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
+//      aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
+//        void processEvent()
+//        {
+//          sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
+//        }
+//      });
+//      sampleChoice.setEnabled(false);
+//      generalPanel.add(transparentBox = new BCheckBox(Translate.text("transparentBackground"), transparentBackground), 0, 3, 3, 1);
+//      aliasChoice.addEventLink(ValueChangedEvent.class, new Object() {
+//        void processEvent()
+//        {
+//          sampleChoice.setEnabled(aliasChoice.getSelectedIndex() > 0);
+//        }
+//      });
+//
+//      // Advanced options panel.
+//
+//      
+//      advancedPanel.add(Translate.label("texSmoothing"), 0, 0, leftLayout);
+//      advancedPanel.add(smoothField = new ValueField(smoothing, ValueField.NONNEGATIVE), 1, 0, rightLayout);
+//      advancedPanel.add(adaptiveBox = new BCheckBox(Translate.text("reduceAccuracyForDistant"), adaptive), 0, 1, 2, 1, rightLayout);
+//      advancedPanel.add(hideBackfaceBox = new BCheckBox(Translate.text("eliminateBackfaces"), hideBackfaces), 0, 2, 2, 1, rightLayout);
+//      advancedPanel.add(hdrBox = new BCheckBox(Translate.text("generateHDR"), generateHDR), 0, 3, 2, 1, rightLayout);
+//
+//      // Create the tabbed pane.
+//
+//      configPanel = new BTabbedPane();
+//
+//    }
+//    if (needCopyToUI)
+//      copyConfigurationToUI();
+    return RasterRenderConfigPanelWidget.build();
   }
 
   /** Copy the current configuration to the user interface. */
@@ -426,10 +455,10 @@ public class Raster implements Renderer, Runnable
 
     final ObjectInfo sortedObjects[] = sortObjects();
     ThreadManager threads = new ThreadManager(sortedObjects.length, new ThreadManager.Task() {
-          @Override
+      @Override
       public void execute(int index)
       {
-        RasterContext context = (RasterContext) threadRasterContext.get();
+        RasterContext context = threadRasterContext.get();
         ObjectInfo obj = sortedObjects[index];
         context.camera.setObjectTransform(obj.getCoords().fromLocal());
         renderObject(obj, orig, viewdir, obj.getCoords().toLocal(), context, thisThread);
@@ -438,10 +467,10 @@ public class Raster implements Renderer, Runnable
         if (System.currentTimeMillis()-updateTime > 5000)
           updateImage();
       }
-          @Override
+      @Override
       public void cleanup()
       {
-        ((RasterContext) threadRasterContext.get()).cleanup();
+        threadRasterContext.get().cleanup();
       }
     });
     threads.run();
@@ -546,7 +575,7 @@ public class Raster implements Renderer, Runnable
       @Override
       public void execute(int i1)
       {
-        CompositingContext context = (CompositingContext) threadCompositingContext.get();
+        CompositingContext context = threadCompositingContext.get();
         Vec3 dir = context.tempVec[1];
         RGBColor totalColor = context.totalColor;
         RGBColor totalTransparency = context.totalTransparency;
@@ -662,7 +691,7 @@ public class Raster implements Renderer, Runnable
       @Override
       public void cleanup()
       {
-        ((CompositingContext) threadCompositingContext.get()).cleanup();
+        threadCompositingContext.get().cleanup();
       }
     });
     threads.run();
@@ -850,19 +879,19 @@ public class Raster implements Renderer, Runnable
     while (theObject instanceof ObjectWrapper)
       theObject = ((ObjectWrapper) theObject).getWrappedObject();
     if (theObject instanceof ObjectCollection)
-      {
+    {
         Enumeration objects = ((ObjectCollection) theObject).getObjects(obj, false, theScene);
-        Mat4 fromLocal = context.camera.getObjectToWorld();
+      Mat4 fromLocal = context.camera.getObjectToWorld();
         while (objects.hasMoreElements())
-          {
+      {
             ObjectInfo elem = (ObjectInfo) objects.nextElement();
             CoordinateSystem coords = elem.getCoords().duplicate();
-            coords.transformCoordinates(fromLocal);
-            context.camera.setObjectTransform(coords.fromLocal());
+        coords.transformCoordinates(fromLocal);
+        context.camera.setObjectTransform(coords.fromLocal());
             renderObject(elem, orig, viewdir, coords.toLocal(), context, mainThread);
-          }
-        return;
       }
+      return;
+    }
     if (adaptive)
       {
         double dist = obj.getBounds().distanceToPoint(toLocal.times(orig));
@@ -3380,7 +3409,7 @@ public class Raster implements Renderer, Runnable
       }
   }
 
-  /** Render a displacement mapeed triangle by recursively subdividing it. */
+  /** Render a displacement mapped triangle by recursively subdividing it. */
 
   private void renderDisplacedTriangle(RenderingTriangle tri, DisplacedVertex dv1,
                                        double dist1, DisplacedVertex dv2, double dist2, DisplacedVertex dv3, double dist3,
@@ -3541,6 +3570,12 @@ public class Raster implements Renderer, Runnable
         dv3.pos, dv3.z, dv3.dispvert, dv3.dispnorm, dv3.u, dv3.v,
         tri, viewdir, closestNorm, clip, bumpMap, backface, material, context);
   }
+
+    private static class RasterRendererConfigPanel extends BTabbedPane {
+
+        public RasterRendererConfigPanel() {
+        }
+    }
 
   /** This is an inner class for keeping track of information about vertices when
      doing displacement mapping. */

@@ -128,7 +128,7 @@ public class RenderSetupDialog
     currentCamera = camChoice.getSelectedIndex();
     if (currentRenderer.recordConfiguration())
     {
-      theScene.setMetadata(currentRenderer.getClass().getName()+" settings", currentRenderer.getConfiguration());
+      theScene.setMetadata(currentRenderer.getClass().getName() + " settings", currentRenderer.getConfiguration());
       ObjectInfo cameraInfo = cameras.get(currentCamera);
       Camera cam = new Camera();
       SceneCamera sc = (SceneCamera) cameraInfo.getObject();

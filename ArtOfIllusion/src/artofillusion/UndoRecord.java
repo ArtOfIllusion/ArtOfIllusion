@@ -20,7 +20,6 @@ import java.awt.*;
 import java.io.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.List;
 
@@ -32,6 +31,10 @@ public class UndoRecord
   private String name;
   
   private final LinkedList<UndoAction> commands = new LinkedList<UndoAction>();
+
+  public int size() {
+    return commands.size();
+  }
   
   private ArrayList<SoftReference[]> dataRef;
   private File cacheFile;

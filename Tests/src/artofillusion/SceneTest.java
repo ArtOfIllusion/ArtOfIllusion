@@ -137,10 +137,7 @@ public class SceneTest {
       scene.addObject(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube", ur);
       assertEquals(++sceneObjects, scene.getNumObjects());
       assertNotNull(scene);
-      assertNotNull(ur.getCommands());
-      assertEquals(1, ur.getCommands().size());
-      assertTrue(ur.getCommands().get(0) == UndoRecord.DELETE_OBJECT);
-      
+      assertEquals(1, ur.size());
     }
     
   /**

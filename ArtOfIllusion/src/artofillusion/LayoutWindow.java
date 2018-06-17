@@ -1097,14 +1097,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setUndoRecord(UndoRecord command)
   {
     undoStack.addRecord(command);
-    boolean modified = false;
-    for (int c : command.getCommands())
-      if (c != UndoRecord.SET_SCENE_SELECTION)
-        modified = true;
-    if (modified)
-      setModified();
-    else
+    if (command.isCommandChangesSelectionOnly())
       dispatchSceneChangedEvent();
+    else
+      setModified();
     updateMenus();
   }
 

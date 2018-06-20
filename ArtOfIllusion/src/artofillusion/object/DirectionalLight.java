@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications Copyright 2016 by Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -15,7 +15,6 @@ import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
-import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
 
@@ -72,14 +71,12 @@ public class DirectionalLight extends Light
   public DirectionalLight(RGBColor theColor, float theIntensity)
   {
     this(theColor, theIntensity, 1.0);
-	//setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
 
   public DirectionalLight(RGBColor theColor, float theIntensity, double theRadius)
   {
     setParameters(theColor.duplicate(), theIntensity, TYPE_NORMAL, 0.5f);
     setRadius(theRadius);
-	//setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
 
   @Override
@@ -200,34 +197,28 @@ public class DirectionalLight extends Light
 	
   }
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    final Widget patch = color.getSample(50, 30);
+    final ColorSampleWidget patch = new ColorSampleWidget(color, Translate.text("lightColor"), 50, 30);
     ValueField intensityField = new ValueField(intensity, ValueField.NONE);
     ValueSelector radiusField = new ValueSelector(radius, 0.0, 45.0, 0.1);
     BComboBox typeChoice = new BComboBox(new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")});
     typeChoice.setSelectedIndex(type);
-    RGBColor oldColor = color.duplicate();
+
     final BFrame parentFrame = parent.getFrame();
 
-    patch.addEventLink(MouseClickedEvent.class, new Object() {
-      void processEvent()
-      {
-        new ColorChooser(parentFrame, Translate.text("lightColor"), color);
-        patch.setBackground(color.getColor());
-      }
-    });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"),
         new Widget [] {patch, intensityField, radiusField, typeChoice}, new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius"), Translate.text("lightType")});
-    if (!dlg.clickedOk())
-    {
-      color.copy(oldColor);
-      return;
+    if (dlg.clickedOk())
+    {      
+      color.copy(patch.getColor());
+      setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(), decayRate);
+      setRadius(radiusField.getValue());
+      cb.run();
     }
-    setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(), decayRate);
-    setRadius(radiusField.getValue());
-    cb.run();
+
   }
 
   @Override
@@ -303,33 +294,28 @@ public class DirectionalLight extends Light
 
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final DirectionalLightKeyframe key = (DirectionalLightKeyframe) k;
-    final Widget patch = key.color.getSample(50, 30);
+    final ColorSampleWidget patch = new ColorSampleWidget(key.color, Translate.text("lightColor"), 50, 30);
     ValueField intensityField = new ValueField(key.intensity, ValueField.NONE);
     ValueSelector radiusField = new ValueSelector(key.radius, 0.0, 45.0, 0.1);
-    RGBColor oldColor = key.color.duplicate();
+
     final BFrame parentFrame = parent.getFrame();
 
-    patch.addEventLink(MouseClickedEvent.class, new Object() {
-      void processEvent()
-      {
-        new ColorChooser(parentFrame, Translate.text("lightColor"), key.color);
-        patch.setBackground(key.color.getColor());
-      }
-    });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"),
         new Widget [] {patch, intensityField, radiusField},
         new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius")});
-    if (!dlg.clickedOk())
+    
+   
+    if (dlg.clickedOk())
     {
-      key.color.copy(oldColor);
-      return;
+      key.color.copy(patch.getColor());
+      key.intensity = (float) intensityField.getValue();
+      key.radius = radiusField.getValue(); 
     }
-    key.intensity = (float) intensityField.getValue();
-    key.radius = radiusField.getValue();
   }
 
   /* Inner class representing a pose for a directional light. */

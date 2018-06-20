@@ -15,7 +15,6 @@ import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
-import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
 
@@ -167,37 +166,32 @@ public class PointLight extends Light
     return true;
   }
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    final Widget patch = color.getSample(50, 30);
+    final ColorSampleWidget patch = new ColorSampleWidget(color, Translate.text("lightColor"), 50, 30);
     ValueField intensityField = new ValueField(intensity, ValueField.NONE);
     ValueField radiusField = new ValueField(radius, ValueField.NONNEGATIVE);
     ValueField decayField = new ValueField(decayRate, ValueField.NONNEGATIVE);
     BComboBox typeChoice = new BComboBox(new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")});
     typeChoice.setSelectedIndex(type);
-    RGBColor oldColor = color.duplicate();
+    
     final BFrame parentFrame = parent.getFrame();
 
-    patch.addEventLink(MouseClickedEvent.class, new Object() {
-      void processEvent()
-      {
-        new ColorChooser(parentFrame, Translate.text("lightColor"), color);
-        patch.setBackground(color.getColor());
-      }
-    });
+
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"),
 	new Widget [] {patch, intensityField, radiusField, decayField, typeChoice},
 	new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("decayRate"), Translate.text("lightType")});
-    if (!dlg.clickedOk())
+    
+    if (dlg.clickedOk())
     {
-      color.copy(oldColor);
-      return;
+      color.copy(patch.getColor());
+      setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(), (float) decayField.getValue());
+      setRadius(radiusField.getValue());
+      cb.run();
     }
-    setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(),
-        (float) decayField.getValue());
-    setRadius(radiusField.getValue());
-    cb.run();
+
   }
 
   /** The following two methods are used for reading and writing files.  The first is a
@@ -305,35 +299,29 @@ public class PointLight extends Light
 
   /** Allow the user to edit a keyframe returned by getPoseKeyframe(). */
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   @Override
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final PointLightKeyframe key = (PointLightKeyframe) k;
-    final Widget patch = key.color.getSample(50, 30);
+    final ColorSampleWidget patch = new ColorSampleWidget(key.color, Translate.text("lightColor"), 50, 30);
     ValueField intensityField = new ValueField(key.intensity, ValueField.NONE);
     ValueField radiusField = new ValueField(key.radius, ValueField.NONNEGATIVE);
     ValueField decayField = new ValueField(key.decayRate, ValueField.NONNEGATIVE);
-    RGBColor oldColor = key.color.duplicate();
+    
     final BFrame parentFrame = parent.getFrame();
 
-    patch.addEventLink(MouseClickedEvent.class, new Object() {
-      void processEvent()
-      {
-        new ColorChooser(parentFrame, Translate.text("lightColor"), key.color);
-        patch.setBackground(key.color.getColor());
-      }
-    });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editPointLightTitle"),
 	new Widget [] {patch, intensityField, radiusField, decayField},
 	new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("Radius"), Translate.text("decayRate")});
-    if (!dlg.clickedOk())
-    {
-      key.color.copy(oldColor);
-      return;
+    
+    if (dlg.clickedOk())
+    {      
+      key.color.copy(patch.getColor());
+      key.intensity = (float) intensityField.getValue();
+      key.decayRate = (float) decayField.getValue();
+      key.radius = radiusField.getValue();
     }
-    key.intensity = (float) intensityField.getValue();
-    key.decayRate = (float) decayField.getValue();
-    key.radius = radiusField.getValue();
   }
 
   /** Inner class representing a pose for a cylinder. */

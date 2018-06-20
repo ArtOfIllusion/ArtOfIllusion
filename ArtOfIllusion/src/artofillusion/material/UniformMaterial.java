@@ -120,7 +120,7 @@ public class UniformMaterial extends Material
   /* Allow the user to interactively edit the material. */
 
   @Override
-  public void edit(final BFrame fr, Scene sc)
+  public void edit(final BFrame fr, Scene scene)
   {
     final UniformMaterial newMaterial = (UniformMaterial) duplicate();
     BTextField nameField = new BTextField(name);
@@ -129,9 +129,11 @@ public class UniformMaterial extends Material
     final ValueSlider scatSlider = new ValueSlider(0.0, 1.0, 100, (double) scattering);
     final ValueSlider transSlider = new ValueSlider(0.0, 1.0, 100, (double) transparency);
     final ValueSlider eccSlider = new ValueSlider(-1.0, 1.0, 100, eccentricity);
-    final Widget transPatch = transparencyColor.getSample(50, 30);
-    final Widget colorPatch = matColor.getSample(50, 30);
-    final Widget scatPatch = scatteringColor.getSample(50, 30);
+    
+    final ColorSampleWidget transPatch = new ColorSampleWidget(newMaterial.transparencyColor, Translate.text("Transparency"), 50, 30);
+    final ColorSampleWidget colorPatch = new ColorSampleWidget(newMaterial.matColor, Translate.text("MaterialColor"), 50, 30);
+    final ColorSampleWidget scatPatch = new ColorSampleWidget(newMaterial.scatteringColor, Translate.text("ScatteringColor"), 50, 30);
+    
     final BCheckBox shadowBox = new BCheckBox(Translate.text("CastsShadows"), shadows);
     final MaterialPreviewer preview = new MaterialPreviewer(null, newMaterial, 200, 160);
     final ActionProcessor process = new ActionProcessor();
@@ -145,8 +147,7 @@ public class UniformMaterial extends Material
     transPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("Transparency"), newMaterial.transparencyColor);
-        transPatch.setBackground(newMaterial.transparencyColor.getColor());
+        newMaterial.transparencyColor.copy(transPatch.getColor());
         newMaterial.recalcColors();
         process.addEvent(renderCallback);
       }
@@ -154,8 +155,7 @@ public class UniformMaterial extends Material
     colorPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("MaterialColor"), newMaterial.matColor);
-        colorPatch.setBackground(newMaterial.matColor.getColor());
+        newMaterial.matColor.copy(colorPatch.getColor());
         newMaterial.recalcColors();
         process.addEvent(renderCallback);
       }
@@ -163,8 +163,7 @@ public class UniformMaterial extends Material
     scatPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("ScatteringColor"), newMaterial.scatteringColor);
-        scatPatch.setBackground(newMaterial.scatteringColor.getColor());
+        newMaterial.scatteringColor.copy(scatPatch.getColor());
         newMaterial.recalcColors();
         process.addEvent(renderCallback);
       }
@@ -195,22 +194,28 @@ public class UniformMaterial extends Material
         Translate.text("Scattering"), Translate.text("ScatteringColor"), Translate.text("Eccentricity"),
         Translate.text("IndexOfRefraction"), null});
     process.stopProcessing();
-    if (!dlg.clickedOk())
-      return;
-    refraction = refractField.getValue();
-    transparency = (float) transSlider.getValue();
-    density = (float) densitySlider.getValue();
-    scattering = (float) scatSlider.getValue();
-    UniformMaterial.this.name = nameField.getText();
-    transparencyColor.copy(newMaterial.transparencyColor);
-    matColor.copy(newMaterial.matColor);
-    scatteringColor.copy(newMaterial.scatteringColor);
-    eccentricity = newMaterial.eccentricity;
-    shadows = newMaterial.shadows;
-    recalcColors();
-    int index = sc.indexOf(this);
-    if (index > -1)
-      sc.changeMaterial(index);
+    
+    if (dlg.clickedOk())
+    {
+      refraction = refractField.getValue();
+      transparency = (float) transSlider.getValue();
+      density = (float) densitySlider.getValue();
+      scattering = (float) scatSlider.getValue();
+      UniformMaterial.this.name = nameField.getText();
+      
+      transparencyColor.copy(newMaterial.transparencyColor);
+      matColor.copy(newMaterial.matColor);
+      scatteringColor.copy(newMaterial.scatteringColor);
+      eccentricity = newMaterial.eccentricity;
+      shadows = newMaterial.shadows;
+      recalcColors();
+      int index = scene.indexOf(this);
+      if (index > -1)
+      {
+        scene.changeMaterial(index);
+      }
+    }
+
   }
 
   /* The following two methods are used for reading and writing files.  The first is a

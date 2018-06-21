@@ -37,7 +37,7 @@ public class Scene
   private Vector<Texture> textures;
   private Vector<ImageMap> images;
   private Vector<Integer> selection;
-  private Vector<ListChangeListener> textureListeners, materialListeners;
+  private List<ListChangeListener> textureListeners, materialListeners;
   private HashMap<String, Object> metadataMap;
   private HashMap<ObjectInfo, Integer> objectIndexMap;
   private RGBColor ambientColor, environColor, fogColor;
@@ -68,7 +68,7 @@ public class Scene
     images = new Vector<ImageMap>();
     selection = new Vector<Integer>();
     metadataMap = new HashMap<String, Object>();
-    textureListeners = new Vector<ListChangeListener>();
+    textureListeners = new ArrayList<ListChangeListener>();
     materialListeners = new Vector<ListChangeListener>();
     defTex.setName("Default Texture");
     textures.addElement(defTex);
@@ -537,8 +537,8 @@ public class Scene
   public void addMaterial(Material mat, int index)
   {
     materials.add(index, mat);
-    for (int i = 0; i < materialListeners.size(); i++)
-      materialListeners.elementAt(i).itemAdded(materials.size()-1, mat);
+    int pos = materials.size()-1;
+    for(ListChangeListener listener: materialListeners) listener.itemAdded(pos, mat);
   }
 
   /** Remove a Material from the scene. */
@@ -549,7 +549,7 @@ public class Scene
 
     materials.removeElementAt(which);
     for (int i = 0; i < materialListeners.size(); i++)
-      materialListeners.elementAt(i).itemRemoved(which, mat);
+      materialListeners.get(i).itemRemoved(which, mat);
     for (int i = 0; i < objects.size(); i++)
       {
         ObjectInfo obj = objects.elementAt(i);
@@ -590,8 +590,8 @@ public class Scene
   public void addTexture(Texture tex, int index)
   {
     textures.add(index, tex);
-    for (int i = 0; i < textureListeners.size(); i++)
-      textureListeners.elementAt(i).itemAdded(textures.size()-1, tex);
+    int pos = textures.size()-1;
+    for(ListChangeListener listener: textureListeners) listener.itemAdded(pos, tex);
   }
 
   /** Remove a Texture from the scene. */
@@ -602,14 +602,14 @@ public class Scene
 
     textures.removeElementAt(which);
     for (int i = 0; i < textureListeners.size(); i++)
-      textureListeners.elementAt(i).itemRemoved(which, tex);
+      textureListeners.get(i).itemRemoved(which, tex);
     if (textures.isEmpty())
       {
         UniformTexture defTex = new UniformTexture();
         defTex.setName("Default Texture");
         textures.addElement(defTex);
         for (int i = 0; i < textureListeners.size(); i++)
-          textureListeners.elementAt(i).itemAdded(0, defTex);
+          textureListeners.get(i).itemAdded(0, defTex);
       }
     Texture def = textures.elementAt(0);
     for (int i = 0; i < objects.size(); i++)
@@ -669,13 +669,12 @@ public class Scene
     Object3D obj;
 
     for (int i = 0; i < objects.size(); i++)
-      {
-        obj = objects.elementAt(i).getObject();
-        if (obj.getMaterial() == mat)
-          obj.setMaterial(mat, obj.getMaterialMapping());
-      }
-    for (int i = 0; i < materialListeners.size(); i++)
-      materialListeners.elementAt(i).itemChanged(which, mat);
+    {
+      obj = objects.elementAt(i).getObject();
+      if (obj.getMaterial() == mat)
+        obj.setMaterial(mat, obj.getMaterialMapping());
+    }
+    for(ListChangeListener listener: materialListeners) listener.itemChanged(which, mat);
   }
 
   /** This method should be called after a Texture has been edited.  It notifies
@@ -686,48 +685,47 @@ public class Scene
     Texture tex = textures.elementAt(which);
 
     for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo obj = objects.elementAt(i);
-        if (obj.getObject().getTexture() == tex)
-          obj.setTexture(tex, obj.getObject().getTextureMapping());
-        else if (obj.getObject().getTexture() instanceof LayeredTexture)
-          for (Texture layer : ((LayeredMapping) obj.getObject().getTextureMapping()).getLayers())
-            if (layer == tex)
-            {
-              obj.setTexture(tex, obj.getObject().getTextureMapping());
-              break;
-            }
-      }
-    for (int i = 0; i < textureListeners.size(); i++)
-      textureListeners.elementAt(i).itemChanged(which, tex);
+    {
+      ObjectInfo obj = objects.elementAt(i);
+      if (obj.getObject().getTexture() == tex)
+        obj.setTexture(tex, obj.getObject().getTextureMapping());
+      else if (obj.getObject().getTexture() instanceof LayeredTexture)
+        for (Texture layer : ((LayeredMapping) obj.getObject().getTextureMapping()).getLayers())
+          if (layer == tex)
+          {
+            obj.setTexture(tex, obj.getObject().getTextureMapping());
+            break;
+          }
+    }
+    for(ListChangeListener listener: textureListeners) listener.itemChanged(which, tex);
   }
 
   /** Add an object which wants to be notified when the list of Materials in the Scene changes. */
 
   public void addMaterialListener(ListChangeListener ls)
   {
-    materialListeners.addElement(ls);
+    materialListeners.add(ls);
   }
 
   /** Remove an object from the set to be notified when the list of Materials changes. */
 
   public void removeMaterialListener(ListChangeListener ls)
   {
-    materialListeners.removeElement(ls);
+    materialListeners.remove(ls);
   }
 
   /** Add an object which wants to be notified when the list of Textures in the Scene changes. */
 
   public void addTextureListener(ListChangeListener ls)
   {
-    textureListeners.addElement(ls);
+    textureListeners.add(ls);
   }
 
   /** Remove an object from the set to be notified when the list of Textures changes. */
 
   public void removeTextureListener(ListChangeListener ls)
   {
-    textureListeners.removeElement(ls);
+    textureListeners.remove(ls);
   }
 
   /**

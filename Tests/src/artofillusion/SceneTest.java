@@ -30,7 +30,6 @@ import artofillusion.texture.Texture;
 import artofillusion.texture.UniformTexture;
 import java.awt.image.BufferedImage;
 import java.util.List;
-import junit.framework.AssertionFailedError;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;

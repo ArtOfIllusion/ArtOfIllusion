@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -33,7 +33,7 @@ import java.beans.*;
 public class Scene
 {
   private List<ObjectInfo> objects;
-  private Vector<Material> materials;
+  private List<Material> materials;
   private Vector<Texture> textures;
   private Vector<ImageMap> images;
   private Vector<Integer> selection;
@@ -63,7 +63,7 @@ public class Scene
     UniformTexture defTex = new UniformTexture();
 
     objects = new ArrayList<ObjectInfo>();
-    materials = new Vector<Material>();
+    materials = new ArrayList<Material>();
     textures = new Vector<Texture>();
     images = new Vector<ImageMap>();
     selection = new Vector<Integer>();
@@ -544,9 +544,9 @@ public class Scene
 
   public void removeMaterial(int which)
   {
-    Material mat = materials.elementAt(which);
+    Material mat = materials.get(which);
 
-    materials.removeElementAt(which);
+    materials.remove(which);
     for (int i = 0; i < materialListeners.size(); i++)
       materialListeners.get(i).itemRemoved(which, mat);
     for (ObjectInfo item: objects)
@@ -662,7 +662,7 @@ public class Scene
 
   public void changeMaterial(int which)
   {
-    Material mat = materials.elementAt(which);
+    Material mat = materials.get(which);
     Object3D obj;
 
     for (ObjectInfo item: objects)
@@ -785,8 +785,8 @@ public class Scene
     for (int i = 0; i < textures.size(); i++)
       if (textures.elementAt(i).usesImage(image))
         return false;
-    for (int i = 0; i < materials.size(); i++)
-      if (materials.elementAt(i).usesImage(image))
+    for (Material mat: materials)
+      if (mat.usesImage(image))
         return false;
     images.removeElementAt(which);
     return true;
@@ -1057,7 +1057,7 @@ public class Scene
 
   public Material getMaterial(int i)
   {
-    return materials.elementAt(i);
+    return materials.get(i);
   }
 
   /** Get the material with the specified name, or null if there is none.  If
@@ -1065,12 +1065,11 @@ public class Scene
 
   public Material getMaterial(String name)
   {
-    for (int i = 0; i < materials.size(); i++)
-      {
-        Material mat = materials.elementAt(i);
-        if (mat.getName().equals(name))
-          return mat;
-      }
+    for (Material mat: materials)
+    {
+      if (mat.getName().equals(name))
+        return mat;
+    }
     return null;
   }
 
@@ -1260,7 +1259,7 @@ public class Scene
     // Read the materials.
 
     count = in.readInt();
-    materials = new Vector<Material>(count);
+    materials = new ArrayList<Material>(count);
     for (int i = 0; i < count; i++)
       {
         try
@@ -1275,7 +1274,7 @@ public class Scene
                 if (cls == null)
                   throw new IOException("Unknown class: "+classname);
                 con = cls.getConstructor(DataInputStream.class, Scene.class);
-                materials.addElement((Material) con.newInstance(new DataInputStream(new ByteArrayInputStream(bytes)), this));
+                materials.add((Material) con.newInstance(new DataInputStream(new ByteArrayInputStream(bytes)), this));
               }
             catch (Exception ex)
               {
@@ -1286,7 +1285,7 @@ public class Scene
                   loadingErrors.append(Translate.text("errorInstantiatingClass", classname)).append('\n');
                 UniformMaterial m = new UniformMaterial();
                 m.setName("<unreadable>");
-                materials.addElement(m);
+                materials.add(m);
                 errorsLoading = true;
               }
           }
@@ -1551,7 +1550,7 @@ public class Scene
 
   public void writeToStream(DataOutputStream out) throws IOException
   {
-    Material mat;
+    
     Texture tex;
     int i, j, index = 0;
     Hashtable<Object3D, Integer> table = new Hashtable<Object3D, Integer>(objects.size());
@@ -1585,16 +1584,15 @@ public class Scene
     // Save the materials.
 
     out.writeInt(materials.size());
-    for (i = 0; i < materials.size(); i++)
-      {
-        mat = materials.elementAt(i);
-        out.writeUTF(mat.getClass().getName());
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        mat.writeToFile(new DataOutputStream(bos), this);
-        byte bytes[] = bos.toByteArray();
-        out.writeInt(bytes.length);
-        out.write(bytes, 0, bytes.length);
-      }
+    for (Material mat: materials)
+    {
+      out.writeUTF(mat.getClass().getName());
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      mat.writeToFile(new DataOutputStream(bos), this);
+      byte bytes[] = bos.toByteArray();
+      out.writeInt(bytes.length);
+      out.write(bytes, 0, bytes.length);
+    }
 
     // Save the textures.
 

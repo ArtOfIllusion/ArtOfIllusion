@@ -44,7 +44,7 @@ public class CSGTool implements ModellingTool
   {
     Scene scene = window.getScene();
     int selection[] = window.getSelectedIndices(), closedCount = 0;
-    Vector<ObjectInfo> inputObj = new Vector<ObjectInfo>();
+    List<ObjectInfo> inputObj = new ArrayList<ObjectInfo>();
 
     for (int i = 0; i < selection.length; i++)
       {
@@ -52,7 +52,7 @@ public class CSGTool implements ModellingTool
         if (obj.getObject().canSetTexture())
           if (obj.getObject() instanceof TriangleMesh || obj.getObject().canConvertToTriangleMesh() != Object3D.CANT_CONVERT)
             {
-              inputObj.addElement(obj);
+              inputObj.add(obj);
               if (obj.getObject().isClosed())
                 closedCount++;
             }
@@ -62,7 +62,7 @@ public class CSGTool implements ModellingTool
         new BStandardDialog("", UIUtilities.breakString("You must select two objects for boolean modelling, at least one of which must be solid."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
         return;
       }
-    CSGObject newobj = new CSGObject(inputObj.elementAt(0), inputObj.elementAt(1), CSGObject.UNION);
+    CSGObject newobj = new CSGObject(inputObj.get(0), inputObj.get(1), CSGObject.UNION);
     Vec3 center = newobj.centerObjects();
     CSGDialog dial = new CSGDialog(window, newobj);
     if (!dial.clickedOk())

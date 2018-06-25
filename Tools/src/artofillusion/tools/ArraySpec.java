@@ -59,7 +59,7 @@ public class ArraySpec
             Set to METHOD_CURVE to create an array along a curve. */
         public int method;
         /** the objects that should be copied to create an array */
-        public Vector<ObjectInfo> objectList;         // list of objectInfo's
+        public List<ObjectInfo> objectList;         // list of objectInfo's
 
         // linear paramters
         /** Number of copies to make for a linear array. */
@@ -126,7 +126,7 @@ public class ArraySpec
                 // set list of object to copy (all selected objects)
                 Scene scene = window.getScene();
                 int selection[] = window.getSelectedIndices();
-                objectList = new Vector<ObjectInfo>();         // list of objectInfo's
+                objectList = new ArrayList<ObjectInfo>();         // list of objectInfo's
                 for (int sel=0; sel<selection.length;sel++)
                 {
                         ObjectInfo info = scene.getObject(selection[sel]);
@@ -211,21 +211,18 @@ public class ArraySpec
         if (method != METHOD_LINEAR)
                 return;
 
-        for (int i=0; i<objectList.size(); i++)
+        for (ObjectInfo item: objectList)
         {
-                // get object
-                ObjectInfo info = objectList.get(i);
+            // calculate displacement vector
+            Vec3 displacement = new Vec3(stepX, stepY, stepZ);
+            BoundingBox bounds = item.getObject().getBounds();
+            if (intervalX) displacement.x *= bounds.getSize().x;
+            if (intervalY) displacement.y *= bounds.getSize().y;
+            if (intervalZ) displacement.z *= bounds.getSize().z;
 
-                // calculate displacement vector
-                Vec3 displacement = new Vec3(stepX, stepY, stepZ);
-                BoundingBox bounds = info.getObject().getBounds();
-                if (intervalX) displacement.x *= bounds.getSize().x;
-                if (intervalY) displacement.y *= bounds.getSize().y;
-                if (intervalZ) displacement.z *= bounds.getSize().z;
-
-                int start = (dupFirst==true ? 0 : 1);
-                for (int n=start; n<linearCopies; n++)
-                        createCopy (info, displacement.times(n));
+            int start = (dupFirst==true ? 0 : 1);
+            for (int n=start; n<linearCopies; n++)
+                    createCopy (item, displacement.times(n));
         }
 
         window.updateImage();
@@ -271,34 +268,32 @@ public class ArraySpec
         CoordinateSystem startCS = new CoordinateSystem(subdiv[0],zdir[0],updir[0]);
         
         // for all objects in selection
-        for (int i=0; i<objectList.size(); i++)
+        for (ObjectInfo item: objectList)
         {
-                // get object
-                ObjectInfo info = objectList.get(i);
 
-                for (int n=startCount; n<curveCopies; n++)
-                {
-                        // determine displacement
-                        Vec3 updir_return = new Vec3(0,0,0), zdir_return = new Vec3(0,0,0);
-                        double relativePos = n*curveLength / ((curveCopies-1) + (cv.isClosed() ? 1 : 0));
+            for (int n=startCount; n<curveCopies; n++)
+            {
+                // determine displacement
+                Vec3 updir_return = new Vec3(0,0,0), zdir_return = new Vec3(0,0,0);
+                double relativePos = n*curveLength / ((curveCopies-1) + (cv.isClosed() ? 1 : 0));
 
-                        CoordinateSystem curveCS = findCoordinateSystem(subdiv, cv.isClosed(), relativePos, zdir, updir);
+                CoordinateSystem curveCS = findCoordinateSystem(subdiv, cv.isClosed(), relativePos, zdir, updir);
 
-                        CoordinateSystem newCS = info.getCoords().duplicate();
-                        if (ignoreOrigin)
-                                newCS.setOrigin(startCS.getOrigin());
-                        if (ignoreOrientation)
-                                newCS.setOrientation(startCS.getZDirection(), startCS.getUpDirection());    
+                CoordinateSystem newCS = item.getCoords().duplicate();
+                if (ignoreOrigin)
+                        newCS.setOrigin(startCS.getOrigin());
+                if (ignoreOrientation)
+                        newCS.setOrientation(startCS.getZDirection(), startCS.getUpDirection());    
 
-                        newCS.transformOrigin(startCS.toLocal());
-                        newCS.transformAxes(startCS.toLocal());
-                        newCS.transformOrigin(curveCS.fromLocal());
-                        if (orientation)
-                                newCS.transformAxes(curveCS.fromLocal());
+                newCS.transformOrigin(startCS.toLocal());
+                newCS.transformAxes(startCS.toLocal());
+                newCS.transformOrigin(curveCS.fromLocal());
+                if (orientation)
+                        newCS.transformAxes(curveCS.fromLocal());
 
-                        createCopy (info, newCS);
-                        
-                }
+                createCopy (item, newCS);
+
+            }
         }
 
         window.updateImage();

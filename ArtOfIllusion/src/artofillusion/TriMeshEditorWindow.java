@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,8 +20,11 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
+import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 
-import java.awt.*;
+
 import java.util.*;
 
 /** The TriMeshEditorWindow class represents the window for editing TriangleMesh objects. */
@@ -857,7 +861,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
           return 0;
         }
       }
-    Vector<EdgeScore> scoreVec = new Vector<EdgeScore>(e.length);
+    List<EdgeScore> scoreList = new ArrayList<EdgeScore>(e.length);
     Vec3 temp0 = new Vec3(), temp1 = new Vec3(), temp2 = new Vec3();
     for (int i = 0; i < e.length; i++)
       {
@@ -903,15 +907,14 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
           continue;
         dot = temp1.dot(temp2);
         score += (dot > 0.0 ? dot : -dot);
-        scoreVec.addElement(new EdgeScore(i, score));
+        scoreList.add(new EdgeScore(i, score));
       }
-    if (scoreVec.isEmpty())
+    if (scoreList.isEmpty())
       return;
 
     // Sort them.
 
-    EdgeScore score[] = new EdgeScore [scoreVec.size()];
-    scoreVec.copyInto(score);
+    EdgeScore score[] = scoreList.toArray(new EdgeScore [scoreList.size()]);
     Arrays.sort(score);
 
     // Mark which edges to hide.

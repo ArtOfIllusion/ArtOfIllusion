@@ -196,21 +196,19 @@ public class UIUtilities
     if (lines < 2)
       return new String [] {s};
     int lineLength = s.length()/lines;
-    Vector<String> line = new Vector<String>();
+    List<String> line = new ArrayList<String>();
     int index = 0;
     while (index+lineLength < s.length())
     {
       int next = s.indexOf(' ', index+lineLength);
       if (next == -1)
         next = s.length();
-      line.addElement(s.substring(index, next).trim());
+      line.add(s.substring(index, next).trim());
       index = next;
     }
     if (index < s.length())
-      line.addElement(s.substring(index).trim());
-    String result[] = new String [line.size()];
-    line.copyInto(result);
-    return result;
+      line.add(s.substring(index).trim());
+    return line.toArray(new String[line.size()]);
   }
 
   /** Recursively enable or disable a container and everything inside it. */

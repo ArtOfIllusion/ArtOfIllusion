@@ -129,7 +129,7 @@ public class ColorChooser extends BDialog
     for (RGBColor recentColor: recentColors)
     {
       final RGBColor color = recentColor;
-      ColorSampleWidget sample = new ColorSampleWidget(color, 16, 16);
+      final ColorSampleWidget sample = new ColorSampleWidget(color, 16, 16);
       recentColorRow.add(sample);
       sample.addEventLink(MousePressedEvent.class, new Object() {
         void processEvent()

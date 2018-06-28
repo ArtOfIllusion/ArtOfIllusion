@@ -1,5 +1,5 @@
 /* Copyright (C) 2003 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -365,8 +365,8 @@ public class Actor extends ObjectWrapper
 
     // Construct the output pose.
 
-    Vector<Gesture> gestureList = new Vector<Gesture>();
-    Vector<Double> weightList = new Vector<Double>();
+    List<Gesture> gestureList = new ArrayList<Gesture>();
+    List<Double> weightList = new ArrayList<Double>();
     
     for (int i = 0; i < weight.length; i++)
       if (weight[i] > 0.0)
@@ -663,9 +663,9 @@ public class Actor extends ObjectWrapper
     {
     }
 
-    /** Add the weights from a keyframe into a hashtable. */
+    /** Add the weights from a keyframe into a map. */
 
-    private void addWeightsToTable(ActorKeyframe k, Hashtable table, double scale)
+    private void addWeightsToTable(ActorKeyframe k, Map table, double scale)
     {
       for (int i = 0; i < k.id.length; i++)
         {
@@ -765,8 +765,8 @@ public class Actor extends ObjectWrapper
 
     public Keyframe createObjectKeyframe(Actor actor)
     {
-      List<Gesture> poseVec = new Vector<Gesture>();
-      List<Double> weightVec = new Vector<Double>();
+      List<Gesture> poseVec = new ArrayList<Gesture>();
+      List<Double> weightVec = new ArrayList<Double>();
 
       for (int i = 0; i < id.length; i++)
       {

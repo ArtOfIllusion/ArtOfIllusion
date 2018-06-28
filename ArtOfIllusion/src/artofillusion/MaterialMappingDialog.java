@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@ import java.util.*;
 public class MaterialMappingDialog extends BDialog
 {
   private Object3D obj;
-  private Vector<Class> mappings;
+  private List<Class> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private MaterialMapping map, oldMapping;
@@ -45,7 +45,7 @@ public class MaterialMappingDialog extends BDialog
 
     // Make a list of all material mappings which can be used for this object and material.
 
-    mappings = new Vector<Class>();
+    mappings = new ArrayList<>();
     Material mat = obj.getMaterial();
     
     for (MaterialMapping mapping: PluginRegistry.getPlugins(MaterialMapping.class))

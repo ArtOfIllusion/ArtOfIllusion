@@ -28,7 +28,8 @@ public class Actor extends ObjectWrapper
 {
   Gesture gesture[];
   String gestureName[];
-  int gestureID[], nextPoseID;
+  int gestureID[];
+  int nextPoseID;
   private ActorKeyframe currentPose;
 
   public Actor(Object3D obj)

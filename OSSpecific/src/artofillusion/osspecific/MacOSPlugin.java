@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,8 +15,6 @@ import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import com.apple.eawt.Application;
-import com.apple.eawt.ApplicationEvent;
 import java.awt.*;
 import java.io.*;
 import java.util.prefs.*;
@@ -24,12 +22,13 @@ import java.util.prefs.*;
 /** This is a plugin to make Art of Illusion behave more like a standard Macintosh
     application when running under Mac OS X. */
 
-public class MacOSPlugin implements Plugin, com.apple.eawt.ApplicationListener
+public class MacOSPlugin implements Plugin
 {
   
   private boolean usingAppMenu;
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void processMessage(int message, Object args[])
   {
     if (message == APPLICATION_STARTING)
@@ -41,10 +40,7 @@ public class MacOSPlugin implements Plugin, com.apple.eawt.ApplicationListener
       UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
       UIUtilities.setStandardDialogInsets(3);
 
-      Application app = Application.getApplication();
-      app.setEnabledAboutMenu(true);
-      app.setEnabledPreferencesMenu(true);
-      app.addApplicationListener(this);
+      new AppListenerBridge();
      
       usingAppMenu = true;
     }
@@ -112,75 +108,6 @@ public class MacOSPlugin implements Plugin, com.apple.eawt.ApplicationListener
       }
       return;
     }
-  }
-
-  @Override
-  public void handleAbout(ApplicationEvent event)
-  {
-      TitleWindow win = new TitleWindow();
-      win.addEventLink(MouseClickedEvent.class, win, "dispose");
-      event.setHandled(true);
-  }
-
-  @Override
-  public void handleOpenApplication(ApplicationEvent event)
-  {
-    event.setHandled(true);
-  }
-
-  @Override
-  public void handleOpenFile(ApplicationEvent event)
-  {
-    try
-    {
-      ArtOfIllusion.newWindow(new Scene(new File(event.getFilename()), true));
-    } catch (IOException ex)
-    {
-      ex.printStackTrace();
-    }
-  }
-
-  @Override
-  public void handlePreferences(ApplicationEvent event)
-  {
-    Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-    boolean frontIsLayoutWindow = false;
-    for (EditingWindow window : ArtOfIllusion.getWindows())
-      if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
-      {
-        ((LayoutWindow) window).preferencesCommand();
-        frontIsLayoutWindow = true;
-        break;
-      }
-    if (!frontIsLayoutWindow)
-    {
-      BFrame f = new BFrame();
-      Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-      f.setBounds(screenBounds);
-      UIUtilities.centerWindow(f);
-      new PreferencesWindow(f);
-      f.dispose();
-    }
-    event.setHandled(true);
-  }
-
-  @Override
-  public void handlePrintFile(ApplicationEvent event)
-  {
-    event.setHandled(true);
-  }
-
-  @Override
-  public void handleQuit(ApplicationEvent event)
-  {
-    ArtOfIllusion.quit();
-    event.setHandled(false);
-  }
-
-  @Override
-  public void handleReOpenApplication(ApplicationEvent event)
-  {
-    event.setHandled(true);
   }
 
   /** This is an inner class used to provide a minimal menu bar when all windows are

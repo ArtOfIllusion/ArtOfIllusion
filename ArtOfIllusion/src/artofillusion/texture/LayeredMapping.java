@@ -136,7 +136,7 @@ public class LayeredMapping extends TextureMapping
         {
           param.add(p[j].duplicate());
           if (p[j].identifier != -1)
-            param.get(param.size()+1).setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
+            param.get(param.size()-1).setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
         }
         if (p.length > maxParams)
           maxParams = p.length;

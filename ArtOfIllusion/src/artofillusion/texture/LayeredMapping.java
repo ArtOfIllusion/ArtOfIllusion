@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2009 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,7 +17,8 @@ import artofillusion.object.*;
 import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /** LayeredMapping is the TextureMapping corresponding to LayeredTextures.  It allows
     multiple textures to be layered on top of each other.  Most of the actual work is done
@@ -106,7 +108,7 @@ public class LayeredMapping extends TextureMapping
   @Override
   public TextureParameter[] getParameters()
   {
-    Vector<TextureParameter> param = new Vector<TextureParameter>();
+    List<TextureParameter> param = new ArrayList<TextureParameter>();
     TextureParameter p[];
     int i, j;
 
@@ -124,7 +126,7 @@ public class LayeredMapping extends TextureMapping
       fractParamIndex[i] = param.size();
       TextureParameter fractParam = new TextureParameter(this, texture[i].getName()+" fraction", 0.0f, 1.0f, 1.0f);
       fractParam.setID(fractParamID[i]);
-      param.addElement(fractParam);
+      param.add(fractParam);
       p = mapping[i].getParameters();
       if (p != null)
       {
@@ -132,9 +134,9 @@ public class LayeredMapping extends TextureMapping
         paramStartIndex[i] = param.size();
         for (j = 0; j < p.length; j++)
         {
-          param.addElement(p[j].duplicate());
+          param.add(p[j].duplicate());
           if (p[j].identifier != -1)
-            param.lastElement().setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
+            param.get(param.size()+1).setID(System.identityHashCode(mapping[i])+p[j].identifier*1025);
         }
         if (p.length > maxParams)
           maxParams = p.length;
@@ -142,7 +144,7 @@ public class LayeredMapping extends TextureMapping
     }
     p = new TextureParameter [param.size()];
     for (i = 0; i < p.length; i++)
-      p[i] = param.elementAt(i);
+      p[i] = param.get(i);
     return p;
   }
 

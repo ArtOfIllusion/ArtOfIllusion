@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2013 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,7 @@ import java.util.*;
 public class IKTrack extends Track
 {
   private ObjectInfo info;
-  private Vector<Constraint> constraints;
+  private List<Constraint> constraints;
   private boolean useGestures;
   private WeightTrack theWeight;
 
@@ -35,7 +35,7 @@ public class IKTrack extends Track
     super("Inverse Kinematics");
     this.info = info;
     theWeight = new WeightTrack(this);
-    constraints = new Vector<Constraint>();
+    constraints = new ArrayList<>();
     useGestures = true;
   }
 
@@ -106,36 +106,34 @@ public class IKTrack extends Track
   @Override
   public Track duplicate(Object obj)
   {
-    IKTrack t = new IKTrack((ObjectInfo) obj);
+    IKTrack track = new IKTrack((ObjectInfo) obj);
 
-    t.name = name;
-    t.enabled = enabled;
-    t.quantized = quantized;
-    t.constraints = new Vector<Constraint>();
-    for (int i = 0; i < constraints.size(); i++)
+    track.name = name;
+    track.enabled = enabled;
+    track.quantized = quantized;
+    track.constraints = new ArrayList<>();
+    for (Constraint item: constraints)
     {
-      Constraint c = constraints.get(i);
-      t.constraints.add(c.duplicate());
+      track.constraints.add(item.duplicate());
     }
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
-    return t;
+    track.theWeight = (WeightTrack) theWeight.duplicate(track);
+    return track;
   }
 
   /** Make this track identical to another one. */
 
   @Override
-  public void copy(Track tr)
+  public void copy(Track source)
   {
-    IKTrack t = (IKTrack) tr;
+    IKTrack t = (IKTrack) source;
 
     name = t.name;
     enabled = t.enabled;
     quantized = t.quantized;
-    constraints = new Vector<Constraint>();
-    for (int i = 0; i < t.constraints.size(); i++)
+    constraints = new ArrayList<>();
+    for (Constraint item: t.constraints)
     {
-      Constraint c = t.constraints.get(i);
-      constraints.add(c.duplicate());
+      constraints.add(item.duplicate());
     }
     theWeight = (WeightTrack) t.theWeight.duplicate(t);
   }
@@ -212,12 +210,11 @@ public class IKTrack extends Track
   @Override
   public ObjectInfo [] getDependencies()
   {
-    Vector<ObjectInfo> v = new Vector<ObjectInfo>();
-    for (int i = 0; i < constraints.size(); i++)
+    List<ObjectInfo> v = new ArrayList<ObjectInfo>();
+    for (Constraint item: constraints)
     {
-      Constraint c = constraints.get(i);
-      if (c.target != null)
-        v.add(c.target.getObject());
+      if (item.target == null) continue;
+      v.add(item.target.getObject());
     }
     return v.toArray(new ObjectInfo[v.size()]);
   }
@@ -288,7 +285,7 @@ public class IKTrack extends Track
     if (version > 0)
       useGestures = in.readBoolean();
     int numConstraints = in.readInt();
-    constraints = new Vector<Constraint>();
+    constraints = new ArrayList<>();
     for (int i = 0; i < numConstraints; i++)
     {
       Constraint c = new Constraint(in.readInt(), in.readBoolean() ? new ObjectRef(in, scene) : null);
@@ -326,7 +323,7 @@ public class IKTrack extends Track
     BList constraintList;
     BTextField nameField;
     BCheckBox gesturesBox;
-    Vector<Constraint> tempConstraints;
+    List<Constraint> tempConstraints;
     int tempJointID[];
     ObjectRef tempTarget[];
     BButton editButton, deleteButton;
@@ -335,9 +332,9 @@ public class IKTrack extends Track
     {
       super(win, Translate.text("ikTrackTitle"), true);
       window = win;
-      tempConstraints = new Vector<Constraint>();
-      for (int i = 0; i < constraints.size(); i++)
-        tempConstraints.add(constraints.get(i).duplicate());
+      tempConstraints = new ArrayList<Constraint>();
+      for (Constraint item: constraints)
+        tempConstraints.add(item.duplicate());
 
       // Layout the dialog.
 

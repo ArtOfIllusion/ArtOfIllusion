@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
 
@@ -17,14 +17,14 @@ package artofillusion.procedural;
 
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
-import java.util.List;
+
 import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
 import artofillusion.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
+import java.awt.Point;
 
 
 class debug {
@@ -108,12 +108,12 @@ class Token {
     public double numValue;
     public char ty;
 
-    static Hashtable<String, OPort> funMap = createFunMap ();
+    static Map<String, OPort> funMap = createFunMap ();
     //    static Hashtable portMap = createPortMap ();
 
 
-    static Hashtable<String, OPort> createFunMap () {
-        Hashtable<String, OPort> fm = new Hashtable<String, OPort> ();
+    static Map<String, OPort> createFunMap () {
+        Map<String, OPort> fm = new HashMap<> ();
         //For version two, pull these out of a config file
         fm.put ("sin",  new OPort (new SineModule (new Point ()), 0));
         fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0));
@@ -175,8 +175,7 @@ class ModuleLoader {
         try {
             moduleClass = ArtOfIllusion.getClass (name);
         } catch (ClassNotFoundException e) {
-            debug.print ("Couldn't get class for " +
-                                name + ": " + e);
+            debug.print ("Couldn't get class for " + name + ": " + e);
             return dummy ();
 
         }
@@ -206,8 +205,7 @@ class ModuleLoader {
             parameterTypes [0] = Point.class;
             cons = moduleClass.getConstructor (parameterTypes);
         } catch (Exception e) {
-            System.err.println ("Couldn't get constructor for " +
-                                moduleClass.getName() + ": " + e);
+            System.err.println ("Couldn't get constructor for " + moduleClass.getName() + ": " + e);
             return dummy();
         }
         try {
@@ -233,10 +231,10 @@ class ModuleLoader {
 public class ExprModule extends Module
 {
 
-    private Hashtable<String, OPort> varTable;
+    private Map<String, OPort> varTable;
     Module [] inputs;
     Module [] myModules;
-    private Vector<Module> moduleVec;
+    private List<Module> moduleVec;
     OPort compiled;
     Token [] tokens;
     Token currTok;
@@ -244,7 +242,7 @@ public class ExprModule extends Module
     PointInfo point;
     Point zero = new Point (0,0);
     String expr;
-    private Vector<String> errors;
+    private List<String> errors;
 
     public ExprModule(Point position)
     {
@@ -328,7 +326,7 @@ public class ExprModule extends Module
           new String [] {"Calculate:"});
         if (!dlg.clickedOk())
             return false;
-        errors = new Vector<String>();
+        errors = new ArrayList<String>();
         try
         {
           setExpr (exprField.getText().toLowerCase ());
@@ -366,7 +364,7 @@ public class ExprModule extends Module
 
     public void setExpr (String e) {
         expr = e;
-        name = "["+expr+"]";
+        name = "[" + expr + "]";
         lex (expr);
         compile();
     }
@@ -451,8 +449,8 @@ public class ExprModule extends Module
     }
 
     void initVarTable () {
-        varTable = new Hashtable<String, OPort>();
-        moduleVec = new Vector<Module>();
+        varTable = new HashMap<String, OPort>();
+        moduleVec = new ArrayList<Module>();
 
         CoordinateModule x, y, z, t;
         x = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
@@ -631,7 +629,7 @@ public class ExprModule extends Module
 
         OPort func = getOPort (name);
 
-        Vector<OPort> s = new Vector<OPort> ();
+        List<OPort> s = new ArrayList<> ();
         //get args
         while (currTok.ty != Token.RP && currTok.ty != Token.END) {
             s.add (expr (false));

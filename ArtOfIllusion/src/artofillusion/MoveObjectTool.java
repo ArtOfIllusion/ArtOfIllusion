@@ -15,8 +15,10 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
-import java.util.Vector;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+
 
 /** MoveObjectTool is an EditingTool used for moving objects in a scene. */
 
@@ -24,7 +26,7 @@ public class MoveObjectTool extends EditingTool
 {
   Point clickPoint;
   Vec3 objectPos[];
-  Vector<ObjectInfo> toMove;
+  private List<ObjectInfo> toMove;
   ObjectInfo clickedObject;
   boolean dragged, applyToChildren = true;
 
@@ -65,18 +67,18 @@ public class MoveObjectTool extends EditingTool
     Scene theScene = theWindow.getScene();
     int i, sel[];
 
-    toMove = new Vector<ObjectInfo>();
+    toMove = new ArrayList<>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
     else
       sel = theScene.getSelection();
     for (i = 0; i < sel.length; i++)
-      toMove.addElement(theScene.getObject(sel[i]));
+      toMove.add(theScene.getObject(sel[i]));
     objectPos = new Vec3 [toMove.size()];
     for (i = 0; i < objectPos.length; i++)
       {
-        ObjectInfo info = toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         objectPos[i] = info.getCoords().getOrigin();
       }
     clickPoint = e.getPoint();
@@ -98,7 +100,7 @@ public class MoveObjectTool extends EditingTool
         theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
         for (i = 0; i < toMove.size(); i++)
           {
-            ObjectInfo info = toMove.elementAt(i);
+            ObjectInfo info = toMove.get(i);
             c = info.getCoords();
             undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
           }
@@ -119,7 +121,7 @@ public class MoveObjectTool extends EditingTool
       v = cam.findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
     for (i = 0; i < toMove.size(); i++)
       {
-        ObjectInfo info = toMove.elementAt(i);
+        ObjectInfo info = toMove.get(i);
         c = info.getCoords();
         c.setOrigin(objectPos[i].plus(v));
       }
@@ -211,12 +213,12 @@ public class MoveObjectTool extends EditingTool
       v = cam.findDragVector(origin, dx, dy);
     }
     theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
-    toMove = new Vector<ObjectInfo>();
+    toMove = new ArrayList<>();
     for (i = 0; i < sel.length; i++)
-      toMove.addElement(theScene.getObject(sel[i]));
+      toMove.add(theScene.getObject(sel[i]));
     for (i = 0; i < toMove.size(); i++)
     {
-      c = toMove.elementAt(i).getCoords();
+      c = toMove.get(i).getCoords();
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
       c.setOrigin(c.getOrigin().plus(v));
     }

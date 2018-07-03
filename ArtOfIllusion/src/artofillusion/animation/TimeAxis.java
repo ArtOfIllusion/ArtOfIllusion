@@ -1,5 +1,5 @@
 /* Copyright (C) 2001,2003,2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,7 +16,8 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.text.*;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 /** This is a Widget which displays a time axis. */
 
@@ -24,7 +25,7 @@ public class TimeAxis extends CustomWidget
 {
   double start, scale, origMarkerPos;
   Score theScore;
-  private final Vector<Marker> markers;
+  private final List<Marker> markers;
   int subdivisions;
   Marker draggingMarker;
   Point clickPos;
@@ -44,7 +45,7 @@ public class TimeAxis extends CustomWidget
     theScore = sc;
     nf.setMinimumFractionDigits(1);
     nf.setMaximumFractionDigits(2);
-    markers = new Vector<Marker>();
+    markers = new ArrayList<Marker>();
     addEventLink(MousePressedEvent.class, this, "mousePressed");
     addEventLink(MouseReleasedEvent.class, this, "mouseReleased");
     addEventLink(MouseDraggedEvent.class, this, "mouseDragged");
@@ -162,9 +163,8 @@ public class TimeAxis extends CustomWidget
 
     // Draw any markers.
 
-    for (i = 0; i < markers.size(); i++)
+    for (Marker m: markers)
     {
-      Marker m = markers.get(i);
       x = (int) Math.round(scale*(m.position-start));
       g.setColor(m.color);
       g.fillRect(x-MARKER_SIZE/2, tickPos+2, MARKER_SIZE, TICK_HEIGHT-2);
@@ -176,23 +176,22 @@ public class TimeAxis extends CustomWidget
     clickPos = ev.getPoint();
     draggingMarker = null;
     process = new ActionProcessor();
-    for (int i = 0; i < markers.size(); i++)
-      {
-	Marker m = markers.get(i);
-	int x = (int) (scale*(m.position-start));
-	if (clickPos.x < x-MARKER_SIZE/2-1 || clickPos.x > x+MARKER_SIZE/2+1)
-	  continue;
-	draggingMarker = m;
-	origMarkerPos = m.position;
-      }
+    for (Marker m: markers)
+    {
+      int x = (int) (scale*(m.position-start));
+      if (clickPos.x < x-MARKER_SIZE/2-1 || clickPos.x > x+MARKER_SIZE/2+1)
+        continue;
+      draggingMarker = m;
+      origMarkerPos = m.position;
+    }
     if (draggingMarker == null && markers.size() > 0)
-      {
-        // Snap the default marker to the click position.
+    {
+      // Snap the default marker to the click position.
 
-	draggingMarker = markers.get(0);
-        origMarkerPos = clickPos.x/scale+start;
-        mouseDragged(ev);
-      }
+      draggingMarker = markers.get(0);
+      origMarkerPos = clickPos.x/scale+start;
+      mouseDragged(ev);
+    }
   }
 
   private void mouseDragged(WidgetMouseEvent ev)

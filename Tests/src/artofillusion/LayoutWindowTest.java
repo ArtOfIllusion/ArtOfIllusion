@@ -447,9 +447,7 @@ public class LayoutWindowTest
   public void testInvokeShowEnvironmentDialog()
   {
     appMainMenu.pushMenuNoBlock("Scene|Environment...");
-    JDialogOperator dialog = new JDialogOperator(appFrame);
-
-    JLabelOperator label = new JLabelOperator(dialog, "Select Environment Properties:");
+    JDialogOperator dialog = new JDialogOperator(appFrame, bundle.getResource("environmentTitle"));
 
     JButtonOperator cancel = new JButtonOperator(dialog, bundle.getResource("button.cancel"));
     cancel.clickMouse();

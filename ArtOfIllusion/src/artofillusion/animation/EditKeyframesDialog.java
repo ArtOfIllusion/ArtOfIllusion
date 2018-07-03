@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -107,7 +107,7 @@ public class EditKeyframesDialog
     
     if (whichTracks == 0)
       {
-        Vector<Track> tracks = new Vector<Track>();
+        List<Track> tracks = new ArrayList<>();
         for (ObjectInfo info: theScene.getObjects())
         {
           for (int j = 0; j < info.getTracks().length; j++)
@@ -120,13 +120,13 @@ public class EditKeyframesDialog
     else if (whichTracks == 1)
       {
         int sel[] = theScene.getSelection();
-        Vector<Track> tracks = new Vector<Track>();
+        List<Track> tracks = new ArrayList<>();
         for (int i = 0; i < sel.length; i++)
-          {
-            ObjectInfo info = theScene.getObject(sel[i]);
-            for (int j = 0; j < info.getTracks().length; j++)
-              addToVector(info.getTracks()[j], tracks);
-          }
+        {
+          ObjectInfo info = theScene.getObject(sel[i]);
+          for (int j = 0; j < info.getTracks().length; j++)
+            addToVector(info.getTracks()[j], tracks);
+        }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
           track[i] = tracks.get(i);

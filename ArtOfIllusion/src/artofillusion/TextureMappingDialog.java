@@ -17,7 +17,7 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Insets;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class TextureMappingDialog extends BDialog
 {
   private FormContainer content;
   private Object3D origObj, editObj;
-  private Vector<Class> mappings;
+  private List<Class> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private TextureMapping map, oldMapping;
@@ -56,7 +56,7 @@ public class TextureMappingDialog extends BDialog
 
     // Make a list of all texture mappings which can be used for this object and texture.
 
-    mappings = new Vector<Class>();
+    mappings = new ArrayList<>();
     for (TextureMapping mapping: PluginRegistry.getPlugins(TextureMapping.class))
     {
       try

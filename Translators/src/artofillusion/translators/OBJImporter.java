@@ -56,7 +56,7 @@ public class OBJImporter
     List<Vec3> vertex = new ArrayList<>();
     List<Vec3> normal = new ArrayList<>();
     List<Vec3> texture = new ArrayList<>();
-    Vector<List<FaceInfo>> face = new Vector<>();
+    @SuppressWarnings("UseOfObsoleteCollectionType") Vector<List<FaceInfo>> face = new Vector<>();
     face.add(new ArrayList<FaceInfo>());
     groupTable.put("default", face.get(0));
     int lineno = 0, smoothingGroup = -1;

@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +15,12 @@ import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
 import java.util.*;
 
 /** This is the Widget which displays all of the tracks in the score. */
@@ -29,7 +35,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   Point lastPos, dragPos;
   boolean draggingBox;
   int yoffset;
-  Vector<Marker> markers;
+  private final List<Marker> markers;
   UndoRecord undo;
 
   private static final Polygon handle;
@@ -49,7 +55,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
     theScore = sc;
     this.subdivisions = subdivisions;
     this.scale = scale;
-    markers = new Vector<Marker>();
+    markers = new ArrayList<>();
     setPreferredSize(new Dimension(200, 100));
     addEventLink(MousePressedEvent.class, this, "mousePressed");
     addEventLink(MouseReleasedEvent.class, this, "mouseReleased");
@@ -95,7 +101,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
   @Override
   public void addMarker(Marker m)
   {
-    markers.addElement(m);
+    markers.add(m);
   }
 
   /*8 Set the mode (select-and-move or scroll-and-scale) for this display. */
@@ -147,11 +153,10 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
 
     // Draw the markers.
 
-    for (i = 0; i < markers.size(); i++)
-    {
-      Marker m = markers.elementAt(i);
-      g.setColor(m.color);
-      x = (int) Math.round(scale*(m.position-start));
+    for (Marker marker: markers)
+    {      
+      x = (int) Math.round(scale*(marker.position-start));
+      g.setColor(marker.color);
       g.drawLine(x, 0, x, dim.height);
     }
 
@@ -338,7 +343,7 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
         row1 = 0;
       if (row2 > obj.length)
         row2 = obj.length;
-      Vector<SelectionInfo> v = new Vector<SelectionInfo>();
+      List<SelectionInfo> v = new ArrayList<>();
       for (int row = row1; row < row2; row++)
       {
         if (!(obj[row] instanceof Track))
@@ -354,12 +359,12 @@ public class TracksPanel extends CustomWidget implements TrackDisplay
           if (x < x1 || x > x2)
             continue;
           Keyframe key = tr.getTimecourse().getValues()[i];
-          v.addElement(new SelectionInfo(tr, key));
+          v.add(new SelectionInfo(tr, key));
         }
       }
       SelectionInfo sel[] = new SelectionInfo [v.size()];
       for (int i = 0; i < sel.length; i++)
-        sel[i] = v.elementAt(i);
+        sel[i] = v.get(i);
       theScore.addSelectedKeyframes(sel);
       theScore.repaintGraphs();
     }

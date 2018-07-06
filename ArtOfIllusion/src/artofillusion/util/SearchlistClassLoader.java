@@ -7,7 +7,7 @@ package artofillusion.util;
  *
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
- * Changes copyright (C) 2017 by Maksim Khramov
+ * Changes copyright (C) 2017-2018 by Maksim Khramov
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -45,11 +45,11 @@ package artofillusion.util;
  */
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -304,7 +304,7 @@ public class SearchlistClassLoader extends ClassLoader
 		    //System.out.println("defined class: " + name);
 
 		    // cache the result
-		    if (cache == null) cache = new Hashtable(1024);
+		    if (cache == null) cache = new HashMap<>(1024);
 		    cache.put(name, result);
 
 		    return result;
@@ -401,7 +401,7 @@ public class SearchlistClassLoader extends ClassLoader
 			    //System.out.println("defined class: " + name);
 
 			    // cache the result
-			    if (cache == null) cache = new Hashtable(1024);
+			    if (cache == null) cache = new HashMap<>(1024);
 			    cache.put(name, result);
 
 			    return result;

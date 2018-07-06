@@ -369,15 +369,18 @@ public class ScriptedObject extends ObjectCollection
 
   /** Inner class representing a pose for a scripted object. */
 
+  @SuppressWarnings("UseOfObsoleteCollectionType")
   public static class ScriptedObjectKeyframe implements Keyframe
   {
     ScriptedObject script;
+    @SuppressWarnings("UseOfObsoleteCollectionType")
     public Hashtable<String, Double> valueTable;
 
+    @SuppressWarnings("UseOfObsoleteCollectionType")
     public ScriptedObjectKeyframe(ScriptedObject object, String names[], double values[])
     {
       script = object;
-      valueTable = new Hashtable<String, Double>();
+      valueTable = new Hashtable<>();
       for (int i = 0; i < names.length; i++)
         valueTable.put(names[i], values[i]);
     }

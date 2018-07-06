@@ -666,16 +666,16 @@ public class Actor extends ObjectWrapper
 
     /** Add the weights from a keyframe into a map. */
 
-    private void addWeightsToTable(ActorKeyframe k, Map table, double scale)
+    private void addWeightsToTable(ActorKeyframe keyFrame, Map table, double scale)
     {
-      for (int i = 0; i < k.id.length; i++)
+      for (int i = 0; i < keyFrame.id.length; i++)
         {
-          Object key = k.id[i];
+          Object key = keyFrame.id[i];
           Double weight = (Double) table.get(key);
           if (weight == null)
-            weight = k.weight[i]*scale;
+            weight = keyFrame.weight[i]*scale;
           else
-            weight = k.weight[i]*scale+weight;
+            weight = keyFrame.weight[i]*scale+weight;
           table.put(key, weight);
         }
     }

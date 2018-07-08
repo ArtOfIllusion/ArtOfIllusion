@@ -253,4 +253,22 @@ public class ActorTest {
         Assert.assertTrue(map.containsKey(2));
         Assert.assertEquals(8.0d, (Double)map.get(2), 0d);
     }
+    
+    @Test
+    public void testActorSingleGestureAddWeightsToTableSingleGestureNotMatch() throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        acf.addGesture(2, 3.0d);
+        Map map = new HashMap();
+        map.put(3, 5d);
+        
+        Method method = Actor.ActorKeyframe.class.getDeclaredMethod("addWeightsToTable", Actor.ActorKeyframe.class, Map.class, double.class);
+        method.setAccessible(true);
+        method.invoke(acf, acf, map, 1.5d);
+
+        Assert.assertEquals(2, map.size());
+        Assert.assertTrue(map.containsKey(2));
+        Assert.assertTrue(map.containsKey(3));
+        Assert.assertEquals(4.5d, (Double)map.get(2), 0d);
+        Assert.assertEquals(5.0d, (Double)map.get(3), 0d);
+    }
 }

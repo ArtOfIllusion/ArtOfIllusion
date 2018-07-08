@@ -604,7 +604,7 @@ public class Actor extends ObjectWrapper
     }
 
     /** Delete a gesture from an ActorKeyframe. */
-
+    // FIXME: Need better error handling on delete missed items. See ActorTest deleteMissedXXX testcases
     public void deleteGesture(int which)
     {
       int newid[] = new int [id.length-1];

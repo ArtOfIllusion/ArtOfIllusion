@@ -16,6 +16,7 @@ import artofillusion.object.Mesh;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
@@ -274,5 +275,38 @@ public class ActorTest {
         Assert.assertTrue(map.containsKey(3));
         Assert.assertEquals(4.5d, (Double)map.get(2), 0d);
         Assert.assertEquals(5.0d, (Double)map.get(3), 0d);
+    }
+    
+    @Test
+    public void testActorKeyFrameGetGraphValues() {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        double[] result = acf.getGraphValues();
+        Assert.assertNotNull(result);
+    }
+    
+    @Test
+    public void testActorKeyFrameSetGraphValues() {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        double weights[] = new double[2];
+        weights[0] = 1.0d;
+        weights[1] = 2.0d;
+        
+        acf.setGraphValues(weights);
+        
+    }
+    
+    @Test
+    public void testCreateActorFromEmptyTable() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        Map<Integer,Double> map = new Hashtable<>();
+        
+        Method method = Actor.ActorKeyframe.class.getDeclaredMethod("getKeyframeFromTable", Hashtable.class);
+        method.setAccessible(true);
+        Actor.ActorKeyframe target = (Actor.ActorKeyframe)method.invoke(acf, map);
+        
+        Assert.assertNotNull(target);
+        Assert.assertEquals(0, acf.id.length);
+        Assert.assertEquals(0, acf.weight.length);
+        
     }
 }

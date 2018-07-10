@@ -305,8 +305,76 @@ public class ActorTest {
         Actor.ActorKeyframe target = (Actor.ActorKeyframe)method.invoke(acf, map);
         
         Assert.assertNotNull(target);
-        Assert.assertEquals(0, acf.id.length);
-        Assert.assertEquals(0, acf.weight.length);
+        Assert.assertEquals(0, target.id.length);
+        Assert.assertEquals(0, target.weight.length);
         
+    }
+
+    @Test
+    public void testCreateActorFromAllZeroTable() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        Map<Integer,Double> map = new Hashtable<>();
+        map.put(1, 0d);
+        map.put(2, 0d);
+        
+        Method method = Actor.ActorKeyframe.class.getDeclaredMethod("getKeyframeFromTable", Hashtable.class);
+        method.setAccessible(true);
+        Actor.ActorKeyframe target = (Actor.ActorKeyframe)method.invoke(acf, map);
+        
+        Assert.assertNotNull(target);
+        Assert.assertEquals(0, target.id.length);
+        Assert.assertEquals(0, target.weight.length);
+        
+    }
+    
+    @Test
+    public void testCreateActorFromTableOfTwo() throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        Map<Integer,Double> map = new Hashtable<>();
+        map.put(1, 50d);
+        map.put(2, 10d);
+        
+        Method method = Actor.ActorKeyframe.class.getDeclaredMethod("getKeyframeFromTable", Hashtable.class);
+        method.setAccessible(true);
+        Actor.ActorKeyframe target = (Actor.ActorKeyframe)method.invoke(acf, map);
+        
+        Assert.assertNotNull(target);
+        Assert.assertEquals(2, target.id.length);
+        Assert.assertEquals(2, target.weight.length);        
+    }
+
+    @Test
+    public void testCreateActorFromTableOfThree() throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        Map<Integer,Double> map = new Hashtable<>();
+        map.put(1, 50d);
+        map.put(2, 10d);
+        map.put(3, 5d);
+        
+        Method method = Actor.ActorKeyframe.class.getDeclaredMethod("getKeyframeFromTable", Hashtable.class);
+        method.setAccessible(true);
+        Actor.ActorKeyframe target = (Actor.ActorKeyframe)method.invoke(acf, map);
+        
+        Assert.assertNotNull(target);
+        Assert.assertEquals(3, target.id.length);
+        Assert.assertEquals(3, target.weight.length);        
+    }
+    
+    @Test
+    public void testCreateActorFromSparseTableOfFour() throws NoSuchMethodException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+        Actor.ActorKeyframe acf = new Actor.ActorKeyframe();
+        Map<Integer,Double> map = new Hashtable<>();
+        map.put(1, 10d);
+        map.put(2, 0d);
+        map.put(3, 5d);
+        map.put(4, 0d);
+        
+        Method method = Actor.ActorKeyframe.class.getDeclaredMethod("getKeyframeFromTable", Hashtable.class);
+        method.setAccessible(true);
+        Actor.ActorKeyframe target = (Actor.ActorKeyframe)method.invoke(acf, map);
+        
+        Assert.assertNotNull(target);
+        Assert.assertEquals(2, target.id.length);
+        Assert.assertEquals(2, target.weight.length);        
     }
 }

@@ -111,7 +111,7 @@ public class EditKeyframesDialog
         for (ObjectInfo info: theScene.getObjects())
         {
           for (int j = 0; j < info.getTracks().length; j++)
-            addToVector(info.getTracks()[j], tracks);
+            addToList(info.getTracks()[j], tracks);
         }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
@@ -125,7 +125,7 @@ public class EditKeyframesDialog
         {
           ObjectInfo info = theScene.getObject(sel[i]);
           for (int j = 0; j < info.getTracks().length; j++)
-            addToVector(info.getTracks()[j], tracks);
+            addToList(info.getTracks()[j], tracks);
         }
         track = new Track [tracks.size()];
         for (int i = 0; i < track.length; i++)
@@ -254,13 +254,13 @@ public class EditKeyframesDialog
     return true;
   }
   
-  /* Given a Track, add it and all of its subtracks to the specified vector. */
+  /* Given a Track, add it and all of its subtracks to the specified list. */
   
-  private void addToVector(Track track, List<Track> v)
+  private void addToList(Track track, List<Track> v)
   {    
     v.add(track);
     for (Track subTrack : track.getSubtracks()) {
-      addToVector(subTrack, v);
+      addToList(subTrack, v);
     }
   }
   

@@ -24,9 +24,10 @@ import java.text.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
+import java.util.Map;
 
 /** This is a Widget which displays all the tracks for objects in a scene, and shows
     where their keyframes are. */
@@ -1058,33 +1059,33 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
 
   public void deleteSelectedKeyframes()
   {
-    Hashtable changedTracks = new Hashtable();
+    Map<Track, Track> changedTracks = new HashMap<>();
     for (int i = 0; i < selection.length; i++)
-      {
-        Track tr = selection[i].track;
-        Keyframe keys[] = tr.getTimecourse().getValues();
-        for (int j = 0; j < keys.length; j++)
-          if (keys[j] == selection[i].key)
-            {
-              if (changedTracks.get(tr) == null)
-                changedTracks.put(tr, tr.duplicate(tr.getParent()));
-              tr.deleteKeyframe(j);
-              break;
-            }
-      }
+    {
+      Track tr = selection[i].track;
+      Keyframe keys[] = tr.getTimecourse().getValues();
+      for (int j = 0; j < keys.length; j++)
+        if (keys[j] == selection[i].key)
+          {
+            if (changedTracks.get(tr) == null)
+              changedTracks.put(tr, tr.duplicate(tr.getParent()));
+            tr.deleteKeyframe(j);
+            break;
+          }
+    }
     selection = new SelectionInfo [0];
     UndoRecord undo = new UndoRecord(window, false);
-    Enumeration tracks = changedTracks.keys();
-    while (tracks.hasMoreElements())
-      {
-        Track tr = (Track) tracks.nextElement();
-        Object parent = tr.getParent();
-        while (parent != null && parent instanceof Track)
-          parent = ((Track) parent).getParent();
-        if (parent instanceof ObjectInfo)
-          window.getScene().applyTracksToObject((ObjectInfo) parent);
-        undo.addCommand(UndoRecord.COPY_TRACK, new Object [] {tr, changedTracks.get(tr)});
-      }
+    Iterator<Track> tracks = changedTracks.keySet().iterator();
+    while (tracks.hasNext())
+    {
+      Track tr = (Track) tracks.next();
+      Object parent = tr.getParent();
+      while (parent != null && parent instanceof Track)
+        parent = ((Track) parent).getParent();
+      if (parent instanceof ObjectInfo)
+        window.getScene().applyTracksToObject((ObjectInfo) parent);
+      undo.addCommand(UndoRecord.COPY_TRACK, new Object [] {tr, changedTracks.get(tr)});
+    }
     window.setUndoRecord(undo);
     window.updateMenus();
     tracksModified(true);

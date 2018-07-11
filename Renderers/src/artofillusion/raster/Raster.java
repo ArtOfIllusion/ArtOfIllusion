@@ -28,14 +28,13 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.image.MemoryImageSource;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** Raster is a Renderer which generates images with a scanline algorithm. */
 
@@ -387,21 +386,22 @@ public class Raster implements Renderer, Runnable
 
   /** Find all the light sources in the scene. */
 
+  //TODO: Inline this code
   void findLights()
   {
-    Vector<ObjectInfo> lt = new Vector<ObjectInfo>();
+    List<ObjectInfo> lt = new ArrayList<>();
     int i;
 
     positionNeeded = false;
     for (ObjectInfo info: theScene.getObjects())
     {
       if (info.getObject() instanceof Light && info.isVisible())
-        lt.addElement(info);
+        lt.add(info);
     }
     light = new ObjectInfo [lt.size()];
     for (i = 0; i < light.length; i++)
       {
-        light[i] = lt.elementAt(i);
+        light[i] = lt.get(i);
         if (!(light[i].getObject() instanceof DirectionalLight))
           positionNeeded = true;
       }

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes copyrignt (C) 2016 by Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,8 +27,7 @@ import java.awt.Color;
 import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.List;
 
 /** CreateCurveTool is an EditingTool used for creating Curve objects. */
@@ -39,7 +38,7 @@ public class CreateCurveTool extends EditingTool
 {
   static int counter = 1;
   private List<Vec3> clickPoint;
-  private Vector<Float> smoothness;
+  private List<Float> smoothness;
   private int smoothing;
   private Curve theCurve;
   private CoordinateSystem coords;
@@ -108,8 +107,8 @@ public class CreateCurveTool extends EditingTool
   {
     if (clickPoint == null)
     {
-      clickPoint = new Vector<Vec3>();
-      smoothness = new Vector<Float>();
+      clickPoint = new ArrayList<Vec3>();
+      smoothness = new ArrayList<Float>();
       view.repaint();
     }
     else
@@ -142,7 +141,7 @@ public class CreateCurveTool extends EditingTool
     if (e.getClickCount() != 2)
       {
         clickPoint.add(cam.convertScreenToWorld(dragPoint, view.getDistToPlane()));
-        smoothness.addElement(e.isShiftDown() ? 0.0f : 1.0f);
+        smoothness.add(e.isShiftDown() ? 0.0f : 1.0f);
       }
     if (clickPoint.size() > 1)
       {
@@ -154,7 +153,7 @@ public class CreateCurveTool extends EditingTool
         for (int i = 0; i < vertex.length; i++)
           {
             vertex[i] = clickPoint.get(i);
-            s[i] = smoothness.elementAt(i);
+            s[i] = smoothness.get(i);
             orig = orig.plus(vertex[i]);
           }
         orig = orig.times(1.0/vertex.length);

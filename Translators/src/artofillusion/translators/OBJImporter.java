@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2015 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -51,13 +51,13 @@ public class OBJImporter
 
     // Open the file and read the contents.
 
-    Hashtable<String, Vector<FaceInfo>> groupTable = new Hashtable<String, Vector<FaceInfo>>();
-    Hashtable<String, TextureInfo> textureTable = new Hashtable<String, TextureInfo>();
-    Vector<Vec3> vertex = new Vector<Vec3>();
-    Vector<Vec3> normal = new Vector<Vec3>();
-    Vector<Vec3> texture = new Vector<Vec3>();
-    Vector<Vector<FaceInfo>> face = new Vector<Vector<FaceInfo>>();
-    face.add(new Vector<FaceInfo>());
+    Map<String, List<FaceInfo>> groupTable = new HashMap<>();
+    Map<String, TextureInfo> textureTable = new HashMap<>();
+    List<Vec3> vertex = new ArrayList<>();
+    List<Vec3> normal = new ArrayList<>();
+    List<Vec3> texture = new ArrayList<>();
+    @SuppressWarnings("UseOfObsoleteCollectionType") Vector<List<FaceInfo>> face = new Vector<>();
+    face.add(new ArrayList<FaceInfo>());
     groupTable.put("default", face.get(0));
     int lineno = 0, smoothingGroup = -1;
     String currentTexture = null;
@@ -99,11 +99,10 @@ public class OBJImporter
             }
             catch (NumberFormatException ex)
             {
-              throw new Exception("Illegal value '"+fields[i+1]+
-                  "' found in line "+lineno+".");
+              throw new Exception("Illegal value '"+fields[i+1]+ "' found in line "+lineno+".");
             }
           }
-          vertex.addElement(new Vec3(val[0], val[1], val[2]));
+          vertex.add(new Vec3(val[0], val[1], val[2]));
         }
         else if ("vn".equals(fields[0]) && fields.length == 4)
         {
@@ -117,11 +116,10 @@ public class OBJImporter
             }
             catch (NumberFormatException ex)
             {
-              throw new Exception("Illegal value '"+fields[i+1]+
-                  "' found in line "+lineno+".");
+              throw new Exception("Illegal value '" + fields[i + 1] + "' found in line " + lineno + ".");
             }
           }
-          normal.addElement(new Vec3(val[0], val[1], val[2]));
+          normal.add(new Vec3(val[0], val[1], val[2]));
         }
         else if ("vt".equals(fields[0]) && fields.length > 1)
         {
@@ -138,25 +136,24 @@ public class OBJImporter
             }
             catch (NumberFormatException ex)
             {
-              throw new Exception("Illegal value '"+fields[i+1]+
-                  "' found in line "+lineno+".");
+              throw new Exception("Illegal value '" + fields[i + 1] + "' found in line " + lineno + ".");
             }
           }
-          texture.addElement(new Vec3(val[0], val[1], val[2]));
+          texture.add(new Vec3(val[0], val[1], val[2]));
         }
         else if ("f".equals(fields[0]))
         {
           if (vertIndex.length != fields.length-1)
             vertIndex = new VertexInfo [fields.length-1];
           for (int i = 0; i < vertIndex.length; i++)
-            vertIndex[i] = parseVertexSpec(fields[i+1], vertex, texture, normal, lineno);
+            vertIndex[i] = parseVertexSpec(fields[i+1], vertex.size(), texture.size(), normal.size(), lineno);
           for (int i = 0; i < face.size(); i++)
           {
             if (fields.length == 4)
             {
               // Add a triangular face.
 
-              face.get(i).addElement(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
+              face.get(i).add(new FaceInfo(vertIndex[0], vertIndex[1], vertIndex[2], smoothingGroup, currentTexture));
             }
             else
             {
@@ -170,7 +167,7 @@ public class OBJImporter
               if (m != null)
               {
                 for (int j = 0; j < m.getFaceCount(); j++)
-                  face.get(i).addElement(new FaceInfo(vertIndex[m.getFaceVertexIndex(j, 0)], vertIndex[m.getFaceVertexIndex(j, 1)], vertIndex[m.getFaceVertexIndex(j, 2)], smoothingGroup, currentTexture));
+                  face.get(i).add(new FaceInfo(vertIndex[m.getFaceVertexIndex(j, 0)], vertIndex[m.getFaceVertexIndex(j, 1)], vertIndex[m.getFaceVertexIndex(j, 2)], smoothingGroup, currentTexture));
               }
               else
               {
@@ -180,9 +177,9 @@ public class OBJImporter
                 for (step = 1; 2*step < vertIndex.length; step *= 2)
                 {
                   for (start = 0; start+2*step < vertIndex.length; start += 2*step)
-                    face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[start+2*step], smoothingGroup, currentTexture));
+                    face.get(i).add(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[start+2*step], smoothingGroup, currentTexture));
                   if (start+step < vertIndex.length)
-                    face.get(i).addElement(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[0], smoothingGroup, currentTexture));
+                    face.get(i).add(new FaceInfo(vertIndex[start], vertIndex[start+step], vertIndex[0], smoothingGroup, currentTexture));
                 }
               }
             }
@@ -213,13 +210,14 @@ public class OBJImporter
 
           if (fields.length == 1)
             fields = new String[] {"g", "default"};
+          
           face.setSize(fields.length-1);
           for (int i = 0; i < face.size(); i++)
           {
             face.set(i, groupTable.get(fields[i+1]));
             if (face.get(i) == null)
             {
-              face.set(i, new Vector<FaceInfo>());
+              face.set(i, new ArrayList<FaceInfo>());
               groupTable.put(fields[i+1], face.get(i));
             }
           }
@@ -254,17 +252,17 @@ public class OBJImporter
       double maxSize = Math.max(Math.max(max[0]-min[0], max[1]-min[1]), max[2]-min[2]);
       double scale = Math.pow(10.0, -Math.floor(Math.log(maxSize)/Math.log(10.0)));
       for (int i = 0; i < vertex.size(); i++)
-        vertex.elementAt(i).scale(scale);
+        vertex.get(i).scale(scale);
 
       // Create a triangle mesh for each group.
 
-      Enumeration<String> keys = groupTable.keys();
-      Hashtable<String, Texture> realizedTextures = new Hashtable<String, Texture>();
-      Hashtable<String, ImageMap> imageMaps = new Hashtable<String, ImageMap>();
+      Enumeration<String> keys = Collections.enumeration(groupTable.keySet());
+      Map<String, Texture> realizedTextures = new HashMap<>();
+      Map<String, ImageMap> imageMaps = new HashMap<>();
       while (keys.hasMoreElements())
       {
         String group = keys.nextElement();
-        Vector<FaceInfo> groupFaces = groupTable.get(group);
+        List<FaceInfo> groupFaces = groupTable.get(group);
         if (groupFaces.isEmpty())
           continue;
 
@@ -276,7 +274,7 @@ public class OBJImporter
         int fc[][] = new int [groupFaces.size()][], numVert = 0;
         for (int i = 0; i < fc.length; i++)
         {
-          FaceInfo fi = groupFaces.elementAt(i);
+          FaceInfo fi = groupFaces.get(i);
           for (int j = 0; j < 3; j++)
             if (realIndex[fi.getVertex(j).vert] == -1)
               realIndex[fi.getVertex(j).vert] = numVert++;
@@ -289,7 +287,7 @@ public class OBJImporter
         for (int i = 0; i < realIndex.length; i++)
           if (realIndex[i] > -1)
           {
-            vert[realIndex[i]] = vertex.elementAt(i);
+            vert[realIndex[i]] = vertex.get(i);
             center.add(vert[realIndex[i]]);
           }
         center.scale(1.0/vert.length);
@@ -307,8 +305,8 @@ public class OBJImporter
         {
           if (edge[i].f2 == -1)
             continue;
-          FaceInfo f1 = groupFaces.elementAt(edge[i].f1);
-          FaceInfo f2 = groupFaces.elementAt(edge[i].f2);
+          FaceInfo f1 = groupFaces.get(edge[i].f1);
+          FaceInfo f2 = groupFaces.get(edge[i].f2);
           if (f1.smoothingGroup == 0 || f1.smoothingGroup != f2.smoothingGroup)
           {
             // They are in different smoothing groups.
@@ -325,7 +323,7 @@ public class OBJImporter
               {
                 int n1 = f1.getVertex(j).norm;
                 int n2 = f2.getVertex(k).norm;
-                if (n1 != n2 && normal.elementAt(n1).distance(normal.elementAt(n2)) > 1e-10)
+                if (n1 != n2 && normal.get(n1).distance(normal.get(n2)) > 1e-10)
                   edge[i].smoothness = 0.0f;
                 break;
               }
@@ -374,11 +372,11 @@ public class OBJImporter
             boolean needPerFace = false;
             for (int j = 0; j < groupFaces.size() && !needPerFace; j++)
             {
-              FaceInfo fi = groupFaces.elementAt(j);
+              FaceInfo fi = groupFaces.get(j);
               for (int k = 0; k < 3; k++)
               {
                 VertexInfo vi = fi.getVertex(k);
-                Vec3 texCoords = (vi.tex < texture.size() ? texture.elementAt(vi.tex) : vertex.elementAt(vi.vert));
+                Vec3 texCoords = (vi.tex < texture.size() ? texture.get(vi.tex) : vertex.get(vi.vert));
                 Vec2 tc = new Vec2(texCoords.x, texCoords.y);
                 if (uv[realIndex[vi.vert]] != null && !uv[realIndex[vi.vert]].equals(tc))
                   needPerFace = true;
@@ -400,11 +398,11 @@ public class OBJImporter
               Vec2 uvf[][] = new Vec2 [groupFaces.size()][3];
               for (int j = 0; j < groupFaces.size(); j++)
               {
-                FaceInfo fi = groupFaces.elementAt(j);
+                FaceInfo fi = groupFaces.get(j);
                 for (int k = 0; k < 3; k++)
                 {
                   VertexInfo vi = fi.getVertex(k);
-                  Vec3 texCoords = (vi.tex < texture.size() ? texture.elementAt(vi.tex) : vertex.elementAt(vi.vert));
+                  Vec3 texCoords = (vi.tex < texture.size() ? texture.get(vi.tex) : vertex.get(vi.vert));
                   uvf[j][k] = new Vec2(texCoords.x, texCoords.y);
                 }
               }
@@ -478,22 +476,21 @@ public class OBJImporter
 
   /** Separate a line into pieces divided by whitespace. */
 
+  // TODO: Replace with String split?
   private static String [] breakLine(String line)
   {
     StringTokenizer st = new StringTokenizer(line);
-    Vector<String> v = new Vector<String>();
+    List<String> v = new ArrayList<String>();
 
     while (st.hasMoreTokens())
-      v.addElement(st.nextToken());
-    String result[] = new String [v.size()];
-    v.copyInto(result);
-    return result;
+      v.add(st.nextToken());    
+    return v.toArray(new String [v.size()]);
   }
 
   /** Parse the specification for a vertex and return the index of the vertex
       to use. */
 
-  private static VertexInfo parseVertexSpec(String spec, Vector vertex, Vector texture, Vector normal, int lineno) throws Exception
+  private static VertexInfo parseVertexSpec(String spec, int vertexSize, int texturesSize, int normalsSize, int lineno) throws Exception
   {
     VertexInfo info = new VertexInfo();
     StringTokenizer st = new StringTokenizer(spec, "/", true);
@@ -512,11 +509,11 @@ public class OBJImporter
             int index = Integer.parseInt(value);
             int total;
             if (i == 0)
-              total = vertex.size();
+              total = vertexSize;
             else if (i == 1)
-              total = texture.size();
+              total = texturesSize;
             else
-              total = normal.size();
+              total = normalsSize;
             if (index < 0)
               index += total;
             else
@@ -529,9 +526,9 @@ public class OBJImporter
               info.norm = index;
           }
         catch (NumberFormatException ex)
-          {
-            throw new Exception("Illegal value '"+spec+"' found in line "+lineno+".");
-          }
+        {
+          throw new Exception("Illegal value '" + spec + "' found in line " + lineno + ".");
+        }
       }
     if (info.tex == Integer.MAX_VALUE)
       info.tex = info.vert;
@@ -542,7 +539,7 @@ public class OBJImporter
 
   /** Parse the contents of a .mtl file and add TextureInfo object to a hashtable. */
 
-  private static void parseTextures(String file, File baseDir, Hashtable<String, TextureInfo> textures) throws Exception
+  private static void parseTextures(String file, File baseDir, Map<String, TextureInfo> textures) throws Exception
   {
     File f = new File(baseDir, file);
     if (!f.isFile())
@@ -609,7 +606,7 @@ public class OBJImporter
 
   /** Create a texture from a TextureInfo and add it to the scene. */
 
-  private static Texture createTexture(TextureInfo info, String name, Scene scene, File baseDir, Hashtable<String, ImageMap> imageMaps) throws Exception
+  private static Texture createTexture(TextureInfo info, String name, Scene scene, File baseDir, Map<String, ImageMap> imageMaps) throws Exception
   {
     if (info == null)
     {
@@ -673,7 +670,7 @@ public class OBJImporter
 
   /** Return the image map corresponding to the specified filename, and add it to the scene. */
 
-  private static ImageMap loadMap(String name, Scene scene, File baseDir, Hashtable<String, ImageMap> imageMaps) throws Exception
+  private static ImageMap loadMap(String name, Scene scene, File baseDir, Map<String, ImageMap> imageMaps) throws Exception
   {
     if (name == null)
       return null;
@@ -684,7 +681,7 @@ public class OBJImporter
     if (!f.isFile())
       f = new File(name);
     if (!f.isFile())
-      throw new Exception("Cannot locate image map file '"+name+"'.");
+        throw new Exception("Cannot locate image map file '" + name + "'.");
     try
       {
         map = ImageMap.loadImage(f);

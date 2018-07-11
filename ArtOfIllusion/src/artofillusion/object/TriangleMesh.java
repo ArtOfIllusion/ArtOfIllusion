@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2017 by Maksim Khramov
-   A modification copyright (C) 2017 Petri Ihalainen
+   A modification copyright (C) 2017-2018 Petri Ihalainen
    
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,10 +22,10 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.lang.ref.*;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 /** The TriangleMesh class represents an arbitrary surface defined by a mesh of triangular
     faces.  Depending on the selected smoothing method, the surface may simply consist of
@@ -369,7 +369,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
      * Determine which ones are duplicates, and add any unique edges from
      * edges2 into edges1.*/
 
-    Hashtable<Point, Integer> edgeTable = new Hashtable<Point, Integer>();
+    Map<Point, Integer> edgeTable = new HashMap<>();
     for (i = 0; i < numEdges1; i++)
       edgeTable.put(new Point(edges1[i].v1, edges1[i].v2), i);
     for (i = 0; i < numEdges2; i++)
@@ -624,40 +624,40 @@ public class TriangleMesh extends Object3D implements FacetedMesh
   {
     // First, find every edge which is on a boundary.
 
-    Vector<Integer> allEdges = new Vector<Integer>();
+    List<Integer> allEdges = new ArrayList<Integer>();
     for (int i = 0; i < edge.length; i++)
       if (edge[i].f2 == -1)
-        allEdges.addElement(i);
+        allEdges.add(i);
 
     // Form boundaries one at a time.
 
-    Vector<Vector<Integer>> boundary = new Vector<Vector<Integer>>();
+    List<List<Integer>> boundary = new ArrayList<>();
     while (allEdges.size() > 0)
       {
         // Take one edge as a starting point, and follow around.
 
-        Vector<Integer> current = new Vector<Integer>();
-        Integer start = allEdges.elementAt(0);
-        allEdges.removeElementAt(0);
-        current.addElement(start);
+        List<Integer> current = new ArrayList<Integer>();
+        Integer start = allEdges.get(0);
+        allEdges.remove(0);
+        current.add(start);
         int i = start, j = 0;
         while (j < (allEdges.size()))
           {
             for (j = 0; j < allEdges.size(); j++)
               {
-                int k = allEdges.elementAt(j);
+                int k = allEdges.get(j);
                 if (edge[i].v1 == edge[k].v1 || edge[i].v1 == edge[k].v2 ||
                     edge[i].v2 == edge[k].v1 || edge[i].v2 == edge[k].v2)
                   {
-                    current.addElement(allEdges.elementAt(j));
-                    allEdges.removeElementAt(j);
+                    current.add(allEdges.get(j));
+                    allEdges.remove(j);
                     i = k;
                     j--;
                     break;
                   }
               }
           }
-        boundary.addElement(current);
+        boundary.add(current);
       }
 
     // Build the final arrays.
@@ -665,10 +665,10 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     int index[][] = new int [boundary.size()][];
     for (int i = 0; i < index.length; i++)
       {
-        Vector<Integer> current = boundary.elementAt(i);
+        List<Integer> current = boundary.get(i);
         index[i] = new int [current.size()];
         for (int j = 0; j < index[i].length; j++)
-          index[i][j] = current.elementAt(j);
+          index[i][j] = current.get(j);
       }
     return index;
   }
@@ -839,7 +839,7 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     // Create the RenderingMesh.
 
     vert = new Vec3 [v.length];
-    norm = new Vector<Vec3>();
+    norm = new ArrayList<>();
     tri = new RenderingTriangle [f.length];
     facenorm = new int [f.length*3];
     normals = 0;

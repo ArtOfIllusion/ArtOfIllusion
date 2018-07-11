@@ -1,5 +1,5 @@
 /* Copyright (C) 2000,2002-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,7 +17,7 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Insets;
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -29,7 +29,7 @@ public class TextureMappingDialog extends BDialog
 {
   private FormContainer content;
   private Object3D origObj, editObj;
-  private Vector<TextureMapping> mappings;
+  private List<TextureMapping> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private TextureMapping map, oldMapping;
@@ -56,7 +56,7 @@ public class TextureMappingDialog extends BDialog
 
     // Make a list of all texture mappings which can be used for this object and texture.
 
-    mappings = new Vector<TextureMapping>();
+    mappings = new ArrayList<>();
     Texture probe = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) : editObj.getTexture();
     
     for (TextureMapping mapping: PluginRegistry.getPlugins(TextureMapping.class))
@@ -207,4 +207,5 @@ public class TextureMappingDialog extends BDialog
       previewObj.setParameterValue(param[i], val[i]);
     preview.render();
   }
+  
 }

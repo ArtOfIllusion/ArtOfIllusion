@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,7 +15,7 @@ import artofillusion.*;
 import artofillusion.animation.*;
 import artofillusion.object.*;
 import javax.swing.*;
-import java.util.*;
+import java.util.ArrayList;
 
 /** This class represents an object in the tree of objects in a scene. */
 
@@ -34,10 +34,11 @@ public class ObjectTreeElement extends TreeElement
     this.info = info;
     this.parent = parent;
     this.tree = tree;
-    children = new Vector<TreeElement>();
+    children = new ArrayList<>();
     if (addChildren)
-      for (int i = 0; i < info.getChildren().length; i++)
-        children.add(new ObjectTreeElement(info.getChildren()[i], this, tree, true));
+      for (ObjectInfo item : info.getChildren()) {
+          children.add(new ObjectTreeElement(item, this, tree, true));
+    }
   }
 
   /* Get the label to display for this element. */

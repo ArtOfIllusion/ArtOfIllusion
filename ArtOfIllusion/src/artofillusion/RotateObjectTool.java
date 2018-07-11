@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /** RotateObjectTool is an EditingTool used for rotating objects in a scene. */
 @EditingTool.ButtonImage("rotate")
@@ -69,7 +69,7 @@ public class RotateObjectTool extends EditingTool
     int i, numSelected = 0, sel[];
     Vec3 center = new Vec3();
 
-    toMove = new Vector<ObjectInfo>();
+    toMove = new ArrayList<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -237,7 +237,7 @@ public class RotateObjectTool extends EditingTool
       sel = theScene.getSelectionWithChildren();
     else
       sel = theScene.getSelection();
-    toMove = new Vector<ObjectInfo>();
+    toMove = new ArrayList<ObjectInfo>();
     for (int i = 0; i < sel.length; i++)
       toMove.add(theScene.getObject(sel[i]));
     rotationCenter = new Vec3 [toMove.size()];

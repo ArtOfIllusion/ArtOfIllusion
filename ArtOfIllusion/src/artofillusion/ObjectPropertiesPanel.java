@@ -1,5 +1,5 @@
 /* Copyright (C) 2006-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -183,7 +183,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     }
     if (canSetTexture)
     {
-      Vector<String> names = new Vector<String>();
+      List<String> names = new ArrayList<>();
       int selected = -1;
       for (int i = 0; i < scene.getNumTextures(); i++)
       {
@@ -206,7 +206,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       {
         names.add(Translate.text("newTextureOfType", texture.getTypeName()));
       }
-      textureChoice.setModel(new DefaultComboBoxModel<String>(names));
+      textureChoice.setModel(new DefaultComboBoxModel(names.toArray()));
       textureChoice.setSelectedIndex(selected);
     }
 
@@ -224,7 +224,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     }
     if (canSetMaterial)
     {
-      Vector<String> names = new Vector<String>();
+      List<String> names = new ArrayList<String>();
       int selected = -1;
       for (int i = 0; i < scene.getNumMaterials(); i++)
       {
@@ -248,7 +248,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       {
         names.add(Translate.text("newMaterialOfType", material.getTypeName()));
       }
-      materialChoice.setModel(new DefaultComboBoxModel<String>(names));
+      materialChoice.setModel(new DefaultComboBoxModel(names.toArray()));
       materialChoice.setSelectedIndex(selected);
     }
 

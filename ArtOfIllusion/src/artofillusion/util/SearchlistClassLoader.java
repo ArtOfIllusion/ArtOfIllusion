@@ -7,7 +7,7 @@ package artofillusion.util;
  *
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
- * Changes copyright (C) 2017 by Maksim Khramov
+ * Changes copyright (C) 2017-2018 by Maksim Khramov
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -45,12 +45,11 @@ package artofillusion.util;
  */
 
 import java.util.ArrayList;
-import java.util.Vector;
-import java.util.Hashtable;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -118,9 +117,9 @@ import java.util.Map;
  */
 public class SearchlistClassLoader extends ClassLoader
 {
-    protected Vector<Loader> list;
-    protected Vector<Loader> search;
-    protected Hashtable<String, Class> cache;
+    protected List<Loader> list;
+    protected List<Loader> search;
+    protected Map<String, Class> cache;
     protected Loader content = null;
     protected byte searchMode = SHARED;
     protected int divide = 0;
@@ -190,11 +189,11 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr = new Loader(loader, true);
 
 	// store loaders in order in list
-	if (list == null) list = new Vector<Loader>(16);
+	if (list == null) list = new ArrayList<Loader>(16);
 	list.add(ldr);
 
 	// store shared loaders in front of non-shared loaders in search.
-	if (search == null) search = new Vector<Loader>(16);
+	if (search == null) search = new ArrayList<Loader>(16);
 	if (search.size() > divide) search.add(divide, ldr);
 	else search.add(ldr);
 
@@ -214,11 +213,11 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr = new Loader(new URLClassLoader(new URL[] { url }), false);
 
 	// store loaders in order in list
-	if (list == null) list = new Vector<Loader>(16);
+	if (list == null) list = new ArrayList<Loader>(16);
 	list.add(ldr);
 
 	// store non-shared loaders after shared loaders in search
-	if (search == null) search = new Vector<Loader>(16);
+	if (search == null) search = new ArrayList<Loader>(16);
 	search.add(ldr);
     }
 
@@ -227,10 +226,7 @@ public class SearchlistClassLoader extends ClassLoader
      */
     public URL[] getURLs()
     {
-	return (content != null
-		? ((URLClassLoader)  content.loader).getURLs()
-		: EMPTY_URL
-		);
+	return content == null ? EMPTY_URL: ((URLClassLoader)  content.loader).getURLs() ;
     }
 
     /**
@@ -308,7 +304,7 @@ public class SearchlistClassLoader extends ClassLoader
 		    //System.out.println("defined class: " + name);
 
 		    // cache the result
-		    if (cache == null) cache = new Hashtable(1024);
+		    if (cache == null) cache = new HashMap<>(1024);
 		    cache.put(name, result);
 
 		    return result;
@@ -316,7 +312,7 @@ public class SearchlistClassLoader extends ClassLoader
 	    }
 	}
 
-	throw (err != null ? err : new ClassNotFoundException(name));
+	throw (err == null ? new ClassNotFoundException(name) : err);
     }
 
     /**
@@ -405,7 +401,7 @@ public class SearchlistClassLoader extends ClassLoader
 			    //System.out.println("defined class: " + name);
 
 			    // cache the result
-			    if (cache == null) cache = new Hashtable(1024);
+			    if (cache == null) cache = new HashMap<>(1024);
 			    cache.put(name, result);
 
 			    return result;
@@ -418,10 +414,7 @@ public class SearchlistClassLoader extends ClassLoader
 	    }
 	}
 
-	throw (err != null
-		   ? new ClassNotFoundException(name, err)
-		   : new ClassNotFoundException(name)
-		   );
+	throw (err == null ? new ClassNotFoundException(name) : new ClassNotFoundException(name, err));
     }
 
     /**
@@ -439,8 +432,7 @@ public class SearchlistClassLoader extends ClassLoader
     @Override
     public URL findResource(String path)
     {
-	System.out.println("findResource: looking in " + this + " for " +
-			   path);
+	System.out.println("findResource: looking in " + this + " for " + path);
 
 	URL url = null;
 	Loader ldr;
@@ -449,8 +441,7 @@ public class SearchlistClassLoader extends ClassLoader
 	    url = ldr.loader.getResource(path);
 
 	    if (url != null) {
-		System.out.println("found " + path + " in loader: " +
-				   ldr.loader);
+		System.out.println("found " + path + " in loader: " + ldr.loader);
 
 		break;
 	    }

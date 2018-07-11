@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Modifications copyright (C) 2016 Petri Ihalainen
-   Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,8 +19,9 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.util.*;
 
 /** The MeshEditorWindow class represents the window for editing Mesh objects.  This is an
@@ -1210,10 +1211,10 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     Joint joint[] = s.getJoints();
     boolean isChild[] = new boolean [joint.length];
     markChildJoints(s, j, isChild);
-    Vector<Joint> options = new Vector<Joint>();
+    List<Joint> options = new ArrayList<Joint>();
     for (int i = 0; i < isChild.length; i++)
       if (!isChild[i])
-        options.addElement(joint[i]);
+        options.add(joint[i]);
 
     // Display a window for the user to select the parent joint.
 
@@ -1223,8 +1224,8 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     ls.setSelected(0, true);
     for (int i = 0; i < options.size(); i++)
     {
-      ls.add(options.elementAt(i).name);
-      if (options.elementAt(i) == j.parent)
+      ls.add(options.get(i).name);
+      if (options.get(i) == j.parent)
         ls.setSelected(i+1, true);
     }
     ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("selectParentBone", j.name),
@@ -1238,7 +1239,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
     if (ls.getSelectedIndex() == 0)
       s.setJointParent(j, null);
     else
-      s.setJointParent(j, options.elementAt(ls.getSelectedIndex()-1));
+      s.setJointParent(j, options.get(ls.getSelectedIndex()-1));
 
     // Adjust the coordinate system.
 

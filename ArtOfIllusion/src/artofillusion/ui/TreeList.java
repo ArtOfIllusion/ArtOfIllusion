@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,9 +17,10 @@ import buoy.widget.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
+
 
 /** This is a Widget which displays a hierarchy of objects.  It provides functionality
     for opening and closing parts of the hierarchy, selecting elements, and moving elements
@@ -28,8 +29,9 @@ import java.util.Vector;
 public class TreeList extends CustomWidget
 {
   private EditingWindow window;
-  private Vector<TreeElement> elements, showing, selected;
-  private Vector<Integer> indent;
+  private final List<TreeElement> elements = new ArrayList<>();
+  private List<TreeElement> showing, selected;
+  private List<Integer> indent;
   private int yoffset, rowHeight, dragStart, lastDrag, lastClickRow, lastIndent, maxRowWidth;
   private boolean updateDisabled, moving, origSelected[], insertAbove, okToInsert, allowMultiple;
   private PopupMenuManager popupManager;
@@ -55,10 +57,11 @@ public class TreeList extends CustomWidget
   public TreeList(EditingWindow win)
   {
     window = win;
-    elements = new Vector<TreeElement>();
-    showing = new Vector<TreeElement>();
-    indent = new Vector<Integer>();
-    selected = new Vector<TreeElement>();
+
+    showing = new ArrayList<>();
+    indent = new ArrayList<>();
+    selected = new ArrayList<>();
+    
     origSelected = new boolean [0];
     allowMultiple = true;
     lastClickRow = -1;
@@ -197,24 +200,18 @@ public class TreeList extends CustomWidget
   }
 
   /** Get an array of all the TreeElements in the tree. */
-
+  
   public TreeElement [] getElements()
   {
-    Vector<TreeElement> v = new Vector<TreeElement>();
-    TreeElement el;
-
-    for (int i = 0; i < elements.size(); i++)
+    List<TreeElement> v = new ArrayList<>();
+    for (TreeElement item: elements)
     {
-      el = elements.get(i);
-      v.add(el);
-      addChildrenToVector(el, v);
+      v.add(item);
+      addChildrenToVector(item, v);
     }
-    TreeElement allEl[] = new TreeElement [v.size()];
-    for (int i = 0; i < allEl.length; i++)
-      allEl[i] = v.get(i);
-    return allEl;
-  }
-
+    return v.toArray(new TreeElement [v.size()]);
+  }  
+  
   private void addChildrenToVector(TreeElement el, List<TreeElement> v)
   {
     for (int i = 0; i < el.getNumChildren(); i++)

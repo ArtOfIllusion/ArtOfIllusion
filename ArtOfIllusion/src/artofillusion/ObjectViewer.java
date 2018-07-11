@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications copyright (C) 2017 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,12 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Shape;
+
 import java.awt.geom.*;
 import java.util.*;
 
@@ -30,7 +35,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   protected MeshEditController controller;
   protected boolean showScene, useWorldCoords, freehandSelection, draggingBox, squareBox, sentClick;
   protected Point clickPoint, dragPoint;
-  protected Vector<Point> selectBoundsPoints;
+  protected List<Point> selectBoundsPoints;
   protected Shape selectBounds;
   protected ObjectInfo thisObjectInScene;
   protected Scene theScene;
@@ -308,6 +313,7 @@ public abstract class ObjectViewer extends ViewerCanvas
 
   /** Set orientation of this view */
 
+  @Override
   public void setOrientation (int which)
   {
     if (which < 6)
@@ -329,7 +335,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     squareBox = square;
     dragPoint = null;
     if (freehandSelection)
-      selectBoundsPoints = new Vector<Point>();
+      selectBoundsPoints = new ArrayList<Point>();
   }
 
   /** Finish dragging a selection region. */
@@ -359,7 +365,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     int n = selectBoundsPoints.size(), x[] = new int [n], y[] = new int [n];
     for (int i = 0; i < n; i++)
     {
-      Point p = selectBoundsPoints.elementAt(i);
+      Point p = selectBoundsPoints.get(i);
       x[i] = p.x;
       y[i] = p.y;
     }
@@ -430,7 +436,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       // Add this point to the region boundary and draw a line.
 
       dragPoint = e.getPoint();
-      selectBoundsPoints.addElement(dragPoint);
+      selectBoundsPoints.add(dragPoint);
       drawDraggedShape(createPolygonFromSelection());
     }
     else if (draggingBox)
@@ -504,12 +510,12 @@ public abstract class ObjectViewer extends ViewerCanvas
     adjustCamera(isPerspective());
   }
   
-   	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		((EditingWindow)controller).updateImage();
-	}
+    @Override
+    protected void mouseMoved(MouseMovedEvent e)
+    {
+            mouseMoving = true;
+            mousePoint = e.getPoint();
+            mouseMoveTimer.restart();
+            ((EditingWindow)controller).updateImage();
+    }
 }

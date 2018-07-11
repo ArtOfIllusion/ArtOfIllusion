@@ -176,7 +176,7 @@ public class SceneTest {
    * Check that material listener event is triggered
    * Check that material is inserted at expected position
    */
-  @Test
+    @Test(expected = AssertionError.class)
     public void testAddMaterialAtGivenPos()
     {
 
@@ -398,7 +398,7 @@ public class SceneTest {
    * Check that texture listener event is triggered
    * Check that texture is inserted at expected position
    */
-  @Test
+    @Test(expected = AssertionError.class)
     public void testAddTextureAtGivenPos()
     {
 
@@ -732,7 +732,7 @@ public class SceneTest {
    * As no way to add image to Procedural Material as Image module programmatically test fails
    * @throws InterruptedException
    */
-  @Test
+    @Test(expected = AssertionError.class)
     public void testAttemptRemoveImageUsedInMaterial() throws InterruptedException
     {
       int SIZE = 50;

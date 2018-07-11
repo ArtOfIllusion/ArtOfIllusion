@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -19,8 +19,14 @@ import artofillusion.ui.*;
 import artofillusion.view.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import java.util.List;
+
 
 /** The SceneViewer class is a component which displays a view of a Scene. */
 
@@ -28,7 +34,7 @@ public class SceneViewer extends ViewerCanvas
 {
   Scene theScene;
   EditingWindow parentFrame;
-  private Vector<ObjectInfo> cameras;
+  private List<ObjectInfo> cameras = new ArrayList<>();
   boolean draggingBox, draggingSelectionBox, squareBox, sentClick, dragging;
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
@@ -47,7 +53,7 @@ public class SceneViewer extends ViewerCanvas
     parentFrame = fr;
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     draggingBox = draggingSelectionBox = false;
-    cameras = new Vector<ObjectInfo>();
+
     buildChoices(p);
     rebuildCameraList();
     setRenderMode(ArtOfIllusion.getPreferences().getDefaultDisplayMode());
@@ -106,7 +112,7 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-		ObjectInfo nextCamera = cameras.elementAt(which-6);
+		ObjectInfo nextCamera = cameras.get(which-6);
 		CoordinateSystem coords = nextCamera.coords.duplicate();
 
 		if (nextCamera.getObject() instanceof SceneCamera){
@@ -138,7 +144,7 @@ public class SceneViewer extends ViewerCanvas
   public void finishAnimation(int which, boolean persp, int navi)
   {
     if (which > 5  && which < 6+cameras.size())
-		boundCamera = cameras.elementAt(which-6);
+		boundCamera = cameras.get(which-6);
     orientation = which;
 	perspective = persp;
 	navigation = navi;

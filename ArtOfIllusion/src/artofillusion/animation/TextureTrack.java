@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
-
+   Changes copyright (C) 2018 by Maksim Khramov
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -16,7 +16,9 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+
 import java.io.*;
 import java.util.*;
 
@@ -479,7 +481,7 @@ public class TextureTrack extends Track
     smoothChoice.setSelectedIndex(smoothingMethod);
     TreeList tree = new TreeList(win);
     BScrollPane sp = new BScrollPane(tree);
-    Vector<TreeElement> elements = new Vector<TreeElement>();
+    List<TreeElement> elements = new ArrayList<>();
 
     // Create a tree of all the texture parameters.
 
@@ -491,7 +493,7 @@ public class TextureTrack extends Track
       Texture layer[] = map.getLayers();
       for (int i = 0; i < layer.length; i++)
       {
-        Vector<TreeElement> v = new Vector<TreeElement>();
+        List<TreeElement> v = new ArrayList<>();
         for (TextureParameter p : map.getLayerParameters(i))
         {
           int k;
@@ -502,16 +504,15 @@ public class TextureTrack extends Track
           for (k = 0; k < param.length; k++)
             if (param[k].equals(p))
               el.setSelected(true);
-          v.addElement(el);
+          v.add(el);
         }
         if (v.isEmpty())
         {
           TreeElement el = new GenericTreeElement(Translate.text("noAdjustableParams"), null, null, tree, null);
           el.setSelectable(false);
-          v.addElement(el);
+          v.add(el);
         }
-        TreeElement el = new GenericTreeElement(Translate.text("layerLabel", Integer.toString(i+1), layer[i].getName()),
-          null, null, tree, v);
+        TreeElement el = new GenericTreeElement(Translate.text("layerLabel", Integer.toString(i+1), layer[i].getName()), null, null, tree, v);
         el.setSelectable(false);
         el.setExpanded(true);
         elements.add(el);

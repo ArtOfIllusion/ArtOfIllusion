@@ -22,7 +22,6 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
-
 import javax.xml.parsers.*;
 
 import org.w3c.dom.*;
@@ -41,23 +40,29 @@ public class PluginRegistry
       @Override
       public void run()
       {
-        if(categoryClasses.containsKey(Plugin.class))
-        {  
-          Object[] pso = new Object [0];
-          for(Object plugin: categoryClasses.get(Plugin.class))
-          {
-            try 
-            {
-              ((Plugin)plugin).processMessage(Plugin.APPLICATION_STOPPING, pso);
-            } 
-            catch(Throwable tx)
-            {
-              tx.printStackTrace();
-            }
-          }
-        }
+        Object[] pso = new Object [0];
+        PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STARTING, pso);
       }
     }, "Plugin shutdown thread"));
+  }
+  
+  
+  public static <T> void notifyPlugins(Class<T> category, int message, Object... args)
+  {
+    if(categoryClasses.containsKey(category))
+    {
+        for(Object plugin: categoryClasses.get(category))
+        {
+          try 
+          {
+            ((Plugin)plugin).processMessage(message, args);
+          } 
+          catch(Throwable tx)
+          {
+            tx.printStackTrace();
+          }
+        }        
+    }
   }
   
   /**

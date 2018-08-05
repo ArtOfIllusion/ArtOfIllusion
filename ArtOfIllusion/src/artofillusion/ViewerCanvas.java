@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes Copyrignt (C) 2016-2017 Petri Ihalainen
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -635,7 +635,7 @@ public abstract class ViewerCanvas extends CustomWidget
   /** 
     Set navigation mode 
    
-    @ param mode may be one of
+    @param nextNavigation may be one of
       NAVIGATE_MODEL_SPACE = 0;
       NAVIGATE_MODEL_LANDSCAPE = 1;
       NAVIGATE_TRAVEL_SPACE = 2;
@@ -884,7 +884,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   /** 
       @deprecated <p>
-	  Use {@link "fitToObjects()} instead.<p>
+	  Use {@link #fitToObjects} instead.<p>
 	  
       Adjust the camera position and magnification so that the specified box
       fills the view.  This has no effect if there is a camera bound to this
@@ -2010,7 +2010,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		/** 
 			Create contents using the given view<p>
 			
-			@ param newGraphics tells to clear any previously stored graphics
+			@param newGraphics tells to clear any previously stored graphics
 		*/
 		public void set(ViewerCanvas v, boolean newGraphics)
 		{

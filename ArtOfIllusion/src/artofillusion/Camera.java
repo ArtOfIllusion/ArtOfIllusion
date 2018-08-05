@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Changes copyright (C) 2016 by Petri Ihalainen
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,14 +24,18 @@ import java.awt.*;
     <li>World Coordinates are used for defining the arrangement of objects to form a scene.</li>
     <li>View Coordinates describe the positions of objects relative to the viewer.
     Specifically, the viewer is considered to be at the origin, and to be looking along the
-    positive z axis.</li>
+    positive z axis.</li>    
     <li>Screen coordinates correspond to pixels in the image being generated.</li>
+    </ul>
     <p>
     Second, the camera class is responsible for drawing various simple shapes.  These include
-    straight lines, rectangular boxes, and Bezier curves. 
+    straight lines, rectangular boxes, and Bezier curves.
+    </p>
     <p>
     The Camera class does *not* represent a "camera" which the user creates and positions
-    within a scene.  That is represented by the SceneCamera class. */
+    within a scene.  That is represented by the SceneCamera class. 
+    </p>
+    */
 
 public class Camera implements Cloneable
 {

@@ -48,8 +48,6 @@ public class MIPMappedImage extends ImageMap
     Image im = new ImageIcon(file.getAbsolutePath()).getImage();
     init(im);
     setDataCreated(file);
-    preview = new SoftReference(null);
-    mapImage = new SoftReference(null);
   }
 
   /** Initialize a newly created MIPMappedImage. */
@@ -58,6 +56,8 @@ public class MIPMappedImage extends ImageMap
   {
     buildMipMaps(im);
     findAverage();
+    preview = new SoftReference(null);
+    mapImage = new SoftReference(null);
   }
 
   /** Given an Image object, this method builds the full set of mipmaps for it. */

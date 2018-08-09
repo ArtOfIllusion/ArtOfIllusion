@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2006 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -169,8 +169,7 @@ public class ActorEditorWindow extends BDialog
 
   private void doSave()
   {
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("savePoseAsGesture"), BStandardDialog.PLAIN);
-    String name = dlg.showInputDialog(this, null, "New Gesture");
+    String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("savePoseAsGesture")).withDefault("newGesture").input();    
     if (name == null)
       return;
     theObject.addGesture((Gesture) theObject.getWrappedObject().getPoseKeyframe(), name);
@@ -183,8 +182,7 @@ public class ActorEditorWindow extends BDialog
 
   private void doExtract()
   {
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("savePoseAsObject"), BStandardDialog.PLAIN);
-    String name = dlg.showInputDialog(this, null, "Extracted Pose");
+    String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("savePoseAsObject")).withDefault("extractedPose").input();
     if (name == null)
       return;
     ObjectInfo info = new ObjectInfo(theObject.getWrappedObject().duplicate(),
@@ -211,8 +209,7 @@ public class ActorEditorWindow extends BDialog
   private void doRename()
   {
     int which = gestureList.getSelectedIndex();
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("enterNewNameForGesture"), BStandardDialog.PLAIN);
-    String name = dlg.showInputDialog(this, null, theObject.gestureName[which]);
+    String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("enterNewNameForGesture")).withDefault(theObject.gestureName[which]).input();
     if (name == null)
       return;
     theObject.gestureName[which] = name;
@@ -225,8 +222,7 @@ public class ActorEditorWindow extends BDialog
   private void doDuplicate()
   {
     int which = gestureList.getSelectedIndex();
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("enterNameForNewGesture"), BStandardDialog.PLAIN);
-    String name = dlg.showInputDialog(this, null, "Copy of "+theObject.gestureName[which]);
+    String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("enterNewNameForGesture")).withDefault("copy" + theObject.gestureName[which]).input();
     if (name == null)
       return;
     theObject.addGesture((Gesture) theObject.gesture[which].duplicate(theObject.getWrappedObject()), name);

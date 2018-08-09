@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -988,7 +989,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       parent = parent.getParent();
     if (parent != null)
     {
-      String name = new BStandardDialog("", Translate.text("extractedCurveName"), BStandardDialog.QUESTION).showInputDialog(this, null, "Extracted Curve");
+      String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("extractedCurveName")).withDefault("extractedCurve").input();
       if (name != null)
       {
         ((LayoutWindow) parent).addObject(cv, ((MeshViewer) theView[currentView]).thisObjectInScene.getCoords().duplicate(), name, null);

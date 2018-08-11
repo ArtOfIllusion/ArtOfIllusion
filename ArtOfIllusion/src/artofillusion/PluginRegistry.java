@@ -1,6 +1,6 @@
  /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018-2022 by Maksim Khramov
+   Changes copyright (C) 2018-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,33 +36,36 @@ public class PluginRegistry
   private static final HashMap<String, Object> classMap = new HashMap<String, Object>();
 
   static {
-    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-      @Override
-      public void run()
-      {
-        Object[] pso = new Object [0];
-        PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STOPPING, pso);
-      }
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Map<String, Throwable> errors = PluginRegistry.notifyPlugins(Plugin.APPLICATION_STOPPING);        
+        errors.forEach((plugin, ex) -> {
+            //NB! At least JUL logger will not outputs log from inside shutdown thread. So I leave System.ouput.println here
+            String out = "Plugin: " + plugin + " throw: " + ex.getMessage() + " with" + Arrays.toString(ex.getStackTrace()) + " at shutdown";
+            System.out.println(out);
+            
+        });
     }, "Plugin shutdown thread"));
   }
   
   
-  public static <T> void notifyPlugins(Class<T> category, int message, Object... args)
+  @SuppressWarnings("ThrowableResultIgnored")
+  public static Map<String, Throwable> notifyPlugins(int message, Object... args)
   {
-    if(categoryClasses.containsKey(category))
-    {
-        for(Object plugin: categoryClasses.get(category))
-        {
-          try 
-          {
-            ((Plugin)plugin).processMessage(message, args);
-          } 
-          catch(Throwable tx)
-          {
-            tx.printStackTrace();
-          }
-        }        
-    }
+    Map<String, Throwable> errors = new HashMap<>();
+    categoryClasses.getOrDefault(Plugin.class, List.of()).forEach(plugin -> {
+      try 
+      {
+        ((Plugin)plugin).processMessage(message, args);
+      } 
+      catch(Throwable tx)
+      {
+        String out = "Plugin: " + plugin.getClass().getSimpleName() + " throw: " + tx.getMessage() + " with" + Arrays.toString(tx.getStackTrace());
+        //TODO: Replace with logger...
+        System.out.println(out);
+        errors.put(plugin.getClass().getSimpleName(), tx);
+      }
+    });
+    return errors;
   }
   
   /**
@@ -783,4 +786,5 @@ public class PluginRegistry
     String type, id, name;
     Locale locale;
   }
+  
 }

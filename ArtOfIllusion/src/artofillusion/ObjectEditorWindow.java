@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications copyright (C) 2017 Petri Ihalainen
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +22,6 @@ import buoy.widget.*;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.prefs.*;
 
 /** The ObjectEditorWindow class represents a window for editing an object.  This is an
@@ -486,14 +486,19 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   @Override
   public void setVisible(boolean visible)
   {
+    Map<String, Throwable> errors = null;
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;
-      PluginRegistry.notifyPlugins(Plugin.class, Plugin.OBJECT_WINDOW_CREATED, this);
+      errors = PluginRegistry.notifyPlugins(Plugin.OBJECT_WINDOW_CREATED, this);
     }
     super.setVisible(visible);
+    if(errors != null && !errors.isEmpty())
+    {        
+        ArtOfIllusion.showErrors(errors);
+    }
   }
-
+  
   /**
    * This is overridden to notify all plugins when the window is closed.
    */
@@ -501,7 +506,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   @Override
   public void dispose()
   {
-    super.dispose();
-    PluginRegistry.notifyPlugins(Plugin.class, Plugin.OBJECT_WINDOW_CLOSING, this);
+    super.dispose();    
+    PluginRegistry.notifyPlugins(Plugin.OBJECT_WINDOW_CLOSING, this);    
   }
 }

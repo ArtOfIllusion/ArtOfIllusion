@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -701,4 +701,23 @@ public class ArtOfIllusion
     ModellingApp.currentDirectory = currentDirectory;
   }
 
+  public static void showErrors(Map<String, Throwable> errors) {
+    java.util.function.Function<Map.Entry<String, Throwable>, String> tmss = (Map.Entry<String, Throwable> t) -> "Plugin: "
+            + t + " throw: " + t.getValue().getMessage()
+            + " with" + Arrays.toString(t.getValue().getStackTrace());
+    List<String> err = errors.entrySet().stream().map(tmss).collect(java.util.stream.Collectors.toList());
+    showErrors(err);
+  }
+  
+  public static void showErrors(List<String> errors)
+  {
+      BTextArea report = new BTextArea(String.join("\n\n", errors));
+      JTextArea area = report.getComponent();
+      area.setPreferredSize(new java.awt.Dimension(500, 200));
+      area.setFont(area.getFont().deriveFont(12f));
+      area.setLineWrap(true);
+      area.setEditable(false);
+      area.setWrapStyleWord(true);      
+      SwingUtilities.invokeLater(() -> new BStandardDialog("Art Of Illusion", new Object[] { new BScrollPane(report) }, BStandardDialog.ERROR).showMessageDialog(null));
+  }
 }

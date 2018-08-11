@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -886,13 +886,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @Override
   public void setVisible(boolean visible)
   {
-    System.out.println("svc....");
+    Map<String, Throwable> errors = null;
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;
-      PluginRegistry.notifyPlugins(Plugin.class, Plugin.SCENE_WINDOW_CREATED, this);
+      errors = PluginRegistry.notifyPlugins(Plugin.SCENE_WINDOW_CREATED, this);
     }
-    super.setVisible(visible); //To change body of generated methods, choose Tools | Templates.
+    super.setVisible(visible);
+    if(errors != null && !errors.isEmpty())
+    {
+        ArtOfIllusion.showErrors(errors);
+    }
   }
   /** Get the File menu. */
 
@@ -1006,7 +1010,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       if (choice == 2)
         return false;
     }
-    PluginRegistry.notifyPlugins(Plugin.class, Plugin.SCENE_WINDOW_CLOSING, this);
+    PluginRegistry.notifyPlugins(Plugin.SCENE_WINDOW_CLOSING, this);    
     dispose();
     KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor(keyEventHandler);
     return true;

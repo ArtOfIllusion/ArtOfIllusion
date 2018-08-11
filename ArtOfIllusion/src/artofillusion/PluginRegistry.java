@@ -47,10 +47,11 @@ public class PluginRegistry
   }
   
   
-  public static <T> void notifyPlugins(Class<T> category, int message, Object... args)
+  public static <T> List<Throwable> notifyPlugins(Class<T> category, int message, Object... args)
   {
     if(categoryClasses.containsKey(category))
     {
+        List<Throwable> errors = new ArrayList<>();
         for(Object plugin: categoryClasses.get(category))
         {
           try 
@@ -59,10 +60,12 @@ public class PluginRegistry
           } 
           catch(Throwable tx)
           {
-            tx.printStackTrace();
+            errors.add(tx);
           }
-        }        
+        }
+        return errors;
     }
+    return Collections.EMPTY_LIST;
   }
   
   /**

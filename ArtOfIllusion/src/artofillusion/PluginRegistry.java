@@ -41,7 +41,7 @@ public class PluginRegistry
       public void run()
       {
         Object[] pso = new Object [0];
-        PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STARTING, pso);
+        PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STOPPING, pso);
       }
     }, "Plugin shutdown thread"));
   }

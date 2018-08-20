@@ -10,6 +10,7 @@
   <property name="assemble" value="${dist}/Plugins" />
   <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
   <property name="JavaVersion" value="1.6" />
+  <property name="args" value="-nowarn" />
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -24,7 +25,9 @@
 
   <target name="compile" depends="init">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
+    <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
+      <compilerarg value="${args}"/>
+    </javac>
   </target>
 
   <target name="dist" depends="compile">

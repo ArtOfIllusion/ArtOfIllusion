@@ -9,6 +9,7 @@
   <property name="lib" value="lib" />
   <property name="dist" value="${basedir}/Live_Application" />
   <property name="JavaVersion" value="1.6" />
+  <property name="args" value="-nowarn" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
@@ -25,7 +26,9 @@
     <pathconvert property="classpath" refid="libraries" />
 
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
+    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
+      <compilerarg value="${args}"/>
+    </javac>
   </target>
 
   <target name="dist" depends="compile">

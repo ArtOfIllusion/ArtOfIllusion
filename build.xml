@@ -7,6 +7,7 @@
   <property name="dist" value="Live_Application" />
   <property name="docs" value="docs/Javadoc" />
   <property name="JavaVersion" value="1.6" />
+  <property name="args" value="-nowarn" />
 
   <!-- set of all library jars -->
   <fileset id="libraries" dir="${lib}" includes="*.jar" />
@@ -37,6 +38,7 @@
     <subant target="" >
       <property name="dist" value="${dist}" />
       <property name="lib" value="${lib}"/>
+      <property name="args" value="${args}"/>
       <fileset refid="subproject.files" />
     </subant>
   </target>
@@ -108,9 +110,13 @@
       <arg value="${ant.file}" />
     </java>
     <echo>
-      The 'dist' and 'docs' targets accept the following properties as options:
+      The 'dist' target accepts the following properties as options:
 
       dist: directory at which to base the live build. Defaults to ${dist}.
+      args: compile-time arguments to pass to javac. Useful for running
+      various lints, etc. Defaults to ${args}.
+
+      The 'docs' target accepts the following property as an option:
 
       docs: directory in wish to place the Javadoc. Defaults to ${docs}.
 

@@ -80,7 +80,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   private void findParameters()
   {
-    Module module[] = procedure.getModules();
+    artofillusion.procedural.Module module[] = procedure.getModules();
     int count = 0;
     for (int i = 0; i < module.length; i++)
       if (module[i] instanceof ParameterModule)

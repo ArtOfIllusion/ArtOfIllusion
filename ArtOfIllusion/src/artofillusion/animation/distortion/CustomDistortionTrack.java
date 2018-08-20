@@ -275,7 +275,7 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
 
   private TextureParameter[] findParameters()
   {
-    Module module[] = proc.getModules();
+    artofillusion.procedural.Module module[] = proc.getModules();
     int count = 0;
 
     for (int i = 0; i < module.length; i++)

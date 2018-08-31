@@ -27,7 +27,7 @@
 
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
-      <compilerarg value="${args}"/>
+      <compilerarg line="${args}"/>
     </javac>
   </target>
 

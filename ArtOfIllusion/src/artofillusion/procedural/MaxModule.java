@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which returns the maximum of two numbers. */
 
-public class MaxModule extends Module
+public class MaxModule extends ProceduralModule
 {
   double lastBlur, value, error;
   int which;

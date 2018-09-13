@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which returns the minimum of two numbers. */
 
-public class MinModule extends Module
+public class MinModule extends ProceduralModule
 {
   double lastBlur, value, error;
   int which;

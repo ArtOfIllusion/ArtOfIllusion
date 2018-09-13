@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which outputs the sine of a number. */
 
-public class SineModule extends Module
+public class SineModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   double value, error, valueIn, errorIn, lastBlur;

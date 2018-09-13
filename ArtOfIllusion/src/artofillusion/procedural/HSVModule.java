@@ -16,7 +16,7 @@ import java.awt.*;
 /** This is a Module which takes three numbers, and uses them as the hue, saturation, and
     value components of a color. */
 
-public class HSVModule extends Module
+public class HSVModule extends ProceduralModule
 {
   RGBColor color;
   boolean colorOk;

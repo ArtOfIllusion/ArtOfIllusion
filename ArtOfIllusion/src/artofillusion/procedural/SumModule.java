@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which outputs the sum of two numbers. */
 
-public class SumModule extends Module
+public class SumModule extends ProceduralModule
 {
   Vec3 tempVec;
 

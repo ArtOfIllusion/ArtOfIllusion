@@ -19,7 +19,7 @@ import java.io.*;
 
 /** This is a Module which outputs a color. */
 
-public class ColorModule extends Module
+public class ColorModule extends ProceduralModule
 {
   RGBColor color;
 

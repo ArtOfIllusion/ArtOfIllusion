@@ -16,7 +16,7 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.awt.*;
 
-public class ColorLightenModule extends Module
+public class ColorLightenModule extends ProceduralModule
 {
   RGBColor color;
   boolean colorOk;

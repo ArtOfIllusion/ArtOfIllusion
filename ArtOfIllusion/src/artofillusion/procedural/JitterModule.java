@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which randomly displaces the coordinate system. */
 
-public class JitterModule extends Module
+public class JitterModule extends ProceduralModule
 {
   boolean valueOk;
   Vec3 v, tempVec;

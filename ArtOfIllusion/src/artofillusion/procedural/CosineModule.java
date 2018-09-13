@@ -15,7 +15,7 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-public class CosineModule extends Module
+public class CosineModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   double value, error, valueIn, errorIn, lastBlur;

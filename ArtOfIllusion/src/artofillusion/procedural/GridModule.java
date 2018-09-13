@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which generates a grid of dots. */
 
-public class GridModule extends Module
+public class GridModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   double value, error, xspace, yspace, zspace, lastBlur;

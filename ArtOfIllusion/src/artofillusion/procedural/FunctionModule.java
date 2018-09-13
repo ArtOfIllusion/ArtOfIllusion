@@ -23,7 +23,7 @@ import java.text.*;
 /** This is a Module which outputs a user defined function of its input, y = f(x).  It is defined
     by a set of points (x,y).  For other values of x, the output is determined by interpolation. */
 
-public class FunctionModule extends Module
+public class FunctionModule extends ProceduralModule
 {
   private boolean repeat, valueOk, errorOk, gradOk;
   private double x[], y[], value, error, deriv, lastBlur;

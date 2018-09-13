@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which generates a marble pattern. */
 
-public class MarbleModule extends Module
+public class MarbleModule extends ProceduralModule
 {
   boolean valueOk, gradOk;
   int octaves;

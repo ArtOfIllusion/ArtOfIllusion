@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which generates a brick pattern. */
 
-public class BrickModule extends Module
+public class BrickModule extends ProceduralModule
 {
   boolean valueOk, gradOk;
   double value, error, gap, offset, height, lastBlur;

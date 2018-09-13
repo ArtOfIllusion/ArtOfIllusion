@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which scales and shifts its input value. */
 
-public class ScaleShiftModule extends Module
+public class ScaleShiftModule extends ProceduralModule
 {
   private double scale, shift;
 

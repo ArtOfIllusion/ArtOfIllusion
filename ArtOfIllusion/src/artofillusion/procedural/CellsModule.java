@@ -22,7 +22,7 @@ import java.util.*;
 /** This is a Module which generates a pattern based on Steven Worley's cellular texture
     basis function. */
 
-public class CellsModule extends Module
+public class CellsModule extends ProceduralModule
 {
   private boolean valueOk[], gradOk[], used2ThisTime, used2LastTime;
   private double value[], value1[], error, cell, lastBlur;

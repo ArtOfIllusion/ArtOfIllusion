@@ -19,7 +19,7 @@ import java.io.*;
 
 /** This is a Module which performs a linear 3D coordinate transform. */
 
-public class TransformModule extends Module
+public class TransformModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   CoordinateSystem coords;

@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which outputs the viewing angle. */
 
-public class ViewAngleModule extends Module
+public class ViewAngleModule extends ProceduralModule
 {
   private boolean abs;
   private PointInfo point;

@@ -17,7 +17,7 @@ import artofillusion.ui.*;
 
 import java.awt.*;
 
-public class AbsModule extends Module
+public class AbsModule extends ProceduralModule
 {
   private boolean signOk, positive;
   private double lastBlur;

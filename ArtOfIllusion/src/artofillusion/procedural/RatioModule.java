@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which outputs the ratio of two numbers. */
 
-public class RatioModule extends Module
+public class RatioModule extends ProceduralModule
 {
   boolean valueOk, errorOk;
   double value, error, valueIn1, valueIn2, errorIn1, errorIn2, lastBlur;

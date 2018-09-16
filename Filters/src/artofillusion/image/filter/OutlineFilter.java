@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2009 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,9 +29,6 @@ public class OutlineFilter extends ImageFilter
   private static final byte LEFT = 4;
   private static final byte RIGHT = 5;
 
-  public OutlineFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

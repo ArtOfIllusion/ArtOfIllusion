@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,20 +18,17 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.io.*;
 
-/** This is an image filter which adjusts the brightness of an image. */
+/** This is an image filter which multiplies an image by a color. */
 
-public class BrightnessFilter extends ImageFilter
+public class TintFilter extends ImageFilter
 {
-  public BrightnessFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 
   @Override
   public String getName()
   {
-    return Translate.text("Brightness");
+    return Translate.text("Tint");
   }
 
   /** Apply the filter to an image.
@@ -43,28 +41,28 @@ public class BrightnessFilter extends ImageFilter
   @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
-    filterComponent(image, ComplexImage.RED);
-    filterComponent(image, ComplexImage.GREEN);
-    filterComponent(image, ComplexImage.BLUE);
+    RGBColor color = (RGBColor) getPropertyValue(0);
+    filterComponent(image, ComplexImage.RED, color.getRed());
+    filterComponent(image, ComplexImage.GREEN, color.getGreen());
+    filterComponent(image, ComplexImage.BLUE, color.getBlue());
   }
 
   /** Apply the filter to one component of an image. */
 
-  private void filterComponent(ComplexImage image, int component)
+  private void filterComponent(ComplexImage image, int component, float scale)
   {
     int width = image.getWidth(), height = image.getHeight();
-    float brightness = ((Number) getPropertyValue(0)).floatValue();
     float filtered[] = new float [width*height];
     for (int i = 0; i < width; i++)
       for (int j = 0; j < height; j++)
-        filtered[i+j*width] = image.getPixelComponent(i, j, component)*brightness;
+        filtered[i+j*width] = image.getPixelComponent(i, j, component)*scale;
     image.setComponentValues(component, filtered);
   }
 
   @Override
   public Property[] getProperties()
   {
-    return new Property [] {new Property(getName(), 0.0, Double.MAX_VALUE, 1.0)};
+    return new Property[] {new Property(getName(), new RGBColor(1.0, 1.0, 1.0))};
   }
 
   /** Write a serialized description of this filter to a stream. */
@@ -72,7 +70,10 @@ public class BrightnessFilter extends ImageFilter
   @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    out.writeDouble((Double) getPropertyValue(0));
+    RGBColor color = (RGBColor) getPropertyValue(0);
+    out.writeDouble(color.getRed());
+    out.writeDouble(color.getGreen());
+    out.writeDouble(color.getBlue());
   }
 
   /** Reconstruct this filter from its serialized representation. */
@@ -80,6 +81,6 @@ public class BrightnessFilter extends ImageFilter
   @Override
   public void initFromStream(DataInputStream in, Scene theScene) throws IOException
   {
-    setPropertyValue(0, in.readDouble());
+    setPropertyValue(0, new RGBColor(in.readDouble(), in.readDouble(), in.readDouble()));
   }
 }

@@ -1,4 +1,5 @@
-/* Copyright (C) 2005-2009 by Peter Eastman
+/* Copyright (C) 2003-2009 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,21 +18,17 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.io.*;
 
-/** This is an image filter which compensates for over or under exposed images by applying
-    a gamma correction. */
+/** This is an image filter which adjusts the brightness of an image. */
 
-public class ExposureFilter extends ImageFilter
+public class BrightnessFilter extends ImageFilter
 {
-  public ExposureFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 
   @Override
   public String getName()
   {
-    return Translate.text("Exposure Correction");
+    return Translate.text("Brightness");
   }
 
   /** Apply the filter to an image.
@@ -44,36 +41,28 @@ public class ExposureFilter extends ImageFilter
   @Override
   public void filterImage(ComplexImage image, Scene scene, SceneCamera camera, CoordinateSystem cameraPos)
   {
+    filterComponent(image, ComplexImage.RED);
+    filterComponent(image, ComplexImage.GREEN);
+    filterComponent(image, ComplexImage.BLUE);
+  }
+
+  /** Apply the filter to one component of an image. */
+
+  private void filterComponent(ComplexImage image, int component)
+  {
     int width = image.getWidth(), height = image.getHeight();
-    double exposure = (Double) getPropertyValue(0);
-    double gamma = (exposure < 0.0 ? 1.0/(1.0-exposure) : exposure+1.0);
-    float red[] = new float [width*height];
-    float green[] = new float [width*height];
-    float blue[] = new float [width*height];
-    RGBColor color = new RGBColor();
+    float brightness = ((Number) getPropertyValue(0)).floatValue();
+    float filtered[] = new float [width*height];
     for (int i = 0; i < width; i++)
       for (int j = 0; j < height; j++)
-      {
-        float r = image.getPixelComponent(i, j, ComplexImage.RED);
-        float g = image.getPixelComponent(i, j, ComplexImage.GREEN);
-        float b = image.getPixelComponent(i, j, ComplexImage.BLUE);
-        color.setRGB(r, g, b);
-        float hsv[] = color.getHSV();
-        hsv[2] = (float) Math.pow(hsv[2], 1.0/gamma);
-        color.setHSV(hsv[0], hsv[1], hsv[2]);
-        red[i+j*width] = color.getRed();
-        green[i+j*width] = color.getGreen();
-        blue[i+j*width] = color.getBlue();
-      }
-    image.setComponentValues(ComplexImage.RED, red);
-    image.setComponentValues(ComplexImage.GREEN, green);
-    image.setComponentValues(ComplexImage.BLUE, blue);
+        filtered[i+j*width] = image.getPixelComponent(i, j, component)*brightness;
+    image.setComponentValues(component, filtered);
   }
 
   @Override
   public Property[] getProperties()
   {
-    return new Property [] {new Property(getName(), -5.0, 5.0, 0.0)};
+    return new Property [] {new Property(getName(), 0.0, Double.MAX_VALUE, 1.0)};
   }
 
   /** Write a serialized description of this filter to a stream. */

@@ -71,6 +71,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private List<ModellingTool> modellingTools;
   protected Preferences preferences;
 
+  private boolean hasNotifiedPlugins;
+  
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
 
@@ -811,6 +813,18 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.show(w, x, y);
   }
 
+
+  @Override
+  public void setVisible(boolean visible)
+  {
+    System.out.println("svc....");
+    if (visible && !hasNotifiedPlugins)
+    {
+      hasNotifiedPlugins = true;
+      PluginRegistry.notifyPlugins(Plugin.class, Plugin.SCENE_WINDOW_CREATED, this);
+    }
+    super.setVisible(visible); //To change body of generated methods, choose Tools | Templates.
+  }
   /** Get the File menu. */
 
   public BMenu getFileMenu()

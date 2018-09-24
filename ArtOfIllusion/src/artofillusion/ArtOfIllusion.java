@@ -279,19 +279,6 @@ public class ArtOfIllusion
       {
         LayoutWindow fr = new LayoutWindow(scene);        
         windows.add(fr);
-        
-        for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-        {
-          try
-          {
-            plugin.processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
-          }
-          catch (Throwable tx)
-          {
-            tx.printStackTrace();
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-          }
-        }
         fr.setVisible(true);
         fr.arrangeDockableWidgets();
 
@@ -327,7 +314,7 @@ public class ArtOfIllusion
           for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
           {
             try
-            {
+            {  
               plugin.processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
             }
             catch (Throwable tx)

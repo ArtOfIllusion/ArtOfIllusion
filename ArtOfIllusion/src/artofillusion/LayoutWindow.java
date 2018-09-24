@@ -72,6 +72,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private SceneChangedEvent sceneChangedEvent;
   private List<ModellingTool> modellingTools;
   protected Preferences preferences;
+  private boolean hasNotifiedPlugins;
   private BMenu editScriptMenu;   
   private BMenu recentScriptMenu;
   public static final ImageIcon [] LANGUAGE_ICONS;
@@ -881,6 +882,18 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.show(w, x, y);
   }
 
+
+  @Override
+  public void setVisible(boolean visible)
+  {
+    System.out.println("svc....");
+    if (visible && !hasNotifiedPlugins)
+    {
+      hasNotifiedPlugins = true;
+      PluginRegistry.notifyPlugins(Plugin.class, Plugin.SCENE_WINDOW_CREATED, this);
+    }
+    super.setVisible(visible); //To change body of generated methods, choose Tools | Templates.
+  }
   /** Get the File menu. */
 
   public BMenu getFileMenu()
@@ -993,6 +1006,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       if (choice == 2)
         return false;
     }
+    PluginRegistry.notifyPlugins(Plugin.class, Plugin.SCENE_WINDOW_CLOSING, this);
     dispose();
     KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor(keyEventHandler);
     return true;

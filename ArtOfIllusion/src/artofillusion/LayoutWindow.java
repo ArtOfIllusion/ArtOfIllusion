@@ -937,6 +937,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       if (choice == 2)
         return false;
     }
+    PluginRegistry.notifyPlugins(Plugin.class, Plugin.SCENE_WINDOW_CLOSING, this);
     dispose();
     KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor(keyEventHandler);
     return true;

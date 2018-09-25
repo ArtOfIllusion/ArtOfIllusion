@@ -307,26 +307,9 @@ public class ArtOfIllusion
   public static void closeWindow(EditingWindow win)
   {
     if (win.confirmClose())
-      {
-        windows.remove(win);
-        if (win instanceof LayoutWindow)
-        {
-          for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-          {
-            try
-            {  
-              plugin.processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
-            }
-            catch (Throwable tx)
-            {
-              tx.printStackTrace();
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-            }
-          }
-        }
-      }
-    if (windows.isEmpty())
-      quit();
+    {
+      windows.remove(win);
+    }
   }
 
   /** Get a list of all open windows. */

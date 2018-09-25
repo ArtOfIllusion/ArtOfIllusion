@@ -50,7 +50,7 @@ public class ArtOfIllusion
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
-  private static ArrayList<EditingWindow> windows = new ArrayList<EditingWindow>();
+  private static LinkedList<EditingWindow> windows = new LinkedList<EditingWindow>();
   private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
@@ -322,13 +322,17 @@ public class ArtOfIllusion
   /** Quit Art of Illusion. */
   public static void quit()
   {
-    for (int i = windows.size()-1; i >= 0; i--)
-    {
-      EditingWindow win = windows.get(i);
-      closeWindow(win);
-      if (windows.contains(win))
-        return;
-    }
+      do
+      {
+        EditingWindow ew = windows.peekLast();
+        if(ew.confirmClose())
+        {
+            windows.removeLast();
+        } else
+        {
+            return;
+        }        
+      } while(!windows.isEmpty());
   }
 
   /** Execute all startup scripts. */

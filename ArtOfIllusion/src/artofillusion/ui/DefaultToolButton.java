@@ -1,4 +1,4 @@
-/* Copyright (C) 2007 by Fran�ois Guillet
+/* Copyright (C) 2007 by François Guillet
    Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the

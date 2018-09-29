@@ -6,7 +6,7 @@ package artofillusion.util;
  * IconGenerator: provide editing and compositing features for icon images
  *
  * Copyright (C) 2008 Nik Trevallyn-Jones, Sydney Australia
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
@@ -89,7 +89,7 @@ import javax.swing.ImageIcon;
  *<br><li>COLOR hash (#) - specifies a color as a list of component values
  *<br>eg: #(1.5, 1, 1, 1)  or #(a=1.5,g=1,b=1)
  *<br><li>HEX (0x) or (0X) - specifies an RGB or ARGB 8-bit colour value as a single hex value
- *<br>egs: 0xff => alpha=1; 0x112233 => red=11, green=22, blue=33; 0xff112233 => alpha=ff, red=11, green=22, blue=33
+ *<br>egs: 0xff =&gt; alpha=1; 0x112233 =&gt; red=11, green=22, blue=33; 0xff112233 =&gt; alpha=ff, red=11, green=22, blue=33
  *</ul>
  *<br>
  *<pre>
@@ -520,9 +520,9 @@ public class IconGenerator
      *
      *  @param image the image to modify
      *
-     *  @param red the red component to add. 0 <= red <= 255
-     *  @param green the green component to add. 0 <= green <= 255
-     *  @param blue the blue component to add. 0 <= blue <= 255
+     *  @param red the red component to add. 0 &lt;= red &lt;= 255
+     *  @param green the green component to add. 0 &lt;= green м= 255
+     *  @param blue the blue component to add. 0 &lt;= blue &lt;= 255
      *
      *  @param clip the area within which the modification is applied.
      */
@@ -569,9 +569,9 @@ public class IconGenerator
      *
      *  @param image the image to modify
      *
-     *  @param red the red component to subtract. 0 <= red <= 255
-     *  @param green the green component to subtract. 0 <= green <= 255
-     *  @param blue the blue component to subtract. 0 <= blue <= 255
+     *  @param red the red component to subtract. 0 &lt;= red &lt;= 255
+     *  @param green the green component to subtract. 0 &lt;= green &lt;= 255
+     *  @param blue the blue component to subtract. 0 &lt;= blue &lt;= 255
      *
      *  @param clip the area within which the modification is applied.
      */
@@ -616,10 +616,10 @@ public class IconGenerator
      *
      *  @param image the image to modify
      *
-     *  @param alpha the alpha component to multiply by. 0.0f <= alpha <= 1.0f
-     *  @param red the red component to multiply by. 0.0f <= red <= 1.0f
-     *  @param green the green component to multiply by. 0.0f <= green <= 1.0f
-     *  @param blue the blue component to multiply by. 0.0f <= blue <= 1.0f
+     *  @param alpha the alpha component to multiply by. 0.0f &lt;= alpha &lt;= 1.0f
+     *  @param red the red component to multiply by. 0.0f &lt;= red &lt;= 1.0f
+     *  @param green the green component to multiply by. 0.0f &lt;= green &lt;= 1.0f
+     *  @param blue the blue component to multiply by. 0.0f &lt;= blue &lt;= 1.0f
      *
      *  @param clip the area within which the modification is applied.
      */
@@ -667,10 +667,10 @@ public class IconGenerator
      *
      *  @param image the image to modify
      *
-     *  @param alpha the alpha component to assign. 0 <= alpha <= 255
-     *  @param red the red component to assign. 0 <= red <= 255
-     *  @param green the green component to assign. 0 <= green <= 255
-     *  @param blue the blue component to assign. 0 <= blue <= 255
+     *  @param alpha the alpha component to assign. 0 &lt;= alpha &lt;= 255
+     *  @param red the red component to assign. 0 &lt;= red &lt;= 255
+     *  @param green the green component to assign. 0 &lt;= green &lt;= 255
+     *  @param blue the blue component to assign. 0 &lt;= blue &lt;= 255
      *
      *  @param clip the area within which the modification is applied.
      */
@@ -716,10 +716,10 @@ public class IconGenerator
      *
      *  @param image the image to modify
      *
-     *  @param alpha the alpha component of the colour. 0 <= alpha <= 255
-     *  @param red the red component of the colour. 0 <= red <= 255
-     *  @param green the green component of the colour. 0 <= green <= 255
-     *  @param blue the blue component of the colour. 0 <= blue <= 255
+     *  @param alpha the alpha component of the colour. 0 &lt;= alpha &lt;= 255
+     *  @param red the red component of the colour. 0 &lt;= red &lt;= 255
+     *  @param green the green component of the colour. 0 &lt;= green &lt;= 255
+     *  @param blue the blue component of the colour. 0 &lt;= blue &lt;= 255
      *
      *  @param clip the area within which the modification is applied.
      */

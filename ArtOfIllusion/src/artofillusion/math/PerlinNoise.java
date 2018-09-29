@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2005 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +14,7 @@ package artofillusion.math;
 import java.util.*;
 
 /** This class provides an implementation of Ken Perlin's noise function, based on the
-    description (but not on the sample code) in "Texturing & Modeling: A Procedural Approach"
+    description (but not on the sample code) in "Texturing &amp; Modeling: A Procedural Approach"
     (second edition), by Ebert, Musgrave, Peachey, Perlin, and Worley (Academic Press, 1998).
     It also includes the improvements described in "Improving Noise", by Ken Perlin,
     published in the 2002 SIGGRAPH Proceedings, pp. 681-2.

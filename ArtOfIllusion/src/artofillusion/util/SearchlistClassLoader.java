@@ -7,7 +7,7 @@ package artofillusion.util;
  *
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
- * Changes copyright (C) 2017 by Maksim Khramov
+ * Changes copyright (C) 2017-2018 by Maksim Khramov
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -353,7 +353,7 @@ public class SearchlistClassLoader extends ClassLoader
     /**
      *  Return a Class object for the specified class name.
      *
-     *  @overloads java.lang.ClassLoader#findClass(String)
+     *  overloads java.lang.ClassLoader#findClass(String)
      *
      *  Traverses the searchlist looking for a classloader which can return
      *	the specified class.
@@ -427,7 +427,7 @@ public class SearchlistClassLoader extends ClassLoader
     /**
      *  find a resource using the searchlist.
      *
-     *  @overloads ClassLoader#findResource(String)
+     *  overloads ClassLoader#findResource(String)
      *
      *  <em>Note</em>Inherited behaviour of loadClass() and getResource() means
      *  that this method is <em>not</em> called if our parent classloader has

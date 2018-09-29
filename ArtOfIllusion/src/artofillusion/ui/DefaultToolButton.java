@@ -1,5 +1,5 @@
-/* Copyright (C) 2007 by Fran�ois Guillet
-   Changes copyright (C) 2017 by Maksim Khramov
+/* Copyright (C) 2007 by François Guillet
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -86,7 +86,7 @@ public class DefaultToolButton extends ToolButton
      *  create a new DefaultToolButton using the specified icons for
      *  <i>normal</i> and <i>selected</i> icons.
      *
-     *<b><em>No</em> style is applied - the icons are used as-is.
+     *<b><em>No</em></b> style is applied - the icons are used as-is.
      *
      *  This is the least-preferred ctor, since it applies no consistency
      *  at all, and relies on the icon creator to have made the icons
@@ -123,7 +123,7 @@ public class DefaultToolButton extends ToolButton
    *  icon url.
    *
    *  If the style defined no <code>type.icon</code> attribute, then
-   *  a definition is generated using the <code>type.background</i> and
+   *  a definition is generated using the <code>type.background</code> and
    *  <code>type.overlay</code> attributes. If no style definition can
    *  be found or generated, the icon from <i>image</i> is returned.
    *

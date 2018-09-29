@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,23 +19,29 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * <p>
  * Raytracer implements a raytracing engine.  It compares rays to objects in a scene to identify what they hit.
- * <p/>
+ * </p>
+ * <p>
  * To use it, first you must define the scene.  Do this by calling {@link #addObject(ObjectInfo)} for each object
  * you want included in the scene.  When all objects have been added, call {@link #finishConstruction()} to analyze
  * the scene and build data structures for use during raytracing.  There are several properties you can set that
  * affect how the objects are interpreted.  For example, {@link #setSurfaceError(double) setSurfaceError()} determines
  * how finely surfaces should be triangulated, and {@link #setAdaptive(boolean) setAdaptive()} determines whether
  * the surface accuracy should vary based on the distance of the object from a camera.
- * <p/>
+ * </p>
+ * <p>
  * While building the scene, it also records a list of {@link RTLight} objects representing light sources in the scene.
  * You can query the list by calling {@link #getLights()}, but otherwise it is not used.
- * <p/>
+ * </p>
+ * <p>
  * To trace a ray and see what it hits, call {@link #traceRay(Vec3, Vec3)}.  There is also a second version of the
  * method that is more efficient, but requires more preparation by the caller before it is invoked.
- * <p/>
+ * </p>
+ * <p>
  * When you are all finished with the Raytracer, it is a good idea to call {@link #cleanup()} to set internal pointers
  * to null.  This is not required, but may help the garbage collector to work more efficiently.
+ * </p>
  */
 
 public class Raytracer

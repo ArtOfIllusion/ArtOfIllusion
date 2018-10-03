@@ -14,15 +14,12 @@ import artofillusion.Scene;
 import artofillusion.WireframeMesh;
 import artofillusion.animation.Keyframe;
 import artofillusion.math.BoundingBox;
-import artofillusion.texture.Texture;
 import java.io.ByteArrayInputStream;
-import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -30,13 +27,6 @@ import org.junit.Test;
  * @author maksim.khramov
  */
 public class Object3DTest {
-    
-    @Test
-    public void testObject3D() {
-        Scene scene = new Scene();
-        Texture tex = scene.getTexture(0);
-        Assert.assertNotNull(tex);
-    }
     
     @Test(expected = InvalidObjectException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -66,11 +56,38 @@ public class Object3DTest {
         new DummyObject(new DataInputStream(targetStream), scene);        
     }
     
+    @Test
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testCreateObjectNoTexturable() throws IOException {
+        Scene scene = new Scene();
+        byte[] bytes = new byte[2];
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        wrap.putShort((short)1); // Object version;
+        
+        InputStream targetStream = new ByteArrayInputStream(bytes);
+        DummyObject.canSetTexture = false;
+        new DummyObject(new DataInputStream(targetStream), scene);          
+    }
+
+
+    @Test(expected = IOException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testCreateObjectTexturable() throws IOException {
+        Scene scene = new Scene();
+        byte[] bytes = new byte[2];
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        wrap.putShort((short)1); // Object version;
+        
+        InputStream targetStream = new ByteArrayInputStream(bytes);
+        DummyObject.canSetTexture = true;
+        new DummyObject(new DataInputStream(targetStream), scene);          
+    }
+    
     private static class DummyObject extends Object3D
     {
         public static boolean canSetTexture = true;
         
-        public DummyObject(DataInput in, Scene theScene) throws IOException
+        public DummyObject(DataInputStream in, Scene theScene) throws IOException
         {
             super(in, theScene);
         }

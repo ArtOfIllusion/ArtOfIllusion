@@ -26,6 +26,19 @@ import org.junit.Test;
 public class CoordinateSystemTest {
 
     @Test
+    public void testCreateCS() {
+        Vec3 vec = new Vec3();
+        vec.set(1, 2.0, 3.0);
+        
+        CoordinateSystem test = new CoordinateSystem(vec, 0, 0, 0);
+        Assert.assertEquals(1.0, test.orig.x, 0);
+        Assert.assertEquals(2.0, test.orig.y, 0);
+        Assert.assertEquals(3.0, test.orig.z, 0);
+        
+    }
+    
+    
+    @Test
     public void testCreateCSFromStream() throws IOException
     {
         byte[] bytes = new byte[200];
@@ -43,6 +56,10 @@ public class CoordinateSystemTest {
         Assert.assertEquals(1.0, test.orig.x, 0);
         Assert.assertEquals(2.0, test.orig.y, 0);
         Assert.assertEquals(3.0, test.orig.z, 0);
+        
+        Assert.assertEquals(0, test.xrot, 0);
+        Assert.assertEquals(45, test.yrot, 0);
+        Assert.assertEquals(90, test.zrot, 0);
         
     }
 }

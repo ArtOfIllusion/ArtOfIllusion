@@ -14,12 +14,14 @@ import artofillusion.Scene;
 import artofillusion.WireframeMesh;
 import artofillusion.animation.Keyframe;
 import artofillusion.math.BoundingBox;
+import artofillusion.texture.LayeredTexture;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -69,10 +71,10 @@ public class Object3DTest {
         new DummyObject(new DataInputStream(targetStream), scene);          
     }
 
-
+    
     @Test(expected = IOException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public void testCreateObjectTexturable() throws IOException {
+    public void testCreateObjectTexturableNoInputData() throws IOException {
         Scene scene = new Scene();
         byte[] bytes = new byte[2];
         ByteBuffer wrap = ByteBuffer.wrap(bytes);
@@ -81,6 +83,27 @@ public class Object3DTest {
         InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = true;
         new DummyObject(new DataInputStream(targetStream), scene);          
+    }
+    
+    @Test
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testCreateObjectNoMaterialButLayeredTexture() throws IOException
+    {
+        Scene scene = new Scene();
+        byte[] bytes = new byte[200];
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        wrap.putShort((short)1); // Object version;
+        wrap.putInt(-1);  // No material
+        wrap.putInt(-1);  // Layered texture
+        
+        InputStream targetStream = new ByteArrayInputStream(bytes);
+        DummyObject.canSetTexture = true;
+        DummyObject dob = new DummyObject(new DataInputStream(targetStream), scene); 
+        Assert.assertNotNull(dob);
+        
+        Assert.assertNull(dob.getMaterial());
+        Assert.assertNotNull(dob.getTexture());
+        Assert.assertTrue(dob.getTexture() instanceof LayeredTexture);
     }
     
     private static class DummyObject extends Object3D

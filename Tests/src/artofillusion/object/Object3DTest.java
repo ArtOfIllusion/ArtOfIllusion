@@ -146,7 +146,10 @@ public class Object3DTest {
         
         InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = true;
-        new DummyObject(new DataInputStream(targetStream), scene);
+        DummyObject dob = new DummyObject(new DataInputStream(targetStream), scene);
+        
+        Assert.assertEquals(scene.getDefaultTexture(), dob.getTexture());
+        Assert.assertTrue(dob.getTextureMapping() instanceof DummyTextureMapping);
         
     }
     
@@ -193,7 +196,10 @@ public class Object3DTest {
         
         InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = true;
-        new DummyObject(new DataInputStream(targetStream), scene);
+        DummyObject dob = new DummyObject(new DataInputStream(targetStream), scene);
+        
+        Assert.assertEquals(scene.getMaterial(0), dob.getMaterial());
+        Assert.assertTrue(dob.getMaterialMapping() instanceof DummyMaterialMapping);
         
     }
     
@@ -293,7 +299,7 @@ public class Object3DTest {
 
         @Override
         public Object3D getObject() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return object;
         }
 
         @Override

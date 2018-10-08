@@ -11,7 +11,10 @@
 package artofillusion.ui;
 
 import buoy.widget.*;
+import buoy.event.WidgetMouseEvent;
 import java.awt.*;
+import static java.awt.event.InputEvent.*;
+import static java.awt.event.MouseEvent.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
@@ -250,5 +253,38 @@ public class UIUtilities
         list.add(child);
         addChildrenToList(child, list);
       }
+  }
+
+  /**
+   * Test event for specified mouse/modifier key combination.
+   * This regularizes 3-button and 1-button + modifier support across
+   * multiple platforms.
+   */
+
+  public static boolean mouseMapButtonOne(WidgetMouseEvent e)
+  {
+    int mods = e.getModifiersEx();
+    return ((mods & BUTTON1_DOWN_MASK) != 0 || e.getButton() == BUTTON1) &&
+            ((mods & (META_DOWN_MASK | ALT_DOWN_MASK)) == 0);
+  }
+
+  public static boolean mouseMapButtonTwo(WidgetMouseEvent e)
+  {
+    int mods = e.getModifiersEx();
+    return (
+             ((mods & BUTTON2_DOWN_MASK) != 0 || e.getButton() == BUTTON2) &&
+             ((mods & BUTTON1_DOWN_MASK) == 0)
+	   )
+           || ((mods & ALT_DOWN_MASK) != 0);
+  }
+
+  public static boolean mouseMapButtonThree(WidgetMouseEvent e)
+  {
+    int mods = e.getModifiersEx();
+    return (
+             ((mods & BUTTON3_DOWN_MASK) != 0 || e.getButton() == BUTTON3) &&
+             ((mods & BUTTON1_DOWN_MASK) == 0)
+           )
+           || ((mods & META_DOWN_MASK) != 0);
   }
 }

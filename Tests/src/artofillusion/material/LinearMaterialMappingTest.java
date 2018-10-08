@@ -203,7 +203,7 @@ public class LinearMaterialMappingTest{
         wrap.putDouble(3.5);
 
         // scale to object
-        wrap.put((byte)0);
+        wrap.put((byte)0);  // Boolean treats as byte
         
         LinearMaterialMapping lmm = new LinearMaterialMapping(new DataInputStream(new ByteArrayInputStream(bytes)), cube, mat);
         

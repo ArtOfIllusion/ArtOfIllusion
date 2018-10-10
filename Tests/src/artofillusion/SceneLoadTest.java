@@ -63,6 +63,43 @@ public class SceneLoadTest {
         new Scene(new DataInputStream(targetStream), true);
     }
     
+    @Test(expected = IOException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testReadSceneWithMissedImage() throws IOException
+    {
+        byte[] bytes = new byte[200];
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        wrap.putShort((short)2); // Scene Version 2. No metadata expected to  set
+        
+        // Ambient color data
+        colorToBuffer(new RGBColor(100, 200, 200), wrap);
+        // Fog color data
+        colorToBuffer(new RGBColor(50, 50, 50), wrap);
+        // Fog
+        wrap.put((byte)1); 
+        // Fog Distance
+        wrap.putDouble(1000);
+        // show grid
+        wrap.put((byte)1); 
+        // snap to grid
+        wrap.put((byte)1); 
+        // grid spacing
+        wrap.putDouble(10);
+        // grid Subdivisions
+        wrap.putInt(10);
+        // FPS
+        wrap.putInt(60);
+        // Image maps count
+        wrap.putInt(1);
+        {
+            String className = "dummy.dummy.MissedImageClass";
+            wrap.putShort(Integer.valueOf(className.length()).shortValue());
+            wrap.put(className.getBytes());
+        }
+
+        new Scene(new DataInputStream(new ByteArrayInputStream(bytes)), true);
+    }
+    
     @Test
     public void testReadEmptySceneWithMissedMaterialAndTexture() throws IOException
     {
@@ -243,7 +280,7 @@ public class SceneLoadTest {
         // Textures count
         wrap.putInt(1);
         {
-            String className = UniformTexture.class.getTypeName();
+            String className = LoadableTexture.class.getTypeName();
             
             wrap.putShort(Integer.valueOf(className.length()).shortValue());
             wrap.put(className.getBytes());
@@ -265,7 +302,7 @@ public class SceneLoadTest {
         
         
         Assert.assertEquals(1, scene.getNumTextures());
-        Assert.assertTrue(scene.getTexture(0) instanceof UniformTexture);
+        Assert.assertTrue(scene.getTexture(0) instanceof LoadableTexture);
         
         Assert.assertEquals(1, scene.getNumMaterials());
         Assert.assertTrue(scene.getMaterial(0) instanceof UniformMaterial);
@@ -316,7 +353,7 @@ public class SceneLoadTest {
         }
         
         InputStream targetStream = new ByteArrayInputStream(bytes);
-        Scene scene = new Scene(new DataInputStream(targetStream), true);
+        new Scene(new DataInputStream(targetStream), true);
     }
 
     private static void colorToBuffer(RGBColor color, ByteBuffer buffer)
@@ -324,6 +361,13 @@ public class SceneLoadTest {
         buffer.putFloat(color.getRed());
         buffer.putFloat(color.getGreen());
         buffer.putFloat(color.getBlue());
+    }
+    
+    public static class LoadableTexture extends UniformTexture
+    {
+        public LoadableTexture(DataInputStream in, Scene theScene)
+        {            
+        }
     }
     
     public class DummyTextureNoConstructor extends Texture

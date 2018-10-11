@@ -13,13 +13,13 @@ package artofillusion.animation;
 
 import artofillusion.LayoutWindow;
 import artofillusion.Scene;
-import artofillusion.math.CoordinateSystem;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InvalidObjectException;
+import java.nio.ByteBuffer;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -56,6 +56,53 @@ public class WeightTrackTest {
         weight.setEnabled(false);
         Assert.assertEquals(1.0, weight.getWeight(0), 0);
     }
+    
+    @Test(expected = InvalidObjectException.class)
+    public void testLoadFromStreamTrackBadVersion() throws IOException
+    {
+        byte[] bytes = new byte[12];
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        wrap.putShort((short)1); // Track Version
+            
+        Track track = new WeightTrack(parent);
+        track.initFromStream(new DataInputStream(new ByteArrayInputStream(bytes)), (Scene)null);
+    }
+    
+    
+    @Test
+    public void testLoadFromStreamTrack() throws IOException
+    {
+        byte[] bytes = new byte[120];
+        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        wrap.putShort((short)0); // Track Version
+
+        String trackName = "Weight";
+        wrap.putShort(Integer.valueOf(trackName.length()).shortValue());
+        wrap.put(trackName.getBytes());
+        
+        wrap.put((byte)1);  // Is Enabled
+        wrap.putInt(Timecourse.LINEAR);
+        
+        wrap.putInt(1); // KeysCount
+        {
+            wrap.putDouble(0); // Time;
+            wrap.putDouble(1); // Scalar Keyframe data;
+            // Smoothness data
+            {
+                wrap.putDouble(0);
+                wrap.putDouble(1);            
+            }
+
+        }
+        
+        Track track = new WeightTrack(parent);
+        track.initFromStream(new DataInputStream(new ByteArrayInputStream(bytes)), (Scene)null);
+        
+        Assert.assertTrue(track.isEnabled());
+        Assert.assertEquals(Timecourse.LINEAR, track.getSmoothingMethod());
+        Assert.assertEquals(1, track.getKeyTimes().length);
+    }
+    
     
     public static class DummyTrack extends Track
     {

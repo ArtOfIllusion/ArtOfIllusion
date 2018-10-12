@@ -1,5 +1,5 @@
 /* Copyright (C) 2003 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -415,12 +415,12 @@ public class Actor extends ObjectWrapper
       throw new InvalidObjectException("");
     try
       {
-        Class cls = ArtOfIllusion.getClass(in.readUTF());
-        Constructor con = cls.getConstructor(new Class [] {DataInputStream.class, Scene.class});
-        theObject = (Object3D) con.newInstance(new Object [] {in, theScene});
+        Class<?> cls = ArtOfIllusion.getClass(in.readUTF());
+        Constructor<?> con = cls.getConstructor(DataInputStream.class, Scene.class);
+        theObject = (Object3D) con.newInstance(in, theScene);
         nextPoseID = in.readInt();
         cls = ArtOfIllusion.getClass(in.readUTF());
-        con = cls.getConstructor(new Class [] {DataInputStream.class, Object.class});
+        con = cls.getConstructor(DataInputStream.class, Object.class);
         int num = in.readInt();
         gesture = new Gesture [num];
         gestureName = new String [num];
@@ -429,7 +429,7 @@ public class Actor extends ObjectWrapper
           {
             gestureID[i] = in.readInt();
             gestureName[i] = in.readUTF();
-            gesture[i] = (Gesture) con.newInstance(new Object [] {in, theObject});
+            gesture[i] = (Gesture) con.newInstance(in, theObject);
           }
         currentPose = new ActorKeyframe(in, this);
       }

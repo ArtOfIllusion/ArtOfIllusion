@@ -25,7 +25,7 @@ import org.junit.Test;
  *
  * @author maksim.khramov
  */
-public class ActorStrealLoadTest{
+public class ActorStreamLoadTest{
 
     @Test(expected = InvalidObjectException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")

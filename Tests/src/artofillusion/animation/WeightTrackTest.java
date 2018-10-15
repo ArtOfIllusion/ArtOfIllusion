@@ -50,6 +50,38 @@ public class WeightTrackTest {
     }
     
     @Test
+    public void testDuplicateWeightTrack()
+    {
+        WeightTrack weight = new WeightTrack(parent);
+        
+        Track dup = weight.duplicate(parent);
+        Assert.assertTrue(dup instanceof WeightTrack);
+        Assert.assertNotEquals(weight, dup);
+        Assert.assertEquals("Weight", dup.getName());
+        Assert.assertEquals(parent, ((WeightTrack)dup).parent);
+        Assert.assertTrue(weight.isEnabled());
+    }
+    
+    @Test
+    public void testCopyWeightTrack()
+    {
+        WeightTrack weight = new WeightTrack(parent);
+        weight.setSmoothingMethod(Timecourse.DISCONTINUOUS);
+        
+        Track dupParent = new DummyTrack();
+        Track dup = new WeightTrack(dupParent);
+        dup.copy(weight);
+        
+        Assert.assertTrue(dup instanceof WeightTrack);
+        Assert.assertNotEquals(weight, dup);
+        Assert.assertEquals("Weight", dup.getName());
+        Assert.assertEquals(dupParent, ((WeightTrack)dup).parent);
+        Assert.assertTrue(weight.isEnabled());
+        Assert.assertEquals(dup.getSmoothingMethod(), weight.getSmoothingMethod());
+        
+    }
+    
+    @Test
     public void testGetWeightForDisabledTrack()
     {
         WeightTrack weight = new WeightTrack(parent);

@@ -33,4 +33,18 @@ public class DirectionalLightTest {
         Assert.assertEquals(light.getDecayRate(), 0.5f, 0);
         
     }
+    
+    @Test
+    public void testCreateDirectinalLight2()
+    {
+        RGBColor color = new RGBColor();
+        DirectionalLight light = new DirectionalLight(color, 0, 5.0);
+        Assert.assertNotNull(light);
+        Assert.assertEquals(light.getColor(), color);
+        Assert.assertEquals(light.getIntensity(), 0, 0);
+        Assert.assertEquals(light.getRadius(), 5.0, 0);
+        Assert.assertEquals(Light.TYPE_NORMAL, light.getType());
+        Assert.assertEquals(light.getDecayRate(), 0.5f, 0);
+        
+    }
 }

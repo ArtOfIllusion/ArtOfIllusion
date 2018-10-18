@@ -10,6 +10,17 @@
 
 package artofillusion.animation;
 
+import artofillusion.Scene;
+import artofillusion.math.CoordinateSystem;
+import artofillusion.object.Cube;
+import artofillusion.object.Object3D;
+import artofillusion.object.ObjectInfo;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.nio.ByteBuffer;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -19,8 +30,37 @@ import org.junit.Test;
 public class PoseTrackTest {
     
     @Test
-    public void testPoseTrackCopy()
+    public void testCreatePoseTrack()
     {
+        Object3D obj = new Cube(1, 1, 1);
+        ObjectInfo oi = new ObjectInfo(obj, new CoordinateSystem(), "Cube");
+        PoseTrack pt = new PoseTrack(oi);
+        Assert.assertNotNull(pt);
+        Assert.assertEquals(oi, pt.getParent());
+        Assert.assertEquals("Pose", pt.getName());
+    }
+
+    @Test(expected = InvalidObjectException.class)
+    public void testLoadPoseTrackBadVersion0() throws IOException
+    {
+        ByteBuffer wrap = ByteBuffer.allocate(200);
+        wrap.putShort((short)-1); // Track Version
         
+        Object3D obj = new Cube(1, 1, 1);
+        ObjectInfo oi = new ObjectInfo(obj, new CoordinateSystem(), "Cube");
+        PoseTrack pt = new PoseTrack(oi);
+        pt.initFromStream(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);   
+    }
+    
+    @Test(expected = InvalidObjectException.class)
+    public void testLoadPoseTrackBadVersion1() throws IOException
+    {
+        ByteBuffer wrap = ByteBuffer.allocate(200);
+        wrap.putShort((short)3); // Track Version
+        
+        Object3D obj = new Cube(1, 1, 1);
+        ObjectInfo oi = new ObjectInfo(obj, new CoordinateSystem(), "Cube");
+        PoseTrack pt = new PoseTrack(oi);
+        pt.initFromStream(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
     }
 }

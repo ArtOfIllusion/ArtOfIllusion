@@ -15,7 +15,8 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 
-import java.awt.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
 import java.io.*;
 import java.lang.ref.*;
 import java.lang.reflect.*;
@@ -27,6 +28,18 @@ import java.util.List;
 
 public class UndoRecord
 {
+  private static final ExecutorService service = Executors.newCachedThreadPool();
+  
+  static {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run()
+      {
+          service.shutdown();
+      }
+    }, "Undo write service shutdown thread"));
+  }
+  
   private ArrayList<Integer> command;
   private ArrayList<Object[]> data;
   private ArrayList<SoftReference[]> dataRef;
@@ -315,31 +328,21 @@ public class UndoRecord
    */
   protected void cacheToDisk()
   {
-    // We need to make sure the caching gets done 1) after we're certain no more commands will be added, and 2) on a
-    // separate thread, so we don't slow down the UI.
-
-    EventQueue.invokeLater(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        Thread thread = new Thread() {
-          @Override
-          public void run()
-          {
-            writeCache();
-          }
-        };
-        thread.setPriority(Thread.NORM_PRIORITY);
-        thread.start();
-      }
-    });
+    service.submit(cacheWriteRunner);
   }
-
+  
+  
+  private final Runnable cacheWriteRunner = new Runnable() {
+      @Override
+      public void run() {
+          UndoRecord.this.writeCache();
+      }
+  };
+  
   /**
    * This routine does the actual caching.
    */
-  private synchronized void writeCache()
+  protected final synchronized void writeCache()
   {
     boolean anyToCache = false;
     for (Integer c : command)
@@ -422,8 +425,8 @@ public class UndoRecord
         int c = command.get(i);
         if (c == COPY_OBJECT && theWindow.getScene() != null)
         {
-          Class cls = ArtOfIllusion.getClass(in.readUTF());
-          Constructor con = cls.getDeclaredConstructor(DataInputStream.class, Scene.class);
+          Class<?> cls = ArtOfIllusion.getClass(in.readUTF());
+          Constructor<?> con = cls.getDeclaredConstructor(DataInputStream.class, Scene.class);
           d[1] = con.newInstance(in, theWindow.getScene());
         }
         else if (c == COPY_VERTEX_POSITIONS)

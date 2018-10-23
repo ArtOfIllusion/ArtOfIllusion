@@ -16,6 +16,7 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
+import static artofillusion.ui.UIUtilities.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -347,9 +348,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     Point dragPoint = e.getPoint();
     if (!clickPoint.equals(dragPoint))
     {
-      if (e.isMetaDown())
+      if (mouseButtonThree(e))
       {
-        if (e.isControlDown())
+         if (e.isControlDown())
           dragTransform = Mat4.translation(0.0, 0.0, (dragPoint.y-clickPoint.y)*0.01);
         else
           dragTransform = Mat4.translation((dragPoint.x-clickPoint.x)*0.01, (clickPoint.y-dragPoint.y)*0.01, 0.0);
@@ -380,9 +381,9 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
       return;
     Graphics g = getComponent().getGraphics();
     Point dragPoint = e.getPoint();
-    if (e.isMetaDown())
+    if (mouseButtonThree(e))
     {
-      if (e.isControlDown())
+       if (e.isControlDown())
         dragTransform = Mat4.translation(0.0, 0.0, (dragPoint.y-clickPoint.y)*0.01);
       else
         dragTransform = Mat4.translation((dragPoint.x-clickPoint.x)*0.01, (clickPoint.y-dragPoint.y)*0.01, 0.0);

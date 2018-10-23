@@ -261,14 +261,14 @@ public class UIUtilities
    * multiple platforms.
    */
 
-  public static boolean mouseMapButtonOne(WidgetMouseEvent e)
+  public static boolean mouseButtonOne(WidgetMouseEvent e)
   {
     int mods = e.getModifiersEx();
     return ((mods & BUTTON1_DOWN_MASK) != 0 || e.getButton() == BUTTON1) &&
             ((mods & (META_DOWN_MASK | ALT_DOWN_MASK)) == 0);
   }
 
-  public static boolean mouseMapButtonTwo(WidgetMouseEvent e)
+  public static boolean mouseButtonTwo(WidgetMouseEvent e)
   {
     int mods = e.getModifiersEx();
     return (
@@ -278,7 +278,7 @@ public class UIUtilities
            || ((mods & ALT_DOWN_MASK) != 0);
   }
 
-  public static boolean mouseMapButtonThree(WidgetMouseEvent e)
+  public static boolean mouseButtonThree(WidgetMouseEvent e)
   {
     int mods = e.getModifiersEx();
     return (

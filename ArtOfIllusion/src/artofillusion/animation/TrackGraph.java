@@ -12,6 +12,7 @@ package artofillusion.animation;
 
 import artofillusion.*;
 import artofillusion.ui.*;
+import static artofillusion.ui.UIUtilities.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -276,7 +277,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
     undo = null;
     dragPos = null;
     draggingBox = false;
-    effectiveMode = (ev.isMetaDown() ? Score.SCROLL_AND_SCALE : mode);
+    effectiveMode = (mouseButtonThree(ev) ? Score.SCROLL_AND_SCALE : mode);
     if (effectiveMode != Score.SELECT_AND_MOVE)
       return;
 

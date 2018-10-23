@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import static artofillusion.ui.UIUtilities.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -82,9 +83,9 @@ public class CurveViewer extends MeshViewer
 
     // Determine which tool is active.
 
-    if (metaTool != null && e.isMetaDown())
+    if (metaTool != null && mouseButtonThree(e))
       activeTool = metaTool;
-    else if (altTool != null && e.isAltDown())
+    else if (altTool != null && mouseButtonTwo(e))
       activeTool = altTool;
     else
       activeTool = currentTool;

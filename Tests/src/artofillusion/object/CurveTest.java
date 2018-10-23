@@ -10,7 +10,13 @@
 
 package artofillusion.object;
 
+import artofillusion.Scene;
 import artofillusion.math.Vec3;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.nio.ByteBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -76,5 +82,53 @@ public class CurveTest {
         Assert.assertEquals(Mesh.APPROXIMATING, curve.getSmoothingMethod());
         Assert.assertFalse(curve.isClosed());
         
+    }
+    
+    @Test(expected = InvalidObjectException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testLoadCurveBadObjectVersion1() throws IOException
+    {
+        ByteBuffer wrap = ByteBuffer.allocate(200);
+        wrap.putShort((short)-1);
+        
+        new Curve(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+    }
+    
+    @Test(expected = InvalidObjectException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testLoadCurveBadObjectVersion2() throws IOException
+    {
+        ByteBuffer wrap = ByteBuffer.allocate(200);
+        wrap.putShort((short)2);
+        
+        new Curve(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+    }
+    
+    @Test(expected = InvalidObjectException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void testLoadCurveBadObjectVersion3() throws IOException
+    {
+        ByteBuffer wrap = ByteBuffer.allocate(200);
+        wrap.putShort((short)1);
+        wrap.putShort((short)1); // Read version again !!!!
+        new Curve(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+    }
+    
+    @Test
+    public void testLoadCurve() throws IOException
+    {
+        ByteBuffer wrap = ByteBuffer.allocate(200);
+        wrap.putShort((short)0);
+        wrap.putShort((short)0); // Read version again !!!!
+        wrap.putInt(0); // Vertex count
+        
+        wrap.put((byte)0);  // Closed curve - false
+        wrap.putInt(Mesh.INTERPOLATING);
+        
+        Curve curve = new Curve(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+        Assert.assertNotNull(curve);
+        Assert.assertEquals(0, curve.getVertices().length);
+        Assert.assertEquals(false, curve.isClosed());
+        Assert.assertEquals(Mesh.INTERPOLATING, curve.getSmoothingMethod());
     }
 }

@@ -11,9 +11,11 @@
 
 package artofillusion;
 
+import static artofillusion.ViewerCanvas.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import static artofillusion.ui.UIUtilities.*;
 import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
 import java.awt.*;
@@ -65,8 +67,7 @@ public class MoveViewTool extends EditingTool
   {
     Camera cam = view.getCamera();
 
-	selectedNavigation = view.getNavigationMode();
-    controlDown = e.isControlDown();
+    selectedNavigation = view.getNavigationMode();
     clickPoint = e.getPoint();
     clickPos = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     oldCoords = cam.getCameraCoordinates().duplicate();
@@ -74,15 +75,17 @@ public class MoveViewTool extends EditingTool
     oldRotCenter = new Vec3(view.getRotationCenter());
     oldScale = view.getScale();
     oldDist = view.getDistToPlane(); // distToPlane needs to be kept up to date
-	view.setRotationCenter(oldCoords.getOrigin().plus(oldCoords.getZDirection().times(oldDist)));
+    view.setRotationCenter(oldCoords.getOrigin().plus(oldCoords.getZDirection().times(oldDist)));
 	
-	if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
-	    !e.isAltDown() && !e.isMetaDown()){
-		if (view.getNavigationMode() > 3)
-			view.setNavigationMode(0);
-		else if (view.getNavigationMode() > 1)
-			view.setNavigationMode(view.getNavigationMode()-2, true);
-	}
+     if (theWindow != null
+         && theWindow.getToolPalette().getSelectedTool() == this
+         && mouseButtonOne(e))
+     {
+       if (view.getNavigationMode() > 3)
+         view.setNavigationMode(NAVIGATE_MODEL_SPACE);
+       else if (view.getNavigationMode() > 1)
+         view.setNavigationMode(view.getNavigationMode()-2, true);
+     }
 	view.mouseDown = true;
 	view.moving = true;
   }
@@ -90,18 +93,21 @@ public class MoveViewTool extends EditingTool
 	@Override
 	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
 	{
-		// If the tool is selected in the tool palette
-		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && !e.isAltDown() && !e.isMetaDown())
-			dragMoveModel(e, view);
+		// If the MoveView tool is selected in the tool palette
+		if (theWindow != null
+                   && theWindow.getToolPalette().getSelectedTool() == this
+                   && mouseButtonOne(e))
+		  dragMoveModel(e, view);
+		// else work according to navigation mode selection
 		else
 		{
 			switch (view.getNavigationMode()) {
-				case ViewerCanvas.NAVIGATE_MODEL_SPACE:
-				case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+				case NAVIGATE_MODEL_SPACE:
+				case NAVIGATE_MODEL_LANDSCAPE:
 					dragMoveModel(e, view);
 					break;
-				case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
-				case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
+				case NAVIGATE_TRAVEL_SPACE:
+				case NAVIGATE_TRAVEL_LANDSCAPE:
 					dragMoveTravel(e, view);
 					break;
 				default:
@@ -126,7 +132,8 @@ public class MoveViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown) // forward move!
+
+		if (mouseButtonThree(e) && e.isControlDown()) // forward move!
 		{ 	
 			Vec3 hDir;
 			if (view.getNavigationMode() == 3)
@@ -181,7 +188,9 @@ public class MoveViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown) // zoom!
+		
+
+		if (mouseButtonThree(e) && !mouseButtonTwo(e) && e.isControlDown()) // zoom!
 		{ 	
 			if (view.isPerspective())
 			{

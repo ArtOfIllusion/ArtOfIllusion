@@ -12,6 +12,7 @@ package artofillusion;
 
 import artofillusion.math.*;
 import artofillusion.object.*;
+import static artofillusion.ui.UIUtilities.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -161,7 +162,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
   {
     requestFocus();
     activeTool = currentTool;
-    if (metaTool != null && e.isMetaDown())
+    if (metaTool != null && mouseButtonThree(e))
       activeTool = metaTool;
     activeTool.mousePressed(e, this);
   }

@@ -14,6 +14,7 @@ import artofillusion.Scene;
 import artofillusion.image.ComplexImage;
 import artofillusion.image.filter.ImageFilter;
 import artofillusion.math.CoordinateSystem;
+import artofillusion.test.util.StreamUtil;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -35,14 +36,13 @@ public class SceneCameraTest {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void loadSceneCameraBadVersion1() throws IOException
     {
-        Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        Scene scene = new Scene();        
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)-1); // Object Version
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         
-        new SceneCamera(new DataInputStream(targetStream), scene);
+        
+        new SceneCamera(StreamUtil.stream(wrap), scene);
     }
     
     @Test(expected = InvalidObjectException.class)
@@ -50,14 +50,13 @@ public class SceneCameraTest {
     public void loadSceneCameraBadVersion1ReadVesionAgain() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[4];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        
+        ByteBuffer wrap = ByteBuffer.allocate(4);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)-1); // Object Version read AGAIN !!!
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         
-        new SceneCamera(new DataInputStream(targetStream), scene);
+        new SceneCamera(StreamUtil.stream(wrap), scene);
     }
     
     
@@ -66,13 +65,12 @@ public class SceneCameraTest {
     public void loadSceneCameraBadVersion2() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)2); // Object Version
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         
-        new SceneCamera(new DataInputStream(targetStream), scene);
+        new SceneCamera(StreamUtil.stream(wrap), scene);
     }
 
     @Test(expected = InvalidObjectException.class)
@@ -80,22 +78,18 @@ public class SceneCameraTest {
     public void loadSceneCameraBadVersion2ReadVesionAgain() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[4];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(4);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)3); // Object Version read AGAIN !!!
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        new SceneCamera(new DataInputStream(targetStream), scene);
+        new SceneCamera(StreamUtil.stream(wrap), scene);
     }
     
     @Test
     public void testLoadSceneCameraVersion0() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)0); // Object Version read AGAIN !!!
         
@@ -105,9 +99,7 @@ public class SceneCameraTest {
         
         wrap.putInt(0); // Camera filters count
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        SceneCamera sc = new SceneCamera(new DataInputStream(targetStream), scene);
+        SceneCamera sc = new SceneCamera(StreamUtil.stream(wrap), scene);
         Assert.assertNotNull(sc);
         Assert.assertEquals(90, sc.getFieldOfView(), 0);
         Assert.assertEquals(500, sc.getDepthOfField(), 0);
@@ -122,8 +114,7 @@ public class SceneCameraTest {
     public void testLoadSceneCameraVersion2() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)2); // Object Version read AGAIN !!!
         
@@ -134,10 +125,8 @@ public class SceneCameraTest {
         wrap.put((byte)1);  // Perspective camera. Boolean treats as byte 
         
         wrap.putInt(0); // Camera filters count
-        
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        SceneCamera sc = new SceneCamera(new DataInputStream(targetStream), scene);
+
+        SceneCamera sc = new SceneCamera(StreamUtil.stream(wrap), scene);
         Assert.assertNotNull(sc);
         Assert.assertEquals(90, sc.getFieldOfView(), 0);
         Assert.assertEquals(500, sc.getDepthOfField(), 0);
@@ -152,8 +141,8 @@ public class SceneCameraTest {
     public void testLoadSceneCameraVersion2NoPersp() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)2); // Object Version read AGAIN !!!
         
@@ -165,9 +154,7 @@ public class SceneCameraTest {
         
         wrap.putInt(0); // Camera filters count
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        SceneCamera sc = new SceneCamera(new DataInputStream(targetStream), scene);
+        SceneCamera sc = new SceneCamera(StreamUtil.stream(wrap), scene);
         Assert.assertNotNull(sc);
         Assert.assertEquals(90, sc.getFieldOfView(), 0);
         Assert.assertEquals(500, sc.getDepthOfField(), 0);
@@ -183,8 +170,8 @@ public class SceneCameraTest {
     public void testLoadCameraWithBadFilter() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)2); // Object Version read AGAIN !!!
         
@@ -200,10 +187,8 @@ public class SceneCameraTest {
         
         wrap.putShort(Integer.valueOf(className.length()).shortValue());
         wrap.put(className.getBytes());
-        
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        new SceneCamera(new DataInputStream(targetStream), scene);
+
+        new SceneCamera(StreamUtil.stream(wrap), scene);
                 
     }
     
@@ -211,8 +196,7 @@ public class SceneCameraTest {
     public void testLoadCameraWithGoodFilter() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object Version
         wrap.putShort((short)2); // Object Version read AGAIN !!!
         
@@ -228,10 +212,8 @@ public class SceneCameraTest {
         
         wrap.putShort(Integer.valueOf(className.length()).shortValue());
         wrap.put(className.getBytes());
-        
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        SceneCamera sc = new SceneCamera(new DataInputStream(targetStream), scene);
+
+        SceneCamera sc = new SceneCamera(StreamUtil.stream(wrap), scene);
         Assert.assertNotNull(sc);
         
         Assert.assertEquals(1, sc.getImageFilters().length);                

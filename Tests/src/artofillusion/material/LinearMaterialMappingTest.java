@@ -12,9 +12,8 @@ package artofillusion.material;
 
 import artofillusion.Scene;
 import artofillusion.object.Cube;
+import artofillusion.test.util.StreamUtil;
 import buoy.widget.BFrame;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -46,11 +45,10 @@ public class LinearMaterialMappingTest{
         Cube cube = new Cube(1, 1, 1);
         Material3D mat = new DummyMaterial();
         
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)-1);
         
-        new LinearMaterialMapping(new DataInputStream(new ByteArrayInputStream(bytes)), cube, mat);
+        new LinearMaterialMapping(StreamUtil.stream(wrap), cube, mat);
         
     }
     
@@ -60,12 +58,11 @@ public class LinearMaterialMappingTest{
     {
         Cube cube = new Cube(1, 1, 1);
         Material3D mat = new DummyMaterial();
-        
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+                
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)2);
         
-        new LinearMaterialMapping(new DataInputStream(new ByteArrayInputStream(bytes)), cube, mat);
+        new LinearMaterialMapping(StreamUtil.stream(wrap), cube, mat);
 
         //        
         wrap.putDouble(1.0);
@@ -83,8 +80,7 @@ public class LinearMaterialMappingTest{
         Cube cube = new Cube(1, 1, 1);
         Material3D mat = new DummyMaterial();
         
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         
         //  Version
         wrap.putShort((short)0);
@@ -108,7 +104,7 @@ public class LinearMaterialMappingTest{
         wrap.putDouble(0.5);
         wrap.putDouble(3.5);
         
-        LinearMaterialMapping lmm = new LinearMaterialMapping(new DataInputStream(new ByteArrayInputStream(bytes)), cube, mat);
+        LinearMaterialMapping lmm = new LinearMaterialMapping(StreamUtil.stream(wrap), cube, mat);
         
         Assert.assertEquals(mat, lmm.getMaterial());
         Assert.assertEquals(false, lmm.isScaledToObject());
@@ -129,8 +125,7 @@ public class LinearMaterialMappingTest{
         Cube cube = new Cube(1, 1, 1);
         Material3D mat = new DummyMaterial();
         
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         
         //  Version
         wrap.putShort((short)1);
@@ -157,7 +152,7 @@ public class LinearMaterialMappingTest{
         // scale to object
         wrap.put((byte)1);
         
-        LinearMaterialMapping lmm = new LinearMaterialMapping(new DataInputStream(new ByteArrayInputStream(bytes)), cube, mat);
+        LinearMaterialMapping lmm = new LinearMaterialMapping(StreamUtil.stream(wrap), cube, mat);
         
         Assert.assertEquals(mat, lmm.getMaterial());
         Assert.assertEquals(true, lmm.isScaledToObject());
@@ -177,8 +172,7 @@ public class LinearMaterialMappingTest{
         Cube cube = new Cube(1, 1, 1);
         Material3D mat = new DummyMaterial();
         
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         
         //  Version
         wrap.putShort((short)1);
@@ -205,7 +199,7 @@ public class LinearMaterialMappingTest{
         // scale to object
         wrap.put((byte)0);  // Boolean treats as byte
         
-        LinearMaterialMapping lmm = new LinearMaterialMapping(new DataInputStream(new ByteArrayInputStream(bytes)), cube, mat);
+        LinearMaterialMapping lmm = new LinearMaterialMapping(StreamUtil.stream(wrap), cube, mat);
         
         Assert.assertEquals(mat, lmm.getMaterial());
         Assert.assertEquals(false, lmm.isScaledToObject());

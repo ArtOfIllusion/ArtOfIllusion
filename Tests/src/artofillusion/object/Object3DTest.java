@@ -20,6 +20,7 @@ import artofillusion.material.MaterialSpec;
 import artofillusion.math.BoundingBox;
 import artofillusion.math.RGBColor;
 import artofillusion.math.Vec3;
+import artofillusion.test.util.StreamUtil;
 import artofillusion.texture.ConstantParameterValue;
 import artofillusion.texture.LayeredTexture;
 import artofillusion.texture.ParameterValue;
@@ -56,13 +57,10 @@ public class Object3DTest {
     public void testAttemptToCreateObjectWithBadVersion1() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)-1); // Object version;
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        new DummyObject(new DataInputStream(targetStream), scene);        
+        new DummyObject(StreamUtil.stream(wrap), scene);        
     }
     
     @Test(expected = InvalidObjectException.class)
@@ -70,26 +68,22 @@ public class Object3DTest {
     public void testAttemptToCreateObjectWithBadVersion2() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)2); // Object version;
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        new DummyObject(new DataInputStream(targetStream), scene);        
+        new DummyObject(StreamUtil.stream(wrap), scene);        
     }
     
     @Test
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void testCreateObjectNoTexturable() throws IOException {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)1); // Object version;
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = false;
-        new DummyObject(new DataInputStream(targetStream), scene);          
+        new DummyObject(StreamUtil.stream(wrap), scene);          
     }
 
     
@@ -97,13 +91,12 @@ public class Object3DTest {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void testCreateObjectTexturableNoInputData() throws IOException {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
-        wrap.putShort((short)1); // Object version;
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
+        wrap.putShort((short)1); // Object version;
+
         DummyObject.canSetTexture = true;
-        new DummyObject(new DataInputStream(targetStream), scene);          
+        new DummyObject(StreamUtil.stream(wrap), scene);          
     }
     
     @Test
@@ -111,15 +104,14 @@ public class Object3DTest {
     public void testCreateObjectNoMaterialButLayeredTexture() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object version;
         wrap.putInt(-1);  // No material
         wrap.putInt(-1);  // Layered texture
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = true;
-        DummyObject dob = new DummyObject(new DataInputStream(targetStream), scene); 
+        DummyObject dob = new DummyObject(StreamUtil.stream(wrap), scene); 
         Assert.assertNotNull(dob);
         
         Assert.assertNull(dob.getMaterial());
@@ -133,8 +125,7 @@ public class Object3DTest {
     {
         Scene scene = new Scene();
         
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object version;
         wrap.putInt(-1);  // No material
         wrap.putInt(0);  // Default scene UniformTexture
@@ -143,10 +134,9 @@ public class Object3DTest {
         
         wrap.putShort(Integer.valueOf(className.length()).shortValue());
         wrap.put(className.getBytes());
-        
-        InputStream targetStream = new ByteArrayInputStream(bytes);
+                
         DummyObject.canSetTexture = true;
-        DummyObject dob = new DummyObject(new DataInputStream(targetStream), scene);
+        DummyObject dob = new DummyObject(StreamUtil.stream(wrap), scene);
         
         Assert.assertEquals(scene.getDefaultTexture(), dob.getTexture());
         Assert.assertTrue(dob.getTextureMapping() instanceof DummyTextureMapping);
@@ -159,8 +149,7 @@ public class Object3DTest {
     public void testCreateObjectButMaterialMissed() throws IOException
     {
         Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object version;
         wrap.putInt(0);  // Take 0'th material from scene but it is missed
         
@@ -171,9 +160,8 @@ public class Object3DTest {
         
         wrap.putInt(-1);  // Layered texture
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = true;
-        new DummyObject(new DataInputStream(targetStream), scene);
+        new DummyObject(StreamUtil.stream(wrap), scene);
     }
     
     @Test
@@ -181,9 +169,8 @@ public class Object3DTest {
     public void testCreateObjectWithMaterial() throws IOException {
         Scene scene = new Scene();
         scene.addMaterial(new DummyMaterial());
-        
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+                
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object version;
         wrap.putInt(0);  // Take 0'th material from scene
         
@@ -194,9 +181,9 @@ public class Object3DTest {
         
         wrap.putInt(-1);  // Layered texture
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
+        
         DummyObject.canSetTexture = true;
-        DummyObject dob = new DummyObject(new DataInputStream(targetStream), scene);
+        DummyObject dob = new DummyObject(StreamUtil.stream(wrap), scene);
         
         Assert.assertEquals(scene.getMaterial(0), dob.getMaterial());
         Assert.assertTrue(dob.getMaterialMapping() instanceof DummyMaterialMapping);
@@ -207,9 +194,8 @@ public class Object3DTest {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void testCreateObjectButTextureMissed() throws IOException
     {
-        Scene scene = new Scene();
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        Scene scene = new Scene();        
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Object version;
         wrap.putInt(-1);  // No material
         wrap.putInt(0);  // Take 0'th texture from scene but texture class is missed
@@ -219,9 +205,8 @@ public class Object3DTest {
         wrap.putShort(Integer.valueOf(className.length()).shortValue());
         wrap.put(className.getBytes());
 
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         DummyObject.canSetTexture = true;
-        new DummyObject(new DataInputStream(targetStream), scene);
+        new DummyObject(StreamUtil.stream(wrap), scene);
     }
     
     
@@ -247,8 +232,7 @@ public class Object3DTest {
     public void testReadParameterValue() throws IOException
     {
 
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
 
         String className = ConstantParameterValue.class.getTypeName();
         
@@ -256,7 +240,7 @@ public class Object3DTest {
         wrap.put(className.getBytes());
         wrap.putDouble(100); // Value to pass to ConstantParameterValue constructor
         
-        ParameterValue pv = DummyObject.readParameterValue(new DataInputStream(new ByteArrayInputStream(bytes)));
+        ParameterValue pv = DummyObject.readParameterValue(StreamUtil.stream(wrap));
         Assert.assertNotNull(pv);
         Assert.assertTrue(pv instanceof ConstantParameterValue);
         Assert.assertEquals(100d, pv.getAverageValue(), 0);
@@ -267,15 +251,14 @@ public class Object3DTest {
     public void testReadParameterValueFromUnknownClass() throws IOException
     {
 
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
 
         String className = "dummy.dummy.Unknown";
         
         wrap.putShort(Integer.valueOf(className.length()).shortValue());
         wrap.put(className.getBytes());
         
-        DummyObject.readParameterValue(new DataInputStream(new ByteArrayInputStream(bytes)));
+        DummyObject.readParameterValue(StreamUtil.stream(wrap));
 
     }
     public static class DummyTextureMapping extends TextureMapping

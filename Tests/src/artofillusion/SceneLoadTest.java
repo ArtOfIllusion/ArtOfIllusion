@@ -14,6 +14,7 @@ package artofillusion;
 import artofillusion.material.UniformMaterial;
 import artofillusion.math.RGBColor;
 import artofillusion.object.Object3D;
+import artofillusion.test.util.StreamUtil;
 import artofillusion.texture.Texture;
 import artofillusion.texture.TextureMapping;
 import artofillusion.texture.TextureSpec;
@@ -42,12 +43,10 @@ public class SceneLoadTest {
     public void testLoadSceneBadVersion1() throws IOException
     {
         
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)-1); // Scene Version
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        new Scene(new DataInputStream(targetStream), true);
+        new Scene(StreamUtil.stream(wrap), true);
     }
     
     @Test(expected = InvalidObjectException.class)
@@ -60,15 +59,14 @@ public class SceneLoadTest {
         wrap.putShort((short)5); // Scene Version
         
         InputStream targetStream = new ByteArrayInputStream(bytes);
-        new Scene(new DataInputStream(targetStream), true);
+        new Scene(StreamUtil.stream(wrap), true);
     }
     
     @Test(expected = IOException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void testReadSceneWithMissedImage() throws IOException
     {
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)2); // Scene Version 2. No metadata expected to  set
         
         // Ambient color data
@@ -97,14 +95,13 @@ public class SceneLoadTest {
             wrap.put(className.getBytes());
         }
 
-        new Scene(new DataInputStream(new ByteArrayInputStream(bytes)), true);
+        new Scene(StreamUtil.stream(wrap), true);
     }
     
     @Test
     public void testReadEmptySceneWithMissedMaterialAndTexture() throws IOException
     {
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)2); // Scene Version 2. No metadata expected to  set
         
         // Ambient color data
@@ -157,8 +154,7 @@ public class SceneLoadTest {
             colorToBuffer(new RGBColor(45, 45, 45), wrap);            
         }
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        Scene scene = new Scene(new DataInputStream(targetStream), true);
+        Scene scene = new Scene(StreamUtil.stream(wrap), true);
         
         
         Assert.assertEquals(1, scene.getNumTextures());
@@ -173,8 +169,7 @@ public class SceneLoadTest {
     @Test
     public void testReadEmptySceneWithMissedMaterialAndBadTexture() throws IOException
     {
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)2); // Scene Version 2. No metadata expected to  set
         
         // Ambient color data
@@ -227,8 +222,7 @@ public class SceneLoadTest {
             colorToBuffer(new RGBColor(45, 45, 45), wrap);            
         }
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        Scene scene = new Scene(new DataInputStream(targetStream), true);
+        Scene scene = new Scene(StreamUtil.stream(wrap), true);
         
         
         Assert.assertEquals(1, scene.getNumTextures());
@@ -243,8 +237,7 @@ public class SceneLoadTest {
     @Test
     public void testReadEmptySceneWithMissedMaterial() throws IOException
     {
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)2); // Scene Version 2. No metadata expected to  set
         
         // Ambient color data
@@ -297,8 +290,7 @@ public class SceneLoadTest {
             colorToBuffer(new RGBColor(45, 45, 45), wrap);            
         }
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        Scene scene = new Scene(new DataInputStream(targetStream), true);
+        Scene scene = new Scene(StreamUtil.stream(wrap), true);
         
         
         Assert.assertEquals(1, scene.getNumTextures());
@@ -315,8 +307,7 @@ public class SceneLoadTest {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void testReadEmptySceneSettingsOnlyNoMeta() throws IOException
     {
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)2); // Scene Version 2. No metadata expected to  set
         
         // Ambient color data
@@ -352,8 +343,7 @@ public class SceneLoadTest {
         
         }
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        new Scene(new DataInputStream(targetStream), true);
+        new Scene(StreamUtil.stream(wrap), true);
     }
 
     private static void colorToBuffer(RGBColor color, ByteBuffer buffer)

@@ -15,6 +15,7 @@ import artofillusion.math.CoordinateSystem;
 import artofillusion.object.Cube;
 import artofillusion.object.Object3D;
 import artofillusion.object.ObjectInfo;
+import artofillusion.test.util.StreamUtil;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class PoseTrackTest {
         Object3D obj = new Cube(1, 1, 1);
         ObjectInfo oi = new ObjectInfo(obj, new CoordinateSystem(), "Cube");
         PoseTrack pt = new PoseTrack(oi);
-        pt.initFromStream(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);   
+        pt.initFromStream(StreamUtil.stream(wrap), (Scene)null);   
     }
     
     @Test(expected = InvalidObjectException.class)
@@ -61,6 +62,6 @@ public class PoseTrackTest {
         Object3D obj = new Cube(1, 1, 1);
         ObjectInfo oi = new ObjectInfo(obj, new CoordinateSystem(), "Cube");
         PoseTrack pt = new PoseTrack(oi);
-        pt.initFromStream(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+        pt.initFromStream(StreamUtil.stream(wrap), (Scene)null);
     }
 }

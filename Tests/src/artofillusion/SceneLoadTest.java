@@ -54,11 +54,9 @@ public class SceneLoadTest {
     public void testLoadSceneBadVersion2() throws IOException
     {
         
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)5); // Scene Version
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
         new Scene(StreamUtil.stream(wrap), true);
     }
     

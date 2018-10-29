@@ -11,10 +11,8 @@
 package artofillusion.object;
 
 import artofillusion.Scene;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+import artofillusion.test.util.StreamUtil;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -29,13 +27,11 @@ public class CubeTest {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void createCubeTestBadVersionLess() throws IOException {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)-1);
+
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        new Cube(new DataInputStream(targetStream), scene);
+        new Cube(StreamUtil.stream(wrap), scene);
     }
     
     
@@ -43,13 +39,10 @@ public class CubeTest {
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     public void createCubeTestBadVersionMore() throws IOException {
         Scene scene = new Scene();
-        byte[] bytes = new byte[2];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(2);
         wrap.putShort((short)2);
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        
-        new Cube(new DataInputStream(targetStream), scene);
+        new Cube(StreamUtil.stream(wrap), scene);
     }
     
     

@@ -13,7 +13,7 @@ package artofillusion.animation;
 
 import artofillusion.LayoutWindow;
 import artofillusion.Scene;
-import java.io.ByteArrayInputStream;
+import artofillusion.test.util.StreamUtil;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -55,6 +55,7 @@ public class WeightTrackTest {
         WeightTrack weight = new WeightTrack(parent);
         
         Track dup = weight.duplicate(parent);
+        Assert.assertNotNull(dup);
         Assert.assertTrue(dup instanceof WeightTrack);
         Assert.assertNotEquals(weight, dup);
         Assert.assertEquals("Weight", dup.getName());
@@ -92,20 +93,18 @@ public class WeightTrackTest {
     @Test(expected = InvalidObjectException.class)
     public void testLoadFromStreamTrackBadVersion() throws IOException
     {
-        byte[] bytes = new byte[12];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(12);
         wrap.putShort((short)1); // Track Version
             
         Track track = new WeightTrack(parent);
-        track.initFromStream(new DataInputStream(new ByteArrayInputStream(bytes)), (Scene)null);
+        track.initFromStream(StreamUtil.stream(wrap), (Scene)null);
     }
     
     
     @Test
     public void testLoadFromStreamTrack() throws IOException
     {
-        byte[] bytes = new byte[120];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(120);
         wrap.putShort((short)0); // Track Version
 
         String trackName = "Weight";
@@ -128,7 +127,7 @@ public class WeightTrackTest {
         }
         
         Track track = new WeightTrack(parent);
-        track.initFromStream(new DataInputStream(new ByteArrayInputStream(bytes)), (Scene)null);
+        track.initFromStream(StreamUtil.stream(wrap), (Scene)null);
         
         Assert.assertTrue(track.isEnabled());
         Assert.assertEquals(Timecourse.LINEAR, track.getSmoothingMethod());

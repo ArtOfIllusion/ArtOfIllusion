@@ -10,8 +10,7 @@
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+import artofillusion.test.util.StreamUtil;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.junit.Test;
@@ -27,13 +26,13 @@ public class RGBColorTest
   @Test
   public void testLoadRGBColorFromStream() throws IOException
   {
-    byte[] bytes = new byte[12];
-    ByteBuffer wrap = ByteBuffer.wrap(bytes);
+    
+    ByteBuffer wrap = ByteBuffer.allocate(12);
     wrap.putFloat(0);
     wrap.putFloat(0.5f);
     wrap.putFloat(1.0f);
     
-    RGBColor color = new RGBColor(new DataInputStream(new ByteArrayInputStream(bytes)));
+    RGBColor color = new RGBColor(StreamUtil.stream(wrap));
     Assert.assertEquals(0, color.red, 0);
     Assert.assertEquals(0.5, color.green, 0);
     Assert.assertEquals(1, color.blue, 0);

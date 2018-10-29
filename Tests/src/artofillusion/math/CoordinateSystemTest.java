@@ -11,8 +11,7 @@
 
 package artofillusion.math;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+import artofillusion.test.util.StreamUtil;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.junit.Assert;
@@ -40,9 +39,8 @@ public class CoordinateSystemTest {
     
     @Test
     public void testCreateCSFromStream() throws IOException
-    {
-        byte[] bytes = new byte[200];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+    {        
+        ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putDouble(1.0);
         wrap.putDouble(2.0);
         wrap.putDouble(3.0);
@@ -51,7 +49,7 @@ public class CoordinateSystemTest {
         wrap.putDouble(45.0);
         wrap.putDouble(90.0);
         
-        CoordinateSystem test = new CoordinateSystem(new DataInputStream(new ByteArrayInputStream(bytes)));
+        CoordinateSystem test = new CoordinateSystem(StreamUtil.stream(wrap));
         
         Assert.assertEquals(1.0, test.orig.x, 0);
         Assert.assertEquals(2.0, test.orig.y, 0);

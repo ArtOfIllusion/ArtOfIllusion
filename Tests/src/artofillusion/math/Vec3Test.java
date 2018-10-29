@@ -10,10 +10,8 @@
 
 package artofillusion.math;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
+import artofillusion.test.util.StreamUtil;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,14 +53,12 @@ public class Vec3Test {
     public void testVec3Constructor3() throws IOException
     {
         
-        byte[] bytes = new byte[24];
-        ByteBuffer wrap = ByteBuffer.wrap(bytes);
+        ByteBuffer wrap = ByteBuffer.allocate(24);
         wrap.putDouble(1.0);
         wrap.putDouble(2.0);
         wrap.putDouble(3.0);
         
-        InputStream targetStream = new ByteArrayInputStream(bytes);
-        Vec3 test = new Vec3(new DataInputStream(targetStream));
+        Vec3 test = new Vec3(StreamUtil.stream(wrap));
         Assert.assertEquals(1.0, test.x, 0);
         Assert.assertEquals(2.0, test.y, 0);
         Assert.assertEquals(2.0, test.y, 0);

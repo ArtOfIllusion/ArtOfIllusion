@@ -16,8 +16,6 @@ import artofillusion.object.Cube;
 import artofillusion.object.Object3D;
 import artofillusion.object.ObjectInfo;
 import artofillusion.test.util.StreamUtil;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;

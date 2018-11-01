@@ -12,12 +12,17 @@
 package artofillusion.animation;
 
 import artofillusion.Scene;
-import artofillusion.object.Cube;
+import artofillusion.math.Vec3;
+import artofillusion.object.Curve;
+import artofillusion.object.Mesh;
+import artofillusion.object.Object3D;
+import artofillusion.object.Tube;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;
+import org.junit.Assert;
 import org.junit.Test;
 
 
@@ -25,7 +30,8 @@ import org.junit.Test;
  *
  * @author maksim.khramov
  */
-public class ActorStreamLoadTest{
+public class ActorTest
+{
 
     @Test(expected = InvalidObjectException.class)
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -34,7 +40,21 @@ public class ActorStreamLoadTest{
         ByteBuffer wrap = ByteBuffer.allocate(200);
         wrap.putShort((short)1); // Actor Version 1. Expected exception to be thrown
         
-        Actor actor = new Actor(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+        new Actor(new DataInputStream(new ByteArrayInputStream(wrap.array())), (Scene)null);
+        
+    }
+    
+    @Test
+    public void testCreateActorForObject()
+    {
+        
+        Object3D tube = new Tube(new Curve(new Vec3[] {new Vec3(), new Vec3()}, new float[] {0f, 1f}, Mesh.APPROXIMATING, false), new double[] {0f, 1f}, Tube.CLOSED_ENDS);
+        Actor actor = new Actor(tube);
+        
+        Assert.assertNotNull(actor);
+        Assert.assertEquals(1, actor.getNumGestures());
+        
+        
         
     }
 }

@@ -12,6 +12,7 @@ package artofillusion.object;
 
 import artofillusion.MaterialPreviewer;
 import artofillusion.Scene;
+import artofillusion.TextureParameter;
 import artofillusion.WireframeMesh;
 import artofillusion.animation.Keyframe;
 import artofillusion.material.Material;
@@ -261,6 +262,177 @@ public class Object3DTest {
         DummyObject.readParameterValue(StreamUtil.stream(wrap));
 
     }
+    
+    @Test
+    public void testCopyTextureAndMaterialFromEmptyOne()
+    {
+        DummyObject source = new DummyObject();
+        DummyObject target = new DummyObject();
+        
+        target.copyTextureAndMaterial(source);
+        
+        Assert.assertNull(target.getTextureMapping());
+        Assert.assertNull(target.getMaterial());
+        Assert.assertNull(target.getMaterialMapping());
+        Assert.assertNull(target.getParameters());
+    }
+    
+    @Test
+    public void testCopyTextureAndMaterialWithExistedTextureNoMapping()
+    {
+        DummyObject source = new DummyObject();
+        DummyObject target = new DummyObject();
+        
+        Texture mock = new MockTexture();
+        source.setTexture(mock, null);
+        
+        target.copyTextureAndMaterial(source);
+        
+        Assert.assertNull(target.getTextureMapping());
+        Assert.assertNull(target.getTexture());
+        
+        Assert.assertNull(target.getMaterial());
+        Assert.assertNull(target.getMaterialMapping());
+        
+        Assert.assertNotNull(target.getParameters());
+        Assert.assertEquals(0, target.getParameters().length);
+        
+    }
+    
+    @Test
+    public void testCopyTextureAndMaterialWithExistedTextureAndMapping()
+    {
+        DummyObject source = new DummyObject();
+        DummyObject target = new DummyObject();
+        
+        Texture mock = new MockTexture();
+        source.setTexture(mock, new DummyTextureMapping(null, source, mock));
+        
+        target.copyTextureAndMaterial(source);
+        
+        Assert.assertNotNull(target.getTextureMapping());
+        Assert.assertNotNull(target.getTexture());
+        
+        Assert.assertNull(target.getMaterial());
+        Assert.assertNull(target.getMaterialMapping());
+        
+        Assert.assertNotNull(target.getParameters());
+        Assert.assertEquals(0, target.getParameters().length);
+        
+    }
+    
+    
+    //@Test
+    public void testCopyTextureAndMaterialWithExistedTextureMappingAndParameters()
+    {
+        DummyObject source = new DummyObject();
+        DummyObject target = new DummyObject();
+        
+        Texture mock = new MockTexture();        
+        source.setTexture(mock, new DummyTextureMapping(null, source, mock));
+        
+        target.copyTextureAndMaterial(source);
+        
+        Assert.assertNotNull(target.getTextureMapping());
+        Assert.assertNotNull(target.getTexture());
+        
+        Assert.assertNull(target.getMaterial());
+        Assert.assertNull(target.getMaterialMapping());
+        
+        Assert.assertNotNull(target.getParameters());
+        Assert.assertEquals(0, target.getParameters().length);
+        
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void testGetParameterValueFromMissedOne()
+    {
+        DummyObject source = new DummyObject();
+        source.getParameterValue(new TextureParameter(source, "Dummy", 0, 0, 0));
+    }
+    
+    @Test
+    public void testGetParameterValueFromEmpty()
+    {
+        DummyObject source = new DummyObject();
+        source.setParameters(new TextureParameter[0]);
+        Assert.assertNull(source.getParameterValue(new TextureParameter(source, "Dummy", 0, 0, 0)));
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void testGetParameterValueFromUnsetValues()
+    {
+        DummyObject source = new DummyObject();
+        TextureParameter tp = new TextureParameter(source, "Dummy", 0, 0, 0);
+        source.setParameters(new TextureParameter[] { tp });
+        
+        Assert.assertNull(source.getParameterValue(tp));        
+        
+    }
+    
+    @Test
+    public void testGetParameterValueFromEmptyValues()
+    {
+        DummyObject source = new DummyObject();
+        TextureParameter tp = new TextureParameter(source, "Dummy", 0, 0, 0);
+        source.setParameters(new TextureParameter[] { tp });
+        source.setParameterValues(new ParameterValue[1]);
+        
+        Assert.assertNull(source.getParameterValue(tp));        
+        
+    }
+    
+    
+    @Test
+    public void testGetParameterValueFromSetValues()
+    {
+        DummyObject source = new DummyObject();
+        TextureParameter tp = new TextureParameter(source, "Dummy", 0, 0, 0);
+        ParameterValue pv = new ConstantParameterValue(100);
+        
+        source.setParameters(new TextureParameter[] { tp });
+        source.setParameterValues(new ParameterValue[] { pv});
+        
+        Assert.assertNotNull(source.getParameterValue(tp));
+        Assert.assertEquals(pv, source.getParameterValue(tp));
+        
+    }
+    
+    public static class MockTexture extends Texture
+    {
+
+        @Override
+        public boolean hasComponent(int component) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void getAverageSpec(TextureSpec spec, double time, double[] param) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public TextureMapping getDefaultMapping(Object3D object) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public Texture duplicate() {
+            return new MockTexture();
+        }
+
+        @Override
+        public void edit(BFrame fr, Scene sc) {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void writeToFile(DataOutputStream out, Scene theScene) throws IOException {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
+    }
+    
     public static class DummyTextureMapping extends TextureMapping
     {
         private   Object3D object;
@@ -302,12 +474,12 @@ public class Object3DTest {
 
         @Override
         public TextureMapping duplicate() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return new DummyTextureMapping(null, object, texture);
         }
 
         @Override
         public TextureMapping duplicate(Object3D obj, Texture tex) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return new DummyTextureMapping(null, obj, tex);
         }
 
         @Override
@@ -349,7 +521,7 @@ public class Object3DTest {
 
         @Override
         public MaterialMapping duplicate() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            return new DummyMaterialMapping(this.getObject(), this.getMaterial());
         }
 
         @Override

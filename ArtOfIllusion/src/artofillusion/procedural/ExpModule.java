@@ -15,7 +15,7 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-public class ExpModule extends Module
+public class ExpModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   double value, error, valueIn, errorIn, lastBlur;

@@ -16,7 +16,7 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.awt.*;
 
-public class BlendModule extends Module
+public class BlendModule extends ProceduralModule
 {
   RGBColor blendColor;
   boolean colorOk;

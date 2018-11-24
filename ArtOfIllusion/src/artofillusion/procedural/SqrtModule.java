@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which outputs the square root of a number. */
 
-public class SqrtModule extends Module
+public class SqrtModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   double value, error, valueIn, errorIn, lastBlur;

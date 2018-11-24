@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which clips its input to a fixed range. */
 
-public class ClipModule extends Module
+public class ClipModule extends ProceduralModule
 {
   double min, max;
 

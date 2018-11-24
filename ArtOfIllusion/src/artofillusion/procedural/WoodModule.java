@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which generates a wood pattern. */
 
-public class WoodModule extends Module
+public class WoodModule extends ProceduralModule
 {
   boolean valueOk, mod;
   int octaves;

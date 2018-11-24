@@ -22,7 +22,7 @@ import javax.swing.*;
 
 /** This is a Module which outputs an image. */
 
-public class ImageModule extends Module
+public class ImageModule extends ProceduralModule
 {
   private ImageMap map;
   private boolean tilex, tiley, mirrorx, mirrory, wrapx, wrapy;

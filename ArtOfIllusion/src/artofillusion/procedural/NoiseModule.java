@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which generates fractal noise based on Perlin's noise function. */
 
-public class NoiseModule extends Module
+public class NoiseModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   int octaves;

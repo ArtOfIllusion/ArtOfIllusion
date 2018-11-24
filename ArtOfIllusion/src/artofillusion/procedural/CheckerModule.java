@@ -17,7 +17,7 @@ import artofillusion.ui.*;
 
 import java.awt.*;
 
-public class CheckerModule extends Module
+public class CheckerModule extends ProceduralModule
 {
   boolean valueOk, gradOk;
   double value, error, lastBlur;

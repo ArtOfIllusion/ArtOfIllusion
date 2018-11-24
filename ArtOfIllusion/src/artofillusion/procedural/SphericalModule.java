@@ -16,7 +16,7 @@ import java.awt.*;
 
 /** This is a Module which converts from rectangular to spherical coordinates. */
 
-public class SphericalModule extends Module
+public class SphericalModule extends ProceduralModule
 {
   double value[], error[], r1, r2, r2inv, lastBlur;
   boolean valueOk[], rOk;

@@ -16,7 +16,7 @@ import java.awt.*;
 
 /** This is a Module which interpolates between two numbers. */
 
-public class InterpModule extends Module
+public class InterpModule extends ProceduralModule
 {
   double value, error, fract, lastBlur;
   boolean valueOk, errorOk, gradOk;

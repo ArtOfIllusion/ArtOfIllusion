@@ -146,7 +146,7 @@ public class ModellingApp
 
   public static Class[] getModules()
   {
-    List instances = PluginRegistry.getPlugins(Module.class);
+    List instances = PluginRegistry.getPlugins(artofillusion.procedural.Module.class);
     Class classes[] = new Class[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
@@ -218,7 +218,7 @@ public class ModellingApp
   
   /** Add a new Module to the list of available ones. */
   
-  public static void registerModule(Module o)
+  public static void registerModule(artofillusion.procedural.Module o)
   {
     PluginRegistry.registerPlugin(o);
   }

@@ -16,7 +16,7 @@ import artofillusion.ui.*;
 import artofillusion.math.*;
 import java.awt.*;
 
-public class BlurModule extends Module
+public class BlurModule extends ProceduralModule
 {
   boolean valueOk;
   double extraBlur, lastBlur;

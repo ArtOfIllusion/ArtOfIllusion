@@ -16,7 +16,7 @@ import java.awt.*;
 /** This is a Module which takes three numbers, and uses them as the red, green, and blue
     components of a color. */
 
-public class RGBModule extends Module
+public class RGBModule extends ProceduralModule
 {
   RGBColor color;
   boolean colorOk;

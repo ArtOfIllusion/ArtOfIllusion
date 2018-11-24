@@ -15,7 +15,7 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-public class OutputModule extends Module
+public class OutputModule extends ProceduralModule
 {
   int width;
   double defaultValue;

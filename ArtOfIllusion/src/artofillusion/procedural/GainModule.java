@@ -17,7 +17,7 @@ import java.awt.*;
 
 /** This is a Module which calculates Perlin's gain function. */
 
-public class GainModule extends Module
+public class GainModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   double value, error, valueIn, errorIn, gain, power, lastBlur;

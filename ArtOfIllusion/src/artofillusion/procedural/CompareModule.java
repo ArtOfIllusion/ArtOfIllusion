@@ -16,7 +16,7 @@ import java.awt.*;
 /** This is a Module which compares two numbers, and outputs either 0 or 1 depending on
     which is greater. */
 
-public class CompareModule extends Module
+public class CompareModule extends ProceduralModule
 {
   double value, error, deriv, lastBlur;
   boolean valueOk, gradOk;

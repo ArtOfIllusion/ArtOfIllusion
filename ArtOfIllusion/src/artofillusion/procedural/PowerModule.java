@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which raises a number to a power. */
 
-public class PowerModule extends Module
+public class PowerModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk, powerIsInteger;
   double value, error, valueIn, errorIn, power, lastBlur;

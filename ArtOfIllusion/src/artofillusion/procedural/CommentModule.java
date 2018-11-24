@@ -18,7 +18,7 @@ import java.io.*;
 
 /** This is a Module which displays a comment, but otherwise has no effect on the procedure. */
 
-public class CommentModule extends Module
+public class CommentModule extends ProceduralModule
 {
   public CommentModule(Point position)
   {

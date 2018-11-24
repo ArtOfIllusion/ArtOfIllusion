@@ -15,7 +15,7 @@ import java.awt.*;
 
 /** This is a Module which outputs one number mod another. */
 
-public class ModModule extends Module
+public class ModModule extends ProceduralModule
 {
   double value, error, gradScale, lastBlur;
   boolean valueOk;

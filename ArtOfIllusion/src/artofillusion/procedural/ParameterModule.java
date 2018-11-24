@@ -19,7 +19,7 @@ import java.io.*;
 
 /** This is a Module which outputs a per-vertex texture parameter. */
 
-public class ParameterModule extends Module
+public class ParameterModule extends ProceduralModule
 {
   double minVal, maxVal, defaultVal;
   int index, id;

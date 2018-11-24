@@ -230,7 +230,7 @@ class ModuleLoader {
 
 /** This is a Module which outputs an expression applied to three numbers. */
 
-public class ExprModule extends Module
+public class ExprModule extends ProceduralModule
 {
 
     private Hashtable<String, OPort> varTable;

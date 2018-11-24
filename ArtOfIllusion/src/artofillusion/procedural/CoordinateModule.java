@@ -18,7 +18,7 @@ import java.io.*;
 
 /** This is a Module which outputs a coordinate (x, y, z, or t). */
 
-public class CoordinateModule extends Module
+public class CoordinateModule extends ProceduralModule
 {
   int coordinate;
   PointInfo point;

@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which generates fractal turbulence based on Perlin's noise function. */
 
-public class TurbulenceModule extends Module
+public class TurbulenceModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
   int octaves;

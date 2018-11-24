@@ -20,7 +20,7 @@ import java.io.*;
 
 /** This is a Module which outputs a number. */
 
-public class NumberModule extends Module
+public class NumberModule extends ProceduralModule
 {
   private double value;
 

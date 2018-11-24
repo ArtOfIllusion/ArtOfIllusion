@@ -16,7 +16,7 @@ import java.awt.*;
 
 /** This is a Module which converts from rectangular to polar coordinates. */
 
-public class PolarModule extends Module
+public class PolarModule extends ProceduralModule
 {
   double value[], error[], lastBlur;
   boolean valueOk[];

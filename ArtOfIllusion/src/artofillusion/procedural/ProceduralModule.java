@@ -18,12 +18,9 @@ import java.io.*;
 import java.lang.reflect.*;
 
 /** This represents a module in a procedure.  This is an abstract class, whose subclasses
-    represent specific kinds of modules.
-    @deprecated as of 3.1, to be removed 4.0. use {@link artofillusion.procedural.ProceduralModule}
-*/
+    represent specific kinds of modules. */
 
-@Deprecated 
-public class Module
+public class ProceduralModule extends artofillusion.procedural.Module
 {
   protected IOPort input[], output[];
   public Module linkFrom[];
@@ -38,13 +35,7 @@ public class Module
   protected final Color selectedColor = new Color(255, 60, 60);  
   protected static final FontMetrics defaultMetrics = Toolkit.getDefaultToolkit().getFontMetrics(defaultFont);
 
-  @Deprecated
-  Module()
-  {
-    //Do not use, this is just so that the replacement class can temporarily extend this one
-  }
-
-  public Module(String name, IOPort input[], IOPort output[], Point position)
+  public ProceduralModule(String name, IOPort input[], IOPort output[], Point position)
   {
     this.name = name;
     this.input = input;

@@ -15,7 +15,7 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-public class DifferenceModule extends Module
+public class DifferenceModule extends ProceduralModule
 {
   Vec3 tempVec;
 

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +12,10 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
+import artofillusion.image.ImageMap;
 import artofillusion.math.*;
+import artofillusion.texture.Texture;
+import artofillusion.ui.Translate;
 import java.awt.*;
 import java.io.*;
 import java.lang.reflect.*;
@@ -274,4 +278,74 @@ public class Procedure
         to.getModule().setInput(to, from);
       }
   }
+  
+  public TextureParameter[] getTextureParameters(Object texture)
+  {
+    int count = 0;
+    for (Module mod : module)
+      if (mod instanceof ParameterModule)
+        count++;
+    
+    TextureParameter[] params = new TextureParameter[count];
+    count = 0;
+    for (Module mod : module)
+      if (mod instanceof ParameterModule)
+      {
+        params[count] = ((ParameterModule) mod).getParameter(texture);
+        ((ParameterModule) mod).setIndex(count++);
+      }
+    return params;
+  }
+
+  /** Determine whether given procedure texture has a non-zero value anywhere for a particular component.
+      @param component    the texture component to check for (one of the Texture *_COMPONENT constants)
+   */
+  public boolean hasTextureComponent(int component)
+  {
+    switch (component)
+    {
+      case Texture.DIFFUSE_COLOR_COMPONENT:
+        return true;
+      case Texture.SPECULAR_COLOR_COMPONENT:
+        return output[5].inputConnected(0);
+      case Texture.TRANSPARENT_COLOR_COMPONENT:
+        return output[4].inputConnected(0);
+      case Texture.HILIGHT_COLOR_COMPONENT:
+        return output[6].inputConnected(0);
+      case Texture.EMISSIVE_COLOR_COMPONENT:
+        return output[3].inputConnected(0);
+      case Texture.BUMP_COMPONENT:
+        return output[9].inputConnected(0);
+      case Texture.DISPLACEMENT_COMPONENT:
+        return output[10].inputConnected(0);
+    }
+    return false;
+  }
+
+  public boolean usesImage(ImageMap image)
+  {
+    for (Module mod : module)
+      if (mod instanceof ImageModule && ((ImageModule) mod).getMap() == image)
+        return true;
+    return false;
+  }
+
+  /**
+   * Create a Procedure object for texture.
+   */
+  public static Procedure createTextureProcedure()
+  {
+    return new Procedure(new OutputModule[]{new OutputModule(Translate.text("Diffuse"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Specular"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Transparent"), Translate.text("white"), 0.0, new RGBColor(1.0F, 1.0F, 1.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Emissive"), Translate.text("black"), 0.0, new RGBColor(0.0F, 0.0F, 0.0F), IOPort.COLOR),
+      new OutputModule(Translate.text("Transparency"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Specularity"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Shininess"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Roughness"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Cloudiness"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("BumpHeight"), "0", 0.0, null, IOPort.NUMBER),
+      new OutputModule(Translate.text("Displacement"), "0", 0.0, null, IOPort.NUMBER)});
+  }
+  
 }

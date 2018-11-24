@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -417,21 +418,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
 
   private TextureParameter[] findParameters()
   {
-    Module module[] = proc.getModules();
-    int count = 0;
-
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        count++;
-    TextureParameter params[] = new TextureParameter [count];
-    count = 0;
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        {
-          params[count] = ((ParameterModule) module[i]).getParameter(this);
-          ((ParameterModule) module[i]).setIndex(count++);
-        }
-    return params;
+    return proc.getTextureParameters(this);
   }
 
   /* Write a serialized representation of this track to a stream. */

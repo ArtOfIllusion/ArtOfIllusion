@@ -19,7 +19,7 @@ public class IOPort
   int x, y, valueType, type, location;
   String description[];
   Rectangle bounds;
-  Module module;
+  ProceduralModule module;
   
   public static final int INPUT = 0;
   public static final int OUTPUT = 1;
@@ -85,7 +85,7 @@ public class IOPort
   
   /** Get the module this port belongs to. */
   
-  public Module getModule()
+  public ProceduralModule getModule()
   {
     return module;
   }
@@ -94,7 +94,7 @@ public class IOPort
   
   public void setModule(Module mod)
   {
-    module = mod;
+    module = (ProceduralModule) mod;
   }
 
   /** Get the index of this port in its Module's list of input or output ports. */

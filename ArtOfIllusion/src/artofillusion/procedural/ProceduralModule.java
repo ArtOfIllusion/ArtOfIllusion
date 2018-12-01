@@ -139,7 +139,7 @@ public class ProceduralModule extends artofillusion.procedural.Module
               linkFrom[i] = null;
               return;
             }
-          Module module = port.getModule();
+          ProceduralModule module = port.getModule();
           for (int j = 0; j < module.output.length; j++)
             if (module.output[j] == port)
               {

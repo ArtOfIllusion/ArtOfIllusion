@@ -22,13 +22,13 @@ import java.lang.reflect.*;
 public class Procedure
 {
   OutputModule output[];
-  Module module[];
+  ProceduralModule module[];
   Link link[];
   
   public Procedure(OutputModule output[])
   {
     this.output = output;
-    module = new Module [0];
+    module = new ProceduralModule [0];
     link = new Link [0];
   }
   
@@ -70,10 +70,10 @@ public class Procedure
   
   public void addModule(Module mod)
   {
-    Module newmod[] = new Module [module.length+1];
+    ProceduralModule newmod[] = new ProceduralModule [module.length+1];
     for (int i = 0; i < module.length; i++)
       newmod[i] = module[i];
-    newmod[module.length] = mod;
+    newmod[module.length] = (ProceduralModule) mod;
     module = newmod;
   }
   
@@ -82,7 +82,7 @@ public class Procedure
 
   public void deleteModule(int which)
   {
-    Module newmod[] = new Module [module.length-1];
+    ProceduralModule newmod[] = new ProceduralModule [module.length-1];
     int i, j;
     for (i = 0, j = 0; i < module.length; i++)
       if (i != which)
@@ -180,9 +180,9 @@ public class Procedure
   
   public void copy(Procedure proc)
   {
-    module = new Module [proc.module.length];
+    module = new ProceduralModule [proc.module.length];
     for (int i = 0; i < module.length; i++)
-      module[i] = proc.module[i].duplicate();
+      module[i] = (ProceduralModule) proc.module[i].duplicate();
     link = new Link [proc.link.length];
     for (int i = 0; i < link.length; i++)
       {
@@ -238,7 +238,7 @@ public class Procedure
       throw new InvalidObjectException("");
     for (int i = 0; i < output.length; i++)
       output[i].setInput(output[i].getInputPorts()[0], null);
-    module = new Module [in.readInt()];
+    module = new ProceduralModule [in.readInt()];
     try
       {
         for (int i = 0; i < module.length; i++)
@@ -247,7 +247,7 @@ public class Procedure
             Point p = new Point(in.readInt(), in.readInt());
             Class cls = ArtOfIllusion.getClass(classname);
             Constructor con = cls.getConstructor(new Class [] {Point.class});
-            module[i] = (Module) con.newInstance(new Object [] {p});
+            module[i] = (ProceduralModule) con.newInstance(new Object [] {p});
             module[i].readFromStream(in, theScene);
           }
       }

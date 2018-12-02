@@ -144,25 +144,25 @@ public class ImageOrValue
 
   /** Get a Widget with which the user can edit the value.  This Widget will send out
       ValueChangedEvents whenever the value changes.
-      @param parent    a parent BFrame which can be used for displaying dialogs
+      @param parent    a parent window which can be used for displaying dialogs
       @param theScene  the Scene from which to get images
   */
   
-  public Widget getEditingPanel(BFrame parent, Scene theScene)
+  public Widget getEditingPanel(WindowWidget parent, Scene theScene)
   {
     return new EditingPanel(parent, theScene);
   }
   
   private class EditingPanel extends FormContainer
   {
-    BFrame fr;
+    WindowWidget fr;
     Scene sc;
     CustomWidget preview;
     BComboBox componentChoice;
     BLabel componentLabel, valueLabel;
     ValueSlider slider;
 
-    public EditingPanel(BFrame parent, Scene theScene)
+    public EditingPanel(WindowWidget parent, Scene theScene)
     {
       super(new double [] {0.0, 1.0, 0.0}, new double [] {1.0, 1.0});
       fr = parent;

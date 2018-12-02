@@ -214,7 +214,7 @@ public class DirectionalLight extends Light
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(parentFrame, Translate.text("lightColor"), color);
+        new ColorChooser(patch, Translate.text("lightColor"), color);
         patch.setBackground(color.getColor());
       }
     });
@@ -316,7 +316,7 @@ public class DirectionalLight extends Light
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(parentFrame, Translate.text("lightColor"), key.color);
+        new ColorChooser(patch, Translate.text("lightColor"), key.color);
         patch.setBackground(key.color.getColor());
       }
     });

@@ -114,11 +114,21 @@ public abstract class Texture
   
   public abstract Texture duplicate();
   
-  /** Allow the user to interactively edit the texture.  fr is a BFrame which can be used as a
-      parent for Dialogs, and sc is the Scene which this Texture is part of. */
+  /** Allow the user to interactively edit the texture.  parent is a WindowWidget which can be used as a
+      parent for Dialogs, and sc is the Scene which this Texture is part of.  Subclasses should override
+      this to implement editing. */
   
-  public abstract void edit(BFrame fr, Scene sc);
+  public void edit(WindowWidget parent, Scene sc) {
+  }
 
+  /** This exists only for backward compatibility.  Subclasses should override the version that takes
+      a WindowWidget instead. */
+
+  @Deprecated
+  public void edit(BFrame fr, Scene sc) {
+    edit((WindowWidget) fr, sc);
+  }
+  
   /** The following method writes the texture's data to an output stream.  In addition to this
       method, every Texture must include a constructor with the signature
   

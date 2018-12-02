@@ -285,7 +285,7 @@ public class ImageMapTexture extends Texture2D
   /** Allow the user to interactively edit the texture. */
 
   @Override
-  public void edit(BFrame fr, Scene sc)
+  public void edit(WindowWidget fr, Scene sc)
   {
     new Editor(fr, sc);
   }
@@ -354,13 +354,11 @@ public class ImageMapTexture extends Texture2D
     MaterialPreviewer preview;
     ActionProcessor renderProcessor;
     ImageMapTexture newTexture;
-    BFrame parent;
     Scene scene;
 
-    public Editor(BFrame fr, Scene sc)
+    public Editor(WindowWidget fr, Scene sc)
     {
       super(fr, true);
-      parent = fr;
       scene = sc;
       newTexture = (ImageMapTexture) duplicate();
       BorderContainer content = new BorderContainer();
@@ -385,10 +383,10 @@ public class ImageMapTexture extends Texture2D
       left.add(Translate.label("EmissiveColor"), 0, 5, leftGapLayout);
       LayoutInfo justLeftLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null);
       left.add(nameField = new BTextField(ImageMapTexture.this.name, 15), 1, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, null, null));
-      left.add(diffColorPanel = newTexture.diffuseColor.getEditingPanel(parent, sc), 1, 2, justLeftLayout);
-      left.add(specColorPanel = newTexture.specularColor.getEditingPanel(parent, sc), 1, 3, justLeftLayout);
-      left.add(transColorPanel = newTexture.transparentColor.getEditingPanel(parent, sc), 1, 4, justLeftLayout);
-      left.add(emissColorPanel = newTexture.emissiveColor.getEditingPanel(parent, sc), 1, 5, justLeftLayout);
+      left.add(diffColorPanel = newTexture.diffuseColor.getEditingPanel(this, sc), 1, 2, justLeftLayout);
+      left.add(specColorPanel = newTexture.specularColor.getEditingPanel(this, sc), 1, 3, justLeftLayout);
+      left.add(transColorPanel = newTexture.transparentColor.getEditingPanel(this, sc), 1, 4, justLeftLayout);
+      left.add(emissColorPanel = newTexture.emissiveColor.getEditingPanel(this, sc), 1, 5, justLeftLayout);
       content.add(left, BorderContainer.WEST);
 
       // Add the right panel.
@@ -408,13 +406,13 @@ public class ImageMapTexture extends Texture2D
       right.add(Translate.label("Cloudiness"), 0, 5, leftGapLayout);
       right.add(Translate.label("BumpHeight"), 0, 6, leftGapLayout);
       right.add(Translate.label("Displacement"), 0, 7, leftGapLayout);
-      right.add(transPanel = newTexture.transparency.getEditingPanel(parent, sc), 1, 1);
-      right.add(specPanel = newTexture.specularity.getEditingPanel(parent, sc), 1, 2);
-      right.add(shinPanel = newTexture.shininess.getEditingPanel(parent, sc), 1, 3);
-      right.add(roughPanel = newTexture.roughness.getEditingPanel(parent, sc), 1, 4);
-      right.add(cloudPanel = newTexture.cloudiness.getEditingPanel(parent, sc), 1, 5);
-      right.add(bumpPanel = newTexture.bump.getEditingPanel(parent, sc), 1, 6);
-      right.add(displacePanel = newTexture.displacement.getEditingPanel(parent, sc), 1, 7);
+      right.add(transPanel = newTexture.transparency.getEditingPanel(this, sc), 1, 1);
+      right.add(specPanel = newTexture.specularity.getEditingPanel(this, sc), 1, 2);
+      right.add(shinPanel = newTexture.shininess.getEditingPanel(this, sc), 1, 3);
+      right.add(roughPanel = newTexture.roughness.getEditingPanel(this, sc), 1, 4);
+      right.add(cloudPanel = newTexture.cloudiness.getEditingPanel(this, sc), 1, 5);
+      right.add(bumpPanel = newTexture.bump.getEditingPanel(this, sc), 1, 6);
+      right.add(displacePanel = newTexture.displacement.getEditingPanel(this, sc), 1, 7);
       content.add(right, BorderContainer.EAST);
       diffColorPanel.addEventLink(ValueChangedEvent.class, this, "valueChanged");
       specColorPanel.addEventLink(ValueChangedEvent.class, this, "valueChanged");

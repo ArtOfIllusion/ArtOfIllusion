@@ -123,11 +123,11 @@ public class ImageOrColor
 
   /** Get a Widget with which the user can edit the color.  This Widget will send out
       ValueChangedEvents whenever the color changes.
-      @param parent    a parent BFrame which can be used for displaying dialogs
+      @param parent    a parent window which can be used for displaying dialogs
       @param theScene  the Scene from which to get images
   */
   
-  public Widget getEditingPanel(final BFrame parent, final Scene theScene)
+  public Widget getEditingPanel(final WindowWidget parent, final Scene theScene)
   {
     final RowContainer row = new RowContainer();
     final CustomWidget preview = new CustomWidget();

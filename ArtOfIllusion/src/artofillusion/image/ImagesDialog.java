@@ -30,7 +30,7 @@ import static java.lang.Math.*;
 public class ImagesDialog extends BDialog
 {
   private Scene theScene;
-  private BFrame parent;
+  private WindowWidget parent;
   private int selection, dialogHeight, dialogWidth, frameWidth, cOff=0;
   private BScrollPane sp;
   private ImagesCanvas ic;
@@ -41,7 +41,7 @@ public class ImagesDialog extends BDialog
   private ImageMap selectedImage;
   private Timer timer;
   
-  public ImagesDialog(BFrame fr, Scene sc, ImageMap selected)
+  public ImagesDialog(WindowWidget fr, Scene sc, ImageMap selected)
   {
     super(fr, "Images", true);
     selectedImage = selected;
@@ -272,7 +272,7 @@ public class ImagesDialog extends BDialog
   private void openDetailsDialog()
   {
     File oldFile = getSelection().getFile();
-    new ImageDetailsDialog(parent, theScene, getSelection());
+    new ImageDetailsDialog(this, theScene, getSelection());
     ic.imagesChanged();
     ic.scrollToSelection();
     if (getSelection().getFile() != oldFile)
@@ -613,7 +613,7 @@ public class ImagesDialog extends BDialog
     
     PurgeDialog(boolean intent)
     {
-      super(parent, "Purge Images", true);
+      super(ImagesDialog.this, "Purge Images", true);
       
       thumb = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(1,15,1,1), null);
       text  = new LayoutInfo(LayoutInfo.CENTER,   LayoutInfo.NONE, new Insets(1,1,1,1),  null);

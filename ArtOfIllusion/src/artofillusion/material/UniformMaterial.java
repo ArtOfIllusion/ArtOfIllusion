@@ -118,7 +118,7 @@ public class UniformMaterial extends Material
   /* Allow the user to interactively edit the material. */
 
   @Override
-  public void edit(final BFrame fr, Scene sc)
+  public void edit(final WindowWidget parent, Scene sc)
   {
     final UniformMaterial newMaterial = (UniformMaterial) duplicate();
     BTextField nameField = new BTextField(name);
@@ -143,7 +143,7 @@ public class UniformMaterial extends Material
     transPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("Transparency"), newMaterial.transparencyColor);
+        new ColorChooser(transPatch, Translate.text("Transparency"), newMaterial.transparencyColor);
         transPatch.setBackground(newMaterial.transparencyColor.getColor());
         newMaterial.recalcColors();
         process.addEvent(renderCallback);
@@ -152,7 +152,7 @@ public class UniformMaterial extends Material
     colorPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("MaterialColor"), newMaterial.matColor);
+        new ColorChooser(colorPatch, Translate.text("MaterialColor"), newMaterial.matColor);
         colorPatch.setBackground(newMaterial.matColor.getColor());
         newMaterial.recalcColors();
         process.addEvent(renderCallback);
@@ -161,7 +161,7 @@ public class UniformMaterial extends Material
     scatPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("ScatteringColor"), newMaterial.scatteringColor);
+        new ColorChooser(scatPatch, Translate.text("ScatteringColor"), newMaterial.scatteringColor);
         scatPatch.setBackground(newMaterial.scatteringColor.getColor());
         newMaterial.recalcColors();
         process.addEvent(renderCallback);
@@ -186,7 +186,7 @@ public class UniformMaterial extends Material
     transSlider.addEventLink(ValueChangedEvent.class, valueListener);
     eccSlider.addEventLink(ValueChangedEvent.class, valueListener);
     shadowBox.addEventLink(ValueChangedEvent.class, valueListener);
-    ComponentsDialog dlg = new ComponentsDialog(fr, "", new Widget [] {
+    ComponentsDialog dlg = new ComponentsDialog(parent, "", new Widget [] {
         preview, nameField, colorPatch, transPatch, transSlider, densitySlider, scatSlider, scatPatch,
         eccSlider, refractField, shadowBox}, new String [] {null, Translate.text("Name"),
         Translate.text("EmissiveColor"), Translate.text("TransparentColor"), Translate.text("Transparency"), Translate.text("Density"),

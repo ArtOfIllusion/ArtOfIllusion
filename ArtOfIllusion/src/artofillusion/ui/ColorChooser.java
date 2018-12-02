@@ -53,14 +53,14 @@ public class ColorChooser extends BDialog
       recentColors.add(new RGBColor(1.0, 1.0, 1.0));
   }
   
-  public ColorChooser(BFrame parent, String title, RGBColor c)
+  public ColorChooser(Widget parent, String title, RGBColor c)
   {
     this(parent, title, c, true);
   }
 
-  public ColorChooser(BFrame parent, String title, RGBColor c, boolean show)
+  public ColorChooser(Widget parent, String title, RGBColor c, boolean show)
   {
-    super(parent, title, true);
+    super(UIUtilities.findWindow(parent), title, true);
     BorderContainer content = new BorderContainer();
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     oldColor = c;
@@ -135,7 +135,7 @@ public class ColorChooser extends BDialog
       }
     });
     setResizable(false);
-    UIUtilities.centerDialog(this, parent);
+    UIUtilities.centerDialog(this, UIUtilities.findWindow(parent));
     if (show)
       setVisible(true);
    }

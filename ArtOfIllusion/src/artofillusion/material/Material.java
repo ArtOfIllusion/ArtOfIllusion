@@ -115,11 +115,21 @@ public abstract class Material
   /** Create a duplicate of the material. */
   
   public abstract Material duplicate();
-  
-  /** Allow the user to interactively edit the material.  fr is a Frame which can be used as a
-      parent for Dialogs, and sc is the Scene which this Material is part of. */
-  
-  public abstract void edit(BFrame fr, Scene sc);
+
+  /** Allow the user to interactively edit the naterial.  parent is a WindowWidget which can be used as a
+   parent for Dialogs, and sc is the Scene which this Material is part of.  Subclasses should override
+   this to implement editing. */
+
+  public void edit(WindowWidget parent, Scene sc) {
+  }
+
+  /** This exists only for backward compatibility.  Subclasses should override the version that takes
+   a WindowWidget instead. */
+
+  @Deprecated
+  public void edit(BFrame fr, Scene sc) {
+    edit((WindowWidget) fr, sc);
+  }
 
   /** The following method writes the material's data to an output stream.  In addition to this
       method, every Material must include a constructor with the signature

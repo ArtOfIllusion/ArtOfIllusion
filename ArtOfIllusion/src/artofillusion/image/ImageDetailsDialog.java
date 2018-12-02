@@ -27,7 +27,7 @@ import java.awt.event.MouseEvent;
 
 public class ImageDetailsDialog extends BDialog
 {
-    private BFrame parent;
+    private WindowWidget parent;
     private Scene scene;
     private ImageMap im;
     private ArrayList<String> texturesUsing;
@@ -41,7 +41,7 @@ public class ImageDetailsDialog extends BDialog
     private BLabel[] title, data; 
     private Color defaultTextColor, errorTextColor, hilightTextColor, currentTextColor;
 
-    public ImageDetailsDialog(BFrame parent, Scene scene, ImageMap im)
+    public ImageDetailsDialog(WindowWidget parent, Scene scene, ImageMap im)
     {
         super(parent, "Image data", true);
         this.parent = parent;

@@ -462,7 +462,7 @@ public class SceneCamera extends Object3D
         temp.fov = fovSlider.getValue();
         temp.depthOfField = dofField.getValue();
         temp.focalDist = fdField.getValue();
-        new CameraFilterDialog(parent, temp, info.getCoords());
+        new CameraFilterDialog(UIUtilities.findWindow(fovSlider), parent.getScene(), temp, info.getCoords());
         filter = temp.filter;
       }
     }, "processEvent");

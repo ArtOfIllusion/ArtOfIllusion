@@ -43,11 +43,11 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   private static final int PREVIEW_WIDTH = 200;
   private static final int PREVIEW_HEIGHT = 150;
 
-  public CameraFilterDialog(EditingWindow parent, SceneCamera camera, CoordinateSystem cameraCoords)
+  public CameraFilterDialog(WindowWidget parent, Scene scene, SceneCamera camera, CoordinateSystem cameraCoords)
   {
-    super(parent.getFrame(), Translate.text("Filters"), true);
+    super(parent, Translate.text("Filters"), true);
     theCamera = camera;
-    theScene = parent.getScene();
+    theScene = scene;
     this.cameraCoords = cameraCoords;
     oldFilters = theCamera.getImageFilters();
     for (int i = 0; i < oldFilters.length; i++)
@@ -101,7 +101,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     // Display the window.
 
     pack();
-    UIUtilities.centerDialog(this, parent.getFrame());
+    UIUtilities.centerDialog(this, parent);
     setVisible(true);
   }
 

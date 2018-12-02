@@ -425,7 +425,7 @@ public class TexturesAndMaterialsDialog extends BDialog
           Texture tex = textureTypes.get(newType).getClass().newInstance();
           tex.setName(name);
           theScene.addTexture(tex);
-          tex.edit(parentFrame.getFrame(), theScene);
+          tex.edit(this, theScene);
         }
         catch (Exception ex)
         {
@@ -497,7 +497,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     if (selectedTexture != null)
     {
       Texture tex = selectedTexture;
-      tex.edit(parentFrame.getFrame(), theScene);
+      tex.edit(this, theScene);
       tex.assignNewID();
       theScene.changeTexture(theScene.indexOf(tex));
       parentFrame.setModified();

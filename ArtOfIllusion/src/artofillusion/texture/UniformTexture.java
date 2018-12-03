@@ -141,7 +141,7 @@ public class UniformTexture extends Texture
   /** Allow the user to interactively edit the material. */
 
   @Override
-  public void edit(final BFrame fr, Scene sc)
+  public void edit(final WindowWidget parent, Scene sc)
   {
     BTextField nameField = new BTextField(name, 15);
     final ValueSlider transSlider = new ValueSlider(0.0, 1.0, 100, (double) transparency);
@@ -166,7 +166,7 @@ public class UniformTexture extends Texture
     diffPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("DiffuseColor"), newTexture.diffuseColor);
+        new ColorChooser(diffPatch, Translate.text("DiffuseColor"), newTexture.diffuseColor);
         diffPatch.setBackground(newTexture.diffuseColor.getColor());
         process.addEvent(renderCallback);
       }
@@ -174,7 +174,7 @@ public class UniformTexture extends Texture
     specPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("SpecularColor"), newTexture.specularColor);
+        new ColorChooser(specPatch, Translate.text("SpecularColor"), newTexture.specularColor);
         specPatch.setBackground(newTexture.specularColor.getColor());
         process.addEvent(renderCallback);
       }
@@ -182,7 +182,7 @@ public class UniformTexture extends Texture
     transPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("TransparentColor"), newTexture.transparentColor);
+        new ColorChooser(transPatch, Translate.text("TransparentColor"), newTexture.transparentColor);
         transPatch.setBackground(newTexture.transparentColor.getColor());
         process.addEvent(renderCallback);
       }
@@ -190,7 +190,7 @@ public class UniformTexture extends Texture
     emissPatch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(fr, Translate.text("EmissiveColor"), newTexture.emissiveColor);
+        new ColorChooser(emissPatch, Translate.text("EmissiveColor"), newTexture.emissiveColor);
         emissPatch.setBackground(newTexture.emissiveColor.getColor());
         process.addEvent(renderCallback);
       }
@@ -211,7 +211,7 @@ public class UniformTexture extends Texture
     shinSlider.addEventLink(ValueChangedEvent.class, valueListener);
     roughSlider.addEventLink(ValueChangedEvent.class, valueListener);
     clearSlider.addEventLink(ValueChangedEvent.class, valueListener);
-    ComponentsDialog dlg = new ComponentsDialog(fr, "", new Widget [] {
+    ComponentsDialog dlg = new ComponentsDialog(parent, "", new Widget [] {
         preview, nameField, diffPatch, specPatch, transPatch, emissPatch, transSlider, specSlider,
         shinSlider, roughSlider, clearSlider}, new String [] {null, Translate.text("Name"),
         Translate.text("DiffuseColor"), Translate.text("SpecularColor"), Translate.text("TransparentColor"),

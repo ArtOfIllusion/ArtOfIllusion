@@ -2947,7 +2947,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       void processEvent()
       {
-        new ColorChooser(LayoutWindow.this, Translate.text("ambientColor"), ambColor);
+        new ColorChooser(ambPatch, Translate.text("ambientColor"), ambColor);
         ambPatch.setBackground(ambColor.getColor());
         ambPatch.repaint();
       }
@@ -2956,7 +2956,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       void processEvent()
       {
-        new ColorChooser(LayoutWindow.this, Translate.text("environmentColor"), envColor);
+        new ColorChooser(envPatch, Translate.text("environmentColor"), envColor);
         envPatch.setBackground(envColor.getColor());
         envPatch.repaint();
       }
@@ -2965,7 +2965,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       void processEvent()
       {
-        new ColorChooser(LayoutWindow.this, Translate.text("fogColor"), fogColor);
+        new ColorChooser(fogPatch, Translate.text("fogColor"), fogColor);
         fogPatch.setBackground(fogColor.getColor());
         fogPatch.repaint();
       }

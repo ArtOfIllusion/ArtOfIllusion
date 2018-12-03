@@ -265,7 +265,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   }
 
   @Override
-  public void edit(BFrame fr, Scene sc)
+  public void edit(WindowWidget fr, Scene sc)
   {
     new ProcedureEditor(proc, this, sc);
   }

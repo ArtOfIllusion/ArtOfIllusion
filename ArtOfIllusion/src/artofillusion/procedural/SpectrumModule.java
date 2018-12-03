@@ -550,7 +550,7 @@ public class SpectrumModule extends ProceduralModule
 
     private void selectColor()
     {
-      new ColorChooser((BFrame) this.getParent(), Translate.text("selectColor"), color[selected]);
+      new ColorChooser(this, Translate.text("selectColor"), color[selected]);
       preview.setBackground(color[selected].getColor());
       canvas.repaint();
       preview.repaint();

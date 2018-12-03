@@ -199,7 +199,7 @@ public class PropertyEditor
       if (color != null)
       {
         RGBColor oldColor = color.duplicate();
-        new ColorChooser(UIUtilities.findFrame(this), title, color);
+        new ColorChooser(this, title, color);
         if (!color.equals(oldColor))
         {
           setBackground(color.getColor());

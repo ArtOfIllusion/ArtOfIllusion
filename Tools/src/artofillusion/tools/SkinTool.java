@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,9 +21,6 @@ import java.util.*;
 
 public class SkinTool implements ModellingTool
 {
-  public SkinTool()
-  {
-  }
 
   /* Get the text that appear as the menu item.*/
 

@@ -1,6 +1,7 @@
 package artofillusion.tools;
 
 /* Copyright (C) 2006-2013 by Peter Eastman and Julio Sangrador-Patón
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,10 +28,6 @@ import java.util.*;
 public class TextTool implements ModellingTool
 {
   public static enum TextType {Outline, Tube, Surface, Solid}
-
-  public TextTool()
-  {
-  }
 
   /** Get the text that appear as the menu item.*/
 

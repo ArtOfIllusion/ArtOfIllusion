@@ -13,11 +13,9 @@
 package artofillusion;
 
 import artofillusion.image.*;
-import artofillusion.image.filter.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.procedural.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -169,7 +167,6 @@ public class ArtOfIllusion
     PluginRegistry.addCategory(Material.class);
     PluginRegistry.addCategory(TextureMapping.class);
     PluginRegistry.addCategory(MaterialMapping.class);
-    PluginRegistry.addCategory(ImageFilter.class);
 
     PluginRegistry.addCategory(artofillusion.procedural.Module.class);
 
@@ -189,15 +186,6 @@ public class ArtOfIllusion
     PluginRegistry.registerPlugin(new LinearMapping3D());
     PluginRegistry.registerPlugin(new LinearMaterialMapping());
     
-    PluginRegistry.registerPlugin(new BrightnessFilter());
-    PluginRegistry.registerPlugin(new SaturationFilter());
-    PluginRegistry.registerPlugin(new ExposureFilter());
-    PluginRegistry.registerPlugin(new TintFilter());
-    PluginRegistry.registerPlugin(new BlurFilter());
-    PluginRegistry.registerPlugin(new GlowFilter());
-    PluginRegistry.registerPlugin(new OutlineFilter());
-    PluginRegistry.registerPlugin(new NoiseReductionFilter());
-    PluginRegistry.registerPlugin(new DepthOfFieldFilter());
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();

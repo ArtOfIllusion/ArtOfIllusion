@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,17 +17,18 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import java.lang.reflect.*;
 import java.util.prefs.*;
 
 /** This is a plugin to make Art of Illusion behave more like a standard Macintosh
     application when running under Mac OS X. */
 
-public class MacOSPlugin implements Plugin, InvocationHandler
+public class MacOSPlugin implements Plugin
 {
+  
   private boolean usingAppMenu;
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void processMessage(int message, Object args[])
   {
     if (message == APPLICATION_STARTING)
@@ -38,25 +39,9 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       ArtOfIllusion.addWindow(new MacMenuBarWindow());
       UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
       UIUtilities.setStandardDialogInsets(3);
-      try
-      {
-        // Use reflection to set up the application menu.
 
-        Class appClass = Class.forName("com.apple.eawt.Application");
-        Object app = appClass.getMethod("getApplication").invoke(null);
-        appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-        appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-        Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
-        Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class [] {listenerClass}, this);
-        appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
-      }
-      catch (Exception ex)
-      {
-        // An error occured trying to set up the application menu, so just stick with the standard
-        // Quit and Preferences menu items in the File and Edit menus.
-
-        ex.printStackTrace();
-      }
+      new AppListenerBridge();
+     
       usingAppMenu = true;
     }
     else if (message == SCENE_WINDOW_CREATED)
@@ -123,77 +108,6 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       }
       return;
     }
-  }
-
-  /** Handle ApplicationListener methods. */
-
-  @Override
-  public Object invoke(Object proxy, Method method, Object args[])
-  {
-    boolean handled = true;
-    if ("handleAbout".equals(method.getName()))
-    {
-      TitleWindow win = new TitleWindow();
-      win.addEventLink(MouseClickedEvent.class, win, "dispose");
-    }
-    else if ("handlePreferences".equals(method.getName()))
-    {
-      Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-      boolean frontIsLayoutWindow = false;
-      for (EditingWindow window : ArtOfIllusion.getWindows())
-        if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
-        {
-          ((LayoutWindow) window).preferencesCommand();
-          frontIsLayoutWindow = true;
-          break;
-        }
-      if (!frontIsLayoutWindow)
-      {
-        BFrame f = new BFrame();
-        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        f.setBounds(screenBounds);
-        UIUtilities.centerWindow(f);
-        new PreferencesWindow(f);
-        f.dispose();
-      }
-    }
-    else if ("handleQuit".equals(method.getName()))
-    {
-      ArtOfIllusion.quit();
-      handled = false;
-    }
-    else if ("handleOpenFile".equals(method.getName()))
-    {
-      try
-      {
-        Method getFilename = args[0].getClass().getMethod("getFilename");
-        String path = (String) getFilename.invoke(args[0]);
-        ArtOfIllusion.newWindow(new Scene(new File(path), true));
-      }
-      catch (Exception ex)
-      {
-        // Nothing we can really do about it...
-
-        ex.printStackTrace();
-      }
-    }
-    else
-      return null;
-
-    // Call setHandled(true) on the event to show we have handled it.
-
-    try
-    {
-      Method setHandled = args[0].getClass().getMethod("setHandled", new Class [] {Boolean.TYPE});
-      setHandled.invoke(args[0], handled);
-    }
-    catch (Exception ex)
-    {
-      // Nothing we can really do about it...
-
-      ex.printStackTrace();
-    }
-    return null;
   }
 
   /** This is an inner class used to provide a minimal menu bar when all windows are

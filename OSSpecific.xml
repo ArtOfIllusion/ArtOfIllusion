@@ -6,6 +6,7 @@
   <property name="src" value="OSSpecific/src" />
   <property name="build" value="OSSpecific/build" />
   <property name="docs" value="OSSpecific/docs" />
+  <property name="lib" value="OSSpecific/lib" />
   <property name="dist" value="Live_Application" />
   <property name="assemble" value="${dist}/Plugins" />
   <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
@@ -17,15 +18,26 @@
     <tstamp/>
     <!-- Create the build directory structure used by compile -->
     <mkdir dir="${build}" />
+    <mkdir dir="${lib}"/>
     <!-- create the dist directory -->
     <mkdir dir="${dist}" />
     <mkdir dir="${assemble}" />
   </target>
 
-  <target name="compile" depends="init">
+  <target name="pull">
+    <get src="http://central.maven.org/maven2/com/yuvimasory/orange-extensions/1.3.0/orange-extensions-1.3.0.jar" dest="${lib}" skipexisting="true"/>
+  </target>
+
+  <target name="compile" depends="init,pull">
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
       <compilerarg line="${args}"/>
+      <classpath>
+         <pathelement  path="${aoijar}"/>
+         <fileset dir="${lib}">
+           <include name="**/*.jar"/>
+         </fileset>
+      </classpath>
     </javac>
   </target>
 

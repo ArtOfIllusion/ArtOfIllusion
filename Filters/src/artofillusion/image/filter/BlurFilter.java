@@ -21,10 +21,6 @@ import java.io.*;
 
 public class BlurFilter extends ImageFilter
 {
-  public BlurFilter()
-  {
-  }
-
   /** Get the name of this filter.*/
 
   @Override

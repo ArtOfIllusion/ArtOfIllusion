@@ -28,9 +28,6 @@ public class GlowFilter extends ImageFilter
 
   private static final String SHAPES[] = new String[] {CROSSHAIR, DIAGONAL, STAR, CIRCLE};
 
-  public GlowFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

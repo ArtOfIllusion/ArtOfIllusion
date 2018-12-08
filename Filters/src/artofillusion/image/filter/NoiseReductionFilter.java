@@ -26,10 +26,7 @@ import java.io.*;
 
 public class NoiseReductionFilter extends ImageFilter
 {
-  public NoiseReductionFilter()
-  {
-  }
-
+    
   /** Get the name of this filter.*/
 
   @Override

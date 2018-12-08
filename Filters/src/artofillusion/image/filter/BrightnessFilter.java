@@ -21,10 +21,6 @@ import java.io.*;
 
 public class BrightnessFilter extends ImageFilter
 {
-  public BrightnessFilter()
-  {
-  }
-
   /** Get the name of this filter.*/
 
   @Override

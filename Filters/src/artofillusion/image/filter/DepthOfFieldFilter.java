@@ -25,9 +25,6 @@ import buoy.event.*;
 
 public class DepthOfFieldFilter extends ImageFilter
 {
-  public DepthOfFieldFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

@@ -21,9 +21,6 @@ import java.io.*;
 
 public class TintFilter extends ImageFilter
 {
-  public TintFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

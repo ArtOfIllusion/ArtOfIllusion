@@ -28,9 +28,6 @@ public class OutlineFilter extends ImageFilter
   private static final byte LEFT = 4;
   private static final byte RIGHT = 5;
 
-  public OutlineFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

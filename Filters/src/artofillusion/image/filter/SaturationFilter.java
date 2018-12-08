@@ -21,9 +21,6 @@ import java.io.*;
 
 public class SaturationFilter extends ImageFilter
 {
-  public SaturationFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

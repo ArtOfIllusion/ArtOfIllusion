@@ -22,9 +22,6 @@ import java.io.*;
 
 public class ExposureFilter extends ImageFilter
 {
-  public ExposureFilter()
-  {
-  }
 
   /** Get the name of this filter.*/
 

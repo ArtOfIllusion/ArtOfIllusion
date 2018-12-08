@@ -45,12 +45,14 @@ public class LinearMaterialMapping extends MaterialMapping
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Linear";
   }
 
-  public static boolean legalMapping(Object3D obj, Material mat)
+  @Override
+  public boolean legalMapping(Object3D obj, Material mat)
   {
     return (mat instanceof Material3D);
   }

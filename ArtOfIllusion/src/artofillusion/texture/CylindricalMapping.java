@@ -46,7 +46,8 @@ public class CylindricalMapping extends NonlinearMapping2D
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Cylindrical";
   }

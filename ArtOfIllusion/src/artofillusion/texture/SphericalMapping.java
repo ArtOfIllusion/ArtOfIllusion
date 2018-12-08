@@ -45,7 +45,8 @@ public class SphericalMapping extends NonlinearMapping2D
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Spherical";
   }

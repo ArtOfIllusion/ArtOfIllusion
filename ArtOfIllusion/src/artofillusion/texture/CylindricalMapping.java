@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2006 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,6 +31,11 @@ public class CylindricalMapping extends NonlinearMapping2D
   boolean transform;
   TextureParameter xparam, yparam, zparam;
 
+  public CylindricalMapping()
+  {
+    this(null,null);
+  }
+  
   public CylindricalMapping(Object3D obj, Texture theTexture)
   {
     super(obj, theTexture);

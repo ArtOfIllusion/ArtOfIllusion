@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,6 +31,11 @@ public class LinearMaterialMapping extends MaterialMapping
   protected double xscale, yscale, zscale;
   protected boolean scaleToObject;
 
+  public LinearMaterialMapping()
+  {
+    this(null,null);
+  }
+  
   public LinearMaterialMapping(Object3D theObject, Material3D theMaterial)
   {
     super(theObject, theMaterial);

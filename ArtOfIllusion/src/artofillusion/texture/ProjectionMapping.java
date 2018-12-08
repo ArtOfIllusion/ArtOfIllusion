@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,6 +32,11 @@ public class ProjectionMapping extends Mapping2D
   protected int numTextureParams;
   protected TextureParameter xparam, yparam, zparam;
 
+  public ProjectionMapping()
+  {
+    this(null,null);
+  }
+  
   public ProjectionMapping(Object3D theObject, Texture theTexture)
   {
     super(theObject, theTexture);

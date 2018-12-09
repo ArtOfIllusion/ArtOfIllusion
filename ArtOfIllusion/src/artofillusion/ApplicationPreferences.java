@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
    Changes Copyright (C) 2016 by Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,13 +16,31 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+
 
 /** This class keeps track of program-wide user preferences. */
 
 public class ApplicationPreferences
 {
+
+  private static final String userHome = System.getProperty("user.home");
+  
+  private static Path path;
+  static {
+    try
+    {
+      path = Files.createDirectories(Paths.get(userHome, ".artofillusion"));
+    } catch (IOException ex)
+    {
+      System.out.println("Resolve preferences path error:" + ex);
+    }
+  }
+  
   private Properties properties;
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol, maxAnimationDuration, animationFrameRate;
@@ -36,61 +54,47 @@ public class ApplicationPreferences
 
   public ApplicationPreferences()
   {
-    File f = new File(getPreferencesDirectory(), "aoiprefs");
-    if (!f.exists())
+    Path fp = path.resolve("aoiprefs");  // file >> ${user.home}/.artofillusion/aoiprefs
+    if(Files.notExists(fp))              // Settings file not exist in new location
     {
-      // See if it exists in the old location.
-
-      File f2 = new File(System.getProperty("user.home"), ".aoiprefs");
-      if (f2.exists())
-        f2.renameTo(f);
+      Path oldPath = Paths.get(userHome,".aoiprefs");  //Old way settings file
+      if(Files.exists(oldPath))                        // If exist than move to new location
+      {
+        try 
+        {
+          fp = Files.move(oldPath, fp);
+        } catch (IOException ex) {
+        }
+      }
     }
+    
     initDefaultPreferences();
-    if (!f.exists())
-      {
-        properties = new Properties();
-        Translate.setLocale(Locale.getDefault());
-        return;
-      }
-    try
-      {
-        InputStream in = new BufferedInputStream(new FileInputStream(f));
-        loadPreferences(in);
-        in.close();
-      }
-    catch (IOException ex)
-      {
-        ex.printStackTrace();
-      }
-  }
-
-  /**
-   * Create a new ApplicationPreferences object, loading the preferences from an InputStream.
-   */
-
-  public ApplicationPreferences(InputStream in)
-  {
-    initDefaultPreferences();
-    try
-    {
-      loadPreferences(in);
-      in.close();
-    }
-    catch (IOException ex)
-    {
-      ex.printStackTrace();
-    }
-  }
-
-  /** Load the preferences from an InputStream. */
-
-  private void loadPreferences(InputStream in) throws IOException
-  {
+    
     properties = new Properties();
-    properties.load(in);
-    parsePreferences();
+    
+    if(Files.notExists(fp))
+    {
+      Translate.setLocale(Locale.getDefault());
+      return; 
+    }
+    
+    try (InputStream in = new BufferedInputStream(Files.newInputStream(fp)))
+    {
+      properties.load(in);
+      parsePreferences();
+    } catch(IOException ioe)
+    {
+      ioe.printStackTrace();
+    }
+
   }
 
+  /** Save any changed preferences to disk. */
+  public void save()
+  {
+    savePreferences();
+  }
+  
   /** Save any changed preferences to disk. */
 
   public void savePreferences()
@@ -99,33 +103,35 @@ public class ApplicationPreferences
 
     properties.put("theme", ThemeManager.getSelectedTheme().resource.getId());
     ThemeManager.ColorSet colorSets[] = ThemeManager.getSelectedTheme().getColorSets();
+    ThemeManager.ColorSet current = ThemeManager.getSelectedColorSet();
+    
     for (int i = 0; i < colorSets.length; i++)
-      if (colorSets[i] == ThemeManager.getSelectedColorSet())
+      if (colorSets[i] == current)
         properties.put("themeColorSet", Integer.toString(i));
 
     // Write the preferences to a file.
-
-    File f = new File(getPreferencesDirectory(), "aoiprefs");
-    try
-      {
-        OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-        properties.store(out, "Art of Illusion Preferences File");
-        out.close();
-      }
-    catch (IOException ex)
-      {
-        ex.printStackTrace();
-      }
+    
+    try(OutputStream out = Files.newOutputStream(path.resolve("aoiprefs"))) {
+      properties.store(out, "Art of Illusion Preferences File");
+    } catch(IOException ioe) {
+      ioe.printStackTrace();
+    }
   }
-
-  /** Get the directory in which preferences files are saved. */
-
+  
+  /** Get the folder path in which preferences files are saved. */
+  public static Path getPreferencesPath()
+  {
+    return path;
+  }
+  
+  /** Get the directory in which preferences files are saved. 
+   * @deprecated Use getPreferencesPath().toFile();
+   */
+  
+  @Deprecated
   public static File getPreferencesDirectory()
   {
-    File dir = new File(System.getProperty("user.home"), ".artofillusion");
-    if (!dir.exists())
-      dir.mkdirs();
-    return dir;
+    return path.toFile();
   }
 
   /** Initialize internal variables to reasonable defaults. */
@@ -142,9 +148,9 @@ public class ApplicationPreferences
     keepBackupFiles = false;
     useCompoundMeshTool = false;
     reverseZooming = false;
-	useViewAnimations = true;
-	maxAnimationDuration = 1.0;
-	animationFrameRate = 60.0;
+    useViewAnimations = true;
+    maxAnimationDuration = 1.0;
+    animationFrameRate = 60.0;
   }
 
   /** Parse the properties loaded from the preferences file. */

@@ -1,4 +1,6 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
+   Changes Copyright (C) 2016 by Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +19,8 @@ import artofillusion.*;
 import java.util.*;
 import java.awt.event.*;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
@@ -139,15 +143,16 @@ public class KeystrokeManager
   {
     try
     {
-      File dir = ApplicationPreferences.getPreferencesDirectory();
-      File inputFile = new File(dir, KEYSTROKE_FILENAME);
+      Path keys = ApplicationPreferences.getPreferencesPath().resolve(KEYSTROKE_FILENAME);
       InputStream in;
-      if (inputFile.exists())
-        in = new BufferedInputStream(new FileInputStream(inputFile));
-      else
-        in = KeystrokeManager.class.getResourceAsStream("/"+KEYSTROKE_FILENAME);
+      if(Files.exists(keys))
+        in = new BufferedInputStream(Files.newInputStream(keys));
+      else 
+        in = KeystrokeManager.class.getResourceAsStream("/" + KEYSTROKE_FILENAME);
+
       addRecordsFromXML(in);
       in.close();
+
     }
     catch (Exception ex)
     {
@@ -215,16 +220,17 @@ public class KeystrokeManager
     }
 
     // Save it to disk.
-
-    File dir = ApplicationPreferences.getPreferencesDirectory();
-    File outFile = new File(dir, KEYSTROKE_FILENAME);
-    OutputStream out = new BufferedOutputStream(new SafeFileOutputStream(outFile, SafeFileOutputStream.OVERWRITE));
-    DOMSource source = new DOMSource(doc);
-    StreamResult result = new StreamResult(out);
-    TransformerFactory transFactory = TransformerFactory.newInstance();
-    Transformer transformer = transFactory.newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.transform(source, result);
-    out.close();
+    
+    File outFile = ApplicationPreferences.getPreferencesPath().resolve(KEYSTROKE_FILENAME).toFile();
+    
+    try (OutputStream out = new BufferedOutputStream(new SafeFileOutputStream(outFile, SafeFileOutputStream.OVERWRITE)))
+    {
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(out);
+      TransformerFactory transFactory = TransformerFactory.newInstance();
+      Transformer transformer = transFactory.newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.transform(source, result);
+    }
   }
 }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2012 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,8 +31,8 @@ public class ProcedureEditor extends CustomWidget
   private ProcedureOwner owner;
   private Scene theScene;
   private EditingWindow win;
-  private Dimension size;
-  private ModuleMenu moduleMenu;
+  private Dimension size = new Dimension(1000, 1000);
+  private final ModuleMenu moduleMenu;
   private BMenuItem undoItem, redoItem, cutItem, copyItem, pasteItem, clearItem;
   private BTextField nameField;
   private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox, draggingMultiple;
@@ -55,7 +56,6 @@ public class ProcedureEditor extends CustomWidget
 
   public ProcedureEditor(Procedure proc, ProcedureOwner owner, Scene scene)
   {
-    super();
     this.proc = proc;
     this.owner = owner;
     theScene = scene;
@@ -72,7 +72,7 @@ public class ProcedureEditor extends CustomWidget
     content.add(scroll = new BScrollPane(this), BorderContainer.CENTER);
     scroll.setPreferredViewSize(new Dimension(600, 600));
     new AutoScroller(scroll, 5, 5);
-    size = new Dimension(1000, 1000);
+    
     setBackground(Color.white);
     addEventLink(KeyPressedEvent.class, this, "keyPressed");
     addEventLink(MousePressedEvent.class, this, "mousePressed");

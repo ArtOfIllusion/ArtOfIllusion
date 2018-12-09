@@ -120,12 +120,12 @@ public class ModuleMenu extends CustomWidget
     if (plugins.size() > 0)
     {
       categories.add(category = new Category(Translate.text("menu.plugins")));
-      for (int i = 0; i < plugins.size(); i++)
+      for (Module mod: PluginRegistry.getPlugins(Module.class))
       {
         try
         {
-          Class<? extends Module> moduleClass = plugins.get(i).getClass();
-          category.add(new Entry((moduleClass.newInstance()).getName(), moduleClass, new Object[0]));
+
+          category.add(new Entry(mod.getName(), mod.getClass(), new Object[0]));
         }
         catch (Exception ex)
         {

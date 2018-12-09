@@ -16,6 +16,10 @@ import java.awt.*;
 
 public class IOPort
 {
+  public enum PortType {INPUT, OUTPUT};
+  public enum PortValue {NUMBER, COLOR};
+  public enum PortPosition {TOP, BOTTOM, LEFT, RIGHT};
+  
   int x, y, valueType, type, location;
   String description[];
   Rectangle bounds;
@@ -23,12 +27,15 @@ public class IOPort
   
   public static final int INPUT = 0;
   public static final int OUTPUT = 1;
+  
   public static final int NUMBER = 0;
   public static final int COLOR = 1;
+  
   public static final int TOP = 0;
   public static final int BOTTOM = 1;
   public static final int LEFT = 2;
   public static final int RIGHT = 3;
+  
   public static final int SIZE = 5;
   
   public IOPort(int valueType, int type, int location, String description[])
@@ -39,6 +46,10 @@ public class IOPort
     this.description = description;
   }
   
+  public IOPort(PortType type, PortValue value, PortPosition position)
+  {
+    
+  }
   /** Get the port's screen position. */
 
   public Point getPosition()
@@ -101,9 +112,8 @@ public class IOPort
 
   public int getIndex()
   {
-    if (type == INPUT)
-      return module.getInputIndex(this);
-    return module.getOutputIndex(this);
+    return type == INPUT ? module.getInputIndex(this) : module.getOutputIndex(this);
+
   }
 
   /** Determine whether a point on the screen is inside this port. */

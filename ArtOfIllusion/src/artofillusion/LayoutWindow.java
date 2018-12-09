@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -2362,8 +2362,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (sel.length != 1)
       return;
     info = theScene.getObject(sel[0]);
-    BStandardDialog dlg = new BStandardDialog("", Translate.text("renameObjectTitle"), BStandardDialog.PLAIN);
-    String val = dlg.showInputDialog(this, null, info.getName());
+    String val = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("renameObjectTitle")).withDefault(info.getName()).input();
     if (val == null)
       return;
     setUndoRecord(new UndoRecord(this, false, UndoRecord.RENAME_OBJECT, new Object [] {sel[0], info.getName()}));

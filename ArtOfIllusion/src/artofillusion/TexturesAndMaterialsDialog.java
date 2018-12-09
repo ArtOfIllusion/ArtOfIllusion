@@ -1,5 +1,5 @@
 /* Copyright (C) 2011 by Helge Hansen and Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -411,7 +411,7 @@ public class TexturesAndMaterialsDialog extends BDialog
   {
     if (selectedTexture != null)
     {
-      String name = new BStandardDialog("", Translate.text("newTexName"), BStandardDialog.PLAIN).showInputDialog(this, null, "");
+      String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("newTexName")).input();
       if (name == null)
         return;
       Texture tex = selectedTexture.duplicate();
@@ -422,7 +422,7 @@ public class TexturesAndMaterialsDialog extends BDialog
     }
     else if (selectedMaterial != null)
     {
-      String name = new BStandardDialog("", Translate.text("newMatName"), BStandardDialog.PLAIN).showInputDialog(this, null, "");
+      String name = Input.create().withOwner(this.getComponent()).withTitle(Translate.text("newMatName")).input();
       if (name == null)
         return;
       Material mat = selectedMaterial.duplicate();

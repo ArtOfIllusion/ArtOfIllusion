@@ -120,7 +120,7 @@ public class UniformMaterial extends Material
   /* Allow the user to interactively edit the material. */
 
   @Override
-  public void edit(final WindowWidget parent, Scene sc)
+  public void edit(final WindowWidget parent, Scene scene)
   {
     final UniformMaterial newMaterial = (UniformMaterial) duplicate();
     BTextField nameField = new BTextField(name);

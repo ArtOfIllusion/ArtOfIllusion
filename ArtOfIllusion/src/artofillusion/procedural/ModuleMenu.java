@@ -98,7 +98,6 @@ public class ModuleMenu extends CustomWidget
     category.add(new Entry(Translate.text("menu.RGBModule"), RGBModule.class));
     category.add(new Entry(Translate.text("menu.HSVModule"), HSVModule.class));
     category.add(new Entry(Translate.text("menu.HLSModule"), HLSModule.class));
-    category.add(new Entry("RGB Channels", RGBChannelsModule.class));
 
     categories.add(category = new Category(Translate.text("menu.transforms")));
     category.add(new Entry(Translate.text("menu.linearModule"), TransformModule.class));

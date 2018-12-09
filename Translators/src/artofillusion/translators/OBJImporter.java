@@ -18,6 +18,7 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
+import artofillusion.util.FileUtils;
 import buoy.widget.*;
 
 import javax.swing.filechooser.*;
@@ -33,9 +34,7 @@ public class OBJImporter
    */
   public static Scene importFile(File f) throws Exception
   {
-    String objName = f.getName();
-    if (objName.lastIndexOf('.') > 0)
-      objName = objName.substring(0, objName.lastIndexOf('.'));
+    String objName = FileUtils.getNameNoExtension(f);
     File directory = f.getCanonicalFile().getParentFile();
 
     // Create a scene to add objects to.
@@ -467,7 +466,7 @@ public class OBJImporter
     try
     {
       Scene scene = importFile(bfc.getSelectedFile());
-      scene.setName(bfc.getSelectedFile().getName());
+      scene.setName(FileUtils.getNameNoExtension(bfc.getSelectedFile()));
       ArtOfIllusion.newWindow(scene);
     }
     catch (Exception ex)

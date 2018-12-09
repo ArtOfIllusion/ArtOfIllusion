@@ -51,7 +51,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   Score theScore;
   ToolPalette tools;
   private TexturesAndMaterialsDialog assetsDialog;
-  BLabel helpText;
+  private BLabel helpText;
   TreeList itemTree;
   Scene theScene;
   BMenuBar menubar;
@@ -2999,5 +2999,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().
+  }
+
+  public BLabel getHelpText() 
+  {
+    return helpText;
   }
 }

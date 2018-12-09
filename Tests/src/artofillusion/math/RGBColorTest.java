@@ -1,5 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,8 +10,12 @@
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.math;
+import artofillusion.test.util.StreamUtil;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Assert;
 
 public class RGBColorTest
 {
@@ -19,6 +23,22 @@ public class RGBColorTest
    * Test converting to and from ERGB format.
    */
 
+  @Test
+  public void testLoadRGBColorFromStream() throws IOException
+  {
+    
+    ByteBuffer wrap = ByteBuffer.allocate(12);
+    wrap.putFloat(0);
+    wrap.putFloat(0.5f);
+    wrap.putFloat(1.0f);
+    
+    RGBColor color = new RGBColor(StreamUtil.stream(wrap));
+    Assert.assertEquals(0, color.red, 0);
+    Assert.assertEquals(0.5, color.green, 0);
+    Assert.assertEquals(1, color.blue, 0);
+  }
+  
+  
   @Test
   public void testERGB()
   {

@@ -62,12 +62,12 @@ public class ColorChooser extends BDialog
     }
   }
   
-  public ColorChooser(Widget parent, String title, RGBColor c)
+  public ColorChooser(Widget parent, String title, RGBColor iColor)
   {
     this(parent, title, iColor, true);
   }
 
-  public ColorChooser(Widget parent, String title, RGBColor c, boolean show)
+  public ColorChooser(Widget parent, String title, RGBColor iColor, boolean show)
   {
     super(UIUtilities.findWindow(parent), title, true);
     BorderContainer content = new BorderContainer();

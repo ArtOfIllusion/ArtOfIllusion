@@ -25,7 +25,7 @@ import java.util.*;
 /** The MeshEditorWindow class represents the window for editing Mesh objects.  This is an
     abstract class, with subclasses for various types of objects. */
 
-public abstract class MeshEditorWindow extends ObjectEditorWindow implements MeshEditController
+public abstract class MeshEditorWindow extends ObjectEditorWindow implements MeshEditController, EditingWindow
 {
   protected Mesh oldMesh;
   protected BMenu viewMenu, colorSurfaceMenu;

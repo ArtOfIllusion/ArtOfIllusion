@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,8 @@ import buoy.event.*;
 import java.awt.*;
 
 /** ScaleMeshTool is an EditingTool used for scaling the vertices of TriangleMesh objects. */
-
+@EditingTool.ButtonImage("scalePoints")
+@EditingTool.Tooltip("scaleMeshTool.tipText")
 public class ScaleMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, scaleX, scaleY, scaleAll;
@@ -28,11 +30,13 @@ public class ScaleMeshTool extends MeshEditingTool
   private final NinePointManipulator manipulator;
 
   public static final int HANDLE_SIZE = 5;
-
+  
+  private static final String errorText = Translate.text("scaleMeshTool.errorText");
+  private static final String helpText = Translate.text("scaleMeshTool.helpText");
+  
   public ScaleMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("scalePoints");
     manipulator = new NinePointManipulator(new Image[] {
       NinePointManipulator.ARROWS_NW_SE, NinePointManipulator.ARROWS_N_S, NinePointManipulator.ARROWS_NE_SW,
       NinePointManipulator.ARROWS_E_W, null, NinePointManipulator.ARROWS_E_W,
@@ -43,36 +47,25 @@ public class ScaleMeshTool extends MeshEditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
   }
 
   @Override
-  public String getToolTipText()
-  {
-    return Translate.text("scaleMeshTool.tipText");
-  }
-
-  @Override
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
-    if (!dragInProgress)
+    if(dragInProgress) return;
+    
     {
-      if (selectionBounds != null)
+      if (selectionBounds == null)
+        theWindow.setHelpText(errorText);
+      else 
       {
         manipulator.draw(view, selectionBounds);
-        theWindow.setHelpText(Translate.text("scaleMeshTool.helpText"));
+        theWindow.setHelpText(helpText);
       }
-      else
-        theWindow.setHelpText(Translate.text("scaleMeshTool.errorText"));
     }
   }
 

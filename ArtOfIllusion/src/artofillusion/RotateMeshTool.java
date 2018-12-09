@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,8 @@ import buoy.event.*;
 import java.awt.*;
 
 /** RotateMeshTool is an EditingTool used for rotating the vertices of TriangleMesh objects. */
-
+@EditingTool.ButtonImage("rotatePoints")
+@EditingTool.Tooltip("rotateMeshTool.tipText")
 public class RotateMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress, selectionCanChange;
@@ -38,7 +40,6 @@ public class RotateMeshTool extends MeshEditingTool
   public RotateMeshTool(EditingWindow fr, MeshEditController controller, boolean only2D)
   {
     super(fr, controller);
-    initButton("rotatePoints");
     if (only2D)
       manipulator = new NinePointManipulator(new Image[] {
         NinePointManipulator.ROTATE_TOPLEFT, null, NinePointManipulator.ROTATE_TOPRIGHT,
@@ -60,12 +61,6 @@ public class RotateMeshTool extends MeshEditingTool
     super.activate();
     lastSelectionDistance = null;
     checkForSelectionChanged();
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override
@@ -95,12 +90,6 @@ public class RotateMeshTool extends MeshEditingTool
       rotCenter = new Vec3((bounds.minx+bounds.maxx)/2.0, (bounds.miny+bounds.maxy)/2.0, (bounds.minz+bounds.maxz)/2.0);
       rotCenter = cam.getViewToWorld().times(rotCenter);
     }
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("rotateMeshTool.tipText");
   }
 
   @Override

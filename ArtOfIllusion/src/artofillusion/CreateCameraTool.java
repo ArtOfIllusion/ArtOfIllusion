@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,7 +20,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** CreateCameraTool is an EditingTool used for creating SceneCamera objects. */
-
+@EditingTool.ButtonImage("camera")
+@EditingTool.Tooltip("createCameraTool.tipText")
+@EditingTool.ActivatedToolText("createCameraTool.helpText")
 public class CreateCameraTool extends EditingTool
 {
   static int counter = 2;
@@ -28,31 +31,6 @@ public class CreateCameraTool extends EditingTool
   public CreateCameraTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("camera");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCameraTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCameraTool.tipText");
-  }
-
-  @Override
-  public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
-  {
   }
 
   @Override

@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyrignt (C) 2016 Petri Ihalainen
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +21,8 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** CreatePolygonTool is an EditingTool used for creating polygon shaped Line objects. */
-
+@EditingTool.ButtonImage("polygon")
+@EditingTool.Tooltip("createPolygonTool.tipText")
 public class CreatePolygonTool extends EditingTool
 {
   private static int counter = 1, sides = 3, shape = 0;
@@ -32,7 +34,6 @@ public class CreatePolygonTool extends EditingTool
   public CreatePolygonTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("polygon");
     tabulateSines();
   }
 
@@ -53,18 +54,6 @@ public class CreatePolygonTool extends EditingTool
     else
       type = "approximatingCurve";
     theWindow.setHelpText(Translate.text("createPolygonTool.helpText", Integer.toString(sides), Translate.text("createPolygonTool."+type)));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createPolygonTool.tipText");
   }
 
   void tabulateSines()

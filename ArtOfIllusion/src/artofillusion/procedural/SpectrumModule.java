@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +23,8 @@ import java.io.*;
 
 public class SpectrumModule extends ProceduralModule
 {
-  RGBColor color[], outputColor;
+  private RGBColor color[];
+  private final RGBColor outputColor;
   float a1[][], b1[][], c1[][];
   double index[], lastBlur;
   boolean repeat, colorOk;
@@ -312,7 +314,7 @@ public class SpectrumModule extends ProceduralModule
     ProcedureEditor editor;
     CustomWidget canvas;
     ValueField indexField;
-    Widget preview;
+    private final ColorSampleWidget preview;
     BCheckBox repeatBox;
     BButton deleteButton;
     Point clickPoint, handlePos[];
@@ -349,8 +351,9 @@ public class SpectrumModule extends ProceduralModule
       });
       indexField.addEventLink(ValueChangedEvent.class, this, "indexChanged");
       row.add(new BLabel(Translate.text("Color")+":"));
-      row.add(preview = color[0].getSample(30, 20));
+      preview = new ColorSampleWidget(color[0], Translate.text("selectColor"), 30, 20);
       preview.addEventLink(MouseClickedEvent.class, this, "selectColor");
+      row.add(preview);      
       row.add(Translate.button("add", this, "doAdd"));
       row.add(deleteButton = Translate.button("delete", this, "doDelete"));
       content.add(repeatBox = new BCheckBox(Translate.text("functionIsPeriodic"), repeat), 0, 3);
@@ -362,7 +365,9 @@ public class SpectrumModule extends ProceduralModule
       adjustComponents();
       handlePos = new Point [index.length];
       for (int i = 0; i < index.length; i++)
+      {
         handlePos[i] = new Point(0, 0);
+      }
       pack();
       UIUtilities.centerDialog(this, editor.getParentFrame());
       setVisible(true);
@@ -373,8 +378,8 @@ public class SpectrumModule extends ProceduralModule
     private void adjustComponents()
     {
       indexField.setText(Double.toString(index[selected]));
-      preview.setBackground(color[selected].getColor());
-      preview.repaint();
+      preview.setColor(color[selected]);
+
       boolean movable = (selected > 0 && selected < index.length-1);
       indexField.setEnabled(movable);
       deleteButton.setEnabled(movable);
@@ -474,7 +479,9 @@ public class SpectrumModule extends ProceduralModule
       color = newcolor;
       handlePos = new Point [index.length+1];
       for (i = 0; i < handlePos.length; i++)
+      {
         handlePos[i] = new Point(0, 0);
+      }
       calcCoefficients();
       adjustComponents();
       canvas.repaint();
@@ -550,10 +557,8 @@ public class SpectrumModule extends ProceduralModule
 
     private void selectColor()
     {
-      new ColorChooser(this, Translate.text("selectColor"), color[selected]);
-      preview.setBackground(color[selected].getColor());
-      canvas.repaint();
-      preview.repaint();
+      color[selected].copy(preview.getColor());
+      canvas.repaint();      
       editor.updatePreview();
     }
 

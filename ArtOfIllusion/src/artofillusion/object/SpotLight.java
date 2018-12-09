@@ -247,7 +247,7 @@ public class SpotLight extends Light
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, final Runnable cb)
   {
-    final Widget patch = color.getSample(50, 30);
+    final ColorSampleWidget patch = new ColorSampleWidget(color, Translate.text("lightColor"), 50, 30);
     final ValueField intensityField = new ValueField(intensity, ValueField.NONE);
     final ValueField radiusField = new ValueField(radius, ValueField.NONNEGATIVE);
     final ValueField decayField = new ValueField(decayRate, ValueField.NONNEGATIVE);
@@ -256,7 +256,7 @@ public class SpotLight extends Light
     final BComboBox typeChoice = new BComboBox(new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")});
     typeChoice.setSelectedIndex(type);
     final Preview preview = new Preview(100);
-    final RGBColor oldColor = color.duplicate();
+
     final BFrame parentFrame = parent.getFrame();
     final BDialog dlg = new BDialog(parentFrame, "", true);
     FormContainer content = new FormContainer(3, 9);
@@ -285,6 +285,7 @@ public class SpotLight extends Light
     BButton okButton = Translate.button("ok", new Object() {
       void processEvent()
       {
+        color.copy(patch.getColor());
         setParameters(color, (float) intensityField.getValue(), typeChoice.getSelectedIndex(),
             (float) decayField.getValue());
         setRadius(radiusField.getValue());
@@ -298,7 +299,6 @@ public class SpotLight extends Light
     BButton cancelButton = Translate.button("cancel", new Object() {
       void processEvent()
       {
-        color.copy(oldColor);
         dlg.dispose();
       }
     }, "processEvent");
@@ -306,8 +306,6 @@ public class SpotLight extends Light
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(patch, Translate.text("lightColor"), color);
-        patch.setBackground(color.getColor());
         preview.updateImage(angleSlider.getValue(), falloffSlider.getValue());
       }
     });
@@ -416,14 +414,14 @@ public class SpotLight extends Light
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     final SpotLightKeyframe key = (SpotLightKeyframe) k;
-    final Widget patch = key.color.getSample(50, 30);
+    final ColorSampleWidget patch = new ColorSampleWidget(key.color, Translate.text("lightColor"), 50, 30);
     final ValueField intensityField = new ValueField(key.intensity, ValueField.NONE);
     final ValueField radiusField = new ValueField(key.radius, ValueField.NONNEGATIVE);
     final ValueField decayField = new ValueField(key.decayRate, ValueField.NONNEGATIVE);
     final ValueSlider angleSlider = new ValueSlider(0.0, 180.0, 180, key.angle);
     final ValueSlider falloffSlider = new ValueSlider(0.0, 1.0, 100, key.falloff);
     final Preview preview = new Preview(100);
-    final RGBColor oldColor = key.color.duplicate();
+
     final BFrame parentFrame = parent.getFrame();
     final BDialog dlg = new BDialog(parentFrame, "", true);
     FormContainer content = new FormContainer(3, 8);
@@ -449,6 +447,7 @@ public class SpotLight extends Light
     BButton okButton = Translate.button("ok", new Object() {
       void processEvent()
       {
+        key.color.copy(patch.getColor());
         key.intensity = (float) intensityField.getValue();
         key.decayRate = (float) decayField.getValue();
         key.radius = radiusField.getValue();
@@ -461,16 +460,14 @@ public class SpotLight extends Light
     BButton cancelButton = Translate.button("cancel", new Object() {
       void processEvent()
       {
-        key.color.copy(oldColor);
         dlg.dispose();
       }
     }, "processEvent");
     buttons.add(cancelButton);
+    
     patch.addEventLink(MouseClickedEvent.class, new Object() {
       void processEvent()
       {
-        new ColorChooser(patch, Translate.text("lightColor"), key.color);
-        patch.setBackground(key.color.getColor());
         preview.updateImage(angleSlider.getValue(), falloffSlider.getValue());
       }
     });

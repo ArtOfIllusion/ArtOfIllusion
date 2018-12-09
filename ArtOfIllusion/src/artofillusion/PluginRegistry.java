@@ -22,6 +22,9 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.xml.parsers.*;
 
@@ -36,6 +39,7 @@ public class PluginRegistry
   private static final HashMap<String, ExportInfo> exports = new HashMap<String, ExportInfo>();
   private static final HashMap<String, Object> classMap = new HashMap<String, Object>();
 
+  private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
    * contained in them.
@@ -43,31 +47,25 @@ public class PluginRegistry
 
   public static void scanPlugins()
   {
-    File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
-    if (!dir.exists())
+    Path pluginsFolder = Paths.get(ArtOfIllusion.PLUGIN_DIRECTORY);
+    if(Files.notExists(pluginsFolder))
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
-      return;
+      return;      
     }
-
+    
     // Scan the plugins directory, and parse the index in every jar file.
-
     HashSet<JarInfo> jars = new HashSet<JarInfo>();
-    for (String file : dir.list())
+    try
     {
-      try
+      for(Path cp: Files.newDirectoryStream(pluginsFolder))
       {
-        jars.add(new JarInfo(new File(dir, file)));
+        if(Files.isRegularFile(cp)) jars.add(new JarInfo(cp));
       }
-      catch (IOException ex)
-      {
-        // Not a zip file.
-      }
-      catch (Exception ex)
-      {
-        System.err.println("*** Exception loading plugin file "+file);
-        ex.printStackTrace(System.err);
-      }
+    } catch (IOException ioex)
+    {
+        System.err.println("*** Exception loading plugin file " + ioex);
+        ioex.printStackTrace(System.err);
     }
     processPlugins(jars);
   }
@@ -131,10 +129,10 @@ public class PluginRegistry
         System.err.println("*** The following plugins were not loaded because their imports could not be resolved:");
         for (JarInfo info : jars)
         {
-          if (info.file == null)
+          if (info.path == null)
             System.err.println("(plugin loaded from ClassLoader)");
           else
-            System.err.println(info.file.getName());
+            System.err.println(info.path.toString());
         }
         System.err.println();
         break;
@@ -156,13 +154,13 @@ public class PluginRegistry
       if (jar.imports.isEmpty() && jar.searchpath.isEmpty())
       {
         if (jar.loader == null)
-          jar.loader = new URLClassLoader(new URL [] {jar.file.toURI().toURL()});
+          jar.loader = new URLClassLoader(new URL [] {jar.getPath().toUri().toURL()});
       }
       else
       {
         SearchlistClassLoader loader;
         if (jar.loader == null)
-          loader = new SearchlistClassLoader(new URL [] {jar.file.toURI().toURL()});
+          loader = new SearchlistClassLoader(new URL [] {jar.getPath().toUri().toURL()});
         else
           loader = new SearchlistClassLoader(jar.loader);
         jar.loader = loader;
@@ -206,14 +204,14 @@ public class PluginRegistry
     }
     catch(NoClassDefFoundError ncdfe)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
-      ncdfe.printStackTrace();      
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.getPath())), BStandardDialog.ERROR).showMessageDialog(null);
+      System.err.println("*** Exception while initializing plugin " + jar.getPath() + ":");
+      ncdfe.printStackTrace();
     }
     catch (Exception ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.getPath())), BStandardDialog.ERROR).showMessageDialog(null);
+      System.err.println("*** Exception while initializing plugin " + jar.getPath() + ":");
       ex.printStackTrace();
     }
   }
@@ -452,24 +450,28 @@ public class PluginRegistry
 
   private static class JarInfo
   {
-    File file;
+    Path path;
+
+    public Path getPath()
+    {
+      return path;
+    }
     String name, version;
     ArrayList<String> imports, plugins, categories, searchpath;
     ArrayList<ResourceInfo> resources;
     ArrayList<ExportInfo> exports;
     ClassLoader loader;
-
-    JarInfo(File file) throws IOException
+    
+    JarInfo(Path path) throws IOException
     {
-      this.file = file;
+      this.path = path;
       imports = new ArrayList<String>();
       plugins = new ArrayList<String>();
       categories = new ArrayList<String>();
       searchpath = new ArrayList<String>();
       resources = new ArrayList<ResourceInfo>();
       exports = new ArrayList<ExportInfo>();
-      ZipFile zf = new ZipFile(file);
-      try
+      try (ZipFile zf = new ZipFile(path.toFile())) 
       {
         ZipEntry ze = zf.getEntry("extensions.xml");
         if (ze != null)
@@ -486,10 +488,6 @@ public class PluginRegistry
           return;
         }
         throw new IOException(); // No index found
-      }
-      finally
-      {
-        zf.close();
       }
     }
 
@@ -520,7 +518,8 @@ public class PluginRegistry
 
     private void loadExtensionsFile(InputStream in) throws IOException
     {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+      System.out.println("Load extensions...");
+      
       try
       {
         DocumentBuilder builder = factory.newDocumentBuilder();
@@ -553,8 +552,9 @@ public class PluginRegistry
             if ("export".equals(childNode.getNodeName()))
             {
               ExportInfo export = new ExportInfo();
-              export.method = childNode.getAttributes().getNamedItem("method").getNodeValue();
-              export.id = childNode.getAttributes().getNamedItem("id").getNodeValue();
+              NamedNodeMap attributes = childNode.getAttributes();
+              export.method = attributes.getNamedItem("method").getNodeValue();
+              export.id = attributes.getNamedItem("id").getNodeValue();
               export.className = className;
               exports.add(export);
             }
@@ -594,7 +594,7 @@ public class PluginRegistry
       }
       catch (Exception ex)
       {
-        System.err.println("*** Exception while parsing extensions.xml for plugin "+file.getName()+":");
+        System.err.println("*** Exception while parsing extensions.xml for plugin " + path + ":");
         ex.printStackTrace();
         throw new IOException();
       }

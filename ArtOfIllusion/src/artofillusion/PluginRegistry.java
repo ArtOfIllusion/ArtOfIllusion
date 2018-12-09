@@ -1,6 +1,6 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -40,6 +40,40 @@ public class PluginRegistry
   private static final HashMap<String, Object> classMap = new HashMap<String, Object>();
 
   private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+  
+  static {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      @Override
+      public void run()
+      {
+        Object[] pso = new Object [0];
+        PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STOPPING, pso);
+      }
+    }, "Plugin shutdown thread"));
+  }
+  
+  
+  public static <T> List<Throwable> notifyPlugins(Class<T> category, int message, Object... args)
+  {
+    if(categoryClasses.containsKey(category))
+    {
+        List<Throwable> errors = new ArrayList<>();
+        for(Object plugin: categoryClasses.get(category))
+        {
+          try 
+          {
+            ((Plugin)plugin).processMessage(message, args);
+          } 
+          catch(Throwable tx)
+          {
+            errors.add(tx);
+          }
+        }
+        return errors;
+    }
+    return Collections.EMPTY_LIST;
+  }
+
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
    * contained in them.
@@ -202,13 +236,7 @@ public class PluginRegistry
         registerResource(info.type, info.id, jar.loader, info.name, info.locale);
       }
     }
-    catch(NoClassDefFoundError ncdfe)
-    {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.getPath())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin " + jar.getPath() + ":");
-      ncdfe.printStackTrace();
-    }
-    catch (Exception ex)
+    catch (NoClassDefFoundError | Exception ex)
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.getPath())), BStandardDialog.ERROR).showMessageDialog(null);
       System.err.println("*** Exception while initializing plugin " + jar.getPath() + ":");

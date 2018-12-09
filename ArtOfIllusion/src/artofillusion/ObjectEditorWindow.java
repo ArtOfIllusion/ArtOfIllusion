@@ -21,7 +21,6 @@ import buoy.widget.*;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.prefs.*;
 
 /** The ObjectEditorWindow class represents a window for editing an object.  This is an
@@ -489,9 +488,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;
-      for(Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-        plugin.processMessage(Plugin.OBJECT_WINDOW_CREATED, new Object[] {this});
-
+      PluginRegistry.notifyPlugins(Plugin.class, Plugin.OBJECT_WINDOW_CREATED, this);
     }
     super.setVisible(visible);
   }
@@ -504,7 +501,6 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public void dispose()
   {
     super.dispose();
-    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-      plugin.processMessage(Plugin.OBJECT_WINDOW_CLOSING, new Object[] {this});
+    PluginRegistry.notifyPlugins(Plugin.class, Plugin.OBJECT_WINDOW_CLOSING, this);
   }
 }

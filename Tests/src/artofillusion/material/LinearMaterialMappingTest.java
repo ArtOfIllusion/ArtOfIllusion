@@ -18,8 +18,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;
-import org.junit.Test;
 import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
@@ -36,7 +36,7 @@ public class LinearMaterialMappingTest{
         LinearMaterialMapping lmm = new LinearMaterialMapping(cube, mat);
         
         Assert.assertEquals(mat, lmm.getMaterial());
-        Assert.assertEquals("Linear", LinearMaterialMapping.getName());
+        Assert.assertEquals("Linear", lmm.getName());
     }
     
     @Test(expected = InvalidObjectException.class)

@@ -1,0 +1,30 @@
+apply plugin: 'java'
+
+sourceCompatibility = '1.8'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(dir: '../lib', include: '*.jar')
+
+    compile group: 'org.jogamp.jogl', name: 'jogl-all-main', version: '2.3.2'
+    compile group: 'org.jogamp.gluegen', name: 'gluegen-rt-main', version: '2.3.2'
+
+    compile group: 'com.kitfox.svg', name: 'svg-salamander', version: '1.0'
+    compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+    compile group: 'org.beanshell', name: 'bsh', version: '2.0b5'
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.15'
+
+    testCompile('junit:junit:4.12') {
+        exclude group: 'org.hamcrest'
+    }
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
+    testCompile group: 'org.netbeans', name: 'jemmy', version: '2.2.7.5'
+}
+
+test {
+    ignoreFailures = true
+}

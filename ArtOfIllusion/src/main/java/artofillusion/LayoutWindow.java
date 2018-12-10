@@ -817,7 +817,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @Override
   public void setVisible(boolean visible)
   {
-    System.out.println("svc....");
     if (visible && !hasNotifiedPlugins)
     {
       hasNotifiedPlugins = true;

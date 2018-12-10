@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.*;
 import javax.xml.bind.JAXBException;
@@ -52,10 +53,11 @@ public class PluginRegistry
 
   
   static {
-    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {      
       @Override
       public void run()
       {
+        System.out.println("Terminating app...");
         Object[] pso = new Object [0];
         PluginRegistry.notifyPlugins(Plugin.class, Plugin.APPLICATION_STOPPING, pso);
       }
@@ -556,7 +558,7 @@ public class PluginRegistry
 
     private void loadExtensionsFile(InputStream in) throws IOException
     {
-      System.out.println("Load extensions...");
+      System.out.println("Load extensions... " + path);
       Extension extension = null;
       try
       {

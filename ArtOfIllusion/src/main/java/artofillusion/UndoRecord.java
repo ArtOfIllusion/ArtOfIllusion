@@ -35,6 +35,7 @@ public class UndoRecord
       @Override
       public void run()
       {
+          System.out.println("Shutdown undo cache writer service...");
           service.shutdown();
       }
     }, "Undo write service shutdown thread"));

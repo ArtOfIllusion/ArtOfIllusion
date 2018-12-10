@@ -12,35 +12,30 @@ package artofillusion;
 
 import artofillusion.animation.*;
 import artofillusion.animation.distortion.*;
-
 import artofillusion.math.CoordinateSystem;
 import artofillusion.math.Vec3;
 import artofillusion.object.Curve;
 import artofillusion.object.ObjectInfo;
 import artofillusion.object.Sphere;
 import java.io.IOException;
-
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.text.MessageFormat;
 import java.util.Locale;
 import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import org.netbeans.jemmy.ClassReference;
-import org.netbeans.jemmy.operators.JFrameOperator;
-import org.netbeans.jemmy.operators.*;
-
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.netbeans.jemmy.Bundle;
+import org.netbeans.jemmy.ClassReference;
 import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.TestOut;
+import org.netbeans.jemmy.operators.*;
 
 /**
  *
@@ -447,9 +442,7 @@ public class LayoutWindowTest
   public void testInvokeShowEnvironmentDialog()
   {
     appMainMenu.pushMenuNoBlock("Scene|Environment...");
-    JDialogOperator dialog = new JDialogOperator(appFrame);
-
-    JLabelOperator label = new JLabelOperator(dialog, "Select Environment Properties:");
+    JDialogOperator dialog = new JDialogOperator(appFrame, bundle.getResource("environmentTitle"));
 
     JButtonOperator cancel = new JButtonOperator(dialog, bundle.getResource("button.cancel"));
     cancel.clickMouse();

@@ -1,5 +1,5 @@
 /* Copyright 2001-2004 by Rick van der Meiden and Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +18,7 @@ import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Insets;
 import java.util.*;
 
 /**
@@ -31,7 +31,7 @@ public class ArrayDialog extends BDialog
   private LayoutWindow window;
   private ArraySpec spec;
 
-  private Vector<ObjectInfo> curvesVector;
+  private List<ObjectInfo> curves;
   private BButton okButton, cancelButton;
   private BLabel linearCopiesLabel, stepXLabel, stepYLabel, stepZLabel;
   private BRadioButton curveCopiesBox, curveStepBox, linearBox, curveBox;
@@ -53,10 +53,10 @@ public class ArrayDialog extends BDialog
     spec = new ArraySpec(window);
 
     // get available curves
-    curvesVector = new Vector<ObjectInfo>(10,10);
-    for (ObjectInfo obj: window.getScene().getAllObjects())
+    curves = new ArrayList<>(10);
+    for (ObjectInfo obj: window.getScene().getObjects())
     {
-      if (obj.getObject() instanceof Curve) curvesVector.add(obj);
+      if (obj.getObject() instanceof Curve) curves.add(obj);
     }
 
     // layout dialog
@@ -72,7 +72,7 @@ public class ArrayDialog extends BDialog
     content.add(createFinishPanel());
 
    // don't allow user to use nil curve
-   if (curvesVector.size() <= 0)
+   if (curves.size() <= 0)
         curveBox.setEnabled(false);
 
     // update spec
@@ -119,7 +119,7 @@ public class ArrayDialog extends BDialog
     panel.add(curveChoice = new BComboBox(), 1, 0);
     
     // put names of possible curves in choice
-    for (ObjectInfo info: curvesVector)
+    for (ObjectInfo info: curves)
     {
       curveChoice.add(info.getName());
     }
@@ -192,8 +192,8 @@ public class ArrayDialog extends BDialog
         spec.intervalX = intervalXBox.getState();
         spec.intervalY = intervalYBox.getState();
         spec.intervalZ = intervalZBox.getState();
-        if (curvesVector.size() > 0)
-                spec.curve = curvesVector.get(curveChoice.getSelectedIndex());
+        if (curves.size() > 0)
+                spec.curve = curves.get(curveChoice.getSelectedIndex());
 
         if (curveCopiesBox.getState() == true)
                 spec.curveMode = ArraySpec.MODE_COPIES;

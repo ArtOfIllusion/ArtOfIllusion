@@ -38,23 +38,23 @@ public class SkinTool implements ModellingTool
   {
     Scene scene = window.getScene();
     int selection[] = window.getSelectedIndices();
-    Vector<ObjectInfo> curves = new Vector<ObjectInfo>();
+    List<ObjectInfo> curves = new ArrayList<ObjectInfo>();
 
     for (int i = 0; i < selection.length; i++)
       {
         ObjectInfo obj = scene.getObject(selection[i]);
         if (obj.getObject() instanceof Curve)
-          curves.addElement(obj);
+          curves.add(obj);
       }
     if (curves.size() < 2)
       {
         new BStandardDialog("", UIUtilities.breakString("You must select two or more curves to create a skin across."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
         return;
       }
-    Curve c = (Curve) curves.elementAt(0).getObject();
+    Curve c = (Curve) curves.get(0).getObject();
     for (int i = 1; i < curves.size(); i++)
       {
-        Curve c2 = (Curve) curves.elementAt(i).getObject();
+        Curve c2 = (Curve) curves.get(i).getObject();
         if (c2.getVertices().length != c.getVertices().length)
           {
             new BStandardDialog("", UIUtilities.breakString("All the curves must have the same number of points."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());

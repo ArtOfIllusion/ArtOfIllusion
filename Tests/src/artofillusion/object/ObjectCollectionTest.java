@@ -14,16 +14,20 @@ import artofillusion.Scene;
 import artofillusion.animation.Keyframe;
 import artofillusion.math.CoordinateSystem;
 import artofillusion.math.Vec3;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+
+        
 /**
  *
  * @author maksim.khramov
  */
 public class ObjectCollectionTest {
+
 
     @Test
     public void testEmptyCollectionObjectIsClosed() {
@@ -81,7 +85,11 @@ public class ObjectCollectionTest {
         public CustomObjectCollection()
         {
             super();
-            cachedObjects = new Vector<>();
+            cachedObjects = new ArrayList<>();
+        }
+
+        public List<ObjectInfo> getCachedObjects() {
+            return cachedObjects;
         }
         
         @Override
@@ -113,6 +121,5 @@ public class ObjectCollectionTest {
         public void applyPoseKeyframe(Keyframe k) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        
-    }
+    }    
 }

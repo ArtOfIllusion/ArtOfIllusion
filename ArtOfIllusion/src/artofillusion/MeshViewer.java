@@ -27,12 +27,12 @@ public abstract class MeshViewer extends ObjectViewer
   protected TextureParameter surfaceColoringParameter;
   private int selectedJoint;
   private boolean detachSkeleton;
-  private Vector<Integer> lockedJoints;
+  private List<Integer> lockedJoints;
 
   public MeshViewer(MeshEditController controller, RowContainer p)
   {
     super(controller, p);
-    lockedJoints = new Vector<Integer>();
+    lockedJoints = new ArrayList<>();
   }
 
   /** 
@@ -61,7 +61,7 @@ public abstract class MeshViewer extends ObjectViewer
     boolean b[] = new boolean [s.getNumJoints()];
     for (int i = 0; i < lockedJoints.size(); i++)
     {
-      int index = s.findJointIndex(lockedJoints.elementAt(i));
+      int index = s.findJointIndex(lockedJoints.get(i));
       if (index > -1 && index < b.length)
         b[index] = true;
     }
@@ -73,7 +73,7 @@ public abstract class MeshViewer extends ObjectViewer
   public boolean isJointLocked(int id)
   {
     for (int i = 0; i < lockedJoints.size(); i++)
-      if (lockedJoints.elementAt(i) == id)
+      if (lockedJoints.get(i) == id)
         return true;
     return false;
   }
@@ -84,14 +84,14 @@ public abstract class MeshViewer extends ObjectViewer
   {
     Integer i = id;
     if (lockedJoints.indexOf(i) == -1)
-      lockedJoints.addElement(i);
+      lockedJoints.add(i);
   }
 
   /** Unlock the joint with the specified ID. */
 
   public void unlockJoint(int id)
   {
-    lockedJoints.removeElement(id);
+    lockedJoints.remove(id);
   }
 
   /** Get whether the control mesh is visible. */

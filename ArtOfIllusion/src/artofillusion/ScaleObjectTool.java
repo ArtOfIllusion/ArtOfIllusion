@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,8 +17,8 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.util.Vector;
 import java.util.List;
+import java.util.ArrayList;
 
 /** ScaleObjectTool is an EditingTool used for resizing objects in a scene.  For convenience, it also
     allows users to move objects by clicking on the object itself rather than on a handle.*/
@@ -78,7 +78,7 @@ public class ScaleObjectTool extends EditingTool
     int i, sel[];
 
     opmode = OPMODE_SCALE;
-    toMove = new Vector<ObjectInfo>();
+    toMove = new ArrayList<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -94,10 +94,10 @@ public class ScaleObjectTool extends EditingTool
     vaxisDir = new int [toMove.size()];
     objectPos = new Vec3 [toMove.size()];
     for (i = 0; i < objectPos.length; i++)
-      {
-        ObjectInfo info = toMove.get(i);
-        objectPos[i] = info.getCoords().getOrigin();
-      }
+    {
+      ObjectInfo info = toMove.get(i);
+      objectPos[i] = info.getCoords().getOrigin();
+    }
 
     // Figure out the correspondence between the object's x, y, and z axes, on the
     // horizontal and vertical axes on the screen.
@@ -220,7 +220,7 @@ public class ScaleObjectTool extends EditingTool
     int i, sel[];
 
     opmode = OPMODE_MOVE;
-    toMove = new Vector<ObjectInfo>();
+    toMove = new ArrayList<ObjectInfo>();
     clickedObject = theScene.getObject(obj);
     if (applyToChildren)
       sel = theScene.getSelectionWithChildren();
@@ -342,12 +342,11 @@ public class ScaleObjectTool extends EditingTool
       {
         UndoRecord undo;
         theWindow.setUndoRecord(undo = new UndoRecord(theWindow, false));
-        for (i = 0; i < toMove.size(); i++)
-          {
-            ObjectInfo info = toMove.get(i);
-            c = info.getCoords();
-            undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
-          }
+        for (ObjectInfo item: toMove)
+        {
+          c = item.getCoords();
+          undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
+        }
         dragged = true;
       }
     dx = dragPoint.x - clickPoint.x;

@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2015 by Peter Eastman and Marco Brenco
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,8 +29,8 @@ import java.util.*;
 
 public class CSGModeller
 {
-  private Vector<VertexInfo> vert1, vert2;
-  private Vector<FaceInfo> face1, face2;
+  private List<VertexInfo> vert1, vert2;
+  private List<FaceInfo> face1, face2;
   private int mainAxis;
 
   static final int VERTEX = 0;
@@ -71,35 +72,35 @@ public class CSGModeller
 
     // Create the lists of vertices, edges, and faces for each mesh.
 
-    vert1 = new Vector<VertexInfo>();
-    vert2 = new Vector<VertexInfo>();
-    face1 = new Vector<FaceInfo>();
-    face2 = new Vector<FaceInfo>();
+    vert1 = new ArrayList<>();
+    vert2 = new ArrayList<>();
+    face1 = new ArrayList<>();
+    face2 = new ArrayList<>();
     TriangleMesh.Vertex vert[] = (TriangleMesh.Vertex []) obj1.getVertices();
     Mat4 trans = coords1.fromLocal();
     for (int i = 0; i < vert.length; i++)
-      vert1.addElement(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
+      vert1.add(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
     vert = (TriangleMesh.Vertex []) obj2.getVertices();
     trans = coords2.fromLocal();
     for (int i = 0; i < vert.length; i++)
-      vert2.addElement(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
+      vert2.add(new VertexInfo(trans.times(vert[i].r), vert[i].smoothness, null));
     TriangleMesh.Edge edge[] = obj1.getEdges();
     TriangleMesh.Face face[] = obj1.getFaces();
     if (obj1.getSmoothingMethod() == Mesh.NO_SMOOTHING)
       for (int i = 0; i < face.length; i++)
-        face1.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1, 0.0f, 0.0f, 0.0f));
+        face1.add(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1, 0.0f, 0.0f, 0.0f));
     else
       for (int i = 0; i < face.length; i++)
-        face1.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1,
+        face1.add(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert1,
             edge[face[i].e1].smoothness, edge[face[i].e2].smoothness, edge[face[i].e3].smoothness));
     edge = obj2.getEdges();
     face = obj2.getFaces();
     if (obj2.getSmoothingMethod() == Mesh.NO_SMOOTHING)
       for (int i = 0; i < face.length; i++)
-        face2.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2, 0.0f, 0.0f, 0.0f));
+        face2.add(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2, 0.0f, 0.0f, 0.0f));
     else
       for (int i = 0; i < face.length; i++)
-        face2.addElement(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2,
+        face2.add(new FaceInfo(face[i].v1, face[i].v2, face[i].v3, vert2,
             edge[face[i].e1].smoothness, edge[face[i].e2].smoothness, edge[face[i].e3].smoothness));
 
     // Step 1: Split the faces of each object so that they do not intersect.
@@ -120,9 +121,9 @@ public class CSGModeller
 
   public TriangleMesh getMesh(int op, Texture texture)
   {
-    Vector<VertexInfo> allVert = new Vector<VertexInfo>();
-    Vector<int[]> faceIndex = new Vector<int[]>();
-    Vector<float[]> faceSmoothness = new Vector<float[]>();
+    List<VertexInfo> allVert = new ArrayList<VertexInfo>();
+    List<int[]> faceIndex = new ArrayList<int[]>();
+    List<float[]> faceSmoothness = new ArrayList<float[]>();
     int index1[] = new int [vert1.size()], index2[] = new int [vert2.size()];
     int firstBoundary = -1, faces1;
 
@@ -145,7 +146,7 @@ public class CSGModeller
 
     for (int i = 0; i < face1.size(); i++)
     {
-      FaceInfo f = face1.elementAt(i);
+      FaceInfo f = face1.get(i);
       if (f.type == INSIDE && op == CSGObject.INTERSECTION)
       {
         addPolygon(f, false, vert1, allVert, index1, faceIndex, faceSmoothness);
@@ -173,7 +174,7 @@ public class CSGModeller
 
     for (int i = 0; i < face2.size(); i++)
     {
-      FaceInfo f = face2.elementAt(i);
+      FaceInfo f = face2.get(i);
       if (f.type == INSIDE && op == CSGObject.INTERSECTION)
       {
         addPolygon(f, false, vert2, allVert, index2, faceIndex, faceSmoothness);
@@ -197,10 +198,10 @@ public class CSGModeller
 
     Vec3 v[] = new Vec3 [allVert.size()];
     for (int i = 0; i < v.length; i++)
-      v[i] = new Vec3(allVert.elementAt(i).r);
+      v[i] = new Vec3(allVert.get(i).r);
     int f[][] = new int [faceIndex.size()][];
     for (int i = 0; i < f.length; i++)
-      f[i] = faceIndex.elementAt(i);
+      f[i] = faceIndex.get(i);
     TriangleMesh mesh = new TriangleMesh(v, f);
     if (texture != null)
       mesh.setTexture(texture, texture.getDefaultMapping(mesh));
@@ -209,7 +210,7 @@ public class CSGModeller
 
     TriangleMesh.Vertex mv[] = (TriangleMesh.Vertex []) mesh.getVertices();
     for (int i = 0; i < mv.length; i++)
-      mv[i].smoothness = allVert.elementAt(i).smoothness;
+      mv[i].smoothness = allVert.get(i).smoothness;
     TriangleMesh.Edge edge[] = mesh.getEdges();
     TriangleMesh.Face face[] = mesh.getFaces();
     for (int i = 0; i < edge.length; i++)
@@ -219,7 +220,7 @@ public class CSGModeller
         int j = (k == 0 ? edge[i].f1 : edge[i].f2);
         if (j == -1)
           continue;
-        float smoothness[] = faceSmoothness.elementAt(j), s;
+        float smoothness[] = faceSmoothness.get(j), s;
         if (face[j].v1 == edge[i].v1 && face[j].v2 == edge[i].v2)
           s = smoothness[0];
         else if (face[j].v1 == edge[i].v2 && face[j].v2 == edge[i].v1)
@@ -249,8 +250,8 @@ public class CSGModeller
       boolean any = false;
       for (int i = 0; i < edge.length; i++)
       {
-        VertexInfo vi1 = allVert.elementAt(edge[i].v1);
-        VertexInfo vi2 = allVert.elementAt(edge[i].v2);
+        VertexInfo vi1 = allVert.get(edge[i].v1);
+        VertexInfo vi2 = allVert.get(edge[i].v2);
         candidate[i] = (vi1.type == BOUNDARY || vi2.type == BOUNDARY);
         any |= candidate[i];
       }
@@ -267,8 +268,8 @@ public class CSGModeller
 
   /** Add a polygon with its vertices to the final mesh */
 
-  private void addPolygon(FaceInfo f, boolean reverseNormal, Vector<VertexInfo> objVert,
-                          Vector<VertexInfo> allVert, int[] vertIndex, Vector<int[]> faceIndex, Vector<float[]> faceSmoothness)
+  private void addPolygon(FaceInfo f, boolean reverseNormal, List<VertexInfo> objVert,
+                          List<VertexInfo> allVert, int[] vertIndex, List<int[]> faceIndex, List<float[]> faceSmoothness)
   {
     // Add polygon's vertices
 
@@ -277,7 +278,7 @@ public class CSGModeller
       int i = (n == 1 ? f.v1 : (n == 2 ? f.v2 : f.v3));
       if (vertIndex[i] == -1)
       {
-        VertexInfo v = objVert.elementAt(i);
+        VertexInfo v = objVert.get(i);
 
         if (v.type == BOUNDARY)
         {
@@ -285,7 +286,7 @@ public class CSGModeller
 
           for (int j = 0; vertIndex[i] == -1 && j < allVert.size(); j++)
           {
-            VertexInfo v2 = allVert.elementAt(j);
+            VertexInfo v2 = allVert.get(j);
             if (v2.type == BOUNDARY && areEqual(v2.r, v.r))
               vertIndex[i] = j;
           }
@@ -294,13 +295,13 @@ public class CSGModeller
             // This is a new vertex.
 
             vertIndex[i] = allVert.size();
-            allVert.addElement(v);
+            allVert.add(v);
           }
         }
         else
         {
           vertIndex[i] = allVert.size();
-          allVert.addElement(v);
+          allVert.add(v);
         }
       }
     }
@@ -309,20 +310,20 @@ public class CSGModeller
 
     if (reverseNormal)
     {
-      faceIndex.addElement(new int [] {vertIndex[f.v2], vertIndex[f.v1], vertIndex[f.v3]});
-      faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness3, f.smoothness2});
+      faceIndex.add(new int [] {vertIndex[f.v2], vertIndex[f.v1], vertIndex[f.v3]});
+      faceSmoothness.add(new float [] {f.smoothness1, f.smoothness3, f.smoothness2});
     }
     else
     {
-      faceIndex.addElement(new int [] {vertIndex[f.v1], vertIndex[f.v2], vertIndex[f.v3]});
-      faceSmoothness.addElement(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
+      faceIndex.add(new int [] {vertIndex[f.v1], vertIndex[f.v2], vertIndex[f.v3]});
+      faceSmoothness.add(new float [] {f.smoothness1, f.smoothness2, f.smoothness3});
     }
   }
 
 
   /** Split the faces in one mesh so that they do not intersect the faces of the other mesh. */
 
-  private void splitFaces(Vector<VertexInfo> v1, Vector<FaceInfo> f1, BoundingBox bounds1, Vector<VertexInfo> v2, final Vector<FaceInfo> f2, BoundingBox bounds2)
+  private void splitFaces(List<VertexInfo> v1, List<FaceInfo> f1, BoundingBox bounds1, List<VertexInfo> v2, final List<FaceInfo> f2, BoundingBox bounds2)
   {
     if (!intersect(bounds1, bounds2))
       return;
@@ -360,12 +361,12 @@ public class CSGModeller
 
     p1 :for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo fa = f1.elementAt(i);
+      FaceInfo fa = f1.get(i);
       if (!intersect(fa.bounds, bounds2))
         continue;
-      VertexInfo va1 = v1.elementAt(fa.v1);
-      VertexInfo va2 = v1.elementAt(fa.v2);
-      VertexInfo va3 = v1.elementAt(fa.v3);
+      VertexInfo va1 = v1.get(fa.v1);
+      VertexInfo va2 = v1.get(fa.v2);
+      VertexInfo va3 = v1.get(fa.v3);
 
       // Do a binary search to find the first face we need to intersect against.
 
@@ -386,7 +387,7 @@ public class CSGModeller
 
       for (int j = start; j < f2.size(); j++)
       {
-        FaceInfo fb = f2.elementAt(faceIndex[j]);
+        FaceInfo fb = f2.get(faceIndex[j]);
         if (minAfter[j] > fa.max+TOL)
           break;
         if (!intersect(fa.bounds, fb.bounds))
@@ -394,9 +395,9 @@ public class CSGModeller
 
         // Determine whether two faces actually intersect.
 
-        VertexInfo vb1 = v2.elementAt(fb.v1);
-        VertexInfo vb2 = v2.elementAt(fb.v2);
-        VertexInfo vb3 = v2.elementAt(fb.v3);
+        VertexInfo vb1 = v2.get(fb.v1);
+        VertexInfo vb2 = v2.get(fb.v2);
+        VertexInfo vb3 = v2.get(fb.v3);
         double dista1, dista2, dista3, distb1, distb2, distb3;
         dista1 = va1.r.dot(fb.norm)-fb.distRoot;
         dista2 = va2.r.dot(fb.norm)-fb.distRoot;
@@ -768,17 +769,17 @@ public class CSGModeller
    root: where the "line" starts
    */
 
-  private void splitOneFace(Vector<VertexInfo> vert, Vector<FaceInfo> face, int which, int intersectVert[], double distA[],
+  private void splitOneFace(List<VertexInfo> vert, List<FaceInfo> face, int which, int intersectVert[], double distA[],
                             double distB[], int typeA[], int spanTypeA, Vec3 line, Vec3 root)
   {
-    FaceInfo f = face.elementAt(which);
+    FaceInfo f = face.get(which);
     Vec3 norm = f.norm;
     double distRoot = f.distRoot;
-    VertexInfo v1 = vert.elementAt(f.v1);
-    VertexInfo v2 = vert.elementAt(f.v2);
-    VertexInfo v3 = vert.elementAt(f.v3);
-    VertexInfo startVert = vert.elementAt(intersectVert[0]);
-    VertexInfo endVert = vert.elementAt(intersectVert[1]);
+    VertexInfo v1 = vert.get(f.v1);
+    VertexInfo v2 = vert.get(f.v2);
+    VertexInfo v3 = vert.get(f.v3);
+    VertexInfo startVert = vert.get(intersectVert[0]);
+    VertexInfo endVert = vert.get(intersectVert[1]);
     int startType, endType;
     double startDist, endDist;
     double startParams[] = null, endParams[] = null;
@@ -863,21 +864,21 @@ public class CSGModeller
         // Vertex-Edge-Edge.
 
         int newindex = vert.size();
-        vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+        vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
         if (splitEdge == 1)
-        {
-          face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, startVert == v1 ? 0.0f : f.smoothness1, 1.0f, f.smoothness3, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v2, f.v3, vert, startVert == v2 ? 0.0f : f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
+        {          
+          face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, startVert == v1 ? 0.0f : f.smoothness1, 1.0f, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v2, f.v3, vert, startVert == v2 ? 0.0f : f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
         }
         else if (splitEdge == 2)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, startVert == v2 ? 0.0f : f.smoothness2, 1.0f, f.smoothness1, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v3, f.v1, vert, startVert == v3 ? 0.0f : f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, startVert == v2 ? 0.0f : f.smoothness2, 1.0f, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v3, f.v1, vert, startVert == v3 ? 0.0f : f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
         }
         else
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, startVert == v3 ? 0.0f : f.smoothness3, 1.0f, f.smoothness2, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v1, f.v2, vert, startVert == v1 ? 0.0f : f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, startVert == v3 ? 0.0f : f.smoothness3, 1.0f, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v1, f.v2, vert, startVert == v1 ? 0.0f : f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
         }
         return;
       }
@@ -886,21 +887,21 @@ public class CSGModeller
         // Edge-Edge-Vertex.
 
         int newindex = vert.size();
-        vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+        vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
         if (splitEdge == 1)
         {
-          face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, endVert == v1 ? 0.0f : f.smoothness1, 1.0f, f.smoothness3, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v2, f.v3, vert, endVert == v2 ? 0.0f : f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, endVert == v1 ? 0.0f : f.smoothness1, 1.0f, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v2, f.v3, vert, endVert == v2 ? 0.0f : f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
         }
         else if (splitEdge == 2)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, endVert == v2 ? 0.0f : f.smoothness2, 1.0f, f.smoothness1, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v3, f.v1, vert, endVert == v3 ? 0.0f : f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, endVert == v2 ? 0.0f : f.smoothness2, 1.0f, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v3, f.v1, vert, endVert == v3 ? 0.0f : f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
         }
         else
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, endVert == v3 ? 0.0f : f.smoothness3, 1.0f, f.smoothness2, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v1, f.v2, vert, endVert == v1 ? 0.0f : f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, endVert == v3 ? 0.0f : f.smoothness3, 1.0f, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v1, f.v2, vert, endVert == v1 ? 0.0f : f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
         }
         return;
       }
@@ -912,21 +913,21 @@ public class CSGModeller
         // Only create one new triangle.
 
         int newindex = vert.size();
-        vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+        vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
         if (splitEdge == 1)
         {
-          face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 1.0f, f.smoothness3, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 1.0f, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
         }
         else if (splitEdge == 2)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 1.0f, f.smoothness1, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 1.0f, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
         }
         else
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 1.0f, f.smoothness2, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 1.0f, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
         }
       }
       else
@@ -936,31 +937,31 @@ public class CSGModeller
         int newindex = vert.size();
         if ((startVert == v1 && endVert == v2) || (startVert == v2 && endVert == v3) || (startVert == v3 && endVert == v1))
         {
-          vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
-          vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+          vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+          vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
         }
         else
         {
-          vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
-          vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+          vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+          vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
         }
         if (splitEdge == 1)
         {
-          face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 1.0f, f.smoothness3, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, newindex+1, f.v3, vert, 0.0f, 1.0f, 1.0f, norm, distRoot));
-          face.addElement(new FaceInfo(newindex+1, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 1.0f, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex, newindex+1, f.v3, vert, 0.0f, 1.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(newindex+1, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
         }
         else if (splitEdge == 2)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 1.0f, f.smoothness1, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, newindex+1, f.v1, vert, 0.0f, 1.0f, 1.0f, norm, distRoot));
-          face.addElement(new FaceInfo(newindex+1, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 1.0f, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex, newindex+1, f.v1, vert, 0.0f, 1.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(newindex+1, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
         }
         else
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 1.0f, f.smoothness2, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, newindex+1, f.v2, vert, 0.0f, 1.0f, 1.0f, norm, distRoot));
-          face.addElement(new FaceInfo(newindex+1, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 1.0f, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex, newindex+1, f.v2, vert, 0.0f, 1.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(newindex+1, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
         }
       }
       return;
@@ -970,21 +971,21 @@ public class CSGModeller
       // Vertex-Face-Edge.
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+      vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
       if (endVert == v1)
       {
-        face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 0.0f, f.smoothness3, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 0.0f, f.smoothness3, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
       }
       else if (endVert == v2)
       {
-        face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 0.0f, f.smoothness1, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 0.0f, f.smoothness1, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 0.0f, f.smoothness2, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 0.0f, f.smoothness2, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
       }
     }
     else if (startType == EDGE && endType == VERTEX)
@@ -992,21 +993,21 @@ public class CSGModeller
       // Edge-Face-Vertex.
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+      vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
       if (startVert == v1)
       {
-        face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 0.0f, f.smoothness3, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 0.0f, f.smoothness3, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
       }
       else if (startVert == v2)
       {
-        face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 0.0f, f.smoothness1, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 0.0f, f.smoothness1, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 0.0f, f.smoothness2, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 0.0f, f.smoothness2, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
       }
     }
     else if (startType == VERTEX && endType == FACE)
@@ -1014,24 +1015,24 @@ public class CSGModeller
       // Vertex-Face-Face.
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+      vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
       if (startVert == v1)
       {
-        face.setElementAt(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
       }
       else if (startVert == v2)
       {
-        face.setElementAt(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
       }
     }
     else if (startType == FACE && endType == VERTEX)
@@ -1039,24 +1040,24 @@ public class CSGModeller
       // Face-Face-Vertex.
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+      vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
       if (endVert == v1)
       {
-        face.setElementAt(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
       }
       else if (endVert == v2)
       {
-        face.setElementAt(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
       }
     }
     else if (startType == EDGE && endType == EDGE)
@@ -1064,65 +1065,65 @@ public class CSGModeller
       // Edge-Face-Edge or Edge-PointOnEdge-Edge
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+      vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
 
       if (spanTypeA == POINT_ON_EDGE)
       {
         // Issues #457 and #479: new case, only split the face in two
         if (startVert == v1)
         {
-          face.setElementAt(new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 1.0f, f.smoothness3, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v1, newindex, f.v3, vert, f.smoothness1, 1.0f, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v2, f.v3, vert, f.smoothness1, f.smoothness2, 1.0f, norm, distRoot));
         }
         else if (startVert == v2)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 1.0f, f.smoothness1, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex, f.v1, vert, f.smoothness2, 1.0f, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v3, f.v1, vert, f.smoothness2, f.smoothness3, 1.0f, norm, distRoot));
         }
         else
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 1.0f, f.smoothness2, norm, distRoot), which);
-          face.addElement(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex, f.v2, vert, f.smoothness3, 1.0f, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v1, f.v2, vert, f.smoothness3, f.smoothness1, 1.0f, norm, distRoot));
         }
       }
       else
       {
-        vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+        vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
         if (startVert == v1 && endVert == v2)
         {
-          face.setElementAt(new FaceInfo(f.v1, newindex, newindex + 1, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot), which);
-          face.addElement(new FaceInfo(f.v1, newindex + 1, f.v3, vert, 1.0f, f.smoothness2, f.smoothness3, norm, distRoot));
-          face.addElement(new FaceInfo(newindex, f.v2, newindex + 1, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v1, newindex, newindex + 1, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(f.v1, newindex + 1, f.v3, vert, 1.0f, f.smoothness2, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v2, newindex + 1, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
         }
         else if (startVert == v2 && endVert == v1)
         {
-          face.setElementAt(new FaceInfo(f.v1, newindex + 1, newindex, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot), which);
-          face.addElement(new FaceInfo(f.v1, newindex, f.v3, vert, 1.0f, f.smoothness2, f.smoothness3, norm, distRoot));
-          face.addElement(new FaceInfo(newindex + 1, f.v2, newindex, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v1, newindex + 1, newindex, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(f.v1, newindex, f.v3, vert, 1.0f, f.smoothness2, f.smoothness3, norm, distRoot));
+          face.add(new FaceInfo(newindex + 1, f.v2, newindex, vert, f.smoothness1, f.smoothness2, 0.0f, norm, distRoot));
         }
         else if (startVert == v2 && endVert == v3)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex, newindex + 1, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot), which);
-          face.addElement(new FaceInfo(f.v2, newindex + 1, f.v1, vert, 1.0f, f.smoothness3, f.smoothness1, norm, distRoot));
-          face.addElement(new FaceInfo(newindex, f.v3, newindex + 1, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex, newindex + 1, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(f.v2, newindex + 1, f.v1, vert, 1.0f, f.smoothness3, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v3, newindex + 1, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
         }
         else if (startVert == v3 && endVert == v2)
         {
-          face.setElementAt(new FaceInfo(f.v2, newindex + 1, newindex, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot), which);
-          face.addElement(new FaceInfo(f.v2, newindex, f.v1, vert, 1.0f, f.smoothness3, f.smoothness1, norm, distRoot));
-          face.addElement(new FaceInfo(newindex + 1, f.v3, newindex, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v2, newindex + 1, newindex, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(f.v2, newindex, f.v1, vert, 1.0f, f.smoothness3, f.smoothness1, norm, distRoot));
+          face.add(new FaceInfo(newindex + 1, f.v3, newindex, vert, f.smoothness2, f.smoothness3, 0.0f, norm, distRoot));
         }
         else if (startVert == v3 && endVert == v1)
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex, newindex + 1, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot), which);
-          face.addElement(new FaceInfo(f.v3, newindex + 1, f.v2, vert, 1.0f, f.smoothness1, f.smoothness2, norm, distRoot));
-          face.addElement(new FaceInfo(newindex, f.v1, newindex + 1, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex, newindex + 1, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(f.v3, newindex + 1, f.v2, vert, 1.0f, f.smoothness1, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex, f.v1, newindex + 1, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
         }
         else
         {
-          face.setElementAt(new FaceInfo(f.v3, newindex + 1, newindex, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot), which);
-          face.addElement(new FaceInfo(f.v3, newindex, f.v2, vert, 1.0f, f.smoothness1, f.smoothness2, norm, distRoot));
-          face.addElement(new FaceInfo(newindex + 1, f.v1, newindex, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
+          face.set(which, new FaceInfo(f.v3, newindex + 1, newindex, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
+          face.add(new FaceInfo(f.v3, newindex, f.v2, vert, 1.0f, f.smoothness1, f.smoothness2, norm, distRoot));
+          face.add(new FaceInfo(newindex + 1, f.v1, newindex, vert, f.smoothness3, f.smoothness1, 0.0f, norm, distRoot));
         }
       }
     }
@@ -1131,28 +1132,28 @@ public class CSGModeller
       // Edge-Face-Face.
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
-      vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+      vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+      vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
       if (startVert == v1)
       {
-        face.setElementAt(new FaceInfo(f.v1, newindex, newindex + 1, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, newindex, newindex + 1, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
       }
       else if (startVert == v2)
       {
-        face.setElementAt(new FaceInfo(f.v2, newindex, newindex + 1, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, newindex, newindex + 1, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, newindex, newindex + 1, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, newindex, newindex + 1, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
       }
     }
     else if (startType == FACE && endType == EDGE)
@@ -1160,28 +1161,28 @@ public class CSGModeller
       // Face-Face-Edge.
 
       int newindex = vert.size();
-      vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
-      vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+      vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+      vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
       if (endVert == v1)
       {
-        face.setElementAt(new FaceInfo(f.v1, newindex, newindex + 1, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, newindex, newindex + 1, vert, f.smoothness1, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
       }
       else if (endVert == v2)
       {
-        face.setElementAt(new FaceInfo(f.v2, newindex, newindex + 1, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, newindex, newindex + 1, vert, f.smoothness2, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, newindex, newindex + 1, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(newindex, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, newindex, newindex + 1, vert, f.smoothness3, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(newindex, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 0.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
       }
     }
     else if (startType == FACE && endType == FACE)
@@ -1195,10 +1196,10 @@ public class CSGModeller
         // The points are at the same location, so only add one new point.
 
         int newindex = vert.size();
-        vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
-        face.setElementAt(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+        face.set(which, new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
         return;
       }
       Vec3 d = new Vec3(endPos.x-v1.r.x, endPos.y-v1.r.y, endPos.z-v1.r.z);
@@ -1230,51 +1231,51 @@ public class CSGModeller
       int newindex = vert.size();
       if (onLinePos.distance(startPos) > onLinePos.distance(endPos))
       {
-        vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
-        vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+        vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+        vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
       }
       else
       {
-        vert.addElement(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
-        vert.addElement(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
+        vert.add(new VertexInfo(endPos, 1.0f, endParams, BOUNDARY));
+        vert.add(new VertexInfo(startPos, 1.0f, startParams, BOUNDARY));
       }
       if (onLine == 3)
       {
-        face.setElementAt(new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v1, newindex, newindex+1, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, newindex+1, newindex, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, newindex+1, f.v3, vert, 1.0f, 1.0f, f.smoothness3, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v1, f.v2, newindex, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, newindex, newindex+1, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, newindex+1, newindex, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, newindex+1, f.v3, vert, 1.0f, 1.0f, f.smoothness3, norm, distRoot));
+        face.add(new FaceInfo(f.v2, f.v3, newindex+1, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
       }
       else if (onLine == 1)
       {
-        face.setElementAt(new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v2, newindex, newindex+1, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, newindex+1, newindex, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v2, newindex+1, f.v1, vert, 1.0f, 1.0f, f.smoothness1, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v2, f.v3, newindex, vert, f.smoothness2, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, newindex, newindex+1, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, newindex+1, newindex, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v2, newindex+1, f.v1, vert, 1.0f, 1.0f, f.smoothness1, norm, distRoot));
+        face.add(new FaceInfo(f.v3, f.v1, newindex+1, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
       }
       else
       {
-        face.setElementAt(new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot), which);
-        face.addElement(new FaceInfo(f.v3, newindex, newindex+1, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, newindex+1, newindex, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
-        face.addElement(new FaceInfo(f.v3, newindex+1, f.v2, vert, 1.0f, 1.0f, f.smoothness2, norm, distRoot));
-        face.addElement(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
+        face.set(which, new FaceInfo(f.v3, f.v1, newindex, vert, f.smoothness3, 1.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, newindex, newindex+1, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v1, newindex+1, newindex, vert, 1.0f, 0.0f, 1.0f, norm, distRoot));
+        face.add(new FaceInfo(f.v3, newindex+1, f.v2, vert, 1.0f, 1.0f, f.smoothness2, norm, distRoot));
+        face.add(new FaceInfo(f.v1, f.v2, newindex+1, vert, f.smoothness1, 1.0f, 1.0f, norm, distRoot));
       }
     }
   }
 
   /** Determine which vertices of one object are inside or outside the other object. */
 
-  private void findInsideVertices(Vector<VertexInfo> v1, Vector<FaceInfo> f1, Vector<VertexInfo> v2, Vector<FaceInfo> f2)
+  private void findInsideVertices(List<VertexInfo> v1, List<FaceInfo> f1, List<VertexInfo> v2, List<FaceInfo> f2)
   {
     // Make a list of the faces sharing each vertex.
 
     int faceCount[] = new int [v1.size()];
     for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo f = f1.elementAt(i);
+      FaceInfo f = f1.get(i);
       faceCount[f.v1]++;
       faceCount[f.v2]++;
       faceCount[f.v3]++;
@@ -1287,7 +1288,7 @@ public class CSGModeller
     }
     for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo f = f1.elementAt(i);
+      FaceInfo f = f1.get(i);
       vertFace[f.v1][faceCount[f.v1]++] = i;
       vertFace[f.v2][faceCount[f.v2]++] = i;
       vertFace[f.v3][faceCount[f.v3]++] = i;
@@ -1297,7 +1298,7 @@ public class CSGModeller
 
     for (int i = 0; i < f1.size(); i++)
     {
-      FaceInfo f = f1.elementAt(i);
+      FaceInfo f = f1.get(i);
 
       if (f.type != UNKNOWN)
         continue;
@@ -1305,9 +1306,9 @@ public class CSGModeller
 
       // Mark the vertices of this face, and any adjacent faces.
 
-      VertexInfo vi1 = v1.elementAt(f.v1);
-      VertexInfo vi2 = v1.elementAt(f.v2);
-      VertexInfo vi3 = v1.elementAt(f.v3);
+      VertexInfo vi1 = v1.get(f.v1);
+      VertexInfo vi2 = v1.get(f.v2);
+      VertexInfo vi3 = v1.get(f.v3);
       int type = f.type;
 //        if (type == SAME || type == OPPOSITE)
 //          continue;
@@ -1322,11 +1323,11 @@ public class CSGModeller
 
   /** Determine whether a particular face is inside or outside the other object. */
 
-  private int classifyFace(FaceInfo f, Vector<VertexInfo> v1, Vector<VertexInfo> v2, Vector<FaceInfo> f2)
+  private int classifyFace(FaceInfo f, List<VertexInfo> v1, List<VertexInfo> v2, List<FaceInfo> f2)
   {
-    VertexInfo vi1 = v1.elementAt(f.v1);
-    VertexInfo vi2 = v1.elementAt(f.v2);
-    VertexInfo vi3 = v1.elementAt(f.v3);
+    VertexInfo vi1 = v1.get(f.v1);
+    VertexInfo vi2 = v1.get(f.v2);
+    VertexInfo vi3 = v1.get(f.v3);
     Vec3 orig = new Vec3(), dir = new Vec3(f.norm);
 
     // Send a ray out from the center of this face, and see what are the first
@@ -1346,13 +1347,13 @@ public class CSGModeller
       firstDist = secondDist = Double.MAX_VALUE;
       for (int j = 0; j < f2.size(); j++)
       {
-        FaceInfo fb = f2.elementAt(j);
+        FaceInfo fb = f2.get(j);
         double dist = rayBoxIntersectionDist(orig, dir, fb.bounds);
         if (dist >= secondDist)
           continue;
-        VertexInfo vb1 = v2.elementAt(fb.v1);
-        VertexInfo vb2 = v2.elementAt(fb.v2);
-        VertexInfo vb3 = v2.elementAt(fb.v3);
+        VertexInfo vb1 = v2.get(fb.v1);
+        VertexInfo vb2 = v2.get(fb.v2);
+        VertexInfo vb3 = v2.get(fb.v3);
         dist = rayFaceIntersectionDist(orig, dir, fb, vb1.r, vb2.r, vb3.r);
 
         if (dist == -Double.MAX_VALUE && fb.norm.length2() == 0.0)
@@ -1394,12 +1395,12 @@ public class CSGModeller
     if (firstDist == 0)
     {
       // Coplanar faces
-      double dot = f.norm.dot((f2.elementAt(first)).norm);
+      double dot = f.norm.dot((f2.get(first)).norm);
       if (dot > 0.0)
         return SAME;
       return OPPOSITE;
     }
-    double dot = dir.dot((f2.elementAt(first)).norm);
+    double dot = dir.dot((f2.get(first)).norm);
     if (dot > 0.0)
       return INSIDE;
     return OUTSIDE;
@@ -1584,21 +1585,21 @@ public class CSGModeller
   /* Mark a vertex as inside or outside, the recursively call this routine for vertices
      of adjacent faces. */
 
-  private void markVertex(int which, int value, Vector v1, Vector f1, int vertFace[][], int stackDepth)
+  private void markVertex(int which, int value, List<VertexInfo> v1, List<FaceInfo> f1, int vertFace[][], int stackDepth)
   {
-    VertexInfo v = (VertexInfo) v1.elementAt(which);
+    VertexInfo v = v1.get(which);
     v.type = value;
     if (stackDepth == 500)
       return; // Limit recursion to prevent stack overflows.
     for (int i = 0; i < vertFace[which].length; i++)
     {
-      FaceInfo f = (FaceInfo) f1.elementAt(vertFace[which][i]);
+      FaceInfo f = f1.get(vertFace[which][i]);
       if (f.type == UNKNOWN || f.type == value)
       {
         f.type = value;
-        VertexInfo vi1 = (VertexInfo) v1.elementAt(f.v1);
-        VertexInfo vi2 = (VertexInfo) v1.elementAt(f.v2);
-        VertexInfo vi3 = (VertexInfo) v1.elementAt(f.v3);
+        VertexInfo vi1 = v1.get(f.v1);
+        VertexInfo vi2 = v1.get(f.v2);
+        VertexInfo vi3 = v1.get(f.v3);
         if (vi1.type == UNKNOWN)
           markVertex(f.v1, value, v1, f1, vertFace, stackDepth+1);
         if (vi2.type == UNKNOWN)
@@ -1698,11 +1699,11 @@ public class CSGModeller
     float smoothness1, smoothness2, smoothness3;
     double distRoot, min, max;
 
-    public FaceInfo(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3)
+    public FaceInfo(int v1, int v2, int v3, List<VertexInfo> vertices, float s1, float s2, float s3)
     {
-      Vec3 vert1 = ((VertexInfo) vertices.elementAt(v1)).r;
-      Vec3 vert2 = ((VertexInfo) vertices.elementAt(v2)).r;
-      Vec3 vert3 = ((VertexInfo) vertices.elementAt(v3)).r;
+      Vec3 vert1 = vertices.get(v1).r;
+      Vec3 vert2 = vertices.get(v2).r;
+      Vec3 vert3 = vertices.get(v3).r;
       Vec3 normal = vert2.minus(vert1).cross(vert3.minus(vert1));
       double length = normal.length();
       if (length > 0.0)
@@ -1711,12 +1712,12 @@ public class CSGModeller
       init(v1, v2, v3, vertices, s1, s2, s3, normal, dist);
     }
 
-    public FaceInfo(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
+    public FaceInfo(int v1, int v2, int v3, List<VertexInfo> vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
     {
       init(v1, v2, v3, vertices, s1, s2, s3, norm, distRoot);
     }
 
-    private void init(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
+    private void init(int v1, int v2, int v3, List<VertexInfo> vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
     {
       this.norm = norm;
       this.distRoot = distRoot;
@@ -1728,9 +1729,9 @@ public class CSGModeller
       smoothness3 = s3;
       type = UNKNOWN;
       double minx, miny, minz, maxx, maxy, maxz;
-      Vec3 vert1 = ((VertexInfo) vertices.elementAt(v1)).r;
-      Vec3 vert2 = ((VertexInfo) vertices.elementAt(v2)).r;
-      Vec3 vert3 = ((VertexInfo) vertices.elementAt(v3)).r;
+      Vec3 vert1 = vertices.get(v1).r;
+      Vec3 vert2 = vertices.get(v2).r;
+      Vec3 vert3 = vertices.get(v3).r;
       minx = Math.min(Math.min(vert1.x, vert2.x), vert3.x);
       miny = Math.min(Math.min(vert1.y, vert2.y), vert3.y);
       minz = Math.min(Math.min(vert1.z, vert2.z), vert3.z);

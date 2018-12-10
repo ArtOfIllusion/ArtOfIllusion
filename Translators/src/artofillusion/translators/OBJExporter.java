@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -120,7 +120,7 @@ public class OBJExporter
     // Write the objects in the scene.
 
     int numVert = 0, numNorm = 0, numTexVert = 0;
-    Hashtable<String, String> groupNames = new Hashtable<String, String>();
+    Map<String, String> groupNames = new HashMap<>();
     NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
     nf.setMaximumFractionDigits(5);
     nf.setGroupingUsed(false);
@@ -345,15 +345,15 @@ public class OBJExporter
     
     // Write out the .mtl file.
     
-    out.println("#Produced by Art of Illusion "+ArtOfIllusion.getVersion()+", "+(new Date()).toString());
-    Enumeration textures = textureExporter.getTextures();
-    Hashtable<String, TextureImageInfo> names = new Hashtable<String, TextureImageInfo>();
+    out.println("#Produced by Art of Illusion " + ArtOfIllusion.getVersion() + ", " + (new Date()).toString());
+    Enumeration<TextureImageInfo> textures = textureExporter.getTextures();
+    Map<String, TextureImageInfo> names = new HashMap<>();
     TextureSpec spec = new TextureSpec();
     NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
     nf.setMaximumFractionDigits(5);
     while (textures.hasMoreElements())
       {
-        TextureImageInfo info = (TextureImageInfo) textures.nextElement();
+        TextureImageInfo info = textures.nextElement();
         
         // Select a name for the texture.
         

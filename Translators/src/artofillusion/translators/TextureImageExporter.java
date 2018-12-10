@@ -1,4 +1,5 @@
 /* Copyright (C) 2003 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,7 +25,7 @@ import java.util.*;
 
 public class TextureImageExporter
 {
-  private Hashtable<Texture,TextureImageInfo> textureTable;
+  private Map<Texture,TextureImageInfo> textureTable;
   private File dir;
   private String baseFilename;
   private int quality, components, width, height;
@@ -48,7 +49,7 @@ public class TextureImageExporter
 
   public TextureImageExporter(File dir, String baseFilename, int quality, int components, int width, int height)
   {
-    textureTable = new Hashtable<Texture,TextureImageInfo>();
+    textureTable = new HashMap<>();
     this.dir = dir;
     this.baseFilename = baseFilename;
     this.quality = quality;
@@ -155,19 +156,19 @@ public class TextureImageExporter
 
   /** Get an Enumeration of all TextureImageInfos. */
 
-  public Enumeration getTextures()
+  public Enumeration<TextureImageInfo> getTextures()
   {
-    return textureTable.elements();
+      return Collections.enumeration(textureTable.values());
   }
 
   /** Write out all of the images for the various textures. */
 
   public void saveImages() throws IOException, InterruptedException
   {
-    Enumeration e = textureTable.keys();
+    Enumeration<Texture> e = Collections.enumeration(textureTable.keySet());
     while (e.hasMoreElements())
       {
-        Texture tex = (Texture) e.nextElement();
+        Texture tex = e.nextElement();
         TextureImageInfo info = textureTable.get(tex);
         if ((components&DIFFUSE) != 0)
           writeComponentImage(info, Texture2D.DIFFUSE_COLOR_COMPONENT, info.diffuseFilename);

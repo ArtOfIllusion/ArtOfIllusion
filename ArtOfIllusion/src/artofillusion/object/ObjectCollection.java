@@ -24,7 +24,7 @@ import java.util.*;
 
 public abstract class ObjectCollection extends Object3D
 {
-  protected Vector<ObjectInfo> cachedObjects;
+  protected List<ObjectInfo> cachedObjects;
   protected BoundingBox cachedBounds;
   protected double lastTime;
   protected CoordinateSystem lastCoords;
@@ -51,8 +51,8 @@ public abstract class ObjectCollection extends Object3D
   public synchronized Enumeration<ObjectInfo> getObjects(ObjectInfo info, boolean interactive, Scene scene)
   {
     if (interactive && cachedObjects != null && info.getDistortion() == previousDistortion)
-      return cachedObjects.elements();
-    Vector<ObjectInfo> objectVec = new Vector<ObjectInfo>();
+      return Collections.enumeration(cachedObjects);
+    List<ObjectInfo> objectVec = new ArrayList<>();
     Enumeration<ObjectInfo> objects = enumerateObjects(info, interactive, scene);
     while (objects.hasMoreElements())
     {
@@ -61,10 +61,10 @@ public abstract class ObjectCollection extends Object3D
       objectVec.add(childInfo);
     }
     if (!interactive)
-      return objectVec.elements();
+        return Collections.enumeration(objectVec);
     cachedObjects = objectVec;
     previousDistortion = info.getDistortion();
-    return cachedObjects.elements();
+    return Collections.enumeration(cachedObjects);
   }
 
   /** Get an enumeration of ObjectInfos listing the objects which this object

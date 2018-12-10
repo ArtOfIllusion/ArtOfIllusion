@@ -28,7 +28,8 @@ public class Actor extends ObjectWrapper
 {
   Gesture gesture[];
   String gestureName[];
-  int gestureID[], nextPoseID;
+  int gestureID[];
+  int nextPoseID;
   private ActorKeyframe currentPose;
 
   public Actor(Object3D obj)
@@ -367,8 +368,8 @@ public class Actor extends ObjectWrapper
 
     // Construct the output pose.
 
-    Vector<Gesture> gestureList = new Vector<Gesture>();
-    Vector<Double> weightList = new Vector<Double>();
+    List<Gesture> gestureList = new ArrayList<Gesture>();
+    List<Double> weightList = new ArrayList<Double>();
     
     for (int i = 0; i < weight.length; i++)
       if (weight[i] > 0.0)
@@ -605,7 +606,7 @@ public class Actor extends ObjectWrapper
     }
 
     /** Delete a gesture from an ActorKeyframe. */
-
+    // FIXME: Need better error handling on delete missed items. See ActorTest deleteMissedXXX testcases
     public void deleteGesture(int which)
     {
       int newid[] = new int [id.length-1];
@@ -665,37 +666,37 @@ public class Actor extends ObjectWrapper
     {
     }
 
-    /** Add the weights from a keyframe into a hashtable. */
+    /** Add the weights from a keyframe into a map. */
 
-    private void addWeightsToTable(ActorKeyframe k, Hashtable table, double scale)
+    private static void addWeightsToTable(ActorKeyframe keyFrame, Map table, double scale)
     {
-      for (int i = 0; i < k.id.length; i++)
+      for (int i = 0; i < keyFrame.id.length; i++)
         {
-          Object key = k.id[i];
+          Object key = keyFrame.id[i];
           Double weight = (Double) table.get(key);
           if (weight == null)
-            weight = k.weight[i]*scale;
+            weight = keyFrame.weight[i]*scale;
           else
-            weight = k.weight[i]*scale+weight;
+            weight = keyFrame.weight[i]*scale+weight;
           table.put(key, weight);
         }
     }
 
     /** Create a keyframe from the information in a hashtable. */
 
-    private ActorKeyframe getKeyframeFromTable(Hashtable table)
+    private static ActorKeyframe getKeyframeFromTable(Map<Integer, Double> table)
     {
       ActorKeyframe k = new ActorKeyframe();
       k.id = new int [table.size()];
       k.weight = new double [k.id.length];
-      Enumeration keys = table.keys();
+     
+      Iterator<Integer> keys = table.keySet().iterator();
       int j = 0;
       for (int i = 0; i < k.id.length; i++)
         {
-          Integer key = (Integer) keys.nextElement();
-          Double weight = (Double) table.get(key);
+          Integer key = keys.next();
           k.id[j] = key;
-          k.weight[j] = weight;
+          k.weight[j] = table.get(key);
           if (k.weight[j] != 0.0)
             j++;
         }
@@ -717,7 +718,7 @@ public class Actor extends ObjectWrapper
     @Override
     public Keyframe blend(Keyframe o2, double weight1, double weight2)
     {
-      Hashtable table = new Hashtable();
+      Map<Integer, Double> table = new HashMap<>();
 
       addWeightsToTable(this, table, weight1);
       addWeightsToTable((ActorKeyframe) o2, table, weight2);
@@ -727,7 +728,7 @@ public class Actor extends ObjectWrapper
     @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, double weight1, double weight2, double weight3)
     {
-      Hashtable table = new Hashtable();
+      Map<Integer, Double> table = new HashMap<>();
 
       addWeightsToTable(this, table, weight1);
       addWeightsToTable((ActorKeyframe) o2, table, weight2);
@@ -738,7 +739,7 @@ public class Actor extends ObjectWrapper
     @Override
     public Keyframe blend(Keyframe o2, Keyframe o3, Keyframe o4, double weight1, double weight2, double weight3, double weight4)
     {
-      Hashtable table = new Hashtable();
+      Map<Integer, Double> table = new HashMap<>();
 
       addWeightsToTable(this, table, weight1);
       addWeightsToTable((ActorKeyframe) o2, table, weight2);
@@ -767,8 +768,8 @@ public class Actor extends ObjectWrapper
 
     public Keyframe createObjectKeyframe(Actor actor)
     {
-      List<Gesture> poseVec = new Vector<Gesture>();
-      List<Double> weightVec = new Vector<Double>();
+      List<Gesture> poseVec = new ArrayList<>();
+      List<Double> weightVec = new ArrayList<>();
 
       for (int i = 0; i < id.length; i++)
       {

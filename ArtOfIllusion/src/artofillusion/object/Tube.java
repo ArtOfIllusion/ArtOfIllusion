@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -473,11 +473,11 @@ public class Tube extends Curve
     if (interactive && cachedMesh != null)
       return cachedMesh;
 
-    Vector<MeshVertex> vert = new Vector<MeshVertex>();
-    Vector<Vec3> norm = new Vector<Vec3>();
-    Vector<int[]> face = new Vector<int[]>();
+    List<MeshVertex> vert = new ArrayList<MeshVertex>();
+    List<Vec3> norm = new ArrayList<Vec3>();
+    List<int[]> face = new ArrayList<int[]>();
     
-    Vector param = new Vector();
+    List param = new ArrayList();
     
     subdivideSurface(tol, vert, norm, face, param);
     Vec3 v[] = new Vec3 [vert.size()];
@@ -506,7 +506,7 @@ public class Tube extends Curve
         {
           double val[] = new double [v.length];
           for (int j = 0; j < val.length; j++)
-            val[j] = ((double []) param.elementAt(j))[i];
+            val[j] = ((double []) param.get(j))[i];
           tubeParamValue[i] = new VertexParameterValue(val);
         }
         else
@@ -557,11 +557,11 @@ public class Tube extends Curve
   {
     // Subdivide the surface and create the triangle mesh.
 
-    Vector<MeshVertex> vert = new Vector<MeshVertex>();
-    Vector<Vec3> norm = new Vector<Vec3>();
-    Vector<int[]> face = new Vector<int[]>();
+    List<MeshVertex> vert = new ArrayList<MeshVertex>();
+    List<Vec3> norm = new ArrayList<Vec3>();
+    List<int[]> face = new ArrayList<int[]>();
     
-    Vector param = new Vector();
+    List param = new ArrayList();
     
     subdivideSurface(tol, vert, norm, face, param);
     Vec3 v[] = new Vec3 [vert.size()];
@@ -584,7 +584,7 @@ public class Tube extends Curve
         {
           double val[] = new double [v.length];
           for (int j = 0; j < val.length; j++)
-            val[j] = ((double []) param.elementAt(j))[i];
+            val[j] = ((double []) param.get(j))[i];
           tubeParamValue[i] = new VertexParameterValue(val);
         }
         else
@@ -613,7 +613,7 @@ public class Tube extends Curve
       It subdivides the surface and fills in the vectors with lists of vertices, normals,
       faces, and parameter values. */
 
-  private void subdivideSurface(double tol, Vector<MeshVertex> vert, Vector<Vec3> norm, Vector<int []> face, Vector param)
+  private void subdivideSurface(double tol, List<MeshVertex> vert, List<Vec3> norm, List<int []> face, List param)
   {
     // Subdivide the central curve to the desired tolerance.
 
@@ -713,21 +713,21 @@ public class Tube extends Curve
 
     double dtheta = 2.0*Math.PI/n, theta = 0.0;
     for (int i = 0; i < pathv.length; i++)
-      {
-        int k = (pathv.length == subdiv.length ? i : 2*i);
-        Vec3 orig = pathv[i], z = zdir[k], up = updir[k];
-        r = 0.5*t.thickness[i];
-        for (int j = 0; j < n; j++)
-          {
-            double sin = Math.sin(theta), cos = Math.cos(theta);
-            Vec3 normal = new Vec3(cos*z.x+sin*up.x, cos*z.y+sin*up.y, cos*z.z+sin*up.z);
-            norm.add(normal);
-            MeshVertex mv = new MeshVertex(new Vec3(orig.x+r*normal.x, orig.y+r*normal.y, orig.z+r*normal.z));
-            vert.add(mv);
-            param.add(tubeParamVal[i]);
-            theta += dtheta;
-          }
-      }
+    {
+      int k = (pathv.length == subdiv.length ? i : 2*i);
+      Vec3 orig = pathv[i], z = zdir[k], up = updir[k];
+      r = 0.5*t.thickness[i];
+      for (int j = 0; j < n; j++)
+        {
+          double sin = Math.sin(theta), cos = Math.cos(theta);
+          Vec3 normal = new Vec3(cos*z.x+sin*up.x, cos*z.y+sin*up.y, cos*z.z+sin*up.z);
+          norm.add(normal);
+          MeshVertex mv = new MeshVertex(new Vec3(orig.x+r*normal.x, orig.y+r*normal.y, orig.z+r*normal.z));
+          vert.add(mv);
+          param.add(tubeParamVal[i]);
+          theta += dtheta;
+        }
+    }
 
     // Create the faces for the sides of the tube.
 

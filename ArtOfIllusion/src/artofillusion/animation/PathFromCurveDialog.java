@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,7 +19,8 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.text.*;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /** PathFromCurveDialog is a dialog box for describing how to set an animation path from
     a Curve object. */
@@ -29,8 +30,8 @@ public class PathFromCurveDialog extends BDialog
   private LayoutWindow window;
   private Scene theScene;
   private BList objList, curveList;
-  private Vector<ObjectInfo> objects;
-  private Vector<ObjectInfo> curves;
+  private List<ObjectInfo> objects;
+  private List<ObjectInfo> curves;
   private BCheckBox orientBox;
   private BComboBox spacingChoice;
   private ValueField startTimeField, endTimeField, startSpeedField, endSpeedField, accelField; 
@@ -47,8 +48,8 @@ public class PathFromCurveDialog extends BDialog
 
     // Find the object and curves.
     
-    objects = new Vector<ObjectInfo>();
-    curves = new Vector<ObjectInfo>();
+    objects = new ArrayList<>();
+    curves = new ArrayList<>();
     objList = new BList();
     curveList = new BList();
     for (int i = 0; i < sel.length; i++)

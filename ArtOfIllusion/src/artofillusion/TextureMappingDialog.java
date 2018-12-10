@@ -17,9 +17,10 @@ import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Insets;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /** This class implements the dialog box which is used to choose texture mappings for objects.
     It presents a list of all mappings which can be used with the current object and material,
@@ -29,7 +30,7 @@ public class TextureMappingDialog extends BDialog
 {
   private FormContainer content;
   private Object3D origObj, editObj;
-  private Vector<TextureMapping> mappings;
+  private List<TextureMapping> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private TextureMapping map, oldMapping;
@@ -56,7 +57,7 @@ public class TextureMappingDialog extends BDialog
 
     // Make a list of all texture mappings which can be used for this object and texture.
 
-    mappings = new Vector<TextureMapping>();
+    mappings = new ArrayList<TextureMapping>();
     Texture probe = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer) : editObj.getTexture();
     
     for (TextureMapping mapping: PluginRegistry.getPlugins(TextureMapping.class))

@@ -13,3 +13,9 @@ Thumbs.db
 /.gradle/
 /.nb-gradle/
 /build/
+/ArtOfIllusion/build/
+/Filters/build/
+/OSSpecific/build/
+/Renderers/build/
+/Tools/build/
+/Translators/build/

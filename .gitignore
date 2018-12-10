@@ -10,3 +10,6 @@ Thumbs.db
 **/.xvpics/
 .DS_Store
 
+/.gradle/
+/.nb-gradle/
+/build/

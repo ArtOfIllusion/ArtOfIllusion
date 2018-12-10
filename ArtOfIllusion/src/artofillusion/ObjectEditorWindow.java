@@ -415,7 +415,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     }
     catch (InterruptedException ex)
     {
-      new BStandardDialog("", Translate.text("errorLoadingImage", fc.getSelectedFile().getName()), BStandardDialog.ERROR).showMessageDialog(this);
+      Messages.error(Translate.text("errorLoadingImage", fc.getSelectedFile().getName()), this.getComponent());
       return;
     }
     theView[currentView].setShowTemplate(true);

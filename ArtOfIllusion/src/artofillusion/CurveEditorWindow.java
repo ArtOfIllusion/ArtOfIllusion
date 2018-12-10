@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -379,12 +380,12 @@ public class CurveEditorWindow extends MeshEditorWindow
       return;
     if (!theCurve.isClosed() && selected.length-num < 2)
       {
-        new BStandardDialog("", Translate.text("curveNeeds2Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+        Messages.information(Translate.text("curveNeeds2Points"), this.getComponent());
         return;
       }
     if (theCurve.isClosed() && selected.length-num < 3)
       {
-        new BStandardDialog("", Translate.text("curveNeeds3Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+        Messages.information(Translate.text("curveNeeds3Points"), this.getComponent());
         return;
       }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theCurve, theCurve.duplicate()}));

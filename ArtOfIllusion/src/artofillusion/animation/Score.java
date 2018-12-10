@@ -1016,9 +1016,8 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
                     continue;
                   if (posable != info.getObject())
                     {
-                      String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
-                      BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("mustConvertToActor", info.getName())), BStandardDialog.QUESTION);
-                      int choice = dlg.showOptionDialog(window, options, options[0]);
+                      String options[] = Messages.optionsYesNo();
+                      int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("mustConvertToActor", info.getName())), BStandardDialog.QUESTION).showOptionDialog(window, options, options[0]);
                       if (choice == 1)
                         continue;
                       theScene.replaceObject(info.getObject(), posable, undo);

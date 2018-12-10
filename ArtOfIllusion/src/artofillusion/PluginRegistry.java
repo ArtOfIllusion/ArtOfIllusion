@@ -12,7 +12,6 @@
 
 package artofillusion;
 
-import buoy.widget.*;
 
 import java.io.*;
 import java.util.zip.*;
@@ -96,8 +95,8 @@ public class PluginRegistry
     Path pluginsFolder = Paths.get(ArtOfIllusion.PLUGIN_DIRECTORY);
     if(Files.notExists(pluginsFolder))
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
-      return;      
+      Messages.error(UIUtilities.breakString(Translate.text("cannotLocatePlugins")));
+      return;
     }
     
     // Scan the plugins directory, and parse the index in every jar file.
@@ -250,8 +249,8 @@ public class PluginRegistry
     }
     catch (NoClassDefFoundError | Exception ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.getPath())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin " + jar.getPath() + ":");
+      Messages.error(UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())));
+      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
       ex.printStackTrace();
     }
   }

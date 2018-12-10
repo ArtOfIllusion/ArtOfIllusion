@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2012 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -465,8 +465,8 @@ public class ProcedureEditor extends CustomWidget
       {
         proc.deleteLink(proc.getLinks().length-1);
         selectedLink = new boolean [proc.getLinks().length];
-        new BStandardDialog(null, new String [] {"The link you have selected cannot be created,",
-          "as it would result in a feedback loop."}, BStandardDialog.ERROR).showMessageDialog(parent);
+        //TODO: Localize message
+        Messages.error(UIUtilities.breakString(Translate.text("The link you have selected cannot be created, as it would result in a feedback loop.")), parent.getComponent());
       }
     updateMenus();
   }

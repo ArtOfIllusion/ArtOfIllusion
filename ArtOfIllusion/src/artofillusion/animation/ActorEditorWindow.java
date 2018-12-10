@@ -237,7 +237,7 @@ public class ActorEditorWindow extends BDialog
   private void doDelete()
   {
     int which = gestureList.getSelectedIndex();
-    String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+    String options[] = Messages.optionsYesNo();
     int choice = new BStandardDialog("", Translate.text("deleteGesture", theObject.gestureName[which]), BStandardDialog.QUESTION).showOptionDialog(this, options, options[0]);
     if (choice== 1)
       return;

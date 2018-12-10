@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +14,6 @@ package artofillusion.tools;
 import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
 import java.util.*;
 
 /** The skin tool creates new objects by placing a skin over a series of curves. */
@@ -48,7 +47,8 @@ public class SkinTool implements ModellingTool
       }
     if (curves.size() < 2)
       {
-        new BStandardDialog("", UIUtilities.breakString("You must select two or more curves to create a skin across."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+        //TODO: Localize message
+        Messages.information(UIUtilities.breakString("You must select two or more curves to create a skin across."), window.getFrame().getComponent());
         return;
       }
     Curve c = (Curve) curves.get(0).getObject();
@@ -57,17 +57,20 @@ public class SkinTool implements ModellingTool
         Curve c2 = (Curve) curves.get(i).getObject();
         if (c2.getVertices().length != c.getVertices().length)
           {
-            new BStandardDialog("", UIUtilities.breakString("All the curves must have the same number of points."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            //TODO: Localize message
+            Messages.information(UIUtilities.breakString("All the curves must have the same number of points."), window.getFrame().getComponent());
             return;
           }
         if (c2.isClosed() != c.isClosed())
           {
-            new BStandardDialog("", UIUtilities.breakString("You cannot create a skin between a closed curve and an open one."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            //TODO: Localize message
+            Messages.information(UIUtilities.breakString("You cannot create a skin between a closed curve and an open one."), window.getFrame().getComponent());
             return;
           }
         if (c2.getSmoothingMethod() != c.getSmoothingMethod() && c.getSmoothingMethod() != Mesh.NO_SMOOTHING && c2.getSmoothingMethod() != Mesh.NO_SMOOTHING)
           {
-            new BStandardDialog("", UIUtilities.breakString("You cannot create a skin between an interpolating curve and an approximating one."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            //TODO: Localize message
+            Messages.information(UIUtilities.breakString("You cannot create a skin between an interpolating curve and an approximating one."), window.getFrame().getComponent());
             return;
           }
       }

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -56,7 +56,7 @@ public class RenderSetupDialog
     cameras = theScene.getCameras();
     if (cameras.isEmpty())
     {
-      new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("noCameraError"), parent.getComponent());
       return;
     }
     if(cameras.size() <= currentCamera)
@@ -147,7 +147,7 @@ public class RenderSetupDialog
         }
         catch (IOException ex)
         {
-          new BStandardDialog("", Translate.text("errorSavingFile", ex.getMessage() == null ? "" : ex.getMessage()), BStandardDialog.ERROR).showMessageDialog(parent);
+          Messages.error(Translate.text("errorSavingFile", ex.getLocalizedMessage()), parent.getComponent());
         }
       }
       else
@@ -164,7 +164,7 @@ public class RenderSetupDialog
     List<ObjectInfo> cameras = theScene.getCameras();
     if (cameras.isEmpty())
     {
-      new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.ERROR).showMessageDialog(parent);
+      Messages.error(Translate.text("noCameraError"), parent.getComponent());
       return;
     }
     if (cameras.size() <= currentCamera)

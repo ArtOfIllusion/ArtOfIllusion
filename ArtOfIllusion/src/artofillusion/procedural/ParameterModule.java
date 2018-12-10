@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -153,12 +154,12 @@ public class ParameterModule extends ProceduralModule
     defaultVal = defaultField.getValue();
     if (minVal > maxVal)
       {
-        new BStandardDialog("", Translate.text("minimumAboveMaxError"), BStandardDialog.ERROR).showMessageDialog(editor.getParentFrame());
+        Messages.error(Translate.text("minimumAboveMaxError"), editor.getParentFrame().getComponent());
         return edit(editor, theScene);
       }
     if (minVal > defaultVal || maxVal < defaultVal)
       {
-        new BStandardDialog("", Translate.text("defaultOutOfRangeError"), BStandardDialog.ERROR).showMessageDialog(editor.getParentFrame());
+        Messages.error(Translate.text("defaultOutOfRangeError"), editor.getParentFrame().getComponent());
         return edit(editor, theScene);
       }
     layout();

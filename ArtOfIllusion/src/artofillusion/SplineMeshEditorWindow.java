@@ -519,9 +519,8 @@ public class SplineMeshEditorWindow extends MeshEditorWindow
     {
       if (!theMesh.isClosed())
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING);
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        String options[] = Messages.optionsOkCancel();
+        int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         theMesh.setMaterial(null, null);
@@ -693,12 +692,12 @@ public class SplineMeshEditorWindow extends MeshEditorWindow
       return;
     if (usize-unum < 2 || vsize-vnum < 2)
     {
-      new BStandardDialog("", Translate.text("curveNeeds2Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("curveNeeds2Points"), this.getComponent());
       return;
     }
     if ((theMesh.isUClosed() && usize-unum < 3) || (theMesh.isVClosed() && vsize-vnum < 3))
     {
-      new BStandardDialog("", Translate.text("curveNeeds3Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("curveNeeds3Points"), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));

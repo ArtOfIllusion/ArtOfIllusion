@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
-   Changes copyright (C) 2017-2018 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
 
@@ -723,7 +723,7 @@ public class ExprModule extends ProceduralModule
       msg[0] = "Your expression contains the following errors:";
       for (int i = 0; i < errors.size(); i++)
         msg[i+1] = errors.get(i);
-      new BStandardDialog("", msg, BStandardDialog.INFORMATION).showMessageDialog(fr);
+      Messages.information(msg, fr.getComponent());
     }
 }
 

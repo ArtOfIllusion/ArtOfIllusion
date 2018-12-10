@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2008 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -162,9 +163,8 @@ public class TubeEditorWindow extends CurveEditorWindow
     {
       if (!theMesh.isClosed())
       {
-        String options[] = new String [] {Translate.text("button.ok"), Translate.text("button.cancel")};
-        BStandardDialog dlg = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING);
-        int choice = dlg.showOptionDialog(this, options, options[0]);
+        String options[] = Messages.optionsOkCancel();
+        int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("surfaceNoLongerClosed")), BStandardDialog.WARNING).showOptionDialog(this, options, options[0]);
         if (choice == 1)
           return;
         theMesh.setMaterial(null, null);
@@ -206,12 +206,12 @@ public class TubeEditorWindow extends CurveEditorWindow
       return;
     if (theTube.getEndsStyle() != Tube.CLOSED_ENDS && selected.length-num < 2)
     {
-      new BStandardDialog("", Translate.text("tubeNeeds2Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("tubeNeeds2Points"), this.getComponent());
       return;
     }
     if (theTube.getEndsStyle() == Tube.CLOSED_ENDS && selected.length-num < 3)
     {
-      new BStandardDialog("", Translate.text("tubeNeeds3Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
+      Messages.information(Translate.text("tubeNeeds3Points"), this.getComponent());
       return;
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theTube, theTube.duplicate()}));

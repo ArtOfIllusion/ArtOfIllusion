@@ -191,7 +191,7 @@ public class EditKeyframesDialog
       {
         NumberFormat nf = NumberFormat.getNumberInstance();
         nf.setMaximumFractionDigits(3);
-        String options[] = new String [] {Translate.text("Yes"), Translate.text("No")};
+        String options[] = Messages.optionsYesNo();
         int choice = new BStandardDialog("", UIUtilities.breakString(Translate.text("existingKeyframesError", nf.format(targetStart), nf.format(targetEnd))), BStandardDialog.QUESTION).showOptionDialog(window, options, options[0]);
         if (choice == 1)
           return false;

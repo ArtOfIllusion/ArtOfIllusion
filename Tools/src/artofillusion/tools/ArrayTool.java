@@ -14,7 +14,6 @@ package artofillusion.tools;
 
 import artofillusion.*;
 import artofillusion.ui.*;
-import buoy.widget.*;
 
 /**
 The array tool creates an array of copies of an object.
@@ -37,7 +36,8 @@ public class ArrayTool implements ModellingTool
   public void commandSelected(LayoutWindow window)
   {
         if (window.getSelectedIndices().length < 1)
-            new BStandardDialog("", "You must select one or more objects to create an array from.", BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            //TODO: Localize message
+            Messages.information("You must select one or more objects to create an array from.", window.getFrame().getComponent());
         else
             new ArrayDialog(window);
   }

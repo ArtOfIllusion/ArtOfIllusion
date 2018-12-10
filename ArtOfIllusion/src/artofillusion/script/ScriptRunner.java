@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,8 +12,8 @@
 package artofillusion.script;
 
 import artofillusion.*;
+import artofillusion.ui.Messages;
 import artofillusion.util.*;
-import buoy.widget.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -149,7 +150,7 @@ public class ScriptRunner
           v.add("Encountered \""+errorText+"\" at line "+line+column);
       }
     String msg[] = v.toArray(new String [v.size()]);
-    new BStandardDialog("Error", msg, BStandardDialog.ERROR).showMessageDialog(null);
+    Messages.error(msg);
     return line;
   }
 

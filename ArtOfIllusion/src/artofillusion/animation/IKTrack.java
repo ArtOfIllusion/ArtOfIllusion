@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2013 by Peter Eastman
-   Changes copyright (C) 2017-2018 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -59,7 +59,7 @@ public class IKTrack extends Track
   public void edit(LayoutWindow win)
   {
     if (info.getSkeleton() == null)
-      new BStandardDialog("", Translate.text("ikNotApplyWarning"), BStandardDialog.INFORMATION).showMessageDialog(win);
+      Messages.information(Translate.text("ikNotApplyWarning"), win.getComponent());
     else
       new Editor(win);
   }

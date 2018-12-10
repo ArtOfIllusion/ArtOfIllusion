@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -56,7 +56,7 @@ public class AnimationPreviewer implements Runnable
     
     if (cameras.isEmpty())
     {
-      new BStandardDialog("", Translate.text("noCameraError"), BStandardDialog.INFORMATION).showMessageDialog(window);
+      Messages.information(Translate.text("noCameraError"), window.getComponent());
       return;
     }
     if (cameras.size() <= currentCamera)

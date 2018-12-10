@@ -13,18 +13,17 @@
 package artofillusion;
 
 
-import java.io.*;
-import java.util.zip.*;
-import java.util.*;
-import java.net.*;
-import java.lang.reflect.*;
-
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import java.io.*;
+import java.lang.reflect.*;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.*;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
@@ -249,8 +248,8 @@ public class PluginRegistry
     }
     catch (NoClassDefFoundError | Exception ex)
     {
-      Messages.error(UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())));
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
+      Messages.error(UIUtilities.breakString(Translate.text("pluginLoadError", jar.getPath())));
+      System.err.println("*** Exception while initializing plugin " + jar.getPath() + ":");
       ex.printStackTrace();
     }
   }

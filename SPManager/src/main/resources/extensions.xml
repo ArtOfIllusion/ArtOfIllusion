@@ -1,0 +1,299 @@
+<?xml version='1.0' standalone='yes' ?>
+
+<extension name="SPManager" version="1.101">
+   <author>Nik TJ et Francois Guillet (fpgui@users.sourceforge.net)</author>
+   <date>March 2013</date>
+
+   <plugin class="artofillusion.spmanager.SPManagerPlugin" >
+      <export method="download" id="artofillusion.SPManager.download" >
+Request SPManager to download a file to the local computer.
+If the file is an AOI plugin, then it is downloaded and installed as if the
+installation were invoked by the user through SPManager. Otherwise the file
+is just downloaded to the specified location.
+@param GUI frame to use as the GUI parent. The current LayoutWindow works well
+@param from the URL specifying the remote file location. This can be inside the
+   AOI plugin repository, or just the URL of a file on a server somewhere.
+      </export>
+
+      <export method="registerResource"
+         id="artofillusion.SPManager.registerResource" >
+Request SPManager to scan the specified ClassLoader for resources that match
+the specified locale, and register the best-matching resouce found.
+
+@param type the resource type
+@param id the resource id
+@param loader the ClassLoader to search
+@param baseName the base name of the resource. Suffixes will be added as needed
+@param locale the Locale to match
+      </export>
+   </plugin>
+
+   <resource type="TranslateBundle" id="spmanager" name="spmanager" />
+	
+   <fileset>
+      <file src="PostInstall-2_7.jar" >PostInstall.jar</file>
+   </fileset>
+
+   <description>
+The Script and Plugin Manager is a plugin that makes the management of scripts and plugins easy.
+It scans for updates of installed scripts/plugins and shows all the not-yet-installed items
+available at repositories. 
+It's probably the tool you're using at this very moment !
+
+See http://aoisp.sourceforge.net/spmanagement.html for usage.
+    </description>
+
+    <comments>
+    </comments>
+
+    <history>
+    <log version="1.101" date="March 2013" author="Nik TJ">
+    - fully implemented support for deflate Content-Encoding, as SF server is suddenly performing the coding
+    </log>log>
+    <log version="1.100" date="March 2013" author="Nik TJ">
+    - fully implemented support for gzip Content-Encoding, as SF server is suddenly performing the coding
+    </log>log>
+	<log version="1.99" date="December 2009" author="Nik TJ">
+	- fixed bugs in assert element test() method.
+	</log>
+	<log version="1.98" date="May 2009" author="Nik TJ">
+	- added support for versioning and renaming in the associated
+	  fileset/file elements
+	  -- added a "src" attribute to specify the original source name
+	</log>
+	<log version="1.97" date="April 2009" author="Nik TJ">
+	- added no-cache semantics to avoid stale entries in caches
+	</log>
+	<log version="1.96" date="Feb 2009" author="Nik TJ">
+	- fixed cosmetic bug that caused multiple status windows to be displayed
+	- fixed scaling of displayed download progress
+	</log>
+	<log version="1.95" date="Feb 2009" author="Nik TJ">
+	- completed implementation of auto-detect of SPManager update
+	</log>
+	<log version="1.94" date="Feb 2009" author="Nik TJ">
+	- implemented support for $APP_DIRECTORY, etc.
+	</log>
+	<log version="1.93" date="Jan, 2009" author="Nik TJ">
+	- fixed bug caused by prefs file not being found (Thanks Troy for reporting this!)
+	</log>
+	<log version="1.92" date="Jan, 2009" author="Nik TJ">
+	- fixed bug saving changes to filter prefs
+	- sort filters by name in GUI
+	</log>
+	<log version="1.91" date="Jan, 2009" author="Nik TJ">
+- improved logic for forming download paths
+  -- support absolute and relative "todir" paths
+     -- absolute are inside AOI folder, whereas relative are inside Plugins.	
+	</log>
+	<log version="1.9" date="Jan, 2009" author="Nik TJ">
+- added support for zip-compressed XML data
+  -- currently not activated as server process needs to be linked with older libs to run on SF
+
+- moved download of repo list to just before first scan
+  -- no longer downloads when first starting up
+    
+- cleaned up proxy initialisation
+  -- move to before first net access
+  
+- implemented proxy authentication dialog
+
+- implemented sorting of tree displays (finally!)
+	</log>
+	<log version="1.85" date="June, 2008" author="Nik TJ">
+- cosmetic changes to the handling of "confirm" flag, particularly when set by
+  the user.
+
+- cosmetic changes to internationalised text when a download is cancelled.
+- removed the "Install this Plugin" and "Update this plugin" button, to avoid
+  the confusion it causes when it is disabled
+	</log>
+	<log version="1.84.26b1" date="April, 2008" author="Nik TJ">
+- Adopted changes in AOI v2.6 API
+	</log>
+	<log version="1.84" date="Feb, 2008" author="Nik TJ">
+- fixed minor bug in comparison of version numbers
+	</log>	
+	<log version="1.83" date="Feb, 2008" author="Nik TJ">
+- removed containing SPManager folder for temp trees.
+  This avoids problems with permissions assigned when this folder is created	
+	</log>
+	<log version="1.82" date="Feb, 2008" author="Nik TJ">
+- removed calls to set permissions, as they are new in 1.6	
+	</log>
+	<log version="1.81" date="Feb, 2008" author="Nik TJ">
+- improved handling of non-existent TEMP parent	
+	</log>
+	<log version="1.8" date="Feb, 2008" author="Nik TJ">
+- Made temporary directory trees per-user
+	</log>
+	<log version="1.73" date="December, 2007" author="Nik TJ">
+- incorporated AOI-2.5 compatible SPManager translate bundle
+	</log>
+	<log version="1.72" date="November, 2007" author="Nik TJ">
+- fixed problem in packaging of 1.71	
+	</log>
+	<log version="1.71" date="November, 2007" author="Nik TJ">
+- added detection of assert failures for installed plugins	
+	</log>
+	<log version="1.7" date="November, 2007" author="Nik TJ">
+- removed Preferences subsystem (it's now a discrete plugin)
+- added &lt;assert&gt; tag support
+	</log>
+	<log version="1.62" date="October, 2007" author="Nik TJ">
+- improved 'confirm' logic
+  -- added confirm icon
+	</log>
+	<log version="1.61" date="October, 2007" author="Nik TJ">
+- added support for 'confirm' filter action
+	</log>
+	<log version="1.6" date="October, 2007" author="Nik TJ">
+- Added Preferences subsystem
+	</log>
+	<log version="1.51" date="August, 2007" author="Nik TJ">
+- Minor fix for problem with "fileset" tags.
+- Added better support for "library" external files.
+	</log>
+	<log version="1.5" date="August, 2007" author="Nik TJ">
+- Minor fix for problem identified in the beta, where particular plugins were
+  not being recognised.
+	</log>
+	<log version="1.5b1" date="July, 2007" author="Nik TJ">
+- new version for AOI 2.5beta
+  -- minor enhancements for SPManager standalone support
+  -- converted the DOWNLOAD message to an exported method
+
+**
+   Still contains 'temporary' code which depends on the final features of 2.5
+**
+	</log>
+	<log version="1.43b1" date="June, 2007" author="Nik TJ">
+- further changes to support new 2.5 features.
+  -- not all features are currently set in stone. This is an interim version.
+
+- some further enhancements to flags displays
+	</log>
+	<log version="1.42" date="May, 2007" author="Nik TJ">
+- Changes for AOI 2.5 compatibility:
+  -- new XML file syntax
+  -- new XML file naming convention
+
+- added standalone mode to aid in fixing plugin startup problems.
+- changed filter controls to use a pull-down for each filter
+	</log>
+
+	<log version="1.41" date="Oct 29, 2006" author="Nik TJ">
+- released with AOI 2.4
+	</log>
+
+	<log version="1.41b1" date="Oct 29, 2006" author="Nik TJ">
+- wrapped transaction semantics around file download/copy
+  -- copy is only attempted if *all* files downloaded without error
+	</log>
+
+	<log version="1.4b2" date="Oct 5, 2006" author="Nik TJ">
+- Added support for external callers of SPManager
+  -- added DOWNLOAD message
+  -- coded DOWNLOAD to provide a GUI derived from StatusDialog
+  -- coded support for downloading non-repository files
+
+- improved handling of empty tags
+        </log>
+
+	<log version="1.39" date="2006/08/28" author="Nik TJ">
+- added 'todir' attribute to fileset entries.
+  -- first use is with the HelpPlugin
+        </log>
+
+	<log version="1.38" date="2006/05/24" author="Nik TJ">
+- downgraded errors regarding deleting temp files to warnings in the log, since
+  these occur normally on some Windows installations.
+	</log>
+
+	<log version="1.37" date="2006/05/22" author="Nik TJ">
+- Aggregation of error messages
+  -- Display options on error for: Continue, Stop, Ignore
+
+- made deletion of downloaded files on error less aggressive.
+
+- re-enabled upgrade of PostInstall.jar
+	</log>
+
+	<log version="1.36b5" date="2006/05/13" author="Nik TJ">
+- FLAGS display - the flags for each plugin/script can be viewed
+  -- Added a 'flags' entry in the detail pull-down
+
+- consolidated postInstall translation files
+	</log>
+
+	<log version="1.36b4" date="2006/05/12" author="Nik TJ">
+- fixed problems with temporary file deletion under Windows
+   - moved file download to temporary directory
+   - updated SPManager and PostInstall to use temp dir instead of live dir
+	</log>
+
+	<log version="1.36b3" date="2006/04/21" author="Nik TJ">
+- fixed introduced bug that stopped the download of more than one file at a time.
+	</log>
+
+	<log version="1.36b2" date="2006/04/21" author="Nik TJ">
+- further bug fixes (thanks to MarcC for finding these)
+-- added verification of the downloaded file size
+-- added validation of JAR and ZIP files
+**Released with AOI 2.3 beta1
+	</log>
+
+	<log version="1.36b1" date="2006/04/19" author="Nik TJ">
+- bug fixes (thanks to Peter Eastman for finding most of these)
+-- fixed NullPointerException that could be raised if description was empty
+-- ensure that description display is cleared if description is empty
+-- added 'version history' to display list if history is empty
+-- catch unexpected exceptions in PostInstall during cleanup
+-- fixed bug in parsing minor version number
+-- enabled update from beta to non-beta
+	</log>
+
+	<log version="1.35" date="2006/03/15" author="Nik TJ">
+**Released with AOI 2.3ea2**
+
+- tidy ups for release
+-- new icons for tree entries
+-- improved behaviour of controls for disabled entries
+-- new fileIO for downloading files
+-- minor change to refresh logic called after download.
+	</log>
+
+	<log version="1.34" date="2006/03/07" author="Nik TJ">
+- implemented filtering.
+        </log>
+
+	<log version="1.33" date="2006/03/07" author="Nik TJ">
+- implemented SafeFile download code. New file is downloaded to a temp file,
+  and renamed after download is complete.
+- implemented PostInstall plugin to cleanup from download rename problems
+        </log>
+
+	<log version="1.32" date="2006/02/14" author="Nik TJ">
+- implemented new repository list format
+- moved repository list to aoisp.sourceforge.net
+        </log>
+
+	<log version="1.31" date="2006/01/28" author="Nik TJ">
+- implemented dependencies between scripts and plugins
+- implemented version independence for SPManager, so it can usefully update itself
+        </log>
+
+        <log version="1.3" date="2005/11/7" author="Nik TJ">
+- removed separate Comments window. Comments are now displayed at the end of the Description.
+- implemented change-log display. The description window now has a pull-down, which allows the entire version history, as well as each individual log entry to be viewed.
+	</log>
+
+	<log version="1.2" date="06/04/2005" author="Francois Guillet">
+Scanning can be done using a script server on repository. Process is many times faster.
+	</log>
+
+	<log version="1.0" author="Francois Guillet">
+initial coding
+	</log>
+    </history>
+</extension>

@@ -19,3 +19,5 @@ Thumbs.db
 /Renderers/build/
 /Tools/build/
 /Translators/build/
+/PostInstall/build/
+/SPManager/build/

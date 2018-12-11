@@ -1,2 +1,2 @@
 rootProject.name = 'ArtOfIllusion'
-include 'Filters', 'Tools', 'Renderers', 'OSSpecific', 'Translators', 'ArtOfIllusion'
+include 'Filters', 'Tools', 'Renderers', 'OSSpecific', 'Translators', 'ArtOfIllusion', 'SPManager', 'PostInstall'

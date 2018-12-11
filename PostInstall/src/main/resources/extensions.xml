@@ -1,0 +1,39 @@
+<?xml version='1.0' standalone='yes' ?>
+
+<extension name="PostInstall" version="1.11.26">
+   <author>Nik TJ (Nik777@users.sf.net</author>
+   <date>Feb 2008</date>
+
+  	<plugin class="artofillusion.spmanager.postinstall.PostInstall" />
+
+	<resource type="TranslateBundle" id="postinstall" name="postinstall" />
+   
+   <description>
+This plugin provides post-install cleanup of the AOI Plugins and Scripts
+directories. It is typically invoked as a result of running an Installation
+or Upgrade of Plugins or Scripts.
+   </description>
+   <comments>
+This plugin is normally distributed as part of the SPManager package
+   </comments>
+   <history>
+	<log version="1.11.26b1" date="April 2008" author="Nik TJ">
+- Changes to match the new AOI 2.6 API
+	</log>
+	<log version="1.11" date="Feb 2008" author="Nik TJ">
+- changes to match those made in SPManager regarding the location of the TEMP trees	
+	</log>
+	<log version="1.1" date="Feb 2008" author="Nik TJ">
+- updated to handle per-process temporary directories
+- now deletes old temporary directory trees	
+	</log>
+	<log version="1.01" date="April 2006" author="Nik TJ">
+- catch unexpected exceptions thrown during cleanup()
+	</log>
+	<log version="1.0" date="March 2006" author="Nik TJ">
+**Released with AOI 2.3ea2**
+
+- initial coding
+	</log>
+    </history>
+</extension>

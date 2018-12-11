@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':ArtOfIllusion')
+}
+tasks.withType(Jar) {
+    destinationDir = file("${rootProject.projectDir}/Plugins")
+}

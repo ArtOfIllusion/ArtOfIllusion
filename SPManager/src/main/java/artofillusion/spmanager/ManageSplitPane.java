@@ -12,7 +12,9 @@ package artofillusion.spmanager;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.tree.*;
 
@@ -113,14 +115,14 @@ public class ManageSplitPane extends SPMSplitPane
      *@param  addTo  Description of the Parameter
      *@param  infos  Description of the Parameter
      */
-    private void getFiles( TreePath addTo, Vector infos )
+    private void getFiles( TreePath addTo, List<SPMObjectInfo> infos )
     {
         DefaultMutableTreeNode tn;
         SPMObjectInfo info;
 
         for ( int i = 0; i < infos.size(); i++ )
         {
-            info = (SPMObjectInfo) infos.elementAt( i );
+            info = (SPMObjectInfo) infos.get( i );
             tn = new DefaultMutableTreeNode( info.getName() );
             tn.setAllowsChildren( false );
             tn.setUserObject( info );
@@ -130,7 +132,7 @@ public class ManageSplitPane extends SPMSplitPane
 
 	// NTJ: set reference counts
 	for (int i = 0; i < infos.size(); i++) {
-            info = (SPMObjectInfo) infos.elementAt( i );
+            info = (SPMObjectInfo) infos.get( i );
 	    //System.out.println("SPManager: file=" + info.getName());
 
 	    Collection externals = info.getExternals();

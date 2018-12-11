@@ -11,11 +11,16 @@
 
 package artofillusion.spmanager;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SPMFileSystem
 {   
-    protected Vector pluginsInfo, toolInfo, objectInfo, startupInfo;
+    protected List<SPMObjectInfo> pluginsInfo;
+    protected List<SPMObjectInfo> toolInfo;
+    protected List<SPMObjectInfo> objectInfo;
+    protected List<SPMObjectInfo> startupInfo;
+    
     protected boolean initialized;
     
     public final static short PLUGIN_TYPE = 0;
@@ -25,23 +30,27 @@ public class SPMFileSystem
     
     public SPMFileSystem()
     {
-        pluginsInfo = new Vector();
-        toolInfo = new Vector();
-        objectInfo = new Vector();
-        startupInfo = new Vector();
+        pluginsInfo = new ArrayList<>();
+        toolInfo = new ArrayList<>();
+        objectInfo = new ArrayList<>();
+        startupInfo = new ArrayList<>();
         initialized = false;
     }
     
     public short getInfoType(SPMObjectInfo info)
     {
-        for (int i = 0; i < pluginsInfo.size(); ++i)
-            if (info == pluginsInfo.elementAt(i)) return PLUGIN_TYPE;
-        for (int i = 0; i < toolInfo.size(); ++i)
-            if (info == toolInfo.elementAt(i)) return TOOL_SCRIPT_TYPE;
-        for (int i = 0; i < objectInfo.size(); ++i)
-            if (info == objectInfo.elementAt(i)) return OBJECT_SCRIPT_TYPE;
-        for (int i = 0; i < startupInfo.size(); ++i)
-            if (info == startupInfo.elementAt(i)) return STARTUP_SCRIPT_TYPE;
+        for(SPMObjectInfo item: pluginsInfo) {
+            if(info == item) return PLUGIN_TYPE;
+        }
+        for(SPMObjectInfo item: toolInfo) {
+            if(info == item) return TOOL_SCRIPT_TYPE;
+        }
+        for(SPMObjectInfo item: objectInfo) {
+            if(info == item) return OBJECT_SCRIPT_TYPE;
+        }
+        for(SPMObjectInfo item: startupInfo) {
+            if(info == item) return STARTUP_SCRIPT_TYPE;
+        }
         return PLUGIN_TYPE;
     }
     
@@ -66,25 +75,25 @@ public class SPMFileSystem
         startupInfo.clear();
     }
     
-    public Vector getPlugins()
+    public List<SPMObjectInfo> getPlugins()
     {
         if (!initialized) initialize();
         return pluginsInfo;
     }
     
-    public Vector getToolScripts()
+    public List<SPMObjectInfo> getToolScripts()
     {
         if (!initialized) initialize();
         return toolInfo;
     }
     
-    public Vector getObjectScripts()
+    public List<SPMObjectInfo> getObjectScripts()
     {
         if (!initialized) initialize();
         return objectInfo;
     }
     
-    public Vector getStartupScripts()
+    public List<SPMObjectInfo> getStartupScripts()
     {
         if (!initialized) initialize();
         return startupInfo;

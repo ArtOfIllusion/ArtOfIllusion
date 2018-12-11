@@ -15,7 +15,10 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
 import java.util.zip.*;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -310,7 +313,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
      *@param  addTo   Which vector to add info to
      *@param  suffix  Scanned files suffix
      */
-    private void scanFiles( URL from, Vector addTo, String suffix )
+    private void scanFiles( URL from, List<SPMObjectInfo> addTo, String suffix )
     {
         SPMObjectInfo info;
         boolean eligible;
@@ -444,7 +447,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
      *@param  dir     directory to fetch scripts from
      *@param  addTo   Which vector to add info to
      */
-    private void scanFiles( String dir, Vector addTo )
+    private void scanFiles( String dir, List<SPMObjectInfo> addTo )
     {
 
         URL cgiUrl = null;

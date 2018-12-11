@@ -16,9 +16,10 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Vector;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.border.*;
+
 
 /**
  *  Main frame of the scripts and plugins manager.
@@ -175,8 +176,8 @@ public class SPManagerFrame extends BFrame
      */
     protected void checkForUpdatedMe()
     {
-	Vector localList = manageSplitPane.getFileSystem().getPlugins();
-	Vector remoteList = updateSplitPane.getFileSystem().getPlugins();
+	List<SPMObjectInfo> localList = manageSplitPane.getFileSystem().getPlugins();
+	List<SPMObjectInfo> remoteList = updateSplitPane.getFileSystem().getPlugins();
 	SPMObjectInfo localinfo=null, remoteinfo=null;
 
 	for (int i = 0; i < localList.size(); i++) {

@@ -11,7 +11,7 @@
 
 package artofillusion.spmanager;
 
-//import artofillusion.ModellingApp;
+
 import java.io.*;
 import java.util.*;
 

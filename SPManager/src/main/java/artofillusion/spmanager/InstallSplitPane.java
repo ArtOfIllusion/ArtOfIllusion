@@ -10,15 +10,14 @@
 package artofillusion.spmanager;
 
 import artofillusion.ui.UIUtilities;
+import buoy.event.*;
+import buoy.widget.*;
 import java.awt.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
-import buoy.widget.*;
-import buoy.event.*;
-//import artofillusion.ModellingApp;
-import java.io.*;
-import java.util.*;
-import java.net.*;
 
 
 /**

@@ -12,15 +12,13 @@ package artofillusion.spmanager;
 
 import artofillusion.*;
 import artofillusion.ui.UIUtilities;
-
+import buoy.event.*;
+import buoy.widget.*;
 import java.awt.*;
-import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.event.ActionEvent;
 import java.util.Vector;
-
-import buoy.widget.*;
-import buoy.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  *  Main frame of the scripts and plugins manager.
@@ -136,28 +134,6 @@ public class SPManagerFrame extends BFrame
         updateSplitPane.setDividerLocation( updateSplitPane.getChild( 0 ).getPreferredSize().width );
         installSplitPane.setDividerLocation( installSplitPane.getChild( 0 ).getPreferredSize().width );
     }
-
-
-    /**
-     *  Dumps the sizes of a widget container children Used for debug purposes
-     *
-     *@param  wc  WidgetContainer
-     */
-    public void printBounds( WidgetContainer wc )
-    {
-        java.util.Iterator childEnum = wc.getChildren().iterator();
-        while ( childEnum.hasNext() )
-        {
-            Widget w = (Widget) childEnum.next();
-            System.out.println( "Widget: " + w );
-            System.out.println( "Bounds: " + w.getBounds() );
-            System.out.println( "Min size: " + w.getMinimumSize() );
-            System.out.println( "Pref size: " + w.getPreferredSize() );
-            if ( w instanceof WidgetContainer )
-                printBounds( (WidgetContainer) w );
-        }
-    }
-
 
     /**
      *  Hides the SPManager main window

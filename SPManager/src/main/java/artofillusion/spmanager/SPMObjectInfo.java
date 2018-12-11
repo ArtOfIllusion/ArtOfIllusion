@@ -108,7 +108,6 @@ public class SPMObjectInfo
 	boolean selected = false;
 	boolean deletable = true;
 	private boolean remote;
-	private boolean filesetRecord;
 
 	/**
 	 *  Constructor for the SPMObjectInfo object

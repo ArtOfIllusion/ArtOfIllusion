@@ -9,13 +9,12 @@
  */
 package artofillusion.spmanager;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.tree.*;
 import buoy.widget.*;
-//import artofillusion.ModellingApp;
+import java.awt.*;
 import java.io.*;
 import java.util.*;
+import javax.swing.*;
+import javax.swing.tree.*;
 
 /**
  *  Description of the Class

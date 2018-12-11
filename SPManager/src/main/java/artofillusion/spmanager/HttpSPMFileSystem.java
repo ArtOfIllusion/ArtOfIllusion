@@ -10,21 +10,21 @@
 package artofillusion.spmanager;
 
 import artofillusion.ui.*;
-import java.awt.*;
-import javax.swing.*;
-import buoy.widget.*;
 import buoy.event.*;
+import buoy.widget.*;
+import java.awt.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.util.zip.*;
-import java.net.*;
+import javax.swing.*;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
-
-import org.xml.sax.*;
-import org.w3c.dom.*;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.*;
 
 /**
  *  Description of the Class

@@ -13,11 +13,9 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 import buoy.widget.*;
-import buoy.event.*;
 //import artofillusion.ModellingApp;
 import java.io.*;
 import java.util.*;
-import java.util.zip.*;
 
 /**
  *  Description of the Class
@@ -54,6 +52,7 @@ public class ManageSplitPane extends SPMSplitPane
     /**
      *  Description of the Method
      */
+    @Override
     protected void updateTree()
     {
         /*
@@ -306,6 +305,7 @@ public class ManageSplitPane extends SPMSplitPane
      *
      *@param  deletable  Description of the Parameter
      */
+    @Override
     public void scriptSelection( boolean deletable )
     {
         deleteButton.setText( SPMTranslate.text( "deleteScript" ) );
@@ -319,6 +319,7 @@ public class ManageSplitPane extends SPMSplitPane
      *
      *@param  deletable  Description of the Parameter
      */
+    @Override
     public void pluginSelection( boolean deletable )
     {
         deleteButton.setText( SPMTranslate.text( "deletePlugin" ) );
@@ -330,6 +331,7 @@ public class ManageSplitPane extends SPMSplitPane
     /**
      *  Description of the Method
      */
+    @Override
     public void voidSelection()
     {
         deleteButton.setEnabled( false );

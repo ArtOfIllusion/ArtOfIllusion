@@ -22,10 +22,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
 import java.security.spec.InvalidKeySpecException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import java.io.UnsupportedEncodingException;
-import java.io.IOException;
 
 
 /**

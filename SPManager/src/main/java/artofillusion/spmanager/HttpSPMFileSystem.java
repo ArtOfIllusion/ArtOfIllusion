@@ -9,12 +9,9 @@
  */
 package artofillusion.spmanager;
 
-import artofillusion.*;
 import artofillusion.ui.*;
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.tree.*;
 import buoy.widget.*;
 import buoy.event.*;
 import java.io.*;
@@ -24,12 +21,6 @@ import java.net.*;
 import javax.swing.text.*;
 import javax.swing.text.html.*;
 import javax.swing.text.html.parser.*;
-import java.util.regex.*;
-import javax.xml.parsers.*;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.xml.sax.*;
 import org.w3c.dom.*;
@@ -98,6 +89,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
      *
      *@param  cb  Callback to call when done
      */
+    @Override
     public void getRemoteInfo( Runnable cb )
     {
         if ( !initialized )
@@ -113,6 +105,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
                 (
                     new Thread()
                     {
+                    @Override
                         public void run()
                         {
                             scanPlugins();
@@ -142,6 +135,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
     /**
      *  Init stuff
      */
+    @Override
     public void initialize()
     {
         super.initialize();
@@ -968,6 +962,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
          *@param  data  Description of the Parameter
          *@param  pos   Description of the Parameter
          */
+        @Override
         public void handleText( char[] data, int pos )
         {
             System.out.println( "handleText " + new String( data ) + " " + pos );
@@ -981,6 +976,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
          *@param  a    Description of the Parameter
          *@param  pos  Description of the Parameter
          */
+        @Override
         public void handleStartTag( HTML.Tag t, MutableAttributeSet a, int pos )
         {
             System.out.println( "StartTag :" + t + ":" + a + ":" + pos );
@@ -1039,6 +1035,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
          *@param  data  Description of the Parameter
          *@param  pos   Description of the Parameter
          */
+        @Override
         public void handleText( char[] data, int pos )
         {
             System.out.println( "handleText " + new String( data ) + " " + pos );
@@ -1104,6 +1101,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
          *@param  a    Description of the Parameter
          *@param  pos  Description of the Parameter
          */
+        @Override
         public void handleStartTag( HTML.Tag t, MutableAttributeSet a, int pos )
         {
             System.out.println( "StartTag :" + t + ":" + a + ":" + pos );

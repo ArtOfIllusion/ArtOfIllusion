@@ -13,11 +13,8 @@ package artofillusion.spmanager;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.regex.*;
-import java.awt.*;
 import javax.swing.*;
 import buoy.widget.*;
-import buoy.event.*;
 
 import artofillusion.ui.*;
 
@@ -130,6 +127,7 @@ public class SPMParameters
             (
                 new Thread()
                 {
+                    @Override
                     public void run()
                     {
                         getThreadedRepositoriesList( true );
@@ -141,6 +139,7 @@ public class SPMParameters
             (
                 new Thread()
                 {
+                    @Override
                     public void run()
                     {
                         getThreadedRepositoriesList( false );
@@ -164,6 +163,7 @@ public class SPMParameters
 	dlg.setEnabled(true);
 
 	(new Thread() {
+                @Override
 		public void run()
 		{
 		    try {
@@ -274,6 +274,7 @@ public class SPMParameters
 					   //new Thread()
 					   new Runnable()
                     {
+                        @Override
                         public void run()
                         {
                             SPManagerFrame.getInstance().updatePanes();
@@ -312,6 +313,7 @@ public class SPMParameters
 					   //new Thread()
 					   new Runnable()
                     {
+                        @Override
                         public void run()
                         {
                             SPManagerFrame.getInstance().updatePanes();
@@ -786,6 +788,7 @@ public class SPMParameters
          *
          *@return    The passwordAuthentication value
          */
+        @Override
         protected PasswordAuthentication getPasswordAuthentication()
         {
             // if we have no stored credentials, prompt the user now

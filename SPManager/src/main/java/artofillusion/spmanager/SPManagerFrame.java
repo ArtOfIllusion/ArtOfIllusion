@@ -15,10 +15,8 @@ import artofillusion.ui.UIUtilities;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.Timer.*;
 import javax.swing.border.*;
 import java.awt.event.ActionEvent;
-import java.io.File;
 import java.util.Vector;
 
 import buoy.widget.*;
@@ -89,6 +87,7 @@ public class SPManagerFrame extends BFrame
         statusTextClearAction =
             new AbstractAction()
             {
+                @Override
                 public void actionPerformed( ActionEvent e )
                 {
                     statusLabel.setText( " " );
@@ -250,12 +249,14 @@ public class SPManagerFrame extends BFrame
 		final SPMObjectInfo info = remoteinfo;
 
 		(new Thread() {
+                    @Override
 		    public void run()
 		    {
 			updateSplitPane.installFile(info);
 			updateSplitPane.showErrors();
 
 			SwingUtilities.invokeLater(new Runnable() {
+                            @Override
 			    public void run()
 			    {
 				status.dispose();
@@ -385,6 +386,7 @@ public class SPManagerFrame extends BFrame
 				   //new Thread()
 				   new Runnable()
             {
+                @Override
                 public void run()
                 {
                     statusLabel.setText( statusText );

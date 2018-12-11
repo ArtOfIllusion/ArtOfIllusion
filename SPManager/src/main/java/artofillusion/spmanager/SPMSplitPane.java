@@ -14,8 +14,6 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.tree.*;
 import java.awt.event.*;
-import javax.swing.event.*;
-import javax.swing.plaf.*;
 import buoy.widget.*;
 import buoy.event.*;
 
@@ -203,6 +201,7 @@ public class SPMSplitPane extends BSplitPane
 					objectDescription.setText((String)descText.get(index));
 
 					SwingUtilities.invokeLater(new Runnable() {
+                                                @Override
 						public void run() {
 							BScrollBar bar =
 								descriptionSP.getVerticalScrollBar();
@@ -263,6 +262,7 @@ public class SPMSplitPane extends BSplitPane
 		MouseListener ml =
 			new MouseAdapter()
 		{
+                        @Override
 			public void mousePressed( MouseEvent e )
 			{
 				int selRow = ( (JTree) tree.getComponent() ).getRowForLocation( e.getX(), e.getY() );
@@ -482,6 +482,7 @@ public class SPMSplitPane extends BSplitPane
 		SwingUtilities.invokeLater(
 				new Runnable()
 				{
+                                        @Override
 					public void run()
 					{
 						BScrollBar bar = descriptionSP.getVerticalScrollBar();
@@ -751,6 +752,7 @@ public class SPMSplitPane extends BSplitPane
 		 *@param  hasFocus  Description of the Parameter
 		 *@return           The treeCellRendererComponent value
 		 */
+                @Override
 		public Component getTreeCellRendererComponent(
 				JTree tree,
 				Object value,
@@ -832,6 +834,7 @@ public class SPMSplitPane extends BSplitPane
 		 *
 		 *@return    The iconHeight value
 		 */
+                @Override
 		public int getIconHeight()
 		{
 			return originalIcon.getIconHeight();
@@ -843,6 +846,7 @@ public class SPMSplitPane extends BSplitPane
 		 *
 		 *@return    The iconWidth value
 		 */
+                @Override
 		public int getIconWidth()
 		{
 			return originalIcon.getIconWidth();
@@ -857,6 +861,7 @@ public class SPMSplitPane extends BSplitPane
 		 *@param  x  Description of the Parameter
 		 *@param  y  Description of the Parameter
 		 */
+                @Override
 		public void paintIcon( Component c, Graphics g, int x, int y )
 		{
 			originalIcon.paintIcon( c, g, x, y );

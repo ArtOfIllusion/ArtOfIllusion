@@ -12,16 +12,11 @@ package artofillusion.spmanager;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
 import java.text.*;
 import java.util.*;
-import java.util.zip.*;
 import buoy.event.*;
 import buoy.widget.*;
 //import artofillusion.ui.*;
-import artofillusion.*;
-import java.io.*;
 
 /**
  *  This class extends AoI Translate Class so that i) the spmanager properties

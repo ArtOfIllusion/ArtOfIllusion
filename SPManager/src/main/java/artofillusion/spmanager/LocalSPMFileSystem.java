@@ -11,15 +11,9 @@
 
 package artofillusion.spmanager;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.tree.*;
-import buoy.widget.*;
-import buoy.event.*;
 //import artofillusion.ModellingApp;
 import java.io.*;
 import java.util.*;
-import java.util.zip.*;
 
 public class LocalSPMFileSystem extends SPMFileSystem
 {   
@@ -28,6 +22,7 @@ public class LocalSPMFileSystem extends SPMFileSystem
         super();
     }
     
+    @Override
     public void initialize()
     {
         super.initialize();

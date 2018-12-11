@@ -12,7 +12,6 @@
 package artofillusion.spmanager;
 
 import java.util.Vector;
-import artofillusion.*;
 
 public class SPMFileSystem
 {   

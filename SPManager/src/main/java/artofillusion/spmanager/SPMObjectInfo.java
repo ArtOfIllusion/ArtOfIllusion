@@ -10,9 +10,9 @@
 package artofillusion.spmanager;
 
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import org.w3c.dom.*;
-import java.net.*;
 
 
 /**
@@ -403,38 +403,7 @@ public class SPMObjectInfo
 	 */
 	private void loadXmlInfoFromJarFile()
 	{
-		/*
-		 * NTJ: AOI 2.5. Default XML file name changed to 'extensions.xml'
-		 * For compatibility we try the new name first, then the old...
-		 */
-		//String fn = getName() + ".xml";
 
-		/*
-		 *  byte[] xmlByteArray = SPManagerUtils.getJarFileContent( fileName, fn );
-		 *  if ( xmlByteArray != null )
-		 *  {
-		 *  try
-		 *  {
-		 *  ByteArrayInputStream xmlStream = new ByteArrayInputStream( xmlByteArray );
-		 *  BufferedReader xmlReader = new BufferedReader( new InputStreamReader( xmlStream ) );
-		 *  XmlParser parser = new XmlParser( xmlReader );
-		 *  try
-		 *  {
-		 *  traverse( parser, "" );
-		 *  }
-		 *  catch ( Exception exc )
-		 *  {
-		 *  System.out.println( "File " + fileName + " does not have a valid XML optional header." );
-		 *  }
-		 *  xmlReader.close();
-		 *  xmlStream.close();
-		 *  }
-		 *  catch ( Exception e )
-		 *  {
-		 *  e.printStackTrace();
-		 *  }
-		 *  }
-		 */
 
 		String fn = "extensions.xml";
 
@@ -442,10 +411,6 @@ public class SPMObjectInfo
 		{
 			InputStream is;
 			URL url = new URL( "jar:file:" + fileName + "!/" + fn );
-			//JarURLConnection jarConnection = (JarURLConnection) url.openConnection();
-			//Object obj = jarConnection.getContent();
-			//if ( obj instanceof InputStream )
-			//{
 
 			// try new name first
 			try {

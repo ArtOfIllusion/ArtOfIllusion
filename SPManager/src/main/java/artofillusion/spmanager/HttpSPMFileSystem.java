@@ -43,7 +43,6 @@ public class HttpSPMFileSystem extends SPMFileSystem
     private boolean isDownloading;
     private Vector callbacks;
     private Document pluginsDoc, objectsDoc, startupDoc, toolsDoc;
-    private File file;
     
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
     
@@ -95,43 +94,41 @@ public class HttpSPMFileSystem extends SPMFileSystem
     @Override
     public void getRemoteInfo( Runnable cb )
     {
-        if ( !initialized )
-        {
+        if ( initialized )
+            cb.run();
+        else {
             super.initialize();
             unknownHost = false;
-            if ( !isDownloading )
-            {
+            if ( isDownloading )
+                callbacks.add( cb );
+            else {
                 callbacks = new Vector();
                 callbacks.add( cb );
                 isDownloading = true;
                 statusDialog = new HttpStatusDialog();
                 (
-                    new Thread()
-                    {
-                    @Override
-                        public void run()
+                        new Thread()
                         {
-                            scanPlugins();
-                            if ( !unknownHost )
-                                scanToolScripts();
-                            if ( !unknownHost )
-                                scanObjectScripts();
-                            if ( !unknownHost )
-                                scanStartupScripts();
-                            isDownloading = false;
-                            initialized = true;
-                            for ( int i = 0; i < callbacks.size(); ++i )
-                                ( (Runnable) callbacks.elementAt( i ) ).run();
-                            statusDialog.dispose();
-                            statusDialog = null;
-                        }
-                    } ).start();
+                            @Override
+                            public void run()
+                            {
+                                scanPlugins();
+                                if ( !unknownHost )
+                                    scanToolScripts();
+                                if ( !unknownHost )
+                                    scanObjectScripts();
+                                if ( !unknownHost )
+                                    scanStartupScripts();
+                                isDownloading = false;
+                                initialized = true;
+                                for ( int i = 0; i < callbacks.size(); ++i )
+                                    ( (Runnable) callbacks.elementAt( i ) ).run();
+                                statusDialog.dispose();
+                                statusDialog = null;
+                            }
+                        } ).start();
             }
-            else
-                callbacks.add( cb );
         }
-        else
-            cb.run();
     }
 
 

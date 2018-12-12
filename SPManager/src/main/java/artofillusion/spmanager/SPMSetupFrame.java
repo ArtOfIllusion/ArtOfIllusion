@@ -10,14 +10,14 @@
  */
 package artofillusion.spmanager;
 
+import artofillusion.ui.Translate;
+import buoy.event.*;
+import buoy.widget.*;
 import java.awt.*;
+import java.net.*;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
-import java.net.*;
-import buoy.widget.*;
-import buoy.event.*;
-
-import java.util.*;
 
 /**
  *  Description of the Class
@@ -60,7 +60,7 @@ public class SPMSetupFrame extends BDialog
 
         ColumnContainer cc = new ColumnContainer();
         LayoutInfo topLayout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 5, 3, 3, 3 ), new Dimension( 0, 0 ) );
-        cc.add( SPMTranslate.bLabel( "chooseRepository" ), topLayout );
+        cc.add(Translate.label("spmanager:chooseRepository"), topLayout );
         LayoutInfo layout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 3, 3, 5, 3 ), new Dimension( 0, 0 ) );
         cc.add( repositoriesCB = new BComboBox( (Object[]) ( rep = parameters.getRepositories() ) ), layout );
         repositoriesCB.addEventLink( ValueChangedEvent.class, this, "doRepositoriesCBChanged" );

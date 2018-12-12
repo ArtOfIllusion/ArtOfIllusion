@@ -10,6 +10,7 @@
  */
 package artofillusion.spmanager;
 
+import artofillusion.ui.Translate;
 import buoy.event.*;
 import buoy.widget.*;
 import java.text.*;
@@ -41,21 +42,7 @@ public class SPMTranslate
         locale = l;
         resources = ResourceBundle.getBundle("spmanager", locale);
     }
-
-
-    /**
-     *  Get the locale currently used for generating text.
-     *
-     *@return    The locale value
-     */
-
-    public static Locale getLocale()
-    {
-        return locale;
-    }
-
-
-
+    
     /**
      *  Description of the Method
      *
@@ -65,7 +52,7 @@ public class SPMTranslate
      *@return         Description of the Return Value
      */
     public static BMenuItem bMenuItem( String name, java.lang.Object target, String method )
-    {
+    {        
         return bMenuItem( name, CommandEvent.class, target, method );
     }
 
@@ -200,9 +187,9 @@ public class SPMTranslate
      *@param  name  Description of the Parameter
      *@return       Description of the Return Value
      */
-    public static BLabel bLabel( String name )
+    public static BLabel bLabel(String name)
     {
-        return bLabel( name, null );
+        return bLabel(name, null);
     }
 
 
@@ -240,20 +227,13 @@ public class SPMTranslate
 
     public static String text( String name )
     {
-        try
-        {
-            return resources.getString( "text." + name );
-        }
-        catch ( MissingResourceException ex )
-        {
-            return name;
-        }
+        return Translate.text("spmanager:" + "text." + name);
     }
 
 
     /**
      *  Get the text given by the property "name". If the property is not found,
-     *  this simply uses name. Any occurrance of the pattern "{0}" in the text
+     *  this simply uses name. Any occurrence of the pattern "{0}" in the text
      *  string will be replaced with the string representation of arg1.
      *
      *@param  name  Description of the Parameter

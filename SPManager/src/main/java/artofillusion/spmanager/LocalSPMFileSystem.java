@@ -56,6 +56,7 @@ public class LocalSPMFileSystem extends SPMFileSystem
     
     private void scanFiles(String directory, List<SPMObjectInfo> infoList, String suffix)
     {
+        System.out.println(directory);
         SPMObjectInfo info;
         
         File dir = new File(directory);

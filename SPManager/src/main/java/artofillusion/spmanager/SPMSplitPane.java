@@ -9,13 +9,13 @@
  */
 package artofillusion.spmanager;
 
-import java.util.*;
+import buoy.event.*;
+import buoy.widget.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.tree.*;
-import java.awt.event.*;
-import buoy.widget.*;
-import buoy.event.*;
 
 /**
  *  Description of the Class
@@ -177,9 +177,7 @@ public class SPMSplitPane extends BSplitPane
 
 		ColumnContainer cc = new ColumnContainer();
 
-		BScrollPane sc;
-		add( sc = new BScrollPane( tree = new BTree( new DefaultMutableTreeNode( SPMTranslate.text( s ) ) ) ), 0 );
-
+		add(new BScrollPane( tree = new BTree( new DefaultMutableTreeNode( SPMTranslate.text( s ) ) ) ), 0 );
 		add( cc, 1 );
 
 		LayoutInfo labelLayout = new LayoutInfo( LayoutInfo.WEST, LayoutInfo.NONE, new Insets( 3, 3, 3, 3 ), new Dimension( 0, 0 ) );
@@ -219,20 +217,15 @@ public class SPMSplitPane extends BSplitPane
 
 		rc.add(new BLabel(SPMTranslate.text("flags") + ":"));
 
-		rc.add(new BLabel("=" + SPMTranslate.text("alertFlag"), alertIcon,
-				BLabel.CENTER, BLabel.EAST));
+		rc.add(new BLabel("=" + SPMTranslate.text("alertFlag"), alertIcon, BLabel.CENTER, BLabel.EAST));
 
-		rc.add(new BLabel("=" + SPMTranslate.text("filtMark"), flagIcon,
-				BLabel.CENTER, BLabel.EAST));
+		rc.add(new BLabel("=" + SPMTranslate.text("filtMark"), flagIcon, BLabel.CENTER, BLabel.EAST));
 
-		rc.add(new BLabel("=" + SPMTranslate.text("filtDisable"),
-				disableIcon, BLabel.CENTER, BLabel.EAST));
+		rc.add(new BLabel("=" + SPMTranslate.text("filtDisable"), disableIcon, BLabel.CENTER, BLabel.EAST));
 
-		rc.add(new BLabel("=" + SPMTranslate.text("filtConfirm"),
-				confirmIcon, BLabel.CENTER, BLabel.EAST));
+		rc.add(new BLabel("=" + SPMTranslate.text("filtConfirm"), confirmIcon, BLabel.CENTER, BLabel.EAST));
 
-		rc.add(new BLabel("=" + SPMTranslate.text("required"),
-				referedIcon, BLabel.CENTER, BLabel.EAST));
+		rc.add(new BLabel("=" + SPMTranslate.text("required"), referedIcon, BLabel.CENTER, BLabel.EAST));
 
 		objectDescription = new BTextArea( "", 8, 50 );
 		objectDescription.setWrapStyle( BTextArea.WRAP_WORD );

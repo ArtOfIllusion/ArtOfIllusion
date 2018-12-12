@@ -98,7 +98,6 @@ public class SPManagerFrame extends BFrame
         installSplitPane = new InstallSplitPane( SPMSplitPane.INSTALL, updateSplitPane.getFileSystem() );
         ( (HttpSPMFileSystem) updateSplitPane.getFileSystem() ).setRepository( parameters.getCurrentRepository() );
         RowContainer rc = new RowContainer();
-        LayoutInfo layout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 5, 3, 3, 3 ), new Dimension( 0, 0 ) );
         ColumnContainer cc = new ColumnContainer();
         LayoutInfo headLayout = new LayoutInfo( LayoutInfo.WEST, LayoutInfo.NONE, new Insets( 3, 5, 5, 3 ), new Dimension( 0, 0 ) );
         rc.add( new BLabel( new ImageIcon( getClass().getResource( "/artofillusion/spmanager/icons/gear.png" ) ) ), headLayout );

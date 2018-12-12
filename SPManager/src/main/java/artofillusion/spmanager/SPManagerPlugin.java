@@ -11,17 +11,15 @@
 package artofillusion.spmanager;
 
 import artofillusion.*;
-import artofillusion.util.SearchlistClassLoader;
 import artofillusion.ui.*;
-
-import java.awt.*;
+import artofillusion.util.SearchlistClassLoader;
 import buoy.event.*;
 import buoy.widget.*;
-
-import java.util.*;
+import java.awt.*;
 import java.io.*;
-import java.net.*;
 import java.lang.reflect.*;
+import java.net.*;
+import java.util.*;
 
 /**
  *  The Plugin corresponding to the SPManager
@@ -172,17 +170,6 @@ public class SPManagerPlugin implements Plugin
 			}
 			else {
 			    urlldr = (URLClassLoader) obj;
-
-			    /*
-			    searchldr =
-				new SearchlistClassLoader((ClassLoader) obj);
-
-			    idx = aoiloaders.indexOf(obj);
-			    if (idx >= 0) aoiloaders.set(idx, searchldr);
-			    else System.out.println("SPM: loader not in list");
-
-			    loaders.put(url, searchldr);
-			     */
 			}
 
 			// ok, now perform the actions
@@ -210,24 +197,7 @@ public class SPManagerPlugin implements Plugin
 			    System.out.println("SPM: adding path: " + url);
 
 			    value = entry.getValue().toString();
-
-			    /*
-			    if ("merge".equalsIgnoreCase(value)) {
-				if (searchldr != null)
-				    searchldr.merge(url);
-				else if (addUrl != null) {
-				    try {
-					urlarg[0] = url;
-					addUrl.invoke(urlldr, urlarg);
-				    } catch (Exception e) {
-					System.out.println("Error invoking: "
-							   + e);
-				    }
-				}
-				else System.out.println("Could not merge path"
-							+ url);				    
-			    }
-			     */
+                            
 			    if ("classpath".equalsIgnoreCase(value)) {
 				if (searchldr != null)
 				    searchldr.add(url);
@@ -252,24 +222,6 @@ public class SPManagerPlugin implements Plugin
 				    else System.out.println("SPM: could not find"
 					    + " loader for: " + url);
 				}
-				/*
-				 * NTJ - disabled. No longer needed, and requires a new method in SearchlistClassLoader
-				 * 
-				else {
-				    System.out.println("SPM: importing: " + key[1]);
-				    if (searchldr != null) {
-					try {
-					    searchldr.add(ldr.loadClass(key[1]));
-					} catch (Exception e) {
-					    System.out.println("SPM: Error importing class: " + key[1] + " into " + url);
-					}
-				    }
-				    else {
-					System.out.println("SPM: Error: Class cannot be imported without a SearchListClassLoader: " + url
-						+ "(" + key[1] + ")");
-				    }
-				}
-				*/
 			    }
 			}
 		    }
@@ -343,8 +295,7 @@ public class SPManagerPlugin implements Plugin
 
 	ArrayList err = new ArrayList(8);
 
-	System.out.println("SPManager: java temp dir is " +
-		System.getProperty("java.io.tmpdir"));
+	System.out.println("SPManager: java temp dir is " + System.getProperty("java.io.tmpdir"));
 
 	// try system TEMP directory
 	File temp = new File(System.getProperty("java.io.tmpdir"));
@@ -378,18 +329,15 @@ public class SPManagerPlugin implements Plugin
 	String path;
 	File t = null;
 	try {
-	    t = File.createTempFile("spmanager-temp-"
-		    + System.getProperty("user.name") + "-", ".lck", temp);
+	    t = File.createTempFile("spmanager-temp-"+ System.getProperty("user.name") + "-", ".lck", temp);
 	    t.deleteOnExit();
 	    path= t.getName();
 	    path = path.substring(0, path.length()- ".lck".length());
 	} catch (Exception e) {
 	    // failed to create temp file, use fallback naming algorithm
-	    System.out.println("SPManager: could not create temp file: " +
-		    t.getAbsolutePath() + e);
+	    System.out.println("SPManager: could not create temp file: " + t.getAbsolutePath() + e);
 
-	    path = System.getProperty("user.name") + "-"
-	    	+ String.valueOf(System.currentTimeMillis());
+	    path = System.getProperty("user.name") + "-" + String.valueOf(System.currentTimeMillis());
 	}
 	
 	temp = new File(temp, path);
@@ -400,13 +348,11 @@ public class SPManagerPlugin implements Plugin
 	}
 
 	if (!temp.canWrite())
-	    err.add("Write permission denied to temp folder: " +
-		    temp.getAbsolutePath());
+	    err.add("Write permission denied to temp folder: " + temp.getAbsolutePath());
 
 	TEMP_DIR = temp.getAbsolutePath();
 
-	System.out.println("SPManager: temp dir set to: " +
-		temp.getAbsolutePath());
+	System.out.println("SPManager: temp dir set to: " + temp.getAbsolutePath());
 
 	// make sure all temp directories are created
 	File subfolder = new File(PLUGIN_DIRECTORY);
@@ -475,8 +421,7 @@ public class SPManagerPlugin implements Plugin
 	}
     }
 
-    public void registerResource(String type, String id, ClassLoader loader,
-	    String baseName, Locale locale)
+    public void registerResource(String type, String id, ClassLoader loader, String baseName, Locale locale)
     {
 	String suffix = "";
 
@@ -601,14 +546,6 @@ public class SPManagerPlugin implements Plugin
 				info.length = info.getRemoteFileSize(url.toString());
 			    }
 
-			    /* NTJ: don't give up yet...
-			     *
-				    if (info.length < 0) {
-					new BStandardDialog("SPManager", SPMTranslate.text("httpError"), BStandardDialog.ERROR).showMessageDialog(null);
-
-					doClose();
-				    }
-			     */
 
 			    // get destination if needed
 			    if (info.name == null

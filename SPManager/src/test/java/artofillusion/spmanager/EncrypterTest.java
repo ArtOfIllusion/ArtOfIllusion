@@ -5,18 +5,18 @@
  */
 package artofillusion.spmanager;
 
+import org.junit.Test;
+
 /**
  *
  * @author maksim.khramov
  */
 public class EncrypterTest {
-    
-    public EncrypterTest() {
-    }
 
     // TODO add test methods here.
     // The methods must be annotated with annotation @Test. For example:
     //
-    // @Test
-    // public void hello() {}
+    @Test
+    public void hello() {
+    }
 }

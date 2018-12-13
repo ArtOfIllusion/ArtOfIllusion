@@ -13,10 +13,19 @@ package artofillusion.spmanager;
 
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class LocalSPMFileSystem extends SPMFileSystem
 {   
+    private static final Logger logger = Logger.getLogger(LocalSPMFileSystem.class.getName());
+    
     public LocalSPMFileSystem()
     {
         super();
@@ -56,20 +65,16 @@ public class LocalSPMFileSystem extends SPMFileSystem
     
     private void scanFiles(String directory, List<SPMObjectInfo> infoList, String suffix)
     {
-        System.out.println(directory);
-        SPMObjectInfo info;
-        
-        File dir = new File(directory);
-        if (dir.exists())
-        {
-            String[] files = dir.list();
-            if (files.length > 0) Arrays.sort(files);
-            for (int i = 0; i < files.length; i++)
-                if (files[i].endsWith(suffix))
-                {   info = new SPMObjectInfo(directory+File.separatorChar+files[i]);
-                    infoList.add(info);
-                }
-        }
+
+        Predicate<Path> pp = (Path t) -> t.getFileName().toString().endsWith(suffix);
+        Function<Path, SPMObjectInfo> pts = (Path t) -> new SPMObjectInfo(t.toString());
+        try {
+            Files.walk(Paths.get(directory)).sorted().filter(pp).map(pts).forEach((item) -> {infoList.add(item);});
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }        
     }
+    
+
 
 }

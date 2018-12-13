@@ -46,71 +46,10 @@ public class SPManagerUtils
         }
     }
 
-    /**
-     *  Description of the Method
-     *
-     *@param  intArray  Description of the Parameter
-     *@return           Description of the Return Value
-     */
-    public static int[] increaseIntArray( int[] intArray )
-    {
-        if ( intArray == null )
-        {
-            int[] tmpArray = new int[1];
-            return tmpArray;
-        }
-        else
-        {
-            int[] tmpArray = new int[intArray.length + 1];
-            System.arraycopy( intArray, 0, tmpArray, 0, intArray.length );
-            return tmpArray;
-        }
-    }
 
 
-    /**
-     *  Description of the Method
-     *
-     *@param  intArray  Description of the Parameter
-     *@param  element   Description of the Parameter
-     *@return           Description of the Return Value
-     */
-    public static int[] deleteIntArrayElement( int[] intArray, int element )
-    {
-        if ( intArray == null )
-            return null;
-        else if ( intArray.length == 1 )
-            return null;
-        else
-        {
-            int[] tmpArray = new int[intArray.length - 1];
-            if ( element > 0 )
-                System.arraycopy( intArray, 0, tmpArray, 0, element );
-            if ( element < intArray.length - 1 )
-                System.arraycopy( intArray, element + 1, tmpArray, element, tmpArray.length - element );
-            int i;
-            return tmpArray;
-        }
-    }
 
 
-    /**
-     *  Sets the dialogLocation attribute of the SPManagerUtils class
-     *
-     *@param  frame        The new dialogLocation value
-     *@param  parentFrame  The new dialogLocation value
-     */
-    public static void setDialogLocation( JFrame frame, JFrame parentFrame )
-    {
-        Point location = new Point();
-        location.x = parentFrame.getLocation().x + parentFrame.getWidth() / 2 - frame.getWidth() / 2;
-        location.y = parentFrame.getLocation().y + parentFrame.getHeight() / 2 - frame.getHeight() / 2;
-        if ( location.x < 0 )
-            location.x = 0;
-        if ( location.y < 0 )
-            location.y = 0;
-        frame.setLocation( location );
-    }
 
 
     /**

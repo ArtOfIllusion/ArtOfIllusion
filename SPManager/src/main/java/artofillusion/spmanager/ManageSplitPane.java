@@ -39,8 +39,7 @@ public class ManageSplitPane extends SPMSplitPane
         acceptsFileSelection = false;
         //initialise button
         LayoutInfo layout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 0, 0, 0, 0 ), new Dimension( 0, 0 ) );
-        //buttonRow.add( deleteAllButton = SPMTranslate.bButton( "deleteAllSelected", this, "doDeleteAll" ), layout );
-        //deleteAllButton.setIcon( new ImageIcon( getClass().getResource( "/artofillusion/spmanager/icons/Delete16.gif" ) ) );
+
         buttonRow.add( deleteButton = SPMTranslate.bButton( "deleteFile", this, "doDelete" ), layout );
         deleteButton.setIcon( new ImageIcon( getClass().getResource( "/artofillusion/spmanager/icons/Delete16.gif" ) ) );
         deleteButton.setText( SPMTranslate.text( "deleteScript" ) );
@@ -56,16 +55,7 @@ public class ManageSplitPane extends SPMSplitPane
     @Override
     protected void updateTree()
     {
-        /*
-         *  {
-         *  updateTree(true);
-         *  }
-         *  protected void updateTree(boolean force)
-         */
-        //update the file system
         fs.initialize();
-
-        //get the scripts
         getPlugins();
         getToolScripts();
         getObjectScripts();
@@ -112,24 +102,17 @@ public class ManageSplitPane extends SPMSplitPane
     /**
      *  Gets the files attribute of the ManageSplitPane object
      *
-     *@param  addTo  Description of the Parameter
+     *@param  target  Description of the Parameter
      *@param  infos  Description of the Parameter
      */
-    private void getFiles( TreePath addTo, List<SPMObjectInfo> infos )
-    {
-        DefaultMutableTreeNode tn;
+    private void getFiles(TreePath target, List<SPMObjectInfo> infos)
+    {      
+        infos.forEach((info) -> {
+            tree.addNode( target, new DefaultMutableTreeNode(info, false));
+        });
+        
         SPMObjectInfo info;
-
-        for ( int i = 0; i < infos.size(); i++ )
-        {
-            info = (SPMObjectInfo) infos.get( i );
-            tn = new DefaultMutableTreeNode( info.getName() );
-            tn.setAllowsChildren( false );
-            tn.setUserObject( info );
-            tree.addNode( addTo, tn );
-            //System.out.println( "added " + info.getName() + " to " + addTo );
-        }
-
+        
 	// NTJ: set reference counts
 	for (int i = 0; i < infos.size(); i++) {
             info = (SPMObjectInfo) infos.get( i );

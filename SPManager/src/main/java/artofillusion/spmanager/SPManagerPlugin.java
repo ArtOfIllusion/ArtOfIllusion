@@ -15,7 +15,7 @@ import artofillusion.ui.*;
 import artofillusion.util.SearchlistClassLoader;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.*;
+import java.awt.Window;
 import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
@@ -30,7 +30,6 @@ import java.util.*;
 public class SPManagerPlugin implements Plugin
 {
     public static String AOI_VERSION;
-    public static String UNIQUE_PATH;
     public static String TEMP_DIR;
     public static String APP_DIRECTORY;
     public static String PLUGIN_DIRECTORY;
@@ -42,6 +41,9 @@ public class SPManagerPlugin implements Plugin
 
     private static SPManagerFrame spmFrame;
 
+    public SPManagerPlugin() {
+        AOI_VERSION = ArtOfIllusion.getMajorVersion();
+    }
     
     /**
      *  Description of the Method
@@ -52,12 +54,6 @@ public class SPManagerPlugin implements Plugin
     @Override
     public void processMessage( int message, Object args[] )
     {
-	// NTJ: get the AOI run-time (*not* compile-time) version
-	if (AOI_VERSION == null) {
-	    AOI_VERSION = ArtOfIllusion.getMajorVersion();
-	    System.setProperty("artofillusion.version", ArtOfIllusion.getVersion());
-	    System.setProperty("artofillusion.version.major", ArtOfIllusion.getMajorVersion());
-	}
 
 	switch (message) {
 	case Plugin.APPLICATION_STARTING:
@@ -223,8 +219,7 @@ public class SPManagerPlugin implements Plugin
 		    .showMessageDialog(null);
 		}
 	    }
-	    else System.out.println("SPManager: could not find plugin dir: " +
-		    PLUGIN_DIRECTORY);
+	    else System.out.println("SPManager: could not find plugin dir: " + PLUGIN_DIRECTORY);
 
 
 	    init();
@@ -236,7 +231,9 @@ public class SPManagerPlugin implements Plugin
 	    
 	    BMenu toolsMenu = layout.getToolsMenu();
 	    toolsMenu.addSeparator();
-	    BMenuItem menuItem = SPMTranslate.bMenuItem( "SPManager", this, "doMenu" );
+            BMenuItem menuItem = new BMenuItem(Translate.text("spmanager:menu.SPManager"));
+            menuItem.addEventLink(CommandEvent.class, this, "doMenu");
+	    
 
 	    toolsMenu.add( menuItem );
 	}

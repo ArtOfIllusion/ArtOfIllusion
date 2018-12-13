@@ -43,50 +43,8 @@ public class SPMTranslate
         resources = ResourceBundle.getBundle("spmanager", locale);
     }
     
-    /**
-     *  Description of the Method
-     *
-     *@param  name    Description of the Parameter
-     *@param  target  Description of the Parameter
-     *@param  method  Description of the Parameter
-     *@return         Description of the Return Value
-     */
-    public static BMenuItem bMenuItem( String name, java.lang.Object target, String method )
-    {        
-        return bMenuItem( name, CommandEvent.class, target, method );
-    }
 
 
-    /**
-     *  Description of the Method
-     *
-     *@param  name       Description of the Parameter
-     *@param  eventType  Description of the Parameter
-     *@param  target     Description of the Parameter
-     *@param  method     Description of the Parameter
-     *@return            Description of the Return Value
-     */
-    public static BMenuItem bMenuItem( String name, java.lang.Class eventType, java.lang.Object target, String method )
-    {
-        String command = name;
-        BMenuItem item = null;
-        try
-        {
-            command = resources.getString( "menu." + name );
-            String shortcut = resources.getString( "menu." + name + ".shortcut" );
-            if ( shortcut.length() > 1 && shortcut.charAt( 0 ) == '^' )
-                item = new BMenuItem( command, new Shortcut( shortcut.charAt( 1 ), Shortcut.SHIFT_MASK | Shortcut.DEFAULT_MASK ) );
-            else if ( shortcut.length() > 0 )
-                item = new BMenuItem( command, new Shortcut( shortcut.charAt( 0 ) ) );
-        }
-        catch ( MissingResourceException ex )
-        {
-            item = new BMenuItem( command );
-        }
-        if ( eventType != null )
-            item.addEventLink( eventType, target, method );
-        return item;
-    }
 
     /**
      *  Description of the Method

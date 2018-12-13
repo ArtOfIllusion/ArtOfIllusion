@@ -52,15 +52,13 @@ public class SPMSetupFrame extends BDialog
         super( fr, true );
         frame = fr;
         setTitle( SPMTranslate.text( "SPManagerSetup" ) );
-        //JDialog dialog = (JDialog) getComponent();
-        //dialog.setUndecorated( true );
-        //dialog.getRootPane().setWindowDecorationStyle( JRootPane.FRAME );
+
         parameters = frame.getParameters();
         addEventLink( WindowClosingEvent.class, this, "doCancel" );
 
         ColumnContainer cc = new ColumnContainer();
         LayoutInfo topLayout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 5, 3, 3, 3 ), new Dimension( 0, 0 ) );
-        cc.add(Translate.label("spmanager:chooseRepository"), topLayout );
+        cc.add(Translate.label("spmanager:label.chooseRepository"), topLayout );
         LayoutInfo layout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 3, 3, 5, 3 ), new Dimension( 0, 0 ) );
         cc.add( repositoriesCB = new BComboBox( (Object[]) ( rep = parameters.getRepositories() ) ), layout );
         repositoriesCB.addEventLink( ValueChangedEvent.class, this, "doRepositoriesCBChanged" );
@@ -81,7 +79,6 @@ public class SPMSetupFrame extends BDialog
 	    //RadioButtonGroup group;
 	    BComboBox sel=null;
 	    LayoutInfo right = new LayoutInfo(LayoutInfo.EAST,LayoutInfo.NONE);
-	    LayoutInfo left = new LayoutInfo(LayoutInfo.WEST,LayoutInfo.NONE);
 	    for (i = 0; i < keys.length; i++) {
 		filtName = keys[i];
 		filtVal = (String) filters.get(filtName);
@@ -129,7 +126,6 @@ public class SPMSetupFrame extends BDialog
         useCacheCB =  SPMTranslate.bCheckBox( "useCache", parameters.getUseCache(), this, "doUseCacheCB" );
         cc.add( useCacheCB, new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 2, 3, 2, 3 ), new Dimension( 0, 0 ) ));
 
-        LayoutInfo buttonLayout = new LayoutInfo( LayoutInfo.WEST, LayoutInfo.BOTH, new Insets( 2, 0, 2, 0 ), new Dimension( 0, 0 ) );
         LayoutInfo rcLayout = new LayoutInfo( LayoutInfo.CENTER, LayoutInfo.NONE, new Insets( 4, 3, 4, 3 ), new Dimension( 0, 0 ) );
 
         FormContainer fm = new FormContainer( 2, 5 );
@@ -192,18 +188,7 @@ public class SPMSetupFrame extends BDialog
      */
     private void doUseProxyCB()
     {
-        if ( !useProxyCB.getState() )
-        {
-            proxyHostEntry.setEnabled( false );
-            proxyPortEntry.setEnabled( false );
-            usernameEntry.setEnabled( false );
-            passwordEntry.setEnabled( false );
-            proxyHostLabel.setEnabled( false );
-            proxyPortLabel.setEnabled( false );
-            usernameLabel.setEnabled( false );
-            passwordLabel.setEnabled( false );
-        }
-        else
+        if ( useProxyCB.getState() )
         {
             proxyHostEntry.setEnabled( true );
             proxyPortEntry.setEnabled( true );
@@ -213,6 +198,17 @@ public class SPMSetupFrame extends BDialog
             proxyPortLabel.setEnabled( true );
             usernameLabel.setEnabled( true );
             passwordLabel.setEnabled( true );
+        }
+        else
+        {
+            proxyHostEntry.setEnabled( false );
+            proxyPortEntry.setEnabled( false );
+            usernameEntry.setEnabled( false );
+            passwordEntry.setEnabled( false );
+            proxyHostLabel.setEnabled( false );
+            proxyPortLabel.setEnabled( false );
+            usernameLabel.setEnabled( false );
+            passwordLabel.setEnabled( false );
         }
     }
 
@@ -297,13 +293,7 @@ public class SPMSetupFrame extends BDialog
 	    line = (RowContainer) filterContainer.getChild(i);
 
 	    filtName = ((BLabel) line.getChild(0)).getText();
-	    /*
-	    group = ((BRadioButton) line.getChild(1)).getGroup();
 
-	    if (group.getSelection() != null)
-		filtVal = ((BRadioButton) group.getSelection()).getText();
-	    else filtVal = SPMParameters.FILTER_NAMES[SPMParameters.DEFAULT];
-	    */
 	    sel = (BComboBox) line.getChild(1);
 	    if (sel.getSelectedIndex() >= 0)
 		filtVal = sel.getSelectedValue().toString();

@@ -424,11 +424,9 @@ public class InstallSplitPane extends SPMSplitPane
 				    BLabel messg = SPMTranslate.bLabel("errMsg");
 
 				    BStandardDialog dlg = new
-				    BStandardDialog("SPManager", messg,
-					    BStandardDialog.WARNING);
+				    BStandardDialog("SPManager", messg, BStandardDialog.WARNING);
 
-				    switch (dlg.showOptionDialog(null, SPManagerFrame.CONTINUE_IGNORE,
-					    SPMTranslate.text("Continue"))) {
+				    switch (dlg.showOptionDialog(null, SPManagerFrame.CONTINUE_IGNORE, SPMTranslate.text("Continue"))) {
 
 					    case 1:
 						break download;
@@ -475,12 +473,10 @@ public class InstallSplitPane extends SPMSplitPane
 
 	    reason = SPMTranslate.text("markedConfirm", installNodeInfo.getName()) +
 	    reason + SPMTranslate.text("Confirm");
-	    if (new BStandardDialog("SPManager", UIUtilities.breakString(reason),
-		    BStandardDialog.QUESTION)
+	    if (new BStandardDialog("SPManager", UIUtilities.breakString(reason), BStandardDialog.QUESTION)
 	    .showOptionDialog(null, SPManagerFrame.YES_NO, SPManagerFrame.YES_NO[1]) == 1)
 	    {
-		errors.add(SPMTranslate.text("Cancelled",
-			installNodeInfo.getName()));
+		errors.add(SPMTranslate.text("Cancelled", installNodeInfo.getName()));
 
 		showErrors(errors);
 		return;

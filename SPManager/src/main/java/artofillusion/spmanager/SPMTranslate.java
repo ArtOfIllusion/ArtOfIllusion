@@ -88,33 +88,6 @@ public class SPMTranslate
         return item;
     }
 
-
-    /**
-     *  Get a BCheckboxMenuItem whose text is given by the property
-     *  "checkbox.(name)". State specifies the initial state of the item.
-     *
-     *@param  name   Description of the Parameter
-     *@param  state  Description of the Parameter
-     *@return        Description of the Return Value
-     */
-
-    public static BCheckBoxMenuItem bCheckBoxMenuItem( String name, boolean state )
-    {
-        String command = name;
-        try
-        {
-            command = resources.getString( "menu." + name );
-        }
-        catch ( MissingResourceException ex )
-        {
-        }
-        BCheckBoxMenuItem item = new BCheckBoxMenuItem( command, state );
-        return item;
-    }
-
-
-
-
     /**
      *  Description of the Method
      *

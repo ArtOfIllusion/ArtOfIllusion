@@ -73,9 +73,9 @@ public class SPManagerPlugin implements Plugin
 	    System.out.println("SPManager starting...");
 
 	    // get details of plugin classloaders
-	    int i, j, idx;
+	    int i;
 	    URL urlList[];
-	    ArrayList aoiloaders;
+
 	    ClassLoader ldr = null;
 	    URLClassLoader urlldr = null;
 	    SearchlistClassLoader searchldr = null;
@@ -94,13 +94,10 @@ public class SPManagerPlugin implements Plugin
 		    loaders.put(urlList[0], obj);
 	    }
 
-	    URL[] urlarg = new URL[1];
-	    Class[] sig = new Class[] { URL.class };
 	    Method addUrl = null;
 
 	    try {
-		addUrl =
-		    URLClassLoader.class.getDeclaredMethod("addURL", sig);
+		addUrl = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 		addUrl.setAccessible(true);
 	    } catch (Exception e) {
 		System.out.println("Error getting addURL method: " + e);
@@ -141,9 +138,7 @@ public class SPManagerPlugin implements Plugin
 			obj = loaders.get(url);
 
 			if (obj == null) {
-			    System.out.println("SPManager: could not find"
-				    + " classloader: "
-				    + files[i].getPath());
+			    System.out.println("SPManager: could not find classloader: " + files[i].getPath());
 			    continue;
 			}
 
@@ -239,12 +234,10 @@ public class SPManagerPlugin implements Plugin
 	case Plugin.SCENE_WINDOW_CREATED:
 	{
 	    LayoutWindow layout = (LayoutWindow) args[0];
-	    //BMenuBar menuBar = layout.getMenuBar();
-	    //BMenu toolsMenu = menuBar.getChild( 3 );
+	    
 	    BMenu toolsMenu = layout.getToolsMenu();
 	    toolsMenu.addSeparator();
-	    BMenuItem menuItem =
-		SPMTranslate.bMenuItem( "SPManager", this, "doMenu" );
+	    BMenuItem menuItem = SPMTranslate.bMenuItem( "SPManager", this, "doMenu" );
 
 	    toolsMenu.add( menuItem );
 	}
@@ -723,10 +716,10 @@ public class SPManagerPlugin implements Plugin
      */
     public void close()
     {
-	if (spmFrame != null) {
-	    spmFrame.setVisible(false);
-	    spmFrame.dispose();
-	}
+        if(null == spmFrame) return;
+
+        spmFrame.setVisible(false);
+        spmFrame.dispose();
     }
 
 
@@ -751,13 +744,6 @@ public class SPManagerPlugin implements Plugin
 	return spmFrame;
     }
 
-    /**
-     *  update an already-loaded plugin
-     */
-    public static void updatePlugin(String name, String action, String target)
-    {
-
-    }
 
 }
 

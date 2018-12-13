@@ -136,13 +136,13 @@ public class SPManagerFrame extends BFrame
     }
 
     /**
-     *  Hides the SPManager main window
+     * Hides the SPManager main window
      */
-    protected void hideSPManager()
-    {
-        if ( manageSplitPane.isModified() || updateSplitPane.isModified() || installSplitPane.isModified() )
-            JOptionPane.showMessageDialog( null, SPMTranslate.text( "modified" ), SPMTranslate.text( "alert" ), JOptionPane.ERROR_MESSAGE );
-        getComponent().setVisible( false );
+    protected void hideSPManager() {
+        if (manageSplitPane.isModified() || updateSplitPane.isModified() || installSplitPane.isModified()) {
+            JOptionPane.showMessageDialog(null, SPMTranslate.text("modified"), SPMTranslate.text("alert"), JOptionPane.ERROR_MESSAGE);
+        }
+        getComponent().setVisible(false);
     }
 
 

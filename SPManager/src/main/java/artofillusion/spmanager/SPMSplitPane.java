@@ -690,7 +690,7 @@ public class SPMSplitPane extends BSplitPane
 		extMap.put(info, info);
 
 		Collection externals = info.getExternals();
-		if (externals == null || externals.size() == 0) return;
+		if (externals == null || externals.isEmpty()) return;
 
 		String extName, extType;
 		SPMObjectInfo ext;

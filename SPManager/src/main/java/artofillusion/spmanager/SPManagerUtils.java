@@ -12,16 +12,14 @@
  */
 package artofillusion.spmanager;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.*;
-import java.io.*;
-import java.util.zip.*;
 import artofillusion.*;
 import artofillusion.ui.*;
+import java.io.*;
+import java.util.zip.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.*;
 
 /**
  *  Description of the Class

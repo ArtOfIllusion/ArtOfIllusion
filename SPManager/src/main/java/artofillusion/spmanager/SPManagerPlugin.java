@@ -42,7 +42,6 @@ public class SPManagerPlugin implements Plugin
 
     private static SPManagerFrame spmFrame;
 
-    protected static HashMap plugins;
     
     /**
      *  Description of the Method
@@ -106,7 +105,7 @@ public class SPManagerPlugin implements Plugin
 	    // get details of all local plugins
 	    SPMObjectInfo info;
 	    StringBuffer errs = null;
-	    Class plugType;
+
 	    File files[], urlfile;
 	    URL url;
 	    Map.Entry entry;

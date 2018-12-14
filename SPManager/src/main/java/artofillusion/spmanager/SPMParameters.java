@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Vector;
 import javax.swing.*;
 
 /**
@@ -199,7 +198,7 @@ public class SPMParameters
 
 	    int previous = current;
 	    current = 0;
-	    Vector newRepositories = new Vector();
+	    List<String> newRepositories = new ArrayList<>();
 	    while (true) {
 		repoName = rd.readLine();
 		if (repoName == null || repoName.length() == 0) break;
@@ -219,7 +218,7 @@ public class SPMParameters
 
 		System.out.println("repoName: " + repoName + "<<");
 
-		newRepositories.addElement( repoName );
+		newRepositories.add( repoName );
 		if ( repoName.equals( currentString ) ) {
 		    current = rd.getLineNumber() - 1;
 
@@ -251,7 +250,7 @@ public class SPMParameters
         {
             if ( !( ( e instanceof UnknownHostException ) || ( e instanceof SocketException ) ) )
                 e.printStackTrace();
-            SPManagerFrame.getInstance().setRemoteStatusText( SPMTranslate.text( "unknownRepositoriesHost", new String[]{repListURL.toString()} ), -1 );
+            SPManagerFrame.getInstance().setRemoteStatusText(SPMTranslate.text("unknownRepositoriesHost", repListURL.toString()), -1);
             //live on saved repositories.
             //System.out.println( "Remote repository list : Not connected. Try later" );
         }

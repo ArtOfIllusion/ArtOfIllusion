@@ -20,6 +20,7 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  *  The Plugin corresponding to the SPManager
@@ -29,6 +30,8 @@ import java.util.*;
  */
 public class SPManagerPlugin implements Plugin
 {
+    private static final Logger logger = Logger.getLogger(SPManagerPlugin.class.getName());
+    
     public static String AOI_VERSION;
     public static String TEMP_DIR;
     public static String APP_DIRECTORY;

@@ -199,7 +199,7 @@ public class SPMTranslate
      *@return       Description of the Return Value
      */
 
-    public static String text( String name, Object args[] )
+    public static String text( String name, Object... args)
     {
         String pattern = name;
         try

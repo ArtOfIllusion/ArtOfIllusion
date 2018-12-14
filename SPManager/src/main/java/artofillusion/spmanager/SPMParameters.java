@@ -14,7 +14,13 @@ import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Vector;
 import javax.swing.*;
 
 /**
@@ -25,11 +31,10 @@ import javax.swing.*;
  */
 public class SPMParameters
 {
-    private static Vector repositories;
+    private static List<String> repositories;
     private static int current;
-    private static String repoList;
-    private static HashMap filters;
-    private static boolean useProxy;
+    private static Map filters;
+    private static boolean useProxy = false;
     private static String proxyHost;
     private static String proxyPort;
     private static String username;
@@ -37,7 +42,7 @@ public class SPMParameters
     private static boolean changed;
     private StringEncrypter se;
     private URL repListURL;
-    private boolean useCache;
+    private boolean useCache = true;
 
     /**  enum for filter values - in order of increasing restriction  */
     public static final int DEFAULT	= 0;
@@ -61,12 +66,10 @@ public class SPMParameters
      */
     public SPMParameters()
     {
-        repositories = new Vector();
+        repositories = new ArrayList<String>();
 
-        repositories.add( "http://aoisp.sourceforge.net/AoIRepository/" );
-        //hack
-        //repositories.add( "http://localhost/AoIRepository/" );
-        // NTJ: testing
+        repositories.add("http://aoisp.sourceforge.net/AoIRepository/");
+
 
 	filters = new HashMap();
 	filters.put("beta", "mark");
@@ -78,12 +81,11 @@ public class SPMParameters
         username = "";
         password = "";
         current = 0;
-        useProxy = false;
-        useCache = true;
+
         se = null;
         loadPropertiesFile();
         initHttp();
-        //getRepositoriesList( false );
+
     }
 
 
@@ -119,32 +121,11 @@ public class SPMParameters
      *
      *@param  forceUpdate  Description of the Parameter
      */
-    public void getRepositoriesList( boolean forceUpdate )
+    public void getRepositoriesList(final boolean forceUpdate )
     {
-        if ( forceUpdate )
-        {
-            (
-                new Thread()
-                {
-                    @Override
-                    public void run()
-                    {
-                        getThreadedRepositoriesList( true );
-                    }
-                } ).start();
-        }
-        else
-        {
-            (
-                new Thread()
-                {
-                    @Override
-                    public void run()
-                    {
-                        getThreadedRepositoriesList( false );
-                    }
-                } ).start();
-        }
+        new Thread(() -> {
+            getThreadedRepositoriesList(forceUpdate);
+        }).start();
     }
 
 
@@ -155,9 +136,7 @@ public class SPMParameters
      */
     private void getThreadedRepositoriesList( boolean forceUpdate )
     {
-	final BDialog dlg = new BDialog(SPManagerFrame.getInstance(),
-					SPMTranslate.text("remoteStatus"),
-					true);
+	final BDialog dlg = new BDialog(SPManagerFrame.getInstance(),SPMTranslate.text("remoteStatus"), true);
 
 	dlg.setEnabled(true);
 
@@ -179,19 +158,7 @@ public class SPMParameters
 	    }).start();
 
         boolean updated = false;
-        //hack
-        /*if (true)
-        {
-            SwingUtilities.invokeLater(
-                    new Thread()
-                    {
-                        public void run()
-                        {
-                            SPManagerFrame.getInstance().updatePanes();
-                        }
-                    } );
-            return;
-        } */
+
 
         repListURL = null;
         //try to get a new repositories definition file
@@ -206,8 +173,7 @@ public class SPMParameters
         SPManagerFrame.getInstance().setRemoteStatusText( SPMTranslate.text( "fetchingRepositoriesList" ) + " " + repListURL, -1 );
         try
         {
-	    HttpURLConnection conn =
-		(HttpURLConnection) repListURL.openConnection();
+	    HttpURLConnection conn = (HttpURLConnection) repListURL.openConnection();
 
 	    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
 		new BStandardDialog("SPManager", new String[] {
@@ -227,10 +193,9 @@ public class SPMParameters
 
             String repoName;
 	    boolean modified = true;
-	    String currentString = (String) repositories.elementAt( current );
+	    String currentString = repositories.get( current );
 
-	    System.out.println("current repo (" + current + "): " +
-			       currentString);
+	    System.out.println("current repo (" + current + "): " + currentString);
 
 	    int previous = current;
 	    current = 0;
@@ -450,7 +415,7 @@ public class SPMParameters
 
         for ( int i = 0; i < repositories.size(); ++i )
         {
-            p.setProperty( "URL_" + i, (String) repositories.elementAt( i ) );
+            p.setProperty( "URL_" + i, repositories.get( i ) );
         }
         p.setProperty( "default", String.valueOf( current ) );
 
@@ -504,12 +469,7 @@ public class SPMParameters
      */
     public String[] getRepositories()
     {
-        String[] s = new String[repositories.size()];
-        for ( int i = 0; i < repositories.size(); ++i )
-        {
-            s[i] = new String( (String) repositories.elementAt( i ) );
-        }
-        return s;
+        return repositories.toArray(new String[repositories.size()]);
     }
 
 
@@ -523,10 +483,8 @@ public class SPMParameters
         URL url = null;
         try
         {
-	    // NTJ: DEBUG!!
-	    //if (true) return new URL("http://localhost/AoIRepository/");
 
-            url = new URL( (String) repositories.elementAt( current ) );
+            url = new URL(repositories.get( current ) );
         }
         catch ( MalformedURLException e )
         {
@@ -561,7 +519,7 @@ public class SPMParameters
     /**
      *  return the current filter map
      */
-    public HashMap getFilters()
+    public Map getFilters()
     { return filters; }
 
     /**
@@ -726,17 +684,7 @@ public class SPMParameters
      */
     public void initHttp()
     {
-        if ( !useProxy )
-        {
-            //System.getProperties().remove("proxySet");
-            //System.getProperties().remove("proxyHost");
-            //System.getProperties().remove("proxyPort");
-            System.getProperties().remove( "http.proxyHost" );
-            System.getProperties().remove( "http.proxyPort" );
-            //System.getProperties().remove("http.nonProxyHosts");
-            Authenticator.setDefault( null );
-        }
-        else
+        if ( useProxy )
         {
             // set proxy host
             System.setProperty( "http.proxyHost", proxyHost );
@@ -750,11 +698,15 @@ public class SPMParameters
             }
             else
             {
-                PasswordAuthentication pw = new PasswordAuthentication(
-                        username, password.toCharArray()
-                         );
+                PasswordAuthentication pw = new PasswordAuthentication(username, password.toCharArray());
                 Authenticator.setDefault( new FirewallAuthenticator( pw ) );
             }
+        }
+        else
+        {
+            System.getProperties().remove( "http.proxyHost" );
+            System.getProperties().remove( "http.proxyPort" );
+            Authenticator.setDefault( null );
         }
     }
 

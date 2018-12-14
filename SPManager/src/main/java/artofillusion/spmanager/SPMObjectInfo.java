@@ -250,9 +250,7 @@ public class SPMObjectInfo
 		{
 			kbsize = 1;
 		}
-		return ( SPMTranslate.text( "fullname", new Object[]{
-				getName(), author, version + betaString, date,
-				String.valueOf( kbsize )} ) + addFiles );
+		return ( SPMTranslate.text( "fullname", new Object[]{ getName(), author, version + betaString, date, String.valueOf( kbsize )} ) + addFiles );
 	}
 
 

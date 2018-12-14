@@ -67,7 +67,7 @@ public class SPMSetupFrame extends BDialog
 	// NTJ: populate filters
 	filterContainer = new ColumnContainer();
 
-	HashMap filters = parameters.getFilters();
+	Map filters = parameters.getFilters();
 
 	if (filters.size() > 0) {
 	    String[] keys = (String[]) filters.keySet().toArray(EMPTY_STRING_ARRAY);
@@ -283,7 +283,7 @@ public class SPMSetupFrame extends BDialog
                 usernameEntry.getText(),
                 passwordEntry.getText() );
 
-	HashMap filters = parameters.getFilters();
+	Map filters = parameters.getFilters();
 	filters.clear();
 	RowContainer line;
 	//RadioButtonGroup group;

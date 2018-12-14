@@ -41,7 +41,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
     private URL repository;
     private HttpStatusDialog statusDialog;
     private boolean isDownloading;
-    private Vector callbacks;
+    private List<Runnable> callbacks;
     private Document pluginsDoc, objectsDoc, startupDoc, toolsDoc;
     
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -71,10 +71,10 @@ public class HttpSPMFileSystem extends SPMFileSystem
      */
     public void setRepository( URL rep )
     {
-        pluginsInfo = new Vector();
-        toolInfo = new Vector();
-        objectInfo = new Vector();
-        startupInfo = new Vector();
+        pluginsInfo = new ArrayList<>();
+        toolInfo = new ArrayList<>();
+        objectInfo = new ArrayList<>();
+        startupInfo = new ArrayList<>();
         initialized = false;
         unknownHost = false;
         repository = rep;
@@ -102,7 +102,7 @@ public class HttpSPMFileSystem extends SPMFileSystem
             if ( isDownloading )
                 callbacks.add( cb );
             else {
-                callbacks = new Vector();
+                callbacks = new ArrayList<>();
                 callbacks.add( cb );
                 isDownloading = true;
                 statusDialog = new HttpStatusDialog();
@@ -121,8 +121,9 @@ public class HttpSPMFileSystem extends SPMFileSystem
                                     scanStartupScripts();
                                 isDownloading = false;
                                 initialized = true;
-                                for ( int i = 0; i < callbacks.size(); ++i )
-                                    ( (Runnable) callbacks.elementAt( i ) ).run();
+                                for(Runnable cbr: callbacks) {
+                                    cbr.run();
+                                }
                                 statusDialog.dispose();
                                 statusDialog = null;
                             }

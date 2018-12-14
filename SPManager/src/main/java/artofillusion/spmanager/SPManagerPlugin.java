@@ -216,10 +216,7 @@ public class SPManagerPlugin implements Plugin
 
 		    BLabel messg = SPMTranslate.bLabel("loadError");
 
-		    new BStandardDialog("SPManager initialise",
-			    new Widget[] { messg, detail },
-			    BStandardDialog.ERROR)
-		    .showMessageDialog(null);
+		    new BStandardDialog("SPManager initialise", new Widget[] { messg, detail }, BStandardDialog.ERROR).showMessageDialog(null);
 		}
 	    }
 	    else System.out.println("SPManager: could not find plugin dir: " + PLUGIN_DIRECTORY);
@@ -384,16 +381,9 @@ public class SPManagerPlugin implements Plugin
 	    for (int i = 0; i < err.size(); i++)
 		txt.append(err.get(i) + "\n");
 
-	    BScrollPane detail =
-		new BScrollPane(txt, BScrollPane.SCROLLBAR_NEVER,
-			BScrollPane.SCROLLBAR_AS_NEEDED);
-
+	    BScrollPane detail = new BScrollPane(txt, BScrollPane.SCROLLBAR_NEVER, BScrollPane.SCROLLBAR_AS_NEEDED);
 	    BLabel messg = SPMTranslate.bLabel("errMsg");
-
-	    new BStandardDialog("SPManager initialise",
-		    new Widget[] { messg, detail },
-		    BStandardDialog.WARNING)
-	    .showMessageDialog(null);
+	    new BStandardDialog("SPManager initialise", new Widget[] { messg, detail }, BStandardDialog.WARNING) .showMessageDialog(null);
 	}
     }
 
@@ -416,8 +406,7 @@ public class SPManagerPlugin implements Plugin
 		url = loader.getResource(baseName + suffix + ".properties");
 
 		if (url != null) {
-		    PluginRegistry.registerResource(type, id, loader,
-			    url.getPath(), locale);
+		    PluginRegistry.registerResource(type, id, loader, url.getPath(), locale);
 		    break;
 		}
 	    } catch (Exception e) {}

@@ -163,7 +163,7 @@ public class SPMParameters
         //try to get a new repositories definition file
         try
         {
-            repListURL = new URL( "http://aoisp.sourceforge.net/SPRepositories.txt" );
+            repListURL = new URL("http://aoisp.sourceforge.net/SPRepositories.txt");
         }
         catch ( Exception e )
         {

@@ -214,6 +214,18 @@ public class LayoutWindowTest
     JButtonOperator cancel = new JButtonOperator(dialog, "Cancel");
     cancel.clickMouse();
   }
+
+  @Test
+  public void testInvokeLoopKeyFramesCommand()
+  {
+    appMainMenu.pushMenuNoBlock("Animation|Bulk Edit Keyframes|Loop...");
+    JDialogOperator dialog = new JDialogOperator(appFrame);
+
+    JLabelOperator label = new JLabelOperator(dialog, "Loop Keyframes");
+    JButtonOperator cancel = new JButtonOperator(dialog, "Cancel");
+    cancel.clickMouse();
+  }
+
 //</editor-fold>
 
   @Test

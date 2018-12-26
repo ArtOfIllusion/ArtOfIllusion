@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2018 by Maksim Khramov
+   Changes copyright (C) 2016-2019 by Maksim Khramov
    Changes copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -73,7 +73,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   BMenuItem animationMenuItem[], popupMenuItem[];
   BCheckBoxMenuItem displayItem[];
   BPopupMenu popupMenu;
-  UndoStack undoStack;
+  private UndoStack undoStack = new UndoStack();
   int numViewsShown, currentView;
   private ActionProcessor uiEventProcessor;
   private boolean modified, sceneChangePending;
@@ -91,7 +91,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene = s;
     helpText = new BLabel();
     theScore = new Score(this);
-    undoStack = new UndoStack();
+    
     sceneChangedEvent = new SceneChangedEvent(this);
     uiEventProcessor = new ActionProcessor();
     createItemList();
@@ -460,8 +460,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     fileMenuItem = new BMenuItem [1];
     fileMenu.add(Translate.menuItem("new", this, "actionPerformed"));
     fileMenu.add(Translate.menuItem("open", this, "actionPerformed"));
-    fileMenu.add(recentFilesMenu = Translate.menu("openRecent"));
-    RecentFiles.createMenu(recentFilesMenu);
+    fileMenu.add(recentFilesMenu = RecentFiles.createRecentMenu());
+    
     fileMenu.add(Translate.menuItem("close", this, "actionPerformed"));
     fileMenu.addSeparator();
     
@@ -533,13 +533,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     objectMenu.add(objectMenuItem[6] = Translate.menuItem("convertToTriangle", this, "convertToTriangleCommand"));
     objectMenu.add(objectMenuItem[7] = Translate.menuItem("convertToActor", this, "convertToActorCommand"));
     objectMenu.addSeparator();
-    objectMenu.add(objectMenuItem[8] = Translate.menuItem("hideSelection", this, "actionPerformed"));
-    objectMenu.add(objectMenuItem[9] = Translate.menuItem("showSelection", this, "actionPerformed"));
-    objectMenu.add(Translate.menuItem("showAll", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[8] = Translate.menuItem("hideSelection", this, "hideSelectionAction"));
+    objectMenu.add(objectMenuItem[9] = Translate.menuItem("showSelection", this, "showSelectionAction"));
+    objectMenu.add(Translate.menuItem("showAll", this, "showAllAction"));
     objectMenu.addSeparator();
-    objectMenu.add(objectMenuItem[10] = Translate.menuItem("lockSelection", this, "actionPerformed"));
-    objectMenu.add(objectMenuItem[11] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
-    objectMenu.add(Translate.menuItem("unlockAll", this, "actionPerformed"));
+    objectMenu.add(objectMenuItem[10] = Translate.menuItem("lockSelection", this, "lockSelectionAction"));
+    objectMenu.add(objectMenuItem[11] = Translate.menuItem("unlockSelection", this, "unlockSelectionAction"));
+    objectMenu.add(Translate.menuItem("unlockAll", this, "unlockAllAction"));
     objectMenu.addSeparator();
     objectMenu.add(createMenu = Translate.menu("createPrimitive"));
     createMenu.add(Translate.menuItem("cube", this, "createObjectCommand"));
@@ -612,8 +612,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     viewMenu.add(viewMenuItem[4] = Translate.menuItem("fitToSelection", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[5] = Translate.menuItem("fitToAll", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[6] = Translate.menuItem("alignWithClosestAxis", this, "actionPerformed"));
-    //viewMenu.addSeparator();
-    //viewMenu.add(viewMenuItem[7] = Translate.menuItem("viewSettings", this, "actionPerformed"));
+
   }
 
   /** Rebuild the list of tool scripts in the Tools menu.  This should be called whenever a
@@ -760,10 +759,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     popupMenu.add(Translate.menuItem("selectAll", this, "selectAllCommand", null));
     popupMenu.add(popupMenuItem[6] = Translate.menuItem("deselectAll", this, "clearSelection", null));
     popupMenu.addSeparator();
-    popupMenu.add(popupMenuItem[7] = Translate.menuItem("hideSelection", this, "actionPerformed", null));
-    popupMenu.add(popupMenuItem[8] = Translate.menuItem("showSelection", this, "actionPerformed", null));
-    popupMenu.add(popupMenuItem[9] = Translate.menuItem("lockSelection", this, "actionPerformed"));
-    popupMenu.add(popupMenuItem[10] = Translate.menuItem("unlockSelection", this, "actionPerformed"));
+    popupMenu.add(popupMenuItem[7] = Translate.menuItem("hideSelection", this, "hideSelectionAction", null));
+    popupMenu.add(popupMenuItem[8] = Translate.menuItem("showSelection", this, "showSelectionAction", null));
+    popupMenu.add(popupMenuItem[9] = Translate.menuItem("lockSelection", this, "lockSelectionAction"));
+    popupMenu.add(popupMenuItem[10] = Translate.menuItem("unlockSelection", this, "unlockSelectionAction"));
     popupMenu.addSeparator();
     popupMenu.add(popupMenuItem[11] = Translate.menuItem("cut", this, "cutCommand", null));
     popupMenu.add(popupMenuItem[12] = Translate.menuItem("copy", this, "copyCommand", null));
@@ -1688,7 +1687,36 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         }
     }
   }
+  
+  private void lockSelectionAction(CommandEvent event)
+  {
+    setObjectsLocked(true, true);
+  }
 
+  private void unlockSelectionAction(CommandEvent event)
+  {
+    setObjectsLocked(false, true);
+  }
+  
+  private void unlockAllAction(CommandEvent event)
+  {
+      setObjectsLocked(false, false);
+  }
+  
+  private void showSelectionAction(CommandEvent event)
+  {
+    setObjectVisibility(true, true);
+  }
+  
+  private void hideSelectionAction(CommandEvent event)
+  {
+    setObjectVisibility(false, true);
+  }
+  
+  private void showAllAction(CommandEvent event)
+  {
+    setObjectVisibility(true, false);
+  }
   private void actionPerformed(CommandEvent e)
   {
     String command = e.getActionCommand();
@@ -1709,21 +1737,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           ArtOfIllusion.quit();
       }
 
-    else if (menu == objectMenu)
-      {
-        if (command.equals("hideSelection"))
-          setObjectVisibility(false, true);
-        else if (command.equals("showSelection"))
-          setObjectVisibility(true, true);
-        else if (command.equals("showAll"))
-          setObjectVisibility(true, false);
-        else if (command.equals("lockSelection"))
-          setObjectsLocked(true, true);
-        else if (command.equals("unlockSelection"))
-          setObjectsLocked(false, true);
-        else if (command.equals("unlockAll"))
-          setObjectsLocked(false, false);
-      }
     else if (menu == animationMenu || menu == theScore.getPopupMenu())
       {
         if (command.equals("showScore"))
@@ -1768,30 +1781,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       else if (command.equals("fitToSelection"))
         getView().fitToObjects(getSelectedObjects());
       else if (command.equals("fitToAll"))
-        getView().fitToObjects(getScene().getAllObjects());
+        getView().fitToObjects(getScene().getObjects());
       else if (command.equals("alignWithClosestAxis"))
         getView().alignWithClosestAxis();
-      /*
-      // Place holder for a view settings menuitem
-      // to launch an options window settings window
-      else if (command.equals("viewSettings"))
-      {
-        new ViewSettingsWindow(this);
-      }
-      */
-    }
 
-    else if (menu == popupMenu)
-      {
-        if (command.equals("hideSelection"))
-          setObjectVisibility(false, true);
-        else if (command.equals("showSelection"))
-          setObjectVisibility(true, true);
-        else if (command.equals("lockSelection"))
-          setObjectsLocked(true, true);
-        else if (command.equals("unlockSelection"))
-          setObjectsLocked(false, true);
-      }
+    }
     clearWaitCursor();
   }
 

@@ -454,15 +454,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     List<Translator> translators = PluginRegistry.getPlugins(Translator.class);
 
     fileMenu = Translate.menu("file");
-    menubar.add(fileMenu);
+    
     importMenu = Translate.menu("import");
     exportMenu = Translate.menu("export");
     fileMenuItem = new BMenuItem [1];
-    fileMenu.add(Translate.menuItem("new", this, "actionPerformed"));
-    fileMenu.add(Translate.menuItem("open", this, "actionPerformed"));
+    fileMenu.add(Translate.menuItem("new", this, "newSceneAction"));
+    fileMenu.add(Translate.menuItem("open", this, "openSceneAction"));
     fileMenu.add(recentFilesMenu = RecentFiles.createRecentMenu());
     
-    fileMenu.add(Translate.menuItem("close", this, "actionPerformed"));
+    fileMenu.add(Translate.menuItem("close", this, "closeSceneAction"));
     fileMenu.addSeparator();
     
     Collections.sort(translators, Comparator.comparing(Translator::getName));
@@ -493,7 +493,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     fileMenu.add(fileMenuItem[0] = Translate.menuItem("save", this, "saveCommand"));
     fileMenu.add(Translate.menuItem("saveas", this, "saveAsCommand"));
     fileMenu.addSeparator();
-    fileMenu.add(Translate.menuItem("quit", this, "actionPerformed"));
+    fileMenu.add(Translate.menuItem("quit", this, "applicationQuitAction"));
+    
+    menubar.add(fileMenu);
   }
 
   private void createEditMenu()
@@ -1555,6 +1557,29 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     trans.exportFile(this, theScene);
   }
   
+  private void newSceneAction(CommandEvent event)
+  {
+    savePreferences();
+    ArtOfIllusion.newWindow();
+  }
+  private void openSceneAction(CommandEvent event)
+  {
+    savePreferences();
+    ArtOfIllusion.openScene(this);     
+  }
+  
+  private void closeSceneAction(CommandEvent event)
+  {
+    savePreferences();
+    ArtOfIllusion.closeWindow(this);
+  }
+  
+  private void applicationQuitAction(CommandEvent event)
+  {
+    savePreferences();
+    ArtOfIllusion.quit();
+  }
+  
   private void selectChildrenAction(CommandEvent event)
   {
     setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {getSelectedIndices()}));
@@ -1724,20 +1749,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     Widget menu = (src instanceof MenuWidget ? src.getParent() : null);
 
     setWaitCursor();
-    if (menu == fileMenu)
-      {
-        savePreferences();
-        if (command.equals("new"))
-          ArtOfIllusion.newWindow();
-        else if (command.equals("open"))
-          ArtOfIllusion.openScene(this);
-        else if (command.equals("close"))
-          ArtOfIllusion.closeWindow(this);
-        else if (command.equals("quit"))
-          ArtOfIllusion.quit();
-      }
-
-    else if (menu == animationMenu || menu == theScore.getPopupMenu())
+    if (menu == animationMenu || menu == theScore.getPopupMenu())
       {
         if (command.equals("showScore"))
           setScoreVisible(theScore.getBounds().height == 0 || theScore.getBounds().width == 0);

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
+   Changes copyright (C) 2019 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,20 +11,30 @@
 
 package artofillusion.keystroke;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlValue;
+
 /**
  * This class contains information about a keyboard shortcut which automates some operation.
- * A keystroke pairs a key description (key code and modifier) with a Beanshell script to execute
+ * A keystroke pairs a key description (key code and modifier) with a Beanshell/Groovy script to execute
  * when the key is pressed.
  */
 
+@XmlAccessorType(XmlAccessType.FIELD)
 public class KeystrokeRecord
 {
-  private int keyCode;
-  private int modifiers;
-  private String name;
-  private String script;
-  private String language;
+  @XmlAttribute private int keyCode;
+  @XmlAttribute private int modifiers;
 
+  @XmlAttribute public String name;
+  @XmlValue private String script;
+  @XmlAttribute private String language;
+
+  public KeystrokeRecord() {
+  }
+  
   /**
    * Create a new KeystrokeRecord.
    *
@@ -33,7 +44,6 @@ public class KeystrokeRecord
    * @param script    a script to execute when the keystroke is activated
    * @param language  the language in which the script is written
    */
-
   public KeystrokeRecord(int keyCode, int modifiers, String name, String script, String language)
   {
     this.keyCode = keyCode;
@@ -116,4 +126,11 @@ public class KeystrokeRecord
   {
     return new KeystrokeRecord(keyCode, modifiers, name, script, language);
   }
+
+    @Override
+    public String toString() {
+        return "KeystrokeRecord{" + "keyCode=" + keyCode + ", modifiers=" + modifiers + ", name=" + name + ", script=" + script + ", language=" + language + '}';
+    }
+  
+  
 }

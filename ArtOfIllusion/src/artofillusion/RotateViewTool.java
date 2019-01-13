@@ -166,12 +166,12 @@ public class RotateViewTool extends EditingTool
 			tilt(e, view, clickPoint);
 			return;
 		}
-		else if (mouseButtonTwo(e))
+		else if (controlDown && e.isShiftDown())
 		{
 			rotateSpace(e, view, clickPoint);
 			return;
 		}
-		else if (mouseButtonThree(e) && e.isShiftDown())
+		else if (!controlDown && e.isShiftDown())
 		{
 			if (Math.abs(dx) > Math.abs(dy))
 			{
@@ -220,7 +220,8 @@ public class RotateViewTool extends EditingTool
 			tilt(e, view, clickPoint);
 			return;
 		}
-		else if (mouseButtonThree(e) && e.isShiftDown()){
+		else if (controlDown && e.isShiftDown())
+		{
 			panSpace(e, view, clickPoint);
 			return;
 		}

@@ -67,6 +67,7 @@ public class MoveViewTool extends EditingTool
   {
     Camera cam = view.getCamera();
 
+    controlDown = e.isControlDown();
     selectedNavigation = view.getNavigationMode();
     clickPoint = e.getPoint();
     clickPos = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
@@ -133,7 +134,7 @@ public class MoveViewTool extends EditingTool
 		dy = dragPoint.y-clickPoint.y;
 
 
-		if (mouseButtonThree(e) && e.isControlDown()) // forward move!
+		if (controlDown) // forward move!
 		{ 	
 			Vec3 hDir;
 			if (view.getNavigationMode() == 3)
@@ -188,9 +189,8 @@ public class MoveViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		
 
-		if (mouseButtonThree(e) && !mouseButtonTwo(e) && e.isControlDown()) // zoom!
+		if (controlDown) // zoom!
 		{ 	
 			if (view.isPerspective())
 			{

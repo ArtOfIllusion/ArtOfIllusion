@@ -11,9 +11,11 @@
 
 package artofillusion;
 
+import static artofillusion.ViewerCanvas.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+import static artofillusion.ui.UIUtilities.*;
 import artofillusion.view.*;
 import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
@@ -86,10 +88,12 @@ public class RotateViewTool extends EditingTool
     rotationCenter = view.getRotationCenter();
 	distToRot = oldCoords.getOrigin().minus(rotationCenter).length();
 	
-	if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && 
-	    !e.isAltDown() && !e.isMetaDown()){
+	if (theWindow != null
+           && theWindow.getToolPalette().getSelectedTool() == this
+           && mouseButtonOne(e))
+	{
 		if (view.getNavigationMode() > 3)
-			view.setNavigationMode(0);
+			view.setNavigationMode(NAVIGATE_MODEL_SPACE);
 		else if (view.getNavigationMode() > 1)
 			view.setNavigationMode(view.getNavigationMode()-2, true);
 	}
@@ -101,11 +105,13 @@ public class RotateViewTool extends EditingTool
   	public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
 	{
 		if (e.getPoint() != clickPoint && view.getBoundCamera() == null) // This is needed even if the mouse has not been dragged yet.
-			view.setOrientation(ViewerCanvas.VIEW_OTHER);
+			view.setOrientation(VIEW_OTHER);
 			
-		if (theWindow != null && theWindow.getToolPalette().getSelectedTool() == this && !e.isAltDown() && !e.isMetaDown())
+		if (theWindow != null
+                   && theWindow.getToolPalette().getSelectedTool() == this
+                   && mouseButtonOne(e))
 		{
-			if (view.getNavigationMode() == 0)
+			if (view.getNavigationMode() == NAVIGATE_MODEL_SPACE)
 				dragRotateSpace(e, view);
 			else if (view.getNavigationMode() == 1)
 			{
@@ -119,19 +125,19 @@ public class RotateViewTool extends EditingTool
 		{
 			switch (view.getNavigationMode()) 
 			{
-				case ViewerCanvas.NAVIGATE_MODEL_SPACE:
+				case NAVIGATE_MODEL_SPACE:
 					dragRotateSpace(e, view);
 					break;
-				case ViewerCanvas.NAVIGATE_MODEL_LANDSCAPE:
+				case NAVIGATE_MODEL_LANDSCAPE:
 					Vec3 zD = oldCoords.getZDirection();
 					fwMax = Math.PI*0.5+Math.asin(zD.y);
 					fwMin = -Math.PI*0.5+Math.asin(zD.y);
 					dragRotateLandscape(e, view);
 					break;
-				case ViewerCanvas.NAVIGATE_TRAVEL_SPACE:
+				case NAVIGATE_TRAVEL_SPACE:
 					dragRotateTravelSpace(e, view);
 					break;
-				case ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE:
+				case NAVIGATE_TRAVEL_LANDSCAPE:
 					dragRotateTravelLandscape(e, view);
 					break;
 				default:
@@ -154,7 +160,7 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown && !e.isShiftDown())
+		if (mouseButtonTwo(e) && controlDown)
 		{
 			view.tilting = true;
 			tilt(e, view, clickPoint);
@@ -208,13 +214,14 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown && !e.isShiftDown())
+		if (mouseButtonTwo(e) && controlDown)
 		{
 			view.tilting = true;
 			tilt(e, view, clickPoint);
 			return;
 		}
-		else if (controlDown && e.isShiftDown()){
+		else if (controlDown && e.isShiftDown())
+		{
 			panSpace(e, view, clickPoint);
 			return;
 		}

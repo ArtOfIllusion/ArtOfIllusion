@@ -14,7 +14,7 @@ package artofillusion.ui;
 import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
-
+import static artofillusion.ui.UIUtilities.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
@@ -492,7 +492,7 @@ public class TreeList extends CustomWidget
     }
     okToInsert = false;
     boolean selectionChanged = false;
-    if (allowMultiple && (ev.isControlDown() || ev.isMetaDown()) && !ev.isPopupTrigger() && ev.getButton() == 1)
+    if (allowMultiple && (ev.isControlDown() || ev.isMetaDown()) && !ev.isPopupTrigger() && mouseButtonOne(ev))
     {
       setSelected(el, !el.isSelected());
       selectionChanged = true;
@@ -741,7 +741,7 @@ public class TreeList extends CustomWidget
 
   private void mouseClicked(MouseClickedEvent ev)
   {
-    if (ev.getClickCount() == 1 && ev.isAltDown())
+    if (ev.getClickCount() == 1 && mouseButtonTwo(ev))
 	{
     	window.getView().fitToObjects(((LayoutWindow)window).getSelectedObjects());
     	return;

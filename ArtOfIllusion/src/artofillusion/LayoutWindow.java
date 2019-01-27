@@ -25,26 +25,12 @@ import artofillusion.view.ViewAnimation;
 import buoy.event.*;
 import buoy.widget.*;
 import buoyx.docking.*;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.text.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
+import java.util.*;
 import java.util.prefs.*;
 import javax.swing.*;
 import javax.swing.text.*;
@@ -149,7 +135,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     viewsContainer.add(viewPanel[1], 1, 0);
     viewsContainer.add(viewPanel[2], 0, 1);
     viewsContainer.add(viewPanel[3], 1, 1);
-    centerContainer = new FormContainer(new double [] {0.0, 1.0}, new double [] {0.0, 1.0, 0.0, 0.0});
+    FormContainer centerContainer = new FormContainer(new double [] {0.0, 1.0}, new double [] {0.0, 1.0, 0.0, 0.0});
     centerContainer.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     centerContainer.add(viewsContainer, 1, 0, 1, 3);
     centerContainer.add(helpText, 0, 3, 2, 1);
@@ -464,23 +450,30 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     
     fileMenu.add(Translate.menuItem("close", this, "closeSceneAction"));
     fileMenu.addSeparator();
-    
-    Collections.sort(translators, Comparator.comparing(Translator::getName));
+
+    Collections.sort(translators, new Comparator<Translator>()
+    {
+      @Override
+      public int compare(Translator t1, Translator t2) {
+          return t1.getName().compareTo(t2.getName());
+      }
+    });
+
     for (Translator translator: translators)
     {
         if(translator.canImport())
         {
-          BMenuItem tim = new BMenuItem(translator.getName());
-          tim.getComponent().putClientProperty("translator", translator);
-          tim.addEventLink(CommandEvent.class, this, "importAction");
-          importMenu.add(tim);
+          BMenuItem item = new BMenuItem(translator.getName());
+          item.getComponent().putClientProperty("translator", translator);
+          item.addEventLink(CommandEvent.class, this, "importAction");
+          importMenu.add(item);
         }
         if(translator.canExport())
         {
-          BMenuItem tim = new BMenuItem(translator.getName());
-          tim.getComponent().putClientProperty("translator", translator);
-          tim.addEventLink(CommandEvent.class, this, "exportAction");
-          exportMenu.add(tim);
+          BMenuItem item = new BMenuItem(translator.getName());
+          item.getComponent().putClientProperty("translator", translator);
+          item.addEventLink(CommandEvent.class, this, "exportAction");
+          exportMenu.add(item);
         }
     }
     
@@ -563,7 +556,15 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createToolsMenu()
   {
     List<ModellingTool> modellingTools = PluginRegistry.getPlugins(ModellingTool.class);
-    Collections.sort(modellingTools, Comparator.comparing(ModellingTool::getName));
+    Collections.sort(modellingTools, new Comparator<ModellingTool>()
+    {
+      @Override
+      public int compare(ModellingTool m1, ModellingTool m2)
+      {
+        return m1.getName().compareTo(m2.getName());
+      }
+    });
+    
     
     toolsMenu = Translate.menu("tools");
     getMenuBar().add(toolsMenu);
@@ -1599,24 +1600,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void editKeyFramesAction(CommandEvent event)
   {
-    switch (event.getActionCommand()) 
-    {
-        case "moveKeyframes":
-            new EditKeyframesDialog(this, EditKeyframesDialog.MOVE);
-            break;
-        case "copyKeyframes":
-            new EditKeyframesDialog(this, EditKeyframesDialog.COPY);
-            break;
-        case "rescaleKeyframes":
-            new EditKeyframesDialog(this, EditKeyframesDialog.RESCALE);
-            break;
-        case "loopKeyframes":
-            new EditKeyframesDialog(this, EditKeyframesDialog.LOOP);
-            break;
-        case "deleteKeyframes":
-            new EditKeyframesDialog(this, EditKeyframesDialog.DELETE);
-            break;
-    }
+    String command = event.getActionCommand();
+    if(command.equals("moveKeyframes"))
+      new EditKeyframesDialog(this, EditKeyframesDialog.MOVE);
+    else if(command.equals("copyKeyframes"))
+      new EditKeyframesDialog(this, EditKeyframesDialog.COPY);
+    else if(command.equals("rescaleKeyframes"))
+      new EditKeyframesDialog(this, EditKeyframesDialog.RESCALE);
+    else if(command.equals("loopKeyframes"))
+      new EditKeyframesDialog(this, EditKeyframesDialog.LOOP);
+    else if(command.equals("deleteKeyframes"))
+       new EditKeyframesDialog(this, EditKeyframesDialog.DELETE);
   }
   
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -1667,59 +1661,32 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   
   private void addTrackAction(CommandEvent event)
   {
-            
+    String command = event.getActionCommand();
     Object[] selection = itemTree.getSelectedObjects();
-    switch (event.getActionCommand())
-    {
-        case "poseTrack": {
-          theScore.addTrack(selection, PoseTrack.class, null, true);
-          break;
-        }
-        case "constraintTrack": {
-          theScore.addTrack(selection, ConstraintTrack.class, null, true);
-          break;
-        }
-        case "visibilityTrack": {
-          theScore.addTrack(selection, VisibilityTrack.class, null, true);
-          break;
-        }
-        case "textureTrack": {
-          theScore.addTrack(selection, TextureTrack.class, null, true);
-          break;
-        }
-        case "quaternionTrack": {
-          theScore.addTrack(selection, RotationTrack.class, new Object [] {"Rotation", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE}, true);
-          break;
-        }
-        case "bendDistortion": {
-          theScore.addTrack(selection, BendTrack.class, null, true);
-          break;
-        }
-        case "customDistortion": {
-          theScore.addTrack(selection, CustomDistortionTrack.class, null, true);
-          break;
-        }
-        case "scaleDistortion": {
-          theScore.addTrack(selection, ScaleTrack.class, null, true);
-          break;
-        }
-        case "shatterDistortion": {
-          theScore.addTrack(selection, ShatterTrack.class, null, true);
-          break;
-        }
-        case "twistDistortion": {
-          theScore.addTrack(selection, TwistTrack.class, null, true);
-          break;
-        }
-        case "IKTrack": {
-          theScore.addTrack(selection, IKTrack.class, null, true);
-          break;
-        }
-        case "skeletonShapeTrack": {
-          theScore.addTrack(selection, SkeletonShapeTrack.class, null, true);
-          break;
-        }
-    }
+    if(command.equals("poseTrack"))
+      theScore.addTrack(selection, PoseTrack.class, null, true);
+    else if(command.equals("constraintTrack"))
+      theScore.addTrack(selection, ConstraintTrack.class, null, true);
+    else if(command.equals("visibilityTrack"))
+      theScore.addTrack(selection, VisibilityTrack.class, null, true);
+    else if(command.equals("textureTrack"))
+      theScore.addTrack(selection, TextureTrack.class, null, true);
+    else if(command.equals("quaternionTrack"))
+      theScore.addTrack(selection, RotationTrack.class, new Object [] {"Rotation", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE}, true);
+    else if(command.equals("bendDistortion"))
+      theScore.addTrack(selection, BendTrack.class, null, true);
+    else if(command.equals("customDistortion"))
+      theScore.addTrack(selection, CustomDistortionTrack.class, null, true);
+    else if(command.equals("scaleDistortion"))
+      theScore.addTrack(selection, ScaleTrack.class, null, true);
+    else if(command.equals("shatterDistortion"))
+      theScore.addTrack(selection, ShatterTrack.class, null, true);
+    else if(command.equals("twistDistortion"))
+      theScore.addTrack(selection, TwistTrack.class, null, true);
+    else if(command.equals("IKTrack"))
+      theScore.addTrack(selection, IKTrack.class, null, true);
+    else if(command.equals("skeletonShapeTrack"))
+      theScore.addTrack(selection, SkeletonShapeTrack.class, null, true);
   }
   
   private void lockSelectionAction(CommandEvent event)

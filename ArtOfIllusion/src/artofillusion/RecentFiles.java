@@ -27,9 +27,9 @@ public class RecentFiles
 
   public static BMenu createRecentMenu()
   {
-      BMenu rfm = Translate.menu("openRecent");
-      createMenu(rfm);
-      return rfm;
+    BMenu rfm = Translate.menu("openRecent");
+    createMenu(rfm);
+    return rfm;
   }
   
   /** Given a BMenu, fill it in with a list of items for recent files. */
@@ -40,15 +40,16 @@ public class RecentFiles
     String recent[] = pref.get("recentFiles", "").split(File.pathSeparator);
     for (String recent1 : recent)
     {
-        final File file = new File(recent1);
-        BMenuItem item = new BMenuItem(file.getName());
-        menu.add(item);
-        item.addEventLink(CommandEvent.class, new Object() {
-            void processEvent(CommandEvent ev)
-            {
-                ArtOfIllusion.openScene(file, UIUtilities.findFrame(ev.getWidget()));
-            }
-        });
+      final File file = new File(recent1);
+      BMenuItem item = new BMenuItem(file.getName());
+      menu.add(item);
+      item.addEventLink(CommandEvent.class, new Object()
+      {
+        void processEvent(CommandEvent ev)
+        {
+          ArtOfIllusion.openScene(file, UIUtilities.findFrame(ev.getWidget()));
+        }
+      });
     }
   }
 

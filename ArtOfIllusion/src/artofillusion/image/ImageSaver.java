@@ -31,7 +31,7 @@ public class ImageSaver
   private String name, directory;
   private boolean ok, premultiply;
   private double quality;
-  private BFrame parent;
+  private WindowWidget parent;
   private QuickTimeWriter qt;
 
   public static final int FORMAT_JPEG = 0;
@@ -59,7 +59,7 @@ public class ImageSaver
       animation.  Use clickedOk() to determine whether the user clicked the OK or Cancel
       button. */
 
-  public ImageSaver(BFrame parent)
+  public ImageSaver(WindowWidget parent)
   {
     init(parent, Integer.MIN_VALUE);
   }
@@ -76,7 +76,7 @@ public class ImageSaver
       @param startFrameNumber   the default number for the first frame of the animation
   */
 
-  public ImageSaver(BFrame parent, int width, int height, int fps, int startFrameNumber) throws IOException
+  public ImageSaver(WindowWidget parent, int width, int height, int fps, int startFrameNumber) throws IOException
   {
     init(parent, startFrameNumber);
     if (format == FORMAT_QUICKTIME && this.clickedOk())
@@ -92,7 +92,7 @@ public class ImageSaver
       @param startFrameNumber   the default number for the first frame of an animation, or Integer.MIN_VALUE for a single image
   */
 
-  private void init(BFrame parent, int startFrameNumber)
+  private void init(WindowWidget parent, int startFrameNumber)
   {
     this.parent = parent;
     boolean animate = (startFrameNumber != Integer.MIN_VALUE);

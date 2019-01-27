@@ -28,10 +28,14 @@ public class ObjectRefSelector extends RowContainer
   private String prompt;
   private ObjectInfo exclude;
 
-  /** Create a new selector.  obj specifies the initially selected object reference.
-      win specifies the window in which the scene is being edited.  prompt is the string
-      which will be used for prompting the user to select a new object.  exclude (which
-      may be null) indicates an object which may not be selected. */
+  /**
+   * Create a new selector.
+   * 
+   * @param obj       the initially selected object reference
+   * @param win       the window in which the scene is being edited
+   * @param prompt    the string which will be used for prompting the user to select a new object
+   * @param exclude   an object which may not be selected (may be null)
+   */
 
   public ObjectRefSelector(ObjectRef obj, LayoutWindow win, String prompt, ObjectInfo exclude)
   {
@@ -98,7 +102,7 @@ public class ObjectRefSelector extends RowContainer
     };
     p.setForceWidth(true);
     p.setForceHeight(true);
-    ComponentsDialog dlg = new ComponentsDialog(window.getFrame(), prompt, new Widget [] {p}, new String [] {null});
+    ComponentsDialog dlg = new ComponentsDialog(UIUtilities.findWindow(this), prompt, new Widget [] {p}, new String [] {null});
     if (!dlg.clickedOk())
       return;
     Object sel[] = tree.getSelectedObjects();

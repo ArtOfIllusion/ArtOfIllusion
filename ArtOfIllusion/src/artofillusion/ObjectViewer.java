@@ -503,13 +503,4 @@ public abstract class ObjectViewer extends ViewerCanvas
     theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
-  
-   	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		((EditingWindow)controller).updateImage();
-	}
 }

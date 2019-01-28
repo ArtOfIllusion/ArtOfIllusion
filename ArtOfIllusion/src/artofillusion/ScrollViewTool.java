@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 by Petri Ihalainen
+/* Copyright (C) 2017-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ public class ScrollViewTool
 	private ViewerCanvas view;
 	private Camera camera;
 	private double distToPlane;
-	private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY; // for graphics
+	private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY;
     private int navigationMode, scrollSteps, startOrientation;
     private Vec3 startZ, startUp;
 	private Rectangle bounds;
@@ -82,10 +82,7 @@ public class ScrollViewTool
 			default:
 				break;
 		}
-		
-		setAuxGraphs(view);
-		repaintAllViews(view);
-		//view.repaint
+		view.repaint();
 		view.viewChanged(false);
 	}
 
@@ -159,11 +156,6 @@ public class ScrollViewTool
 			oldPos = new Vec3(coords.getOrigin());
 			newPos = oldPos.plus(coords.getZDirection().times(deltaZ));
 			coords.setOrigin(newPos);
-			
-			if (scrollBlend < 0.5)
-				view.blendColorR = blendColor(view.green, view.yellow, scrollBlend*2.0);
-			else
-				view.blendColorR = blendColor(view.yellow, view.red, scrollBlend*2.0-1.0);
 		}
 		
 		else if (navigationMode == ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE)
@@ -204,16 +196,6 @@ public class ScrollViewTool
 			newPos = oldPos.plus(hDir.times(deltaZ));
 			newPos = newPos.plus(vDir.times(deltaY));
 			coords.setOrigin(newPos);
-			
-			if (scrollBlendX < 0.5)
-				view.blendColorX = blendColor(view.green, view.yellow, scrollBlendX*2.0);
-			else
-				view.blendColorX = blendColor(view.yellow, view.red, scrollBlendX*2.0-1.0);
-			
-			if (scrollBlendY < 0.5)
-				view.blendColorY = blendColor(view.green, view.yellow, scrollBlendY*2.0);
-			else
-				view.blendColorY = blendColor(view.yellow, view.red, scrollBlendY*2.0-1.0);
 		}
 		else 
 			return;
@@ -236,8 +218,8 @@ public class ScrollViewTool
             moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
             window.setUndoRecord(undo);
         }
-		wipeAuxGraphs();
-        window.updateImage();
+        view.repaint();
+        //window.updateImage();
 	}
 
 	private Timer scrollTimer = new Timer(500, new ActionListener() 
@@ -250,15 +232,6 @@ public class ScrollViewTool
 			mouseStoppedScrolling();
 		}
 	});
-
-	private Color  blendColor(Color color0, Color color1, double blend)
-	{
-		int R = (int)(color0.getRed()*(1.0-blend) + color1.getRed()*blend);
-		int G = (int)(color0.getGreen()*(1.0-blend) + color1.getGreen()*blend);
-		int B = (int)(color0.getBlue()*(1.0-blend) + color1.getBlue()*blend);
-		
-		return new Color(R, G, B);
-	}
 
 	/** 
 	    This is called recursively to move any children of a bound camera. 
@@ -274,31 +247,6 @@ public class ScrollViewTool
             moveCameraChildren(parent.getChildren()[i], transform, undo);
 		}  
 	}
-
-  private void repaintAllViews(ViewerCanvas view)
-  {
-    if (window == null || window instanceof UVMappingWindow)
-	  view.repaint();
-    else
-	  for (ViewerCanvas v : window.getAllViews())
-	  	v.repaint();
-  }
-
-  private void setAuxGraphs(ViewerCanvas view)
-  {
-	if (window != null)
-	  for (ViewerCanvas v : window.getAllViews())
-        if (v != view)
-	      v.auxGraphs.set(view, true);
-  }
-  
-  private void wipeAuxGraphs()
-  {
-    if (window != null)
-	  for (ViewerCanvas v : window.getAllViews())
-		v.auxGraphs.wipe();
-  }
-
 	public void drawOverlay()
     {
         // This could draw a "ghost" of the bound camera and it's children during scroll

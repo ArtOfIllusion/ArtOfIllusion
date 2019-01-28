@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
-   Changes copyright (C) 2106-2017 by Petri Ihalainen
+   Changes copyright (C) 2016-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -144,9 +144,8 @@ public class RotateViewTool extends EditingTool
 					break;
 			}
 		}
-		setAuxGraphs(view);
-		repaintAllViews(view);
-		view.viewChanged(false);	
+		view.repaint();
+		view.viewChanged(false);
 	}
 	
 	private void dragRotateTravelSpace(WidgetMouseEvent e, ViewerCanvas view)
@@ -401,7 +400,6 @@ public class RotateViewTool extends EditingTool
 	// This shouls be directly in the ViewerCanvas but it had a side-effect.
 	if (dragPoint.x == clickPoint.x && dragPoint.y == clickPoint.y)
 	    view.centerToPoint(dragPoint);
-	wipeAuxGraphs();
 	view.viewChanged(false);
   }
 
@@ -535,9 +533,6 @@ public class RotateViewTool extends EditingTool
 	int dx = dragPoint.x-clickPoint.x;
 	int dy = dragPoint.y-clickPoint.y;
 
-	//double dragAngleFw = dy*DRAG_SCALE;
-	//if (dragAngleFw > Math.PI) dragAngleFw = Math.PI;
-	//if (dragAngleFw < -Math.PI) dragAngleFw = -Math.PI;
 	Mat4 rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), dy*DRAG_SCALE);
 	rotation = Mat4.axisRotation(vertical, -dx*DRAG_SCALE).times(rotation);
     
@@ -564,34 +559,8 @@ public class RotateViewTool extends EditingTool
 		}
 		else
 			c.transformCoordinates(Mat4.translation(rotationCenter.x, rotationCenter.y, rotationCenter.z));
-    
 		view.getCamera().setCameraCoordinates(c);
 	}
-  }
-
-  private void repaintAllViews(ViewerCanvas view)
-  {
-    if (theWindow == null || theWindow instanceof UVMappingWindow)
-	  view.repaint();
-    else
-	  for (ViewerCanvas v : theWindow.getAllViews())
-	  	v.repaint();
-  }
-
-  private void setAuxGraphs(ViewerCanvas view)
-  {
-
-	if (theWindow != null)
-	  for (ViewerCanvas v : theWindow.getAllViews())
-        if (v != view)
-	      v.auxGraphs.set(view, true);
-  }
-  
-  private void wipeAuxGraphs()
-  {
-    if (theWindow != null)
-	  for (ViewerCanvas v : theWindow.getAllViews())
-		v.auxGraphs.wipe();
   }
 
   @Override
@@ -599,7 +568,6 @@ public class RotateViewTool extends EditingTool
   {
     if (theWindow != null && view.tilting)
 	{
-	  view.repaint();
 	  for (int i=0; i<4; i++)
 		view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.teal);
 	  

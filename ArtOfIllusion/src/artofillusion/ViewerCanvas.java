@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2019 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2017 Petri Ihalainen
    Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -53,9 +53,8 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected final ViewChangedEvent viewChangedEvent;
 
-  public static Color gray, ghost, red, green, blue, yellow, cone, teal, TEAL;
+  public static Color gray, ghost, red, green, blue, teal, TEAL;
   public Point mousePoint;
-  public AuxiliaryGraphics auxGraphs = new AuxiliaryGraphics();
   public boolean perspectiveControlEnabled = true;
   public boolean navigationTravelEnabled = true;
   public int lastSetNavigation = 0; // To get the mode right during animation preview
@@ -110,7 +109,6 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int NAVIGATE_TRAVEL_LANDSCAPE = 3;
   
   public boolean mouseDown, mouseMoving, tilting, moving, rotating, scrolling, dragging;
-  public Color blendColorR, blendColorX, blendColorY;
   
   /** Create a new ViewerCanvas */
   public ViewerCanvas()
@@ -151,10 +149,9 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseReleasedEvent.class, this, "processMouseReleased");
     addEventLink(MouseDraggedEvent.class, this, "processMouseDragged");
     addEventLink(MouseMovedEvent.class, this, "processMouseDragged"); // Workaround for Mac OS X bug
-	addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
+    addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
-    //addEventLink(MouseClickedEvent.class, this, "mouseClicked"); // Did not work as expected. See below....
     getComponent().addComponentListener(new ComponentListener()
     {
       @Override
@@ -228,7 +225,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   private void processMouseMoved(final MouseMovedEvent ev)
   {
-	if (mouseProcessor != null)
+    if (mouseProcessor != null)
       mouseProcessor.stopProcessing();
     mouseProcessor = new ActionProcessor();
     mouseProcessor.addEvent(new Runnable() {
@@ -242,7 +239,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   private void processMouseReleased(WidgetMouseEvent ev)
   {
-	if (mouseProcessor != null)
+    if (mouseProcessor != null)
     {
       mouseProcessor.stopProcessing();
       mouseProcessor = null;
@@ -251,7 +248,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-	Processing scrollwheel events here. Subclasses may override.
+    Processing scrollwheel events here. Subclasses may override.
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
@@ -275,9 +272,6 @@ public abstract class ViewerCanvas extends CustomWidget
         scrollTool.mouseScrolled(scrollEvent, viewToProcess);
       }
     });
-    //// Should there be an ActionProcessor just in case?
-	//if (scrollTool != null)
-	//  scrollTool.mouseScrolled(e, this);
   }
 
   /** Subclasses should override this to handle events. */
@@ -682,7 +676,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	  perspective = nextPerspective;
     else
 	  perspective = true;
-	
+	  
     // Turn y up for landscape modes. Animated
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
     {
@@ -697,10 +691,10 @@ public abstract class ViewerCanvas extends CustomWidget
 		{
 			// When z.y == 1.0, z.x and z.x may still have a value in the 
 			// magnitude of 1E-15.
-			
 			z.x = z.z = 0.0; 
 			up.y = 0.0;
-			if (up.length() == 0.0) up.z = 1.0;// Just a precaution. Should never happen.
+			if (up.length() == 0.0) // Just a precaution. Should never happen.
+				up.z = 1.0;
 			up.normalize();
 			coords.setOrientation(z, up);
 			coords.setOrigin(rotationCenter.minus(z.times(distToPlane)));
@@ -712,7 +706,6 @@ public abstract class ViewerCanvas extends CustomWidget
 		else
 		{
 			// Start with up = vertical direction and turn it prpendicular to z
-			
 			up.x = up.z = 0.0;
 			up.y = 1.0;
 			up.subtract(z.times(up.dot(z)));
@@ -727,8 +720,8 @@ public abstract class ViewerCanvas extends CustomWidget
 		viewChanged(false);
 	}
   }
-  
-  /* Changing perspective without animation */
+
+  /** Changing perspective without animation **/
   
   private void flipPerspectiveSwitch(boolean nextPerspective)
   {
@@ -765,7 +758,6 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Set the PopupMenuManager for this canvas. */
-
   public void setPopupMenuManager(PopupMenuManager manager)
   {
     popupManager = manager;
@@ -782,31 +774,6 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
-  /* 
-      Decide what to do when a mouse is clicked on the viewercanvas
-	  - Show pop-up menu
-	  - Center to a new point
-	  - Sub classes may override but should call super first
-	  I wonder if this needs an action processor?
-  */
-  //For some reason after this, when an object was opened for editing by double clicking it on the view, 
-  //the first time of pressing Cancel or OK launched an undo sequence. If the object was opened by 
-  //pop-up menu or by double clicking the object, the editor window behaved normally.
-  /*
-  protected void mouseClicked(MouseClickedEvent ev)
-  {
-    //if (popupManager != null && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
-    if (popupManager != null && ev.isMetaDown() && ev.getClickCount() == 1)
-    {
-      Point pos = ev.getPoint();
-      popupManager.showPopupMenu(this, pos.x, pos.y);
-    }
-    if (ev.isAltDown() && ev.getClickCount() == 1)
-    //if (ev.getButton() == WidgetMouseEvent.BUTTON2 && ev.getClickCount() == 1)
-  	centerToPoint(ev.getPoint());
-  }
-  */
-
   /** Matching the camera with the cirrent state of the view */ // I guess?
   
   public void adjustCamera(boolean perspective)
@@ -816,7 +783,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
     if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
       theCamera.setScreenTransform(((SceneCamera) boundCamera.getObject()).getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
-	}
+    }
     else if (perspective)
       theCamera.setScreenParams(0, scale, bounds.width, bounds.height);
     else
@@ -1318,7 +1285,6 @@ public abstract class ViewerCanvas extends CustomWidget
   protected void drawCoordinateAxes()
   {
     // Select a size for the coordinate axes.
-	// drawLine(new Point(200,1), new Point (100,100), Color.ORANGE);
 
     Rectangle bounds = getBounds();
     int axisLength = 50;
@@ -1721,11 +1687,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     return Collections.unmodifiableMap(controlMap);
   }
-	
-	//---------------------------------------------------//
-	//   The cue graphics drawing starts here            //
-	//---------------------------------------------------//
-	
+
 	/** Get the centermost point of the screen */
 	public Point getViewCenter()
 	{
@@ -1735,12 +1697,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		int cy = y/2;
 		return (new Point(cx, cy));
 	}
-	
-	private void drawMouseMoveGraphics()
-	{
-		// Nothing to draw currently
-	}
-  
+ 
 	private void drawNavigationGraphics()
 	{
 		if (tilting || moving || rotating) return;
@@ -1750,16 +1707,10 @@ public abstract class ViewerCanvas extends CustomWidget
 		Color color1, colorR, colorX, colorY;
 		
 		if (scrolling){
-			color1 = teal;
-			colorR = blendColorR;
-			colorX = blendColorX;
-			colorY = blendColorY;
+			color1 = gray;
 		}
 		else{
 			color1 = ghost;
-			colorR = ghost;
-			colorX = ghost;
-			colorY = ghost;
 		}
 		if (navigation == 2){
 			drawCircle(viewCenter, d*0.1, 30, color1);
@@ -1768,79 +1719,6 @@ public abstract class ViewerCanvas extends CustomWidget
 		if (navigation == 3){
 			drawSquare(viewCenter, d*0.1, color1);
 			drawSquare(viewCenter, d*0.4, color1);
-		}
-		
-		if (mousePoint == null) return; // This is very important!
-		
-		double mx, my;
-		mx = mousePoint.x-viewCenter.x;
-		my = mousePoint.y-viewCenter.y;
-		double angle = Math.atan2(my, mx);
-		double rMouse = Math.sqrt(mx*mx+my*my);
-		
-		// Draw the radial pointer
-		if (navigation == 2)
-		{
-			if(rMouse >= (double)d*.1)
-			{
-				drawLine(viewCenter, angle, d*.1, d*.4, colorR);
-				
-				Point point = mousePoint;
-				if (rMouse > (double)d*.4)
-				{
-					double r = (double)d*.4;
-					int px = (int)(Math.cos(angle)*(double)d*.4);
-					int py = (int)(Math.sin(angle)*(double)d*.4);
-					point = new Point(viewCenter.x+px, viewCenter.y+py);
-				}
-				drawCircle(point, 10.0, 12, colorR);
-			}
-			else
-				if (scrolling)
-					drawCircle(viewCenter, (double)d*.1, 30, green); // Just draw the center circle green if mouse is inside it.
-		}
-		// Draw vertical and horizontal ponters
-		if (navigation == 3)
-		{
-			int cx = viewCenter.x;
-			int cy = viewCenter.y;
-			
-			if (Math.abs(mx) >= d*.1){
-				drawLine(new Point(viewCenter.x+(int)((d*.1)*Math.signum(mx)), viewCenter.y), 
-				         new Point(viewCenter.x+(int)((d*.4)*Math.signum(mx)), viewCenter.y),
-						 colorX);
-				if (Math.abs(mx) <= d*.4)
-					drawCircle(new Point(viewCenter.x+(int)mx, viewCenter.y), 10.0, 8, colorX);
-				else
-					drawCircle(new Point(viewCenter.x+(int)((d*.4)*Math.signum(mx)), viewCenter.y), 10.0, 8, colorX);
-			}
-			else if(scrolling)
-			{
-				drawLine(new Point(cx+(int)(d*.1), (int)(cy+d*0.1)), 
-				         new Point(cx+(int)(d*.1), (int)(cy-d*0.1)), 
-				         green);
-				drawLine(new Point(cx-(int)(d*.1), (int)(cy+d*0.1)), 
-				         new Point(cx-(int)(d*.1), (int)(cy-d*0.1)), 
-				         green);
-			}
-			if (Math.abs(my) >= d*.1){
-				drawLine(new Point(viewCenter.x, viewCenter.y+(int)((d*.1)*Math.signum(my))), 
-				         new Point(viewCenter.x, viewCenter.y+(int)((d*.4)*Math.signum(my))),
-						 colorY);
-				if (Math.abs(my) <= d*.4)
-					drawCircle(new Point(viewCenter.x, viewCenter.y+(int)my), 10.0, 8, colorY);
-				else
-					drawCircle(new Point(viewCenter.x, viewCenter.y+(int)((d*.4)*Math.signum(my))), 10.0, 8, colorY);
-			}
-			else if(scrolling)
-			{
-				drawLine(new Point((int)(cx+(int)(d*.1)), cy+(int)(d*.1)), 
-				         new Point((int)(cx-(int)(d*.1)), cy+(int)(d*.1)),
-				         blendColorY);
-				drawLine(new Point((int)(cx+(int)(d*.1)), cy-(int)(d*.1)), 
-				         new Point((int)(cx-(int)(d*.1)), cy-(int)(d*.1)),
-				         blendColorY);
-			}
 		}
 	}
 
@@ -1931,7 +1809,7 @@ public abstract class ViewerCanvas extends CustomWidget
 	private void setNavigationColors()
 	{
 		TEAL = new Color(0, 127, 127);
-		
+
 		gray   = new Color(Color.GRAY.getRed()/2+backgroundColor.getRed()/2,
                            Color.GRAY.getGreen()/2+backgroundColor.getGreen()/2,
                            Color.GRAY.getBlue()/2+backgroundColor.getBlue()/2);
@@ -1943,26 +1821,18 @@ public abstract class ViewerCanvas extends CustomWidget
 		red    = new Color(Color.RED.getRed()*3/4+backgroundColor.getRed()/4,
                            Color.RED.getGreen()*3/4+backgroundColor.getGreen()/4,
                            Color.RED.getBlue()*3/4+backgroundColor.getBlue()/4);
-						 
-		yellow = new Color(Color.YELLOW.getRed()*3/4+backgroundColor.getRed()/4,
-                           Color.YELLOW.getGreen()*3/4+backgroundColor.getGreen()/4,
-                           Color.YELLOW.getBlue()*3/4+backgroundColor.getBlue()/4);
 						   
 		green  = new Color(Color.GREEN.getRed()*3/4+backgroundColor.getRed()/4,
                            Color.GREEN.getGreen()*3/4+backgroundColor.getGreen()/4,
                            Color.GREEN.getBlue()*3/4+backgroundColor.getBlue()/4);
 				 		 
-		blue   = new Color(Color.BLUE.getRed()*3/4+backgroundColor.getRed()/4,
-                           Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()/4,
-                           Color.BLUE.getBlue()*3/4+backgroundColor.getBlue()/4);
-				 		 
 		teal   = new Color(TEAL.getRed()*3/4+backgroundColor.getRed()/4,
                            TEAL.getGreen()*3/4+backgroundColor.getGreen()/4,
                            TEAL.getBlue()*3/4+backgroundColor.getBlue()/4);
 
-		cone   = new Color(Color.GREEN.getRed()/2+backgroundColor.getRed()/2,
-                           Color.GREEN.getGreen()/2+backgroundColor.getGreen()/2,
-                           Color.GREEN.getBlue()/2+backgroundColor.getBlue()/2);
+		blue   = new Color(Color.BLUE.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.BLUE.getBlue()*3/4+backgroundColor.getBlue()/4);
 	}
 	
 	/* 
@@ -1978,194 +1848,10 @@ public abstract class ViewerCanvas extends CustomWidget
 		return new Color(R, G, B);
 	}
 	
-	/** Call all the methods that draw informative graphics on the screen */
+	/** Draw informative graphics on the screen */
 	public void drawOverlay()
 	{
 		if (mouseMoving || scrolling)
 			drawNavigationGraphics();
-		auxGraphs.render();
 	}
-	
-	/** 
-		This class creates and stores information for drawing view cones or other 
-		temporary 3D graphics and privides a method to draw them on the screen.
-	*/
-	public class AuxiliaryGraphics
-	{
-		private ArrayList<Vec3>   points;
-		private ArrayList<Vec3[]> lines;
-		private ArrayList<Color>  pointColors, lineColors;
-		
-		/** Create an empty AuxiliaryGraphics object */
-		public AuxiliaryGraphics()
-		{}
-
-		/* Create emply point list */
-		private void newPoints(){
-			points = new ArrayList<Vec3>();
-			pointColors = new ArrayList<Color>();
-		}
-			
-		/* Create emply point list */
-		private void newLines(){
-			lines = new ArrayList<Vec3[]>();
-			lineColors = new ArrayList<Color>();
-		}
-		/** 
-			Create contents using the given view<p>
-			
-			@param newGraphics tells to clear any previously stored graphics
-		*/
-		public void set(ViewerCanvas v, boolean newGraphics)
-		{
-			if(! showViewCone)
-				return;
-			if (newGraphics){
-				newPoints();
-				newLines();
-			}
-			
-			Camera ca = v.getCamera();
-			CoordinateSystem cs = ca.getCameraCoordinates();
-			Vec3 rc = v.getRotationCenter();
-			Vec3 cz = cs.getZDirection();
-			Vec3 cp = new Vec3(cs.getOrigin().plus(cz.times(0.0001))); // Need to move so that the camera can see it
-			double dp = v.getDistToPlane();
-
-			// rotation center 
-			add(new Vec3(rc), Color.GREEN);
-			
-			// view edges
-			Rectangle b = v.getBounds();
-			Vec3 c0, c1, c2, c3;
-			c0 = ca.convertScreenToWorld(new Point(0, 0), dp);
-			c1 = ca.convertScreenToWorld(new Point(b.width, 0), dp);
-			c2 = ca.convertScreenToWorld(new Point(b.width, b.height), dp);
-			c3 = ca.convertScreenToWorld(new Point(0, b.height), dp);
-			
-			// screen border
-			add(new Vec3[]{c0, c1}, cone);
-			add(new Vec3[]{c1, c2}, cone);
-			add(new Vec3[]{c2, c3}, cone);
-			add(new Vec3[]{c3, c0}, cone);
-			
-			if (v.isPerspective()){
-				// camera position
-				add(new Vec3(cp), Color.MAGENTA);
-				// corner lines
-				add(new Vec3[]{c0, cp}, cone);
-				add(new Vec3[]{c1, cp}, cone);
-				add(new Vec3[]{c2, cp}, cone);
-				add(new Vec3[]{c3, cp}, cone);
-			}
-			else{
-				Vec3 m0, m1, m2, m3, mh, cpp;
-				
-				// pseudo location for view point position
-				double cppDist = 100.0*ca.getDistToScreen()/v.getScale();
-				cpp = rc.minus(cz.times(cppDist*1.0));
-				add(cpp, Color.MAGENTA);
-				
-				m0 = c0.minus(cz.times(cppDist*(1-0.618033))); // "Golden mean.. :) "
-				m1 = c1.minus(cz.times(cppDist*(1-0.618033)));
-				m2 = c2.minus(cz.times(cppDist*(1-0.618033)));
-				m3 = c3.minus(cz.times(cppDist*(1-0.618033)));
-
-				add(new Vec3[]{m0, m1}, cone);
-				add(new Vec3[]{m1, m2}, cone);
-				add(new Vec3[]{m2, m3}, cone);
-				add(new Vec3[]{m3, m0}, cone);
-
-				add(new Vec3[]{c0, m0}, cone);
-				add(new Vec3[]{c1, m1}, cone);
-				add(new Vec3[]{c2, m2}, cone);
-				add(new Vec3[]{c3, m3}, cone);
-
-				add(new Vec3[]{m0, cpp}, gray);
-				add(new Vec3[]{m1, cpp}, gray);
-				add(new Vec3[]{m2, cpp}, gray);
-				add(new Vec3[]{m3, cpp}, gray);
-			}
-		}
-
-		/** Add a point */
-		public void add(Vec3 point, Color pointColor)
-		{
-			if (points == null)
-				newPoints();
-			points.add(point);
-			pointColors.add(pointColor);
-		}
-
-		/** Add a line */
-		public void add(Vec3[] lineEnds, Color lineColor)
-		{
-			if (lines == null)
-				newLines();
-			lines.add(lineEnds);
-			lineColors.add(lineColor);
-		}
-
-		/** Copy all information from an existing graphics object */
-		public void copy(AuxiliaryGraphics ext)
-		{
-			points = ext.getPoints();
-			pointColors = ext.getPointColors(); 
-			lines = ext.getLines();
-			lineColors = ext.getLineColors(); 
-		}
-
-		public ArrayList<Vec3> getPoints()
-		{
-			return points;
-		}
-
-		public ArrayList<Color> getPointColors()
-		{
-			return pointColors;
-		}
-
-		public ArrayList<Vec3[]> getLines()
-		{
-			return lines;
-		}
-
-		public ArrayList<Color> getLineColors()
-		{
-			return lineColors;
-		}
-
-		/** Render the object on screen */
-		public void render()
-		{
-		
-			Vec2 v0, v1;
-			Point p0, p1;
-			int pointRadius = 4;
-			if (points != null)
-				for(int i = 0; i < points.size(); i++){
-					renderPoint(points.get(i), pointColors.get(i), pointRadius);
-				}
-			if (lines != null)
-				for(int i = 0; i < lines.size(); i++){
-				
-					// renderLine of CanvasDrawer does not work right here. Object dependencies...
-
-					v0 = new Vec2(theCamera.getWorldToScreen().timesXY(lines.get(i)[0]));
-					v1 = new Vec2(theCamera.getWorldToScreen().timesXY(lines.get(i)[1]));
-					p0 = new Point((int)v0.x, (int)v0.y);
-					p1 = new Point((int)v1.x, (int)v1.y);
-					drawLine (p0, p1, lineColors.get(i));
-				}
-		}
-
-		/** Empty the object */
-		public void wipe()
-		{
-			points = null;
-			pointColors = null;
-			lines = null;
-			lineColors = null;
-		}
-	} // AuxiliaryGraphics
 }

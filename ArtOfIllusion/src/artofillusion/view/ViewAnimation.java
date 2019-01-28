@@ -190,10 +190,6 @@ public class ViewAnimation
         if (viewHasCamera)
             window.setModified();
         else
-
-		// auxGraphs shows up wrong. Possibly numerical accuaracy issue.
-		// setAuxGraphs();
-
 		step++;
 	}
 
@@ -382,7 +378,6 @@ public class ViewAnimation
 		view.repaint();
         if (viewHasCamera)
             window.setModified();
-		setAuxGraphs();
 		step++;
 	}
 
@@ -399,7 +394,6 @@ public class ViewAnimation
 		changingPerspective = false;
 		animatingMove = false;
 
-		wipeAuxGraphs();
 		view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
         if (viewHasCamera)
         {
@@ -408,9 +402,9 @@ public class ViewAnimation
         }
         else
         {
-		view.viewChanged(false);
-		view.repaint();
-	}
+			view.viewChanged(false);
+			view.repaint();
+		}
     }
 
 	/** 
@@ -435,19 +429,5 @@ public class ViewAnimation
         // This only works for the 'animate' boolean to take effect immediately
 		// Don't know why?
 		animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
-	}
-
-	/* Set view cone craphis */
-	public void setAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			if (v != view)
-				v.auxGraphs.set(view, true);
-	}
-
-	public void wipeAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			v.auxGraphs.wipe();
 	}
 }

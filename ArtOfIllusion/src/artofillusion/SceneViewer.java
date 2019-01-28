@@ -705,8 +705,6 @@ public class SceneViewer extends ViewerCanvas
 
   public void mouseClicked(MouseClickedEvent e)
   {
-	//super.mouseClicked(e);
-	
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
@@ -723,15 +721,6 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
- 	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		parentFrame.updateImage(); // I wonder why, but that's how it works
-	}
-	
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)

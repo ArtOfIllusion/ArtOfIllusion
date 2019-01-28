@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2017 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2019 Petri Ihalainen
    Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -683,26 +683,25 @@ public abstract class ViewerCanvas extends CustomWidget
     else
 	  perspective = true;
 	
-    //repaint(); 
-
-	//if (nextNavigation > 1)
-    //  nextPerspective = true; // Just to be sure
-	//
     // Turn y up for landscape modes. Animated
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
     {
 		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
 		Vec3 z  = coords.getZDirection();
 		Vec3 up = coords.getUpDirection();
-
-		// if camera z-axis is aligned with world y-axis the orientation is good for 
-		// landscape modes. The z.y may be 1.0 but z.x and z.x may have error in the 
-		// magnitude of 1E-15.
-		if((z.x < 1E-6 && z.x > -1E-6) && (z.z < 1E-6 && z.z > -1E-6))
+		
+		// If camera z-axis is aligned with world y-axis the orientation is good for 
+		// landscape modes. 
+		
+		if (Math.abs(z.y) == 1.0)
 		{
-			z.x = z.z = 0.0; 
-			z.y = 1.0*Math.signum(z.y); 
+			// When z.y == 1.0, z.x and z.x may still have a value in the 
+			// magnitude of 1E-15.
 			
+			z.x = z.z = 0.0; 
+			up.y = 0.0;
+			if (up.length() == 0.0) up.z = 1.0;// Just a precaution. Should never happen.
+			up.normalize();
 			coords.setOrientation(z, up);
 			coords.setOrigin(rotationCenter.minus(z.times(distToPlane)));
 			theCamera.setCameraCoordinates(coords);
@@ -712,8 +711,13 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 		else
 		{
-			// The system uses only the projection of the y-direction, that is needed.
-			coords.setOrientation(z, new Vec3(0,1,0)); // new coords
+			// Start with up = vertical direction and turn it prpendicular to z
+			
+			up.x = up.z = 0.0;
+			up.y = 1.0;
+			up.subtract(z.times(up.dot(z)));
+			up.normalize();
+			coords.setOrientation(z, up);
 			animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
 		}
     }

@@ -146,7 +146,7 @@ public class RenderingDialog extends BDialog implements RenderListener
   private void doSave()
   {
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    ImageSaver saver = new ImageSaver(parent);
+    ImageSaver saver = new ImageSaver(this);
     if (saver.clickedOk())
     {
       try

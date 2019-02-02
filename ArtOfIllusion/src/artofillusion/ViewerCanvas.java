@@ -1714,6 +1714,9 @@ public abstract class ViewerCanvas extends CustomWidget
 	private void drawNavigationCues()
 	{
 		if (tilting || moving || rotating) return;
+		if (! ArtOfIllusion.getPreferences().getShowTravelCuesOnIdle() && 
+		   (! ArtOfIllusion.getPreferences().getShowTravelCuesScrolling() || ! scrolling))
+			return;
 		
 		int d = Math.min(getBounds().width, getBounds().height);
 		Point viewCenter = getViewCenter();

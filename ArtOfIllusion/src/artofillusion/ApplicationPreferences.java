@@ -27,7 +27,7 @@ public class ApplicationPreferences
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol, maxAnimationDuration, animationFrameRate;
   private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming, useViewAnimations;
-  private boolean drawActiveFrustum, drawCameraFrustum;
+  private boolean drawActiveFrustum, drawCameraFrustum, showTravelCuesOnIdle, showTravelCuesScrolling, showTiltDial;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
   
   /**
@@ -146,8 +146,11 @@ public class ApplicationPreferences
 	useViewAnimations = true;
 	maxAnimationDuration = 1.0;
 	animationFrameRate = 60.0;
-    drawActiveFrustum = true;
+    drawActiveFrustum = false;
     drawCameraFrustum = true;
+    showTravelCuesOnIdle = false;
+    showTravelCuesScrolling = true;
+    showTiltDial = false;
   }
 
   /** Parse the properties loaded from the preferences file. */
@@ -171,6 +174,9 @@ public class ApplicationPreferences
     animationFrameRate = parseDoubleProperty("animationFrameRate", animationFrameRate);
     drawActiveFrustum = parseBooleanProperty("drawActiveFrustum", drawActiveFrustum);
     drawCameraFrustum = parseBooleanProperty("drawCameraFrustum", drawCameraFrustum);
+    showTravelCuesOnIdle = parseBooleanProperty("showTravelCuesOnIdle", showTravelCuesOnIdle);
+    showTravelCuesScrolling = parseBooleanProperty("showTravelCuesScrolling", showTravelCuesScrolling);
+    showTiltDial = parseBooleanProperty("showTiltDial", showTiltDial);
 
     Translate.setLocale(parseLocaleProperty("language"));
     if (properties.getProperty("theme") == null)
@@ -526,5 +532,49 @@ public class ApplicationPreferences
   {
     drawCameraFrustum = draw;
     properties.put("drawCameraFrustum", Boolean.toString(draw));
+  }
+
+  /** Check if cues should be drawn "always" */
+
+  public final boolean getShowTravelCuesOnIdle()
+  {
+    return showTravelCuesOnIdle;
+  }
+
+  /** Set if cues should be drawn "always" */
+
+  public final void setShowTravelCuesOnIdle(boolean show)
+  {
+    showTravelCuesOnIdle = show;
+    properties.put("showTravelCuesOnIdle", Boolean.toString(show));
+  }
+
+  /** Check if cues should be drawn during scroll movement */
+
+  public final boolean getShowTravelCuesScrolling()
+  {
+    return showTravelCuesScrolling;
+  }
+
+  /** Set if cues should be drawn during scroll movement */
+
+  public final void setShowTravelCuesScrolling(boolean show)
+  {
+    showTravelCuesScrolling = show;
+    properties.put("showTravelCuesScrolling", Boolean.toString(show));
+  }
+ /** Check if the tilt dial is shown */
+
+  public final boolean getShowTiltDial()
+  {
+    return showTiltDial;
+  }
+
+  /** Set if the tilt dial is shown */
+
+  public final void setShowTiltDial(boolean show)
+  {
+    showTiltDial = show;
+    properties.put("showTiltDial", Boolean.toString(show));
   }
 }

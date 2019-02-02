@@ -106,26 +106,16 @@ public class ViewAnimation
 		endRotationCenter = view.getRotationCenter();
 		endOrientation = view.getOrientation();
 		endNavigation = view.getNavigationMode();
-		endDistToScreen = camera.getDistToScreen();
 		refDistToScreen = endDistToScreen = camera.getDistToScreen();
-		if (view.isPerspective())
-			refDistToPlane = view.getDistToPlane();
-		else
-			refDistToPlane = 100.0/view.getScale()*camera.getDistToScreen();
-		
-
+		refDistToPlane = view.getDistToPlane();
 		endCoords = camera.getCameraCoordinates().duplicate();
-		if(nextPerspective){
-			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-refDistToPlane)));
+		if(nextPerspective)
 			endScale = 100.0;
-		}
-		else{
-			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-20)));
+		else
 			endScale = 100.0*refDistToScreen/refDistToPlane;
-		}
-		
 		checkPreferences(); // This only works for the 'animate'
-		if (! animate){
+		if (! animate)
+		{
 			endAnimation(); // Go directly to the last frame
 			return;
 		}

@@ -115,6 +115,8 @@ public class MoveViewTool extends EditingTool
 					break;
 			}
 		}
+		if (view.getBoundCamera() != null)
+			view.getBoundCamera().getCoords().copyCoords(view.getCamera().getCameraCoordinates());
 		view.repaint();
 		view.viewChanged(false);
 	}
@@ -190,21 +192,25 @@ public class MoveViewTool extends EditingTool
 
 
 		if (controlDown) // zoom!
-		{ 	
+		{
+			double newDist;
+			Rectangle bounds = view.getBounds();
 			if (view.isPerspective())
 			{
-				CoordinateSystem coords = view.getCamera().getCameraCoordinates();
-				double newDist = oldDist*Math.pow(1.0/1.01, (double)dy);
-				Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
-				coords.setOrigin(newPos);
-				view.getCamera().setCameraCoordinates(coords);
-				view.setDistToPlane(newDist);
+				newDist = oldDist*Math.pow(1.0/1.01, (double)dy);
 			}
 			else
 			{
 				double newScale = oldScale*(Math.pow(1.01,(double)dy));
 				view.setScale(newScale);
+				cam.setScreenParamsParallel(newScale, bounds.width, bounds.height);
+				newDist = cam.getDistToScreen()*100.0/newScale;
 			}
+			view.setDistToPlane(newDist);
+			CoordinateSystem coords = view.getCamera().getCameraCoordinates();
+			Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
+			coords.setOrigin(newPos);
+			view.getCamera().setCameraCoordinates(coords);
 		}
 		else // Move up-down-right-left
 		{

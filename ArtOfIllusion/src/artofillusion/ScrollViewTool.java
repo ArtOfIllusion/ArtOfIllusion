@@ -82,6 +82,8 @@ public class ScrollViewTool
 			default:
 				break;
 		}
+		if (boundCamera != null)
+			boundCamera.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
 		view.repaint();
 		view.viewChanged(false);
 	}
@@ -94,22 +96,18 @@ public class ScrollViewTool
 		if (ArtOfIllusion.getPreferences().getReverseZooming())
 			amount *= -1;
 		if (view.isPerspective())
-		{
-			CoordinateSystem coords = camera.getCameraCoordinates();
-			double oldDist = distToPlane;
-            //double newDist = oldDist*Math.pow(1.0/1.01, amount); // This would reverse the action
-			double newDist = oldDist*Math.pow(1.01, amount);
-			Vec3 oldPos = new Vec3(coords.getOrigin());
-			Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
-			coords.setOrigin(newPos);
-			camera.setCameraCoordinates(coords);
-			view.setDistToPlane(newDist);
-			distToPlane = newDist; // local field
-		}
+			distToPlane = distToPlane*Math.pow(1.01, amount);
 		else
 		{
 			view.setScale(view.getScale()*Math.pow(1.0/1.01, amount));
+			distToPlane = camera.getDistToScreen()*100.0/view.getScale();
+			camera.setScreenParamsParallel(view.getScale(), bounds.width, bounds.height);
 		}
+		view.setDistToPlane(distToPlane);
+		CoordinateSystem coords = camera.getCameraCoordinates();
+		Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-distToPlane));
+		coords.setOrigin(newPos);
+		camera.setCameraCoordinates(coords);
 	}
 
 	private void scrollMoveTravel(MouseScrolledEvent e)
@@ -209,7 +207,7 @@ public class ScrollViewTool
 
 	public void mouseStoppedScrolling()
 	{
-	    if (window != null && boundCamera != null)
+        if (window != null && boundCamera != null)
         {
             boundCamera.getCoords().copyCoords(camera.getCameraCoordinates());
             if (boundCamera.getObject() instanceof SceneCamera) ((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);
@@ -218,8 +216,8 @@ public class ScrollViewTool
             moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
             window.setUndoRecord(undo);
         }
-        view.repaint();
-        //window.updateImage();
+        window.updateImage();
+        view.viewChanged(false);
 	}
 
 	private Timer scrollTimer = new Timer(500, new ActionListener() 

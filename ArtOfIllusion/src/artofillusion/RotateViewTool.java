@@ -568,10 +568,9 @@ public class RotateViewTool extends EditingTool
 	@Override
 	public void drawOverlay(ViewerCanvas view)
 	{
-		r = 0.45 * Math.min(view.getBounds().width, view.getBounds().height);
-		
-		if (theWindow != null && view.tilting)
+		if (theWindow != null && view.tilting && ArtOfIllusion.getPreferences().getShowTiltDial())
 		{
+			r = 0.45 * Math.min(view.getBounds().width, view.getBounds().height);
 			for (int i=0; i<4; i++)
 				view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.cueIdle);
 			view.drawLine(viewCenter, -Math.PI/2.0, r, r*1.1, view.red);

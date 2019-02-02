@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
-   Changes Copyright (C) 2016 by Petri Ihalainen
+   Changes Copyright (C) 2016-2019 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -27,6 +27,7 @@ public class PreferencesWindow
 {
   private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, localeChoice, themeChoice, colorChoice, toolChoice;
   private ValueField interactiveTolField, undoField, animationDurationField, animationFrameRateField;
+  private BCheckBox drawActiveFrustumBox, drawCameraFrustumBox;
   private BCheckBox glBox, backupBox, reverseZoomBox, useViewAnimationsBox;
   private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
@@ -77,10 +78,13 @@ public class PreferencesWindow
     prefs.setKeepBackupFiles(backupBox.getState());
     prefs.setReverseZooming(reverseZoomBox.getState());
     prefs.setUseViewAnimations(useViewAnimationsBox.getState());
-	prefs.setMaxAnimationDuration(animationDurationField.getValue());
-	prefs.setAnimationFrameRate(animationFrameRateField.getValue());
+    prefs.setMaxAnimationDuration(animationDurationField.getValue());
+    prefs.setAnimationFrameRate(animationFrameRateField.getValue());
+    prefs.setDrawActiveFrustum(drawActiveFrustumBox.getState());
+    prefs.setDrawCameraFrustum(drawCameraFrustumBox.getState());
+
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
-	
+
     ThemeManager.setSelectedTheme(themes.get(themeChoice.getSelectedIndex()));
     ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[colorChoice.getSelectedIndex()]);
     prefs.savePreferences();
@@ -121,9 +125,8 @@ public class PreferencesWindow
     useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
     animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
     animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
-
-	//useViewAnimationsBox.addEventLink(ValueChangedEvent.class, this, "useViewAnimationsChanged");
-	//animationDurationField.addEventLink(ValueChangedEvent.class, this, "animationDurationChanged");
+    drawActiveFrustumBox = new BCheckBox(Translate.text("drawActiveFrustum"), prefs.getDrawActiveFrustum());
+    drawCameraFrustumBox = new BCheckBox(Translate.text("drawCameraFrustum"), prefs.getDrawCameraFrustum());
 
     themes = new ArrayList<ThemeManager.ThemeInfo>();
     for (ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
@@ -178,8 +181,7 @@ public class PreferencesWindow
     }
 
     // Layout the panel.
-
-    FormContainer panel = new FormContainer(2, 16);
+    FormContainer panel = new FormContainer(2, 18);
     panel.setColumnWeight(1, 1.0);
     LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null);
     LayoutInfo widgetLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null);
@@ -206,13 +208,17 @@ public class PreferencesWindow
     panel.add(backupBox, 0, 10, 2, 1, centerLayout);
     panel.add(localeChoice, 1, 11, widgetLayout);
     panel.add(new BLabel(" "), 1, 12, labelLayout);
-	panel.add(useViewAnimationsBox, 1, 13, widgetLayout);
-	panel.add(Translate.label("maxAnimationDuration"), 0, 14, labelLayout);
-	panel.add(Translate.label("animationFrameRate"), 0, 15, labelLayout);
-	panel.add(animationDurationField, 1, 14, widgetLayout);
-	panel.add(animationFrameRateField, 1, 15, widgetLayout);
-	//animationDurationField.setEnabled(false);
-	//animationFrameRateField.setEnabled(false);
+    panel.add(useViewAnimationsBox, 1, 13, widgetLayout);
+    panel.add(Translate.label("maxAnimationDuration"), 0, 14, labelLayout);
+    panel.add(Translate.label("animationFrameRate"), 0, 15, labelLayout);
+    panel.add(animationDurationField, 1, 14, widgetLayout);
+    panel.add(animationFrameRateField, 1, 15, widgetLayout);
+    panel.add(drawActiveFrustumBox, 0, 16, 2 ,1, centerLayout);
+    panel.add(drawCameraFrustumBox, 0, 17, 2, 1, centerLayout);
+
+    drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState()); 
+    drawActiveFrustumBox.addEventLink(ValueChangedEvent.class, new Object(){void processEvent(){
+                         drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState());}});
     return panel;
   }
 

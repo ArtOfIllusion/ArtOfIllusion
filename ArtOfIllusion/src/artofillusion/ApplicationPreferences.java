@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
-   Changes Copyright (C) 2016 by Petri Ihalainen
+   Changes Copyright (C) 2016-2019 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -27,8 +27,9 @@ public class ApplicationPreferences
   private int defaultDisplayMode, undoLevels;
   private double interactiveTol, maxAnimationDuration, animationFrameRate;
   private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming, useViewAnimations;
+  private boolean drawActiveFrustum, drawCameraFrustum;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
-
+  
   /**
    * Create a new ApplicationPreferences object, loading the preferences from a
    * file in the default location.
@@ -145,6 +146,8 @@ public class ApplicationPreferences
 	useViewAnimations = true;
 	maxAnimationDuration = 1.0;
 	animationFrameRate = 60.0;
+    drawActiveFrustum = true;
+    drawCameraFrustum = true;
   }
 
   /** Parse the properties loaded from the preferences file. */
@@ -162,11 +165,13 @@ public class ApplicationPreferences
     keepBackupFiles = parseBooleanProperty("keepBackupFiles", keepBackupFiles);
     useCompoundMeshTool = parseBooleanProperty("useCompoundMeshTool", useCompoundMeshTool);
     reverseZooming = parseBooleanProperty("reverseZooming", reverseZooming);
-	
+
     useViewAnimations = parseBooleanProperty("useViewAnimations", useViewAnimations);
     maxAnimationDuration = parseDoubleProperty("maxAnimationDuration", maxAnimationDuration);
     animationFrameRate = parseDoubleProperty("animationFrameRate", animationFrameRate);
-	
+    drawActiveFrustum = parseBooleanProperty("drawActiveFrustum", drawActiveFrustum);
+    drawCameraFrustum = parseBooleanProperty("drawCameraFrustum", drawCameraFrustum);
+
     Translate.setLocale(parseLocaleProperty("language"));
     if (properties.getProperty("theme") == null)
     {
@@ -491,5 +496,35 @@ public class ApplicationPreferences
   {
     animationFrameRate = rate;
 	properties.put("animationFrameRate", Double.toString(rate));
+  }
+
+  /** Check if the movement of the handled view should be visualized on other views */
+  
+  public final boolean getDrawActiveFrustum()
+  {
+    return drawActiveFrustum;
+  }
+  
+  /** Set if the movement of the handled view should be visualized on other views */
+  
+  public final void setDrawActiveFrustum(boolean draw)
+  {
+    drawActiveFrustum = draw;
+    properties.put("drawActiveFrustum", Boolean.toString(draw));
+  }
+  
+  /** Check if the movement of the handled camera should be visualized on other views */
+  
+  public final boolean getDrawCameraFrustum()
+  {
+    return drawCameraFrustum;
+  }
+
+  /** Set if the movement of the handled camera should be visualized on other views */
+  
+  public final void setDrawCameraFrustum(boolean draw)
+  {
+    drawCameraFrustum = draw;
+    properties.put("drawCameraFrustum", Boolean.toString(draw));
   }
 }

@@ -309,12 +309,13 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
-	drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
+    for(ViewerCanvas v : parentFrame.getAllViews())
+        v.drawOverlay(this);
     if (showAxes)
-      drawCoordinateAxes();
+        drawCoordinateAxes();
     drawBorder();
 }
 
@@ -552,7 +553,6 @@ public class SceneViewer extends ViewerCanvas
   protected void mouseDragged(WidgetMouseEvent e)
   {
 	mousePoint = e.getPoint();
-	drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {

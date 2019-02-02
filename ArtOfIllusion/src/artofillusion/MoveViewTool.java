@@ -117,7 +117,12 @@ public class MoveViewTool extends EditingTool
 		}
 		if (view.getBoundCamera() != null)
 			view.getBoundCamera().getCoords().copyCoords(view.getCamera().getCameraCoordinates());
-		view.repaint();
+		view.frustumShape.update();
+		if (ArtOfIllusion.getPreferences().getDrawActiveFrustum() || 
+		   (ArtOfIllusion.getPreferences().getDrawCameraFrustum() && view.getBoundCamera() != null))
+			theWindow.updateImage();
+		else
+			view.repaint();
 		view.viewChanged(false);
 	}
 

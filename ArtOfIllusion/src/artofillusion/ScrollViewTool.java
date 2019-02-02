@@ -84,7 +84,12 @@ public class ScrollViewTool
 		}
 		if (boundCamera != null)
 			boundCamera.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
-		view.repaint();
+		view.frustumShape.update();
+		if (ArtOfIllusion.getPreferences().getDrawActiveFrustum() || 
+		   (ArtOfIllusion.getPreferences().getDrawCameraFrustum() && view.getBoundCamera() != null))
+			window.updateImage();
+		else
+			view.repaint();
 		view.viewChanged(false);
 	}
 
@@ -245,8 +250,4 @@ public class ScrollViewTool
             moveCameraChildren(parent.getChildren()[i], transform, undo);
 		}  
 	}
-	public void drawOverlay()
-    {
-        // This could draw a "ghost" of the bound camera and it's children during scroll
-    }
 }

@@ -144,6 +144,8 @@ public class RotateViewTool extends EditingTool
 					break;
 			}
 		}
+		if (view.getBoundCamera() != null)
+			view.getBoundCamera().getCoords().copyCoords(view.getCamera().getCameraCoordinates());
 		view.repaint();
 		view.viewChanged(false);
 	}
@@ -334,11 +336,10 @@ public class RotateViewTool extends EditingTool
 		}
 		else
 		{
-			if (view.getBoundCamera() != null){
+			if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+			{
 				int yp = view.getBounds().height/2;
 				double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
-				
-				// dts is equivalent to the "distToScreen" parameter on SceneCameras.
 				dts = Math.tan(fa)*yp/100;
 			}
 			rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), -dy*DRAG_SCALE/dts);
@@ -352,7 +353,7 @@ public class RotateViewTool extends EditingTool
 			c.transformCoordinates(rotation);
 
 			// Prevent tilting forward or back more than 90 degrees.
-			// almost works
+			// With scene camera not always correct
 			if (c.getUpDirection().y < 0.0)
 			{
 				Vec3 upD = new Vec3(c.getUpDirection().x,0.0,c.getUpDirection().z); 

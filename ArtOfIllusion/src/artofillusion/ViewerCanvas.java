@@ -719,6 +719,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		navigation = nextNavigation;
 		viewChanged(false);
 	}
+	repaint();
   }
 
   /** Changing perspective without animation **/
@@ -921,22 +922,16 @@ public abstract class ViewerCanvas extends CustomWidget
 	Vec3 newCenter = new Vec3(b.getCenter());
 	CoordinateSystem newCoords = theCamera.getCameraCoordinates().duplicate();
 	int d = Math.min(getBounds().width, getBounds().height);
-	double diag = Math.sqrt((b.maxx-b.minx)*(b.maxx-b.minx)+(b.maxy-b.miny)*(b.maxy-b.miny)+(b.maxz-b.minz)*(b.maxz-b.minz));
-
+	Vec3 size = b.getSize();
+	double diag = Math.sqrt(size.x*size.x+size.y*size.y+size.z*size.z);
+	double newDistToPlane = 100*theCamera.getDistToScreen() / (double)d / 0.9 * diag;
+	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(b.maxz-b.minz) * 0.5)));
+	double newScale;
 	if (perspective)
-	{
-		double newDistToPlane = 2000 / (double)d / 0.9 * diag;
-		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(b.maxz-b.minz) * 0.5)));
-
-		animation.start(newCoords, newCenter, scale, orientation, navigation);
-	}
+		newScale = 100.0;
 	else
-	{
-		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
-		double newScale = (double)d * 0.9 / diag; // with minimum 5% margins
-
-		animation.start(newCoords, newCenter, newScale, orientation, navigation);
-	}
+		newScale = 100.0*theCamera.getDistToScreen()/newDistToPlane;
+	animation.start(newCoords, newCenter, newScale, orientation, navigation);
   }
 
   /** Sub classes that can handle bones needs to override this */
@@ -1028,7 +1023,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		p = worldToView.timesXY(bc.plus(cx.times(br)));
 		minx = Math.min(minx, p.x);
 		
- 		p = worldToView.timesXY(bc.plus(cy.times(br)));
+		p = worldToView.timesXY(bc.plus(cy.times(br)));
 		maxy = Math.max(maxy, p.y);
 		p = worldToView.timesXY(bc.plus(cy.times(-br)));
 		miny = Math.min(miny, p.y);
@@ -1042,21 +1037,25 @@ public abstract class ViewerCanvas extends CustomWidget
 	newCenter = new Vec3((minx+maxx)*0.5, (miny+maxy)*0.5, (minz+maxz)*0.5);
 	viewToWorld.transform(newCenter);
 	newCoords = theCamera.getCameraCoordinates().duplicate();
-	
-	if (perspective)
-	{
-		double newDistToPlane = 2000 / (double)d / 0.9 * Math.max(maxx-minx, maxy-miny);
-		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));
 
-		animation.start(newCoords, newCenter, scale, orientation, navigation);
+	double dts;
+	if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+	{
+		int yp = getBounds().height/2;
+		double fa = Math.PI/2.0 - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()/2.0);///180.0*Math.PI;
+		dts = Math.tan(fa)*yp/100;
 	}
 	else
-	{
-		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
-		double newScale = (double)d * 0.9 / Math.max(maxx-minx, maxy-miny); // with minimum 5% margins
+		dts = theCamera.getDistToScreen();
+	double newDistToPlane = 100*dts/(double)d/0.9*Math.max(maxx-minx, maxy-miny);
+	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));;
+	double newScale;
+	if (perspective)
+		newScale = 100.0;
+	else
+		newScale = 100.0*dts/newDistToPlane;
 
-		animation.start(newCoords, newCenter, newScale, orientation, navigation);
-	}
+	animation.start(newCoords, newCenter, newScale, orientation, navigation);
   }
 
   /** 

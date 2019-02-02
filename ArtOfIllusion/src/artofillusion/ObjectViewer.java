@@ -189,7 +189,6 @@ public abstract class ObjectViewer extends ViewerCanvas
         drawImage(renderedImage, 0, 0);
       else
         viewChanged(false);
-      drawOverlay();
       drawBorder();
       if (showAxes)
         drawCoordinateAxes();
@@ -224,12 +223,14 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     // Finish up.
 
-    drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
+    if (controller instanceof ObjectEditorWindow)
+        for(ViewerCanvas v : ((ObjectEditorWindow)controller).getAllViews())
+            v.drawOverlay(this);
     if (showAxes)
-      drawCoordinateAxes();
+        drawCoordinateAxes();
     drawBorder();
   }
 

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Modifications copyright (C) 2017 Petri Ihalainen
+   Modifications copyright (C) 2017-2019 Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the

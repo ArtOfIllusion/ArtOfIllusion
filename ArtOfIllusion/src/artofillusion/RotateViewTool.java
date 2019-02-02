@@ -421,17 +421,13 @@ public class RotateViewTool extends EditingTool
   private void tilt(WidgetMouseEvent e, ViewerCanvas view, Point clickPoint)
   {
 	int d = Math.min(view.getBounds().width, view.getBounds().height);
-	r = d*0.45;
 	int cx = view.getBounds().width/2;
 	int cy = view.getBounds().height/2;
 	viewCenter = new Point(cx, cy);
 	
 	double aClick = Math.atan2(clickPoint.y-cy, clickPoint.x-cx);
-	p0 = new Point((int)(r*Math.cos(aClick)+cx), (int)(r*Math.sin(aClick))+cy);
-	
 	Point dragPoint = e.getPoint();
 	double aDrag = Math.atan2(dragPoint.y-cy, dragPoint.x-cx);
-	p1 = new Point((int)(r*Math.cos(aDrag))+cx, (int)(r*Math.sin(aDrag))+cy);
 	
 	Vec3 axis = viewToWorld.timesDirection(Vec3.vz());
 	
@@ -564,25 +560,22 @@ public class RotateViewTool extends EditingTool
 	}
   }
 
-  @Override
-  public void drawOverlay(ViewerCanvas view)
-  {
-    if (theWindow != null && view.tilting)
+	@Override
+	public void drawOverlay(ViewerCanvas view)
 	{
-	  for (int i=0; i<4; i++)
-		view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.teal);
-	  
-	  view.drawLine(viewCenter, -Math.PI/2.0, r*0.1, r, view.red);
-	  view.drawLine(viewCenter, Math.PI/2.0, r*0.1, r, view.red);
-	  view.drawLine(viewCenter, Math.PI, r*0.1, r, view.blue);
-	  view.drawLine(viewCenter, 0.0, r*0.1, r, view.blue);
-	  
-	  // draw dial lines
-	  for (int i=0; i<24; i++)
-		view.drawLine(viewCenter, Math.PI/12.0*i+angle, r/.45*.4, r, view.ghost);
+		r = 0.45 * Math.min(view.getBounds().width, view.getBounds().height);
 		
-	  view.drawCircle(viewCenter, r, 48, view.ghost);
-      view.drawCircle(viewCenter, r/.45*.4, 48, view.teal);
+		if (theWindow != null && view.tilting)
+		{
+			for (int i=0; i<4; i++)
+				view.drawLine(viewCenter, Math.PI/2.0*i+angle, 0.0, r, view.cueIdle);
+			view.drawLine(viewCenter, -Math.PI/2.0, r, r*1.1, view.red);
+			view.drawLine(viewCenter,  Math.PI/2.0, r, r*1.1, view.red);
+			view.drawLine(viewCenter,  Math.PI    , r, r*1.1, view.blue);
+			view.drawLine(viewCenter,  0.0        , r, r*1.1, view.blue);
+			for (int i=0; i<24; i++) 
+				view.drawLine(viewCenter, Math.PI/12.0*i+angle, r*.95, r, view.cueActive);
+			view.drawCircle(viewCenter, r, 48, view.cueActive);
+		}
 	}
-  }
 }

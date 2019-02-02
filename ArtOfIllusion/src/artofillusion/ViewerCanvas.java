@@ -53,7 +53,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected final ViewChangedEvent viewChangedEvent;
 
-  public static Color gray, ghost, red, green, blue, teal, TEAL;
+  public static Color gray, red, green, blue, CUE, cueActive, cueIdle;
   public Point mousePoint;
   public boolean perspectiveControlEnabled = true;
   public boolean navigationTravelEnabled = true;
@@ -175,7 +175,7 @@ public abstract class ViewerCanvas extends CustomWidget
     orientation = 0;
     perspective = false;
     scale = 100.0;
-	setNavigationColors();
+    setCueColors();
 	mouseMoveTimer.setCoalesce(false);
   }
 
@@ -1697,27 +1697,27 @@ public abstract class ViewerCanvas extends CustomWidget
 		return (new Point(cx, cy));
 	}
  
-	private void drawNavigationGraphics()
+	private void drawNavigationCues()
 	{
 		if (tilting || moving || rotating) return;
 		
 		int d = Math.min(getBounds().width, getBounds().height);
 		Point viewCenter = getViewCenter();
-		Color color1, colorR, colorX, colorY;
+		Color cueColor;
 		
 		if (scrolling){
-			color1 = gray;
+			cueColor = cueActive;
 		}
 		else{
-			color1 = ghost;
+			cueColor = cueIdle;
 		}
 		if (navigation == 2){
-			drawCircle(viewCenter, d*0.1, 30, color1);
-			drawCircle(viewCenter, d*0.4, 60, color1);
+			drawCircle(viewCenter, d*0.1, 30, cueColor);
+			drawCircle(viewCenter, d*0.4, 60, cueColor);
 		}
 		if (navigation == 3){
-			drawSquare(viewCenter, d*0.1, color1);
-			drawSquare(viewCenter, d*0.4, color1);
+			drawSquare(viewCenter, d*0.1, cueColor);
+			drawSquare(viewCenter, d*0.4, cueColor);
 		}
 	}
 
@@ -1805,35 +1805,29 @@ public abstract class ViewerCanvas extends CustomWidget
 	}
 	
 	/* These colors are used on the navigation cue graphics */
-	private void setNavigationColors()
+	private void setCueColors()
 	{
-		TEAL = new Color(0, 127, 127);
-
-		gray   = new Color(Color.GRAY.getRed()/2+backgroundColor.getRed()/2,
-                           Color.GRAY.getGreen()/2+backgroundColor.getGreen()/2,
-                           Color.GRAY.getBlue()/2+backgroundColor.getBlue()/2);
-						 
-		ghost  = new Color(Color.GRAY.getRed()/3+backgroundColor.getRed()*2/3,
-                           Color.GRAY.getGreen()/3+backgroundColor.getGreen()*2/3,
-                           Color.GRAY.getBlue()/3+backgroundColor.getBlue()*2/3);
-						 
-		red    = new Color(Color.RED.getRed()*3/4+backgroundColor.getRed()/4,
-                           Color.RED.getGreen()*3/4+backgroundColor.getGreen()/4,
-                           Color.RED.getBlue()*3/4+backgroundColor.getBlue()/4);
-						   
-		green  = new Color(Color.GREEN.getRed()*3/4+backgroundColor.getRed()/4,
-                           Color.GREEN.getGreen()*3/4+backgroundColor.getGreen()/4,
-                           Color.GREEN.getBlue()*3/4+backgroundColor.getBlue()/4);
-				 		 
-		teal   = new Color(TEAL.getRed()*3/4+backgroundColor.getRed()/4,
-                           TEAL.getGreen()*3/4+backgroundColor.getGreen()/4,
-                           TEAL.getBlue()*3/4+backgroundColor.getBlue()/4);
-
-		blue   = new Color(Color.BLUE.getRed()*3/4+backgroundColor.getRed()/4,
-                           Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()/4,
-                           Color.BLUE.getBlue()*3/4+backgroundColor.getBlue()/4);
+		CUE       = new Color(0, 127, 255);
+		cueIdle   = new Color(CUE.getRed()  *1/4+backgroundColor.getRed()  *3/4,
+		                      CUE.getGreen()*1/4+backgroundColor.getGreen()*3/4,
+		                      CUE.getBlue() *1/4+backgroundColor.getBlue() *3/4);
+		cueActive = new Color(CUE.getRed()  *1/2+backgroundColor.getRed()  *1/2,
+		                      CUE.getGreen()*1/2+backgroundColor.getGreen()*1/2,
+		                      CUE.getBlue() *1/2+backgroundColor.getBlue() *1/2);
+		gray      = new Color(Color.GRAY.getRed()  *1/2+backgroundColor.getRed()  *1/2,
+		                      Color.GRAY.getGreen()*1/2+backgroundColor.getGreen()*1/2,
+		                      Color.GRAY.getBlue() *1/2+backgroundColor.getBlue() *1/2);
+		red       = new Color(Color.RED.getRed()   *3/4+backgroundColor.getRed()  *1/4,
+		                      Color.RED.getGreen() *3/4+backgroundColor.getGreen()*1/4,
+		                      Color.RED.getBlue()  *3/4+backgroundColor.getBlue() *1/4);
+		green     = new Color(Color.GREEN.getRed()   *3/4+backgroundColor.getRed()  *1/4,
+		                      Color.GREEN.getGreen() *3/4+backgroundColor.getGreen()*1/4,
+		                      Color.GREEN.getBlue()  *3/4+backgroundColor.getBlue() *1/4);
+		blue      = new Color(Color.BLUE.getRed()  *3/4+backgroundColor.getRed()  *1/4,
+		                      Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()*1/4,
+		                      Color.BLUE.getBlue() *3/4+backgroundColor.getBlue() *1/4);
 	}
-	
+
 	/* 
 	 * Blend between two colors. 
 	 * The 'blend' is the balance of the color in range 0.0 - 1.0 from color0 to color1
@@ -1850,7 +1844,10 @@ public abstract class ViewerCanvas extends CustomWidget
 	/** Draw informative graphics on the screen */
 	public void drawOverlay()
 	{
-		if (mouseMoving || scrolling)
-			drawNavigationGraphics();
+		setCueColors(); // This should be set at preferences change
+		if (viewToDrawOn == this)
+			drawNavigationCues();
+		else
+			frustumShape.draw(viewToDrawOn);
 	}
 }

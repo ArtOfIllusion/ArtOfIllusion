@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2017 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2019 Petri Ihalainen
    Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -433,8 +433,8 @@ public abstract class ViewerCanvas extends CustomWidget
 			return;
 		}
 
-		// I wonder if this is right....
-		if (boundCamera != null){
+		// SceneCamera has logic of it's own, so just jump there!
+		if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
 			perspective = perspectiveSwitch = nextPerspective;
 			return;
 		}
@@ -442,8 +442,8 @@ public abstract class ViewerCanvas extends CustomWidget
 		if (animation.animatingMove() || animation.changingPerspective()) 
 			return;
 
-		perspectiveSwitch = nextPerspective;			
-		animation.start(nextPerspective, navigation, theCamera.getCameraCoordinates()); // , refDistToPlane, navigation);
+		perspectiveSwitch = nextPerspective;
+		animation.start(nextPerspective);
 	}
 
 	/** 
@@ -629,9 +629,17 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Get the distance from camera to drawing plane */
+  
   public double getDistToPlane()
   {
-	return distToPlane;
+    if (boundCamera != null)
+        if (boundCamera.getObject() instanceof SceneCamera)
+            return ((SceneCamera)boundCamera.getObject()).getDistToPlane();
+        else if (boundCamera.getObject() instanceof SpotLight)
+            return ((SpotLight)boundCamera.getObject()).getDistToPlane();
+        else if (boundCamera.getObject() instanceof DirectionalLight)
+            return ((DirectionalLight)boundCamera.getObject()).getDistToPlane();
+    return distToPlane;
   }
 
   /** Get the currently used navigation mode */

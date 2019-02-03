@@ -65,9 +65,9 @@ public class ScrollViewTool
 		CoordinateSystem coords = camera.getCameraCoordinates();
         startZ  = new Vec3(coords.getZDirection());
         startUp = new Vec3(coords.getUpDirection());
-		view.setRotationCenter(coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane())));
+		view.setRotationCenter(coords.getOrigin().plus(startZ.times(distToPlane)));
 		mousePoint = view.mousePoint = e.getPoint();
-		scrollTimer.restart(); // The timer takes case of teh graphics and updating the children of a camera object
+		scrollTimer.restart(); // The timer takes case of the graphics and updating the children of a camera object
 
 		switch (navigationMode) 
 		{
@@ -108,11 +108,11 @@ public class ScrollViewTool
 			distToPlane = camera.getDistToScreen()*100.0/view.getScale();
 			camera.setScreenParamsParallel(view.getScale(), bounds.width, bounds.height);
 		}
-		view.setDistToPlane(distToPlane);
 		CoordinateSystem coords = camera.getCameraCoordinates();
 		Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-distToPlane));
 		coords.setOrigin(newPos);
 		camera.setCameraCoordinates(coords);
+		view.setDistToPlane(distToPlane);
 	}
 
 	private void scrollMoveTravel(MouseScrolledEvent e)
@@ -214,9 +214,6 @@ public class ScrollViewTool
 	{
         if (window != null && boundCamera != null)
         {
-            boundCamera.getCoords().copyCoords(camera.getCameraCoordinates());
-            if (boundCamera.getObject() instanceof SceneCamera) ((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);
-
             UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, new Object [] {boundCamera.getCoords(), startCoords});
             moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
             window.setUndoRecord(undo);

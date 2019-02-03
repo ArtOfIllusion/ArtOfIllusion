@@ -522,9 +522,10 @@ public class SceneCamera extends Object3D
     super(in, theScene);
 
     short version = in.readShort();
-    if (version < 0 ||version > 2)
+    if (version < 0 ||version > 3)
       throw new InvalidObjectException("");
-	//distToPlane = in.readDouble();
+    if (version >= 3)
+      distToPlane = in.readDouble();
     fov = in.readDouble();
     depthOfField = in.readDouble();
     focalDist = in.readDouble();
@@ -559,8 +560,8 @@ public class SceneCamera extends Object3D
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(2);
-	//out.writeDouble(distToPlane);
+    out.writeShort(3);
+    out.writeDouble(distToPlane);
     out.writeDouble(fov);
     out.writeDouble(depthOfField);
     out.writeDouble(focalDist);

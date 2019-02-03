@@ -471,7 +471,7 @@ public class RotateViewTool extends EditingTool
 	int dy = dragPoint.y-clickPoint.y;
 	double dts = camera.getDistToScreen();
 	
-	if (view.getBoundCamera() != null){
+	if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
 		int yp = view.getBounds().height/2;
 		double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
 		dts = Math.tan(fa)*yp/100;

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2019 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2020 Petri Ihalainen
    Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -21,6 +21,7 @@ import buoy.widget.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.*;
 import java.io.*;
 import java.text.*;
 import java.util.*;
@@ -63,6 +64,8 @@ public abstract class ViewerCanvas extends CustomWidget
   
   private static boolean openGLAvailable;
   private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
+  private CoordinateAxes coordinateAxes;
+  
   static
   {
     try
@@ -127,6 +130,7 @@ public abstract class ViewerCanvas extends CustomWidget
     theCamera.setCameraCoordinates(coords);
 	finder = new ClickedPointFinder();
     frustumShape = new FrustumShape();
+    coordinateAxes = new CoordinateAxes();
     setBackground(backgroundColor);
 	setRotationCenter(new Vec3());
 	setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
@@ -1275,67 +1279,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected void drawCoordinateAxes()
   {
-    // Select a size for the coordinate axes.
-
-    Rectangle bounds = getBounds();
-    int axisLength = 50;
-    if (axisLength*5 > bounds.width)
-      axisLength = bounds.width/5;
-    if (axisLength*5 > bounds.height)
-      axisLength = bounds.height/5;
-    double len = axisLength/getScale();
-
-    // Calculate the screen positions of the axis ends.
-
-    Vec2 offset = new Vec2(0.5*bounds.width-axisLength-15, 0.5*bounds.height-axisLength-15);
-    CoordinateSystem cameraCoords = theCamera.getCameraCoordinates();
-    Vec3 center = cameraCoords.getOrigin().plus(cameraCoords.getZDirection().times(theCamera.getDistToScreen()));
-    Vec3 xpos = center.plus(new Vec3(len, 0.0, 0.0));
-    Vec3 ypos = center.plus(new Vec3(0.0, len, 0.0));
-    Vec3 zpos = center.plus(new Vec3(0.0, 0.0, len));
-    Vec2 screenCenter = theCamera.getWorldToScreen().timesXY(center).plus(offset);
-    Vec2 screenX = theCamera.getWorldToScreen().timesXY(xpos).plus(offset);
-    Vec2 screenY = theCamera.getWorldToScreen().timesXY(ypos).plus(offset);
-    Vec2 screenZ = theCamera.getWorldToScreen().timesXY(zpos).plus(offset);
-
-    // Draw the axes.
-
-    Point centerPoint = new Point((int) Math.round(screenCenter.x), (int) Math.round(screenCenter.y));
-    drawLine(centerPoint, new Point((int) screenX.x, (int) screenX.y), lineColor);
-    drawLine(centerPoint, new Point((int) screenY.x, (int) screenY.y), lineColor);
-    drawLine(centerPoint, new Point((int) screenZ.x, (int) screenZ.y), lineColor);
-
-    // Draw the labels.
-
-    if (screenX.minus(screenCenter).length() > 2.0)
-    {
-      Vec2 dir = screenX.minus(screenCenter);
-      Vec2 labelPos = screenX.plus(dir.times(8.0/dir.length()));
-      int x = (int) labelPos.x;
-      int y = (int) labelPos.y;
-      drawLine(new Point(x-4, y-4), new Point(x+4, y+4), lineColor);
-      drawLine(new Point(x-4, y+4), new Point(x+4, y-4), lineColor);
-    }
-    if (screenY.minus(screenCenter).length() > 2.0)
-    {
-      Vec2 dir = screenY.minus(screenCenter);
-      Vec2 labelPos = screenY.plus(dir.times(8.0/dir.length()));
-      int x = (int) labelPos.x;
-      int y = (int) labelPos.y;
-      drawLine(new Point(x-4, y-4), new Point(x, y), lineColor);
-      drawLine(new Point(x+4, y-4), new Point(x, y), lineColor);
-      drawLine(new Point(x, y), new Point(x, y+4), lineColor);
-    }
-    if (screenZ.minus(screenCenter).length() > 2.0)
-    {
-      Vec2 dir = screenZ.minus(screenCenter);
-      Vec2 labelPos = screenZ.plus(dir.times(8.0/dir.length()));
-      int x = (int) labelPos.x;
-      int y = (int) labelPos.y;
-      drawLine(new Point(x-4, y-4), new Point(x+4, y-4), lineColor);
-      drawLine(new Point(x+4, y-4), new Point(x-4, y+4), lineColor);
-      drawLine(new Point(x-4, y+4), new Point(x+4, y+4), lineColor);
-    }
+    coordinateAxes.draw();
   }
 
   public int getRenderMode()
@@ -2036,6 +1980,102 @@ public abstract class ViewerCanvas extends CustomWidget
           v.drawLine(new Point(p.x, p.y+i), new Point(p.x+1, p.y+i), c);
           v.drawLine(new Point(p.x, p.y-i), new Point(p.x+1, p.y-i), c);
         }
+    }
+  }
+
+  /** 
+    The coordinate axes (or more precisely 'coordinate directions indicator') as an inner 
+    class to keep it's variables away from the rest of the ViewerCanvas.
+  */
+
+  private class CoordinateAxes
+  {
+    private static final int coordinateAxisSize = 30;
+    private BufferedImage image;
+    private Graphics2D graphics;
+    private int axisLength, imageSize, labelD;
+    private Vec2 label2D, axis2D;
+    private Color axisColor,lastBGColor, lastLColor;
+    private Point imagePos, labelPos, imageCenter;
+    private Rectangle bounds;
+    private CoordinateSystem cameraCoords;
+    private Mat4 rotate;
+    private int axis, i, labelPoint[][][], dc[];
+    private final Vec3 axis3D[] = new Vec3[]{Vec3.vx(), Vec3.vy(), Vec3.vz()};
+    private final Vec3 origin = new Vec3();
+
+    CoordinateAxes()
+    {
+      setDimensions();
+      setColors();
+    }
+
+    void draw()
+    {
+      if (axisLength != coordinateAxisSize || bounds.x != getBounds().width || bounds.y != getBounds().height)
+        setDimensions();
+      if (lastBGColor.getRGB() != backgroundColor.getRGB() || lastLColor.getRGB() != lineColor.getRGB())
+        setColors();
+      cameraCoords = theCamera.getCameraCoordinates();
+      rotate = Mat4.viewTransform(origin, cameraCoords.getZDirection(), cameraCoords.getUpDirection().times(-1));
+      graphics.clearRect(0,0,imageSize-1,imageSize-1);
+      graphics.setColor(axisColor);
+      for(axis = 0; axis < 3; axis++)
+      {
+        axis2D = rotate.timesXY(axis3D[axis]).times(axisLength);
+        label2D = rotate.timesXY(axis3D[axis]).times(axisLength+labelD*2);
+        graphics.drawLine(imageCenter.x, imageCenter.y, point(axis2D, imageCenter).x,  point(axis2D, imageCenter).y);
+        if (label2D.minus(axis2D).length() > (double)labelD/4.0)
+        {
+          labelPos = point(label2D, imageCenter);
+          for (i = 0; i < labelPoint[axis].length; i++)
+          {
+            dc = drawingCoords(labelPoint[axis][i], labelPos);
+            graphics.drawLine(dc[0], dc[1], dc[2], dc[3]);
+          }
+        }
+      }
+      drawImage(image, imagePos.x, imagePos.y);
+    }
+
+    private void setDimensions()
+    {
+      bounds = getBounds();
+      axisLength = Math.min(coordinateAxisSize, Math.min(bounds.width/6, bounds.height/6));
+      labelD = (axisLength < 45) ? 6 : 8; // Indexing. The size is 7 or 9 pixels.
+      imageSize = (axisLength+(labelD+1)*3+1)*2+1; // Make sure it's odd, so the center is really drawn in the middle
+      imageCenter = new Point(imageSize/2, imageSize/2);
+      imagePos = new Point(bounds.width-imageSize, bounds.height-imageSize);
+
+      // The instrucuions to draw x, y and z
+      labelPoint = new int[3][][];
+      labelPoint[0] = new int[][]{{0,0,labelD,labelD},{0,labelD,labelD,0}};
+      labelPoint[1] = new int[][]{{0,0,labelD/2,labelD/2},{labelD/2,labelD/2,labelD,0},{labelD/2,labelD/2,labelD/2,labelD}};
+      labelPoint[2] = new int[][]{{0,0,labelD,0},{0,labelD,labelD,0},{0,labelD,labelD,labelD}};
+
+      image = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_INT_ARGB);
+      graphics = image.createGraphics();
+      graphics.setBackground(new Color(0,0,0,0));
+    }
+
+    private void setColors()
+    {
+      axisColor = new Color(backgroundColor.getRed()*3/8 + lineColor.getRed()*5/8, 
+                            backgroundColor.getGreen()*3/8 + lineColor.getGreen()*5/8, 
+                            backgroundColor.getBlue()*3/8 + lineColor.getBlue()*5/8,
+                            255);
+      lastBGColor = backgroundColor;
+      lastLColor = lineColor;
+    }
+
+    private Point point(Vec2 v2, Point p)
+    {
+      return new Point ((int)v2.x+p.x, (int)v2.y+p.y);
+    }
+
+    private int[] drawingCoords(int[] a, Point p)
+    {
+      return new int[]{a[0]+p.x-labelD/2, a[1]+p.y-labelD/2, a[2]+p.x-labelD/2, a[3]+p.y-labelD/2};
     }
   }
 }

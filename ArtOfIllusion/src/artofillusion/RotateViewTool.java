@@ -160,37 +160,44 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown &&  !e.isShiftDown())
-		{
-			view.tilting = true;
-			tilt(e, view, clickPoint);
-			return;
-		}
-		else if (controlDown && e.isShiftDown())
-		{
-			rotateSpace(e, view, clickPoint);
-			return;
-		}
-		else if (!controlDown && e.isShiftDown())
-		{
-			if (Math.abs(dx) > Math.abs(dy))
+		// Action selection by modifer keys
+
+		if (controlDown)
+			if (e.isShiftDown())
 			{
-				axis = viewToWorld.timesDirection(Vec3.vy());
-				angle = dx * DRAG_SCALE / view.getCamera().getDistToScreen();
+				rotateSpace(e, view, clickPoint);
+				return;
 			}
 			else
 			{
-				axis = viewToWorld.timesDirection(Vec3.vx());
-				angle = -dy * DRAG_SCALE / view.getCamera().getDistToScreen();
+				view.tilting = true;
+				tilt(e, view, clickPoint);
+				return;
 			}
-		}
-		else
-		{
-			axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
-			angle = axis.length() / view.getCamera().getDistToScreen();
-			axis.normalize(); //  = axis.times(1.0/angle);
-			axis = viewToWorld.timesDirection(axis);
-		}
+		else 
+			if (e.isShiftDown())
+				if (Math.abs(dx) > Math.abs(dy))
+				{
+					axis = viewToWorld.timesDirection(Vec3.vy());
+					angle = dx * DRAG_SCALE / view.getCamera().getDistToScreen();
+				}
+				else
+				{
+					axis = viewToWorld.timesDirection(Vec3.vx());
+					angle = -dy * DRAG_SCALE / view.getCamera().getDistToScreen();
+				}
+			else
+			{
+				// The default case
+				
+				axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
+				angle = axis.length() / view.getCamera().getDistToScreen();
+				axis.normalize(); //  = axis.times(1.0/angle);
+				axis = viewToWorld.timesDirection(axis);
+			}
+
+		// Modifier keys checked
+
 		if (angle != 0)
 		{
 			c.transformCoordinates(Mat4.translation(-location.x, -location.y, -location.z));
@@ -214,37 +221,44 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (controlDown && !e.isShiftDown())
-		{
-			view.tilting = true;
-			tilt(e, view, clickPoint);
-			return;
-		}
-		else if (controlDown && e.isShiftDown())
-		{
-			panSpace(e, view, clickPoint);
-			return;
-		}
-		else if (!controlDown && e.isShiftDown())
-		{
-			if (Math.abs(dx) > Math.abs(dy))
+		// Action selection by modifer keys
+
+		if (controlDown)
+			if (e.isShiftDown())
 			{
-				axis = viewToWorld.timesDirection(Vec3.vy());
-				angle = dx * DRAG_SCALE;
+				panSpace(e, view, clickPoint);
+				return;
 			}
 			else
 			{
-				axis = viewToWorld.timesDirection(Vec3.vx());
-				angle = -dy * DRAG_SCALE;
+				view.tilting = true;
+				tilt(e, view, clickPoint);
+				return;
 			}
-		}
 		else
-		{
-			axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
-			angle = axis.length();
-			axis = axis.times(1.0/angle);
-			axis = viewToWorld.timesDirection(axis);
-		}
+			if (e.isShiftDown())
+				if (Math.abs(dx) > Math.abs(dy))
+				{
+					axis = viewToWorld.timesDirection(Vec3.vy());
+					angle = dx * DRAG_SCALE;
+				}
+				else
+				{
+					axis = viewToWorld.timesDirection(Vec3.vx());
+					angle = -dy * DRAG_SCALE;
+				}
+			else
+			{
+				// This is the deault action
+				
+				axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
+				angle = axis.length();
+				axis = axis.times(1.0/angle);
+				axis = viewToWorld.timesDirection(axis);
+			}
+
+		// Modifier keys checked
+
 		if (angle != 0.0)
 		{
 			c.transformCoordinates(Mat4.translation(-rotationCenter.x, -rotationCenter.y, -rotationCenter.z));

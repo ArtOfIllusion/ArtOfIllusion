@@ -160,7 +160,7 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (mouseButtonTwo(e) && controlDown)
+		if (controlDown &&  !e.isShiftDown())
 		{
 			view.tilting = true;
 			tilt(e, view, clickPoint);
@@ -214,7 +214,7 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (mouseButtonTwo(e) && controlDown)
+		if (controlDown && !e.isShiftDown())
 		{
 			view.tilting = true;
 			tilt(e, view, clickPoint);

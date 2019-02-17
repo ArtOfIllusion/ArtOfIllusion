@@ -692,14 +692,21 @@ public abstract class ViewerCanvas extends CustomWidget
       return;
     }
 
-    
-	// Change perspective without animation, if needed.
-    if (nextNavigation < 2) // ...?
-	  perspective = nextPerspective;
+    // Change perspective without animation. This is a bit blunt but softer  
+    // options would need a more complex set of conditions.
+
+    if (nextNavigation < 2)
+        perspective = nextPerspective;
     else
-	  perspective = true;
-	  
-    // Turn y up for landscape modes. Animated
+        perspective = true;
+    if (perspective)
+        scale = 100;
+    else
+        scale = 100.0*theCamera.getDistToScreen()/distToPlane;
+
+    // If changing from a 3D-mode to a landscape mode, 
+    // animate the turning of y-direction up.
+
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
     {
 		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
@@ -742,42 +749,6 @@ public abstract class ViewerCanvas extends CustomWidget
 		viewChanged(false);
 	}
 	repaint();
-  }
-
-  /** Changing perspective without animation **/
-  
-  private void flipPerspectiveSwitch(boolean nextPerspective)
-  {
-	if (perspective == nextPerspective || perspectiveSwitch == nextPerspective)
-		return;
-	
-	if(nextPerspective)
-	{
-		// converting scale to distance
-		distToPlane = 100.0*theCamera.getDistToScreen()/scale;
-		scale = 100.0; // scale needs to be 100 in perspective mode or the magnification is incorrect.
-		
-		// repositioning camera
-		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
-		Vec3 cz = new Vec3(coords.getZDirection());
-		Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
-		coords.setOrigin(cp);
-		theCamera.setCameraCoordinates(coords);	
-	}
-	else
-	{
-		// converting distance to scale
-		scale = 100.0*theCamera.getDistToScreen()/distToPlane;
-		distToPlane = 20.0; // to follow the convention
-		
-		// repositioning camera
-		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
-		Vec3 cz = new Vec3(coords.getZDirection());
-		Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
-		coords.setOrigin(cp);
-		theCamera.setCameraCoordinates(coords);
-	}
-	perspectiveSwitch = perspective = nextPerspective;
   }
 
   /** Set the PopupMenuManager for this canvas. */

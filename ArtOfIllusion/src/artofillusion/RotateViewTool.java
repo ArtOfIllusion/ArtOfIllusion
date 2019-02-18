@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
-   Changes copyright (C) 2106-2017 by Petri Ihalainen
+   Changes copyright (C) 2016-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -107,13 +107,13 @@ public class RotateViewTool extends EditingTool
 		if (e.getPoint() != clickPoint && view.getBoundCamera() == null) // This is needed even if the mouse has not been dragged yet.
 			view.setOrientation(VIEW_OTHER);
 			
-		if (theWindow != null
-                   && theWindow.getToolPalette().getSelectedTool() == this
-                   && mouseButtonOne(e))
+		if (theWindow != null && 
+		    theWindow.getToolPalette().getSelectedTool() == this && 
+		    mouseButtonOne(e))
 		{
 			if (view.getNavigationMode() == NAVIGATE_MODEL_SPACE)
 				dragRotateSpace(e, view);
-			else if (view.getNavigationMode() == 1)
+			else
 			{
 				Vec3 zD = oldCoords.getZDirection();
 				fwMax = Math.PI*0.5+Math.asin(zD.y);
@@ -349,7 +349,7 @@ public class RotateViewTool extends EditingTool
 		}
 		else
 		{
-			if (view.getBoundCamera() != null){
+			if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
 				int yp = view.getBounds().height/2;
 				double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
 				
@@ -485,7 +485,7 @@ public class RotateViewTool extends EditingTool
 	int dy = dragPoint.y-clickPoint.y;
 	double dts = camera.getDistToScreen();
 	
-	if (view.getBoundCamera() != null){
+	if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
 		int yp = view.getBounds().height/2;
 		double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
 		dts = Math.tan(fa)*yp/100;

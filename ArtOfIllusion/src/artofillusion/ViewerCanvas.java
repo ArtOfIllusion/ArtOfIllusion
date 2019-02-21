@@ -812,9 +812,9 @@ public abstract class ViewerCanvas extends CustomWidget
 
     if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
       theCamera.setScreenTransform(((SceneCamera) boundCamera.getObject()).getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
-	}
+    }
     else if (perspective)
-      theCamera.setScreenParams(0, scale, bounds.width, bounds.height);
+      theCamera.setScreenParams(scale, bounds.width, bounds.height);
     else
       theCamera.setScreenParamsParallel(scale, bounds.width, bounds.height);
   }
@@ -900,7 +900,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
     Rectangle bounds = getBounds();
     if (isPerspective())
-      theCamera.setScreenParams(0, 100.0, bounds.width, bounds.height);
+      theCamera.setScreenParams(100.0, bounds.width, bounds.height);
     else
       theCamera.setScreenParamsParallel(100.0, bounds.width, bounds.height);
     double startDist = Camera.DEFAULT_DISTANCE_TO_SCREEN+Math.max(Math.max(bb.maxx-bb.minx, bb.maxy-bb.miny), bb.maxz-bb.minz);

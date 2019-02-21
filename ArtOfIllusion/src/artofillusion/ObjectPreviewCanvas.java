@@ -148,7 +148,7 @@ public class ObjectPreviewCanvas extends ViewerCanvas
       Vec3 objSize = objInfo.getObject().getBounds().getSize();
       double scale = 0.8*Math.min(dim.width, dim.height)/Math.max(Math.max(objSize.x, objSize.y), objSize.z);
       setScale(scale);
-      theCamera.setScreenParams(0, scale, dim.width, dim.height);
+      theCamera.setScreenParams(scale, dim.width, dim.height);
       sizeSet = true;
     }
     Vec3 viewDir = theCamera.getViewToWorld().timesDirection(Vec3.vz());

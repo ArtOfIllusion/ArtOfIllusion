@@ -265,7 +265,7 @@ public class SceneCamera extends Object3D
     if (perspective)
     {
       double scale = 0.5*height/Math.tan(getFieldOfView()*Math.PI/360.0);
-      Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(0.0));
+      Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective());
       screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
       return screenTransform;
     }

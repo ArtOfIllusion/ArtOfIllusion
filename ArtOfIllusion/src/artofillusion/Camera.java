@@ -54,7 +54,7 @@ public class Camera implements Cloneable
   {
     objectToWorld = objectToView = worldToView = viewToWorld = Mat4.identity();
     distToScreen = DEFAULT_DISTANCE_TO_SCREEN;
-    setScreenParams(0.0, 100.0, 100, 100);
+    setScreenParams(100.0, 100, 100);
   }
 
   /**
@@ -140,10 +140,10 @@ public class Camera implements Cloneable
    * Set the camera to perspective mode with the specified parameters.
    */
 
-  public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
+  public void setScreenParams(double newScale, int newHres, int newVres)
   {
     scale = newScale*distToScreen;
-    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
+    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(0.0));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
 
@@ -152,6 +152,23 @@ public class Camera implements Cloneable
     // objects but not rendering lines (like the grid). GLCanvasDrawer ignores this setting 
     // entirely and uses its own, that produces the exact same clipping distance.
 
+    frontClipPlane = distToScreen/DEFAULT_DISTANCE_TO_SCREEN;
+    perspective = true;
+  }
+
+  /**
+   * Set the camera to perspective mode with the specified parameters.
+   * With this method you can have the perspective dirtortion origin 
+   * separated from the camera origin. It is recommended to 
+   * use <pre>setScreenParams(double newScale, int newHres, int newVres)</pre> instead.
+   */
+
+  public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
+  {
+    scale = newScale*distToScreen;
+    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
+    screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
+    setScreenTransform(screenTransform, newHres, newVres);
     frontClipPlane = distToScreen/DEFAULT_DISTANCE_TO_SCREEN;
     perspective = true;
   }

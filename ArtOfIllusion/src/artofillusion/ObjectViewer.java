@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Modifications copyright (C) 2017 Petri Ihalainen
+   Modifications copyright (C) 2017-2019 Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -189,7 +189,6 @@ public abstract class ObjectViewer extends ViewerCanvas
         drawImage(renderedImage, 0, 0);
       else
         viewChanged(false);
-      drawOverlay();
       drawBorder();
       if (showAxes)
         drawCoordinateAxes();
@@ -224,12 +223,14 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     // Finish up.
 
-    drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
+    if (controller instanceof ObjectEditorWindow)
+        for(ViewerCanvas v : ((ObjectEditorWindow)controller).getAllViews())
+            v.drawOverlay(this);
     if (showAxes)
-      drawCoordinateAxes();
+        drawCoordinateAxes();
     drawBorder();
   }
 
@@ -503,13 +504,4 @@ public abstract class ObjectViewer extends ViewerCanvas
     theCamera.setCameraCoordinates(cameraCoords);
     adjustCamera(isPerspective());
   }
-  
-   	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		((EditingWindow)controller).updateImage();
-	}
 }

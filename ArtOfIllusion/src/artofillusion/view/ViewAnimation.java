@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2017 by Petri Ihalainen
+/* Copyright (C) 2016-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -46,7 +46,7 @@ public class ViewAnimation
 	Vec3 endRotationCenter, rotStart, rotAni, aniZ, aniOrigin;
 	ViewerCanvas view;
 	Camera camera;
-    boolean  viewHasCamera;
+	ObjectInfo boundCamera;
 	double[] startAngles, endAngles;
 	double   startDist, endDist, aniDist, distanceFactor, moveDist; 
 	double   startWeightLin, endWeightLin, startWeightExp, endWeightExp;
@@ -97,35 +97,31 @@ public class ViewAnimation
 		}
 	});
 
-	/** Start animation of perspective change. */
-	public void start(boolean nextPerspective, int nextNavigation, CoordinateSystem nextCoords)
+	/** Start animation of perspective change. 
+	    Camera position will not eventually chnage but the camera will travel 
+	    from/to infinity to produce the perspectve change effect. */
+	
+	public void start(boolean nextPerspective)
 	{
+		if (changingPerspective)
+			return;
+
 		camera = view.getCamera();
-		
 		endPerspective = nextPerspective;
 		endRotationCenter = view.getRotationCenter();
 		endOrientation = view.getOrientation();
 		endNavigation = view.getNavigationMode();
 		endDistToScreen = camera.getDistToScreen();
-		refDistToScreen = endDistToScreen = camera.getDistToScreen();
-		if (view.isPerspective())
-			refDistToPlane = view.getDistToPlane();
-		else
-			refDistToPlane = 100.0/view.getScale()*camera.getDistToScreen();
-		
-
+		refDistToScreen = camera.getDistToScreen();
+		refDistToPlane = view.getDistToPlane();
 		endCoords = camera.getCameraCoordinates().duplicate();
-		if(nextPerspective){
-			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-refDistToPlane)));
+		if(nextPerspective)
 			endScale = 100.0;
-		}
-		else{
-			endCoords.setOrigin(view.getRotationCenter().plus(endCoords.getZDirection().times(-20)));
+		else
 			endScale = 100.0*refDistToScreen/refDistToPlane;
-		}
-		
 		checkPreferences(); // This only works for the 'animate'
-		if (! animate){
+		if (! animate)
+		{
 			endAnimation(); // Go directly to the last frame
 			return;
 		}
@@ -164,7 +160,7 @@ public class ViewAnimation
 
 		step = 1;
 		changingPerspective = true;
-        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
+		boundCamera = view.getBoundCamera();
 		timer.restart();
 	}
 
@@ -183,17 +179,10 @@ public class ViewAnimation
 		// This has to be the last thing before repaint.
 		// The view will react to it immediately.
 
-		if (step == 1){
+		if (step == 1)
 			view.preparePerspectiveAnimation();
-		}
+
 		view.repaint();
-        if (viewHasCamera)
-            window.setModified();
-        else
-
-		// auxGraphs shows up wrong. Possibly numerical accuaracy issue.
-		// setAuxGraphs();
-
 		step++;
 	}
 
@@ -224,11 +213,14 @@ public class ViewAnimation
 			return;
 		}
 
-		startCoords = camera.getCameraCoordinates().duplicate();
-		aniCoords = startCoords.duplicate();
+		// If an animationis redireceted, let's use the original starting point
+
+		if(! animatingMove)
+			startCoords = camera.getCameraCoordinates().duplicate();
+
+		aniCoords = camera.getCameraCoordinates().duplicate();
 		rotStart = view.getRotationCenter(); // get from view
 		startScale = view.getScale(); // get from view
-		
 		startAngles = startCoords.getRotationAngles();
 		endAngles = endCoords.getRotationAngles();
 		startDist = (startCoords.getOrigin().minus(rotStart).length());
@@ -309,7 +301,6 @@ public class ViewAnimation
 		if (timeAni < timeRot) timeAni = timeRot;
 		if (timeAni < timeScale) timeAni = timeScale;
 		if (timeAni < timeDist) timeAni = timeDist;
-		//if (timeRot == 0.0) // this must be a remnant from something else
 		if (timeAni < timeMove) timeAni = timeMove;
 				
 		if (timeAni == 0.0) // zero for time = nothing moves & division by zero next --> Blank view.
@@ -328,10 +319,10 @@ public class ViewAnimation
 			view.viewChanged(false);
 		}
 		
+		boundCamera = view.getBoundCamera();
 		// Now we  know all we need to know to launch the animation sequence.
 		// Restart because the previous move could still be running.
 		animatingMove = true;
-        viewHasCamera = (window instanceof LayoutWindow && view.getBoundCamera() != null);
 		timer.restart();
 	}
 
@@ -380,9 +371,6 @@ public class ViewAnimation
 		camera.setCameraCoordinates(aniCoords);
 		view.setScale(view.getScale()*scalingFactor);
 		view.repaint();
-        if (viewHasCamera)
-            window.setModified();
-		setAuxGraphs();
 		step++;
 	}
 
@@ -396,21 +384,16 @@ public class ViewAnimation
 		view.setRotationCenter(endRotationCenter);
 		view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work without this too... But not with SceneCamera
 		view.setShowGrid(endShowGrid);
-		changingPerspective = false;
-		animatingMove = false;
-
-		wipeAuxGraphs();
 		view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
-        if (viewHasCamera)
-        {
-            window.updateImage();
-            window.setModified();
-        }
+        if (boundCamera != null)
+            updateBoundCamera();
         else
         {
-		view.viewChanged(false);
-		view.repaint();
-	}
+			view.viewChanged(false);
+			view.repaint();
+		}
+		changingPerspective = false;
+		animatingMove = false;
     }
 
 	/** 
@@ -437,17 +420,31 @@ public class ViewAnimation
 		animate = ArtOfIllusion.getPreferences().getUseViewAnimations();
 	}
 
-	/* Set view cone craphis */
-	public void setAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			if (v != view)
-				v.auxGraphs.set(view, true);
-	}
+    private void updateBoundCamera()
+    {
+        if (window != null)
+        {
+            if (boundCamera != null)
+            {
+                boundCamera.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
+                UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, new Object [] {boundCamera.getCoords(), startCoords});
+                moveChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
+                window.setUndoRecord(undo);
+            }
+            window.updateImage();
+        }
+        view.viewChanged(false);
+    }
 
-	public void wipeAuxGraphs()
-	{
-		for (ViewerCanvas v : window.getAllViews())
-			v.auxGraphs.wipe();
-	}
+    private void moveChildren(ObjectInfo parent, Mat4 transform, UndoRecord undo)
+    {
+        for (int i = 0; i < parent.getChildren().length; i++)
+        {
+            CoordinateSystem coords = parent.getChildren()[i].getCoords();
+            CoordinateSystem oldCoords = coords.duplicate();
+            coords.transformCoordinates(transform);
+            undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
+            moveChildren(parent.getChildren()[i], transform, undo);
+        }  
+    }
 }

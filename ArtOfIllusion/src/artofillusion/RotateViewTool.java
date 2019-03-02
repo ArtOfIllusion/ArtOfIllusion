@@ -107,9 +107,9 @@ public class RotateViewTool extends EditingTool
 		if (e.getPoint() != clickPoint && view.getBoundCamera() == null) // This is needed even if the mouse has not been dragged yet.
 			view.setOrientation(VIEW_OTHER);
 			
-		if (theWindow != null
-                   && theWindow.getToolPalette().getSelectedTool() == this
-                   && mouseButtonOne(e))
+		if (theWindow != null && 
+		    theWindow.getToolPalette().getSelectedTool() == this && 
+		    mouseButtonOne(e))
 		{
 			if (view.getNavigationMode() == NAVIGATE_MODEL_SPACE)
 				dragRotateSpace(e, view);
@@ -166,39 +166,41 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (mouseButtonTwo(e) && controlDown)
-		{
-			view.tilting = true;
-			tilt(e, view, clickPoint);
-			return;
-		}
-		else if (controlDown && e.isShiftDown())
-		{
-			rotateSpace(e, view, clickPoint);
-			return;
-		}
-		else if (!controlDown && e.isShiftDown())
-		{
-			if (Math.abs(dx) > Math.abs(dy))
+		// Action selection by modifer keys
+
+		if (controlDown)
+			if (e.isShiftDown())
 			{
-				axis = viewToWorld.timesDirection(Vec3.vy());
-				angle = dx * DRAG_SCALE / view.getCamera().getDistToScreen();
+				rotateSpace(e, view, clickPoint);
+				return;
 			}
 			else
 			{
-				axis = viewToWorld.timesDirection(Vec3.vx());
-				angle = -dy * DRAG_SCALE / view.getCamera().getDistToScreen();
+				view.tilting = true;
+				tilt(e, view, clickPoint);
+				return;
 			}
-		}
-		else
-		{
-			// The default case
-		
-			axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
-			angle = axis.length() / view.getCamera().getDistToScreen();
-			axis.normalize(); //  = axis.times(1.0/angle);
-			axis = viewToWorld.timesDirection(axis);
-		}
+		else 
+			if (e.isShiftDown())
+				if (Math.abs(dx) > Math.abs(dy))
+				{
+					axis = viewToWorld.timesDirection(Vec3.vy());
+					angle = dx * DRAG_SCALE / view.getCamera().getDistToScreen();
+				}
+				else
+				{
+					axis = viewToWorld.timesDirection(Vec3.vx());
+					angle = -dy * DRAG_SCALE / view.getCamera().getDistToScreen();
+				}
+			else
+			{
+				// The default case
+				
+				axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
+				angle = axis.length() / view.getCamera().getDistToScreen();
+				axis.normalize(); //  = axis.times(1.0/angle);
+				axis = viewToWorld.timesDirection(axis);
+			}
 
 		// Modifier keys checked
 
@@ -225,39 +227,41 @@ public class RotateViewTool extends EditingTool
 		dx = dragPoint.x-clickPoint.x;
 		dy = dragPoint.y-clickPoint.y;
 
-		if (mouseButtonTwo(e) && controlDown)
-		{
-			view.tilting = true;
-			tilt(e, view, clickPoint);
-			return;
-		}
-		else if (controlDown && e.isShiftDown())
-		{
-			panSpace(e, view, clickPoint);
-			return;
-		}
-		else if (!controlDown && e.isShiftDown())
-		{
-			if (Math.abs(dx) > Math.abs(dy))
+		// Action selection by modifer keys
+
+		if (controlDown)
+			if (e.isShiftDown())
 			{
-				axis = viewToWorld.timesDirection(Vec3.vy());
-				angle = dx * DRAG_SCALE;
+				panSpace(e, view, clickPoint);
+				return;
 			}
 			else
 			{
-				axis = viewToWorld.timesDirection(Vec3.vx());
-				angle = -dy * DRAG_SCALE;
+				view.tilting = true;
+				tilt(e, view, clickPoint);
+				return;
 			}
-		}
 		else
-		{
-			// This is the deault action
-			
-			axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
-			angle = axis.length();
-			axis = axis.times(1.0/angle);
-			axis = viewToWorld.timesDirection(axis);
-		}
+			if (e.isShiftDown())
+				if (Math.abs(dx) > Math.abs(dy))
+				{
+					axis = viewToWorld.timesDirection(Vec3.vy());
+					angle = dx * DRAG_SCALE;
+				}
+				else
+				{
+					axis = viewToWorld.timesDirection(Vec3.vx());
+					angle = -dy * DRAG_SCALE;
+				}
+			else
+			{
+				// This is the deault action
+				
+				axis = new Vec3(-dy*DRAG_SCALE, dx*DRAG_SCALE, 0.0);
+				angle = axis.length();
+				axis = axis.times(1.0/angle);
+				axis = viewToWorld.timesDirection(axis);
+			}
 
 		// Modifier keys checked
 
@@ -351,8 +355,7 @@ public class RotateViewTool extends EditingTool
 		}
 		else
 		{
-			if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
-			{
+			if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
 				int yp = view.getBounds().height/2;
 				double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
 				dts = Math.tan(fa)*yp/100;

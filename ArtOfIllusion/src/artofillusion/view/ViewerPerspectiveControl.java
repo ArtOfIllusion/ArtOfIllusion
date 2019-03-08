@@ -1,5 +1,5 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
-   Modifications copyright (C) 2017-2019 Petri Ihalainen
+   Modifications copyright (C) 2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,24 +30,30 @@ public class ViewerPerspectiveControl implements ViewerControl
       Translate.text("Perspective"),
       Translate.text("Parallel")
     });
-
+	
     perspectiveChoice.setSelectedIndex(1);
-
+	
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
         if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
+		  view.setPerspective(true);
+		  perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
           perspectiveChoice.setEnabled(false);
-          view.setPerspective(((SceneCamera)view.getBoundCamera().getObject()).isPerspective());
-          perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
-        }
+		}
         else if (view.getRenderMode() == ViewerCanvas.RENDER_RENDERED)
           perspectiveChoice.setEnabled(false);
+		else if (view.getNavigationMode() > 1)
+		{
+		  perspectiveChoice.setEnabled(false);
+		  perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
+        }
         else
         {
-          perspectiveChoice.setEnabled(view.perspectiveControlEnabled);
+          perspectiveChoice.setEnabled(true);
           perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
         }
+		perspectiveChoice.setEnabled(view.perspectiveControlEnabled);
       }
     });
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2019 by Petri Ihalainen
+/* Copyright (C) 2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ public class ScrollViewTool
 	private ViewerCanvas view;
 	private Camera camera;
 	private double distToPlane;
-	private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY;
+	private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY; // for graphics
     private int navigationMode, scrollSteps, startOrientation;
     private Vec3 startZ, startUp;
 	private Rectangle bounds;
@@ -65,9 +65,9 @@ public class ScrollViewTool
 		CoordinateSystem coords = camera.getCameraCoordinates();
         startZ  = new Vec3(coords.getZDirection());
         startUp = new Vec3(coords.getUpDirection());
-		view.setRotationCenter(coords.getOrigin().plus(startZ.times(distToPlane)));
+		view.setRotationCenter(coords.getOrigin().plus(coords.getZDirection().times(view.getDistToPlane())));
 		mousePoint = view.mousePoint = e.getPoint();
-		scrollTimer.restart(); // The timer takes case of the graphics and updating the children of a camera object
+		scrollTimer.restart(); // The timer takes case of teh graphics and updating the children of a camera object
 
 		switch (navigationMode) 
 		{
@@ -82,14 +82,10 @@ public class ScrollViewTool
 			default:
 				break;
 		}
-		if (boundCamera != null)
-			boundCamera.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
-		view.frustumShape.update();
-		if (ArtOfIllusion.getPreferences().getDrawActiveFrustum() || 
-		   (ArtOfIllusion.getPreferences().getDrawCameraFrustum() && view.getBoundCamera() != null))
-			window.updateImage();
-		else
-			view.repaint();
+		
+		setAuxGraphs(view);
+		repaintAllViews(view);
+		//view.repaint
 		view.viewChanged(false);
 	}
 
@@ -101,18 +97,22 @@ public class ScrollViewTool
 		if (ArtOfIllusion.getPreferences().getReverseZooming())
 			amount *= -1;
 		if (view.isPerspective())
-			distToPlane = distToPlane*Math.pow(1.01, amount);
+		{
+			CoordinateSystem coords = camera.getCameraCoordinates();
+			double oldDist = distToPlane;
+            //double newDist = oldDist*Math.pow(1.0/1.01, amount); // This would reverse the action
+			double newDist = oldDist*Math.pow(1.01, amount);
+			Vec3 oldPos = new Vec3(coords.getOrigin());
+			Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
+			coords.setOrigin(newPos);
+			camera.setCameraCoordinates(coords);
+			view.setDistToPlane(newDist);
+			distToPlane = newDist; // local field
+		}
 		else
 		{
 			view.setScale(view.getScale()*Math.pow(1.0/1.01, amount));
-			distToPlane = camera.getDistToScreen()*100.0/view.getScale();
-			camera.setScreenParamsParallel(view.getScale(), bounds.width, bounds.height);
 		}
-		CoordinateSystem coords = camera.getCameraCoordinates();
-		Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-distToPlane));
-		coords.setOrigin(newPos);
-		camera.setCameraCoordinates(coords);
-		view.setDistToPlane(distToPlane);
 	}
 
 	private void scrollMoveTravel(MouseScrolledEvent e)
@@ -159,6 +159,11 @@ public class ScrollViewTool
 			oldPos = new Vec3(coords.getOrigin());
 			newPos = oldPos.plus(coords.getZDirection().times(deltaZ));
 			coords.setOrigin(newPos);
+			
+			if (scrollBlend < 0.5)
+				view.blendColorR = blendColor(view.green, view.yellow, scrollBlend*2.0);
+			else
+				view.blendColorR = blendColor(view.yellow, view.red, scrollBlend*2.0-1.0);
 		}
 		
 		else if (navigationMode == ViewerCanvas.NAVIGATE_TRAVEL_LANDSCAPE)
@@ -199,6 +204,16 @@ public class ScrollViewTool
 			newPos = oldPos.plus(hDir.times(deltaZ));
 			newPos = newPos.plus(vDir.times(deltaY));
 			coords.setOrigin(newPos);
+			
+			if (scrollBlendX < 0.5)
+				view.blendColorX = blendColor(view.green, view.yellow, scrollBlendX*2.0);
+			else
+				view.blendColorX = blendColor(view.yellow, view.red, scrollBlendX*2.0-1.0);
+			
+			if (scrollBlendY < 0.5)
+				view.blendColorY = blendColor(view.green, view.yellow, scrollBlendY*2.0);
+			else
+				view.blendColorY = blendColor(view.yellow, view.red, scrollBlendY*2.0-1.0);
 		}
 		else 
 			return;
@@ -212,14 +227,17 @@ public class ScrollViewTool
 
 	public void mouseStoppedScrolling()
 	{
-        if (window != null && boundCamera != null)
+	    if (window != null && boundCamera != null)
         {
+            boundCamera.getCoords().copyCoords(camera.getCameraCoordinates());
+            if (boundCamera.getObject() instanceof SceneCamera) ((SceneCamera)boundCamera.getObject()).setDistToPlane(distToPlane);
+
             UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, new Object [] {boundCamera.getCoords(), startCoords});
             moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
             window.setUndoRecord(undo);
         }
+		wipeAuxGraphs();
         window.updateImage();
-        view.viewChanged(false);
 	}
 
 	private Timer scrollTimer = new Timer(500, new ActionListener() 
@@ -232,6 +250,15 @@ public class ScrollViewTool
 			mouseStoppedScrolling();
 		}
 	});
+
+	private Color  blendColor(Color color0, Color color1, double blend)
+	{
+		int R = (int)(color0.getRed()*(1.0-blend) + color1.getRed()*blend);
+		int G = (int)(color0.getGreen()*(1.0-blend) + color1.getGreen()*blend);
+		int B = (int)(color0.getBlue()*(1.0-blend) + color1.getBlue()*blend);
+		
+		return new Color(R, G, B);
+	}
 
 	/** 
 	    This is called recursively to move any children of a bound camera. 
@@ -247,4 +274,33 @@ public class ScrollViewTool
             moveCameraChildren(parent.getChildren()[i], transform, undo);
 		}  
 	}
+
+  private void repaintAllViews(ViewerCanvas view)
+  {
+    if (window == null || window instanceof UVMappingWindow)
+	  view.repaint();
+    else
+	  for (ViewerCanvas v : window.getAllViews())
+	  	v.repaint();
+  }
+
+  private void setAuxGraphs(ViewerCanvas view)
+  {
+	if (window != null)
+	  for (ViewerCanvas v : window.getAllViews())
+        if (v != view)
+	      v.auxGraphs.set(view, true);
+  }
+  
+  private void wipeAuxGraphs()
+  {
+    if (window != null)
+	  for (ViewerCanvas v : window.getAllViews())
+		v.auxGraphs.wipe();
+  }
+
+	public void drawOverlay()
+    {
+        // This could draw a "ghost" of the bound camera and it's children during scroll
+    }
 }

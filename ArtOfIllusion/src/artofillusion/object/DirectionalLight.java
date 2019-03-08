@@ -178,13 +178,11 @@ public class DirectionalLight extends Light
     super(in, theScene);
 
     short version = in.readShort();
-    if (version < 0 || version > 3)
+    if (version < 0 || version > 2)
       throw new InvalidObjectException("");
     setParameters(new RGBColor(in), in.readFloat(), version == 0 ? TYPE_NORMAL : in.readShort(), 0.0f);
     setRadius(version > 1 ? in.readDouble() : 0.0);
-    if (version >= 3)
-      distToPlane = in.readDouble();
-
+	//distToPlane = in.readDouble();
     bounds = new BoundingBox(-0.15, 0.15, -0.15, 0.15, -0.15, 0.25);
   }
 
@@ -193,12 +191,13 @@ public class DirectionalLight extends Light
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(3);
+    out.writeShort(2);
     color.writeToFile(out);
     out.writeFloat(intensity);
     out.writeShort(type);
     out.writeDouble(radius);
-    out.writeDouble(distToPlane);
+    //out.writeDouble(distToPlane);
+	
   }
 
   @Override

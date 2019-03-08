@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
-   Changes Copyright 2016-2019 by Petri Ihalainen
+   Modifications Copyright 2016 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -218,15 +218,13 @@ public class SpotLight extends Light
     super(in, theScene);
 
     short version = in.readShort();
-    if (version < 0 || version > 2)
+    if (version < 0 || version > 1)
       throw new InvalidObjectException("");
     setParameters(new RGBColor(in), in.readFloat(), version == 0 ? (in.readBoolean() ? TYPE_AMBIENT : TYPE_NORMAL) : in.readShort(), in.readFloat());
     setRadius(in.readDouble());
     setAngle(in.readDouble());
     setFalloff(in.readDouble());
-    if (version >= 2)
-      distToPlane = in.readDouble();
-
+	//distToPlane = in.readDouble();
     bounds = new BoundingBox(-0.2, 0.2, -0.2, 0.2, -0.2, 0.2);
   }
 
@@ -235,7 +233,7 @@ public class SpotLight extends Light
   {
     super.writeToFile(out, theScene);
 
-    out.writeShort(2);
+    out.writeShort(1);
     color.writeToFile(out);
     out.writeFloat(intensity);
     out.writeShort(type);
@@ -243,7 +241,7 @@ public class SpotLight extends Light
     out.writeDouble(radius);
     out.writeDouble(angle);
     out.writeDouble(falloff);
-    out.writeDouble(distToPlane);
+    //out.writeDouble(distToPlane);
   }
 
   @Override

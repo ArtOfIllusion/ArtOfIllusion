@@ -258,13 +258,20 @@ public abstract class MeshViewer extends ObjectViewer
 
 	CoordinateSystem newCoords = theCamera.getCameraCoordinates().duplicate();
 	int d = Math.min(getBounds().width, getBounds().height);
-	double newDistToPlane = 100*theCamera.getDistToScreen() / (double)d / 0.9 * boneLength;
-	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane)));
-	double newScale;
+
 	if (perspective)
-		newScale = 100.0;
+	{
+		double newDistToPlane = 2000 / (double)d / 0.9 * boneLength;
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane)));
+
+		animation.start(newCoords, newCenter, scale, orientation, navigation);
+	}
 	else
-		newScale = 100.0*theCamera.getDistToScreen()/newDistToPlane;
-	animation.start(newCoords, newCenter, newScale, orientation, navigation);
+	{
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
+		double newScale = (double)d * 0.9 / boneLength; // with minimum 5% margins
+
+		animation.start(newCoords, newCenter, newScale, orientation, navigation);
+	}
   }
 }

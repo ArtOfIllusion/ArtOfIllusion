@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2019 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2017 Petri Ihalainen
    Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -53,9 +53,9 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected final ViewChangedEvent viewChangedEvent;
 
-  public static Color gray, red, green, blue, CUE, cueActive, cueIdle, BEAM, beam;
-  public FrustumShape frustumShape;
+  public static Color gray, ghost, red, green, blue, yellow, cone, teal, TEAL;
   public Point mousePoint;
+  public AuxiliaryGraphics auxGraphs = new AuxiliaryGraphics();
   public boolean perspectiveControlEnabled = true;
   public boolean navigationTravelEnabled = true;
   public int lastSetNavigation = 0; // To get the mode right during animation preview
@@ -110,6 +110,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int NAVIGATE_TRAVEL_LANDSCAPE = 3;
   
   public boolean mouseDown, mouseMoving, tilting, moving, rotating, scrolling, dragging;
+  public Color blendColorR, blendColorX, blendColorY;
   
   /** Create a new ViewerCanvas */
   public ViewerCanvas()
@@ -126,7 +127,6 @@ public abstract class ViewerCanvas extends CustomWidget
     theCamera = new Camera();
     theCamera.setCameraCoordinates(coords);
 	finder = new ClickedPointFinder();
-    frustumShape = new FrustumShape();
     setBackground(backgroundColor);
 	setRotationCenter(new Vec3());
 	setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
@@ -151,10 +151,10 @@ public abstract class ViewerCanvas extends CustomWidget
     addEventLink(MouseReleasedEvent.class, this, "processMouseReleased");
     addEventLink(MouseDraggedEvent.class, this, "processMouseDragged");
     addEventLink(MouseMovedEvent.class, this, "processMouseDragged"); // Workaround for Mac OS X bug
-    addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
-    addEventLink(MouseExitedEvent.class, this, "mouseExited");
+	addEventLink(MouseMovedEvent.class, this, "processMouseMoved");
     addEventLink(MouseScrolledEvent.class, this, "processMouseScrolled");
     addEventLink(MouseClickedEvent.class, this, "showPopupIfNeeded");
+    //addEventLink(MouseClickedEvent.class, this, "mouseClicked"); // Did not work as expected. See below....
     getComponent().addComponentListener(new ComponentListener()
     {
       @Override
@@ -178,7 +178,7 @@ public abstract class ViewerCanvas extends CustomWidget
     orientation = 0;
     perspective = false;
     scale = 100.0;
-    setCueColors();
+	setNavigationColors();
 	mouseMoveTimer.setCoalesce(false);
   }
 
@@ -228,7 +228,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   private void processMouseMoved(final MouseMovedEvent ev)
   {
-    if (mouseProcessor != null)
+	if (mouseProcessor != null)
       mouseProcessor.stopProcessing();
     mouseProcessor = new ActionProcessor();
     mouseProcessor.addEvent(new Runnable() {
@@ -242,7 +242,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
   private void processMouseReleased(WidgetMouseEvent ev)
   {
-    if (mouseProcessor != null)
+	if (mouseProcessor != null)
     {
       mouseProcessor.stopProcessing();
       mouseProcessor = null;
@@ -251,7 +251,7 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /**
-    Processing scrollwheel events here. Subclasses may override.
+	Processing scrollwheel events here. Subclasses may override.
   */
   protected void processMouseScrolled(MouseScrolledEvent e)
   {
@@ -275,6 +275,9 @@ public abstract class ViewerCanvas extends CustomWidget
         scrollTool.mouseScrolled(scrollEvent, viewToProcess);
       }
     });
+    //// Should there be an ActionProcessor just in case?
+	//if (scrollTool != null)
+	//  scrollTool.mouseScrolled(e, this);
   }
 
   /** Subclasses should override this to handle events. */
@@ -298,17 +301,6 @@ public abstract class ViewerCanvas extends CustomWidget
 
   protected void mouseReleased(WidgetMouseEvent ev)
   {
-  }
-
-  /** Subclasses may override but should call super first */
-
-  protected void mouseExited(WidgetMouseEvent ev)
-  {
-    // Mouse may exit the view while scroll wheel is rotating 
-    // and the state would be left incorrect, allowing unintended 
-    // drawing of frustumShape.
-    
-    scrolling = false;
   }
 
   /** This needs to be overridden, since the component may not be a JComponent. */
@@ -433,8 +425,8 @@ public abstract class ViewerCanvas extends CustomWidget
 			return;
 		}
 
-		// SceneCamera has logic of it's own, so just jump there!
-		if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
+		// I wonder if this is right....
+		if (boundCamera != null){
 			perspective = perspectiveSwitch = nextPerspective;
 			return;
 		}
@@ -442,8 +434,8 @@ public abstract class ViewerCanvas extends CustomWidget
 		if (animation.animatingMove() || animation.changingPerspective()) 
 			return;
 
-		perspectiveSwitch = nextPerspective;
-		animation.start(nextPerspective);
+		perspectiveSwitch = nextPerspective;			
+		animation.start(nextPerspective, navigation, theCamera.getCameraCoordinates()); // , refDistToPlane, navigation);
 	}
 
 	/** 
@@ -629,17 +621,9 @@ public abstract class ViewerCanvas extends CustomWidget
   }
 
   /** Get the distance from camera to drawing plane */
-  
   public double getDistToPlane()
   {
-    if (boundCamera != null)
-        if (boundCamera.getObject() instanceof SceneCamera)
-            return ((SceneCamera)boundCamera.getObject()).getDistToPlane();
-        else if (boundCamera.getObject() instanceof SpotLight)
-            return ((SpotLight)boundCamera.getObject()).getDistToPlane();
-        else if (boundCamera.getObject() instanceof DirectionalLight)
-            return ((DirectionalLight)boundCamera.getObject()).getDistToPlane();
-    return distToPlane;
+	return distToPlane;
   }
 
   /** Get the currently used navigation mode */
@@ -692,39 +676,33 @@ public abstract class ViewerCanvas extends CustomWidget
       return;
     }
 
-    // Change perspective without animation. This is a bit blunt but softer  
-    // options would need a more complex set of conditions.
-
-    if (nextNavigation < 2)
-        perspective = nextPerspective;
+    
+	// Change perspective without animation, if needed.
+    if (nextNavigation < 2) // ...?
+	  perspective = nextPerspective;
     else
-        perspective = true;
-    if (perspective)
-        scale = 100;
-    else
-        scale = 100.0*theCamera.getDistToScreen()/distToPlane;
+	  perspective = true;
+	
+    //repaint(); 
 
-    // If changing from a 3D-mode to a landscape mode, 
-    // animate the turning of y-direction up.
-
+	//if (nextNavigation > 1)
+    //  nextPerspective = true; // Just to be sure
+	//
+    // Turn y up for landscape modes. Animated
     if ((navigation == 0 || navigation == 2) && (nextNavigation == 1 || nextNavigation == 3))
     {
 		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
 		Vec3 z  = coords.getZDirection();
 		Vec3 up = coords.getUpDirection();
-		
-		// If camera z-axis is aligned with world y-axis the orientation is good for 
-		// landscape modes. 
-		
-		if (Math.abs(z.y) == 1.0)
+
+		// if camera z-axis is aligned with world y-axis the orientation is good for 
+		// landscape modes. The z.y may be 1.0 but z.x and z.x may have error in the 
+		// magnitude of 1E-15.
+		if((z.x < 1E-6 && z.x > -1E-6) && (z.z < 1E-6 && z.z > -1E-6))
 		{
-			// When z.y == 1.0, z.x and z.x may still have a value in the 
-			// magnitude of 1E-15.
 			z.x = z.z = 0.0; 
-			up.y = 0.0;
-			if (up.length() == 0.0) // Just a precaution. Should never happen.
-				up.z = 1.0;
-			up.normalize();
+			z.y = 1.0*Math.signum(z.y); 
+			
 			coords.setOrientation(z, up);
 			coords.setOrigin(rotationCenter.minus(z.times(distToPlane)));
 			theCamera.setCameraCoordinates(coords);
@@ -734,12 +712,8 @@ public abstract class ViewerCanvas extends CustomWidget
 		}
 		else
 		{
-			// Start with up = vertical direction and turn it prpendicular to z
-			up.x = up.z = 0.0;
-			up.y = 1.0;
-			up.subtract(z.times(up.dot(z)));
-			up.normalize();
-			coords.setOrientation(z, up);
+			// The system uses only the projection of the y-direction, that is needed.
+			coords.setOrientation(z, new Vec3(0,1,0)); // new coords
 			animation.start(coords, rotationCenter, scale, orientation, nextNavigation);
 		}
     }
@@ -748,10 +722,46 @@ public abstract class ViewerCanvas extends CustomWidget
 		navigation = nextNavigation;
 		viewChanged(false);
 	}
-	repaint();
+  }
+  
+  /* Changing perspective without animation */
+  
+  private void flipPerspectiveSwitch(boolean nextPerspective)
+  {
+	if (perspective == nextPerspective || perspectiveSwitch == nextPerspective)
+		return;
+	
+	if(nextPerspective)
+	{
+		// converting scale to distance
+		distToPlane = 100.0*theCamera.getDistToScreen()/scale;
+		scale = 100.0; // scale needs to be 100 in perspective mode or the magnification is incorrect.
+		
+		// repositioning camera
+		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
+		Vec3 cz = new Vec3(coords.getZDirection());
+		Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
+		coords.setOrigin(cp);
+		theCamera.setCameraCoordinates(coords);	
+	}
+	else
+	{
+		// converting distance to scale
+		scale = 100.0*theCamera.getDistToScreen()/distToPlane;
+		distToPlane = 20.0; // to follow the convention
+		
+		// repositioning camera
+		CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
+		Vec3 cz = new Vec3(coords.getZDirection());
+		Vec3 cp = rotationCenter.plus(cz.times(-distToPlane));
+		coords.setOrigin(cp);
+		theCamera.setCameraCoordinates(coords);
+	}
+	perspectiveSwitch = perspective = nextPerspective;
   }
 
   /** Set the PopupMenuManager for this canvas. */
+
   public void setPopupMenuManager(PopupMenuManager manager)
   {
     popupManager = manager;
@@ -768,6 +778,31 @@ public abstract class ViewerCanvas extends CustomWidget
     }
   }
 
+  /* 
+      Decide what to do when a mouse is clicked on the viewercanvas
+	  - Show pop-up menu
+	  - Center to a new point
+	  - Sub classes may override but should call super first
+	  I wonder if this needs an action processor?
+  */
+  //For some reason after this, when an object was opened for editing by double clicking it on the view, 
+  //the first time of pressing Cancel or OK launched an undo sequence. If the object was opened by 
+  //pop-up menu or by double clicking the object, the editor window behaved normally.
+  /*
+  protected void mouseClicked(MouseClickedEvent ev)
+  {
+    //if (popupManager != null && ev.getButton() == WidgetMouseEvent.BUTTON3 && ev.getClickCount() == 1)
+    if (popupManager != null && ev.isMetaDown() && ev.getClickCount() == 1)
+    {
+      Point pos = ev.getPoint();
+      popupManager.showPopupMenu(this, pos.x, pos.y);
+    }
+    if (ev.isAltDown() && ev.getClickCount() == 1)
+    //if (ev.getButton() == WidgetMouseEvent.BUTTON2 && ev.getClickCount() == 1)
+  	centerToPoint(ev.getPoint());
+  }
+  */
+
   /** Matching the camera with the cirrent state of the view */ // I guess?
   
   public void adjustCamera(boolean perspective)
@@ -777,7 +812,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
     if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
       theCamera.setScreenTransform(((SceneCamera) boundCamera.getObject()).getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
-    }
+	}
     else if (perspective)
       theCamera.setScreenParams(0, scale, bounds.width, bounds.height);
     else
@@ -915,16 +950,22 @@ public abstract class ViewerCanvas extends CustomWidget
 	Vec3 newCenter = new Vec3(b.getCenter());
 	CoordinateSystem newCoords = theCamera.getCameraCoordinates().duplicate();
 	int d = Math.min(getBounds().width, getBounds().height);
-	Vec3 size = b.getSize();
-	double diag = Math.sqrt(size.x*size.x+size.y*size.y+size.z*size.z);
-	double newDistToPlane = 100*theCamera.getDistToScreen() / (double)d / 0.9 * diag;
-	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(b.maxz-b.minz) * 0.5)));
-	double newScale;
+	double diag = Math.sqrt((b.maxx-b.minx)*(b.maxx-b.minx)+(b.maxy-b.miny)*(b.maxy-b.miny)+(b.maxz-b.minz)*(b.maxz-b.minz));
+
 	if (perspective)
-		newScale = 100.0;
+	{
+		double newDistToPlane = 2000 / (double)d / 0.9 * diag;
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(b.maxz-b.minz) * 0.5)));
+
+		animation.start(newCoords, newCenter, scale, orientation, navigation);
+	}
 	else
-		newScale = 100.0*theCamera.getDistToScreen()/newDistToPlane;
-	animation.start(newCoords, newCenter, newScale, orientation, navigation);
+	{
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
+		double newScale = (double)d * 0.9 / diag; // with minimum 5% margins
+
+		animation.start(newCoords, newCenter, newScale, orientation, navigation);
+	}
   }
 
   /** Sub classes that can handle bones needs to override this */
@@ -1016,7 +1057,7 @@ public abstract class ViewerCanvas extends CustomWidget
 		p = worldToView.timesXY(bc.plus(cx.times(br)));
 		minx = Math.min(minx, p.x);
 		
-		p = worldToView.timesXY(bc.plus(cy.times(br)));
+ 		p = worldToView.timesXY(bc.plus(cy.times(br)));
 		maxy = Math.max(maxy, p.y);
 		p = worldToView.timesXY(bc.plus(cy.times(-br)));
 		miny = Math.min(miny, p.y);
@@ -1030,25 +1071,21 @@ public abstract class ViewerCanvas extends CustomWidget
 	newCenter = new Vec3((minx+maxx)*0.5, (miny+maxy)*0.5, (minz+maxz)*0.5);
 	viewToWorld.transform(newCenter);
 	newCoords = theCamera.getCameraCoordinates().duplicate();
-
-	double dts;
-	if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+	
+	if (perspective)
 	{
-		int yp = getBounds().height/2;
-		double fa = Math.PI/2.0 - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()/2.0);///180.0*Math.PI;
-		dts = Math.tan(fa)*yp/100;
+		double newDistToPlane = 2000 / (double)d / 0.9 * Math.max(maxx-minx, maxy-miny);
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));
+
+		animation.start(newCoords, newCenter, scale, orientation, navigation);
 	}
 	else
-		dts = theCamera.getDistToScreen();
-	double newDistToPlane = 100*dts/(double)d/0.9*Math.max(maxx-minx, maxy-miny);
-	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));;
-	double newScale;
-	if (perspective)
-		newScale = 100.0;
-	else
-		newScale = 100.0*dts/newDistToPlane;
+	{
+		newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-distToPlane)));
+		double newScale = (double)d * 0.9 / Math.max(maxx-minx, maxy-miny); // with minimum 5% margins
 
-	animation.start(newCoords, newCenter, newScale, orientation, navigation);
+		animation.start(newCoords, newCenter, newScale, orientation, navigation);
+	}
   }
 
   /** 
@@ -1277,6 +1314,7 @@ public abstract class ViewerCanvas extends CustomWidget
   protected void drawCoordinateAxes()
   {
     // Select a size for the coordinate axes.
+	// drawLine(new Point(200,1), new Point (100,100), Color.ORANGE);
 
     Rectangle bounds = getBounds();
     int axisLength = 50;
@@ -1679,7 +1717,11 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     return Collections.unmodifiableMap(controlMap);
   }
-
+	
+	//---------------------------------------------------//
+	//   The cue graphics drawing starts here            //
+	//---------------------------------------------------//
+	
 	/** Get the centermost point of the screen */
 	public Point getViewCenter()
 	{
@@ -1689,31 +1731,112 @@ public abstract class ViewerCanvas extends CustomWidget
 		int cy = y/2;
 		return (new Point(cx, cy));
 	}
- 
-	private void drawNavigationCues()
+	
+	private void drawMouseMoveGraphics()
+	{
+		// Nothing to draw currently
+	}
+  
+	private void drawNavigationGraphics()
 	{
 		if (tilting || moving || rotating) return;
-		if (! ArtOfIllusion.getPreferences().getShowTravelCuesOnIdle() && 
-		   (! ArtOfIllusion.getPreferences().getShowTravelCuesScrolling() || ! scrolling))
-			return;
 		
 		int d = Math.min(getBounds().width, getBounds().height);
 		Point viewCenter = getViewCenter();
-		Color cueColor;
+		Color color1, colorR, colorX, colorY;
 		
 		if (scrolling){
-			cueColor = cueActive;
+			color1 = teal;
+			colorR = blendColorR;
+			colorX = blendColorX;
+			colorY = blendColorY;
 		}
 		else{
-			cueColor = cueIdle;
+			color1 = ghost;
+			colorR = ghost;
+			colorX = ghost;
+			colorY = ghost;
 		}
 		if (navigation == 2){
-			drawCircle(viewCenter, d*0.1, 30, cueColor);
-			drawCircle(viewCenter, d*0.4, 60, cueColor);
+			drawCircle(viewCenter, d*0.1, 30, color1);
+			drawCircle(viewCenter, d*0.4, 60, color1);
 		}
 		if (navigation == 3){
-			drawSquare(viewCenter, d*0.1, cueColor);
-			drawSquare(viewCenter, d*0.4, cueColor);
+			drawSquare(viewCenter, d*0.1, color1);
+			drawSquare(viewCenter, d*0.4, color1);
+		}
+		
+		if (mousePoint == null) return; // This is very important!
+		
+		double mx, my;
+		mx = mousePoint.x-viewCenter.x;
+		my = mousePoint.y-viewCenter.y;
+		double angle = Math.atan2(my, mx);
+		double rMouse = Math.sqrt(mx*mx+my*my);
+		
+		// Draw the radial pointer
+		if (navigation == 2)
+		{
+			if(rMouse >= (double)d*.1)
+			{
+				drawLine(viewCenter, angle, d*.1, d*.4, colorR);
+				
+				Point point = mousePoint;
+				if (rMouse > (double)d*.4)
+				{
+					double r = (double)d*.4;
+					int px = (int)(Math.cos(angle)*(double)d*.4);
+					int py = (int)(Math.sin(angle)*(double)d*.4);
+					point = new Point(viewCenter.x+px, viewCenter.y+py);
+				}
+				drawCircle(point, 10.0, 12, colorR);
+			}
+			else
+				if (scrolling)
+					drawCircle(viewCenter, (double)d*.1, 30, green); // Just draw the center circle green if mouse is inside it.
+		}
+		// Draw vertical and horizontal ponters
+		if (navigation == 3)
+		{
+			int cx = viewCenter.x;
+			int cy = viewCenter.y;
+			
+			if (Math.abs(mx) >= d*.1){
+				drawLine(new Point(viewCenter.x+(int)((d*.1)*Math.signum(mx)), viewCenter.y), 
+				         new Point(viewCenter.x+(int)((d*.4)*Math.signum(mx)), viewCenter.y),
+						 colorX);
+				if (Math.abs(mx) <= d*.4)
+					drawCircle(new Point(viewCenter.x+(int)mx, viewCenter.y), 10.0, 8, colorX);
+				else
+					drawCircle(new Point(viewCenter.x+(int)((d*.4)*Math.signum(mx)), viewCenter.y), 10.0, 8, colorX);
+			}
+			else if(scrolling)
+			{
+				drawLine(new Point(cx+(int)(d*.1), (int)(cy+d*0.1)), 
+				         new Point(cx+(int)(d*.1), (int)(cy-d*0.1)), 
+				         green);
+				drawLine(new Point(cx-(int)(d*.1), (int)(cy+d*0.1)), 
+				         new Point(cx-(int)(d*.1), (int)(cy-d*0.1)), 
+				         green);
+			}
+			if (Math.abs(my) >= d*.1){
+				drawLine(new Point(viewCenter.x, viewCenter.y+(int)((d*.1)*Math.signum(my))), 
+				         new Point(viewCenter.x, viewCenter.y+(int)((d*.4)*Math.signum(my))),
+						 colorY);
+				if (Math.abs(my) <= d*.4)
+					drawCircle(new Point(viewCenter.x, viewCenter.y+(int)my), 10.0, 8, colorY);
+				else
+					drawCircle(new Point(viewCenter.x, viewCenter.y+(int)((d*.4)*Math.signum(my))), 10.0, 8, colorY);
+			}
+			else if(scrolling)
+			{
+				drawLine(new Point((int)(cx+(int)(d*.1)), cy+(int)(d*.1)), 
+				         new Point((int)(cx-(int)(d*.1)), cy+(int)(d*.1)),
+				         blendColorY);
+				drawLine(new Point((int)(cx+(int)(d*.1)), cy-(int)(d*.1)), 
+				         new Point((int)(cx-(int)(d*.1)), cy-(int)(d*.1)),
+				         blendColorY);
+			}
 		}
 	}
 
@@ -1801,33 +1924,43 @@ public abstract class ViewerCanvas extends CustomWidget
 	}
 	
 	/* These colors are used on the navigation cue graphics */
-	private void setCueColors()
+	private void setNavigationColors()
 	{
-		CUE       = new Color(0, 127, 255);
-		BEAM      = new Color(159, 255, 0);
-		cueIdle   = new Color(CUE.getRed()  *1/4+backgroundColor.getRed()  *3/4,
-		                      CUE.getGreen()*1/4+backgroundColor.getGreen()*3/4,
-		                      CUE.getBlue() *1/4+backgroundColor.getBlue() *3/4);
-		cueActive = new Color(CUE.getRed()  *1/2+backgroundColor.getRed()  *1/2,
-		                      CUE.getGreen()*1/2+backgroundColor.getGreen()*1/2,
-		                      CUE.getBlue() *1/2+backgroundColor.getBlue() *1/2);
-		gray      = new Color(Color.GRAY.getRed()  *1/2+backgroundColor.getRed()  *1/2,
-		                      Color.GRAY.getGreen()*1/2+backgroundColor.getGreen()*1/2,
-		                      Color.GRAY.getBlue() *1/2+backgroundColor.getBlue() *1/2);
-		red       = new Color(Color.RED.getRed()   *3/4+backgroundColor.getRed()  *1/4,
-		                      Color.RED.getGreen() *3/4+backgroundColor.getGreen()*1/4,
-		                      Color.RED.getBlue()  *3/4+backgroundColor.getBlue() *1/4);
-		green     = new Color(Color.GREEN.getRed()   *3/4+backgroundColor.getRed()  *1/4,
-		                      Color.GREEN.getGreen() *3/4+backgroundColor.getGreen()*1/4,
-		                      Color.GREEN.getBlue()  *3/4+backgroundColor.getBlue() *1/4);
-		blue      = new Color(Color.BLUE.getRed()  *3/4+backgroundColor.getRed()  *1/4,
-		                      Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()*1/4,
-		                      Color.BLUE.getBlue() *3/4+backgroundColor.getBlue() *1/4);
-		beam      = new Color(BEAM.getRed()  *2/4+backgroundColor.getRed()  *2/4,
-		                      BEAM.getGreen()*2/4+backgroundColor.getGreen()*2/4,
-		                      BEAM.getBlue() *2/4+backgroundColor.getBlue() *2/4);
-	}
+		TEAL = new Color(0, 127, 127);
+		
+		gray   = new Color(Color.GRAY.getRed()/2+backgroundColor.getRed()/2,
+                           Color.GRAY.getGreen()/2+backgroundColor.getGreen()/2,
+                           Color.GRAY.getBlue()/2+backgroundColor.getBlue()/2);
+						 
+		ghost  = new Color(Color.GRAY.getRed()/3+backgroundColor.getRed()*2/3,
+                           Color.GRAY.getGreen()/3+backgroundColor.getGreen()*2/3,
+                           Color.GRAY.getBlue()/3+backgroundColor.getBlue()*2/3);
+						 
+		red    = new Color(Color.RED.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.RED.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.RED.getBlue()*3/4+backgroundColor.getBlue()/4);
+						 
+		yellow = new Color(Color.YELLOW.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.YELLOW.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.YELLOW.getBlue()*3/4+backgroundColor.getBlue()/4);
+						   
+		green  = new Color(Color.GREEN.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.GREEN.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.GREEN.getBlue()*3/4+backgroundColor.getBlue()/4);
+				 		 
+		blue   = new Color(Color.BLUE.getRed()*3/4+backgroundColor.getRed()/4,
+                           Color.BLUE.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           Color.BLUE.getBlue()*3/4+backgroundColor.getBlue()/4);
+				 		 
+		teal   = new Color(TEAL.getRed()*3/4+backgroundColor.getRed()/4,
+                           TEAL.getGreen()*3/4+backgroundColor.getGreen()/4,
+                           TEAL.getBlue()*3/4+backgroundColor.getBlue()/4);
 
+		cone   = new Color(Color.GREEN.getRed()/2+backgroundColor.getRed()/2,
+                           Color.GREEN.getGreen()/2+backgroundColor.getGreen()/2,
+                           Color.GREEN.getBlue()/2+backgroundColor.getBlue()/2);
+	}
+	
 	/* 
 	 * Blend between two colors. 
 	 * The 'blend' is the balance of the color in range 0.0 - 1.0 from color0 to color1
@@ -1840,203 +1973,195 @@ public abstract class ViewerCanvas extends CustomWidget
 		
 		return new Color(R, G, B);
 	}
-
-	/** Draw informative graphics on the screen */
-	public void drawOverlay(ViewerCanvas viewToDrawOn)
+	
+	/** Call all the methods that draw informative graphics on the screen */
+	public void drawOverlay()
 	{
-		setCueColors(); // This should be set at preferences change
-		if (viewToDrawOn == this)
-			drawNavigationCues();
-		else
-			frustumShape.draw(viewToDrawOn);
+		if (mouseMoving || scrolling)
+			drawNavigationGraphics();
+		auxGraphs.render();
 	}
+	
+	/** 
+		This class creates and stores information for drawing view cones or other 
+		temporary 3D graphics and privides a method to draw them on the screen.
+	*/
+	public class AuxiliaryGraphics
+	{
+		private ArrayList<Vec3>   points;
+		private ArrayList<Vec3[]> lines;
+		private ArrayList<Color>  pointColors, lineColors;
+		
+		/** Create an empty AuxiliaryGraphics object */
+		public AuxiliaryGraphics()
+		{}
 
-  /**
-    FrustumShape is the visulization of the 'drawinplane' where mouse actions happening 
-    and the position of view camera. The ViewerCanvas parameter 'distToPlane' defines 
-    the distance between the drawing palne theCamera.
-  */
-  
-  public class FrustumShape
-  {
-    private Vec3[] corners = new Vec3[4];;
-    private Vec3 viewingPoint3D;
-    private Vec2 vector2D; // used in conversions 3D to screen 2D
-    private Color CUEBACK, cueBack, eyeBright, eyeDim;
-    private Color planeColor, shapeColor, centerColor, eyeColor;
+		/* Create emply point list */
+		private void newPoints(){
+			points = new ArrayList<Vec3>();
+			pointColors = new ArrayList<Color>();
+		}
+			
+		/* Create emply point list */
+		private void newLines(){
+			lines = new ArrayList<Vec3[]>();
+			lineColors = new ArrayList<Color>();
+		}
+		/** 
+			Create contents using the given view<p>
+			
+			@param newGraphics tells to clear any previously stored graphics
+		*/
+		public void set(ViewerCanvas v, boolean newGraphics)
+		{
+			if(! showViewCone)
+				return;
+			if (newGraphics){
+				newPoints();
+				newLines();
+			}
+			
+			Camera ca = v.getCamera();
+			CoordinateSystem cs = ca.getCameraCoordinates();
+			Vec3 rc = v.getRotationCenter();
+			Vec3 cz = cs.getZDirection();
+			Vec3 cp = new Vec3(cs.getOrigin().plus(cz.times(0.0001))); // Need to move so that the camera can see it
+			double dp = v.getDistToPlane();
 
-    private FrustumShape()
-    {
-    }
+			// rotation center 
+			add(new Vec3(rc), Color.GREEN);
+			
+			// view edges
+			Rectangle b = v.getBounds();
+			Vec3 c0, c1, c2, c3;
+			c0 = ca.convertScreenToWorld(new Point(0, 0), dp);
+			c1 = ca.convertScreenToWorld(new Point(b.width, 0), dp);
+			c2 = ca.convertScreenToWorld(new Point(b.width, b.height), dp);
+			c3 = ca.convertScreenToWorld(new Point(0, b.height), dp);
+			
+			// screen border
+			add(new Vec3[]{c0, c1}, cone);
+			add(new Vec3[]{c1, c2}, cone);
+			add(new Vec3[]{c2, c3}, cone);
+			add(new Vec3[]{c3, c0}, cone);
+			
+			if (v.isPerspective()){
+				// camera position
+				add(new Vec3(cp), Color.MAGENTA);
+				// corner lines
+				add(new Vec3[]{c0, cp}, cone);
+				add(new Vec3[]{c1, cp}, cone);
+				add(new Vec3[]{c2, cp}, cone);
+				add(new Vec3[]{c3, cp}, cone);
+			}
+			else{
+				Vec3 m0, m1, m2, m3, mh, cpp;
+				
+				// pseudo location for view point position
+				double cppDist = 100.0*ca.getDistToScreen()/v.getScale();
+				cpp = rc.minus(cz.times(cppDist*1.0));
+				add(cpp, Color.MAGENTA);
+				
+				m0 = c0.minus(cz.times(cppDist*(1-0.618033))); // "Golden mean.. :) "
+				m1 = c1.minus(cz.times(cppDist*(1-0.618033)));
+				m2 = c2.minus(cz.times(cppDist*(1-0.618033)));
+				m3 = c3.minus(cz.times(cppDist*(1-0.618033)));
 
-    private void setPlaneColors()
-    {
-      CUEBACK   = new Color(255, 127, 0);
-      cueBack   = new Color(CUEBACK.getRed()  *1/2+backgroundColor.getRed()  *1/2,
-                            CUEBACK.getGreen()*1/2+backgroundColor.getGreen()*1/2,
-                            CUEBACK.getBlue() *1/2+backgroundColor.getBlue() *1/2);
-      eyeBright = Color.MAGENTA;
-      eyeDim    = new Color(eyeBright.getRed()  *1/2+backgroundColor.getRed()  *1/2,
-                            eyeBright.getGreen()*1/2+backgroundColor.getGreen()*1/2,
-                            eyeBright.getBlue() *1/2+backgroundColor.getBlue() *1/2);
-    }
-    
-    void update()
-    {
-      Rectangle b = getBounds();
-      
-      Vec3 camZ = theCamera.getCameraCoordinates().getZDirection();
-      double ds = theCamera.getDistToScreen();
-      corners[0] = theCamera.convertScreenToWorld(new Point(0, 0), distToPlane, false);
-      corners[1] = theCamera.convertScreenToWorld(new Point(b.width, 0), distToPlane, false);
-      corners[2] = theCamera.convertScreenToWorld(new Point(b.width, b.height), distToPlane, false);
-      corners[3] = theCamera.convertScreenToWorld(new Point(0, b.height), distToPlane, false);
-      viewingPoint3D = theCamera.getCameraCoordinates().getOrigin();
-    }
+				add(new Vec3[]{m0, m1}, cone);
+				add(new Vec3[]{m1, m2}, cone);
+				add(new Vec3[]{m2, m3}, cone);
+				add(new Vec3[]{m3, m0}, cone);
 
-    /** The direction in the scene from the user's eye to the view. */
+				add(new Vec3[]{c0, m0}, cone);
+				add(new Vec3[]{c1, m1}, cone);
+				add(new Vec3[]{c2, m2}, cone);
+				add(new Vec3[]{c3, m3}, cone);
 
-    public Vec3 getViewingDirection()
-    {
-      return new Vec3(theCamera.getCameraCoordinates().getZDirection());
-    }
+				add(new Vec3[]{m0, cpp}, gray);
+				add(new Vec3[]{m1, cpp}, gray);
+				add(new Vec3[]{m2, cpp}, gray);
+				add(new Vec3[]{m3, cpp}, gray);
+			}
+		}
 
-    /** Corners of this drawing plane in scene coordinates. */
+		/** Add a point */
+		public void add(Vec3 point, Color pointColor)
+		{
+			if (points == null)
+				newPoints();
+			points.add(point);
+			pointColors.add(pointColor);
+		}
 
-    public Vec3[] getCorners()
-    {
-      return corners;
-    }
+		/** Add a line */
+		public void add(Vec3[] lineEnds, Color lineColor)
+		{
+			if (lines == null)
+				newLines();
+			lines.add(lineEnds);
+			lineColors.add(lineColor);
+		}
 
-    public double size()
-    {
-      return corners[2].minus(corners[0]).length();
-    }
+		/** Copy all information from an existing graphics object */
+		public void copy(AuxiliaryGraphics ext)
+		{
+			points = ext.getPoints();
+			pointColors = ext.getPointColors(); 
+			lines = ext.getLines();
+			lineColors = ext.getLineColors(); 
+		}
 
-    public boolean smallEnough(ViewerCanvas toDrawOn, double limit)
-    {
-      return (size() <= toDrawOn.frustumShape.size()*limit);
-    }
+		public ArrayList<Vec3> getPoints()
+		{
+			return points;
+		}
 
-    /**
-      Draw a 2D projection of this plane on the given ViewerCancvas
-    */
+		public ArrayList<Color> getPointColors()
+		{
+			return pointColors;
+		}
 
-    public void draw(ViewerCanvas viewToDrawOn)
-    {
-      if (! ArtOfIllusion.getPreferences().getDrawActiveFrustum() && 
-         (! ArtOfIllusion.getPreferences().getDrawCameraFrustum() || boundCamera == null))
-        return;  
-      if (! moving && ! rotating && ! scrolling)
-        return;
+		public ArrayList<Vec3[]> getLines()
+		{
+			return lines;
+		}
 
-      viewToDrawOn.frustumShape.update();
-      update();
-      if (! smallEnough(viewToDrawOn, 1.25))
-        return;
+		public ArrayList<Color> getLineColors()
+		{
+			return lineColors;
+		}
 
-      Point[] cornerPoints = new Point[4];
-      Point viewPoint, rotPoint, tipPoint;
-      setCueColors();
-      setPlaneColors();
+		/** Render the object on screen */
+		public void render()
+		{
+		
+			Vec2 v0, v1;
+			Point p0, p1;
+			int pointRadius = 4;
+			if (points != null)
+				for(int i = 0; i < points.size(); i++){
+					renderPoint(points.get(i), pointColors.get(i), pointRadius);
+				}
+			if (lines != null)
+				for(int i = 0; i < lines.size(); i++){
+				
+					// renderLine of CanvasDrawer does not work right here. Object dependencies...
 
-      Vec3 viewZ = viewToDrawOn.getCamera().getCameraCoordinates().getZDirection();
-      double viewCos = viewZ.dot(getViewingDirection());
-      if (viewCos < 0.0)
-      {
-        centerColor = CUEBACK;
-        planeColor  = cueBack;
-        eyeColor    = eyeDim;
-      }
-      else
-      {
-        centerColor = CUE;
-        planeColor  = cueActive;
-        eyeColor    = eyeBright;
-      }
+					v0 = new Vec2(theCamera.getWorldToScreen().timesXY(lines.get(i)[0]));
+					v1 = new Vec2(theCamera.getWorldToScreen().timesXY(lines.get(i)[1]));
+					p0 = new Point((int)v0.x, (int)v0.y);
+					p1 = new Point((int)v1.x, (int)v1.y);
+					drawLine (p0, p1, lineColors.get(i));
+				}
+		}
 
-      // This makes the color of the edges of the shape fade when it is 
-      // pointed toward or away from the camera of view it is drawn on. 
-
-      double viewCos2;
-      if (viewCos < 0.0)
-        viewCos2 = Math.abs(viewCos*0.67);
-      else
-        viewCos2 = Math.pow(viewCos, 10.0);
-
-      shapeColor = new Color((int)(planeColor.getRed()  *(1-viewCos2) + backgroundColor.getRed()  *viewCos2),
-                             (int)(planeColor.getGreen()*(1-viewCos2) + backgroundColor.getGreen()*viewCos2),
-                             (int)(planeColor.getBlue() *(1-viewCos2) + backgroundColor.getBlue() *viewCos2));
-      
-      Mat4 worldToScreen = viewToDrawOn.getCamera().getWorldToScreen();
-
-      for (int c = 0; c < cornerPoints.length; c++)
-      {
-        vector2D = worldToScreen.timesXY(corners[c]);
-        cornerPoints[c] = new Point((int)Math.round(vector2D.x), (int)Math.round(vector2D.y));
-      }
-
-      vector2D = worldToScreen.timesXY(rotationCenter);
-      rotPoint = new Point((int)Math.round(vector2D.x), (int)Math.round(vector2D.y));
-      vector2D = worldToScreen.timesXY(viewingPoint3D);
-      viewPoint = new Point((int)Math.round(vector2D.x), (int)Math.round(vector2D.y));
-
-      // Darw a flat shape when the view is in orthographic mode
-      
-      if (isPerspective())
-        tipPoint = viewPoint;
-      else
-        tipPoint = rotPoint;
-
-      if (boundCamera != null && !(boundCamera.getObject() instanceof SceneCamera))
-        viewToDrawOn.drawLine(rotPoint, viewPoint, beam);
-
-      for (int c = 0; c < 4; c++)
-      {
-        // Could add 3D-feel by first drawinf a faint shape as overlay and then 
-        // redrawing by rendeLine() with a thicker color. Unfortunately the depth map of 
-        // SWDrawer is inaccurate and the GL-drawer has a shift of one or two pixels in the
-        // interpretation of drawinf coordinates
-
-        if (getViewingDirection().dot(viewToDrawOn.getCamera().getCameraCoordinates().getZDirection()) < 0.985)
-        {
-          viewToDrawOn.drawLine(cornerPoints[c], tipPoint, shapeColor);
-          drawMarker(viewToDrawOn, viewPoint, 7, eyeColor, true);
-        }
-        viewToDrawOn.drawLine(cornerPoints[c], cornerPoints[(c+1)%4], planeColor);
-      }
-      drawMarker(viewToDrawOn, rotPoint, 7, centerColor, false);
-    }
-
-    /** 
-      Draw a marker on the screen.<p>
-      
-      The drawing has to happen pixel by pixel because the canvasdrawers 
-      handle 'drawLine()' with a different logic.<p>
-      
-      A marker is a small cross, drawn either upright or diagonally.
-    */
-    
-    private void drawMarker(ViewerCanvas v, Point p, int size, Color c, boolean diag)
-    {
-      int s = size/2;
-      v.drawLine(p, new Point(p.x+1, p.y), c);
-      if (diag)
-        for (int i = 1; i <= s; i++)
-        {
-          v.drawLine(new Point(p.x+i, p.y+i), new Point(p.x+i+1, p.y+i), c);
-          v.drawLine(new Point(p.x-i, p.y+i), new Point(p.x-i+1, p.y+i), c);
-          v.drawLine(new Point(p.x+i, p.y-i), new Point(p.x+i+1, p.y-i), c);
-          v.drawLine(new Point(p.x-i, p.y-i), new Point(p.x-i+1, p.y-i), c);
-        }
-      else
-        for (int i = 1; i <= s; i++)
-        {
-          v.drawLine(new Point(p.x+i, p.y), new Point(p.x+i+1, p.y), c);
-          v.drawLine(new Point(p.x-i, p.y), new Point(p.x-i+1, p.y), c);
-          v.drawLine(new Point(p.x, p.y+i), new Point(p.x+1, p.y+i), c);
-          v.drawLine(new Point(p.x, p.y-i), new Point(p.x+1, p.y-i), c);
-        }
-    }
-  }
+		/** Empty the object */
+		public void wipe()
+		{
+			points = null;
+			pointColors = null;
+			lines = null;
+			lineColors = null;
+		}
+	} // AuxiliaryGraphics
 }

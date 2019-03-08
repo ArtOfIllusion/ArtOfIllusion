@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes copyright (C) 2016-2019 by Petri Ihalainen
+   Changes copyright (C) 2016-2017 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -115,15 +115,9 @@ public class MoveViewTool extends EditingTool
 					break;
 			}
 		}
-		if (view.getBoundCamera() != null)
-			view.getBoundCamera().getCoords().copyCoords(view.getCamera().getCameraCoordinates());
-		view.frustumShape.update();
-		if (ArtOfIllusion.getPreferences().getDrawActiveFrustum() || 
-		   (ArtOfIllusion.getPreferences().getDrawCameraFrustum() && view.getBoundCamera() != null))
-			theWindow.updateImage();
-		else
-			view.repaint();
-		view.viewChanged(false);
+		setAuxGraphs(view);
+		repaintAllViews(view);
+		view.viewChanged(false);	
 	}
 
 	/* The view must be set to Perspective for travel modes! */
@@ -197,25 +191,21 @@ public class MoveViewTool extends EditingTool
 
 
 		if (controlDown) // zoom!
-		{
-			double newDist;
-			Rectangle bounds = view.getBounds();
+		{ 	
 			if (view.isPerspective())
 			{
-				newDist = oldDist*Math.pow(1.0/1.01, (double)dy);
+				CoordinateSystem coords = view.getCamera().getCameraCoordinates();
+				double newDist = oldDist*Math.pow(1.0/1.01, (double)dy);
+				Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
+				coords.setOrigin(newPos);
+				view.getCamera().setCameraCoordinates(coords);
+				view.setDistToPlane(newDist);
 			}
 			else
 			{
 				double newScale = oldScale*(Math.pow(1.01,(double)dy));
 				view.setScale(newScale);
-				cam.setScreenParamsParallel(newScale, bounds.width, bounds.height);
-				newDist = cam.getDistToScreen()*100.0/newScale;
 			}
-			view.setDistToPlane(newDist);
-			CoordinateSystem coords = view.getCamera().getCameraCoordinates();
-			Vec3 newPos = view.getRotationCenter().plus(coords.getZDirection().times(-newDist));
-			coords.setOrigin(newPos);
-			view.getCamera().setCameraCoordinates(coords);
 		}
 		else // Move up-down-right-left
 		{
@@ -260,6 +250,7 @@ public class MoveViewTool extends EditingTool
         }
         theWindow.updateImage();
       }
+	wipeAuxGraphs();
 	view.viewChanged(false);
   }
 
@@ -274,5 +265,38 @@ public class MoveViewTool extends EditingTool
       undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
       moveChildren(parent.getChildren()[i], transform, undo);
     }  
+  }
+
+  private void repaintAllViews(ViewerCanvas view)
+  {
+    if (theWindow == null || theWindow instanceof UVMappingWindow)
+	  view.repaint();
+    else
+	  for (ViewerCanvas v : theWindow.getAllViews())
+	  	v.repaint();
+  }
+
+  private void setAuxGraphs(ViewerCanvas view)
+  {
+
+	if (theWindow != null)
+	  for (ViewerCanvas v : theWindow.getAllViews())
+        if (v != view)
+	      v.auxGraphs.set(view, true);
+  }
+  
+  private void wipeAuxGraphs()
+  {
+    if (theWindow != null)
+	  for (ViewerCanvas v : theWindow.getAllViews())
+		v.auxGraphs.wipe();
+  }
+
+  @Override
+  public void drawOverlay(ViewerCanvas view)
+  {
+     if (view.moving){
+       //view.drawLine(new Point (0,0), new Point (100, 100), Color.MAGENTA);
+	 }
   }
 }

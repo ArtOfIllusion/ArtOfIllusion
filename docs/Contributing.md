@@ -69,8 +69,9 @@ following formating convention:
 ```java
 public class Example
 {
-  public static String Braces = "Left, new line to start a block";
-  public static int indentSpaces = 2;
+  public static String blocks = "Braces should be on the left.";
+  public static String blockDetails = "Indent them the same as the enclosing declaration.";
+  public static int indentStatementsInsideBlockSpaces = 2;
 
   public void longParameterLists(boolean areStacked,
                                  String toPrevent,
@@ -78,8 +79,8 @@ public class Example
 				 String fromRunningInto,
 				 int wrappingIssues)
   {
-    if(youUseAConditionalWithAOneLiner)
-       System.out.println("Just indent the statement to be executed!");
+    if (youUseAConditionalWithALongOneLiner)
+        System.out.println("Just indent the statement to be executed!");
 
     for (Object obj: Collection group)
          obj.indent("One space past opening Parenthesis");

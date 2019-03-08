@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes copyright (C) 2016-2017 by Maksim Khramov
-   Changes copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2017-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,7 +34,6 @@ public class SceneViewer extends ViewerCanvas
   Point clickPoint, dragPoint;
   ObjectInfo clickedObject;
   int deselect;
-  Vec3 nextCenter = new Vec3();
 
   public SceneViewer(Scene s, RowContainer p, EditingWindow fr)
   {
@@ -107,26 +106,44 @@ public class SceneViewer extends ViewerCanvas
     super.setOrientation(which);
     if (which > 5 && which < 6+cameras.size())
     {
-		ObjectInfo nextCamera = cameras.elementAt(which-6);
-		CoordinateSystem coords = nextCamera.coords.duplicate();
+        ObjectInfo nextCamera = cameras.elementAt(which-6);
+        CoordinateSystem nextCoords = nextCamera.coords.duplicate();
+        double workingDepth, projectionDist, nextScale;
+        Vec3 nextCenter;
 
-		if (nextCamera.getObject() instanceof SceneCamera){
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SceneCamera)nextCamera.getObject()).getDistToPlane())));
-		}
-		else if (nextCamera.getObject() instanceof SpotLight)
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((SpotLight)nextCamera.getObject()).getDistToPlane())));
-		else if (nextCamera.getObject() instanceof DirectionalLight)
-			nextCenter = new Vec3(coords.getOrigin().plus(coords.getZDirection().times(((DirectionalLight)nextCamera.getObject()).getDistToPlane())));
-		else
-			return;
+        // We seriously need a common interface for ViewControlledObjects
+        
+        if (nextCamera.getObject() instanceof SceneCamera)
+            workingDepth = ((SceneCamera)nextCamera.getObject()).getDistToPlane();
+        else if (nextCamera.getObject() instanceof SpotLight)
+            workingDepth = ((SpotLight)nextCamera.getObject()).getDistToPlane();
+        else if (nextCamera.getObject() instanceof DirectionalLight)
+            workingDepth = ((DirectionalLight)nextCamera.getObject()).getDistToPlane();
+        else
+            return;
+        nextCenter = nextCoords.getOrigin().plus(nextCoords.getZDirection().times(workingDepth));
 
-		animation.start(coords, rotationCenter, 100.0, which, navigation);
+        // SceneCamera does not obey the normal rules here. For now it is assumed to be always in perspective mode
+
+        if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+        {
+            double innerAngle = (Math.PI - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()))/2.0;
+            projectionDist = Math.tan(innerAngle)*getBounds().height/2.0/100;
+        }
+        else
+            projectionDist = theCamera.getDistToScreen();
+        if (perspective)
+            nextScale = 100.0;
+        else
+            nextScale = 100.0*projectionDist/workingDepth;
+
+        animation.start(nextCoords, nextCenter, nextScale, which, navigation);
     }
     else
     {
       boundCamera = null;
-	  if (which > 5) // Would have thought that the super takes care of this but not always.
-		orientation = VIEW_OTHER;
+      if (which > 5) // Would have thought that the super takes care of this but not always.
+        orientation = VIEW_OTHER;
       viewChanged(false);
     }
   }
@@ -143,9 +160,6 @@ public class SceneViewer extends ViewerCanvas
     orientation = which;
 	perspective = persp;
 	navigation = navi;
-
-    if (boundCamera != null)
-        boundCamera.setCoords(theCamera.getCameraCoordinates().duplicate());
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -309,12 +323,13 @@ public class SceneViewer extends ViewerCanvas
 
     // Finish up.
 
-	drawOverlay();
-	currentTool.drawOverlay(this);
-	if (activeTool != null)
-		activeTool.drawOverlay(this);
+    currentTool.drawOverlay(this);
+    if (activeTool != null)
+        activeTool.drawOverlay(this);
+    for(ViewerCanvas v : parentFrame.getAllViews())
+        v.drawOverlay(this);
     if (showAxes)
-      drawCoordinateAxes();
+        drawCoordinateAxes();
     drawBorder();
 }
 
@@ -552,7 +567,6 @@ public class SceneViewer extends ViewerCanvas
   protected void mouseDragged(WidgetMouseEvent e)
   {
 	mousePoint = e.getPoint();
-	drawOverlay();
     moveToGrid(e);
     if (!dragging)
     {
@@ -705,8 +719,6 @@ public class SceneViewer extends ViewerCanvas
 
   public void mouseClicked(MouseClickedEvent e)
   {
-	//super.mouseClicked(e);
-	
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
@@ -723,15 +735,6 @@ public class SceneViewer extends ViewerCanvas
     }
   }
 
- 	@Override
-	protected void mouseMoved(MouseMovedEvent e)
-	{
-		mouseMoving = true;
-		mousePoint = e.getPoint();
-		mouseMoveTimer.restart();
-		parentFrame.updateImage(); // I wonder why, but that's how it works
-	}
-	
   /** This is called recursively to move any children of a bound camera. */
 
   private void moveChildren(ObjectInfo obj, Mat4 transform, UndoRecord undo)

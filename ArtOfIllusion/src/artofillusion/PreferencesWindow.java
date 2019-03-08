@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
-   Changes Copyright (C) 2016 by Petri Ihalainen
+   Changes Copyright (C) 2016-2019 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -27,9 +27,13 @@ public class PreferencesWindow
 {
   private BComboBox defaultRendChoice, objectRendChoice, texRendChoice, localeChoice, themeChoice, colorChoice, toolChoice;
   private ValueField interactiveTolField, undoField, animationDurationField, animationFrameRateField;
+  private BCheckBox drawActiveFrustumBox, drawCameraFrustumBox, showTravelCuesOnIdleBox, showTravelCuesScrollingBox;
+  private BCheckBox showTiltDialBox;
   private BCheckBox glBox, backupBox, reverseZoomBox, useViewAnimationsBox;
   private List<ThemeManager.ThemeInfo> themes;
   private static int lastTab;
+  private ApplicationPreferences prefs;
+  private boolean cameraFrustumState, travelCuesState;
   
   public PreferencesWindow(BFrame parent)
   {
@@ -55,7 +59,7 @@ public class PreferencesWindow
           done = false;
       }
     }
-    ApplicationPreferences prefs = ArtOfIllusion.getPreferences();
+    prefs = ArtOfIllusion.getPreferences();
     Locale languages[] = Translate.getAvailableLocales();
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     if (renderers.size() > 0)
@@ -77,10 +81,16 @@ public class PreferencesWindow
     prefs.setKeepBackupFiles(backupBox.getState());
     prefs.setReverseZooming(reverseZoomBox.getState());
     prefs.setUseViewAnimations(useViewAnimationsBox.getState());
-	prefs.setMaxAnimationDuration(animationDurationField.getValue());
-	prefs.setAnimationFrameRate(animationFrameRateField.getValue());
+    prefs.setMaxAnimationDuration(animationDurationField.getValue());
+    prefs.setAnimationFrameRate(animationFrameRateField.getValue());
+    prefs.setDrawActiveFrustum(drawActiveFrustumBox.getState());
+    prefs.setDrawCameraFrustum(cameraFrustumState);
+    prefs.setShowTravelCuesOnIdle(showTravelCuesOnIdleBox.getState());
+    prefs.setShowTravelCuesScrolling(travelCuesState);
+    prefs.setShowTiltDial(showTiltDialBox.getState());
+
     prefs.setUseCompoundMeshTool(toolChoice.getSelectedIndex() == 1);
-	
+
     ThemeManager.setSelectedTheme(themes.get(themeChoice.getSelectedIndex()));
     ThemeManager.setSelectedColorSet(ThemeManager.getSelectedTheme().getColorSets()[colorChoice.getSelectedIndex()]);
     prefs.savePreferences();
@@ -121,9 +131,69 @@ public class PreferencesWindow
     useViewAnimationsBox =  new BCheckBox(Translate.text("useViewAnimations"), prefs.getUseViewAnimations());
     animationDurationField = new ValueField(prefs.getMaxAnimationDuration(), ValueField.POSITIVE);
     animationFrameRateField = new ValueField(prefs.getAnimationFrameRate(), ValueField.POSITIVE);
+    drawActiveFrustumBox = new BCheckBox(Translate.text("anyActiveView"), prefs.getDrawActiveFrustum());
+    cameraFrustumState = prefs.getDrawCameraFrustum();
+    drawCameraFrustumBox = new BCheckBox(Translate.text("cameraView"), cameraFrustumState);
+    showTravelCuesOnIdleBox = new BCheckBox(Translate.text("onIdle"), prefs.getShowTravelCuesOnIdle());
+    travelCuesState = prefs.getShowTravelCuesScrolling();
+    showTravelCuesScrollingBox = new BCheckBox(Translate.text("duringScrolling"), travelCuesState);
+    showTiltDialBox = new BCheckBox(Translate.text("ShowTiltDial"), prefs.getShowTiltDial());
+    
+    useViewAnimationsBox.addEventLink(ValueChangedEvent.class, 
+      new Object(){void processEvent()
+      {
+        animationDurationField.setEnabled(useViewAnimationsBox.getState());
+        animationFrameRateField.setEnabled(useViewAnimationsBox.getState());
+      }}
+    );
 
-	//useViewAnimationsBox.addEventLink(ValueChangedEvent.class, this, "useViewAnimationsChanged");
-	//animationDurationField.addEventLink(ValueChangedEvent.class, this, "animationDurationChanged");
+    // Interaction between frustum checkboxes
+
+    drawActiveFrustumBox.addEventLink(ValueChangedEvent.class, 
+      new Object(){void processEvent()
+      {
+        drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState());
+        if (drawActiveFrustumBox.getState())
+          drawCameraFrustumBox.setState(drawActiveFrustumBox.getState());
+        else
+          drawCameraFrustumBox.setState(cameraFrustumState);
+      }}
+    );
+    drawCameraFrustumBox.addEventLink(ValueChangedEvent.class, 
+      new Object(){void processEvent()
+      {
+        cameraFrustumState = drawCameraFrustumBox.getState();
+      }}
+    );
+    if (drawActiveFrustumBox.getState())
+    {
+        drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState()); 
+        drawCameraFrustumBox.setState(drawActiveFrustumBox.getState()); 
+    }
+
+    // Interaction between scroll cue checkboxes
+
+    showTravelCuesOnIdleBox.addEventLink(ValueChangedEvent.class, 
+      new Object(){void processEvent()
+      {
+        showTravelCuesScrollingBox.setEnabled(! showTravelCuesOnIdleBox.getState());
+        if (showTravelCuesOnIdleBox.getState())
+          showTravelCuesScrollingBox.setState(showTravelCuesOnIdleBox.getState());
+        else
+          showTravelCuesScrollingBox.setState(travelCuesState);
+      }}
+    );
+    showTravelCuesScrollingBox.addEventLink(ValueChangedEvent.class, 
+      new Object(){void processEvent()
+      {
+        travelCuesState = showTravelCuesScrollingBox.getState();
+      }}
+    );
+    if (showTravelCuesOnIdleBox.getState())
+    {
+        showTravelCuesScrollingBox.setEnabled(! showTravelCuesOnIdleBox.getState()); 
+        showTravelCuesScrollingBox.setState(showTravelCuesOnIdleBox.getState()); 
+    }
 
     themes = new ArrayList<ThemeManager.ThemeInfo>();
     for (ThemeManager.ThemeInfo theme: ThemeManager.getThemes())
@@ -179,40 +249,53 @@ public class PreferencesWindow
 
     // Layout the panel.
 
-    FormContainer panel = new FormContainer(2, 16);
-    panel.setColumnWeight(1, 1.0);
-    LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 0, 2, 5), null);
+    FormContainer panel = new FormContainer(3, 20);
+    LayoutInfo labelLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE, new Insets(2, 5, 2, 5), null);
     LayoutInfo widgetLayout = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.BOTH, new Insets(2, 0, 2, 0), null);
     LayoutInfo centerLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(2, 0, 2, 0), null);
-    panel.add(Translate.label("defaultRenderer"), 0, 0, labelLayout);
-    panel.add(Translate.label("objPreviewRenderer"), 0, 1, labelLayout);
-    panel.add(Translate.label("texPreviewRenderer"), 0, 2, labelLayout);
-    panel.add(Translate.label("selectedTheme"), 0, 3, labelLayout);
-    panel.add(Translate.label("themeColorSet"), 0, 4, labelLayout);
-    panel.add(Translate.label("defaultMeshEditingTool"), 0, 5, labelLayout);
-    panel.add(Translate.label("interactiveSurfError"), 0, 6, labelLayout);
+
+    panel.setColumnWeight(0, 0.0);
+    panel.setColumnWeight(1, 0.0);
+    panel.setColumnWeight(2, 3.0);
+
+    panel.add(Translate.label("language"), 0, 0, labelLayout);
+    panel.add(Translate.label("defaultRenderer"), 0, 1, labelLayout);
+    panel.add(Translate.label("objPreviewRenderer"), 0, 2, labelLayout);
+    panel.add(Translate.label("texPreviewRenderer"), 0, 3, labelLayout);
+    panel.add(Translate.label("selectedTheme"), 0, 4, labelLayout);
+    panel.add(Translate.label("themeColorSet"), 0, 5, labelLayout);
+    panel.add(Translate.label("defaultMeshEditingTool"), 0, 6, labelLayout);
     panel.add(Translate.label("maxUndoLevels"), 0, 7, labelLayout);
-    panel.add(Translate.label("language"), 0, 11, labelLayout);
-    panel.add(defaultRendChoice, 1, 0, widgetLayout);
-    panel.add(objectRendChoice, 1, 1, widgetLayout);
-    panel.add(texRendChoice, 1, 2, widgetLayout);
-    panel.add(themeChoice, 1, 3, widgetLayout);
-    panel.add(colorChoice, 1, 4, widgetLayout);
-    panel.add(toolChoice, 1, 5, widgetLayout);
-    panel.add(interactiveTolField, 1, 6, widgetLayout);
+    panel.add(Translate.label("interactiveSurfError"), 0,11, labelLayout);
+
+    panel.add(localeChoice, 1, 0, widgetLayout);
+    panel.add(defaultRendChoice, 1, 1, widgetLayout);
+    panel.add(objectRendChoice, 1, 2, widgetLayout);
+    panel.add(texRendChoice, 1, 3, widgetLayout);
+    panel.add(themeChoice, 1, 4, widgetLayout);
+    panel.add(colorChoice, 1, 5, widgetLayout);
+    panel.add(toolChoice, 1, 6, widgetLayout);
     panel.add(undoField, 1, 7, widgetLayout);
-    panel.add(reverseZoomBox, 0, 8, 2, 1, centerLayout);
-    panel.add(glBox, 0, 9, 2, 1, centerLayout);
-    panel.add(backupBox, 0, 10, 2, 1, centerLayout);
-    panel.add(localeChoice, 1, 11, widgetLayout);
-    panel.add(new BLabel(" "), 1, 12, labelLayout);
-	panel.add(useViewAnimationsBox, 1, 13, widgetLayout);
-	panel.add(Translate.label("maxAnimationDuration"), 0, 14, labelLayout);
-	panel.add(Translate.label("animationFrameRate"), 0, 15, labelLayout);
-	panel.add(animationDurationField, 1, 14, widgetLayout);
-	panel.add(animationFrameRateField, 1, 15, widgetLayout);
-	//animationDurationField.setEnabled(false);
-	//animationFrameRateField.setEnabled(false);
+    panel.add(backupBox, 1, 8, 2, 1, widgetLayout);
+    panel.add(reverseZoomBox, 1, 9, 2, 1, widgetLayout);
+    panel.add(glBox, 1, 10, 2, 1, widgetLayout);
+    panel.add(interactiveTolField, 1, 11, widgetLayout);
+    panel.add(useViewAnimationsBox, 1, 12, 2, 1, widgetLayout);
+
+    panel.add(Translate.label("maxAnimationDuration"), 0, 13, labelLayout);
+    panel.add(Translate.label("animationFrameRate"), 0, 14, labelLayout);
+    panel.add(animationDurationField, 1, 13, widgetLayout);
+    panel.add(animationFrameRateField, 1, 14, widgetLayout);
+
+    panel.add(Translate.label("DisplayViewFrustumOf"), 0, 15, labelLayout);
+    panel.add(drawActiveFrustumBox, 1, 15, 2, 1, widgetLayout);
+    panel.add(drawCameraFrustumBox, 1, 16, 2, 1, widgetLayout);
+
+    panel.add(Translate.label("ShowTravelScrollCues"), 0, 17, labelLayout);
+    panel.add(showTravelCuesOnIdleBox, 1, 17, 2, 1, widgetLayout);
+    panel.add(showTravelCuesScrollingBox, 1, 18, 2, 1, widgetLayout);
+    panel.add(showTiltDialBox, 1, 19, 2, 1, widgetLayout);
+
     return panel;
   }
 

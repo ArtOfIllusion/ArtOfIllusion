@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016-2017 by Maksim Khramov
-   Changes copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2017-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -65,7 +65,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   UndoStack undoStack;
   int numViewsShown, currentView;
   private ActionProcessor uiEventProcessor;
-  private boolean modified, sceneChangePending;
+  private boolean modified, sceneChangePending, objectListShown;
   private KeyEventPostProcessor keyEventHandler;
   private SceneChangedEvent sceneChangedEvent;
   private List<ModellingTool> modellingTools;
@@ -84,6 +84,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     sceneChangedEvent = new SceneChangedEvent(this);
     uiEventProcessor = new ActionProcessor();
     createItemList();
+    objectListShown = true;
 
     // Create the four SceneViewer panels.
 
@@ -1081,7 +1082,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     addTrackMenu.setEnabled(numSelObjects > 0);
     distortionMenu.setEnabled(sel.length > 0);
     
-    viewMenuItem[1].setText(Translate.text(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0 ? "menu.showObjectList" : "menu.hideObjectList"));
+    viewMenuItem[1].setText(Translate.text(!objectListShown ? "menu.showObjectList" : "menu.hideObjectList"));
     viewMenuItem[2].setText(Translate.text(view.getShowAxes() ? "menu.hideCoordinateAxes" : "menu.showCoordinateAxes"));
     viewMenuItem[3].setEnabled(view.getTemplateImage() != null); // Show template
     viewMenuItem[3].setText(Translate.text(view.getTemplateShown() ? "menu.hideTemplate" : "menu.showTemplate"));
@@ -1339,6 +1340,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void setObjectListVisible(boolean visible)
   {
+    objectListShown = visible; // in case this method is called from outside
     setDockableWidgetVisible((DockableWidget) itemTreeScroller.getParent(), visible);
   }
 
@@ -1642,8 +1644,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
           new RenderSetupDialog(this, theScene);
         else if (command.equals("renderImmediately"))
           RenderSetupDialog.renderImmediately(this, theScene);
-        else if (command.equals("hideObjectList"))
-          setObjectListVisible(itemTreeScroller.getBounds().width == 0 || itemTreeScroller.getBounds().height == 0);
         else if (command.equals("images"))
           new ImagesDialog(this, theScene, null);
       }
@@ -1666,6 +1666,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         updateImage();
         updateMenus();
       }
+      else if (command.equals("hideObjectList"))
+        setObjectListVisible(objectListShown = !objectListShown);
       else if (command.equals("fitToSelection"))
         getView().fitToObjects(getSelectedObjects());
       else if (command.equals("fitToAll"))

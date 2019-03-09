@@ -263,6 +263,7 @@ public class ImagesDialog extends BDialog
   {
     // To prevent handling of interrupted resize-events 
     // Don't know if it really matters, but there are plenty of those.
+
     if (dialogWidth == getBounds().width && dialogHeight == getBounds().height)
       return;
     dialogWidth  = getBounds().width;
@@ -419,19 +420,19 @@ public class ImagesDialog extends BDialog
     {
       public void actionPerformed(ActionEvent e) 
       {  
-          BScrollBar bar = sp.getVerticalScrollBar();
+        BScrollBar bar = sp.getVerticalScrollBar();
         if ((scrollIncrement < 0 && bar.getValue()+scrollIncrement <= scrollFinalValue) ||
             (scrollIncrement > 0 && bar.getValue()+scrollIncrement >= scrollFinalValue) )
-          {
-            timer.stop();
-              bar.setValue(scrollFinalValue);
-          }
+        {
+          timer.stop();
+            bar.setValue(scrollFinalValue);
+        }
         else
-          {
-            bar.setValue(bar.getValue()+scrollIncrement);
-            step++;
-            timer.restart();
-          }
+        {
+          bar.setValue(bar.getValue()+scrollIncrement);
+          step++;
+          timer.restart();
+        }
       }
     });
 

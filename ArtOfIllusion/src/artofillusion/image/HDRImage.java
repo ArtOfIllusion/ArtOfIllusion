@@ -57,15 +57,15 @@ public class HDRImage extends ImageMap
     wratio = w1 / (float) w;
     hratio = h1 / (float) h;
     if (w > 1 && wratio > 0.75)
-      {
-        w1 /= 2;
-        wratio *= 0.5;
-      }
+    {
+      w1 /= 2;
+      wratio *= 0.5;
+    }
     if (h > 1 && hratio > 0.75)
-      {
-        h1 /= 2;
-        hratio *= 0.5;
-      }
+    {
+      h1 /= 2;
+      hratio *= 0.5;
+    }
 
     // aspectRatio is needed for scaling
     
@@ -92,63 +92,63 @@ public class HDRImage extends ImageMap
     // Construct the first reduced map.
 
     if (num > 1)
+    {
+      width[1] = w1;
+      height[1] = h1;
+      scale[1] = 1.0/Math.min(w1, h1);
+      maps[1] = new byte [4][w1*h1];
+      float widthScale = w/(float) w1;
+      float heightScale = h/(float) h1;
+      for (i = 0; i < 4; i++)
       {
-        width[1] = w1;
-        height[1] = h1;
-        scale[1] = 1.0/Math.min(w1, h1);
-        maps[1] = new byte [4][w1*h1];
-        float widthScale = w/(float) w1;
-        float heightScale = h/(float) h1;
-        for (i = 0; i < 4; i++)
+        byte componentMap0[] = maps[0][i];
+        byte componentMap1[] = maps[1][i];
+        for (j = 0; j < h1; j++)
+        {
+          int pos1 = j*w1;
+          float pos0 = ((int) (j*heightScale))*w;
+          for (k = 0; k < w1; k++)
           {
-            byte componentMap0[] = maps[0][i];
-            byte componentMap1[] = maps[1][i];
-            for (j = 0; j < h1; j++)
-              {
-                int pos1 = j*w1;
-                float pos0 = ((int) (j*heightScale))*w;
-                for (k = 0; k < w1; k++)
-                  {
-                    componentMap1[pos1++] = componentMap0[(int) pos0];
-                    pos0 += widthScale;
-                  }
-              }
+            componentMap1[pos1++] = componentMap0[(int) pos0];
+            pos0 += widthScale;
           }
+        }
       }
+    }
 
     // Now construct the remaining mipmaps.
 
     RGBColor avg = new RGBColor();
     RGBColor tempColor = new RGBColor();
     for (i = 2; i < num; i++)
-      {
-        w = width[i] = width[i-1]/2;
-        h = height[i] = height[i-1]/2;
-        scale[i] = 2.0*scale[i-1];
-        maps[i] = new byte [4][w*h];
-        for (k = 0; k < w; k++)
-          for (m = 0; m < h; m++)
-            {
-              j = 2*k+4*w*m;
-              tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
-              avg.copy(tempColor);
-              j = 2*k+1+4*w*m;
-              tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
-              avg.add(tempColor);
-              j = 2*k+2*w*(2*m+1);
-              tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
-              avg.add(tempColor);
-              j = 2*k+1+2*w*(2*m+1);
-              tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
-              avg.add(tempColor);
-              avg.scale(0.25);
-              int ergb = avg.getERGB();
-              maps[i][0][k+w*m] = (byte) ((ergb>>16)&0xFF);
-              maps[i][1][k+w*m] = (byte) ((ergb>>8)&0xFF);
-              maps[i][2][k+w*m] = (byte) (ergb&0xFF);
-              maps[i][3][k+w*m] = (byte) ((ergb>>24)&0xFF);
-            }
-      }
+    {
+      w = width[i] = width[i-1]/2;
+      h = height[i] = height[i-1]/2;
+      scale[i] = 2.0*scale[i-1];
+      maps[i] = new byte [4][w*h];
+      for (k = 0; k < w; k++)
+        for (m = 0; m < h; m++)
+        {
+          j = 2*k+4*w*m;
+          tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
+          avg.copy(tempColor);
+          j = 2*k+1+4*w*m;
+          tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
+          avg.add(tempColor);
+          j = 2*k+2*w*(2*m+1);
+          tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
+          avg.add(tempColor);
+          j = 2*k+1+2*w*(2*m+1);
+          tempColor.setERGB(maps[i-1][0][j], maps[i-1][1][j], maps[i-1][2][j], maps[i-1][3][j]);
+          avg.add(tempColor);
+          avg.scale(0.25);
+          int ergb = avg.getERGB();
+          maps[i][0][k+w*m] = (byte) ((ergb>>16)&0xFF);
+          maps[i][1][k+w*m] = (byte) ((ergb>>8)&0xFF);
+          maps[i][2][k+w*m] = (byte) (ergb&0xFF);
+          maps[i][3][k+w*m] = (byte) ((ergb>>24)&0xFF);
+        }
+    }
 
     // Precompute multipliers used for doing the mipmapping.
 
@@ -174,10 +174,10 @@ public class HDRImage extends ImageMap
     int len = map[0].length;
 
     for (int i = 0; i < len; i++)
-      {
-        tempColor.setERGB(map[0][i], map[1][i], map[2][i], map[3][i]);
-        avg.add(tempColor);
-      }
+    {
+      tempColor.setERGB(map[0][i], map[1][i], map[2][i], map[3][i]);
+      avg.add(tempColor);
+    }
     avg.scale(1.0/len);
     average = new float [] {avg.getRed(), avg.getGreen(), avg.getBlue()};
   }
@@ -188,32 +188,32 @@ public class HDRImage extends ImageMap
   {
     int w, h;
     if (width[0] <= size && height[0] <= size) // "Tässä!" 
-      {
-        w = width[0];
-        h = height[0];
-      }
+    {
+      w = width[0];
+      h = height[0];
+    }
     else
-      {
-        w = Math.max(Math.min(size, (int)Math.round(size*aspectRatio)),1);
-        h = Math.max(Math.min(size, (int)Math.round(size/aspectRatio)),1);
-      }
+    {
+      w = Math.max(Math.min(size, (int)Math.round(size*aspectRatio)),1);
+      h = Math.max(Math.min(size, (int)Math.round(size/aspectRatio)),1);
+    }
     int data[] = new int [w*h];
     float xstep = width[0]/(float) w;
     float ystep = height[0]/(float) h;
     byte map0[][] = maps[0];
     RGBColor tempColor = new RGBColor();
     for (int i = 0; i < h; i++)
+    {
+      float pos = (int) (i*ystep)*width[0];
+      int base = i*w;
+      for (int j = 0; j < w; j++)
       {
-        float pos = (int) (i*ystep)*width[0];
-        int base = i*w;
-        for (int j = 0; j < w; j++)
-          {
-            int ipos = (int) pos;
-            tempColor.setERGB(map0[0][ipos], map0[1][ipos], map0[2][ipos], map0[3][ipos]);
-            data[base+j] = tempColor.getARGB();
-            pos += xstep;
-          }
+        int ipos = (int) pos;
+        tempColor.setERGB(map0[0][ipos], map0[1][ipos], map0[2][ipos], map0[3][ipos]);
+        data[base+j] = tempColor.getARGB();
+        pos += xstep;
       }
+    }
     MemoryImageSource src = new MemoryImageSource(w, h, data, 0, w);
     previewSize = size;
     return Toolkit.getDefaultToolkit().createImage(src);
@@ -316,20 +316,20 @@ public class HDRImage extends ImageMap
     i1 = (int) frac1;
     frac1 -= (float) i1;
     if (i1 >= w-1)
-      {
-        i1 = w-1;
-        i2 = wrapx ? 0 : i1;
-      }
+    {
+      i1 = w-1;
+      i2 = wrapx ? 0 : i1;
+    }
     else
       i2 = i1+1;
     frac2 = (float) (y*yscale[which]);
     j1 = (int) frac2;
     frac2 -= (float) j1;
     if (j1 >= h-1)
-      {
-        j1 = h-1;
-        j2 = wrapy ? 0 : j1;
-      }
+    {
+      j1 = h-1;
+      j2 = wrapy ? 0 : j1;
+    }
     else
       j2 = j1+1;
     ind1 = i1+j1*w;
@@ -385,15 +385,15 @@ public class HDRImage extends ImageMap
     // or last one, as appropriate.
 
     if (size <= scale[0])
-      {
-        getMapColor(theColor, 0, wrapx, wrapy, x, y);
-        return;
-      }
+    {
+      getMapColor(theColor, 0, wrapx, wrapy, x, y);
+      return;
+    }
     if (size >= scale[maps.length-1])
-      {
-        getMapColor(theColor, maps.length-1,wrapx, wrapy, x, y);
-        return;
-      }
+    {
+      getMapColor(theColor, maps.length-1,wrapx, wrapy, x, y);
+      return;
+    }
 
     // Determine which mipmaps to use.
 
@@ -491,15 +491,15 @@ public class HDRImage extends ImageMap
     // or last one, as appropriate.
 
     if (size <= scale[0])
-      {
-        getMapGradient(grad, component, 0, wrapx, wrapy, x, y);
-        return;
-      }
+    {
+      getMapGradient(grad, component, 0, wrapx, wrapy, x, y);
+      return;
+    }
     if (size >= scale[maps.length-1])
-      {
-        grad.set(0.0, 0.0);
-        return;
-      }
+    {
+      grad.set(0.0, 0.0);
+      return;
+    }
 
     // Determine which mipmaps to use.
 
@@ -531,20 +531,20 @@ public class HDRImage extends ImageMap
     i1 = (int) frac1;
     frac1 -= (double) i1;
     if (i1 >= w-1)
-      {
-        i1 = w-1;
-        i2 = wrapx ? 0 : i1;
-      }
+    {
+      i1 = w-1;
+      i2 = wrapx ? 0 : i1;
+    }
     else
       i2 = i1+1;
     frac2 = y*yscale[which];
     j1 = (int) frac2;
     frac2 -= (double) j1;
     if (j1 >= h-1)
-      {
-        j1 = h-1;
-        j2 = wrapy ? 0 : j1;
-      }
+    {
+      j1 = h-1;
+      j2 = wrapy ? 0 : j1;
+    }
     else
       j2 = j1+1;
     ind1 = i1+j1*w;

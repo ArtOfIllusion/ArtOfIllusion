@@ -61,13 +61,13 @@ public class TriMeshViewer extends MeshViewer
     double clipDist = theCamera.getClipDistance();
     boolean hideVert[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideVert : new boolean [v.length]);
     for (int i = 0; i < v.length; i++)
-      {
-        Vec3 pos = (project ? previewMesh.vert[i] : v[i].r);
-        screenVec2[i] = theCamera.getObjectToScreen().timesXY(pos);
-        screenVert[i] = new Point((int) screenVec2[i].x, (int) screenVec2[i].y);
-        screenZ[i] = theCamera.getObjectToView().timesZ(pos);
-        visible[i] = (!hideVert[i] && screenZ[i] > clipDist);
-      }
+    {
+      Vec3 pos = (project ? previewMesh.vert[i] : v[i].r);
+      screenVec2[i] = theCamera.getObjectToScreen().timesXY(pos);
+      screenVert[i] = new Point((int) screenVec2[i].x, (int) screenVec2[i].y);
+      screenZ[i] = theCamera.getObjectToView().timesZ(pos);
+      visible[i] = (!hideVert[i] && screenZ[i] > clipDist);
+    }
     super.updateImage();
   }
 
@@ -89,24 +89,20 @@ public class TriMeshViewer extends MeshViewer
     {
       meshColor = lineColor;
       selectedColor = highlightColor;
-	  //if (animation == null || !animation.changingPerspective()){
         if (showSkeleton && mesh.getSkeleton() != null)
           mesh.getSkeleton().draw(this, false);
-	  //}
     }
-	//if (animation == null || !animation.changingPerspective()) // mismatch at animation -- turned off for perspective change animation
-	//{
-      if (controller.getSelectionMode() == MeshEditController.POINT_MODE)
-      {
-        drawEdges(screenVec2, disabledColor, disabledColor);
-        drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
-      }
-      else
-	    drawEdges(screenVec2, meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
-      if (currentTool instanceof SkeletonTool)
-        if (showSkeleton && mesh.getSkeleton() != null)
-          mesh.getSkeleton().draw(this, true);
-	//}
+
+    if (controller.getSelectionMode() == MeshEditController.POINT_MODE)
+    {
+      drawEdges(screenVec2, disabledColor, disabledColor);
+      drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+    }
+    else
+      drawEdges(screenVec2, meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+    if (currentTool instanceof SkeletonTool)
+      if (showSkeleton && mesh.getSkeleton() != null)
+        mesh.getSkeleton().draw(this, true);
   }
 
   /** Draw the surface of the object. */
@@ -380,14 +376,14 @@ public class TriMeshViewer extends MeshViewer
     selected[i] = true;
     boolean hideEdge[] = (controller instanceof TriMeshEditorWindow ? ((TriMeshEditorWindow) controller).hideEdge : new boolean [ed.length]);
     if (controller.getSelectionMode() == MeshEditController.FACE_MODE)
-      {
-        if (hideEdge[f[i].e1])
-          selected[ed[f[i].e1].f1] = selected[ed[f[i].e1].f2] = true;
-        if (hideEdge[f[i].e2])
-          selected[ed[f[i].e2].f1] = selected[ed[f[i].e2].f2] = true;
-        if (hideEdge[f[i].e3])
-          selected[ed[f[i].e3].f1] = selected[ed[f[i].e3].f2] = true;
-      }
+    {
+      if (hideEdge[f[i].e1])
+        selected[ed[f[i].e1].f1] = selected[ed[f[i].e1].f2] = true;
+      if (hideEdge[f[i].e2])
+        selected[ed[f[i].e2].f1] = selected[ed[f[i].e2].f2] = true;
+      if (hideEdge[f[i].e3])
+        selected[ed[f[i].e3].f1] = selected[ed[f[i].e3].f2] = true;
+    }
     currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
     controller.setSelection(selected);
     currentTool.getWindow().updateMenus();
@@ -402,11 +398,11 @@ public class TriMeshViewer extends MeshViewer
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
-      {
-        Point p = e.getPoint();
-        if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
-          return;
-      }
+    {
+      Point p = e.getPoint();
+      if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
+        return;
+    }
     dragging = true;
     deselect = -1;
     super.mouseDragged(e);

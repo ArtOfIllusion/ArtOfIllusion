@@ -69,23 +69,20 @@ public class TubeViewer extends CurveViewer
 
       // Draw the handles for the control points.
 
-	  //if (animation == null || !animation.changingPerspective()) // mismatch at animation
-	  //{
-        boolean selected[] = controller.getSelection();
-        for (int i = 0; i < v.length; i++)
-          if (!selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
-          {
-            double z = theCamera.getObjectToView().timesZ(v[i].r);
-            renderBox(((int) pos[i].x) - HANDLE_SIZE/2, ((int) pos[i].y) - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, z, lineColor);
-          }
-        Color color = (currentTool.hilightSelection() ? highlightColor : lineColor);
-        for (int i = 0; i < v.length; i++)
-          if (selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
-          {
-            double z = theCamera.getObjectToView().timesZ(v[i].r);
-            renderBox(((int) pos[i].x) - HANDLE_SIZE/2, ((int) pos[i].y) - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, z, color);
-          }
-	  //}
+      boolean selected[] = controller.getSelection();
+      for (int i = 0; i < v.length; i++)
+        if (!selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
+        {
+          double z = theCamera.getObjectToView().timesZ(v[i].r);
+          renderBox(((int) pos[i].x) - HANDLE_SIZE/2, ((int) pos[i].y) - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, z, lineColor);
+        }
+      Color color = (currentTool.hilightSelection() ? highlightColor : lineColor);
+      for (int i = 0; i < v.length; i++)
+        if (selected[i] && theCamera.getObjectToView().timesZ(v[i].r) > theCamera.getClipDistance())
+        {
+          double z = theCamera.getObjectToView().timesZ(v[i].r);
+          renderBox(((int) pos[i].x) - HANDLE_SIZE/2, ((int) pos[i].y) - HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, z, color);
+        }
     }
   }
 }

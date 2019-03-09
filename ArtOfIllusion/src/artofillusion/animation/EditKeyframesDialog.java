@@ -73,7 +73,7 @@ public class EditKeyframesDialog
     row.add(endField = new ValueField(0.0, ValueField.NONE, 5));
     content.add(row = new RowContainer());
     if (operation == MOVE || operation == COPY)
-      row.add(Translate.label("to time"));
+      row.add(Translate.label("toTime"));
     else if (operation == RESCALE)
       row.add(Translate.label("byFactorOf"));
     else if (operation == LOOP)

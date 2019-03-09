@@ -1,6 +1,7 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications Copyright 2016 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
+
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -30,11 +31,12 @@ public class DirectionalLight extends Light
   static WireframeMesh mesh;
   static final int SEGMENTS = 8;
   private static final Property PROPERTIES[] = new Property [] {
-    new Property(Translate.text("lightColor"), new RGBColor(1.0, 1.0, 1.0)),
-    new Property(Translate.text("Intensity"), -Double.MAX_VALUE, Double.MAX_VALUE, 1.0),
-    new Property(Translate.text("AngularRadius"), 0.0, 45.0, 1.0),
-    new Property(Translate.text("lightType"), new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight"))
-  };
+      new Property(Translate.text("lightColor"), new RGBColor(1.0, 1.0, 1.0)),
+      new Property(Translate.text("Intensity"), -Double.MAX_VALUE, Double.MAX_VALUE, 1.0),
+      new Property(Translate.text("AngularRadius"), 0.0, 45.0, 1.0),
+      new Property(Translate.text("lightType"), 
+      new String[] {Translate.text("normalLight"), Translate.text("shadowlessLight"), Translate.text("ambientLight")}, Translate.text("normalLight")
+  )};
 
   static {
     double sine[] = new double [SEGMENTS];
@@ -44,42 +46,40 @@ public class DirectionalLight extends Light
 
     bounds = new BoundingBox(-0.15, 0.15, -0.15, 0.15, -0.15, 0.25);
     for (i = 0; i < SEGMENTS; i++)
-      {
-        sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
-        cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
-      }
+    {
+      sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
+      cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
+    }
     vert = new Vec3 [SEGMENTS*4];
     from = new int [SEGMENTS*4];
     to = new int [SEGMENTS*4];
     for (i = 0; i < SEGMENTS; i++)
-      {
-        vert[i] = new Vec3(0.15*cosine[i], 0.15*sine[i], -0.15);
-        vert[i+SEGMENTS] = new Vec3(0.15*cosine[i], 0.15*sine[i], 0.0);
-        vert[i+2*SEGMENTS] = new Vec3(0.15*cosine[i], 0.15*sine[i], 0.05);
-        vert[i+3*SEGMENTS] = new Vec3(0.15*cosine[i], 0.15*sine[i], 0.25);
-        from[i] = i;
-        to[i] = (i+1)%SEGMENTS;
-        from[i+SEGMENTS] = i;
-        to[i+SEGMENTS] = i+SEGMENTS;
-        from[i+2*SEGMENTS] = i+SEGMENTS;
-        to[i+2*SEGMENTS] = (i+1)%SEGMENTS+SEGMENTS;
-        from[i+3*SEGMENTS] = i+2*SEGMENTS;
-        to[i+3*SEGMENTS] = i+3*SEGMENTS;
-      }
+    {
+      vert[i] = new Vec3(0.15*cosine[i], 0.15*sine[i], -0.15);
+      vert[i+SEGMENTS] = new Vec3(0.15*cosine[i], 0.15*sine[i], 0.0);
+      vert[i+2*SEGMENTS] = new Vec3(0.15*cosine[i], 0.15*sine[i], 0.05);
+      vert[i+3*SEGMENTS] = new Vec3(0.15*cosine[i], 0.15*sine[i], 0.25);
+      from[i] = i;
+      to[i] = (i+1)%SEGMENTS;
+      from[i+SEGMENTS] = i;
+      to[i+SEGMENTS] = i+SEGMENTS;
+      from[i+2*SEGMENTS] = i+SEGMENTS;
+      to[i+2*SEGMENTS] = (i+1)%SEGMENTS+SEGMENTS;
+      from[i+3*SEGMENTS] = i+2*SEGMENTS;
+      to[i+3*SEGMENTS] = i+3*SEGMENTS;
+    }
     mesh = new WireframeMesh(vert, from, to);
   }
 
   public DirectionalLight(RGBColor theColor, float theIntensity)
   {
     this(theColor, theIntensity, 1.0);
-	//setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
 
   public DirectionalLight(RGBColor theColor, float theIntensity, double theRadius)
   {
     setParameters(theColor.duplicate(), theIntensity, TYPE_NORMAL, 0.5f);
     setRadius(theRadius);
-	//setDistToPlane(Camera.DEFAULT_DISTANCE_TO_SCREEN);
   }
 
   @Override
@@ -105,12 +105,12 @@ public class DirectionalLight extends Light
 
   public double getDistToPlane()
   {
-	return distToPlane;
+    return distToPlane;
   }
 
   public void setDistToPlane(double dist)
   {
-	distToPlane = dist;
+    distToPlane = dist;
   }
 
   /** A DirectionalLight has no size.  Hence, calls to setSize() are ignored. */
@@ -220,7 +220,8 @@ public class DirectionalLight extends Light
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"),
-        new Widget [] {patch, intensityField, radiusField, typeChoice}, new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius"), Translate.text("lightType")});
+                           new Widget [] {patch, intensityField, radiusField, typeChoice}, 
+                           new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius"), Translate.text("lightType")});
     if (!dlg.clickedOk())
     {
       color.copy(oldColor);
@@ -298,8 +299,8 @@ public class DirectionalLight extends Light
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Intensity", "AngularRadius"},
-        new double [] {intensity, radius},
-        new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}, {0.0, 45.0}});
+                                            new double [] {intensity, radius},
+                                            new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}, {0.0, 45.0}});
   }
 
   /* Allow the user to edit a keyframe returned by getPoseKeyframe(). */
@@ -322,8 +323,8 @@ public class DirectionalLight extends Light
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(parentFrame, Translate.text("editDirectionalLightTitle"),
-        new Widget [] {patch, intensityField, radiusField},
-        new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius")});
+                           new Widget [] {patch, intensityField, radiusField},
+                           new String [] {Translate.text("Color"), Translate.text("Intensity"), Translate.text("AngularRadius")});
     if (!dlg.clickedOk())
     {
       key.color.copy(oldColor);

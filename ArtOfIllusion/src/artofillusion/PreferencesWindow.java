@@ -34,7 +34,7 @@ public class PreferencesWindow
   private static int lastTab;
   private ApplicationPreferences prefs;
   private boolean cameraFrustumState, travelCuesState;
-  
+
   public PreferencesWindow(BFrame parent)
   {
     BTabbedPane tabs = new BTabbedPane();
@@ -103,7 +103,7 @@ public class PreferencesWindow
   {
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     BComboBox c = new BComboBox();
-    
+
     for (Renderer r : renderers)
       c.add(r.getName());
     if (selected != null)
@@ -138,8 +138,8 @@ public class PreferencesWindow
     travelCuesState = prefs.getShowTravelCuesScrolling();
     showTravelCuesScrollingBox = new BCheckBox(Translate.text("duringScrolling"), travelCuesState);
     showTiltDialBox = new BCheckBox(Translate.text("ShowTiltDial"), prefs.getShowTiltDial());
-    
-    useViewAnimationsBox.addEventLink(ValueChangedEvent.class, 
+
+    useViewAnimationsBox.addEventLink(ValueChangedEvent.class,
       new Object(){void processEvent()
       {
         animationDurationField.setEnabled(useViewAnimationsBox.getState());
@@ -149,7 +149,7 @@ public class PreferencesWindow
 
     // Interaction between frustum checkboxes
 
-    drawActiveFrustumBox.addEventLink(ValueChangedEvent.class, 
+    drawActiveFrustumBox.addEventLink(ValueChangedEvent.class,
       new Object(){void processEvent()
       {
         drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState());
@@ -159,7 +159,7 @@ public class PreferencesWindow
           drawCameraFrustumBox.setState(cameraFrustumState);
       }}
     );
-    drawCameraFrustumBox.addEventLink(ValueChangedEvent.class, 
+    drawCameraFrustumBox.addEventLink(ValueChangedEvent.class,
       new Object(){void processEvent()
       {
         cameraFrustumState = drawCameraFrustumBox.getState();
@@ -167,13 +167,13 @@ public class PreferencesWindow
     );
     if (drawActiveFrustumBox.getState())
     {
-        drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState()); 
-        drawCameraFrustumBox.setState(drawActiveFrustumBox.getState()); 
+        drawCameraFrustumBox.setEnabled(! drawActiveFrustumBox.getState());
+        drawCameraFrustumBox.setState(drawActiveFrustumBox.getState());
     }
 
     // Interaction between scroll cue checkboxes
 
-    showTravelCuesOnIdleBox.addEventLink(ValueChangedEvent.class, 
+    showTravelCuesOnIdleBox.addEventLink(ValueChangedEvent.class,
       new Object(){void processEvent()
       {
         showTravelCuesScrollingBox.setEnabled(! showTravelCuesOnIdleBox.getState());
@@ -183,7 +183,7 @@ public class PreferencesWindow
           showTravelCuesScrollingBox.setState(travelCuesState);
       }}
     );
-    showTravelCuesScrollingBox.addEventLink(ValueChangedEvent.class, 
+    showTravelCuesScrollingBox.addEventLink(ValueChangedEvent.class,
       new Object(){void processEvent()
       {
         travelCuesState = showTravelCuesScrollingBox.getState();
@@ -191,8 +191,8 @@ public class PreferencesWindow
     );
     if (showTravelCuesOnIdleBox.getState())
     {
-        showTravelCuesScrollingBox.setEnabled(! showTravelCuesOnIdleBox.getState()); 
-        showTravelCuesScrollingBox.setState(showTravelCuesOnIdleBox.getState()); 
+        showTravelCuesScrollingBox.setEnabled(! showTravelCuesOnIdleBox.getState());
+        showTravelCuesScrollingBox.setState(showTravelCuesOnIdleBox.getState());
     }
 
     themes = new ArrayList<ThemeManager.ThemeInfo>();
@@ -211,13 +211,13 @@ public class PreferencesWindow
         return o1.getName().compareTo(o2.getName());
       }
     });
-    
+
     themeChoice = new BComboBox();
     for (ThemeManager.ThemeInfo theme: themes)
     {
       themeChoice.add(theme.getName());
     }
-    
+
     ThemeManager.ThemeInfo selectedTheme = ThemeManager.getSelectedTheme();
     themeChoice.setSelectedValue(selectedTheme.getName());
     colorChoice = new BComboBox();

@@ -270,13 +270,14 @@ public class CurveEditorWindow extends MeshEditorWindow implements EditingWindow
       for (i = 0; i < 6; i++)
         meshMenuItem[i].setEnabled(false);
     }
-	
-	// This should go to the super class, but some plugin editors can not handle it
-	boolean selected[] = getSelection();
-	boolean enable = false;
-	for (i = 0; i < selected.length; i++)
-		enable = (selected[i] ? true : enable);
-	fitToSelItem.setEnabled(enable);
+
+    // This should go to the super class, but some plugin editors can not handle it
+
+    boolean selected[] = getSelection();
+    boolean enable = false;
+    for (i = 0; i < selected.length; i++)
+      enable = (selected[i] ? true : enable);
+    fitToSelItem.setEnabled(enable);
   }
 
   @Override

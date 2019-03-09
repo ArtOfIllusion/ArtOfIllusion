@@ -30,8 +30,9 @@ public class ToolPalette extends CustomWidget
 
   public ToolPalette(int w, int h)
   {
-	this(w, h, null);
+    this(w, h, null);
   }
+
   /** Create a new ToolPalette.  w and h give the width and height of the tool palette,
       measured in icons. */
 
@@ -39,7 +40,7 @@ public class ToolPalette extends CustomWidget
   {
     width = w;
     height = h;
-	window = win;
+    window = win;
     tool = new EditingTool [w*h];
     numTools = 0;
     selected = 0;
@@ -146,16 +147,22 @@ public class ToolPalette extends CustomWidget
     int paletteMargin = ThemeManager.getPaletteMargin();
     g.setColor(ThemeManager.getPaletteBackgroundColor());
     g.fillRoundRect(0, 0, width*maxsize.width + 2*paletteMargin, height*maxsize.height + 2*paletteMargin, 8, 8);
+
     //So as to ensure graphical consistency, buttons must be drawn following a certain order:
     //normal buttons first
+
     for (int i = 0; i < numTools; i++)
       if (!tool[i].getButton().isSelected() && !tool[i].getButton().isHighlighted())
           tool[i].getButton().paint(g);
+  
     //highlighted buttons next
+
     for (int i = 0; i < numTools; i++)
       if (!tool[i].getButton().isSelected() && tool[i].getButton().isHighlighted())
           tool[i].getButton().paint(g);
+  
     //then the selected one.
+
     for (int i = 0; i < numTools; i++)
       if (tool[i].getButton().isSelected())
           tool[i].getButton().paint(g);
@@ -198,14 +205,17 @@ public class ToolPalette extends CustomWidget
       repaint();
       tool[i].activate();
     }
-	// This is a bit ugly. The 'toolChanged' should be defined in EditingWindow but that 
-	// causes error at compile with Score and UVMappingEditorWindow
-	if(window != null){
-	  if (window instanceof LayoutWindow)
-		((LayoutWindow)window).toolChanged(tool[i]);
-	  if (window instanceof ObjectEditorWindow)
-		((ObjectEditorWindow)window).toolChanged(tool[i]);
-	}
+
+    // This is a bit ugly. The 'toolChanged' should be defined in EditingWindow but that 
+    // causes error at compile with Score and UVMappingEditorWindow
+
+    if(window != null)
+    {
+      if (window instanceof LayoutWindow)
+        ((LayoutWindow)window).toolChanged(tool[i]);
+      if (window instanceof ObjectEditorWindow)
+        ((ObjectEditorWindow)window).toolChanged(tool[i]);
+    }
   }
 
   private void mouseClicked(MouseClickedEvent e)
@@ -226,7 +236,7 @@ public class ToolPalette extends CustomWidget
   private void mouseExited()
   {
     for (int i = 0; i < numTools; i++)
-	  tool[i].getButton().setHighlighted(false);
+      tool[i].getButton().setHighlighted(false);
     repaint();
   }
 

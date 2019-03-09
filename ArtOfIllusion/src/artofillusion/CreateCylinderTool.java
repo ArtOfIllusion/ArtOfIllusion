@@ -1,5 +1,4 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -144,7 +143,8 @@ public class CreateCylinderTool extends EditingTool
   {
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, ratio);
     ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("editCylinderTitle"),
-		new Widget [] {ratioSlider}, new String [] {Translate.text("radiusRatio")});
+                           new Widget [] {ratioSlider},
+                           new String [] {Translate.text("radiusRatio")});
     if (dlg.clickedOk())
       ratio = ratioSlider.getValue();
   }

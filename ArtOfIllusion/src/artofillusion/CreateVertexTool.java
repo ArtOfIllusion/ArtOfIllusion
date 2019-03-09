@@ -1,5 +1,4 @@
 /* Copyright (C) 2003-2007 by Peter Eastman
-   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,11 +38,11 @@ public class CreateVertexTool extends MeshEditingTool
     super.activate();
     setHelpText();
   }
-  
+
   /**
    * Set the help text based on the current selection mode.
    */
-  
+
   private void setHelpText()
   {
     int mode = controller.getSelectionMode();
@@ -84,7 +83,7 @@ public class CreateVertexTool extends MeshEditingTool
     if (mode == MeshEditController.POINT_MODE)
     {
       // Create a new vertex if this is a boundary vertex.  Otherwise, just move it.
-      
+
       constrainDir = mesh.getNormals()[target];
       if (createBoundaryVertex(mesh))
       {
@@ -105,7 +104,7 @@ public class CreateVertexTool extends MeshEditingTool
       if (mode == MeshEditController.EDGE_MODE)
       {
         // Subdivide an edge.
-        
+
         TriangleMesh.Edge edge[] = mesh.getEdges();
         Vec3 v1 = vert[edge[target].v1].r;
         Vec3 v2 = vert[edge[target].v2].r;
@@ -119,7 +118,7 @@ public class CreateVertexTool extends MeshEditingTool
       else if (mode == MeshEditController.FACE_MODE)
       {
         // Subdivide a face.
-        
+
         TriangleMesh.Face face[] = mesh.getFaces();
         Vec3 v1 = vert[face[target].v1].r;
         Vec3 v2 = vert[face[target].v2].r;
@@ -140,7 +139,7 @@ public class CreateVertexTool extends MeshEditingTool
       theWindow.updateMenus();
     }
   }
-  
+
   @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
@@ -183,11 +182,11 @@ public class CreateVertexTool extends MeshEditingTool
     theWindow.updateImage();
     setHelpText();
   }
-  
+
   /**
    * Return the new positions of every vertex.
    */
-  
+
   private Vec3 [] findDraggedPositions(TriangleMesh mesh, Vec3 drag)
   {
     MeshVertex vert[] = mesh.getVertices();
@@ -198,11 +197,11 @@ public class CreateVertexTool extends MeshEditingTool
     pos[vertexToMove] = clickPos.plus(drag);
     return pos;
   }
-  
+
   /**
    * Find the displacement vector for the vertex being dragged.
    */
-  
+
   private Vec3 findDragVector(int dx, int dy, TriMeshViewer view, boolean constrain)
   {
     Vec3 drag = view.getCamera().findDragVector(clickPos, dx, dy);
@@ -220,7 +219,7 @@ public class CreateVertexTool extends MeshEditingTool
    * Try to create a new vertex when a boundary vertex is dragged.  Returns true if a new vertex was
    * created, false otherwise.
    */
-  
+
   private boolean createBoundaryVertex(TriangleMesh mesh)
   {
     TriangleMesh.Vertex vert[] = (TriangleMesh.Vertex []) mesh.getVertices();
@@ -234,7 +233,7 @@ public class CreateVertexTool extends MeshEditingTool
     theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()}));
 
     // Create a new vertex and two new faces.
-    
+
     TriangleMesh.Vertex newvert[] = new TriangleMesh.Vertex [vert.length+1];
     int newface[][] = new int [face.length+2][];
     for (int i = 0; i < vert.length; i++)
@@ -257,17 +256,17 @@ public class CreateVertexTool extends MeshEditingTool
     else
       newface[face.length+1] = new int [] {e.v1, e.v2, vert.length};
     mesh.setShape(newvert, newface);
-    
+
     // Copy over the edge smoothness values.
-    
+
     TriangleMesh.Edge newedge[] = mesh.getEdges();
     for (int i = 0; i < newedge.length; i++)
       for (int j = 0; j < edge.length; j++)
         if ((newedge[i].v1 == edge[j].v1 && newedge[i].v2 == edge[j].v2) || (newedge[i].v1 == edge[j].v2 && newedge[i].v2 == edge[j].v1))
           newedge[i].smoothness = edge[j].smoothness;
-    
+
     // Update the parameter values.
-    
+
     TextureParameter param[] = mesh.getParameters();
     ParameterValue paramValue[] = mesh.getParameterValues();
     for (int i = 0; i < paramValue.length; i++)

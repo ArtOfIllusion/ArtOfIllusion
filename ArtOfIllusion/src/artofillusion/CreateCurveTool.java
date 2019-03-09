@@ -103,12 +103,12 @@ public class CreateCurveTool extends EditingTool
         view.drawLine(p[mesh.from[i]], p[mesh.to[i]], ViewerCanvas.lineColor);
     }
     
-    if(clickPoint.isEmpty()) 
+    if (clickPoint.isEmpty()) 
     {
       return;
     }
     int lastPoint = clickPoint.size()-1;
-    
+
     Mat4 cameraWorldToScreen = cam.getWorldToScreen();
     
     for (int listIndex = 0; listIndex < clickPoint.size(); listIndex++)
@@ -117,7 +117,6 @@ public class CreateCurveTool extends EditingTool
       Color handleColor = (listIndex == lastPoint) ? ViewerCanvas.highlightColor : ViewerCanvas.disabledColor;
       view.drawBox((int) screenPos.x-HANDLE_SIZE/2, (int) screenPos.y-HANDLE_SIZE/2, HANDLE_SIZE, HANDLE_SIZE, handleColor);
     }
-
   }
 
   @Override
@@ -169,11 +168,11 @@ public class CreateCurveTool extends EditingTool
         s = new float [clickPoint.size()];
         orig = new Vec3();
         for (int i = 0; i < vertex.length; i++)
-          {
-            vertex[i] = (Vec3) clickPoint.elementAt(i);
-            s[i] = smoothness.elementAt(i);
-            orig = orig.plus(vertex[i]);
-          }
+        {
+          vertex[i] = (Vec3) clickPoint.elementAt(i);
+          s[i] = smoothness.elementAt(i);
+          orig = orig.plus(vertex[i]);
+        }
         orig = orig.times(1.0/vertex.length);
 
         // Find the object's coordinate system.
@@ -195,16 +194,16 @@ public class CreateCurveTool extends EditingTool
         // Transform all of the vertices into the object's coordinate system.
 
         for (int i = 0; i < vertex.length; i++)
-          {
-            vertex[i] = coords.toLocal().times(vertex[i]);
-          }
+        {
+          vertex[i] = coords.toLocal().times(vertex[i]);
+        }
         theCurve = new Curve(vertex, s, smoothing, false);
         if (e.getClickCount() == 2)
-          {
-            theCurve.setClosed(e.isControlDown());
-            addToScene();
-            return;
-          }
+        {
+          theCurve.setClosed(e.isControlDown());
+          addToScene();
+          return;
+        }
         cam.setObjectTransform(coords.fromLocal());
       }
     theWindow.updateImage();
@@ -216,11 +215,11 @@ public class CreateCurveTool extends EditingTool
   public void keyPressed(KeyPressedEvent e, ViewerCanvas view)
   {
     if (e.getKeyCode() == KeyPressedEvent.VK_ENTER && theCurve != null)
-      {
-        theCurve.setClosed(e.isControlDown());
-        addToScene();
-        e.consume();
-      }
+    {
+      theCurve.setClosed(e.isControlDown());
+      addToScene();
+      e.consume();
+    }
   }
 
   /** Add the curve to the scene. */
@@ -229,17 +228,17 @@ public class CreateCurveTool extends EditingTool
   {
     boolean addCurve = (theCurve != null);
     if (addCurve)
-      {
-        ObjectInfo info = new ObjectInfo(theCurve, coords, "Curve "+(counter++));
-        info.addTrack(new PositionTrack(info), 0);
-        info.addTrack(new RotationTrack(info), 1);
-        UndoRecord undo = new UndoRecord(theWindow, false);
-        int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
-        ((LayoutWindow) theWindow).addObject(info, undo);
-        undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
-        theWindow.setUndoRecord(undo);
-        ((LayoutWindow) theWindow).setSelection(theWindow.getScene().getNumObjects()-1);
-      }
+    {
+      ObjectInfo info = new ObjectInfo(theCurve, coords, "Curve "+(counter++));
+      info.addTrack(new PositionTrack(info), 0);
+      info.addTrack(new RotationTrack(info), 1);
+      UndoRecord undo = new UndoRecord(theWindow, false);
+      int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
+      ((LayoutWindow) theWindow).addObject(info, undo);
+      undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
+      theWindow.setUndoRecord(undo);
+      ((LayoutWindow) theWindow).setSelection(theWindow.getScene().getNumObjects()-1);
+    }
     clickPoint = null;
     smoothness = null;
     theCurve = null;
@@ -260,8 +259,8 @@ public class CreateCurveTool extends EditingTool
     else
       smoothingChoice.setSelectedIndex(1);
     ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectCurveSmoothing"),
-                new Widget [] {smoothingChoice},
-                new String [] {Translate.text("Smoothing Method")});
+                           new Widget [] {smoothingChoice},
+                           new String [] {Translate.text("Smoothing Method")});
     if (!dlg.clickedOk())
       return;
     if (smoothingChoice.getSelectedIndex() == 0)

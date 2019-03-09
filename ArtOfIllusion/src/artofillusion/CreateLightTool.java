@@ -1,5 +1,4 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -72,15 +71,15 @@ public class CreateLightTool extends EditingTool
     path.append(new Line2D.Double(clickPoint.x, clickPoint.y, dragPoint.x, dragPoint.y), false);
     double dx, dy, len, angle;
     if (controlDown)
-      {
-        dx = (double) (dragPoint.x-clickPoint.x);
-        dy = (double) (dragPoint.y-clickPoint.y);
-        len = Math.sqrt(dx*dx+dy*dy);
-        angle = (double) ((int) (Math.atan(50.0/len)*360.0/Math.PI));
-        theWindow.setHelpText(Translate.text("createLightTool.dragText", Double.toString(angle)));
-        path.append(new Line2D.Double(clickPoint.x, clickPoint.y, dragPoint.x+(int) (dy*50.0/len), dragPoint.y-(int) (dx*50.0/len)), false);
-        path.append(new Line2D.Double(clickPoint.x, clickPoint.y, dragPoint.x-(int) (dy*50.0/len), dragPoint.y+(int) (dx*50.0/len)), false);
-      }
+    {
+      dx = (double) (dragPoint.x-clickPoint.x);
+      dy = (double) (dragPoint.y-clickPoint.y);
+      len = Math.sqrt(dx*dx+dy*dy);
+      angle = (double) ((int) (Math.atan(50.0/len)*360.0/Math.PI));
+      theWindow.setHelpText(Translate.text("createLightTool.dragText", Double.toString(angle)));
+      path.append(new Line2D.Double(clickPoint.x, clickPoint.y, dragPoint.x+(int) (dy*50.0/len), dragPoint.y-(int) (dx*50.0/len)), false);
+      path.append(new Line2D.Double(clickPoint.x, clickPoint.y, dragPoint.x-(int) (dy*50.0/len), dragPoint.y+(int) (dx*50.0/len)), false);
+    }
     view.drawDraggedShape(path);
   }
 
@@ -94,32 +93,32 @@ public class CreateLightTool extends EditingTool
 
     orig = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     if (dragPoint == null)
-      {
-        ydir = new Vec3(0.0, 1.0, 0.0);
-        zdir = new Vec3(0.0, 0.0, 1.0);
-        obj = new PointLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f, 0.1);
-      }
+    {
+      ydir = new Vec3(0.0, 1.0, 0.0);
+      zdir = new Vec3(0.0, 0.0, 1.0);
+      obj = new PointLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f, 0.1);
+    }
     else
+    {
+      dragPoint = e.getPoint();
+      zdir = cam.findDragVector(cam.convertScreenToWorld(clickPoint, view.getDistToPlane()),
+              dragPoint.x-clickPoint.x, dragPoint.y-clickPoint.y);
+      zdir.normalize();
+      ydir = cam.getViewToWorld().times(Vec3.vz());
+      if (controlDown)
       {
-        dragPoint = e.getPoint();
-        zdir = cam.findDragVector(cam.convertScreenToWorld(clickPoint, view.getDistToPlane()),
-                dragPoint.x-clickPoint.x, dragPoint.y-clickPoint.y);
-        zdir.normalize();
-        ydir = cam.getViewToWorld().times(Vec3.vz());
-        if (controlDown)
-          {
-            double dx, dy, len, angle;
+        double dx, dy, len, angle;
 
-            dx = (double) (dragPoint.x-clickPoint.x);
-            dy = (double) (dragPoint.y-clickPoint.y);
-            len = Math.sqrt(dx*dx+dy*dy);
-            angle = (double) ((int) (Math.atan(50.0/len)*360.0/Math.PI));
-            obj = new SpotLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f, angle, 0.0, 0.1);
-            theWindow.setHelpText(Translate.text("createLightTool.helpText"));
-          }
-        else
-          obj = new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f);
+        dx = (double) (dragPoint.x-clickPoint.x);
+        dy = (double) (dragPoint.y-clickPoint.y);
+        len = Math.sqrt(dx*dx+dy*dy);
+        angle = (double) ((int) (Math.atan(50.0/len)*360.0/Math.PI));
+        obj = new SpotLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f, angle, 0.0, 0.1);
+        theWindow.setHelpText(Translate.text("createLightTool.helpText"));
       }
+      else
+        obj = new DirectionalLight(new RGBColor(1.0f, 1.0f, 1.0f), 1.0f);
+    }
     ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(orig, zdir, ydir), "Light "+(counter++));
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);

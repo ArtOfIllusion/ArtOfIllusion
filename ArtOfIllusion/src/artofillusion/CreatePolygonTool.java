@@ -1,5 +1,4 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -76,20 +75,20 @@ public class CreatePolygonTool extends EditingTool
     minsine = mincosine = 1.0;
     maxsine = maxcosine = -1.0;
     for (i = 0; i < sides; i++)
-      {
-        sine[i] = Math.sin((i+0.5)*2.0*Math.PI/sides);
-        sine[i] = 1e-10*Math.round(sine[i]*1e10);
-        cosine[i] = Math.cos((i+0.5)*2.0*Math.PI/sides);
-        cosine[i] = 1e-10*Math.round(cosine[i]*1e10);
-        if (sine[i] < minsine)
-          minsine = sine[i];
-        if (sine[i] > maxsine)
-          maxsine = sine[i];
-        if (cosine[i] < mincosine)
-          mincosine = cosine[i];
-        if (cosine[i] > maxcosine)
-          maxcosine = cosine[i];
-      }
+    {
+      sine[i] = Math.sin((i+0.5)*2.0*Math.PI/sides);
+      sine[i] = 1e-10*Math.round(sine[i]*1e10);
+      cosine[i] = Math.cos((i+0.5)*2.0*Math.PI/sides);
+      cosine[i] = 1e-10*Math.round(cosine[i]*1e10);
+      if (sine[i] < minsine)
+        minsine = sine[i];
+      if (sine[i] > maxsine)
+        maxsine = sine[i];
+      if (cosine[i] < mincosine)
+        mincosine = cosine[i];
+      if (cosine[i] > maxcosine)
+        maxcosine = cosine[i];
+    }
   }
 
   @Override
@@ -124,17 +123,17 @@ public class CreatePolygonTool extends EditingTool
 
     findPoints(dragPoint, e.isShiftDown());
     if (e.isControlDown())
-      {
-        vertex = new Vec3 [points.length+1];
-        vertex[points.length] = new Vec3();
-      }
+    {
+      vertex = new Vec3 [points.length+1];
+      vertex[points.length] = new Vec3();
+    }
     else
-      {
-        vertex = new Vec3 [points.length];
-        s = new float [points.length];
-        for (int i = 0; i < points.length; i++)
-          s[i] = 1.0f;
-      }
+    {
+      vertex = new Vec3 [points.length];
+      s = new float [points.length];
+      for (int i = 0; i < points.length; i++)
+        s[i] = 1.0f;
+    }
     orig = cam.convertScreenToWorld(new Point((int) centerx, (int) centery), view.getDistToPlane(), false);
     temp = cam.convertScreenToWorld(new Point(1+(int) centerx, (int) centery), view.getDistToPlane(), false);
     scale = temp.minus(orig).length();
@@ -153,7 +152,6 @@ public class CreatePolygonTool extends EditingTool
         faces[0] = new int [] {sides-1, 0, sides};
         for (int i = 1; i < sides; i++)
           faces[i] = new int [] {i-1, i, sides};
-//        vertex[vertex.length-1] = new Vec3(ce)
         obj = new TriangleMesh(vertex, faces);
         ((TriangleMesh) obj).setSmoothingMethod(shape);
       }
@@ -215,8 +213,8 @@ public class CreatePolygonTool extends EditingTool
     else
       shapeChoice.setSelectedIndex(2);
     ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("enterNumSides"),
-                new Widget [] {sidesField, shapeChoice},
-                new String [] {Translate.text("Sides"), Translate.text("Shape")});
+                           new Widget [] {sidesField, shapeChoice},
+                           new String [] {Translate.text("Sides"), Translate.text("Shape")});
     if (!dlg.clickedOk())
       return;
     i = (int) sidesField.getValue();

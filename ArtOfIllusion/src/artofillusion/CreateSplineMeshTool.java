@@ -1,5 +1,4 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes Copyrignt (C) 2016 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -95,27 +94,27 @@ public class CreateSplineMeshTool extends EditingTool
     int i;
 
     if (shiftDown)
+    {
+      if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
       {
-	if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
-	  {
-	    if (dragPoint.y < clickPoint.y)
-	      dragPoint.y = clickPoint.y - Math.abs(dragPoint.x-clickPoint.x);
-	    else
-	      dragPoint.y = clickPoint.y + Math.abs(dragPoint.x-clickPoint.x);
-          }
+        if (dragPoint.y < clickPoint.y)
+          dragPoint.y = clickPoint.y - Math.abs(dragPoint.x-clickPoint.x);
         else
-          {
-            if (dragPoint.x < clickPoint.x)
-              dragPoint.x = clickPoint.x - Math.abs(dragPoint.y-clickPoint.y);
-            else
-              dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
-          }
+          dragPoint.y = clickPoint.y + Math.abs(dragPoint.x-clickPoint.x);
       }
-    if (dragPoint.x == clickPoint.x || dragPoint.y == clickPoint.y)
+      else
       {
-        ((SceneViewer) view).repaint();
-        return;
+        if (dragPoint.x < clickPoint.x)
+          dragPoint.x = clickPoint.x - Math.abs(dragPoint.y-clickPoint.y);
+        else
+          dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
       }
+    }
+    if (dragPoint.x == clickPoint.x || dragPoint.y == clickPoint.y)
+    {
+      ((SceneViewer) view).repaint();
+      return;
+    }
     v1 = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), view.getDistToPlane());
     v3 = cam.convertScreenToWorld(dragPoint, view.getDistToPlane());
@@ -158,38 +157,38 @@ public class CreateSplineMeshTool extends EditingTool
     int i, j;
 
     if (shape == FLAT)
-      {
-        double xmin = -xsize*0.5, ymin = -ysize*0.5;
-        double uscale = 1.0/(usize-1), vscale = 1.0/(vsize-1);
+    {
+      double xmin = -xsize*0.5, ymin = -ysize*0.5;
+      double uscale = 1.0/(usize-1), vscale = 1.0/(vsize-1);
 
-        for (i = 0; i < usize; i++)
-          for (j = 0; j < vsize; j++)
-            v[i][j] = new Vec3(xsize*i*uscale+xmin, ysize*j*vscale+ymin, 0.0);
-      }
+      for (i = 0; i < usize; i++)
+        for (j = 0; j < vsize; j++)
+          v[i][j] = new Vec3(xsize*i*uscale+xmin, ysize*j*vscale+ymin, 0.0);
+    }
     else if (shape == CYLINDER)
-      {
-        double rad = xsize*0.5, ymin = -ysize*0.5;
-        double uscale = 2.0*Math.PI/usize, vscale = 1.0/(vsize-1);
+    {
+      double rad = xsize*0.5, ymin = -ysize*0.5;
+      double uscale = 2.0*Math.PI/usize, vscale = 1.0/(vsize-1);
 
-        for (i = 0; i < usize; i++)
-          for (j = 0; j < vsize; j++)
-            v[i][j] = new Vec3(rad*Math.sin(uscale*i), ysize*j*vscale+ymin, rad*Math.cos(uscale*i));
-      }
+      for (i = 0; i < usize; i++)
+        for (j = 0; j < vsize; j++)
+          v[i][j] = new Vec3(rad*Math.sin(uscale*i), ysize*j*vscale+ymin, rad*Math.cos(uscale*i));
+    }
     else
-      {
-        double rad = Math.min(xsize, ysize)*0.25*thickness;
-        double radx = xsize*0.5 - rad, rady = ysize*0.5 - rad;
-        double uscale = 2.0*Math.PI/usize, vscale = 2.0*Math.PI/vsize;
-        Vec3 vr = new Vec3(), vc = new Vec3();
+    {
+      double rad = Math.min(xsize, ysize)*0.25*thickness;
+      double radx = xsize*0.5 - rad, rady = ysize*0.5 - rad;
+      double uscale = 2.0*Math.PI/usize, vscale = 2.0*Math.PI/vsize;
+      Vec3 vr = new Vec3(), vc = new Vec3();
 
-        for (i = 0; i < usize; i++)
-          {
-            vc.set(radx*Math.cos(uscale*i), rady*Math.sin(uscale*i), 0.0);
-            vr.set(rad*Math.cos(uscale*i), rad*Math.sin(uscale*i), 0.0);
-            for (j = 0; j < vsize; j++)
-              v[i][j] = new Vec3(vc.x+vr.x*Math.cos(vscale*j), vc.y+vr.y*Math.cos(vscale*j), rad*Math.sin(vscale*j));
-          }
+      for (i = 0; i < usize; i++)
+      {
+        vc.set(radx*Math.cos(uscale*i), rady*Math.sin(uscale*i), 0.0);
+        vr.set(rad*Math.cos(uscale*i), rad*Math.sin(uscale*i), 0.0);
+        for (j = 0; j < vsize; j++)
+          v[i][j] = new Vec3(vc.x+vr.x*Math.cos(vscale*j), vc.y+vr.y*Math.cos(vscale*j), rad*Math.sin(vscale*j));
       }
+    }
     return v;
   }
 
@@ -228,8 +227,16 @@ public class CreateSplineMeshTool extends EditingTool
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectMeshSizeShape"),
-                new Widget [] {usizeField, vsizeField, shapeChoice, smoothingChoice, thicknessSlider},
-                new String [] {Translate.text("uSize"), Translate.text("vSize"), Translate.text("Shape"), Translate.text("Smoothing Method"), Translate.text("Thickness")});
+                           new Widget [] {usizeField, 
+                                          vsizeField, 
+                                          shapeChoice, 
+                                          smoothingChoice, 
+                                          thicknessSlider},
+                           new String [] {Translate.text("uSize"), 
+                                          Translate.text("vSize"), 
+                                          Translate.text("Shape"), 
+                                          Translate.text("Smoothing Method"), 
+                                          Translate.text("Thickness")});
     if (!dlg.clickedOk())
       return;
     minu = shapeChoice.getSelectedIndex() == 0 ? 2 : 3;

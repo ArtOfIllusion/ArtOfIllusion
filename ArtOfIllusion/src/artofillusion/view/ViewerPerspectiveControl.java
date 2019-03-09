@@ -30,13 +30,12 @@ public class ViewerPerspectiveControl implements ViewerControl
       Translate.text("Perspective"),
       Translate.text("Parallel")
     });
-
     perspectiveChoice.setSelectedIndex(1);
-
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
-        if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
+        if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+        {
           perspectiveChoice.setEnabled(false);
           view.setPerspective(((SceneCamera)view.getBoundCamera().getObject()).isPerspective());
           perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);

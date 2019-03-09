@@ -41,15 +41,13 @@ public class ViewerOrientationControl implements ViewerControl
 
     private OrientationChoice(ViewerCanvas view)
     {
-      super(new String [] {
-        Translate.text("Front"),
-        Translate.text("Back"),
-        Translate.text("Left"),
-        Translate.text("Right"),
-        Translate.text("Top"),
-        Translate.text("Bottom"),
-        Translate.text("Other")
-      });
+      super(new String [] {Translate.text("Front"),
+                           Translate.text("Back"),
+                           Translate.text("Left"),
+                           Translate.text("Right"),
+                           Translate.text("Top"),
+                           Translate.text("Bottom"),
+                           Translate.text("Other")});
       this.view = view;
       if (view instanceof SceneViewer)
         rebuildCameraList();
@@ -64,7 +62,7 @@ public class ViewerOrientationControl implements ViewerControl
       if (view.getOrientation() != getSelectedIndex())
       {
         if (view.getOrientation() < getItemCount())
-         setSelectedIndex(view.getOrientation());
+          setSelectedIndex(view.getOrientation());
         else
           setSelectedIndex(getItemCount()-1);
       }
@@ -101,7 +99,7 @@ public class ViewerOrientationControl implements ViewerControl
         getParent().layoutChildren();
     }
 
-    /** 
+    /**
         This is needed because several view cameras may have the same name. 
         Using just Strings in the ComboBox results selecting always the first 
         occurrence of a name. 

@@ -80,10 +80,10 @@ public class Example
 				 int wrappingIssues)
   {
     if (youUseAConditionalWithALongOneLiner)
-        System.out.println("Just indent the statement to be executed!");
+      System.out.println("Just indent the statement to be executed!");
 
     for (Object obj: Collection group)
-         obj.indent("One space past opening Parenthesis");
+      obj.indent("Also good for operating on the contents of a Collection");
   }
 }
 ```

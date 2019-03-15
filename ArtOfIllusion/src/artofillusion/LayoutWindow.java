@@ -602,7 +602,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     displayMenu.add(displayItem[5] = Translate.checkboxMenuItem("renderedDisplay", this, "displayModeCommand", theView[0].getRenderMode() == ViewerCanvas.RENDER_RENDERED));
 
     viewMenu.add(viewMenuItem[0] = Translate.menuItem("fourViews", this, "toggleViewsCommand"));
-    viewMenu.add(viewMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
     viewMenu.add(Translate.menuItem("grid", this, "setGridCommand"));
     viewMenu.add(viewMenuItem[2] = Translate.menuItem("showCoordinateAxes", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[3] = Translate.menuItem("showTemplate", this, "actionPerformed"));
@@ -611,6 +610,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     viewMenu.add(viewMenuItem[4] = Translate.menuItem("fitToSelection", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[5] = Translate.menuItem("fitToAll", this, "actionPerformed"));
     viewMenu.add(viewMenuItem[6] = Translate.menuItem("alignWithClosestAxis", this, "actionPerformed"));
+    viewMenu.addSeparator();
+    viewMenu.add(viewMenuItem[1] = Translate.menuItem("hideObjectList", this, "actionPerformed"));
+
     //viewMenu.addSeparator();
     //viewMenu.add(viewMenuItem[7] = Translate.menuItem("viewSettings", this, "actionPerformed"));
   }
@@ -705,12 +707,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenu.add(animationMenuItem[10] = Translate.menuItem("pathFromCurve", this, "actionPerformed"));
     animationMenu.add(animationMenuItem[11] = Translate.menuItem("bindToParent", this, "bindToParentCommand"));
     animationMenu.addSeparator();
-    animationMenu.add(animationMenuItem[12] = Translate.menuItem("showScore", this, "actionPerformed"));
-    animationMenu.add(Translate.menuItem("previewAnimation", this, "actionPerformed"));
-    animationMenu.addSeparator();
     animationMenu.add(Translate.menuItem("forwardFrame", this, "actionPerformed"));
     animationMenu.add(Translate.menuItem("backFrame", this, "actionPerformed"));
     animationMenu.add(Translate.menuItem("jumpToTime", this, "jumpToTimeCommand"));
+    animationMenu.addSeparator();
+    animationMenu.add(Translate.menuItem("previewAnimation", this, "actionPerformed"));
+    animationMenu.add(animationMenuItem[12] = Translate.menuItem("showScore", this, "actionPerformed"));
   }
 
   private void createSceneMenu()
@@ -1081,13 +1083,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenuItem[12].setText(Translate.text(theScore.getBounds().height == 0 || theScore.getBounds().width == 0 ? "menu.showScore" : "menu.hideScore"));
     addTrackMenu.setEnabled(numSelObjects > 0);
     distortionMenu.setEnabled(sel.length > 0);
-    
+
     viewMenuItem[1].setText(Translate.text(!objectListShown ? "menu.showObjectList" : "menu.hideObjectList"));
     viewMenuItem[2].setText(Translate.text(view.getShowAxes() ? "menu.hideCoordinateAxes" : "menu.showCoordinateAxes"));
     viewMenuItem[3].setEnabled(view.getTemplateImage() != null); // Show template
     viewMenuItem[3].setText(Translate.text(view.getTemplateShown() ? "menu.hideTemplate" : "menu.showTemplate"));
     viewMenuItem[4].setEnabled(sel.length > 0); // Frame Selection With Camera
-    
+
     displayItem[0].setState(view.getRenderMode() == ViewerCanvas.RENDER_WIREFRAME);
     displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
     displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);

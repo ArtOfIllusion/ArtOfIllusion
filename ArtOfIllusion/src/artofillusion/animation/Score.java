@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -155,8 +155,8 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     popupMenu.add(popupMenuItem[0] = Translate.menuItem("editTrack", this, "editSelectedTrack", null));
     popupMenu.add(popupMenuItem[1] = Translate.menuItem("duplicateTracks", this, "duplicateSelectedTracks", null));
     popupMenu.add(popupMenuItem[2] = Translate.menuItem("deleteTracks", this, "deleteSelectedTracks", null));
-    popupMenu.add(popupMenuItem[3] = Translate.menuItem("enableTracks", window, "actionPerformed", null));
-    popupMenu.add(popupMenuItem[4] = Translate.menuItem("disableTracks", window, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[3] = Translate.menuItem("enableTracks", window, "enableTracksAction", null));
+    popupMenu.add(popupMenuItem[4] = Translate.menuItem("disableTracks", window, "disableTracksAction", null));
   }
 
   /** Display the popup menu. */

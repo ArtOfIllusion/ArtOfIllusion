@@ -1029,7 +1029,6 @@ public abstract class ViewerCanvas extends CustomWidget
 
 	newCenter = new Vec3((minx+maxx)*0.5, (miny+maxy)*0.5, (minz+maxz)*0.5);
 	viewToWorld.transform(newCenter);
-	newCoords = theCamera.getCameraCoordinates().duplicate();
 
 	double dts;
 	if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
@@ -1040,13 +1039,14 @@ public abstract class ViewerCanvas extends CustomWidget
 	}
 	else
 		dts = theCamera.getDistToScreen();
-	double newDistToPlane = 100*dts/(double)d/0.9*Math.max(maxx-minx, maxy-miny);
-	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));;
-	double newScale;
-	if (perspective)
-		newScale = 100.0;
-	else
-		newScale = 100.0*dts/newDistToPlane;
+    double newDistToPlane = 100*dts/(double)d/0.9*Math.max(maxx-minx, maxy-miny)+(maxz-minz)*0.5;
+    double newScale;
+    if (perspective)
+      newScale = 100.0;
+    else
+      newScale = 100.0*dts/newDistToPlane;
+    newCoords = theCamera.getCameraCoordinates().duplicate();
+    newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane)));
 
 	animation.start(newCoords, newCenter, newScale, orientation, navigation);
   }

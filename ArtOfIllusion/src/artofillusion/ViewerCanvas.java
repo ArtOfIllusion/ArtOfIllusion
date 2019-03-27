@@ -1029,24 +1029,23 @@ public abstract class ViewerCanvas extends CustomWidget
 
 	newCenter = new Vec3((minx+maxx)*0.5, (miny+maxy)*0.5, (minz+maxz)*0.5);
 	viewToWorld.transform(newCenter);
-	newCoords = theCamera.getCameraCoordinates().duplicate();
 
-	double dts;
+    double projectionDist;
 	if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
 	{
-		int yp = getBounds().height/2;
-		double fa = Math.PI/2.0 - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()/2.0);///180.0*Math.PI;
-		dts = Math.tan(fa)*yp/100;
+		double compAngle = (Math.PI - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()))/2;
+		projectionDist = Math.tan(compAngle)*getBounds().height/2/100;
 	}
 	else
-		dts = theCamera.getDistToScreen();
-	double newDistToPlane = 100*dts/(double)d/0.9*Math.max(maxx-minx, maxy-miny);
-	newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(maxz-minz) * 0.5)));;
-	double newScale;
-	if (perspective)
-		newScale = 100.0;
-	else
-		newScale = 100.0*dts/newDistToPlane;
+      projectionDist = theCamera.getDistToScreen();
+    double newDistToPlane = 100*projectionDist/(double)d/0.9*Math.max(maxx-minx, maxy-miny)+(maxz-minz)*0.5;
+    double newScale;
+    if (perspective)
+      newScale = 100.0;
+    else
+      newScale = 100.0*projectionDist/newDistToPlane;
+    newCoords = theCamera.getCameraCoordinates().duplicate();
+    newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane)));
 
 	animation.start(newCoords, newCenter, newScale, orientation, navigation);
   }

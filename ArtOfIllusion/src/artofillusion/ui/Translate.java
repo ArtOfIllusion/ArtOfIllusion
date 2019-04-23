@@ -64,6 +64,7 @@ public class Translate
     availableLocales.add(new Locale("es", "ES"));
     availableLocales.add(new Locale("sv", "SE"));
     availableLocales.add(new Locale("vi", "VN"));
+    availableLocales.add(new Locale("ru", "RU"));
   }
   
   private static Locale locale = availableLocales.contains(Locale.getDefault()) ? Locale.getDefault() : Locale.US;

@@ -1,5 +1,6 @@
 /* Copyright (C) 2017 by Petri Ihalainen
    Some methods copyright (C) by Peter Eastman
+   Changes copyright 2019 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -305,7 +306,7 @@ public class ImageDetailsDialog extends BDialog
         catch (Exception ex)
         {
             setCursor(Cursor.getDefaultCursor());
-            new BStandardDialog("", Translate.text("errorExportingImage_HEAD") + " " + im.getName() + " " + Translate.text("errorExportingImage_TAIL"), BStandardDialog.ERROR).showMessageDialog(this);
+            new BStandardDialog("", Translate.text("errorExportingImage", im.getName()), BStandardDialog.ERROR).showMessageDialog(this);
             ex.printStackTrace();
             return;
         }
@@ -340,9 +341,7 @@ public class ImageDetailsDialog extends BDialog
     private boolean confirmConvert(String name)
     {
       String title    = Translate.text("confirmTitle");
-      String question = (Translate.text("convertQuestionHEAD") + 
-                         " '"+ name + "' " + 
-                         Translate.text("convertQuestionTAIL"));
+      String question = Translate.text("convertQuestion", name);
 
       BStandardDialog confirm = new BStandardDialog(title, question, BStandardDialog.QUESTION);
       String[] options = new String[]{Translate.text("Yes"), Translate.text("No")};

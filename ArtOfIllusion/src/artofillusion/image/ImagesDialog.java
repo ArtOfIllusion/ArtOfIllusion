@@ -1,5 +1,6 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
+   Changes copyright 2019 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -788,9 +789,7 @@ public class ImagesDialog extends BDialog
     private boolean confirmRemoval(int count)
     {
       String title   = Translate.text("confirmTitle");
-      String warning = Translate.text("purgeWarningHEAD") + " " + count + " " +
-                       Translate.text("purgeWarningTAIL") + "\n" + 
-                       Translate.text("purgeConfirmQuestion");
+      String warning = Translate.text("purgeWarning", count);
 
       BStandardDialog confirm = new BStandardDialog(title, warning, BStandardDialog.QUESTION);
       String[] options = new String[]{Translate.text("Yes"), Translate.text("No")};

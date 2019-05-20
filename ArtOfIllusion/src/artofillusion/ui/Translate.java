@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
-   Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2018-2019 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -354,7 +354,7 @@ public class Translate
       then passed to MessageFormat.format() so that any variable fields
       can be replaced with the correct values. */
 
-  public static String text(String name, Object args[])
+  public static String text(String name, Object... args)
   {
     String pattern = name;
     try

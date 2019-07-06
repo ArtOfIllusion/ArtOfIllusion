@@ -1,8 +1,8 @@
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>../InstallerBuild/AOI-Windows-303.jar</jar>
-  <outfile>../InstallerBuild/ArtOfIllusion303-Windows.exe</outfile>
+  <jar>../InstallerBuild/install.jar</jar>
+  <outfile>../InstallerBuild/ArtOfIllusion310-Windows.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -14,7 +14,7 @@
   <icon>aoi.ico</icon>
   <jre>
     <path></path>
-    <minVersion>1.5.0</minVersion>
+    <minVersion>1.6.0</minVersion>
     <maxVersion></maxVersion>
     <dontUsePrivateJres>false</dontUsePrivateJres>
     <initialHeapSize>0</initialHeapSize>
@@ -24,9 +24,9 @@
     <fileVersion>1.1.0.0</fileVersion>
     <txtFileVersion>1.1.0</txtFileVersion>
     <fileDescription>Art of Illusion Package for Windows</fileDescription>
-    <copyright>2016 Peter Eastman</copyright>
-    <productVersion>3.0.3.0</productVersion>
-    <txtProductVersion>Stable 3.0.3</txtProductVersion>
+    <copyright>2019 Peter Eastman et. al.</copyright>
+    <productVersion>3.1.0.0</productVersion>
+    <txtProductVersion>Stable 3.1.0</txtProductVersion>
     <productName>Art of Illusion Windows</productName>
     <companyName></companyName>
     <internalName>Art of Illusion Windows</internalName>

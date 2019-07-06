@@ -1,5 +1,18 @@
 Art of Illusion Version History
 
+v3.1.0, July 6, 2019
+
+- Added Russian Localization
+- Major re-work of editing window viewpoint controls
+- Update Apple Launch configuration to work with recent versions of OSX and Java
+- Fix mouse modifier keys to work correctly with newer JVMs
+- Fixes to dialog parenting - dialog boxes should appear in front of the rest of the UI
+- Updated internals to build properly on java 9+
+- Performance enhancements for dealing with many objects
+- Link external images - file format support & management tools
+- Animated view changes
+- _Many_ small bugfixes and minor enhancements
+
 v3.0.3, Dec. 12, 2016
 
 - Fix bug related to shaded mesh objects having wrong material properties calculated

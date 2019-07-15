@@ -85,8 +85,9 @@ public class ScrollViewTool
 		if (boundCamera != null)
 			boundCamera.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
 		view.frustumShape.update();
-		if (ArtOfIllusion.getPreferences().getDrawActiveFrustum() || 
-		   (ArtOfIllusion.getPreferences().getDrawCameraFrustum() && view.getBoundCamera() != null))
+		if (window != null &&
+		   (ArtOfIllusion.getPreferences().getDrawActiveFrustum() || 
+		   (ArtOfIllusion.getPreferences().getDrawCameraFrustum() && view.getBoundCamera() != null)))
 			window.updateImage();
 		else
 			view.repaint();

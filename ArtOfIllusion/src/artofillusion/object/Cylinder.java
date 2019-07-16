@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -387,9 +388,9 @@ public class Cylinder extends Object3D
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    ValueField xField = new ValueField(rx, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(rz, ValueField.POSITIVE, 5);
-    ValueField heightField = new ValueField(height, ValueField.POSITIVE, 5);
+    ValueField xField = new ValueField(rx, ValueField.NONNEGATIVE, 5);
+    ValueField yField = new ValueField(rz, ValueField.NONNEGATIVE, 5);
+    ValueField heightField = new ValueField(height, ValueField.NONNEGATIVE, 5);
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, ratio);
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(),
         Translate.text("editCylinderTitle"), new Widget [] {xField, yField, ratioSlider, heightField},
@@ -530,9 +531,9 @@ public class Cylinder extends Object3D
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     CylinderKeyframe key = (CylinderKeyframe) k;
-    ValueField xField = new ValueField(2.0*key.rx, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(2.0*key.ry, ValueField.POSITIVE, 5);
-    ValueField heightField = new ValueField(key.height, ValueField.POSITIVE, 5);
+    ValueField xField = new ValueField(2.0*key.rx, ValueField.NONNEGATIVE, 5);
+    ValueField yField = new ValueField(2.0*key.ry, ValueField.NONNEGATIVE, 5);
+    ValueField heightField = new ValueField(key.height, ValueField.NONNEGATIVE, 5);
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, key.ratio);
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(),
         Translate.text("editCylinderTitle"), new Widget [] {xField, yField, ratioSlider, heightField},

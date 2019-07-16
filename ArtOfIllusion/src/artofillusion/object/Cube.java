@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -189,9 +190,9 @@ public class Cube extends Object3D
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    ValueField xField = new ValueField(2.0*halfx, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(2.0*halfy, ValueField.POSITIVE, 5);
-    ValueField zField = new ValueField(2.0*halfz, ValueField.POSITIVE, 5);
+    ValueField xField = new ValueField(2.0*halfx, ValueField.NONNEGATIVE, 5);
+    ValueField yField = new ValueField(2.0*halfy, ValueField.NONNEGATIVE, 5);
+    ValueField zField = new ValueField(2.0*halfz, ValueField.NONNEGATIVE, 5);
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCubeTitle"),
       new Widget [] {xField, yField, zField}, new String [] {"X", "Y", "Z"});
     if (!dlg.clickedOk())
@@ -296,9 +297,9 @@ public class Cube extends Object3D
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     VectorKeyframe key = (VectorKeyframe) k;
-    ValueField xField = new ValueField(key.x, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(key.y, ValueField.POSITIVE, 5);
-    ValueField zField = new ValueField(key.z, ValueField.POSITIVE, 5);
+    ValueField xField = new ValueField(key.x, ValueField.NONNEGATIVE, 5);
+    ValueField yField = new ValueField(key.y, ValueField.NONNEGATIVE, 5);
+    ValueField zField = new ValueField(key.z, ValueField.NONNEGATIVE, 5);
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCubeTitle"),
       new Widget [] {xField, yField, zField}, new String [] {"X", "Y", "Z"});
     if (!dlg.clickedOk())

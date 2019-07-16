@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes Copyright (C) 2016, 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,11 +24,12 @@ import java.awt.*;
 public class CreateCylinderTool extends EditingTool
 {
   static int counter = 1;
-  private boolean shiftDown;
+  private boolean equilateral, centered;
   private Point clickPoint;
   private double ratio = 1.0;
   private ObjectInfo objInfo;
-
+  private Vec3 ydir, zdir;
+  
   public CreateCylinderTool(LayoutWindow fr)
   {
     super(fr);
@@ -56,37 +58,50 @@ public class CreateCylinderTool extends EditingTool
   @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
-    clickPoint = e.getPoint();
-    shiftDown = e.isShiftDown();
+    clickPoint  = e.getPoint();
+    equilateral = e.isShiftDown();
+    centered    = e.isControlDown();
+    ydir = Vec3.vy();
+    zdir = Vec3.vz();
   }
 
   @Override
   public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
+    Camera cam = view.getCamera();
+    Point dragPoint = e.getPoint();
+    ydir.set(cam.getCameraCoordinates().getUpDirection());
+    zdir.set(cam.getCameraCoordinates().getZDirection());
+    zdir.scale(-1.0);
+
     if (objInfo == null)
     {
-      // Create the cylinder.
+      // Create the initial cube, if the mouse has moved enough. The limit is there to reduce 
+      // the probability of accidentally creating zero size objects.
 
-      Scene theScene = ((LayoutWindow) theWindow).getScene();
-      objInfo = new ObjectInfo(new Cylinder(1.0, 1.0, 1.0, ratio), new CoordinateSystem(), "Cylinder "+(counter++));
-      objInfo.addTrack(new PositionTrack(objInfo), 0);
-      objInfo.addTrack(new RotationTrack(objInfo), 1);
-      UndoRecord undo = new UndoRecord(theWindow, false);
-      int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
-      ((LayoutWindow) theWindow).addObject(objInfo, undo);
-      undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
-      theWindow.setUndoRecord(undo);
-      ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
+      if (Math.abs(dragPoint.x-clickPoint.x) + Math.abs(dragPoint.y-clickPoint.y) > 3)
+      {
+        Scene theScene = ((LayoutWindow) theWindow).getScene();
+        objInfo = new ObjectInfo(new Cylinder(1.0, 1.0, 1.0, ratio), new CoordinateSystem(), "Cylinder "+(counter++));
+        objInfo.addTrack(new PositionTrack(objInfo), 0);
+        objInfo.addTrack(new RotationTrack(objInfo), 1);
+        UndoRecord undo = new UndoRecord(theWindow, false);
+        int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
+        ((LayoutWindow) theWindow).addObject(objInfo, undo);
+        undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
+        theWindow.setUndoRecord(undo);
+        ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
+      }
+      else
+        return;
     }
 
     // Determine the size and position for the cylinder.
 
-    Camera cam = view.getCamera();
-    Point dragPoint = e.getPoint();
-    Vec3 v1, v2, v3, orig, xdir, ydir, zdir;
+    Vec3 v1, v2, v3, orig;
     double xsize, ysize, zsize;
 
-    if (shiftDown)
+    if (equilateral)
     {
       if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
       {
@@ -106,20 +121,19 @@ public class CreateCylinderTool extends EditingTool
     v1 = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), view.getDistToPlane());
     v3 = cam.convertScreenToWorld(dragPoint, view.getDistToPlane());
-    orig = v1.plus(v3).times(0.5);
-    if (dragPoint.x < clickPoint.x)
-      xdir = v1.minus(v2);
+ 
+    if (centered)
+    {
+      orig  = v1;
+      xsize = v2.minus(v1).length()*2.0; 
+      ysize = v2.minus(v3).length()*2.0;
+    }
     else
-      xdir = v2.minus(v1);
-    if (dragPoint.y < clickPoint.y)
-      ydir = v3.minus(v2);
-    else
-      ydir = v2.minus(v3);
-    xsize = xdir.length();
-    ysize = ydir.length();
-    xdir = xdir.times(1.0/xsize);
-    ydir = ydir.times(1.0/ysize);
-    zdir = xdir.cross(ydir);
+    {
+      orig  = v1.plus(v3).times(0.5);
+      xsize = v2.minus(v1).length(); 
+      ysize = v2.minus(v3).length();
+    }
     zsize = Math.min(xsize, ysize);
 
     // Update the size and position, and redraw the display.

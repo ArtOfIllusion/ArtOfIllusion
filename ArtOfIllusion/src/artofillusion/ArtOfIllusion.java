@@ -141,24 +141,10 @@ public class ArtOfIllusion
     catch (Exception ex)
     {
     }
+
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
     ToolTipManager.sharedInstance().setLightWeightPopupEnabled(false);
-    try
-    {
-      // Due to the strange way PopupFactory is implemented, we need to use reflection to make sure
-      // we *really* get heavyweight popups from the very start.
 
-      Class<PopupFactory> popup = PopupFactory.class;
-      Field heavyweight = popup.getDeclaredField("HEAVY_WEIGHT_POPUP");
-      Method setPopupType = popup.getDeclaredMethod("setPopupType", Integer.TYPE);
-      heavyweight.setAccessible(true);
-      setPopupType.setAccessible(true);
-      setPopupType.invoke(PopupFactory.getSharedInstance(), heavyweight.get(null));
-    }
-    catch (Exception ex)
-    {
-      // Don't worry about it.
-    }
     TitleWindow title = new TitleWindow();
     PluginRegistry.addCategory(Plugin.class);
     PluginRegistry.addCategory(Renderer.class);

@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2017 by Petri Ihalainen
+/* Copyright (C) 2016-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -32,11 +32,6 @@ public class ViewerNavigationControl implements ViewerControl
 	public String getName()
 	{
 		return Translate.text("Navigation");
-	}
-	
-	public Object getItem(int index)
-	{
-		return this.getItem(index);
 	}
 	
 	public static class NavigationChoice extends BComboBox

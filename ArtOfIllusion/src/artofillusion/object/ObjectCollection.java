@@ -124,12 +124,12 @@ public abstract class ObjectCollection extends Object3D
   @Override
   public boolean isClosed()
   {
-    for (int i = 0; i < cachedObjects.size(); i++)
-      {
-        ObjectInfo info = (ObjectInfo) cachedObjects.elementAt(i);
-        if (!info.getObject().isClosed())
-          return false;
-      }
+    if(cachedObjects.isEmpty())  return true;
+    for(ObjectInfo item: cachedObjects)
+    {
+        if(item.getObject().isClosed()) continue;
+        return false;
+    }
     return true;
   }
 

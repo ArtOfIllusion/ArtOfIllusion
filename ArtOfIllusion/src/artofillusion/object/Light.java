@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -52,7 +53,7 @@ public abstract class Light extends Object3D
    * Set the parameters for this light.
    */
 
-  public void setParameters(RGBColor color, float intensity, int type, float decayRate)
+  public final void setParameters(RGBColor color, float intensity, int type, float decayRate)
   {
     this.color = color;
     this.intensity = intensity;

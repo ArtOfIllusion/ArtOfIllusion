@@ -83,7 +83,7 @@ public class CSGDialog extends BDialog
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "dispose"));
     content.add(buttons, new LayoutInfo());
-    addEventLink(WindowClosingEvent.class, this, "doOk"); // Really? Wouldn't 'Cancel' be the expectation?
+    addEventLink(WindowClosingEvent.class, this, "dispose");
     makePreview();
     pack();
     UIUtilities.centerDialog(this, window.getFrame());

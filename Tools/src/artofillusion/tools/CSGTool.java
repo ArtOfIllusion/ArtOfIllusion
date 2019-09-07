@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
-   Additions Copyright (C) 2019 by Petri Ihalainen
+   Modifications Copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -41,7 +41,7 @@ public class CSGTool implements ModellingTool
   }
 
   /* See whether an appropriate set of objects is selected and either display an error
-     message, or bring up the extrude window. */
+     message, or bring up the CSG operation dialog. */
 
   @Override
   public void commandSelected(LayoutWindow window)
@@ -73,6 +73,14 @@ public class CSGTool implements ModellingTool
     CSGDialog dial = new CSGDialog(window, newobj);
     if (!dial.clickedOk())
       return;
+
+    // Either hide or leave unchanged
+
+    if (dial.hideOriginals.getState())
+    {
+      inputObj.elementAt(0).setVisible(false);
+      inputObj.elementAt(1).setVisible(false);
+    }
     ObjectInfo info = new ObjectInfo(newobj, new CoordinateSystem(center, Vec3.vz(), Vec3.vy()), "Boolean "+(counter++));
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);

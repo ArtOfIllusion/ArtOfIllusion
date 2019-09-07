@@ -17,7 +17,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 
-/** This dialog box allows the user to specify options for CSG objects. */
+/** This dialog box allows the user to specify options for CSG objects, a.k.a 'boolean objects' */
 
 public class CSGDialog extends BDialog
 {

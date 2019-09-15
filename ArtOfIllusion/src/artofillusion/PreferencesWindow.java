@@ -239,6 +239,7 @@ public class PreferencesWindow
     toolChoice.setSelectedIndex(prefs.getUseCompoundMeshTool() ? 1 : 0);
     localeChoice = new BComboBox();
     Locale languages[] = Translate.getAvailableLocales();
+    localeChoice.setPreferredVisibleRows(languages.length > 20 ? 16 : languages.length);
     for (int i = 0; i < languages.length; i++)
     {
       localeChoice.add(languages[i].getDisplayName(languages[i]));

@@ -191,7 +191,7 @@ public class SkeletonTool extends EditingTool
         Joint j, parent = s.getJoint(mv.getSelectedJoint());
         if (parent == null)
           {
-            double distToJoint = cam.getDistToScreen();
+            double distToJoint = mv.getDistToPlane();
             clickPos = cam.convertScreenToWorld(clickPoint, distToJoint);
             objCoords.toLocal().transform(clickPos);
             j = new Joint(new CoordinateSystem(clickPos, Vec3.vz(), Vec3.vy()), null, "Root "+s.getNextJointID());

@@ -60,7 +60,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     Mat4 toView = theCamera.getWorldToView();
 
     // Find the depth range for the object being edited.
-    
+
     BoundingBox bounds = controller.getObject().getBounds();
     double dx = bounds.maxx-bounds.minx;
     double dy = bounds.maxy-bounds.miny;
@@ -77,7 +77,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       for(ObjectInfo info: theScene.getAllObjects())
       {
         if (info == thisObjectInScene) continue;
-          
+
         bounds = info.getBounds();
         dx = bounds.maxx-bounds.minx;
         dy = bounds.maxy-bounds.miny;
@@ -95,7 +95,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     }
     return new double [] {min, max};
   }
-  
+
   @Override
   public void viewChanged(boolean selectionOnly)
   {
@@ -312,12 +312,12 @@ public abstract class ObjectViewer extends ViewerCanvas
   public void setOrientation (int which)
   {
     if (which < 6)
-	  super.setOrientation(which);
-	else
-	{
-	  orientation = VIEW_OTHER;
-	  viewChanged(false);
-	}
+      super.setOrientation(which);
+    else
+    {
+      orientation = VIEW_OTHER;
+      viewChanged(false);
+    }
   }
 
   /** Begin dragging a selection region.  The variable square determines whether
@@ -350,7 +350,7 @@ public abstract class ObjectViewer extends ViewerCanvas
       selectBounds = createPolygonFromSelection();
     else
       selectBounds = new Rectangle(Math.min(clickPoint.x, dragPoint.x), Math.min(clickPoint.y, dragPoint.y),
-		Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
+        Math.abs(dragPoint.x-clickPoint.x), Math.abs(dragPoint.y-clickPoint.y));
   }
 
   /** Create a Polygon from the selection bounds. */

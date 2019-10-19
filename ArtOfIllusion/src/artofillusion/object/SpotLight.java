@@ -50,26 +50,26 @@ public class SpotLight extends Light
 
     bounds = new BoundingBox(-0.2, 0.2, -0.2, 0.2, -0.2, 0.2);
     for (i = 0; i < SEGMENTS; i++)
-      {
-        sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
-        cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
-      }
+    {
+      sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
+      cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
+    }
     vert = new Vec3 [SEGMENTS*3+1];
     from = new int [SEGMENTS*3];
     to = new int [SEGMENTS*3];
     vert[SEGMENTS*3] = new Vec3(0.0, 0.0, -0.2);
     for (i = 0; i < SEGMENTS; i++)
-      {
-        vert[i] = new Vec3(0.075*cosine[i], 0.075*sine[i], -0.05);
-        vert[i+SEGMENTS] = new Vec3(0.1*cosine[i], 0.1*sine[i], 0.0);
-        vert[i+2*SEGMENTS] = new Vec3(0.2*cosine[i], 0.2*sine[i], 0.2);
-        from[i] = SEGMENTS*3;
-        to[i] = i;
-        from[i+SEGMENTS] = i;
-        to[i+SEGMENTS] = (i+1)%SEGMENTS;
-        from[i+2*SEGMENTS] = i+SEGMENTS;
-        to[i+2*SEGMENTS] = i+2*SEGMENTS;
-      }
+    {
+      vert[i] = new Vec3(0.075*cosine[i], 0.075*sine[i], -0.05);
+      vert[i+SEGMENTS] = new Vec3(0.1*cosine[i], 0.1*sine[i], 0.0);
+      vert[i+2*SEGMENTS] = new Vec3(0.2*cosine[i], 0.2*sine[i], 0.2);
+      from[i] = SEGMENTS*3;
+      to[i] = i;
+      from[i+SEGMENTS] = i;
+      to[i+SEGMENTS] = (i+1)%SEGMENTS;
+      from[i+2*SEGMENTS] = i+SEGMENTS;
+      to[i+2*SEGMENTS] = i+2*SEGMENTS;
+    }
     mesh = new WireframeMesh(vert, from, to);
   }
 
@@ -88,12 +88,12 @@ public class SpotLight extends Light
 
   public double getDistToPlane()
   {
-	return distToPlane;
+    return distToPlane;
   }
 
   public void setDistToPlane(double dist)
   {
-	distToPlane = dist;
+    distToPlane = dist;
   }
 
   public double getRadius()

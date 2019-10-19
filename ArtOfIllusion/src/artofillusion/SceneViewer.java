@@ -114,28 +114,28 @@ public class SceneViewer extends ViewerCanvas
         // We seriously need a common interface for ViewControlledObjects
         
         if (nextCamera.getObject() instanceof SceneCamera)
-            workingDepth = ((SceneCamera)nextCamera.getObject()).getDistToPlane();
+          workingDepth = ((SceneCamera)nextCamera.getObject()).getDistToPlane();
         else if (nextCamera.getObject() instanceof SpotLight)
-            workingDepth = ((SpotLight)nextCamera.getObject()).getDistToPlane();
+          workingDepth = ((SpotLight)nextCamera.getObject()).getDistToPlane();
         else if (nextCamera.getObject() instanceof DirectionalLight)
-            workingDepth = ((DirectionalLight)nextCamera.getObject()).getDistToPlane();
+          workingDepth = ((DirectionalLight)nextCamera.getObject()).getDistToPlane();
         else
-            return;
+          return;
         nextCenter = nextCoords.getOrigin().plus(nextCoords.getZDirection().times(workingDepth));
 
         // SceneCamera does not obey the normal rules here. For now it is assumed to be always in perspective mode
 
         if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
         {
-            double innerAngle = (Math.PI - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()))/2.0;
-            projectionDist = Math.tan(innerAngle)*getBounds().height/2.0/100;
+          double innerAngle = (Math.PI - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()))/2.0;
+          projectionDist = Math.tan(innerAngle)*getBounds().height/2.0/100;
         }
         else
-            projectionDist = theCamera.getDistToScreen();
+          projectionDist = theCamera.getDistToScreen();
         if (perspective)
-            nextScale = 100.0;
+          nextScale = 100.0;
         else
-            nextScale = 100.0*projectionDist/workingDepth;
+          nextScale = 100.0*projectionDist/workingDepth;
 
         animation.start(nextCoords, nextCenter, nextScale, which, navigation);
     }
@@ -156,10 +156,10 @@ public class SceneViewer extends ViewerCanvas
   public void finishAnimation(int which, boolean persp, int navi)
   {
     if (which > 5  && which < 6+cameras.size())
-		boundCamera = cameras.elementAt(which-6);
+      boundCamera = cameras.elementAt(which-6);
     orientation = which;
-	perspective = persp;
-	navigation = navi;
+    perspective = persp;
+    navigation = navi;
   }
 
   /** Estimate the range of depth values that the camera will need to render.  This need not be exact,
@@ -710,7 +710,7 @@ public class SceneViewer extends ViewerCanvas
       changed = (oldSelection[i] != newSelection[i]);
     if (changed)
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
-	dragging = false;
+    dragging = false;
   }
 
   /** 
@@ -725,13 +725,13 @@ public class SceneViewer extends ViewerCanvas
       parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
         @Override
-	    public void run()
-	    {
-	      theScene.objectModified(obj);
-	      parentFrame.updateImage();
-	      parentFrame.updateMenus();
-	    }
-	});
+        public void run()
+        {
+          theScene.objectModified(obj);
+          parentFrame.updateImage();
+          parentFrame.updateMenus();
+        }
+    });
     }
   }
 

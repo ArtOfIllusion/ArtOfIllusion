@@ -134,7 +134,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       viewMenu.add(Translate.menuItem("renderPreview", this, "renderPreviewCommand"));
     }
     viewMenu.addSeparator();
-	
+
     viewMenu.add(fitToSelItem = Translate.menuItem("fitToSelection", this, "fitToSelectedCommand"));
     viewMenu.add(Translate.menuItem("fitToAll", this, "fitToBooleanCommand"));
     viewMenu.add(Translate.menuItem("alignWithClosestAxis", this, "closestAxisCommand"));
@@ -162,7 +162,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     displayItem[1].setState(view.getRenderMode() == ViewerCanvas.RENDER_FLAT);
     displayItem[2].setState(view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH);
     displayItem[3].setState(view.getRenderMode() == ViewerCanvas.RENDER_TEXTURED);
-	fitToSelItem.setEnabled(selected.length > 0);
+    fitToSelItem.setEnabled(selected.length > 0);
   }
 
   @Override
@@ -360,10 +360,10 @@ public class CSGEditorWindow extends ObjectEditorWindow
       return;
     if (sel.length == 1)
       dlg = new TransformDialog(this, Translate.text("transformObjectTitle", theScene.getObject(sel[0]).getName()),
-		new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
+        new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
     else
       dlg = new TransformDialog(this, Translate.text("transformObjectTitleMultiple"),
-		new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
+        new double [] {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0}, true, true);
     values = dlg.getValues();
     UndoRecord undo = new UndoRecord(this, false);
     setUndoRecord(undo);
@@ -443,7 +443,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     pz.add(Translate.label("alignTo"));
     pz.add(vfz = new ValueField(Double.NaN, ValueField.NONE, 5));
     dlg = new ComponentsDialog(this, Translate.text("alignObjectsTitle"),
-		new Widget [] {px, py, pz}, new String [] {"X", "Y", "Z"});
+        new Widget [] {px, py, pz}, new String [] {"X", "Y", "Z"});
     if (!dlg.clickedOk())
       return;
     UndoRecord undo = new UndoRecord(this, false);
@@ -613,22 +613,22 @@ public class CSGEditorWindow extends ObjectEditorWindow
     ObjectInfo cameraInfo = new ObjectInfo(new SceneCamera(), theCamera.getCameraCoordinates(), "");
     new RenderingDialog(this, rend, sc, theCamera, cameraInfo);
   }
-  
+
   /** Fit the active view to the selected object(s) */
   public void fitToSelectedCommand()
   {
-	int selected[] = theScene.getSelection();
+    int selected[] = theScene.getSelection();
 
-	if (selected.length == 0)
-		return;
+    if (selected.length == 0)
+      return;
 
-	ArrayList<ObjectInfo> selection = new ArrayList<ObjectInfo>();
-	
-	// This did not work if only object 1 was selected. Strange bug.
-	//for (int s : selected)
+    ArrayList<ObjectInfo> selection = new ArrayList<ObjectInfo>();
 
-	for (int s = 0; s < selected.length; s++)
-		selection.add(theScene.getObject(selected[s]));
+    // This did not work if only object 1 was selected. Strange bug.
+    //for (int s : selected)
+
+    for (int s = 0; s < selected.length; s++)
+      selection.add(theScene.getObject(selected[s]));
 
     getView().fitToObjects(selection);
   }

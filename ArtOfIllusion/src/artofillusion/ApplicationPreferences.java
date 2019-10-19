@@ -29,7 +29,7 @@ public class ApplicationPreferences
   private boolean keepBackupFiles, useOpenGL, useCompoundMeshTool, reverseZooming, useViewAnimations;
   private boolean drawActiveFrustum, drawCameraFrustum, showTravelCuesOnIdle, showTravelCuesScrolling, showTiltDial;
   private Renderer objectPreviewRenderer, texturePreviewRenderer, defaultRenderer;
-  
+
   /**
    * Create a new ApplicationPreferences object, loading the preferences from a
    * file in the default location.
@@ -48,21 +48,21 @@ public class ApplicationPreferences
     }
     initDefaultPreferences();
     if (!f.exists())
-      {
-        properties = new Properties();
-        Translate.setLocale(Locale.getDefault());
-        return;
-      }
+    {
+      properties = new Properties();
+      Translate.setLocale(Locale.getDefault());
+      return;
+    }
     try
-      {
-        InputStream in = new BufferedInputStream(new FileInputStream(f));
-        loadPreferences(in);
-        in.close();
-      }
+    {
+      InputStream in = new BufferedInputStream(new FileInputStream(f));
+      loadPreferences(in);
+      in.close();
+    }
     catch (IOException ex)
-      {
-        ex.printStackTrace();
-      }
+    {
+      ex.printStackTrace();
+    }
   }
 
   /**
@@ -108,15 +108,15 @@ public class ApplicationPreferences
 
     File f = new File(getPreferencesDirectory(), "aoiprefs");
     try
-      {
-        OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
-        properties.store(out, "Art of Illusion Preferences File");
-        out.close();
-      }
+    {
+      OutputStream out = new BufferedOutputStream(new FileOutputStream(f));
+      properties.store(out, "Art of Illusion Preferences File");
+      out.close();
+    }
     catch (IOException ex)
-      {
-        ex.printStackTrace();
-      }
+    {
+      ex.printStackTrace();
+    }
   }
 
   /** Get the directory in which preferences files are saved. */
@@ -143,9 +143,9 @@ public class ApplicationPreferences
     keepBackupFiles = false;
     useCompoundMeshTool = false;
     reverseZooming = false;
-	useViewAnimations = true;
-	maxAnimationDuration = 1.0;
-	animationFrameRate = 60.0;
+    useViewAnimations = true;
+    maxAnimationDuration = 1.0;
+    animationFrameRate = 60.0;
     drawActiveFrustum = false;
     drawCameraFrustum = true;
     showTravelCuesOnIdle = false;
@@ -160,7 +160,7 @@ public class ApplicationPreferences
     objectPreviewRenderer = getNamedRenderer(properties.getProperty("objectPreviewRenderer"));
     texturePreviewRenderer = getNamedRenderer(properties.getProperty("texturePreviewRenderer"));
     defaultRenderer = getNamedRenderer(properties.getProperty("defaultRenderer"));
-    
+
     defaultDisplayMode = parseIntProperty("defaultDisplayMode", defaultDisplayMode);
     interactiveTol = parseDoubleProperty("interactiveSurfaceError", interactiveTol);
     undoLevels = parseIntProperty("undoLevels", undoLevels);
@@ -209,13 +209,13 @@ public class ApplicationPreferences
   private int parseIntProperty(String name, int defaultVal)
   {
     try
-      {
-        return Integer.parseInt(properties.getProperty(name));
-      }
+    {
+      return Integer.parseInt(properties.getProperty(name));
+    }
     catch (Exception ex)
-      {
-        return defaultVal;
-      }
+    {
+      return defaultVal;
+    }
   }
 
   /** Parse a double valued property. */
@@ -223,13 +223,13 @@ public class ApplicationPreferences
   private double parseDoubleProperty(String name, double defaultVal)
   {
     try
-      {
-        return Double.valueOf(properties.getProperty(name));
-      }
+    {
+      return Double.valueOf(properties.getProperty(name));
+    }
     catch (Exception ex)
-      {
-        return defaultVal;
-      }
+    {
+      return defaultVal;
+    }
   }
 
   /** Parse a boolean valued property. */
@@ -247,16 +247,16 @@ public class ApplicationPreferences
   private Locale parseLocaleProperty(String name)
   {
     try
-      {
-        String desc = properties.getProperty(name);
-        String language = desc.substring(0, 2);
-        String country = desc.substring(3);
-        return new Locale(language, country);
-      }
+    {
+      String desc = properties.getProperty(name);
+      String language = desc.substring(0, 2);
+      String country = desc.substring(3);
+      return new Locale(language, country);
+    }
     catch (Exception ex)
-      {
-        return Locale.getDefault();
-      }
+    {
+      return Locale.getDefault();
+    }
   }
 
   /** Look up a renderer by name. */
@@ -458,7 +458,7 @@ public class ApplicationPreferences
     reverseZooming = reverse;
     properties.put("reverseZooming", Boolean.toString(reverse));
   }
-  
+
    /** Get whether to animate view moves. */
 
   public final boolean getUseViewAnimations()
@@ -473,31 +473,31 @@ public class ApplicationPreferences
     useViewAnimations = animate;
     properties.put("useViewAnimations", Boolean.toString(animate));
   }
-  
+
   /** Get maximum duration of view animations. */
-  
+
   public final double getMaxAnimationDuration()
   {
     return maxAnimationDuration;
   }
-  
+
   /** Set maximum duration of view animations. */
-  
+
   public final void setMaxAnimationDuration(double duration)
   {
     maxAnimationDuration = duration;
 	properties.put("maxAnimationDuration", Double.toString(duration));
   }
-  
+
   /** Get default framerate of view animations. */
-  
+
   public final double getAnimationFrameRate()
   {
     return animationFrameRate;
   }
-  
+
   /** Set default framerate for view animations. */
-  
+
   public final void setAnimationFrameRate(double rate)
   {
     animationFrameRate = rate;
@@ -505,29 +505,29 @@ public class ApplicationPreferences
   }
 
   /** Check if the movement of the handled view should be visualized on other views */
-  
+
   public final boolean getDrawActiveFrustum()
   {
     return drawActiveFrustum;
   }
-  
+
   /** Set if the movement of the handled view should be visualized on other views */
-  
+
   public final void setDrawActiveFrustum(boolean draw)
   {
     drawActiveFrustum = draw;
     properties.put("drawActiveFrustum", Boolean.toString(draw));
   }
-  
+
   /** Check if the movement of the handled camera should be visualized on other views */
-  
+
   public final boolean getDrawCameraFrustum()
   {
     return drawCameraFrustum;
   }
 
   /** Set if the movement of the handled camera should be visualized on other views */
-  
+
   public final void setDrawCameraFrustum(boolean draw)
   {
     drawCameraFrustum = draw;

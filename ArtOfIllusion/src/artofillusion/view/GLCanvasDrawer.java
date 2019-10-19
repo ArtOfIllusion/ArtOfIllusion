@@ -109,14 +109,16 @@ public class GLCanvasDrawer implements CanvasDrawer
     lastObjectTransform = camera.getObjectToView();
     gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glLoadIdentity();
-    if (view.isPerspective()){
-	  double scale = -1.0/camera.getViewToScreen().m11*camera.getDistToScreen()/20.0;
+    if (view.isPerspective())
+    {
+      double scale = -1.0/camera.getViewToScreen().m11*camera.getDistToScreen()/20.0;
       gl.glFrustum(-0.5*bounds.width*scale, 0.5*bounds.width*scale, -0.5*bounds.height*scale, 0.5*bounds.height*scale, minDepth, maxDepth);
-	}
-    else{
-	  double scale = -1.0/camera.getViewToScreen().m11;
+    }
+    else
+    {
+      double scale = -1.0/camera.getViewToScreen().m11;
       gl.glOrtho(-0.5*bounds.width*scale, 0.5*bounds.width*scale, -0.5*bounds.height*scale, 0.5*bounds.height*scale, minDepth, maxDepth);
-	}
+    }
     Mat4 toView = lastObjectTransform;
     gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glLoadMatrixd(new double [] {

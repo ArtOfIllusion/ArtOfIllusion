@@ -43,7 +43,7 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   protected static boolean lastShowSkeleton[] = new boolean [] {true, true, true, true};
   protected static boolean lastShowScene[] = new boolean [] {false, false, false, false};
   protected static boolean lastFreehand, lastUseWorldCoords;
-  
+
   public MeshEditorWindow(EditingWindow parent, String title, ObjectInfo obj)
   {
     super(parent, title, obj);
@@ -278,11 +278,14 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
         colorSurfaceItem[i].setState(view.getSurfaceTextureParameter() == params[i-2]);
     }
 
-	//boolean selected[] = getSelection();
-	//boolean enable = false;
-	//for (int s = 0; s < selected.length; s++)
-	//	enable = (selected[s] ? true : enable);
-	//fitToSelItem.setEnabled(enable);
+    /* This should be here but it had to be implemented in sub classes because some
+       plugin erditors couldn't deal with code change. */
+
+    //boolean selected[] = getSelection();
+    //boolean enable = false;
+    //for (int s = 0; s < selected.length; s++)
+    //  enable = (selected[s] ? true : enable);
+    //fitToSelItem.setEnabled(enable);
   }
 
   private void displayModeChanged(WidgetEvent ev)
@@ -1514,17 +1517,19 @@ public abstract class MeshEditorWindow extends ObjectEditorWindow implements Mes
   }
 
   /** Fit the active view to the selected vertices */
+
   public void fitToVerticesCommand()
   {
     getView().fitToVertices(this, true);
   }
 
   /** Fit the active view to the ControlMesh */
+ 
   public void fitToMeshCommand()
   {
     getView().fitToVertices(this, false);
   }
-  
+
   /** Given a list of deltas which will be added to the selected vertices, calculate the
       corresponding deltas for the unselected vertices according to the mesh tension. */
 

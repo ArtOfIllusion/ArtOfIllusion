@@ -563,7 +563,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     
     toolsMenu = Translate.menu("tools");
     menubar.add(toolsMenu);
-	
+
     for (ModellingTool tool: modellingTools)
     {
       BMenuItem item = new BMenuItem(tool.getName());
@@ -1180,8 +1180,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   /** Add a new object to the scene.  If undo is not null,
       appropriate commands will be added to it to undo this operation. <P>
-	  
-	  NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
+ 
+      NOTE! This method is only used by 'UndoRecord'. Using it in any other context is not safe. */
 
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {

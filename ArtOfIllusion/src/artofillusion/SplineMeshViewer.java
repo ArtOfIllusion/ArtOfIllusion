@@ -55,12 +55,12 @@ public class SplineMeshViewer extends MeshViewer
     screenZ = new double [v.length];
     double clipDist = theCamera.getClipDistance();
     for (int i = 0; i < v.length; i++)
-      {
-        Vec2 p = theCamera.getObjectToScreen().timesXY(v[i].r);
-        screenVert[i] = new Point((int) p.x, (int) p.y);
-        screenZ[i] = theCamera.getObjectToView().timesZ(v[i].r);
-        visible[i] = (screenZ[i] > clipDist);
-      }
+    {
+      Vec2 p = theCamera.getObjectToScreen().timesXY(v[i].r);
+      screenVert[i] = new Point((int) p.x, (int) p.y);
+      screenZ[i] = theCamera.getObjectToView().timesZ(v[i].r);
+      visible[i] = (screenZ[i] > clipDist);
+    }
     super.updateImage();
   }
 
@@ -85,30 +85,27 @@ public class SplineMeshViewer extends MeshViewer
 
     Color meshColor, selectedColor;
     if (currentTool instanceof SkeletonTool)
-      {
-        meshColor = disabledColor;
-        selectedColor = new Color(255, 127, 255);
-      }
+    {
+      meshColor = disabledColor;
+      selectedColor = new Color(255, 127, 255);
+    }
     else
-      {
-        meshColor = lineColor;
-        selectedColor = highlightColor;
-        if (showSkeleton && mesh.getSkeleton() != null)
-          mesh.getSkeleton().draw(this, false);
-      }
-	//if (animation == null || !animation.changingPerspective()) // mismatch at animation
-	//{
-      if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
-      {
-        drawEdges(disabledColor, disabledColor);
-        drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
-      }
-      else
-        drawEdges(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
-      if (currentTool instanceof SkeletonTool)
-        if (showSkeleton && mesh.getSkeleton() != null)
-          mesh.getSkeleton().draw(this, true);
-	//}
+    {
+      meshColor = lineColor;
+      selectedColor = highlightColor;
+      if (showSkeleton && mesh.getSkeleton() != null)
+        mesh.getSkeleton().draw(this, false);
+    }
+    if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
+    {
+      drawEdges(disabledColor, disabledColor);
+      drawVertices(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+    }
+    else
+      drawEdges(meshColor, currentTool.hilightSelection() ? selectedColor : meshColor);
+    if (currentTool instanceof SkeletonTool)
+      if (showSkeleton && mesh.getSkeleton() != null)
+        mesh.getSkeleton().draw(this, true);
   }
 
   /** Draw the surface of the object. */
@@ -198,41 +195,41 @@ public class SplineMeshViewer extends MeshViewer
     boolean uclosed = mesh.isUClosed(), vclosed = mesh.isVClosed();
     boolean selected[] = controller.getSelection();
     if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
+    {
+      for (i = 0; i < usize; i++)
       {
-        for (i = 0; i < usize; i++)
-          {
-            for (j = 0; j < vsize-1; j++)
-              renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
-            if (vclosed)
-              renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
-          }
-        for (j = 0; j < vsize; j++)
-          {
-            for (i = 0; i < usize-1; i++)
-              renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
-            if (uclosed)
-              renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
-          }
+        for (j = 0; j < vsize-1; j++)
+          renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
+        if (vclosed)
+          renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
       }
+      for (j = 0; j < vsize; j++)
+      {
+        for (i = 0; i < usize-1; i++)
+          renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
+        if (uclosed)
+          renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
+      }
+    }
     else
-      {
-        for (i = 0; i < usize; i++)
-          if (!selected[i])
-            {
-              for (j = 0; j < vsize-1; j++)
-                renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
-              if (vclosed)
-                renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
-            }
-        for (j = 0; j < vsize; j++)
-          if (!selected[j+usize])
-            {
-              for (i = 0; i < usize-1; i++)
-                renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
-              if (uclosed)
-                renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
-            }
-      }
+    {
+      for (i = 0; i < usize; i++)
+        if (!selected[i])
+        {
+          for (j = 0; j < vsize-1; j++)
+            renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, unselectedColor);
+          if (vclosed)
+            renderLine(v[i+j*usize].r, v[i].r, theCamera, unselectedColor);
+        }
+      for (j = 0; j < vsize; j++)
+        if (!selected[j+usize])
+        {
+          for (i = 0; i < usize-1; i++)
+            renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, unselectedColor);
+          if (uclosed)
+            renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, unselectedColor);
+        }
+    }
 
     // Now draw the selected portions.
 
@@ -240,20 +237,20 @@ public class SplineMeshViewer extends MeshViewer
       return;
     for (i = 0; i < usize; i++)
       if (selected[i])
-        {
-          for (j = 0; j < vsize-1; j++)
-            renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, selectedColor);
-          if (vclosed)
-            renderLine(v[i+j*usize].r, v[i].r, theCamera, selectedColor);
-        }
+      {
+        for (j = 0; j < vsize-1; j++)
+          renderLine(v[i+j*usize].r, v[i+(j+1)*usize].r, theCamera, selectedColor);
+        if (vclosed)
+          renderLine(v[i+j*usize].r, v[i].r, theCamera, selectedColor);
+      }
     for (j = 0; j < vsize; j++)
       if (selected[j+usize])
-        {
-          for (i = 0; i < usize-1; i++)
-            renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, selectedColor);
-          if (uclosed)
-            renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, selectedColor);
-        }
+      {
+        for (i = 0; i < usize-1; i++)
+          renderLine(v[i+j*usize].r, v[i+1+j*usize].r, theCamera, selectedColor);
+        if (uclosed)
+          renderLine(v[i+j*usize].r, v[j*usize].r, theCamera, selectedColor);
+      }
   }
 
   /** When the user presses the mouse, forward events to the current tool as appropriate.
@@ -285,11 +282,11 @@ public class SplineMeshViewer extends MeshViewer
     // If the current tool wants all clicks, just forward the event and return.
 
     if ((activeTool.whichClicks() & EditingTool.ALL_CLICKS) != 0)
-      {
-        activeTool.mousePressed(e, this);
-        dragging = true;
-        sentClick = true;
-      }
+    {
+      activeTool.mousePressed(e, this);
+      dragging = true;
+      sentClick = true;
+    }
     boolean allowSelectionChange = activeTool.allowSelectionChanges();
     boolean wantHandleClicks = ((activeTool.whichClicks() & EditingTool.HANDLE_CLICKS) != 0);
     if (!allowSelectionChange && !wantHandleClicks)
@@ -302,41 +299,41 @@ public class SplineMeshViewer extends MeshViewer
     // If the click was not on an object, start dragging a selection box.
 
     if (i == -1)
+    {
+      if (allowSelectionChange)
       {
-        if (allowSelectionChange)
-        {
-          draggingSelectionBox = true;
-          beginDraggingSelection(pos, false);
-        }
-        return;
+        draggingSelectionBox = true;
+        beginDraggingSelection(pos, false);
       }
+      return;
+    }
 
     // If we are in curve selection mode, find the nearest vertex of the clicked curve,
     // so that it can be passed to editing tools.
 
     if (controller.getSelectionMode() == MeshEditController.EDGE_MODE)
+    {
+      j = 0;
+      closest = Integer.MAX_VALUE;
+      if (i < usize)
       {
-        j = 0;
-        closest = Integer.MAX_VALUE;
-        if (i < usize)
+        for (k = 0; k < vsize; k++)
           {
-            for (k = 0; k < vsize; k++)
-              {
-                dist = Math.abs(pos.x-screenVert[i+usize*k].x) + Math.abs(pos.y-screenVert[i+usize*k].y);
-                if (dist < closest)
-                  j = i+usize*k;
-              }
-          }
-        else
-          {
-            for (k = 0; k < usize; k++)
-              {
-                dist = Math.abs(pos.x-screenVert[k+usize*(i-usize)].x) + Math.abs(pos.y-screenVert[k+usize*(i-usize)].y);
-                if (dist < closest)
-                  j = k+usize*(i-usize);
-              }
+            dist = Math.abs(pos.x-screenVert[i+usize*k].x) + Math.abs(pos.y-screenVert[i+usize*k].y);
+            if (dist < closest)
+              j = i+usize*k;
           }
       }
+      else
+      {
+        for (k = 0; k < usize; k++)
+          {
+            dist = Math.abs(pos.x-screenVert[k+usize*(i-usize)].x) + Math.abs(pos.y-screenVert[k+usize*(i-usize)].y);
+            if (dist < closest)
+              j = k+usize*(i-usize);
+          }
+      }
+    }
     else
       j = i;
 
@@ -345,16 +342,16 @@ public class SplineMeshViewer extends MeshViewer
 
     boolean selected[] = controller.getSelection();
     if (selected[i])
+    {
+      if (e.isShiftDown() && allowSelectionChange)
+        deselect = i;
+      if (wantHandleClicks)
       {
-        if (e.isShiftDown() && allowSelectionChange)
-          deselect = i;
-        if (wantHandleClicks)
-        {
-          activeTool.mousePressedOnHandle(e, this, 0, j);
-          sentClick = true;
-        }
-        return;
+        activeTool.mousePressedOnHandle(e, this, 0, j);
+        sentClick = true;
       }
+      return;
+    }
     if (!allowSelectionChange)
       return;
 
@@ -379,11 +376,11 @@ public class SplineMeshViewer extends MeshViewer
   protected void mouseDragged(WidgetMouseEvent e)
   {
     if (!dragging)
-      {
-        Point p = e.getPoint();
-        if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
-          return;
-      }
+    {
+      Point p = e.getPoint();
+      if (Math.abs(p.x-clickPoint.x) < 2 && Math.abs(p.y-clickPoint.y) < 2)
+        return;
+    }
     dragging = true;
     deselect = -1;
     super.mouseDragged(e);
@@ -408,43 +405,43 @@ public class SplineMeshViewer extends MeshViewer
     // it intersects.
 
     if (selectBounds != null)
+    {
+      boolean newsel = !e.isControlDown();
+      if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
       {
-        boolean newsel = !e.isControlDown();
-        if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
-          {
-            for (i = 0; i < selected.length; i++)
-              if (selectionRegionContains(screenVert[i]))
-                selected[i] = newsel;
-          }
-        else
-          {
-            for (i = 0; i < usize; i++)
-              {
-                for (j = 0; j < vsize && selectionRegionContains(screenVert[i+j*usize]); j++);
-                if (j == vsize)
-                  selected[i] = newsel;
-              }
-            for (i = 0; i < vsize; i++)
-              {
-                for (j = 0; j < usize && selectionRegionContains(screenVert[j+i*usize]); j++);
-                if (j == usize)
-                  selected[i+usize] = newsel;
-              }
-          }
+        for (i = 0; i < selected.length; i++)
+          if (selectionRegionContains(screenVert[i]))
+            selected[i] = newsel;
       }
+      else
+      {
+        for (i = 0; i < usize; i++)
+        {
+          for (j = 0; j < vsize && selectionRegionContains(screenVert[i+j*usize]); j++);
+          if (j == vsize)
+            selected[i] = newsel;
+        }
+        for (i = 0; i < vsize; i++)
+        {
+          for (j = 0; j < usize && selectionRegionContains(screenVert[j+i*usize]); j++);
+          if (j == usize)
+            selected[i+usize] = newsel;
+        }
+      }
+    }
     draggingBox = draggingSelectionBox = false;
 
     // Send the event to the current tool, if appropriate.
 
     if (sentClick)
+    {
+      if (!dragging)
       {
-        if (!dragging)
-          {
-            Point p = e.getPoint();
-            e.translatePoint(clickPoint.x-p.x, clickPoint.y-p.y);
-          }
-        activeTool.mouseReleased(e, this);
+        Point p = e.getPoint();
+        e.translatePoint(clickPoint.x-p.x, clickPoint.y-p.y);
       }
+      activeTool.mouseReleased(e, this);
+    }
 
     // If the user shift-clicked a selected point and released the mouse without dragging,
     // then deselect the point.
@@ -480,79 +477,79 @@ public class SplineMeshViewer extends MeshViewer
     int usize = mesh.getUSize(), vsize = mesh.getVSize();
 
     if (controller.getSelectionMode() == SplineMeshEditorWindow.POINT_MODE)
+    {
+      for (i = 0; i < vt.length; i++)
       {
-        for (i = 0; i < vt.length; i++)
-          {
-            if (!visible[i])
-              continue;
-            if (sel && !selected[i] && priorityToSelected)
-              continue;
-            v1 = screenVert[i];
-            if (pos.x < v1.x-HANDLE_SIZE/2 || pos.x > v1.x+HANDLE_SIZE/2 ||
-                pos.y < v1.y-HANDLE_SIZE/2 || pos.y > v1.y+HANDLE_SIZE/2)
-              continue;
-            z = theCamera.getObjectToView().timesZ(vt[i].r);
-            if (z < closestz || (!sel && selected[i] && priorityToSelected))
-              {
-                which = i;
-                closestz = z;
-                sel = selected[i];
-              }
-          }
+        if (!visible[i])
+          continue;
+        if (sel && !selected[i] && priorityToSelected)
+          continue;
+        v1 = screenVert[i];
+        if (pos.x < v1.x-HANDLE_SIZE/2 || pos.x > v1.x+HANDLE_SIZE/2 ||
+            pos.y < v1.y-HANDLE_SIZE/2 || pos.y > v1.y+HANDLE_SIZE/2)
+          continue;
+        z = theCamera.getObjectToView().timesZ(vt[i].r);
+        if (z < closestz || (!sel && selected[i] && priorityToSelected))
+        {
+          which = i;
+          closestz = z;
+          sel = selected[i];
+        }
       }
+    }
     else
+    {
+      for (i = 0; i < usize; i++)
       {
-        for (i = 0; i < usize; i++)
+        if (sel && !selected[i] && priorityToSelected)
+          continue;
+        for (j = 1; j < vsize; j++)
+        {
+          z = lineClickDepth(pos, vt, i+(j-1)*usize, i+j*usize);
+          if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
           {
-            if (sel && !selected[i] && priorityToSelected)
-              continue;
-            for (j = 1; j < vsize; j++)
-              {
-                z = lineClickDepth(pos, vt, i+(j-1)*usize, i+j*usize);
-                if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
-                  {
-                    which = i;
-                    closestz = z;
-                    sel = selected[i];
-                  }
-              }
-            if (vclosed)
-              {
-                z = lineClickDepth(pos, vt, i+(j-1)*usize, i);
-                if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
-                  {
-                    which = i;
-                    closestz = z;
-                    sel = selected[i];
-                  }
-              }
+            which = i;
+            closestz = z;
+            sel = selected[i];
           }
-        for (i = 0; i < vsize; i++)
+        }
+        if (vclosed)
+        {
+          z = lineClickDepth(pos, vt, i+(j-1)*usize, i);
+          if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
           {
-            if (sel && !selected[i+usize] && priorityToSelected)
-              continue;
-            for (j = 1; j < usize; j++)
-              {
-                z = lineClickDepth(pos, vt, j-1+i*usize, j+i*usize);
-                if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
-                  {
-                    which = i+usize;
-                    closestz = z;
-                    sel = selected[i+usize];
-                  }
-              }
-            if (uclosed)
-              {
-                z = lineClickDepth(pos, vt, j-1+i*usize, i*usize);
-                if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
-                  {
-                    which = i+usize;
-                    closestz = z;
-                    sel = selected[i+usize];
-                  }
-              }
+            which = i;
+            closestz = z;
+            sel = selected[i];
           }
+        }
       }
+      for (i = 0; i < vsize; i++)
+      {
+        if (sel && !selected[i+usize] && priorityToSelected)
+          continue;
+        for (j = 1; j < usize; j++)
+        {
+          z = lineClickDepth(pos, vt, j-1+i*usize, j+i*usize);
+          if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
+          {
+            which = i+usize;
+            closestz = z;
+            sel = selected[i+usize];
+          }
+        }
+        if (uclosed)
+        {
+          z = lineClickDepth(pos, vt, j-1+i*usize, i*usize);
+          if (z < closestz || (z < Double.MAX_VALUE && !sel && selected[i] && priorityToSelected))
+          {
+            which = i+usize;
+            closestz = z;
+            sel = selected[i+usize];
+          }
+        }
+      }
+    }
     return which;
   }
 
@@ -578,33 +575,33 @@ public class SplineMeshViewer extends MeshViewer
     // Determine the distance of the click point from the line.
 
     if (Math.abs(v1.x-v2.x) > Math.abs(v1.y-v2.y))
+    {
+      if (v2.x > v1.x)
       {
-        if (v2.x > v1.x)
-          {
-            v = ((double) pos.x-v1.x)/(v2.x-v1.x);
-            u = 1.0-v;
-          }
-        else
-          {
-            u = ((double) pos.x-v2.x)/(v1.x-v2.x);
-            v = 1.0-u;
-          }
-        w = u*v1.y + v*v2.y - pos.y;
+        v = ((double) pos.x-v1.x)/(v2.x-v1.x);
+        u = 1.0-v;
       }
+      else
+      {
+        u = ((double) pos.x-v2.x)/(v1.x-v2.x);
+        v = 1.0-u;
+      }
+      w = u*v1.y + v*v2.y - pos.y;
+    }
     else
+    {
+      if (v2.y > v1.y)
       {
-        if (v2.y > v1.y)
-          {
-            v = ((double) pos.y-v1.y)/(v2.y-v1.y);
-            u = 1.0-v;
-          }
-        else
-          {
-            u = ((double) pos.y-v2.y)/(v1.y-v2.y);
-            v = 1.0-u;
-          }
-        w = u*v1.x + v*v2.x - pos.x;
+        v = ((double) pos.y-v1.y)/(v2.y-v1.y);
+        u = 1.0-v;
       }
+      else
+      {
+        u = ((double) pos.y-v2.y)/(v1.y-v2.y);
+        v = 1.0-u;
+      }
+      w = u*v1.x + v*v2.x - pos.x;
+    }
     if (Math.abs(w) > HANDLE_SIZE/2)
       return Double.MAX_VALUE;
     return u*theCamera.getObjectToView().timesZ(vt[p1].r) + v*theCamera.getObjectToView().timesZ(vt[p2].r);

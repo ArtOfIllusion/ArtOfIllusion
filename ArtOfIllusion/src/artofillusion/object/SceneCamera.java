@@ -139,12 +139,12 @@ public class SceneCamera extends Object3D
 
   public double getDistToPlane()
   {
-	return distToPlane;
+    return distToPlane;
   }
 
   public void setDistToPlane(double dist)
   {
-	distToPlane = dist;
+    distToPlane = dist;
   }
 
   public double getFieldOfView()
@@ -331,7 +331,7 @@ public class SceneCamera extends Object3D
   {
     SceneCamera sc = new SceneCamera();
 
-	sc.distToPlane = distToPlane;
+    sc.distToPlane = distToPlane;
     sc.fov = fov;
     sc.depthOfField = depthOfField;
     sc.focalDist = focalDist;
@@ -347,7 +347,7 @@ public class SceneCamera extends Object3D
   {
     SceneCamera sc = (SceneCamera) obj;
 
-	sc.distToPlane = distToPlane;
+    sc.distToPlane = distToPlane;
     fov = sc.fov;
     depthOfField = sc.depthOfField;
     focalDist = sc.focalDist;
@@ -467,8 +467,8 @@ public class SceneCamera extends Object3D
       }
     }, "processEvent");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),
-		new Widget[] {fovSlider, dofField, fdField, perspectiveBox, filtersButton},
-		new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist"), null, null});
+                           new Widget[] {fovSlider, dofField, fdField, perspectiveBox, filtersButton},
+                           new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist"), null, null});
     if (dlg.clickedOk())
     {
       fov = fovSlider.getValue();
@@ -637,8 +637,8 @@ public class SceneCamera extends Object3D
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"Field of View", "Depth of Field", "Focal Distance"},
-        new double [] {fov, depthOfField, focalDist},
-        new double [][] {{0.0, 180.0}, {0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}});
+                             new double [] {fov, depthOfField, focalDist},
+                             new double [][] {{0.0, 180.0}, {0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE}});
     FilterParameterTrack subtrack[] = new FilterParameterTrack [filter.length];
     for (int i = 0; i < subtrack.length; i++)
       subtrack[i] = new FilterParameterTrack(track, filter[i]);
@@ -655,8 +655,8 @@ public class SceneCamera extends Object3D
     ValueField dofField = new ValueField(key.depthOfField, ValueField.POSITIVE);
     ValueField fdField = new ValueField(key.focalDist, ValueField.POSITIVE);
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),
-		new Widget[] {fovSlider, dofField, fdField},
-		new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist")});
+                           new Widget[] {fovSlider, dofField, fdField},
+                           new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist")});
     if (!dlg.clickedOk())
       return;
     key.fov = fovSlider.getValue();

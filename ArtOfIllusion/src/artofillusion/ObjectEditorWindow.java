@@ -48,7 +48,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   protected static int lastNumViews = 4, lastGridSubdivisions = 10;
   protected static double lastGridSpacing = 1.0;
   protected ScrollViewTool scrollTool;
-  
+
   public ObjectEditorWindow(EditingWindow parent, String title, ObjectInfo obj)
   {
     super(title);
@@ -119,22 +119,22 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
       theView[i].setShowAxes(lastShowAxes);
       theView[i].setGrid(lastGridSpacing, lastGridSubdivisions, lastShowGrid, lastSnapToGrid);
       theView[i].addEventLink(MousePressedEvent.class, listen);
-	  theView[i].setViewAnimation (new ViewAnimation(this, theView[i]));
+      theView[i].setViewAnimation (new ViewAnimation(this, theView[i]));
     }
     theView[1].setOrientation(2);
     theView[2].setOrientation(4);
     theView[3].setNavigationMode(1,true);
     //theView[3].setPerspective(true);
-	
-	/* 
-	   I wonder if this would have any side effects?
-	   At least this way it will be in the sub classes, including plugins.
-	*/
-	scrollTool = new ScrollViewTool(this);
-	for (ViewerCanvas v : theView)
-		v.setScrollTool(scrollTool);
 
-	viewsContainer.add(viewPanel[0], 0, 0);
+    /*
+       I wonder if this would have any side effects?
+       At least this way it will be in the sub classes, including plugins.
+    */
+    scrollTool = new ScrollViewTool(this);
+    for (ViewerCanvas v : theView)
+      v.setScrollTool(scrollTool);
+
+    viewsContainer.add(viewPanel[0], 0, 0);
     viewsContainer.add(viewPanel[1], 1, 0);
     viewsContainer.add(viewPanel[2], 0, 1);
     viewsContainer.add(viewPanel[3], 1, 1);
@@ -232,13 +232,13 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
   public void toolChanged(EditingTool tool)
   {
     for (ViewerCanvas v:theView)
-	{
-		if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
-			v.navigationTravelEnabled = false;
-		else
-			v.navigationTravelEnabled = true;
-		v.viewChanged(false); // This should do nothing now...
-	}
+    {
+      if (tool instanceof MoveViewTool || tool instanceof RotateViewTool)
+        v.navigationTravelEnabled = false;
+      else
+        v.navigationTravelEnabled = true;
+      v.viewChanged(false); // This should do nothing now...
+    }
   }
 
   @Override
@@ -265,7 +265,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     for (ViewerCanvas view : theView)
       view.repaint();
   }
-  
+
   @Override
   public void setUndoRecord(UndoRecord command)
   {
@@ -446,7 +446,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
     savePreferences();
     updateImage();
   }
-  
+
   /** Align the view with the closest main axix directions */
   public void closestAxisCommand()
   {

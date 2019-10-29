@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2015 by Peter Eastman
+   Modifications Copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,7 +18,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 
-/** This dialog box allows the user to specify options for CSG objects. */
+/** This dialog box allows the user to specify options for CSG objects, a.k.a 'boolean objects' */
 
 public class CSGDialog extends BDialog
 {
@@ -28,6 +29,7 @@ public class CSGDialog extends BDialog
   private ObjectPreviewCanvas preview;
   private int operation[];
   private boolean ok;
+  public  BCheckBox hideOriginals;
 
   public CSGDialog(EditingWindow window, CSGObject obj)
   {
@@ -35,15 +37,17 @@ public class CSGDialog extends BDialog
     theObject = obj;
     Scene scene = window.getScene();
     texture = scene.getDefaultTexture();
+    LayoutInfo nw = new LayoutInfo(LayoutInfo.NORTHWEST, LayoutInfo.NONE);
     
     // Layout the window.
     
-    BorderContainer content = new BorderContainer();
+    ColumnContainer content = new ColumnContainer();
     setContent(content);
     RowContainer opRow = new RowContainer();
-    content.add(opRow, BorderContainer.NORTH);
     opRow.add(new BLabel(Translate.text("Operation")+":"));
     opRow.add(opChoice = new BComboBox());
+    content.add(opRow, nw);
+    content.add(hideOriginals = new BCheckBox (Translate.text("hideOriginals"), true), nw);
     int i = 0;
     operation = new int [4];
     if (obj.getObject1().getObject().isClosed() && obj.getObject2().getObject().isClosed())
@@ -70,7 +74,7 @@ public class CSGDialog extends BDialog
 
     // Add the preview canvas.
     
-    content.add(preview = new ObjectPreviewCanvas(null), BorderContainer.CENTER);
+    content.add(preview = new ObjectPreviewCanvas(null), new LayoutInfo());
     preview.setPreferredSize(new Dimension(200, 200));
     
     // Add the buttons at the bottom.
@@ -78,8 +82,8 @@ public class CSGDialog extends BDialog
     RowContainer buttons = new RowContainer();
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "dispose"));
-    content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-    addEventLink(WindowClosingEvent.class, this, "doOk");
+    content.add(buttons, new LayoutInfo());
+    addEventLink(WindowClosingEvent.class, this, "dispose");
     makePreview();
     pack();
     UIUtilities.centerDialog(this, window.getFrame());

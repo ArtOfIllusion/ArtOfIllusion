@@ -318,7 +318,7 @@ public class ImageDetailsDialog extends BDialog
             return;
 
         String name = im.getName();
-        if (name.isEmpty());
+        if (name.isEmpty())
             name = Translate.text("unNamed");
 
         if (confirmConvert(name))

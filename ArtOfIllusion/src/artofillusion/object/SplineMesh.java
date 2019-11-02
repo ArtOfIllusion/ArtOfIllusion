@@ -39,12 +39,16 @@ public class SplineMesh extends Object3D implements Mesh
 
   private static final int MAX_SUBDIVISIONS = 20;
   private static final Property PROPERTIES[] = new Property [] {
-    new Property(Translate.text("menu.smoothingMethod"), new Object[] {
-      Translate.text("menu.interpolating"), Translate.text("menu.approximating")
-    }, Translate.text("menu.shading")),
-    new Property(Translate.text("menu.closed"), new Object[] {
-      Translate.text("menu.udirection"), Translate.text("menu.vdirection"), Translate.text("menu.both"), Translate.text("menu.neither")
-    }, Translate.text("menu.neither"))
+    new Property(Translate.text("menu.smoothingMethod"), 
+                 new Object[]{Translate.text("menu.interpolating"), 
+                              Translate.text("menu.approximating")}, 
+                 Translate.text("menu.shading")),
+    new Property(Translate.text("menu.closed"), 
+                 new Object[]{Translate.text("menu.udirection"), 
+                              Translate.text("menu.vdirection"), 
+                              Translate.text("menu.both"), 
+                              Translate.text("menu.neither")}, 
+                 Translate.text("menu.neither"))
   };
 
   /** v is an array containing the points of the control mesh, with the first index
@@ -131,14 +135,14 @@ public class SplineMesh extends Object3D implements Mesh
     miny = maxy = vert[0].y;
     minz = maxz = vert[0].z;
     for (i = 1; i < vert.length; i++)
-      {
-        if (vert[i].x < minx) minx = vert[i].x;
-        if (vert[i].x > maxx) maxx = vert[i].x;
-        if (vert[i].y < miny) miny = vert[i].y;
-        if (vert[i].y > maxy) maxy = vert[i].y;
-        if (vert[i].z < minz) minz = vert[i].z;
-        if (vert[i].z > maxz) maxz = vert[i].z;
-      }
+    {
+      if (vert[i].x < minx) minx = vert[i].x;
+      if (vert[i].x > maxx) maxx = vert[i].x;
+      if (vert[i].y < miny) miny = vert[i].y;
+      if (vert[i].y > maxy) maxy = vert[i].y;
+      if (vert[i].z < minz) minz = vert[i].z;
+      if (vert[i].z > maxz) maxz = vert[i].z;
+    }
     bounds = new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
   }
 
@@ -288,19 +292,19 @@ public class SplineMesh extends Object3D implements Mesh
   public boolean isClosed()
   {
     if (!vclosed)
-      {
-        Vec3 v1 = vertex[0].r, v2 = vertex[usize*(vsize-1)].r;
-        for (int i = 1; i < usize; i++)
-          if (v1.distance2(vertex[i].r) > 1e-24 || v2.distance2(vertex[i+usize*(vsize-1)].r) > 1e-24)
-            return false;
-      }
+    {
+      Vec3 v1 = vertex[0].r, v2 = vertex[usize*(vsize-1)].r;
+      for (int i = 1; i < usize; i++)
+        if (v1.distance2(vertex[i].r) > 1e-24 || v2.distance2(vertex[i+usize*(vsize-1)].r) > 1e-24)
+          return false;
+    }
     if (!uclosed)
-      {
-        Vec3 v1 = vertex[0].r, v2 = vertex[usize-1].r;
-        for (int i = 1; i < vsize; i++)
-          if (v1.distance2(vertex[i*usize].r) > 1e-24 || v2.distance2(vertex[i*usize+usize-1].r) > 1e-24)
-            return false;
-      }
+    {
+      Vec3 v1 = vertex[0].r, v2 = vertex[usize-1].r;
+      for (int i = 1; i < vsize; i++)
+        if (v1.distance2(vertex[i*usize].r) > 1e-24 || v2.distance2(vertex[i*usize+usize-1].r) > 1e-24)
+          return false;
+    }
     return true;
   }
 
@@ -491,61 +495,61 @@ public class SplineMesh extends Object3D implements Mesh
       news = new float [v[0].length+count];
       newparam = new double [v.length][v[0].length+count][numParam];
       for (i = 0, k = 0; i < refine.length; i++)
-        {
-          // Existing points remain unchanged.
+      {
+        // Existing points remain unchanged.
 
+        for (j = 0; j < v.length; j++)
+        {
+          newv[j][k] = v[j][i];
+          newparam[j][k] = param[j][i];
+        }
+        news[k] = Math.min(s[i]*2.0f, 1.0f);
+
+        // Now calculate positions for the new points.
+
+        k++;
+        if (refine[i])
+        {
+          p1 = i-1;
+          if (p1 < 0)
+          {
+            if (closed)
+              p1 = v[0].length-1;
+            else
+              p1 = 0;
+          }
+          p3 = i+1;
+          if (p3 == v[0].length)
+          {
+            if (closed)
+              p3 = 0;
+            else
+              p3 = v[0].length-1;
+          }
+          p4 = i+2;
+          if (p4 >= v[0].length)
+          {
+            if (closed)
+              p4 %= v[0].length;
+            else
+              p4 = v[0].length-1;
+          }
           for (j = 0; j < v.length; j++)
           {
-            newv[j][k] = v[j][i];
-            newparam[j][k] = param[j][i];
-          }
-          news[k] = Math.min(s[i]*2.0f, 1.0f);
-
-          // Now calculate positions for the new points.
-
-          k++;
-          if (refine[i])
+            newv[j][k] = calcInterpPoint(v[j], s, param[j], paramTemp, p1, i, p3, p4);
+            for (int m = 0; m < numParam; m++)
+              newparam[j][k][m] = paramTemp[m];
+            if (v[j][i].r.distance2(newv[j][k].r) > tol2 && v[j][p3].r.distance2(newv[j][k].r) > tol2)
             {
-              p1 = i-1;
-              if (p1 < 0)
-                {
-                  if (closed)
-                    p1 = v[0].length-1;
-                  else
-                    p1 = 0;
-                }
-              p3 = i+1;
-              if (p3 == v[0].length)
-                {
-                  if (closed)
-                    p3 = 0;
-                  else
-                    p3 = v[0].length-1;
-                }
-              p4 = i+2;
-              if (p4 >= v[0].length)
-                {
-                  if (closed)
-                    p4 %= v[0].length;
-                  else
-                    p4 = v[0].length-1;
-                }
-              for (j = 0; j < v.length; j++)
-                {
-                  newv[j][k] = calcInterpPoint(v[j], s, param[j], paramTemp, p1, i, p3, p4);
-                  for (int m = 0; m < numParam; m++)
-                    newparam[j][k][m] = paramTemp[m];
-                  if (v[j][i].r.distance2(newv[j][k].r) > tol2 && v[j][p3].r.distance2(newv[j][k].r) > tol2)
-                    {
-                      temp = v[j][i].r.plus(v[j][p3].r).times(0.5);
-                      if (temp.distance2(newv[j][k].r) > tol2)
-                        newrefine[k] = newrefine[(k-1+newrefine.length)%newrefine.length] = true;
-                    }
-                }
-              news[k] = 1.0f;
-              k++;
+              temp = v[j][i].r.plus(v[j][p3].r).times(0.5);
+              if (temp.distance2(newv[j][k].r) > tol2)
+                newrefine[k] = newrefine[(k-1+newrefine.length)%newrefine.length] = true;
             }
+          }
+          news[k] = 1.0f;
+          k++;
         }
+      }
       if (!closed)
         for (j = 0; j < v.length; j++)
         {
@@ -563,7 +567,8 @@ public class SplineMesh extends Object3D implements Mesh
       s = news;
       param = newparam;
       refine = newrefine;
-    } while (count > 0 && ++iterations < MAX_SUBDIVISIONS);
+    } 
+    while (count > 0 && ++iterations < MAX_SUBDIVISIONS);
     return new Object [] {v, s, param};
   }
 
@@ -587,10 +592,10 @@ public class SplineMesh extends Object3D implements Mesh
     if (closed)
       count = refine.length;
     else
-      {
-        count = refine.length-1;
-        refine[0] = refine[refine.length-1] = false;
-      }
+    {
+      count = refine.length-1;
+      refine[0] = refine[refine.length-1] = false;
+    }
     int iterations = 0;
     do
     {
@@ -599,61 +604,61 @@ public class SplineMesh extends Object3D implements Mesh
       news = new float [v[0].length+count];
       newparam = new double [v.length][v[0].length+count][numParam];
       for (i = 0, k = 0; i < refine.length; i++)
+      {
+        p1 = i-1;
+        if (p1 < 0)
         {
-          p1 = i-1;
-          if (p1 < 0)
-            {
-              if (closed)
-                p1 = refine.length-1;
-              else
-                p1 = 0;
-            }
-          p3 = i+1;
-          if (p3 == refine.length)
-            {
-              if (closed)
-                p3 = 0;
-              else
-                p3 = refine.length-1;
-            }
-
-          // Calculate the new positions for existing points.
-
-          if (!refine[i])
-            for (j = 0; j < v.length; j++)
-            {
-              newv[j][k] = v[j][i];
-              newparam[j][k] = param[j][i];
-            }
+          if (closed)
+            p1 = refine.length-1;
           else
-            for (j = 0; j < v.length; j++)
-              {
-                newv[j][k] = calcApproxPoint(v[j], s, param[j], paramTemp, p1, i, p3);
-                for (int m = 0; m < numParam; m++)
-                  newparam[j][k][m] = paramTemp[m];
-                temp = newv[j][k].r.minus(v[j][i].r);
-                if (temp.length2() > tol*tol)
-                  newrefine[k] = newrefine[(k-1+newrefine.length)%newrefine.length] = newrefine[(k+1)%newrefine.length] = true;
-              }
-          news[k] = Math.min(s[i]*2.0f, 1.0f);
-          if (!closed && i == refine.length-1)
-            break;
-
-          // Now calculate positions for the new points.
-
-          k++;
-          if (refine[i] || refine[p3])
-            {
-              for (j = 0; j < v.length; j++)
-              {
-                newv[j][k] = MeshVertex.blend(v[j][i], v[j][p3], 0.5, 0.5);
-                for (int m = 0; m < numParam; m++)
-                  newparam[j][k][m] = 0.5*(param[j][i][m]+param[j][p3][m]);
-              }
-              news[k] = 1.0f;
-              k++;
-            }
+            p1 = 0;
         }
+        p3 = i+1;
+        if (p3 == refine.length)
+        {
+          if (closed)
+            p3 = 0;
+          else
+            p3 = refine.length-1;
+        }
+
+        // Calculate the new positions for existing points.
+
+        if (!refine[i])
+          for (j = 0; j < v.length; j++)
+          {
+            newv[j][k] = v[j][i];
+            newparam[j][k] = param[j][i];
+          }
+        else
+          for (j = 0; j < v.length; j++)
+          {
+            newv[j][k] = calcApproxPoint(v[j], s, param[j], paramTemp, p1, i, p3);
+            for (int m = 0; m < numParam; m++)
+              newparam[j][k][m] = paramTemp[m];
+            temp = newv[j][k].r.minus(v[j][i].r);
+            if (temp.length2() > tol*tol)
+              newrefine[k] = newrefine[(k-1+newrefine.length)%newrefine.length] = newrefine[(k+1)%newrefine.length] = true;
+          }
+        news[k] = Math.min(s[i]*2.0f, 1.0f);
+        if (!closed && i == refine.length-1)
+          break;
+
+        // Now calculate positions for the new points.
+
+        k++;
+        if (refine[i] || refine[p3])
+        {
+          for (j = 0; j < v.length; j++)
+          {
+            newv[j][k] = MeshVertex.blend(v[j][i], v[j][p3], 0.5, 0.5);
+            for (int m = 0; m < numParam; m++)
+              newparam[j][k][m] = 0.5*(param[j][i][m]+param[j][p3][m]);
+          }
+          news[k] = 1.0f;
+          k++;
+        }
+      }
 
       // Count the number of rows which are not yet converged.
 
@@ -692,20 +697,20 @@ public class SplineMesh extends Object3D implements Mesh
     for (int n = 0; n < newParam.length; n++)
       newParam[n] = w1*oldParam[i][n]+w2*oldParam[j][n]+w3*oldParam[k][n]+w4*oldParam[m][n];
     if (v[j].ikJoint == v[k].ikJoint)
-      {
-        vt.ikJoint = v[j].ikJoint;
-        vt.ikWeight = 0.5*(v[j].ikWeight+v[k].ikWeight);
-      }
+    {
+      vt.ikJoint = v[j].ikJoint;
+      vt.ikWeight = 0.5*(v[j].ikWeight+v[k].ikWeight);
+    }
     else if (v[j].ikWeight > v[k].ikWeight)
-      {
-        vt.ikJoint = v[j].ikJoint;
-        vt.ikWeight = v[j].ikWeight;
-      }
+    {
+      vt.ikJoint = v[j].ikJoint;
+      vt.ikWeight = v[j].ikWeight;
+    }
     else
-      {
-        vt.ikJoint = v[k].ikJoint;
-        vt.ikWeight = v[k].ikWeight;
-      }
+    {
+      vt.ikJoint = v[k].ikJoint;
+      vt.ikWeight = v[k].ikWeight;
+    }
     return vt;
   }
 
@@ -714,8 +719,8 @@ public class SplineMesh extends Object3D implements Mesh
     double w1 = 0.125*s[j], w2 = 1.0-2.0*w1;
 
     MeshVertex vt = new MeshVertex (new Vec3(w1*v[i].r.x + w2*v[j].r.x + w1*v[k].r.x,
-                            w1*v[i].r.y + w2*v[j].r.y + w1*v[k].r.y,
-                            w1*v[i].r.z + w2*v[j].r.z + w1*v[k].r.z));
+                                             w1*v[i].r.y + w2*v[j].r.y + w1*v[k].r.y,
+                                             w1*v[i].r.z + w2*v[j].r.z + w1*v[k].r.z));
     for (int n = 0; n < newParam.length; n++)
       newParam[n] = w1*oldParam[i][n]+w2*oldParam[j][n]+w1*oldParam[k][n];
     vt.ikJoint = v[j].ikJoint;
@@ -742,20 +747,20 @@ public class SplineMesh extends Object3D implements Mesh
     if (cachedMesh != null)
       cached = cachedMesh.get();
     if (cached != null)
-      {
-        point = cached.vert;
-        udim = cachedUSize;
-        vdim = cachedVSize;
-      }
+    {
+      point = cached.vert;
+      udim = cachedUSize;
+      vdim = cachedVSize;
+    }
     else
-      {
-        SplineMesh newmesh = subdivideMesh(this, ArtOfIllusion.getPreferences().getInteractiveSurfaceError());
-        cachedUSize = udim = newmesh.usize;
-        cachedVSize = vdim = newmesh.vsize;
-        point = new Vec3 [newmesh.vertex.length];
-        for (i = 0; i < point.length; i++)
-          point[i] = newmesh.vertex[i].r;
-      }
+    {
+      SplineMesh newmesh = subdivideMesh(this, ArtOfIllusion.getPreferences().getInteractiveSurfaceError());
+      cachedUSize = udim = newmesh.usize;
+      cachedVSize = vdim = newmesh.vsize;
+      point = new Vec3 [newmesh.vertex.length];
+      for (i = 0; i < point.length; i++)
+        point[i] = newmesh.vertex[i].r;
+    }
 
     // Determine how many lines there will be.
 
@@ -772,33 +777,33 @@ public class SplineMesh extends Object3D implements Mesh
     k = 0;
     for (i = 0; i < udim-1; i++)
       for (j = 0; j < vdim-1; j++)
-        {
-          from[k] = from[k+1] = i+udim*j;
-          to[k++] = i+1+udim*j;
-          to[k++] = i+udim*(j+1);
-        }
+      {
+        from[k] = from[k+1] = i+udim*j;
+        to[k++] = i+1+udim*j;
+        to[k++] = i+udim*(j+1);
+      }
     for (i = 0; i < udim-1; i++)
-      {
-        from[k] = i+udim*(vdim-1);
-        to[k++] = i+1+udim*(vdim-1);
-      }
+    {
+      from[k] = i+udim*(vdim-1);
+      to[k++] = i+1+udim*(vdim-1);
+    }
     for (i = 0; i < vdim-1; i++)
-      {
-        from[k] = udim-1+udim*i;
-        to[k++] = udim-1+udim*(i+1);
-      }
+    {
+      from[k] = udim-1+udim*i;
+      to[k++] = udim-1+udim*(i+1);
+    }
     if (uclosed)
       for (i = 0; i < vdim; i++)
-        {
-          from[k] = i*udim;
-          to[k++] = i*udim+udim-1;
-        }
+      {
+        from[k] = i*udim;
+        to[k++] = i*udim+udim-1;
+      }
     if (vclosed)
       for (i = 0; i < udim; i++)
-        {
-          from[k] = i;
-          to[k++] = i+udim*(vdim-1);
-        }
+      {
+        from[k] = i;
+        to[k++] = i+udim*(vdim-1);
+      }
     WireframeMesh wire = new WireframeMesh(point, from, to);
     cachedWire = new SoftReference<WireframeMesh>(wire);
     return wire;
@@ -838,70 +843,70 @@ public class SplineMesh extends Object3D implements Mesh
     k = 0;
     for (i = 0; i < udim; i++)
       for (j = 0; j < vdim; j++)
+      {
+        u1 = i-1;
+        if (u1 == -1)
         {
-          u1 = i-1;
-          if (u1 == -1)
-            {
-              if (uclosed)
-                u1 = udim-1;
-              else
-                u1 = 0;
-            }
-          u2 = i+1;
-          if (u2 == udim)
-            {
-              if (uclosed)
-                u2 = 0;
-              else
-                u2 = i;
-            }
-          v1 = j-1;
-          if (v1 == -1)
-            {
-              if (vclosed)
-                v1 = vdim-1;
-              else
-                v1 = 0;
-            }
-          v2 = j+1;
-          if (v2 == vdim)
-            {
-              if (vclosed)
-                v2 = 0;
-              else
-                v2 = j;
-            }
-          if (us[i] < 1.0f && vs[j] < 1.0f) // Creases in both directions.
-            {
-              normal.add(calcNormal(point, i, j, u1, i, v1, j, udim));
-              normal.add(calcNormal(point, i, j, i, u2, v1, j, udim));
-              normal.add(calcNormal(point, i, j, u1, i, j, v2, udim));
-              normal.add(calcNormal(point, i, j, i, u2, j, v2, udim));
-              normIndex[i][j][0] = k++;
-              normIndex[i][j][1] = k++;
-              normIndex[i][j][2] = k++;
-              normIndex[i][j][3] = k++;
-            }
-          else if (us[i] < 1.0f) // Crease in the u direction.
-            {
-              normal.add(calcNormal(point, i, j, u1, i, v1, v2, udim));
-              normal.add(calcNormal(point, i, j, i, u2, v1, v2, udim));
-              normIndex[i][j][0] = normIndex[i][j][2] = k++;
-              normIndex[i][j][1] = normIndex[i][j][3] = k++;
-            }
-          else if ( vs[j] < 1.0f) // Crease in the v direction.
-            {
-              normal.add(calcNormal(point, i, j, u1, u2, v1, j, udim));
-              normal.add(calcNormal(point, i, j, u1, u2, j, v2, udim));
-              normIndex[i][j][0] = normIndex[i][j][1] = k++;
-              normIndex[i][j][2] = normIndex[i][j][3] = k++;
-            }
-          else // Smooth vertex.
-            {
-              normal.add(calcNormal(point, i, j, u1, u2, v1, v2, udim));
-              normIndex[i][j][0] = normIndex[i][j][1] = normIndex[i][j][2] = normIndex[i][j][3] = k++;
-            }
+          if (uclosed)
+            u1 = udim-1;
+          else
+            u1 = 0;
         }
+        u2 = i+1;
+        if (u2 == udim)
+        {
+          if (uclosed)
+            u2 = 0;
+          else
+            u2 = i;
+        }
+        v1 = j-1;
+        if (v1 == -1)
+        {
+          if (vclosed)
+            v1 = vdim-1;
+          else
+            v1 = 0;
+        }
+        v2 = j+1;
+        if (v2 == vdim)
+        {
+          if (vclosed)
+            v2 = 0;
+          else
+            v2 = j;
+        }
+        if (us[i] < 1.0f && vs[j] < 1.0f) // Creases in both directions.
+        {
+          normal.add(calcNormal(point, i, j, u1, i, v1, j, udim));
+          normal.add(calcNormal(point, i, j, i, u2, v1, j, udim));
+          normal.add(calcNormal(point, i, j, u1, i, j, v2, udim));
+          normal.add(calcNormal(point, i, j, i, u2, j, v2, udim));
+          normIndex[i][j][0] = k++;
+          normIndex[i][j][1] = k++;
+          normIndex[i][j][2] = k++;
+          normIndex[i][j][3] = k++;
+        }
+        else if (us[i] < 1.0f) // Crease in the u direction.
+        {
+          normal.add(calcNormal(point, i, j, u1, i, v1, v2, udim));
+          normal.add(calcNormal(point, i, j, i, u2, v1, v2, udim));
+          normIndex[i][j][0] = normIndex[i][j][2] = k++;
+          normIndex[i][j][1] = normIndex[i][j][3] = k++;
+        }
+        else if ( vs[j] < 1.0f) // Crease in the v direction.
+        {
+          normal.add(calcNormal(point, i, j, u1, u2, v1, j, udim));
+          normal.add(calcNormal(point, i, j, u1, u2, j, v2, udim));
+          normIndex[i][j][0] = normIndex[i][j][1] = k++;
+          normIndex[i][j][2] = normIndex[i][j][3] = k++;
+        }
+        else // Smooth vertex.
+        {
+          normal.add(calcNormal(point, i, j, u1, u2, v1, v2, udim));
+          normIndex[i][j][0] = normIndex[i][j][1] = normIndex[i][j][2] = normIndex[i][j][3] = k++;
+        }
+      }
     norm = new Vec3 [normal.size()];
     for (i = 0; i < norm.length; i++)
       norm[i] = normal.get(i);
@@ -923,27 +928,27 @@ public class SplineMesh extends Object3D implements Mesh
     k = 0;
     for (i = 0; i < udim-1; i++)
       for (j = 0; j < vdim-1; j++)
-        {
-          tri[k++] = texMapping.mapTriangle(i+udim*j, i+1+udim*j, i+1+udim*(j+1), normIndex[i][j][3], normIndex[i+1][j][2], normIndex[i+1][j+1][0], point);
-          tri[k++] = texMapping.mapTriangle(i+udim*j, i+1+udim*(j+1), i+udim*(j+1), normIndex[i][j][3], normIndex[i+1][j+1][0], normIndex[i][j+1][1], point);
-        }
+      {
+        tri[k++] = texMapping.mapTriangle(i+udim*j, i+1+udim*j, i+1+udim*(j+1), normIndex[i][j][3], normIndex[i+1][j][2], normIndex[i+1][j+1][0], point);
+        tri[k++] = texMapping.mapTriangle(i+udim*j, i+1+udim*(j+1), i+udim*(j+1), normIndex[i][j][3], normIndex[i+1][j+1][0], normIndex[i][j+1][1], point);
+      }
     if (uclosed)
       for (i = 0; i < vdim-1; i++)
-        {
-          tri[k++] = texMapping.mapTriangle((i+1)*udim-1, i*udim, (i+1)*udim, normIndex[udim-1][i][3], normIndex[0][i][2], normIndex[0][i+1][0], point);
-          tri[k++] = texMapping.mapTriangle((i+1)*udim-1, (i+1)*udim, (i+2)*udim-1, normIndex[udim-1][i][3], normIndex[0][i+1][0], normIndex[udim-1][i+1][1], point);
-        }
+      {
+        tri[k++] = texMapping.mapTriangle((i+1)*udim-1, i*udim, (i+1)*udim, normIndex[udim-1][i][3], normIndex[0][i][2], normIndex[0][i+1][0], point);
+        tri[k++] = texMapping.mapTriangle((i+1)*udim-1, (i+1)*udim, (i+2)*udim-1, normIndex[udim-1][i][3], normIndex[0][i+1][0], normIndex[udim-1][i+1][1], point);
+      }
     if (vclosed)
       for (i = 0; i < udim-1; i++)
-        {
-          tri[k++] = texMapping.mapTriangle(i+udim*(vdim-1), i+1+udim*(vdim-1), i+1, normIndex[i][vdim-1][3], normIndex[i+1][vdim-1][2], normIndex[i+1][0][0], point);
-          tri[k++] = texMapping.mapTriangle(i+udim*(vdim-1), i+1, i, normIndex[i][vdim-1][3], normIndex[i+1][0][0], normIndex[i][0][1], point);
-        }
-    if (uclosed && vclosed)
       {
-        tri[k++] = texMapping.mapTriangle(udim*vdim-1, udim*(vdim-1), 0, normIndex[udim-1][vdim-1][3], normIndex[0][vdim-1][2], normIndex[0][0][0], point);
-        tri[k++] = texMapping.mapTriangle(udim*vdim-1, 0, udim-1, normIndex[udim-1][vdim-1][3], normIndex[0][0][0], normIndex[udim-1][0][1], point);
+        tri[k++] = texMapping.mapTriangle(i+udim*(vdim-1), i+1+udim*(vdim-1), i+1, normIndex[i][vdim-1][3], normIndex[i+1][vdim-1][2], normIndex[i+1][0][0], point);
+        tri[k++] = texMapping.mapTriangle(i+udim*(vdim-1), i+1, i, normIndex[i][vdim-1][3], normIndex[i+1][0][0], normIndex[i][0][1], point);
       }
+    if (uclosed && vclosed)
+    {
+      tri[k++] = texMapping.mapTriangle(udim*vdim-1, udim*(vdim-1), 0, normIndex[udim-1][vdim-1][3], normIndex[0][vdim-1][2], normIndex[0][0][0], point);
+      tri[k++] = texMapping.mapTriangle(udim*vdim-1, 0, udim-1, normIndex[udim-1][vdim-1][3], normIndex[0][0][0], normIndex[udim-1][0][1], point);
+    }
     mesh = new RenderingMesh(point, norm, tri, texMapping, matMapping);
     mesh.setParameters(newmesh.paramValue);
     if (interactive)
@@ -963,30 +968,30 @@ public class SplineMesh extends Object3D implements Mesh
     vec1 = point[u1+udim*v].minus(point[u2+udim*v]);
     len1 = vec1.length2();
     if (len1 == 0.0)
-      {
-        vec1 = point[u1+udim*v1].minus(point[u2+udim*v1]);
-        len1 = vec1.length2();
-      }
+    {
+      vec1 = point[u1+udim*v1].minus(point[u2+udim*v1]);
+      len1 = vec1.length2();
+    }
     if (len1 == 0.0)
-      {
-        vec1 = point[u1+udim*v2].minus(point[u2+udim*v2]);
-        len1 = vec1.length2();
-      }
+    {
+      vec1 = point[u1+udim*v2].minus(point[u2+udim*v2]);
+      len1 = vec1.length2();
+    }
 
     // Calculate the tangent vector along the v direction.
 
     vec2 = point[u+udim*v1].minus(point[u+udim*v2]);
     len2 = vec2.length2();
     if (len2 == 0.0)
-      {
-        vec2 = point[u1+udim*v1].minus(point[u1+udim*v2]);
-        len2 = vec2.length2();
-      }
+    {
+      vec2 = point[u1+udim*v1].minus(point[u1+udim*v2]);
+      len2 = vec2.length2();
+    }
     if (len2 == 0.0)
-      {
-        vec2 = point[u2+udim*v1].minus(point[u2+udim*v2]);
-        len2 = vec2.length2();
-      }
+    {
+      vec2 = point[u2+udim*v1].minus(point[u2+udim*v2]);
+      len2 = vec2.length2();
+    }
 
     // Take the cross product to get the normal.
 
@@ -1038,44 +1043,44 @@ public class SplineMesh extends Object3D implements Mesh
     k = 0;
     for (i = 0; i < udim-1; i++)
       for (j = 0; j < vdim-1; j++)
-        {
-          faces[k++] = new int [] {i+udim*j, i+1+udim*j, i+1+udim*(j+1)};
-          faces[k++] = new int [] {i+udim*j, i+1+udim*(j+1), i+udim*(j+1)};
-        }
+      {
+        faces[k++] = new int [] {i+udim*j, i+1+udim*j, i+1+udim*(j+1)};
+        faces[k++] = new int [] {i+udim*j, i+1+udim*(j+1), i+udim*(j+1)};
+      }
     if (uclosed)
       for (i = 0; i < vdim-1; i++)
-        {
-          faces[k++] = new int [] {(i+1)*udim-1, i*udim, (i+1)*udim};
-          faces[k++] = new int [] {(i+1)*udim-1, (i+1)*udim, (i+2)*udim-1};
-        }
+      {
+        faces[k++] = new int [] {(i+1)*udim-1, i*udim, (i+1)*udim};
+        faces[k++] = new int [] {(i+1)*udim-1, (i+1)*udim, (i+2)*udim-1};
+      }
     if (vclosed)
       for (i = 0; i < udim-1; i++)
-        {
-          faces[k++] = new int [] {i+udim*(vdim-1), i+1+udim*(vdim-1), i+1};
-          faces[k++] = new int [] {i+udim*(vdim-1), i+1, i};
-        }
-    if (uclosed && vclosed)
       {
-        faces[k++] = new int [] {udim*vdim-1, udim*(vdim-1), 0};
-        faces[k++] = new int [] {udim*vdim-1, 0, udim-1};
+        faces[k++] = new int [] {i+udim*(vdim-1), i+1+udim*(vdim-1), i+1};
+        faces[k++] = new int [] {i+udim*(vdim-1), i+1, i};
       }
+    if (uclosed && vclosed)
+    {
+      faces[k++] = new int [] {udim*vdim-1, udim*(vdim-1), 0};
+      faces[k++] = new int [] {udim*vdim-1, 0, udim-1};
+    }
     trimesh = new TriangleMesh(point, faces);
 
     // Set the smoothness values for the edges of the triangle mesh.
 
     TriangleMesh.Edge ed[] = trimesh.getEdges();
     for (i = 0; i < ed.length; i++)
+    {
+      j = ed[i].v1 / udim;
+      k = ed[i].v2 / udim;
+      if (j == k)
+        ed[i].smoothness = vs[j];
+      else
       {
-        j = ed[i].v1 / udim;
-        k = ed[i].v2 / udim;
-        if (j == k)
-          ed[i].smoothness = vs[j];
-        else
-          {
-            j = ed[i].v1 % udim;
-            ed[i].smoothness = us[j];
-          }
+        j = ed[i].v1 % udim;
+        ed[i].smoothness = us[j];
       }
+    }
 
     // Copy over the texture, texture parameters, and material.
 
@@ -1157,14 +1162,14 @@ public class SplineMesh extends Object3D implements Mesh
       for (int i = 0; i < paramValue.length; i++)
         paramValue[i] = new VertexParameterValue(new double [vertex.length]);
     for (int i = 0; i < vertex.length; i++)
-      {
-        vertex[i] = new MeshVertex(new Vec3(in));
-        vertex[i].ikJoint = in.readInt();
-        vertex[i].ikWeight = in.readDouble();
-        if (version == 0)
-          for (int j = 0; j < paramValue.length; j++)
-            ((VertexParameterValue) paramValue[j]).getValue()[i] = in.readDouble();
-      }
+    {
+      vertex[i] = new MeshVertex(new Vec3(in));
+      vertex[i].ikJoint = in.readInt();
+      vertex[i].ikWeight = in.readDouble();
+      if (version == 0)
+        for (int j = 0; j < paramValue.length; j++)
+          ((VertexParameterValue) paramValue[j]).getValue()[i] = in.readDouble();
+    }
     for (int i = 0; i < usize; i++)
       usmoothness[i] = in.readFloat();
     for (int i = 0; i < vsize; i++)
@@ -1184,11 +1189,11 @@ public class SplineMesh extends Object3D implements Mesh
     out.writeInt(usize);
     out.writeInt(vsize);
     for (int i = 0; i < vertex.length; i++)
-      {
-        vertex[i].r.writeToFile(out);
-        out.writeInt(vertex[i].ikJoint);
-        out.writeDouble(vertex[i].ikWeight);
-      }
+    {
+      vertex[i].r.writeToFile(out);
+      out.writeInt(vertex[i].ikJoint);
+      out.writeDouble(vertex[i].ikWeight);
+    }
     for (int i = 0; i < usize; i++)
       out.writeFloat(usmoothness[i]);
     for (int i = 0; i < vsize; i++)
@@ -1230,17 +1235,17 @@ public class SplineMesh extends Object3D implements Mesh
     int i, j;
 
     for (i = 0; i < usize/2; i++)
+    {
+      for (j = 0; j < vsize; j++)
       {
-        for (j = 0; j < vsize; j++)
-          {
-            swapVert = vertex[i+usize*j];
-            vertex[i+usize*j] = vertex[usize-1-i+usize*j];
-            vertex[usize-1-i+usize*j] = swapVert;
-          }
-        swapSmooth = usmoothness[i];
-        usmoothness[i] = usmoothness[usize-1-i];
-        usmoothness[usize-1-i] = swapSmooth;
+        swapVert = vertex[i+usize*j];
+        vertex[i+usize*j] = vertex[usize-1-i+usize*j];
+        vertex[usize-1-i+usize*j] = swapVert;
       }
+      swapSmooth = usmoothness[i];
+      usmoothness[i] = usmoothness[usize-1-i];
+      usmoothness[usize-1-i] = swapSmooth;
+    }
     cachedMesh = null;
   }
 
@@ -1257,41 +1262,41 @@ public class SplineMesh extends Object3D implements Mesh
       point[i] = vertex[i].r;
     for (i = 0; i < usize; i++)
       for (j = 0; j < vsize; j++)
+      {
+        u1 = i-1;
+        if (u1 == -1)
         {
-          u1 = i-1;
-          if (u1 == -1)
-            {
-              if (uclosed)
-                u1 = usize-1;
-              else
-                u1 = 0;
-            }
-          u2 = i+1;
-          if (u2 == usize)
-            {
-              if (uclosed)
-                u2 = 0;
-              else
-                u2 = i;
-            }
-          v1 = j-1;
-          if (v1 == -1)
-            {
-              if (vclosed)
-                v1 = vsize-1;
-              else
-                v1 = 0;
-            }
-          v2 = j+1;
-          if (v2 == vsize)
-            {
-              if (vclosed)
-                v2 = 0;
-              else
-                v2 = j;
-            }
-          norm[i+usize*j] = calcNormal(point, i, j, u1, u2, v1, v2, usize);
+          if (uclosed)
+            u1 = usize-1;
+          else
+            u1 = 0;
         }
+        u2 = i+1;
+        if (u2 == usize)
+        {
+          if (uclosed)
+            u2 = 0;
+          else
+            u2 = i;
+        }
+        v1 = j-1;
+        if (v1 == -1)
+        {
+          if (vclosed)
+            v1 = vsize-1;
+          else
+            v1 = 0;
+        }
+        v2 = j+1;
+        if (v2 == vsize)
+        {
+          if (vclosed)
+            v2 = 0;
+          else
+            v2 = j;
+        }
+        norm[i+usize*j] = calcNormal(point, i, j, u1, u2, v1, v2, usize);
+      }
     return norm;
   }
 
@@ -1544,19 +1549,19 @@ public class SplineMesh extends Object3D implements Mesh
       // Make sure all smoothness values are within legal bounds.
 
       for (int i = 0; i < avg.usmoothness.length; i++)
-        {
-          if (avg.usmoothness[i] < 0.0)
-            avg.usmoothness[i] = 0.0f;
-          if (avg.usmoothness[i] > 1.0)
-            avg.usmoothness[i] = 1.0f;
-        }
+      {
+        if (avg.usmoothness[i] < 0.0)
+          avg.usmoothness[i] = 0.0f;
+        if (avg.usmoothness[i] > 1.0)
+          avg.usmoothness[i] = 1.0f;
+      }
       for (int i = 0; i < avg.vsmoothness.length; i++)
-        {
-          if (avg.vsmoothness[i] < 0.0)
-            avg.vsmoothness[i] = 0.0f;
-          if (avg.vsmoothness[i] > 1.0)
-            avg.vsmoothness[i] = 1.0f;
-        }
+      {
+        if (avg.vsmoothness[i] < 0.0)
+          avg.vsmoothness[i] = 0.0f;
+        if (avg.vsmoothness[i] > 1.0)
+          avg.vsmoothness[i] = 1.0f;
+      }
     }
 
     /** Determine whether this keyframe is identical to another one. */
@@ -1592,27 +1597,27 @@ public class SplineMesh extends Object3D implements Mesh
       ParameterValue newval[] = new ParameterValue [newParams.length];
 
       for (int i = 0; i < newParams.length; i++)
+      {
+        int j;
+        for (j = 0; j < oldParams.length && !oldParams[j].equals(newParams[i]); j++);
+        if (j == oldParams.length)
         {
-          int j;
-          for (j = 0; j < oldParams.length && !oldParams[j].equals(newParams[i]); j++);
-          if (j == oldParams.length)
-            {
-              // This is a new parameter, so copy the value from the mesh.
+          // This is a new parameter, so copy the value from the mesh.
 
-              for (int k = 0; k < mesh.texParam.length; k++)
-                if (mesh.texParam[k].equals(newParams[i]))
-                {
-                  newval[i] = mesh.paramValue[k].duplicate();
-                  break;
-                }
-            }
-          else
+          for (int k = 0; k < mesh.texParam.length; k++)
+            if (mesh.texParam[k].equals(newParams[i]))
             {
-              // This is an old parameter, so copy the values over.
-
-              newval[i] = paramValue[j];
+              newval[i] = mesh.paramValue[k].duplicate();
+              break;
             }
         }
+        else
+        {
+          // This is an old parameter, so copy the values over.
+
+          newval[i] = paramValue[j];
+        }
+      }
       paramValue = newval;
     }
 
@@ -1665,13 +1670,13 @@ public class SplineMesh extends Object3D implements Mesh
         out.writeFloat(vsmoothness[i]);
       Joint joint[] = skeleton.getJoints();
       for (int i = 0; i < joint.length; i++)
-        {
-          joint[i].coords.writeToFile(out);
-          out.writeDouble(joint[i].angle1.pos);
-          out.writeDouble(joint[i].angle2.pos);
-          out.writeDouble(joint[i].twist.pos);
-          out.writeDouble(joint[i].length.pos);
-        }
+      {
+        joint[i].coords.writeToFile(out);
+        out.writeDouble(joint[i].angle1.pos);
+        out.writeDouble(joint[i].angle2.pos);
+        out.writeDouble(joint[i].twist.pos);
+        out.writeDouble(joint[i].length.pos);
+      }
     }
 
     /** Reconstructs the keyframe from its serialized representation. */
@@ -1690,12 +1695,12 @@ public class SplineMesh extends Object3D implements Mesh
         for (int i = 0; i < paramValue.length; i++)
           paramValue[i] = new VertexParameterValue(new double [numVert]);
       for (int i = 0; i < numVert; i++)
-        {
-          vertPos[i] = new Vec3(in);
-          if (version == 0)
-            for (int j = 0; j < paramValue.length; j++)
-              ((VertexParameterValue) paramValue[j]).getValue()[i] = in.readDouble();
-        }
+      {
+        vertPos[i] = new Vec3(in);
+        if (version == 0)
+          for (int j = 0; j < paramValue.length; j++)
+            ((VertexParameterValue) paramValue[j]).getValue()[i] = in.readDouble();
+      }
       if (version > 0)
         for (int i = 0; i < paramValue.length; i++)
           paramValue[i] = readParameterValue(in);
@@ -1708,13 +1713,13 @@ public class SplineMesh extends Object3D implements Mesh
       skeleton = mesh.getSkeleton().duplicate();
       Joint joint[] = skeleton.getJoints();
       for (int i = 0; i < joint.length; i++)
-        {
-          joint[i].coords = new CoordinateSystem(in);
-          joint[i].angle1.pos = in.readDouble();
-          joint[i].angle2.pos = in.readDouble();
-          joint[i].twist.pos = in.readDouble();
-          joint[i].length.pos = in.readDouble();
-        }
+      {
+        joint[i].coords = new CoordinateSystem(in);
+        joint[i].angle1.pos = in.readDouble();
+        joint[i].angle2.pos = in.readDouble();
+        joint[i].twist.pos = in.readDouble();
+        joint[i].length.pos = in.readDouble();
+      }
     }
   }
 }

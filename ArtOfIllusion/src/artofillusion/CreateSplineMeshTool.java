@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,10 +28,13 @@ public class CreateSplineMeshTool extends EditingTool
   static final int CYLINDER = 1;
   static final int TORUS = 2;
 
-  boolean shiftDown;
-  Point clickPoint;
-  int usize = 5, vsize = 5, shape = FLAT, smoothing = Mesh.APPROXIMATING;
-  double thickness = 0.5;
+  private boolean shiftDown, equilateral, centered;
+  private Point clickPoint;
+  private ObjectInfo info;
+  private SplineMesh mesh;
+  private Vec3 ydir, zdir;
+  private int usize = 5, vsize = 5, shape = FLAT, smoothing = Mesh.APPROXIMATING;
+  private double thickness = 0.5;
 
   public CreateSplineMeshTool(LayoutWindow fr)
   {
@@ -78,22 +82,58 @@ public class CreateSplineMeshTool extends EditingTool
   @Override
   public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
   {
-    clickPoint = e.getPoint();
-    shiftDown = e.isShiftDown();
-    ((SceneViewer) view).beginDraggingBox(clickPoint, shiftDown);
+    clickPoint  = e.getPoint();
+    equilateral = e.isShiftDown();
+    centered    = e.isControlDown();
+    ydir = Vec3.vy();
+    zdir = Vec3.vz();
   }
 
   @Override
-  public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
+  public void mouseDragged(WidgetMouseEvent e, ViewerCanvas view)
   {
-    Scene theScene = ((LayoutWindow) theWindow).getScene();
     Camera cam = view.getCamera();
     Point dragPoint = e.getPoint();
-    Vec3 v1, v2, v3, orig, xdir, ydir, zdir;
-    double xsize, ysize;
-    int i;
+    ydir.set(cam.getCameraCoordinates().getUpDirection());
+    zdir.set(cam.getCameraCoordinates().getZDirection());
+    zdir.scale(-1.0);
 
-    if (shiftDown)
+    if (info == null)
+    {
+      // Create the initial mesh, if the mouse has moved enough. The limit is there to reduce 
+      // the probability of accidentally creating zero size objects.
+
+      if (Math.abs(dragPoint.x-clickPoint.x) + Math.abs(dragPoint.y-clickPoint.y) > 3)
+      {
+        Scene theScene = ((LayoutWindow) theWindow).getScene();
+        Vec3 v[][] = getMeshPoints(1.0, 1.0);
+        float usmoothness[] = new float [usize], vsmoothness[] = new float [vsize];
+        int i;
+        for (i = 0; i < usize; i++)
+          usmoothness[i] = 1.0f;
+        for (i = 0; i < vsize; i++)
+          vsmoothness[i] = 1.0f;
+        mesh = new SplineMesh(v, usmoothness, vsmoothness, smoothing, shape != FLAT, shape == TORUS);
+        info = new ObjectInfo(mesh, new CoordinateSystem(), "Spline Mesh "+(counter++));
+        info.addTrack(new PositionTrack(info), 0);
+        info.addTrack(new RotationTrack(info), 1);
+        UndoRecord undo = new UndoRecord(theWindow, false);
+        int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
+        ((LayoutWindow) theWindow).addObject(info, undo);
+        undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
+        theWindow.setUndoRecord(undo);
+        ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
+      }
+      else
+        return;
+    }
+
+    // Determine the size and position for the sphere.
+
+    Vec3 v1, v2, v3, orig;
+    double xsize, ysize, zsize;
+
+    if (equilateral)
     {
       if (Math.abs(dragPoint.x-clickPoint.x) > Math.abs(dragPoint.y-clickPoint.y))
       {
@@ -110,48 +150,40 @@ public class CreateSplineMeshTool extends EditingTool
           dragPoint.x = clickPoint.x + Math.abs(dragPoint.y-clickPoint.y);
       }
     }
-    if (dragPoint.x == clickPoint.x || dragPoint.y == clickPoint.y)
-    {
-      ((SceneViewer) view).repaint();
-      return;
-    }
     v1 = cam.convertScreenToWorld(clickPoint, view.getDistToPlane());
     v2 = cam.convertScreenToWorld(new Point(dragPoint.x, clickPoint.y), view.getDistToPlane());
     v3 = cam.convertScreenToWorld(dragPoint, view.getDistToPlane());
-    orig = v1.plus(v3).times(0.5);
-    if (dragPoint.x < clickPoint.x)
-      xdir = v1.minus(v2);
+
+    if (centered)
+    {
+      orig  = v1;
+      xsize = v2.minus(v1).length()*2.0; 
+      ysize = v2.minus(v3).length()*2.0;
+    }
     else
-      xdir = v2.minus(v1);
-    if (dragPoint.y < clickPoint.y)
-      ydir = v3.minus(v2);
-    else
-      ydir = v2.minus(v3);
-    xsize = xdir.length();
-    ysize = ydir.length();
-    xdir = xdir.times(1.0/xsize);
-    ydir = ydir.times(1.0/ysize);
-    zdir = xdir.cross(ydir);
-    Vec3 v[][] = getMeshPoints(xsize, ysize);
-    float usmoothness[] = new float [usize], vsmoothness[] = new float [vsize];
-    for (i = 0; i < usize; i++)
-      usmoothness[i] = 1.0f;
-    for (i = 0; i < vsize; i++)
-      vsmoothness[i] = 1.0f;
-    SplineMesh obj = new SplineMesh(v, usmoothness, vsmoothness, smoothing, shape != FLAT, shape == TORUS);
-    ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(orig, zdir, ydir), "Spline Mesh "+(counter++));
-    info.addTrack(new PositionTrack(info), 0);
-    info.addTrack(new RotationTrack(info), 1);
-    UndoRecord undo = new UndoRecord(theWindow, false);
-    int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
-    ((LayoutWindow) theWindow).addObject(info, undo);
-    undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
-    theWindow.setUndoRecord(undo);
-    ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
+    {
+      orig  = v1.plus(v3).times(0.5);
+      xsize = v2.minus(v1).length(); 
+      ysize = v2.minus(v3).length();
+    }
+    mesh.setVertexPositions(getMeshPoints(xsize, ysize));
+
+    info.getCoords().setOrigin(orig);
+    info.getCoords().setOrientation(zdir, ydir);
+    info.clearCachedMeshes();
+    theWindow.setModified();
     theWindow.updateImage();
   }
 
-  private Vec3 [][] getMeshPoints(double xsize, double ysize)
+  @Override
+  public void mouseReleased(WidgetMouseEvent e, ViewerCanvas view)
+  {
+    mesh = null;
+    info = null;
+    System.gc();
+  }
+
+  private Vec3[][] getMeshPoints(double xsize, double ysize)
   {
     Vec3 v[][] = new Vec3 [usize][vsize];
     int i, j;

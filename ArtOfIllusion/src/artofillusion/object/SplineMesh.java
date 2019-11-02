@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -223,10 +224,23 @@ public class SplineMesh extends Object3D implements Mesh
   /** Set the positions for all the vertices of the mesh. */
 
   @Override
-  public void setVertexPositions(Vec3 v[])
+  public void setVertexPositions(Vec3 positions[])
   {
-    for (int i = 0; i < v.length; i++)
-      vertex[i].r = v[i];
+    for (int i = 0; i < positions.length; i++)
+      vertex[i].r = positions[i];
+    cachedMesh = null;
+    cachedWire = null;
+    bounds = null;
+  }
+
+  /** Set the positions for all the vertices of the mesh from a two dimensional table.
+      The table dimensions sahould match the mesh u-v-dimensions.  */
+
+  public void setVertexPositions(Vec3 positions[][])
+  {
+    for (int u = 0; u < positions.length; u++)
+      for (int v = 0; v < positions[0].length; v++)
+        vertex[u+usize*v].r = positions[u][v];
     cachedMesh = null;
     cachedWire = null;
     bounds = null;

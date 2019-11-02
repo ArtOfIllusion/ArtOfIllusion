@@ -229,20 +229,8 @@ public class CreateSplineMeshTool extends EditingTool
   @Override
   public void iconDoubleClicked()
   {
-    final ValueSlider thicknessSlider = new ValueSlider(0.0, 1.0, 100, thickness);
     int i, minu, minv;
 
-    thicknessSlider.setEnabled(shape == TORUS);
-    final ValueField usizeField = new ValueField((double) usizefor[shape], ValueField.POSITIVE+ValueField.INTEGER);
-    final ValueField vsizeField = new ValueField((double) vsizefor[shape], ValueField.POSITIVE+ValueField.INTEGER);
-    BComboBox smoothingChoice = new BComboBox(new String [] {
-      Translate.text("Interpolating"),
-      Translate.text("Approximating")
-    });
-    if (smoothing == Mesh.INTERPOLATING)
-      smoothingChoice.setSelectedIndex(0);
-    else
-      smoothingChoice.setSelectedIndex(1);
     final BComboBox shapeChoice = new BComboBox(new String [] {
       Translate.text("Flat"),
       Translate.text("Cylinder"),
@@ -254,6 +242,19 @@ public class CreateSplineMeshTool extends EditingTool
       shapeChoice.setSelectedIndex(1);
     else
       shapeChoice.setSelectedIndex(2);
+    final ValueField usizeField = new ValueField((double) usizefor[shape], ValueField.POSITIVE+ValueField.INTEGER);
+    final ValueField vsizeField = new ValueField((double) vsizefor[shape], ValueField.POSITIVE+ValueField.INTEGER);
+    BComboBox smoothingChoice = new BComboBox(new String [] {
+      Translate.text("Interpolating"),
+      Translate.text("Approximating")
+    });
+    if (smoothing == Mesh.INTERPOLATING)
+      smoothingChoice.setSelectedIndex(0);
+    else
+      smoothingChoice.setSelectedIndex(1);
+    final ValueSlider thicknessSlider = new ValueSlider(0.0, 1.0, 100, thickness);
+    thicknessSlider.setEnabled(shape == TORUS);
+
     shapeChoice.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
@@ -268,13 +269,13 @@ public class CreateSplineMeshTool extends EditingTool
         usizefor[shapeChoice.getSelectedIndex()] = (int)usizeField.getValue();
       }
     });
-
     vsizeField.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
         vsizefor[shapeChoice.getSelectedIndex()] = (int)vsizeField.getValue();
       }
     });
+
     ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectMeshSizeShape"),
                            new Widget [] {shapeChoice, 
                                           usizeField, 
@@ -288,6 +289,7 @@ public class CreateSplineMeshTool extends EditingTool
                                           Translate.text("Thickness")});
     if (!dlg.clickedOk())
       return;
+
     minu = shapeChoice.getSelectedIndex() == 0 ? 2 : 3;
     minv = shapeChoice.getSelectedIndex() == 2 ? 3 : 2;
     if (usizeField.getValue() < minu)

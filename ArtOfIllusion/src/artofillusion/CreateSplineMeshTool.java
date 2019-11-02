@@ -34,6 +34,8 @@ public class CreateSplineMeshTool extends EditingTool
   private SplineMesh mesh;
   private Vec3 ydir, zdir;
   private int usize = 5, vsize = 5, shape = FLAT, smoothing = Mesh.APPROXIMATING;
+  private int[] usizefor = new int[] {5, 8, 8};
+  private int[] vsizefor = new int[] {5, 5, 8};
   private double thickness = 0.5;
 
   public CreateSplineMeshTool(LayoutWindow fr)
@@ -231,8 +233,8 @@ public class CreateSplineMeshTool extends EditingTool
     int i, minu, minv;
 
     thicknessSlider.setEnabled(shape == TORUS);
-    ValueField usizeField = new ValueField((double) usize, ValueField.POSITIVE+ValueField.INTEGER);
-    ValueField vsizeField = new ValueField((double) vsize, ValueField.POSITIVE+ValueField.INTEGER);
+    final ValueField usizeField = new ValueField((double) usizefor[shape], ValueField.POSITIVE+ValueField.INTEGER);
+    final ValueField vsizeField = new ValueField((double) vsizefor[shape], ValueField.POSITIVE+ValueField.INTEGER);
     BComboBox smoothingChoice = new BComboBox(new String [] {
       Translate.text("Interpolating"),
       Translate.text("Approximating")
@@ -256,17 +258,32 @@ public class CreateSplineMeshTool extends EditingTool
       void processEvent()
       {
         thicknessSlider.setEnabled(shapeChoice.getSelectedIndex() == 2);
+        usizeField.setValue(usizefor[shapeChoice.getSelectedIndex()]);
+        vsizeField.setValue(vsizefor[shapeChoice.getSelectedIndex()]);
+      }
+    });
+    usizeField.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        usizefor[shapeChoice.getSelectedIndex()] = (int)usizeField.getValue();
+      }
+    });
+
+    vsizeField.addEventLink(ValueChangedEvent.class, new Object() {
+      void processEvent()
+      {
+        vsizefor[shapeChoice.getSelectedIndex()] = (int)vsizeField.getValue();
       }
     });
     ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("selectMeshSizeShape"),
-                           new Widget [] {usizeField, 
+                           new Widget [] {shapeChoice, 
+                                          usizeField, 
                                           vsizeField, 
-                                          shapeChoice, 
                                           smoothingChoice, 
                                           thicknessSlider},
-                           new String [] {Translate.text("uSize"), 
+                           new String [] {Translate.text("Shape"), 
+                                          Translate.text("uSize"), 
                                           Translate.text("vSize"), 
-                                          Translate.text("Shape"), 
                                           Translate.text("Smoothing Method"), 
                                           Translate.text("Thickness")});
     if (!dlg.clickedOk())

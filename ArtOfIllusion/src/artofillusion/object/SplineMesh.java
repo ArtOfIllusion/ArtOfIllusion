@@ -136,12 +136,12 @@ public class SplineMesh extends Object3D implements Mesh
     minz = maxz = vert[0].z;
     for (i = 1; i < vert.length; i++)
     {
-      if (vert[i].x < minx) minx = vert[i].x;
-      if (vert[i].x > maxx) maxx = vert[i].x;
-      if (vert[i].y < miny) miny = vert[i].y;
-      if (vert[i].y > maxy) maxy = vert[i].y;
-      if (vert[i].z < minz) minz = vert[i].z;
-      if (vert[i].z > maxz) maxz = vert[i].z;
+      minx = Math.min(minx, vert[i].x);
+      maxx = Math.max(maxx, vert[i].x);
+      miny = Math.min(miny, vert[i].y);
+      maxy = Math.max(maxy, vert[i].y);
+      minz = Math.min(minz, vert[i].z);
+      maxz = Math.max(maxz, vert[i].z);
     }
     bounds = new BoundingBox(minx, maxx, miny, maxy, minz, maxz);
   }

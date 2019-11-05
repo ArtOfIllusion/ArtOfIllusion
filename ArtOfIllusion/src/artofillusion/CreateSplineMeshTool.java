@@ -310,12 +310,17 @@ public class CreateSplineMeshTool extends EditingTool
     else
       smoothing = Mesh.APPROXIMATING;
     i = shapeChoice.getSelectedIndex();
-    if (i == 0)
-      shape = FLAT;
-    else if (i == 1)
-      shape = CYLINDER;
-    else
-      shape = TORUS;
+    switch (i)
+    {
+      case 2:
+        shape = TORUS;
+        break;
+      case 1:
+        shape = CYLINDER;
+        break;
+      default:
+        shape = FLAT; // The most simple case is the default
+    }
     thickness = thicknessSlider.getValue();
     setHelpText();
   }

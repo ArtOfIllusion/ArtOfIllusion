@@ -974,9 +974,9 @@ public class GLCanvasDrawer implements CanvasDrawer
       if (view.isPerspective())
         minDepth = view.getCamera().getDistToScreen()/20.0;
       else
-        minDepth = Math.min(-0.01, depthRange[0]);
+        minDepth = Math.min(0.0, depthRange[0]);
+      maxDepth = Math.max(minDepth, depthRange[1])+0.01;
       minDepth -= 0.01;
-      maxDepth = depthRange[1]+0.01;
       if (view.getTemplateShown())
         drawImage(template, 0, 0);
       gl.glClear(GL.GL_DEPTH_BUFFER_BIT);

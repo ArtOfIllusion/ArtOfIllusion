@@ -2,9 +2,6 @@
 *.class
 *.jar
 
-#Javadoc output
-**/docs/
-
 #Windows and Mac image thumbnail stores and directory caches
 Thumbs.db
 **/.xvpics/

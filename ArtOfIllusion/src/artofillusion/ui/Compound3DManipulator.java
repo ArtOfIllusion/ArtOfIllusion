@@ -398,7 +398,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     //when in NPQ mode, the manipulator must not change position during dragging
     boolean freezeManipulator = ( dragging && (dragHandleType == ROTATE || dragHandleType == SCALE));
     if (!freezeManipulator)
-        center = view.getCamera().getViewToWorld().times(selectionBounds.getCenter());
+      center = view.getCamera().getViewToWorld().times(selectionBounds.getCenter());
 
     //now compute axis extremities and widget positions
     findHandleLocations(center, view);
@@ -424,19 +424,19 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     //draw rotation feedback if appropriate
     if (dragging && dragHandleType == ROTATE)
     {
-        Vec3[] pt = currentRotationHandle.getRotationFeedback(rotAngle);
-        Vec2 pt2d;
-        int[] x = new int[pt.length];
-        int[] y = new int[pt.length];
-        for (int j = 0; j < pt.length; j++)
-        {
-            pt2d = worldToScreen.timesXY(center.plus(pt[j].times(len)));
-            x[j] = (int) pt2d.x;
-            y[j] = (int) pt2d.y;
-        }
-        Polygon p = new Polygon(x, y, x.length);
-        view.drawShape(p, Color.darkGray);
-        view.fillShape( p, Color.gray);
+      Vec3[] pt = currentRotationHandle.getRotationFeedback(rotAngle);
+      Vec2 pt2d;
+      int[] x = new int[pt.length];
+      int[] y = new int[pt.length];
+      for (int j = 0; j < pt.length; j++)
+      {
+        pt2d = worldToScreen.timesXY(center.plus(pt[j].times(len)));
+        x[j] = (int) pt2d.x;
+        y[j] = (int) pt2d.y;
+      }
+      Polygon p = new Polygon(x, y, x.length);
+      view.drawShape(p, Color.darkGray);
+      view.fillShape( p, Color.gray);
     }
 
     // Draw the axes.
@@ -471,39 +471,40 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
     for (int i = 0; i < 2; i++)
     {
-        view.drawImage(handles[X_MOVE_INDEX +i], boxes[X_MOVE_INDEX +i].x, boxes[X_MOVE_INDEX +i].y);
+      view.drawImage(handles[X_MOVE_INDEX +i], boxes[X_MOVE_INDEX +i].x, boxes[X_MOVE_INDEX +i].y);
     }
     for (int i = 0; i < 2; i++)
     {
-        view.drawImage(handles[Y_MOVE_INDEX +i], boxes[Y_MOVE_INDEX +i].x, boxes[Y_MOVE_INDEX +i].y);
+      view.drawImage(handles[Y_MOVE_INDEX +i], boxes[Y_MOVE_INDEX +i].x, boxes[Y_MOVE_INDEX +i].y);
     }
     if (viewMode != UV_MODE)
         for (int i = 0; i < 2; i++)
     {
-        view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
+      view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
     }
     else
     {
-        int udeltax =  boxes[X_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
-        int udeltay =  boxes[X_SCALE_INDEX].y + HANDLE_SIZE/2 - centerPoint.y;
-        int vdeltax =  boxes[Y_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
-        int vdeltay =  boxes[Y_SCALE_INDEX].y + HANDLE_SIZE/2 - centerPoint.y;
-        extraUVBox.x = udeltax + vdeltax + centerPoint.x - HANDLE_SIZE/2;
-        extraUVBox.y = udeltay + vdeltay + centerPoint.y - HANDLE_SIZE/2;
-        Vec3 handlePos = center.plus(xaxis.times(len + handleSize*2.0)).plus(yaxis.times(len + handleSize*2.0));
-        Vec2 screenHandle = worldToScreen.timesXY(handlePos);
-        extraUVBox.x = (int) screenHandle.x - HANDLE_SIZE/2;
-        extraUVBox.y = (int) screenHandle.y - HANDLE_SIZE/2;
-        view.drawImage(handles[X_SCALE_INDEX], extraUVBox.x, extraUVBox.y);
+      int udeltax =  boxes[X_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
+      int udeltay =  boxes[X_SCALE_INDEX].y + HANDLE_SIZE/2 - centerPoint.y;
+      int vdeltax =  boxes[Y_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
+      int vdeltay =  boxes[Y_SCALE_INDEX].y + HANDLE_SIZE/2 - centerPoint.y;
+      extraUVBox.x = udeltax + vdeltax + centerPoint.x - HANDLE_SIZE/2;
+      extraUVBox.y = udeltay + vdeltay + centerPoint.y - HANDLE_SIZE/2;
+      Vec3 handlePos = center.plus(xaxis.times(len + handleSize*2.0)).plus(yaxis.times(len + handleSize*2.0));
+      Vec2 screenHandle = worldToScreen.timesXY(handlePos);
+      extraUVBox.x = (int) screenHandle.x - HANDLE_SIZE/2;
+      extraUVBox.y = (int) screenHandle.y - HANDLE_SIZE/2;
+      view.drawImage(handles[X_SCALE_INDEX], extraUVBox.x, extraUVBox.y);
     }
 
     //draw the rotation handles
     for (int i = 0; i < activeRotationHandleSet.length; ++i)
     {
-        RotationHandle rotHandle = activeRotationHandleSet[i];
-        for (int j = 0; j < rotHandle.points3d.length-1; j++)
-            view.drawLine(new Point((int) rotHandle.points2d[j].x, (int) rotHandle.points2d[j].y),
-                    new Point((int) rotHandle.points2d[j+1].x, (int) rotHandle.points2d[j+1].y), rotHandle.color);
+      RotationHandle rotHandle = activeRotationHandleSet[i];
+      for (int j = 0; j < rotHandle.points3d.length-1; j++)
+        view.drawLine(new Point((int) rotHandle.points2d[j].x,   (int) rotHandle.points2d[j].y),
+                      new Point((int) rotHandle.points2d[j+1].x, (int) rotHandle.points2d[j+1].y), 
+                      rotHandle.color);
     }
   }
 
@@ -522,27 +523,27 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Point p = ev.getPoint();
     for (int i = 6; i >= 0; i--)
     {
-        if (viewMode == UV_MODE && ( i == Z_MOVE_INDEX || i == Z_SCALE_INDEX) )
-            continue;
-        if (boxes[i].contains(p))
+      if (viewMode == UV_MODE && ( i == Z_MOVE_INDEX || i == Z_SCALE_INDEX) )
+        continue;
+      if (boxes[i].contains(p))
+      {
+        if (i == CENTER_INDEX)
         {
-            if (i == CENTER_INDEX)
-            {
-                dragAxis = ALL;
-                dragHandleType = MOVE;
-                dragStartPosition = center;
-            }
-            else
-            {
-                dragHandleType = boxHandleType[i];
-                dragAxis = boxAxis[i];
-            }
-            orAxisLength = axisLength;
-            dragging = true;
-            baseClick = new Point(ev.getPoint());
-            dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
-            return true;
+          dragAxis = ALL;
+          dragHandleType = MOVE;
+          dragStartPosition = center;
         }
+        else
+        {
+          dragHandleType = boxHandleType[i];
+          dragAxis = boxAxis[i];
+        }
+        orAxisLength = axisLength;
+        dragging = true;
+        baseClick = new Point(ev.getPoint());
+        dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
+        return true;
+      }
     }
     //select proper rotation handles
     RotationHandle[] rotHandles = null;
@@ -555,28 +556,28 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     //and detect if click happened in one of them
     for (int i = 0; i < rotHandles.length; i++)
     {
-        if ( (rotSegment = rotHandles[i].findClickTarget(p, view.getCamera())) != -1)
-        {
-            currentRotationHandle = rotHandles[i];
-            dragHandleType = ROTATE;
-            dragAxis = currentRotationHandle.axis;
-            dragging = true;
-            baseClick = new Point(ev.getPoint());
-            dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
-            rotAngle = 0;
-            return true;
-        }
+      if ( (rotSegment = rotHandles[i].findClickTarget(p, view.getCamera())) != -1)
+      {
+        currentRotationHandle = rotHandles[i];
+        dragHandleType = ROTATE;
+        dragAxis = currentRotationHandle.axis;
+        dragging = true;
+        baseClick = new Point(ev.getPoint());
+        dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
+        rotAngle = 0;
+        return true;
+      }
     }
     //check for extra UV handle
     if (viewMode == UV_MODE && extraUVBox.contains(p))
     {
-        dragHandleType = SCALE;
-        dragAxis = UV;
-        orAxisLength = axisLength;
-        dragging = true;
-        baseClick = new Point(ev.getPoint());
-        dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
-        return true;
+      dragHandleType = SCALE;
+      dragAxis = UV;
+      orAxisLength = axisLength;
+      dragging = true;
+      baseClick = new Point(ev.getPoint());
+      dispatchEvent(new HandlePressedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev));
+      return true;
     }
     return false;
   }
@@ -667,9 +668,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     rotAngle = vector.dot(disp)/70;
     if (isShiftDown)
     {
-        rotAngle *= (180.0/(5*Math.PI));
-        rotAngle = Math.round(rotAngle);
-        rotAngle *= (5*Math.PI)/180;
+      rotAngle *= (180.0/(5*Math.PI));
+      rotAngle = Math.round(rotAngle);
+      rotAngle *= (5*Math.PI)/180;
     }
     Mat4 mat = Mat4.axisRotation(currentRotationHandle.rotAxis, rotAngle);
     if (rotateAroundSelectionCenter)
@@ -688,55 +689,55 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Vec2 current = new Vec2(p.x - centerPoint.x, p.y - centerPoint.y);
     double scale = base.dot(current);
     if (base.length() < 1)
-        scale = 1;
+      scale = 1;
     else
-        scale /= (base.length()*base.length());
+      scale /= (base.length()*base.length());
     if (isCtrlDown)
     {
-        axisLength = orAxisLength*scale;
-        scale = 1;
-        view.repaint();
+      axisLength = orAxisLength*scale;
+      scale = 1;
+      view.repaint();
     }
     else
     {
-        scaleX = scaleY = scaleZ = 1;
-        if (dragAxis == X || dragAxis == U || dragAxis == N)
+      scaleX = scaleY = scaleZ = 1;
+      if (dragAxis == X || dragAxis == U || dragAxis == N)
+      {
+        scaleX = scale;
+        if (isShiftDown)
+          scaleY = scaleZ = scaleX;
+      }
+      else if (dragAxis == Y || dragAxis == V || dragAxis == P)
+      {
+        scaleY = scale;
+        if (isShiftDown)
+          scaleX = scaleZ = scaleY;
+      }
+      else if (dragAxis == Z || dragAxis == Q)
+      {
+        scaleZ = scale;
+        if (isShiftDown)
+          scaleY = scaleX = scaleZ;
+      }
+      else if (dragAxis == UV)
+      {
+        scaleX = x2DaxisNormed.dot(current)/x2DaxisNormed.dot(base);
+        scaleY = y2DaxisNormed.dot(current)/y2DaxisNormed.dot(base);
+        if (isShiftDown)
         {
-          scaleX = scale;
-          if (isShiftDown)
-              scaleY = scaleZ = scaleX;
+          if (scaleX < 1 && scaleY < 1)
+            scaleX = scaleZ = scaleY = Math.min(scaleX, scaleY);
+          else
+            scaleX = scaleZ = scaleY = Math.max(scaleX, scaleY);
         }
-        else if (dragAxis == Y || dragAxis == V || dragAxis == P)
-        {
-          scaleY = scale;
-          if (isShiftDown)
-              scaleX = scaleZ = scaleY;
-        }
-        else if (dragAxis == Z || dragAxis == Q)
-        {
-          scaleZ = scale;
-          if (isShiftDown)
-              scaleY = scaleX = scaleZ;
-        }
-        else if (dragAxis == UV)
-        {
-          scaleX = x2DaxisNormed.dot(current)/x2DaxisNormed.dot(base);
-          scaleY = y2DaxisNormed.dot(current)/y2DaxisNormed.dot(base);
-          if (isShiftDown)
-          {
-            if (scaleX < 1 && scaleY < 1)
-              scaleX = scaleZ = scaleY = Math.min(scaleX, scaleY);
-            else
-              scaleX = scaleZ = scaleY = Math.max(scaleX, scaleY);
-          }
-        }
-        CoordinateSystem coords = new CoordinateSystem(center, zaxis, yaxis);
-        Mat4 m = Mat4.scale(scaleX, scaleY, scaleZ).times(coords.toLocal());
-        m = coords.fromLocal().times(m);
-        if (dragAxis == UV)
-          dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, m, scaleX, scaleY));
-        else
-          dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, m, scale, 0.0));
+      }
+      CoordinateSystem coords = new CoordinateSystem(center, zaxis, yaxis);
+      Mat4 m = Mat4.scale(scaleX, scaleY, scaleZ).times(coords.toLocal());
+      m = coords.fromLocal().times(m);
+      if (dragAxis == UV)
+        dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, m, scaleX, scaleY));
+      else
+        dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, m, scale, 0.0));
     }
   }
 
@@ -780,150 +781,150 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   private class RotationHandle
   {
-      private Axis axis;
-      private int segments;
-      protected Color color;
-      protected Vec3[] points3d;
-      protected Vec2[] points2d;
-      protected Vec3 rotAxis, refAxis;
+    private Axis axis;
+    private int segments;
+    protected Color color;
+    protected Vec3[] points3d;
+    protected Vec2[] points2d;
+    protected Vec3 rotAxis, refAxis;
 
-      /**
-       * Creates a Rotation Handle with a given number of segments
-       *
-       * @param segments The number of segmetns that describe the rotation circle
-       * @param axis The rotation axis
-       */
-      public RotationHandle(int segments, Axis axis, Color color )
+    /**
+     * Creates a Rotation Handle with a given number of segments
+     *
+     * @param segments The number of segmetns that describe the rotation circle
+     * @param axis The rotation axis
+     */
+    public RotationHandle(int segments, Axis axis, Color color )
+    {
+      this.segments = segments;
+      this.color = color;
+      this.axis = axis;
+      points3d = new Vec3[segments+1];
+      points2d = new Vec2[segments+1];
+      if (axis == X || axis == U || axis == N)
+        setAxis(xaxis, yaxis);
+      else if (axis == Y || axis == V || axis == P)
+        setAxis(yaxis, zaxis);
+      else
+        setAxis(zaxis, xaxis);
+//      switch (axis)
+//      {
+//        case XAXIS :
+//          setAxis(xaxis, yaxis);
+//          break;
+//        case YAXIS :
+//          setAxis(yaxis, zaxis);
+//          break;
+//        case ZAXIS :
+//          setAxis(zaxis, xaxis);
+//          break;
+//      }
+    }
+
+    /**
+     * sets the axis of the handle
+     * @param rotAxis The rotation axis
+     * @param refAxis The axis where arc drawing begins.
+     * Used when asking for a rotation feedback polygon
+     */
+    public void setAxis(Vec3 rotAxis, Vec3 refAxis)
+    {
+      this.rotAxis = rotAxis;
+      this.refAxis = refAxis;
+      Mat4 m = Mat4.axisRotation(rotAxis, 2*Math.PI/segments);
+      Vec3 v = new Vec3(refAxis);
+      for (int i = 0; i <= segments; i++)
+        points3d[i] = v = m.times(v);
+    }
+
+
+    /**
+     * Given an angle, this method returns a 3D polygon which can be used to
+     * tell the user the rotation amount when drawn on the canvas
+     * @param angle
+     * @return The 2d points deinfing the polygon
+     */
+
+    public Vec3[] getRotationFeedback(double angle)
+    {
+      Vec3[] points = new Vec3[segments+1];
+
+      points[0] = new Vec3();
+      Mat4 m = null;
+      Vec3 v = null;
+      m = Mat4.axisRotation(rotAxis, angle/segments);
+      v = new Vec3(refAxis);
+      points[1] = v;
+      for (int i = 1; i < segments; i++)
+        points[i+1] = v = m.times(v);
+      return points;
+    }
+
+    /**
+     * This method tells if the mouse has been been clicked on a rotation handle
+     *
+     * @param pos The point where the mouse was clicked
+     * @param camera The view camera
+     * @return The number of the segment being clicked on or -1 if the mouse has not been
+     * clicked on the handle
+     */
+    public int findClickTarget(Point pos, Camera camera)
+    {
+      double u, v, w, z;
+      double closestz = Double.MAX_VALUE;
+      int which = -1;
+      for ( int i = 0; i < points2d.length - 1; i++ )
       {
-          this.segments = segments;
-          this.color = color;
-          this.axis = axis;
-          points3d = new Vec3[segments+1];
-          points2d = new Vec2[segments+1];
-          if (axis == X || axis == U || axis == N)
-            setAxis(xaxis, yaxis);
-          else if (axis == Y || axis == V || axis == P)
-            setAxis(yaxis, zaxis);
-          else
-            setAxis(zaxis, xaxis);
-//          switch (axis)
-//          {
-//              case XAXIS :
-//                  setAxis(xaxis, yaxis);
-//                  break;
-//              case YAXIS :
-//                  setAxis(yaxis, zaxis);
-//                  break;
-//              case ZAXIS :
-//                  setAxis(zaxis, xaxis);
-//                  break;
-//          }
-      }
+        Vec2 v1 = points2d[i];
+        Vec2 v2 = points2d[i+1];
+        if ( ( pos.x < v1.x - HANDLE_SIZE / 4 && pos.x < v2.x - HANDLE_SIZE / 4 ) ||
+             ( pos.x > v1.x + HANDLE_SIZE / 4 && pos.x > v2.x + HANDLE_SIZE / 4 ) ||
+             ( pos.y < v1.y - HANDLE_SIZE / 4 && pos.y < v2.y - HANDLE_SIZE / 4 ) ||
+             ( pos.y > v1.y + HANDLE_SIZE / 4 && pos.y > v2.y + HANDLE_SIZE / 4 ) )
+          continue;
 
-      /**
-       * sets the axis of the handle
-       * @param rotAxis The rotation axis
-       * @param refAxis The axis where arc drawing begins.
-       * Used when asking for a rotation feedback polygon
-       */
-      public void setAxis(Vec3 rotAxis, Vec3 refAxis)
-      {
-          this.rotAxis = rotAxis;
-          this.refAxis = refAxis;
-          Mat4 m = Mat4.axisRotation(rotAxis, 2*Math.PI/segments);
-          Vec3 v = new Vec3(refAxis);
-          for (int i = 0; i <= segments; i++)
-               points3d[i] = v = m.times(v);
-      }
+        // Determine the distance of the click point from the line.
 
-
-      /**
-       * Given an angle, this method returns a 3D polygon which can be used to
-       * tell the user the rotation amount when drawn on the canvas
-       * @param angle
-       * @return The 2d points deinfing the polygon
-       */
-
-      public Vec3[] getRotationFeedback(double angle)
-      {
-          Vec3[] points = new Vec3[segments+1];
-
-          points[0] = new Vec3();
-          Mat4 m = null;
-          Vec3 v = null;
-          m = Mat4.axisRotation(rotAxis, angle/segments);
-          v = new Vec3(refAxis);
-          points[1] = v;
-          for (int i = 1; i < segments; i++)
-              points[i+1] = v = m.times(v);
-          return points;
-      }
-
-      /**
-       * This method tells if the mouse has been been clicked on a rotation handle
-       *
-       * @param pos The point where the mouse was clicked
-       * @param camera The view camera
-       * @return The number of the segment being clicked on or -1 if the mouse has not been
-       * clicked on the handle
-       */
-      public int findClickTarget(Point pos, Camera camera)
-      {
-          double u, v, w, z;
-          double closestz = Double.MAX_VALUE;
-          int which = -1;
-          for ( int i = 0; i < points2d.length - 1; i++ )
+        if ( Math.abs( v1.x - v2.x ) > Math.abs( v1.y - v2.y ) )
+        {
+          if ( v2.x > v1.x )
           {
-              Vec2 v1 = points2d[i];
-              Vec2 v2 = points2d[i+1];
-              if ( ( pos.x < v1.x - HANDLE_SIZE / 4 && pos.x < v2.x - HANDLE_SIZE / 4 ) ||
-                      ( pos.x > v1.x + HANDLE_SIZE / 4 && pos.x > v2.x + HANDLE_SIZE / 4 ) ||
-                      ( pos.y < v1.y - HANDLE_SIZE / 4 && pos.y < v2.y - HANDLE_SIZE / 4 ) ||
-                      ( pos.y > v1.y + HANDLE_SIZE / 4 && pos.y > v2.y + HANDLE_SIZE / 4 ) )
-                  continue;
-
-              // Determine the distance of the click point from the line.
-
-              if ( Math.abs( v1.x - v2.x ) > Math.abs( v1.y - v2.y ) )
-              {
-                  if ( v2.x > v1.x )
-                  {
-                      v = ( (double) pos.x - v1.x ) / ( v2.x - v1.x );
-                      u = 1.0 - v;
-                  }
-                  else
-                  {
-                      u = ( (double) pos.x - v2.x ) / ( v1.x - v2.x );
-                      v = 1.0 - u;
-                  }
-                  w = u * v1.y + v * v2.y - pos.y;
-              }
-              else
-              {
-                  if ( v2.y > v1.y )
-                  {
-                      v = ( (double) pos.y - v1.y ) / ( v2.y - v1.y );
-                      u = 1.0 - v;
-                  }
-                  else
-                  {
-                      u = ( (double) pos.y - v2.y ) / ( v1.y - v2.y );
-                      v = 1.0 - u;
-                  }
-                  w = u * v1.x + v * v2.x - pos.x;
-              }
-              if ( Math.abs( w ) > HANDLE_SIZE / 2 )
-                  continue;
-              z = u * camera.getObjectToView().timesZ( points3d[i] ) +
-                      v * camera.getObjectToView().timesZ( points3d[i+1] );
-              if ( z < closestz )
-              {
-                  closestz = z;
-                  which = i;
-              }
+            v = ( (double) pos.x - v1.x ) / ( v2.x - v1.x );
+            u = 1.0 - v;
           }
-          return which;
+          else
+          {
+            u = ( (double) pos.x - v2.x ) / ( v1.x - v2.x );
+            v = 1.0 - u;
+          }
+          w = u * v1.y + v * v2.y - pos.y;
+        }
+        else
+        {
+          if ( v2.y > v1.y )
+          {
+            v = ( (double) pos.y - v1.y ) / ( v2.y - v1.y );
+            u = 1.0 - v;
+          }
+          else
+          {
+            u = ( (double) pos.y - v2.y ) / ( v1.y - v2.y );
+            v = 1.0 - u;
+          }
+          w = u * v1.x + v * v2.x - pos.x;
+        }
+        if ( Math.abs( w ) > HANDLE_SIZE / 2 )
+          continue;
+        z = u * camera.getObjectToView().timesZ( points3d[i] ) +
+            v * camera.getObjectToView().timesZ( points3d[i+1] );
+        if ( z < closestz )
+        {
+          closestz = z;
+          which = i;
+        }
       }
+      return which;
+    }
   }
 
   /**

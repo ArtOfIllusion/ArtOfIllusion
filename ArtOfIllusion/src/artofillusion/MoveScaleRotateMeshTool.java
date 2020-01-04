@@ -184,12 +184,12 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     int selected[] = controller.getSelectionDistance();
     Vec3 v[] = new Vec3 [baseVertPos.length];
     for (int i = 0; i < v.length; i++)
-      {
-        if (selected[i] == 0)
-          v[i] = transform.times(baseVertPos[i]).minus(baseVertPos[i]);
-        else
-          v[i] = new Vec3();
-      }
+    {
+      if (selected[i] == 0)
+        v[i] = transform.times(baseVertPos[i]).minus(baseVertPos[i]);
+      else
+        v[i] = new Vec3();
+    }
     if (theFrame instanceof MeshEditorWindow)
       ((MeshEditorWindow) theFrame).adjustDeltas(v);
     for (int i = 0; i < v.length; i++)

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2009 by Francois Guillet and Peter Eastman
+   Changes copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -40,15 +41,17 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private Point baseClick;
   private Vec3 dragStartPosition;
   private Vec3 xaxis, yaxis, zaxis;
-  private Vec2 x2DaxisNormed, y2DaxisNormed, z2DaxisNormed;
-  private Vec3 npqModeAxes[];
+  private Vec2 x2DaxisNormed, y2DaxisNormed, z2DaxisNormed, screenX, screenY, screenZ;
+  private Mat4 worldToScreen;
+  private double len, handleSize;
+  private Vec3 pqnModeAxes[];
   private int rotSegment;
   private double rotAngle;
   private Point centerPoint;
   private Vec3 center;
   private double axisLength, orAxisLength;
   private RotationHandle[] xyzRotHandles;
-  private RotationHandle[] npqRotHandles;
+  private RotationHandle[] pqnRotHandles;
   private RotationHandle[] uvRotationHandle;
   private RotationHandle[] activeRotationHandleSet;
   private RotationHandle currentRotationHandle;
@@ -57,7 +60,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   public final static ViewMode XYZ_MODE = new ViewMode();
   public final static ViewMode UV_MODE = new ViewMode();
-  public final static ViewMode NPQ_MODE = new ViewMode();
+  public final static ViewMode PQN_MODE = new ViewMode();
+  @Deprecated
+  public final static ViewMode NPQ_MODE = PQN_MODE;
 
   private static final int HANDLE_SIZE = 12;
 
@@ -77,11 +82,11 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   public static final Axis Z = new Axis("z");
   public static final Axis U = new Axis("u");
   public static final Axis V = new Axis("v");
-  public static final Axis W = new Axis("v");
+  public static final Axis W = new Axis("w");
   public static final Axis UV = new Axis("uv");
-  public static final Axis N = new Axis("n");
   public static final Axis P = new Axis("p");
   public static final Axis Q = new Axis("q");
+  public static final Axis N = new Axis("n");
   public static final Axis ALL = new Axis("all");
 
   public static final HandleType MOVE = new HandleType();
@@ -91,7 +96,11 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private static final Image centerhandle;
   private static final Image xyzHandleImages[] = new Image[6];
   private static final Image uvHandleImages[] = new Image[4];
-  private static final Image npqHandleImages[] = new Image[6];
+  private static final Image pqnHandleImages[] = new Image[6];
+  
+  private static Color handleRed   = new Color(255-16,0,0);
+  private static Color handleGreen = new Color(0,255-16,0);
+  private static Color handleBlue  = new Color(15,127-16,255);
 
   static
   {
@@ -106,12 +115,12 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     uvHandleImages[Y_MOVE_INDEX] = loadImage("vhandle.gif");
     uvHandleImages[Y_SCALE_INDEX] = loadImage("uvscale.gif");
     centerhandle = loadImage("centerhandle.gif");
-    npqHandleImages[X_MOVE_INDEX] = loadImage("phandle.gif");
-    npqHandleImages[X_SCALE_INDEX] = loadImage("xscale.gif");
-    npqHandleImages[Y_MOVE_INDEX] = loadImage("qhandle.gif");
-    npqHandleImages[Y_SCALE_INDEX] = loadImage("yscale.gif");
-    npqHandleImages[Z_MOVE_INDEX] = loadImage("nhandle.gif");
-    npqHandleImages[Z_SCALE_INDEX] = loadImage("zscale.gif");
+    pqnHandleImages[X_MOVE_INDEX] = loadImage("phandle.gif");
+    pqnHandleImages[X_SCALE_INDEX] = loadImage("xscale.gif");
+    pqnHandleImages[Y_MOVE_INDEX] = loadImage("qhandle.gif");
+    pqnHandleImages[Y_SCALE_INDEX] = loadImage("yscale.gif");
+    pqnHandleImages[Z_MOVE_INDEX] = loadImage("nhandle.gif");
+    pqnHandleImages[Z_SCALE_INDEX] = loadImage("zscale.gif");
   }
 
   private static Image loadImage(String name)
@@ -143,15 +152,15 @@ public class Compound3DManipulator extends EventSource implements Manipulator
         boxes[i] = new Rectangle(0,0,HANDLE_SIZE, HANDLE_SIZE);
     extraUVBox = new Rectangle(0,0,HANDLE_SIZE, HANDLE_SIZE);
     boxHandleType = new HandleType[] {MOVE, SCALE, MOVE, SCALE, MOVE, SCALE, MOVE};
-    xyzRotHandles[0] = new RotationHandle(64, X, Color.blue );
-    xyzRotHandles[1] = new RotationHandle(64, Y, Color.green );
-    xyzRotHandles[2] = new RotationHandle(64, Z, Color.red);
+    xyzRotHandles[0] = new RotationHandle(64, X, handleBlue);
+    xyzRotHandles[1] = new RotationHandle(64, Y, handleGreen);
+    xyzRotHandles[2] = new RotationHandle(64, Z, handleRed);
     uvRotationHandle = new RotationHandle[1];
     uvRotationHandle[0] = new RotationHandle(64, U, Color.orange);
-    npqRotHandles = new RotationHandle[3];
-    npqRotHandles[0] = new RotationHandle(64, N, Color.blue );
-    npqRotHandles[1] = new RotationHandle(64, P, Color.green );
-    npqRotHandles[2] = new RotationHandle(64, Q, Color.red);
+    pqnRotHandles = new RotationHandle[3];
+    pqnRotHandles[0] = new RotationHandle(64, P, handleBlue);
+    pqnRotHandles[1] = new RotationHandle(64, Q, handleGreen);
+    pqnRotHandles[2] = new RotationHandle(64, N, handleRed);
     axisLength = 80;
     setViewMode(XYZ_MODE);
   }
@@ -175,9 +184,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     if (mode == XYZ_MODE)
       boxAxis = new Axis[] {X, X, Y, Y, Z, Z, ALL};
     else if (mode == UV_MODE)
-      boxAxis = new Axis[] {U, U, V, V, null, null, ALL};
+      boxAxis = new Axis[] {U, U, V, V, null, null, ALL}; // W, W !!!
     else
-      boxAxis = new Axis[] {N, N, P, P, Q, Q, ALL};
+      boxAxis = new Axis[] {P, P, Q, Q, N, N, ALL};
   }
 
   /**
@@ -199,15 +208,26 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   }
 
   /**
-   * Set the axis directions to be used in NPQ mode.
+   * @deprecated
+   * Use setPQNAxes. This method redirects
+   * x -> p, y -> q, z -> n. N stands for 'normal-direction'
    */
-
+  @Deprecated
   public void setNPQAxes(Vec3 nDir, Vec3 pDir, Vec3 qDir)
   {
-    npqModeAxes = new Vec3[] {new Vec3(pDir), new Vec3(qDir), new Vec3(nDir)};
-    npqRotHandles[0].setAxis(nDir, pDir);
-    npqRotHandles[1].setAxis(pDir, qDir);
-    npqRotHandles[2].setAxis(qDir, nDir);
+    setPQNAxes(pDir, qDir, nDir);
+  }
+
+  /**
+   * Set the axis directions to be used in PQN mode.
+   */
+
+  public void setPQNAxes(Vec3 pDir, Vec3 qDir, Vec3 nDir)
+  {
+    pqnModeAxes = new Vec3[] {new Vec3(pDir), new Vec3(qDir), new Vec3(nDir)};
+    pqnRotHandles[0].setAxis(pDir, qDir);
+    pqnRotHandles[1].setAxis(qDir, nDir);
+    pqnRotHandles[2].setAxis(nDir, pDir);
   }
 
   /**
@@ -232,12 +252,12 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       CoordinateSystem coords = view.getCamera().getCameraCoordinates();
       return coords.getUpDirection();
     }
-    if (axis == N)
-      return npqModeAxes[0];
     if (axis == P)
-      return npqModeAxes[1];
+      return pqnModeAxes[0];
     if (axis == Q)
-      return npqModeAxes[2];
+      return pqnModeAxes[1];
+    if (axis == N)
+      return pqnModeAxes[2];
     throw new IllegalArgumentException("Axis "+axis.getName()+" does not have a fixed direction");
   }
 
@@ -263,8 +283,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       rotHandles = xyzRotHandles;
     else if (viewMode == UV_MODE)
       rotHandles = uvRotationHandle;
-    else if (viewMode == NPQ_MODE)
-      rotHandles = npqRotHandles;
+    else if (viewMode == PQN_MODE)
+      rotHandles = pqnRotHandles;
     //and detect if click happened in one of them
     for (int i = 0; i < rotHandles.length; i++)
       if ((rotSegment = rotHandles[i].findClickTarget(location, view.getCamera())) != -1)
@@ -289,19 +309,20 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     else if (viewMode == UV_MODE)
     {
+     // Let's have this in screen coordinates. 
       CoordinateSystem coords = view.getCamera().getCameraCoordinates();
-      xaxis = coords.getUpDirection().cross(coords.getZDirection());
+      xaxis = coords.getZDirection().cross(coords.getUpDirection());
       yaxis = coords.getUpDirection();
-      zaxis = coords.getZDirection();
+      zaxis = coords.getZDirection().times(-1);
     }
     else
     {
-      xaxis = npqModeAxes[0];
-      yaxis = npqModeAxes[1];
-      zaxis = npqModeAxes[2];
+      xaxis = pqnModeAxes[0];
+      yaxis = pqnModeAxes[1];
+      zaxis = pqnModeAxes[2];
     }
-    double handleSize = HANDLE_SIZE / view.getScale();
-    double len = axisLength / view.getScale();
+    handleSize = HANDLE_SIZE / view.getScale();
+    len = axisLength / view.getScale();
     Vec3 xpos = center.plus(xaxis.times(len));
     Vec3 ypos = center.plus(yaxis.times(len));
     Vec3 zpos = center.plus(zaxis.times(len));
@@ -311,14 +332,14 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Vec3 xHandleOffset = center.plus(xaxis.times(len + handleSize*1.5) );
     Vec3 yHandleOffset = center.plus(yaxis.times(len + handleSize*1.5) );
     Vec3 zHandleOffset = center.plus(zaxis.times(len + handleSize*1.5) );
-    Mat4 worldToScreen = view.getCamera().getWorldToScreen();
+    worldToScreen = view.getCamera().getWorldToScreen();
     Vec2 x2DHandleOffset = worldToScreen.timesXY(xHandleOffset);
     Vec2 y2DHandleOffset = worldToScreen.timesXY(yHandleOffset);
     Vec2 z2DHandleOffset = worldToScreen.timesXY(zHandleOffset);
     Vec2 axisCenter = worldToScreen.timesXY(center);
-    Vec2 screenX = worldToScreen.timesXY(xpos);
-    Vec2 screenY = worldToScreen.timesXY(ypos);
-    Vec2 screenZ = worldToScreen.timesXY(zpos);
+    screenX = worldToScreen.timesXY(xpos);
+    screenY = worldToScreen.timesXY(ypos);
+    screenZ = worldToScreen.timesXY(zpos);
     Vec2 screenXHandle = worldToScreen.timesXY(xHandlePos);
     Vec2 screenYHandle = worldToScreen.timesXY(yHandlePos);
     Vec2 screenZHandle = worldToScreen.timesXY(zHandlePos);
@@ -368,8 +389,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       activeRotationHandleSet = uvRotationHandle;
       activeRotationHandleSet[0].setAxis(zaxis, xaxis);
     }
-    else if (viewMode == NPQ_MODE)
-      activeRotationHandleSet = npqRotHandles;
+    else if (viewMode == PQN_MODE)
+      activeRotationHandleSet = pqnRotHandles;
     for (int i = 0; i < activeRotationHandleSet.length; ++i)
     {
       RotationHandle rotHandle = activeRotationHandleSet[i];
@@ -395,31 +416,12 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     bounds = findScreenBounds(selectionBounds, view.getCamera());
 
-    //when in NPQ mode, the manipulator must not change position during dragging
-    boolean freezeManipulator = ( dragging && (dragHandleType == ROTATE || dragHandleType == SCALE));
+    //when in PQN mode, the manipulator must not change position during rotation or scaling
+    boolean freezeManipulator = (dragging && (dragHandleType == ROTATE || dragHandleType == SCALE));
     if (!freezeManipulator)
       center = view.getCamera().getViewToWorld().times(selectionBounds.getCenter());
 
-    //now compute axis extremities and widget positions
     findHandleLocations(center, view);
-    double handleSize = HANDLE_SIZE / view.getScale();
-    double len = axisLength / view.getScale();
-    Vec3 xpos = center.plus(xaxis.times(len));
-    Vec3 ypos = center.plus(yaxis.times(len));
-    Vec3 zpos = center.plus(zaxis.times(len));
-    Vec3 xHandleOffset = center.plus(xaxis.times(len + handleSize*1.5) );
-    Vec3 yHandleOffset = center.plus(yaxis.times(len + handleSize*1.5) );
-    Vec3 zHandleOffset = center.plus(zaxis.times(len + handleSize*1.5) );
-    Mat4 worldToScreen = view.getCamera().getWorldToScreen();
-    Vec2 x2DHandleOffset = worldToScreen.timesXY(xHandleOffset);
-    Vec2 y2DHandleOffset = worldToScreen.timesXY(yHandleOffset);
-    Vec2 z2DHandleOffset = worldToScreen.timesXY(zHandleOffset);
-    Vec2 screenX = worldToScreen.timesXY(xpos);
-    Vec2 screenY = worldToScreen.timesXY(ypos);
-    Vec2 screenZ = worldToScreen.timesXY(zpos);
-    x2DHandleOffset.subtract(screenX);
-    y2DHandleOffset.subtract(screenY);
-    z2DHandleOffset.subtract(screenZ);
 
     //draw rotation feedback if appropriate
     if (dragging && dragHandleType == ROTATE)
@@ -444,24 +446,24 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Image[] handles = null;
     if (viewMode == XYZ_MODE)
     {
-      xColor = Color.blue;
-      yColor = Color.green;
-      zColor = Color.red;
+      xColor = handleBlue;
+      yColor = handleGreen;
+      zColor = handleRed;
       handles = xyzHandleImages;
     }
     else if (viewMode == UV_MODE)
     {
       xColor = Color.orange;
       yColor = Color.orange;
-      zColor = Color.red;
+      zColor = Color.orange;
       handles = uvHandleImages;
     }
     else
     {
-      xColor = Color.blue;
-      yColor = Color.green;
-      zColor = Color.red;
-      handles = npqHandleImages;
+      xColor = handleBlue;
+      yColor = handleGreen;
+      zColor = handleRed;
+      handles = pqnHandleImages;
     }
     view.drawLine(centerPoint, new Point((int) screenX.x, (int) screenX.y), xColor);
     view.drawLine(centerPoint, new Point((int) screenY.x, (int) screenY.y), yColor);
@@ -470,18 +472,12 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     // Draw the handles.
     view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
     for (int i = 0; i < 2; i++)
-    {
       view.drawImage(handles[X_MOVE_INDEX +i], boxes[X_MOVE_INDEX +i].x, boxes[X_MOVE_INDEX +i].y);
-    }
     for (int i = 0; i < 2; i++)
-    {
       view.drawImage(handles[Y_MOVE_INDEX +i], boxes[Y_MOVE_INDEX +i].x, boxes[Y_MOVE_INDEX +i].y);
-    }
     if (viewMode != UV_MODE)
-        for (int i = 0; i < 2; i++)
-    {
-      view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
-    }
+      for (int i = 0; i < 2; i++)
+        view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
     else
     {
       int udeltax =  boxes[X_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
@@ -551,8 +547,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       rotHandles = xyzRotHandles;
     else if (viewMode == UV_MODE)
       rotHandles = uvRotationHandle;
-    else if (viewMode == NPQ_MODE)
-      rotHandles = npqRotHandles;
+    else if (viewMode == PQN_MODE)
+      rotHandles = pqnRotHandles;
     //and detect if click happened in one of them
     for (int i = 0; i < rotHandles.length; i++)
     {
@@ -631,12 +627,12 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     double amplitude = 0;
     Vec3 axis;
-    if (dragAxis == X || dragAxis == U || dragAxis == N)
+    if (dragAxis == X || dragAxis == U || dragAxis == P)
     {
       axis = xaxis;
       amplitude = disp.dot(x2DaxisNormed);
     }
-    else if (dragAxis == Y || dragAxis == V || dragAxis == P)
+    else if (dragAxis == Y || dragAxis == V || dragAxis == Q)
     {
       axis = yaxis;
       amplitude = disp.dot(y2DaxisNormed);
@@ -701,19 +697,19 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     else
     {
       scaleX = scaleY = scaleZ = 1;
-      if (dragAxis == X || dragAxis == U || dragAxis == N)
+      if (dragAxis == X || dragAxis == U || dragAxis == P)
       {
         scaleX = scale;
         if (isShiftDown)
           scaleY = scaleZ = scaleX;
       }
-      else if (dragAxis == Y || dragAxis == V || dragAxis == P)
+      else if (dragAxis == Y || dragAxis == V || dragAxis == Q)
       {
         scaleY = scale;
         if (isShiftDown)
           scaleX = scaleZ = scaleY;
       }
-      else if (dragAxis == Z || dragAxis == Q)
+      else if (dragAxis == Z || dragAxis == N)
       {
         scaleZ = scale;
         if (isShiftDown)
@@ -801,9 +797,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       this.axis = axis;
       points3d = new Vec3[segments+1];
       points2d = new Vec2[segments+1];
-      if (axis == X || axis == U || axis == N)
+      if (axis == X || axis == U || axis == P)
         setAxis(xaxis, yaxis);
-      else if (axis == Y || axis == V || axis == P)
+      else if (axis == Y || axis == V || axis == Q)
         setAxis(yaxis, zaxis);
       else
         setAxis(zaxis, xaxis);

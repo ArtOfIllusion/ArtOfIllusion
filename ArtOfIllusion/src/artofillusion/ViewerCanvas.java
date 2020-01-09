@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2019 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2020 Petri Ihalainen
    Changes copyright (C) 2016-2018 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -855,6 +855,15 @@ public abstract class ViewerCanvas extends CustomWidget
     return gridSubdivisions;
   }
 
+  /** 
+      Sub classes that can handle a partially hidden mesh should override this.
+   */
+
+  public boolean[] getHiddenRenderingTriangles()
+  {
+    return null;
+  }
+
   /**
       @deprecated <p>
       Use {@link #fitToObjects} instead.<p>
@@ -863,6 +872,7 @@ public abstract class ViewerCanvas extends CustomWidget
       fills the view.  This has no effect if there is a camera bound to this
       view.
   */
+
   @Deprecated
   public void frameBox(BoundingBox bb)
   {

@@ -12,7 +12,7 @@ In Art of Illusion you can use images to generate textures. To manage the images
 
 .. figure:: managing_images/manage_images.png
 
-Imagemapped textures and procedural editors also open this dialog to handle images.
+Image-mapped textures and procedural editors also open this dialog to handle images.
 
 .. note:: Stretching the dialog will enlarge the icons.
 
@@ -26,13 +26,13 @@ The icon symbols
    
 .. |usedimg| image:: managing_images/used.png
    
-.. |usedtxt| replace:: **Paper clip:** A texture or a material is using the image.
-   |*- Images that are in use can not be deleted.*
+.. |usedtxt| replace:: **Paper clip:** A texture or material is using the image.
+   |*- Images that are in use cannot be deleted.*
   
 .. |linkedimg| image:: managing_images/linked.png
    
 .. |linkedtxt| replace:: **Chain:** This image is linked from an external file.
-   *- You can keep editing the file and **Refresh** for changes*
+   *- You can keep editing the file and **Refresh** to see the latest changes*
  
 .. |brokenimg| image:: managing_images/broken.png
    
@@ -50,7 +50,7 @@ The icon symbols
 
 :|usedimg|:     **Paper clip:** A texture or a material is using the image.
 
-                *- Images that are in use can not be deleted.*
+                *- Images that are in use cannot be deleted.*
   
 :|linkedimg|:   **Chain:** This image is linked from an external file.
 
@@ -58,7 +58,7 @@ The icon symbols
 
 :|brokenimg|:   **Broken chain:** The linked image file could not be read.
 
-                *- The icon shows, what kind of an image is missing.*
+                *- The icon shows what kind of an image is missing.*
 
                 *- Try* **View Details...** |arrR| **Reconnect** *to find the image*
 
@@ -78,19 +78,19 @@ You have two options for importing images: You can **load** them into the scene 
 
 - The images are stored in lossless formats, .png, .hdr or .svg.
 - Transparency is supported where possible.
-- Loaded images **can** be exported.
+- Loaded images *can* be exported.
 
 
-**A linked image** stays as an independent image file. You can edit the image afterwards or even change the image, that the link is referring to. The link is saved in both relative and absoulte forms, so if you move the scene inside your hard drive, you can either move an entire folder structure including your images or you can keep the images in a stationary library. 
+**A linked image** stays as an independent image file. You can edit the image afterwards or even change the image that the link is referring to. The link is saved in both relative and absoulte forms: If you move the scene to a differen location on your hard drive, you can either move an entire folder structure including your images or you can keep the images in a stationary library. 
 
-Linked images are marked by a piece of a chain on lower left corner of the image icon. If the image file is not found, the chain icon appears broken and the displayed replacement icon will show, what type of an image is missing. To reconnect the link to a lost image, first click the icon to select it and then click **View Details...** |arrR| **Reconnect**. 
+Linked images are marked by a piece of chain on lower left corner of the image icon. If the image file is not found, the chain icon appears broken and the displayed default icon will show what type of an image is missing. To reconnect the link to a lost image, first click the icon to select it and then click **View Details...** |arrR| **Reconnect**. 
 
 Tools to manage the images
 **************************
 
 .. figure:: managing_images/image_tools.png
 
-**Refresh:** Reload linked images. Use this if you have edited one.
+**Refresh:** Reload linked images. Use this if you have edited a linked image during the current AOI session.
 
 **Delete:** Remove the selected image or link.
 
@@ -108,16 +108,16 @@ Here you can:
 - Export a local image into a new file.
 
 
-.. note:: **Idea, how to use:**
+.. note:: **Hint:**
 
- - Link an image, while you are working on it.
- - Convert to local, when finished.
+ - It can be handy to use a Linked image while you are still refining it.
+ - Convert to local when finished for simpler storage, or to share your .aoi file with others.
 
 .. figure:: managing_images/purge_dialog.png
    :align: right
 
 **Purge:** Delete unused images. 
 
-The Purge dialog will suggest to remove all unused images and links. You can select individually which ones to remove before performing the action. Purge does not delete images, that are currently in use.
+The Purge dialog will list all unused images and links for potential removal. You can select individually which ones to remove before performing the action. Purge does not delete images that are currently in use.
 
 

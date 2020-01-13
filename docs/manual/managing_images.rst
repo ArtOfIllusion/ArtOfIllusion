@@ -1,13 +1,13 @@
 
-Where ever this goes?
-#####################
+Image Resources
+###############
 
 .. |arrR| image:: text_icon/arrow_right.png
    :height: 10px
 
 
-Managing images
-****************
+The Image Management Dialog
+***************************
 In Art of Illusion you can use images to generate textures. To manage the images select  **Scene** |arrR| **Images...**
 
 .. figure:: managing_images/manage_images.png
@@ -40,7 +40,7 @@ The icon symbols
    *- The icon shows, what kind of an image is missing.*
    *- Try **View Details &rarr; Reconnect** to find the image*
 
-.. comment:: I tried to use list-table here, but I did not look right
+.. comment   I tried to use list-table here, but I did not look right
              This is closer and is shows with single linebreaks, but 
              unfortunately it add the colon after every image.
    
@@ -68,7 +68,7 @@ Using images
 To pick an image for your texture, click an image icon to select it and click **OK**. 
 
 Importing images
-================
+****************
 
 You have two options for importing images: You can **load** them into the scene as local images or you can **link** them as external files.
 
@@ -86,7 +86,7 @@ You have two options for importing images: You can **load** them into the scene 
 Linked images are marked by a piece of a chain on lower left corner of the image icon. If the image file is not found, the chain icon appears broken and the displayed replacement icon will show, what type of an image is missing. To reconnect the link to a lost image, first click the icon to select it and then click **View Details...** |arrR| **Reconnect**. 
 
 Tools to manage the images
-==========================
+**************************
 
 .. figure:: managing_images/image_tools.png
 

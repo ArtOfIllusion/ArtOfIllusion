@@ -11,6 +11,7 @@ Art of Illusion Manual
    modelling_tools
    editing_objects
    lights
+   managing_images
    textures
    textures2
    materials

@@ -14,6 +14,7 @@ package artofillusion.ui;
 import buoy.event.*;
 import artofillusion.*;
 import artofillusion.math.*;
+import artofillusion.object.SceneCamera;
 
 import javax.imageio.*;
 import java.awt.*;
@@ -41,7 +42,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private Point baseClick;
   private Vec3 dragStartPosition;
   private Vec3 xaxis, yaxis, zaxis;
-  private Vec2 x2DaxisNormed, y2DaxisNormed, z2DaxisNormed, screenX, screenY, screenZ;
+  private Vec2 x2DaxisNormed, y2DaxisNormed, z2DaxisNormed, screenX, screenY, screenZ, axisCenter;
   private Mat4 worldToScreen;
   private double len, handleSize;
   private Vec3 pqnModeAxes[];
@@ -61,6 +62,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   public final static ViewMode XYZ_MODE = new ViewMode();
   public final static ViewMode UV_MODE = new ViewMode();
   public final static ViewMode PQN_MODE = new ViewMode();
+
+  /** @deprecated Redirects to PQN_MODE */
   @Deprecated
   public final static ViewMode NPQ_MODE = PQN_MODE;
 
@@ -149,7 +152,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     boxes = new Rectangle[7];
     extraUVBox = new Rectangle();
     for (int i = 0; i < boxes.length; ++i)
-        boxes[i] = new Rectangle(0,0,HANDLE_SIZE, HANDLE_SIZE);
+      boxes[i] = new Rectangle(0,0,HANDLE_SIZE, HANDLE_SIZE);
     extraUVBox = new Rectangle(0,0,HANDLE_SIZE, HANDLE_SIZE);
     boxHandleType = new HandleType[] {MOVE, SCALE, MOVE, SCALE, MOVE, SCALE, MOVE};
     xyzRotHandles[0] = new RotationHandle(64, X, handleBlue);
@@ -209,7 +212,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   /**
    * @deprecated
-   * Use setPQNAxes. This method redirects
+   * Use setPQNAxes. This method redirects.
    * x -> p, y -> q, z -> n. N stands for 'normal-direction'
    */
   @Deprecated
@@ -245,12 +248,17 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     if (axis == U)
     {
       CoordinateSystem coords = view.getCamera().getCameraCoordinates();
-      return coords.getUpDirection().cross(coords.getZDirection());
+      return coords.getZDirection().cross(coords.getUpDirection());
     }
     if (axis == V)
     {
       CoordinateSystem coords = view.getCamera().getCameraCoordinates();
       return coords.getUpDirection();
+    }
+    if (axis == W)
+    {
+      CoordinateSystem coords = view.getCamera().getCameraCoordinates();
+      return coords.getZDirection().times(-1.0);
     }
     if (axis == P)
       return pqnModeAxes[0];
@@ -301,6 +309,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   private void findHandleLocations(Vec3 center, ViewerCanvas view)
   {
+    // Which axes are active?
     if (viewMode == XYZ_MODE)
     {
       xaxis = Vec3.vx();
@@ -321,44 +330,49 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       yaxis = pqnModeAxes[1];
       zaxis = pqnModeAxes[2];
     }
-    handleSize = HANDLE_SIZE / view.getScale();
-    len = axisLength / view.getScale();
+
+    // How large the manipulator and the handles would be in the scene
+    if (view.isPerspective())
+    {
+      double projectionDist = calculateProjectionDistance(view);
+      handleSize = HANDLE_SIZE*view.getCamera().getWorldToView().times(center).z/projectionDist/100.0;
+      len = axisLength*view.getDistToPlane()/projectionDist/100.0;
+    }
+    else
+    {
+      handleSize = HANDLE_SIZE / view.getScale();
+      len = axisLength / view.getScale();
+    }
+    worldToScreen = view.getCamera().getWorldToScreen();
+
     Vec3 xpos = center.plus(xaxis.times(len));
     Vec3 ypos = center.plus(yaxis.times(len));
     Vec3 zpos = center.plus(zaxis.times(len));
-    Vec3 xHandlePos = center.plus(xaxis.times(len + handleSize/2.0));
-    Vec3 yHandlePos = center.plus(yaxis.times(len + handleSize/2.0));
-    Vec3 zHandlePos = center.plus(zaxis.times(len + handleSize/2.0));
-    Vec3 xHandleOffset = center.plus(xaxis.times(len + handleSize*1.5) );
-    Vec3 yHandleOffset = center.plus(yaxis.times(len + handleSize*1.5) );
-    Vec3 zHandleOffset = center.plus(zaxis.times(len + handleSize*1.5) );
-    worldToScreen = view.getCamera().getWorldToScreen();
+    Vec3 xHandlePos = center.plus(xaxis.times(len + handleSize));
+    Vec3 yHandlePos = center.plus(yaxis.times(len + handleSize));
+    Vec3 zHandlePos = center.plus(zaxis.times(len + handleSize));
+    Vec3 xHandleOffset = center.plus(xaxis.times(len + handleSize*1.5));
+    Vec3 yHandleOffset = center.plus(yaxis.times(len + handleSize*1.5));
+    Vec3 zHandleOffset = center.plus(zaxis.times(len + handleSize*1.5));
     Vec2 x2DHandleOffset = worldToScreen.timesXY(xHandleOffset);
     Vec2 y2DHandleOffset = worldToScreen.timesXY(yHandleOffset);
     Vec2 z2DHandleOffset = worldToScreen.timesXY(zHandleOffset);
-    Vec2 axisCenter = worldToScreen.timesXY(center);
+    axisCenter = worldToScreen.timesXY(center);
     screenX = worldToScreen.timesXY(xpos);
     screenY = worldToScreen.timesXY(ypos);
     screenZ = worldToScreen.timesXY(zpos);
-    Vec2 screenXHandle = worldToScreen.timesXY(xHandlePos);
-    Vec2 screenYHandle = worldToScreen.timesXY(yHandlePos);
-    Vec2 screenZHandle = worldToScreen.timesXY(zHandlePos);
     x2DHandleOffset.subtract(screenX);
     y2DHandleOffset.subtract(screenY);
     z2DHandleOffset.subtract(screenZ);
-    Vec2 x2Daxis = screenX.minus(axisCenter);
-    Vec2 y2Daxis = screenY.minus(axisCenter);
-    Vec2 z2Daxis = screenZ.minus(axisCenter);
-    x2DaxisNormed = new Vec2( x2Daxis );
-    y2DaxisNormed = new Vec2( y2Daxis );
-    z2DaxisNormed = new Vec2( z2Daxis );
-    x2DaxisNormed.normalize();
-    y2DaxisNormed.normalize();
-    z2DaxisNormed.normalize();
+    Vec2 screenXHandle = worldToScreen.timesXY(xHandlePos);
+    Vec2 screenYHandle = worldToScreen.timesXY(yHandlePos);
+    Vec2 screenZHandle = worldToScreen.timesXY(zHandlePos);
+    x2DaxisNormed = screenX.minus(axisCenter).unit();
+    y2DaxisNormed = screenY.minus(axisCenter).unit();
+    z2DaxisNormed = screenZ.minus(axisCenter).unit();
     centerPoint = new Point((int) Math.round(axisCenter.x), (int) Math.round(axisCenter.y));
     boxes[CENTER_INDEX].x = (int)(centerPoint.x - HANDLE_SIZE/2);
     boxes[CENTER_INDEX].y = (int)(centerPoint.y - HANDLE_SIZE/2);
-    view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
     for (int i = 0; i < 2; i++)
     {
       boxes[X_MOVE_INDEX +i].x = (int)( screenXHandle.x - HANDLE_SIZE/2  + i * x2DHandleOffset.x);
@@ -377,10 +391,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       }
     else
     {
-      Vec3 handlePos = center.plus(xaxis.times(len + handleSize*2.0)).plus(yaxis.times(len + handleSize*2.0));
-      Vec2 screenHandle = worldToScreen.timesXY(handlePos);
-      extraUVBox.x = (int) screenHandle.x - HANDLE_SIZE/2;
-      extraUVBox.y = (int) screenHandle.y - HANDLE_SIZE/2;
+      extraUVBox.x = boxes[X_SCALE_INDEX].x;
+      extraUVBox.y = boxes[Y_SCALE_INDEX].y;
     }
     if (viewMode == XYZ_MODE)
       activeRotationHandleSet = xyzRotHandles;
@@ -411,8 +423,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   {
     if (selectionBounds == null)
     {
-        //not a valid selection, do not draw onto screen
-        return;
+      //not a valid selection, do not draw onto screen
+      return;
     }
     bounds = findScreenBounds(selectionBounds, view.getCamera());
 
@@ -472,32 +484,20 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     // Draw the handles.
     view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
     for (int i = 0; i < 2; i++)
-      view.drawImage(handles[X_MOVE_INDEX +i], boxes[X_MOVE_INDEX +i].x, boxes[X_MOVE_INDEX +i].y);
-    for (int i = 0; i < 2; i++)
-      view.drawImage(handles[Y_MOVE_INDEX +i], boxes[Y_MOVE_INDEX +i].x, boxes[Y_MOVE_INDEX +i].y);
-    if (viewMode != UV_MODE)
-      for (int i = 0; i < 2; i++)
-        view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
-    else
     {
-      int udeltax =  boxes[X_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
-      int udeltay =  boxes[X_SCALE_INDEX].y + HANDLE_SIZE/2 - centerPoint.y;
-      int vdeltax =  boxes[Y_SCALE_INDEX].x + HANDLE_SIZE/2 - centerPoint.x;
-      int vdeltay =  boxes[Y_SCALE_INDEX].y + HANDLE_SIZE/2 - centerPoint.y;
-      extraUVBox.x = udeltax + vdeltax + centerPoint.x - HANDLE_SIZE/2;
-      extraUVBox.y = udeltay + vdeltay + centerPoint.y - HANDLE_SIZE/2;
-      Vec3 handlePos = center.plus(xaxis.times(len + handleSize*2.0)).plus(yaxis.times(len + handleSize*2.0));
-      Vec2 screenHandle = worldToScreen.timesXY(handlePos);
-      extraUVBox.x = (int) screenHandle.x - HANDLE_SIZE/2;
-      extraUVBox.y = (int) screenHandle.y - HANDLE_SIZE/2;
-      view.drawImage(handles[X_SCALE_INDEX], extraUVBox.x, extraUVBox.y);
+      view.drawImage(handles[X_MOVE_INDEX +i], boxes[X_MOVE_INDEX +i].x, boxes[X_MOVE_INDEX +i].y);
+      view.drawImage(handles[Y_MOVE_INDEX +i], boxes[Y_MOVE_INDEX +i].x, boxes[Y_MOVE_INDEX +i].y);
+      if (viewMode != UV_MODE)
+        view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
+      else
+        view.drawImage(handles[X_SCALE_INDEX], extraUVBox.x, extraUVBox.y);
     }
 
     //draw the rotation handles
     for (int i = 0; i < activeRotationHandleSet.length; ++i)
     {
       RotationHandle rotHandle = activeRotationHandleSet[i];
-      for (int j = 0; j < rotHandle.points3d.length-1; j++)
+      for (int j = 0; j < rotHandle.points2d.length-1; j++)
         view.drawLine(new Point((int) rotHandle.points2d[j].x,   (int) rotHandle.points2d[j].y),
                       new Point((int) rotHandle.points2d[j+1].x, (int) rotHandle.points2d[j+1].y), 
                       rotHandle.color);
@@ -508,8 +508,10 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   public boolean mousePressed(WidgetMouseEvent ev, ViewerCanvas view, BoundingBox selectionBounds)
   {
     Rectangle r = findScreenBounds(selectionBounds, view.getCamera());
+
     //3D manipulators don't draw the bounds, but bounds is used to detect
     //a valid selection
+
     if (r == null)
         return false;
     bounds = r;
@@ -578,6 +580,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     return false;
   }
 
+  // This is for the center handle, when handling a mesh
+  
   public void mousePressedOnHandle(WidgetMouseEvent ev, ViewerCanvas view, BoundingBox selectionBounds, Vec3 handleLocation)
   {
     center = view.getCamera().getViewToWorld().times(selectionBounds.getCenter());
@@ -607,9 +611,13 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   {
     boolean isShiftDown = ev.isShiftDown();
     double gridSize = view.getGridSpacing()/view.getSnapToSubdivisions();
-    Vec2 disp = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
+    
+    // Using the center handle
+    // Movement is parallel to screen plane
+
     if (dragAxis == ALL)
     {
+      Vec2 disp = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
       Vec3 drag;
       if (ev.isControlDown())
         drag = view.getCamera().getCameraCoordinates().getZDirection().times(-disp.y*0.01);
@@ -625,32 +633,65 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, transform));
       return;
     }
-    double amplitude = 0;
-    Vec3 axis;
+
+    // Using one of the move handles
+
+    Vec3 dragDir3D;
+    Vec2 dragDir2D;
+
     if (dragAxis == X || dragAxis == U || dragAxis == P)
     {
-      axis = xaxis;
-      amplitude = disp.dot(x2DaxisNormed);
+      dragDir3D = xaxis;
+      dragDir2D = x2DaxisNormed;
     }
     else if (dragAxis == Y || dragAxis == V || dragAxis == Q)
     {
-      axis = yaxis;
-      amplitude = disp.dot(y2DaxisNormed);
+      dragDir3D = yaxis;
+      dragDir2D = y2DaxisNormed;
     }
     else
     {
-      axis = zaxis;
-      amplitude = disp.dot(z2DaxisNormed);
+      dragDir3D = zaxis;
+      dragDir2D = z2DaxisNormed;
     }
-    amplitude /= view.getScale();
+
+    Vec3 camZDir = view.getCamera().getCameraCoordinates().getZDirection();
+    Vec3 camOrig = view.getCamera().getCameraCoordinates().getOrigin();
+    Vec3 camYDir = view.getCamera().getCameraCoordinates().getUpDirection();
+    Vec3 camXDir = camZDir.cross(camYDir).unit();
+
+    Vec2 mouseDrag = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
+    Vec2 drag2D = dragDir2D.times(mouseDrag.dot(dragDir2D));
+    Vec3 dragProjected = camXDir.times(drag2D.x).minus(camYDir.times(drag2D.y));
+    Vec3 dirProjected = dragProjected.unit();
+    double scaleOut;
+    if (view.isPerspective())
+    {
+      double depth = center.minus(camOrig).dot(camZDir);
+      double projDist = calculateProjectionDistance(view);
+      scaleOut = depth/projDist/100.0;
+    }
+    else
+      scaleOut = 1.0/view.getScale();
+    dragProjected.scale(scaleOut);
+    double dragDistance = dragProjected.dot(dragDir3D);
+    double axisProjectionScale = Math.abs(dirProjected.dot(dragDir3D));
+
+    // Mouse may have returned to starting line 
+    //   --> drag vector length = 0.0
+    //   --> axis scale = 0.0
+
+    if (axisProjectionScale != 0.0)
+      dragDistance /= axisProjectionScale*axisProjectionScale;
+
     if (isShiftDown)
     {
-      amplitude /= gridSize;
-      amplitude = Math.round(amplitude);
-      amplitude *= gridSize;
+      dragDistance /= gridSize;
+      dragDistance = Math.round(dragDistance);
+      dragDistance *= gridSize;
     }
-    Vec3 drag = axis.times(amplitude);
-    Mat4 transform = Mat4.translation(drag.x, drag.y, drag.z);
+    Vec3 drag3D = dragDir3D.times(dragDistance);
+    Mat4 transform = Mat4.translation(drag3D.x, drag3D.y, drag3D.z);
     dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, transform));
   }
 
@@ -662,6 +703,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Vec2 vector = currentRotationHandle.points2d[rotSegment+1].minus(currentRotationHandle.points2d[rotSegment]);
     vector.normalize();
     rotAngle = vector.dot(disp)/70;
+
     if (isShiftDown)
     {
       rotAngle *= (180.0/(5*Math.PI));
@@ -764,6 +806,30 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     return r;
   }
 
+  /* 
+    This is a value that really should be provoded by the view camera object.
+
+    The method should be used, when the view is in perspective mode.
+    In parallel mode it just return the distToScreen of Camera.
+  */
+  
+  private double calculateProjectionDistance(ViewerCanvas view)
+  {
+    if (! view.isPerspective())
+      return view.getCamera().getDistToScreen();
+
+    double projectionDist;
+    if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+    {
+      double edgeAngle = (Math.PI - Math.toRadians(((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()))/2.0;
+      projectionDist = Math.tan(edgeAngle)/Camera.DEFAULT_DISTANCE_TO_SCREEN*view.getBounds().height/view.getScale()*10;
+    }
+    else
+      projectionDist = view.getCamera().getDistToScreen();
+
+    return projectionDist;
+  }
+
   /**
    * Instances of this class represent the different view modes for the manipulator.
    */
@@ -790,6 +856,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
      * @param segments The number of segmetns that describe the rotation circle
      * @param axis The rotation axis
      */
+
     public RotationHandle(int segments, Axis axis, Color color )
     {
       this.segments = segments;
@@ -803,18 +870,6 @@ public class Compound3DManipulator extends EventSource implements Manipulator
         setAxis(yaxis, zaxis);
       else
         setAxis(zaxis, xaxis);
-//      switch (axis)
-//      {
-//        case XAXIS :
-//          setAxis(xaxis, yaxis);
-//          break;
-//        case YAXIS :
-//          setAxis(yaxis, zaxis);
-//          break;
-//        case ZAXIS :
-//          setAxis(zaxis, xaxis);
-//          break;
-//      }
     }
 
     /**
@@ -823,6 +878,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
      * @param refAxis The axis where arc drawing begins.
      * Used when asking for a rotation feedback polygon
      */
+
     public void setAxis(Vec3 rotAxis, Vec3 refAxis)
     {
       this.rotAxis = rotAxis;
@@ -832,7 +888,6 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       for (int i = 0; i <= segments; i++)
         points3d[i] = v = m.times(v);
     }
-
 
     /**
      * Given an angle, this method returns a 3D polygon which can be used to
@@ -864,6 +919,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
      * @return The number of the segment being clicked on or -1 if the mouse has not been
      * clicked on the handle
      */
+
     public int findClickTarget(Point pos, Camera camera)
     {
       double u, v, w, z;

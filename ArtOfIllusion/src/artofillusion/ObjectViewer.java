@@ -32,7 +32,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   protected Point clickPoint, dragPoint;
   protected Vector<Point> selectBoundsPoints;
   protected Shape selectBounds;
-  protected ObjectInfo thisObjectInScene;
+  public    ObjectInfo thisObjectInScene;
   protected Scene theScene;
 
   public ObjectViewer(MeshEditController controller, RowContainer p)

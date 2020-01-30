@@ -1,4 +1,4 @@
-/* Copyright (C) 2016 by Petri Ihalainen
+/* Copyright (C) 2016 - 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +15,7 @@ import artofillusion.ui.*;
 import artofillusion.object.*;
 import artofillusion.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class ClickedPointFinder
 {
@@ -23,8 +24,9 @@ public class ClickedPointFinder
   private int w, h;
   private Vec3 cameraOrigin, cameraZ;
   private boolean perspective;
-  
-  public ClickedPointFinder(){};
+
+  public ClickedPointFinder()
+  {};
 
   /** 
      Return the closest point on a surface of an object that is found under 
@@ -33,63 +35,67 @@ public class ClickedPointFinder
     
      This works only for objects, that can produce a RenderingMesh.
    */
-   
-  public Vec3 newPoint(ViewerCanvas v, Point point)
+
+  public Vec3 newPoint(ViewerCanvas view, Point point)
   {
-    Vec3 clickedPoint = v.getCamera().convertScreenToWorld(point, v.getDistToPlane()); // defaultpoint if nothing is there
+    Vec3 clickedPoint = view.getCamera().convertScreenToWorld(point, view.getDistToPlane()); // defaultpoint if nothing is there
     Vec3 pointOnTriangle;
     boolean inSpace = true;
     bary = new double[3];
 
-    cameraOrigin = v.getCamera().getCameraCoordinates().getOrigin();
-    cameraZ = v.getCamera().getCameraCoordinates().getZDirection();
-    perspective = v.isPerspective();
-    w = v.getBounds().width;
-    h = v.getBounds().height;
-  
+    cameraOrigin = view.getCamera().getCameraCoordinates().getOrigin();
+    cameraZ = view.getCamera().getCameraCoordinates().getZDirection();
+    perspective = view.isPerspective();
+    w = view.getBounds().width;
+    h = view.getBounds().height;
+
     // ToScreen matrices produce the actual pixel coordinates on the ViewerCanvas.
-    
-    if ((v instanceof ObjectViewer) && !(((ObjectViewer)v).getUseWorldCoords()))
-      modelToScreen = v.getCamera().getObjectToScreen();
+
+    if ((view instanceof ObjectViewer) && !(((ObjectViewer)view).getUseWorldCoords()))
+      modelToScreen = view.getCamera().getObjectToScreen();
     else
-      modelToScreen = v.getCamera().getWorldToScreen();
-    
-    Mat4 toScene, toThisObject, fromExtToLocal;
-    ObjectInfo[] objList = renderableObjects(v);
-    RenderingMesh rMesh;
+      modelToScreen = view.getCamera().getWorldToScreen();
+
+    ObjectInfo info;
+    RenderingMesh surface;
+    boolean hideTriangle[];
     Vec3[] corner3D = new Vec3[3];
     Vec2[] corner2D = new Vec2[3],  corner2DS = new Vec2[3];
-    CoordinateSystem localCoords;
+    Mat4 toContext;
+    ArrayList<ObjectInfo> shownObjects = renderableObjects(view);
 
-    localCoords = getLocalCoords(v);
-    toThisObject = localCoords.toLocal();
-    
+    for (int i = 0; i < shownObjects.size(); i++)
+    {
+      info = shownObjects.get(i);
+      surface = info.getPreviewMesh();
+      if (view instanceof ObjectViewer && (!((ObjectViewer)view).getSceneVisible() || info == ((ObjectViewer)view).thisObjectInScene))
+         hideTriangle = view.getHiddenRenderingTriangles();
+      else
+         hideTriangle = null;
+      toContext = contextTransform(view, info);
 
-    for (int i = 0; i< objList.length ; i++)
-    {  
-      rMesh = objList[i].getPreviewMesh();
-      toScene = objList[i].getCoords().fromLocal();
-      fromExtToLocal = toThisObject.times(toScene);
-
-      for (int j = 0; j < rMesh.triangle.length; j++)
+      for (int t = 0; t < surface.triangle.length; t++)
       {
-        corner3D[0] = new Vec3 (fromExtToLocal.times(rMesh.vert[rMesh.triangle[j].v1]));
-        corner3D[1] = new Vec3 (fromExtToLocal.times(rMesh.vert[rMesh.triangle[j].v2]));
-        corner3D[2] = new Vec3 (fromExtToLocal.times(rMesh.vert[rMesh.triangle[j].v3]));        
+        if (hideTriangle != null && hideTriangle[t])
+          continue;
+
+        corner3D[0] = new Vec3 (toContext.times(surface.vert[surface.triangle[t].v1]));
+        corner3D[1] = new Vec3 (toContext.times(surface.vert[surface.triangle[t].v2]));
+        corner3D[2] = new Vec3 (toContext.times(surface.vert[surface.triangle[t].v3]));        
 
         corner2D[0] = modelToScreen.timesXY(corner3D[0]);
         corner2D[1] = modelToScreen.timesXY(corner3D[1]);
         corner2D[2] = modelToScreen.timesXY(corner3D[2]);
 
         if (onTriangle(corner2D, point))
-        {  
+        {
           (corner3D[0] = corner3D[0]).scale(bary[0]);
           (corner3D[1] = corner3D[1]).scale(bary[1]);
           (corner3D[2] = corner3D[2]).scale(bary[2]);
 
           pointOnTriangle = new Vec3(corner3D[0].plus(corner3D[1].plus(corner3D[2])));
 
-          if (onScreen(pointOnTriangle)) // Needed for perspective mode 
+          if (onView(pointOnTriangle)) // Needed for perspective mode
           {
             if (inSpace)
             {  
@@ -136,37 +142,10 @@ public class ClickedPointFinder
       return false;
   }
 
-  private boolean onScreen(Vec3 p3D)
+  private boolean onView(Vec3 p3D)
   {
     Vec2 p2D = modelToScreen.timesXY(p3D);
     return (p2D.x > 0 && p2D.x < w && p2D.y > 0 && p2D.y < h);
-  }
-
-  private ObjectInfo[] renderableObjects(ViewerCanvas v)
-  {
-    Scene scene = v.getScene();
-    int n = scene.getNumObjects();
-    int m = 0;
-    ObjectInfo[] rObjI = new ObjectInfo[n];
-    
-    for(int i = 0; i < n; i++)
-    {
-      ObjectInfo oi = scene.getObject(i);
-      if (oi.isVisible() && oi.getObject().canSetTexture())
-      {
-        rObjI[m] = oi;
-        m++;
-      }
-    }
-    
-    ObjectInfo[] vObjI = new ObjectInfo[m];
-    
-    for(int i = 0; i < m; i++)
-    {
-      vObjI[i] = rObjI[i];
-    }
-
-    return vObjI;
   }
 
   /*
@@ -175,27 +154,66 @@ public class ClickedPointFinder
   // This would reduce work, when the camera is inside a scene 
   // with a lot of objects around it.
 
-  private boolean boxInView(ViewerCanvas v, ObjectInfo oi)
+  private boolean boxInView(ViewerCanvas view, ObjectInfo oi)
   {
     return true;
   }
-  
-  private boolean clickOnBox(ViewerCanvas v, ObjectInfo oi)
+
+  private boolean clickOnBox(ViewerCanvas view, ObjectInfo oi)
   {
     return true;
   }
   */
 
-  CoordinateSystem getLocalCoords(ViewerCanvas v)
+  private ArrayList renderableObjects(ViewerCanvas view)
   {
-    if (v instanceof ObjectViewer && ! ((ObjectViewer)v).getUseWorldCoords())
+    ArrayList<ObjectInfo> renderable = new ArrayList<ObjectInfo>();
+    ObjectInfo oi;
+
+    if (view instanceof SceneViewer || (view instanceof ObjectViewer && ((ObjectViewer)view).getSceneVisible()))
     {
-      ((ObjectViewer)v).setUseWorldCoords(true);
-      CoordinateSystem c = ((ObjectViewer)v).getDisplayCoordinates().duplicate();
-      ((ObjectViewer)v).setUseWorldCoords(false);
-      return c;
+      Scene scene = view.getScene();
+      for(int i = 0; i < scene.getNumObjects(); i++)
+      {
+        oi = scene.getObject(i);
+        if (oi.isVisible() && oi.getObject().canSetTexture())
+          renderable.add(oi);
+      }
     }
+    else if (view instanceof ObjectViewer)
+      renderable.add(((ObjectViewer)view).getController().getObject());
+    else if (view instanceof ObjectPreviewCanvas)
+      renderable.add(((ObjectPreviewCanvas)view).getObject());
+
+    return renderable;
+  }
+
+  private Mat4 contextTransform(ViewerCanvas view, ObjectInfo info)
+  {
+    Mat4 t;
+
+    if (view instanceof ObjectViewer)
+      if (((ObjectViewer)view).getUseWorldCoords())
+        if (((ObjectViewer)view).getSceneVisible())
+          t = info.getCoords().fromLocal();
+        else
+        {
+          t = ((ObjectViewer)view).getDisplayCoordinates().fromLocal();
+          t = t.times(info.getCoords().toLocal());
+        }
+      else
+        if (((ObjectViewer)view).getSceneVisible())
+        {
+          ((ObjectViewer)view).setUseWorldCoords(true);
+          t = ((ObjectViewer)view).getDisplayCoordinates().toLocal();
+          t = t.times(info.getCoords().fromLocal());
+          ((ObjectViewer)view).setUseWorldCoords(false);
+        }
+        else
+          t = Mat4.identity();
     else
-      return new CoordinateSystem();
+      t = info.getCoords().fromLocal();
+
+    return t;
   }
 }

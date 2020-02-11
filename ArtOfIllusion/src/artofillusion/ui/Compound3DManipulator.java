@@ -40,7 +40,11 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private HandleType dragHandleType;
   private boolean dragging;
   private Point baseClick;
+  private Vec3 center;
+  private Vec3 xpos, ypos, zpos;
+  private Vec3[] handlePos;  
   private Vec3 dragStartPosition;
+  private Vec3 xAxis3D, yAxis3D, zAxis3D;
   private Vec3 xDir3D, yDir3D, zDir3D;
   private Vec2 xDir2D, yDir2D, zDir2D;
   private Mat4 worldToScreen;
@@ -49,7 +53,6 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private int rotSegment;
   private double rotAngle;
   private Point centerPoint, xPoint, yPoint, zPoint;
-  private Vec3 center;
   private double axisLength, orAxisLength;
   private RotationHandle[] xyzRotHandles;
   private RotationHandle[] pqnRotHandles;
@@ -166,6 +169,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     pqnRotHandles[2] = new RotationHandle(64, N, handleRed);
     axisLength = 80;
     setViewMode(XYZ_MODE);
+    handlePos = new Vec3[7];
   }
 
   /**
@@ -345,16 +349,19 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     worldToScreen = view.getCamera().getWorldToScreen();
 
-    Vec3 xpos = center.plus(xDir3D.times(len));
-    Vec3 ypos = center.plus(yDir3D.times(len));
-    Vec3 zpos = center.plus(zDir3D.times(len));
-    Vec3 xMovePos = center.plus(xDir3D.times(len + handleSize));
-    Vec3 yMovePos = center.plus(yDir3D.times(len + handleSize));
-    Vec3 zMovePos = center.plus(zDir3D.times(len + handleSize));
-    Vec3 xScalePos = center.plus(xDir3D.times(len + handleSize*2.5));
-    Vec3 yScalePos = center.plus(yDir3D.times(len + handleSize*2.5));
-    Vec3 zScalePos = center.plus(zDir3D.times(len + handleSize*2.5));
-
+    xAxis3D = xDir3D.times(len);
+    yAxis3D = yDir3D.times(len);
+    zAxis3D = zDir3D.times(len);
+    xpos = center.plus(xAxis3D);
+    ypos = center.plus(yAxis3D);
+    zpos = center.plus(zAxis3D);
+    Vec3 xMovePos = handlePos[X_MOVE_INDEX] = center.plus(xDir3D.times(len + handleSize));
+    Vec3 yMovePos = handlePos[Y_MOVE_INDEX] = center.plus(yDir3D.times(len + handleSize));
+    Vec3 zMovePos = handlePos[Z_MOVE_INDEX] = center.plus(zDir3D.times(len + handleSize));
+    Vec3 xScalePos = handlePos[X_SCALE_INDEX] = center.plus(xDir3D.times(len + handleSize*2.5));
+    Vec3 yScalePos = handlePos[Y_SCALE_INDEX] = center.plus(yDir3D.times(len + handleSize*2.5));
+    Vec3 zScalePos = handlePos[Z_SCALE_INDEX] = center.plus(zDir3D.times(len + handleSize*2.5));
+    handlePos[CENTER_INDEX] = center;
 
     Vec2 xMovePos2D = worldToScreen.timesXY(xMovePos);
     Vec2 yMovePos2D = worldToScreen.timesXY(yMovePos);
@@ -436,11 +443,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   @Override
   public void draw(ViewerCanvas view, BoundingBox selectionBounds)
   {
-    if (selectionBounds == null)
-    {
-      //not a valid selection, do not draw onto screen
+    if (selectionBounds == null) //not a valid selection
       return;
-    }
+
     bounds = findScreenBounds(selectionBounds, view.getCamera());
 
     //when in PQN mode, the manipulator must not change position during rotation or scaling
@@ -492,32 +497,179 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       zColor = handleRed;
       handles = pqnHandleImages;
     }
-    view.drawLine(centerPoint, xPoint, xColor);
-    view.drawLine(centerPoint, yPoint, yColor);
-    view.drawLine(centerPoint, zPoint, zColor); // Even in UV-mode. Doesn't hurt.
 
-    // Draw the handles.
-    view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
-    for (int i = 0; i < 2; i++)
+    if (viewMode == UV_MODE)
     {
-      view.drawImage(handles[X_MOVE_INDEX +i], boxes[X_MOVE_INDEX +i].x, boxes[X_MOVE_INDEX +i].y);
-      view.drawImage(handles[Y_MOVE_INDEX +i], boxes[Y_MOVE_INDEX +i].x, boxes[Y_MOVE_INDEX +i].y);
-      if (viewMode != UV_MODE)
-        view.drawImage(handles[Z_MOVE_INDEX +i], boxes[Z_MOVE_INDEX +i].x, boxes[Z_MOVE_INDEX +i].y);
-      else
-        view.drawImage(handles[X_SCALE_INDEX], extraUVBox.x, extraUVBox.y);
-    }
+      // flat on the screen, order does not matter
+      view.drawLine(centerPoint, xPoint, xColor);
+      view.drawLine(centerPoint, yPoint, yColor);
 
-    //draw the rotation handles
-    Vec2[] handlePoint;
-    Color  handleColor;
-    for (int i = 0; i < activeRotationHandleSet.length; ++i)
-    {
-      handlePoint = activeRotationHandleSet[i].points2d;
-      handleColor = activeRotationHandleSet[i].color;
+      // Draw the handles
+      view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
+      view.drawImage(handles[X_MOVE_INDEX],  boxes[X_MOVE_INDEX].x,  boxes[X_MOVE_INDEX].y);
+      view.drawImage(handles[Y_MOVE_INDEX],  boxes[Y_MOVE_INDEX].x,  boxes[Y_MOVE_INDEX].y);
+      view.drawImage(handles[X_SCALE_INDEX], boxes[X_SCALE_INDEX].x, boxes[X_SCALE_INDEX].y);
+      view.drawImage(handles[Y_SCALE_INDEX], boxes[Y_SCALE_INDEX].x, boxes[Y_SCALE_INDEX].y);
+      view.drawImage(handles[X_SCALE_INDEX], extraUVBox.x, extraUVBox.y);
+
+      //draw the rotation handles
+      Vec2[] handlePoint;
+      Color  handleColor;
+      handlePoint = activeRotationHandleSet[0].points2d;
+      handleColor = activeRotationHandleSet[0].color;
       for (int j = 0; j < handlePoint.length-1; j++)
         view.drawLine(toPoint(handlePoint[j]), toPoint(handlePoint[j+1]), handleColor);
     }
+    else
+    {
+      int[][] order = drawingOrder(view);
+      Color handleColor;
+      Vec2[] handlePoint;
+      int handle, quadrant, start, k0;
+      quadrant = activeRotationHandleSet[0].segments/4; // Assume they all have the same amount of segments
+
+      for (int majOrdNum = 0; majOrdNum < order[0].length; majOrdNum++)
+        for (int j = 0; j < order[0].length; j++)
+          if (order[0][j] == majOrdNum)
+          {
+            if (j < 6)
+              view.drawImage(handles[j], boxes[j].x, boxes[j].y);
+            else
+            {
+              for (int minOrdNum = 0; minOrdNum < order[1].length; minOrdNum++)
+                for (int k = 0; k < order[1].length; k++)
+                  if (order[1][k] == minOrdNum)
+                    switch(k)
+                    {
+                      case 0:
+                        view.drawImage(centerhandle, boxes[j].x, boxes[j].y);
+                        break;
+                      case 1:
+                        view.drawLine(centerPoint, xPoint, xColor);
+                        break;
+                      case 2:
+                        view.drawLine(centerPoint, yPoint, yColor);
+                        break;
+                      case 3:
+                        view.drawLine(centerPoint, zPoint, zColor);
+                        break;
+                      default: // cases 4 to 15
+                        if (k > 15) 
+                          break;
+                        handle = k/4-1;
+                        k0 = 4 + (k/4-1)*4;
+                        handlePoint = activeRotationHandleSet[handle].points2d;
+                        handleColor = activeRotationHandleSet[handle].color;
+                        start = (k-k0)*quadrant;
+                        for (int s = start; s < start+quadrant; s++)
+                          view.drawLine(toPoint(handlePoint[s]), toPoint(handlePoint[s+1]), handleColor);
+                        break;
+                    }
+            }
+          }
+    }
+  }
+
+  private int[][] drawingOrder(ViewerCanvas view)
+  {
+    // Not handling UV mode
+    
+    int[] majorOrder = new int[7];
+    int[] minorOrder = new int[16];
+    Vec3[] fromCamera;
+    double[] refDepth;
+    int maxAt;
+    double maxDist;
+
+    Vec3 camOrg = view.getCamera().getCameraCoordinates().getOrigin();
+    Vec3 camAim = view.getCamera().getCameraCoordinates().getZDirection();
+
+    // Reference depths of main elements.
+    // The centerpoint repsesents the entire "inner sphere", which 
+    // contains the rotation handles and the axis lines too.
+
+    fromCamera = new Vec3[7];
+    refDepth = new double[7];
+
+    for (int i = 0; i < fromCamera.length; i++)
+    {
+      fromCamera[i] = handlePos[i].minus(camOrg);
+      majorOrder[i] = -1;
+    }
+    if (view.isPerspective())
+      for (int i = 0; i < 7; i++)
+        refDepth[i] = fromCamera[i].dot(fromCamera[i].unit()); // may be negative
+    else
+      for (int i = 0; i < 7; i++)
+        refDepth[i] = fromCamera[i].dot(camAim);
+
+    // Order numbers to the main structure
+
+    for (int onum = 0; onum < 7; onum++)
+    {
+      maxDist = Double.NEGATIVE_INFINITY;
+      maxAt = -1;
+      for (int j = 0; j < 7; j++)
+      {
+        if (majorOrder[j] == -1 && refDepth[j] > maxDist)
+        {
+          maxDist = refDepth[j];
+          maxAt = j;
+        }
+      }
+      majorOrder[maxAt] = onum;
+    }
+
+    // Reference depths of the inner elements
+
+    fromCamera = new Vec3[16];
+    refDepth = new double[16];
+
+    fromCamera[0]  = center.minus(camOrg);
+    fromCamera[1]  = xpos.minus(camOrg);
+    fromCamera[2]  = ypos.minus(camOrg);
+    fromCamera[3]  = zpos.minus(camOrg);
+    fromCamera[4]  = center.plus (yAxis3D).plus (zAxis3D).minus(camOrg);
+    fromCamera[5]  = center.minus(yAxis3D).plus (zAxis3D).minus(camOrg);
+    fromCamera[6]  = center.minus(yAxis3D).minus(zAxis3D).minus(camOrg);
+    fromCamera[7]  = center.plus (yAxis3D).minus(zAxis3D).minus(camOrg);
+    fromCamera[8]  = center.plus (zAxis3D).plus (xAxis3D).minus(camOrg);
+    fromCamera[9]  = center.minus(zAxis3D).plus (xAxis3D).minus(camOrg);
+    fromCamera[10] = center.minus(zAxis3D).minus(xAxis3D).minus(camOrg);
+    fromCamera[11] = center.plus (zAxis3D).minus(xAxis3D).minus(camOrg);
+    fromCamera[12] = center.plus (xAxis3D).plus (yAxis3D).minus(camOrg);
+    fromCamera[13] = center.minus(xAxis3D).plus (yAxis3D).minus(camOrg);
+    fromCamera[14] = center.minus(xAxis3D).minus(yAxis3D).minus(camOrg);
+    fromCamera[15] = center.plus (xAxis3D).minus(yAxis3D).minus(camOrg);
+
+    refDepth = new double[16];
+    if (view.isPerspective())
+      for (int i = 0; i < 16; i++)
+        refDepth[i] = fromCamera[i].dot(fromCamera[i].unit()); // may be negative
+    else
+      for (int i = 0; i < 16; i++)
+        refDepth[i] = fromCamera[i].dot(camAim);
+
+    // order numbers to the inner "sphere"
+
+    for (int i = 0; i < 16; i++)
+      minorOrder[i] = -1;
+    for (int onum = 0; onum < 16; onum++)
+    {
+      maxDist = Double.NEGATIVE_INFINITY;
+      maxAt = -1;
+      for (int j = 0; j < 16; j++)
+      {
+        if (minorOrder[j] == -1 && refDepth[j] > maxDist)
+        {
+          maxDist = refDepth[j];
+          maxAt = j;
+        }
+      }
+      minorOrder[maxAt] = onum;
+    }
+
+    return new int[][]{majorOrder, minorOrder};
   }
 
   @Override
@@ -597,7 +749,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   }
 
   // This is for the center handle, when handling a mesh
-  
+
   public void mousePressedOnHandle(WidgetMouseEvent ev, ViewerCanvas view, BoundingBox selectionBounds, Vec3 handleLocation)
   {
     center = view.getCamera().getViewToWorld().times(selectionBounds.getCenter());
@@ -818,7 +970,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     return r;
   }
 
-  /* 
+  /*
     This is a value that really should be provoded by the view camera object.
 
     The method should be used, when the view is in perspective mode.

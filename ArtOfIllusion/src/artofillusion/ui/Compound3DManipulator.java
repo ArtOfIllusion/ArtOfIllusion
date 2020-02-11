@@ -41,14 +41,14 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private boolean dragging;
   private Point baseClick;
   private Vec3 dragStartPosition;
-  private Vec3 xaxis, yaxis, zaxis;
-  private Vec2 x2DaxisNormed, y2DaxisNormed, z2DaxisNormed, screenX, screenY, screenZ, axisCenter;
+  private Vec3 xDir3D, yDir3D, zDir3D;
+  private Vec2 xDir2D, yDir2D, zDir2D;
   private Mat4 worldToScreen;
   private double len, handleSize;
   private Vec3 pqnModeAxes[];
   private int rotSegment;
   private double rotAngle;
-  private Point centerPoint;
+  private Point centerPoint, xPoint, yPoint, zPoint;
   private Vec3 center;
   private double axisLength, orAxisLength;
   private RotationHandle[] xyzRotHandles;
@@ -60,24 +60,24 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private boolean rotateAroundSelectionCenter = true;
 
   public final static ViewMode XYZ_MODE = new ViewMode();
-  public final static ViewMode UV_MODE = new ViewMode();
+  public final static ViewMode UV_MODE  = new ViewMode();
   public final static ViewMode PQN_MODE = new ViewMode();
 
   /** @deprecated Redirects to PQN_MODE */
   @Deprecated
   public final static ViewMode NPQ_MODE = PQN_MODE;
 
-  private static final int HANDLE_SIZE = 12;
+  private static final int HANDLE_SIZE = 11;
 
-  public final static short X_MOVE_INDEX = 0;
-  public final static short X_SCALE_INDEX = 1;
-  public final static short Y_MOVE_INDEX = 2;
-  public final static short Y_SCALE_INDEX = 3;
-  public final static short Z_MOVE_INDEX = 4;
-  public final static short Z_SCALE_INDEX = 5;
-  public final static short CENTER_INDEX = 6;
-  public final static short ROTATE_INDEX = 7;
-  public final static short TOOL_HANDLE = 8;
+  public final static short X_MOVE_INDEX   = 0;
+  public final static short X_SCALE_INDEX  = 1;
+  public final static short Y_MOVE_INDEX   = 2;
+  public final static short Y_SCALE_INDEX  = 3;
+  public final static short Z_MOVE_INDEX   = 4;
+  public final static short Z_SCALE_INDEX  = 5;
+  public final static short CENTER_INDEX   = 6;
+  public final static short ROTATE_INDEX   = 7;
+  public final static short TOOL_HANDLE    = 8;
   public final static short UV_EXTRA_INDEX = 9;
 
   public static final Axis X = new Axis("x");
@@ -107,22 +107,22 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   static
   {
-    xyzHandleImages[X_MOVE_INDEX] = loadImage("xhandle.gif");
+    xyzHandleImages[X_MOVE_INDEX]  = loadImage("xhandle.gif");
     xyzHandleImages[X_SCALE_INDEX] = loadImage("xscale.gif");
-    xyzHandleImages[Y_MOVE_INDEX] = loadImage("yhandle.gif");
+    xyzHandleImages[Y_MOVE_INDEX]  = loadImage("yhandle.gif");
     xyzHandleImages[Y_SCALE_INDEX] = loadImage("yscale.gif");
-    xyzHandleImages[Z_MOVE_INDEX] = loadImage("zhandle.gif");
+    xyzHandleImages[Z_MOVE_INDEX]  = loadImage("zhandle.gif");
     xyzHandleImages[Z_SCALE_INDEX] = loadImage("zscale.gif");
-    uvHandleImages[X_MOVE_INDEX] = loadImage("uhandle.gif");
-    uvHandleImages[X_SCALE_INDEX] = loadImage("uvscale.gif");
-    uvHandleImages[Y_MOVE_INDEX] = loadImage("vhandle.gif");
-    uvHandleImages[Y_SCALE_INDEX] = loadImage("uvscale.gif");
+    uvHandleImages[X_MOVE_INDEX]   = loadImage("uhandle.gif");
+    uvHandleImages[X_SCALE_INDEX]  = loadImage("uvscale.gif");
+    uvHandleImages[Y_MOVE_INDEX]   = loadImage("vhandle.gif");
+    uvHandleImages[Y_SCALE_INDEX]  = loadImage("uvscale.gif");
     centerhandle = loadImage("centerhandle.gif");
-    pqnHandleImages[X_MOVE_INDEX] = loadImage("phandle.gif");
+    pqnHandleImages[X_MOVE_INDEX]  = loadImage("phandle.gif");
     pqnHandleImages[X_SCALE_INDEX] = loadImage("xscale.gif");
-    pqnHandleImages[Y_MOVE_INDEX] = loadImage("qhandle.gif");
+    pqnHandleImages[Y_MOVE_INDEX]  = loadImage("qhandle.gif");
     pqnHandleImages[Y_SCALE_INDEX] = loadImage("yscale.gif");
-    pqnHandleImages[Z_MOVE_INDEX] = loadImage("nhandle.gif");
+    pqnHandleImages[Z_MOVE_INDEX]  = loadImage("nhandle.gif");
     pqnHandleImages[Z_SCALE_INDEX] = loadImage("zscale.gif");
   }
 
@@ -145,9 +145,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   public Compound3DManipulator()
   {
-    xaxis = Vec3.vx();
-    yaxis = Vec3.vy();
-    zaxis = Vec3.vz();
+    xDir3D = Vec3.vx();
+    yDir3D = Vec3.vy();
+    zDir3D = Vec3.vz();
     xyzRotHandles = new RotationHandle[3];
     boxes = new Rectangle[7];
     extraUVBox = new Rectangle();
@@ -312,23 +312,23 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     // Which axes are active?
     if (viewMode == XYZ_MODE)
     {
-      xaxis = Vec3.vx();
-      yaxis = Vec3.vy();
-      zaxis = Vec3.vz();
+      xDir3D = Vec3.vx();
+      yDir3D = Vec3.vy();
+      zDir3D = Vec3.vz();
     }
     else if (viewMode == UV_MODE)
     {
-     // Let's have this in screen coordinates. 
+     // Let's have this in screen coordinates, y up and x ponting right
       CoordinateSystem coords = view.getCamera().getCameraCoordinates();
-      xaxis = coords.getZDirection().cross(coords.getUpDirection());
-      yaxis = coords.getUpDirection();
-      zaxis = coords.getZDirection().times(-1);
+      xDir3D = coords.getZDirection().cross(coords.getUpDirection());
+      yDir3D = coords.getUpDirection();
+      zDir3D = coords.getZDirection().times(-1);
     }
     else
     {
-      xaxis = pqnModeAxes[0];
-      yaxis = pqnModeAxes[1];
-      zaxis = pqnModeAxes[2];
+      xDir3D = pqnModeAxes[0];
+      yDir3D = pqnModeAxes[1];
+      zDir3D = pqnModeAxes[2];
     }
 
     // How large the manipulator and the handles would be in the scene
@@ -345,61 +345,76 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     worldToScreen = view.getCamera().getWorldToScreen();
 
-    Vec3 xpos = center.plus(xaxis.times(len));
-    Vec3 ypos = center.plus(yaxis.times(len));
-    Vec3 zpos = center.plus(zaxis.times(len));
-    Vec3 xHandlePos = center.plus(xaxis.times(len + handleSize));
-    Vec3 yHandlePos = center.plus(yaxis.times(len + handleSize));
-    Vec3 zHandlePos = center.plus(zaxis.times(len + handleSize));
-    Vec3 xHandleOffset = center.plus(xaxis.times(len + handleSize*1.5));
-    Vec3 yHandleOffset = center.plus(yaxis.times(len + handleSize*1.5));
-    Vec3 zHandleOffset = center.plus(zaxis.times(len + handleSize*1.5));
-    Vec2 x2DHandleOffset = worldToScreen.timesXY(xHandleOffset);
-    Vec2 y2DHandleOffset = worldToScreen.timesXY(yHandleOffset);
-    Vec2 z2DHandleOffset = worldToScreen.timesXY(zHandleOffset);
-    axisCenter = worldToScreen.timesXY(center);
-    screenX = worldToScreen.timesXY(xpos);
-    screenY = worldToScreen.timesXY(ypos);
-    screenZ = worldToScreen.timesXY(zpos);
-    x2DHandleOffset.subtract(screenX);
-    y2DHandleOffset.subtract(screenY);
-    z2DHandleOffset.subtract(screenZ);
-    Vec2 screenXHandle = worldToScreen.timesXY(xHandlePos);
-    Vec2 screenYHandle = worldToScreen.timesXY(yHandlePos);
-    Vec2 screenZHandle = worldToScreen.timesXY(zHandlePos);
-    x2DaxisNormed = screenX.minus(axisCenter).unit();
-    y2DaxisNormed = screenY.minus(axisCenter).unit();
-    z2DaxisNormed = screenZ.minus(axisCenter).unit();
-    centerPoint = new Point((int) Math.round(axisCenter.x), (int) Math.round(axisCenter.y));
-    boxes[CENTER_INDEX].x = (int)(centerPoint.x - HANDLE_SIZE/2);
-    boxes[CENTER_INDEX].y = (int)(centerPoint.y - HANDLE_SIZE/2);
-    for (int i = 0; i < 2; i++)
-    {
-      boxes[X_MOVE_INDEX +i].x = (int)( screenXHandle.x - HANDLE_SIZE/2  + i * x2DHandleOffset.x);
-      boxes[X_MOVE_INDEX +i].y = (int)( screenXHandle.y - HANDLE_SIZE/2  + i * x2DHandleOffset.y);
-    }
-    for (int i = 0; i < 2; i++)
-    {
-      boxes[Y_MOVE_INDEX +i].x = (int)( screenYHandle.x - HANDLE_SIZE/2  + i * y2DHandleOffset.x);
-      boxes[Y_MOVE_INDEX +i].y = (int)( screenYHandle.y - HANDLE_SIZE/2  + i * y2DHandleOffset.y);
-    }
+    Vec3 xpos = center.plus(xDir3D.times(len));
+    Vec3 ypos = center.plus(yDir3D.times(len));
+    Vec3 zpos = center.plus(zDir3D.times(len));
+    Vec3 xMovePos = center.plus(xDir3D.times(len + handleSize));
+    Vec3 yMovePos = center.plus(yDir3D.times(len + handleSize));
+    Vec3 zMovePos = center.plus(zDir3D.times(len + handleSize));
+    Vec3 xScalePos = center.plus(xDir3D.times(len + handleSize*2.5));
+    Vec3 yScalePos = center.plus(yDir3D.times(len + handleSize*2.5));
+    Vec3 zScalePos = center.plus(zDir3D.times(len + handleSize*2.5));
+
+
+    Vec2 xMovePos2D = worldToScreen.timesXY(xMovePos);
+    Vec2 yMovePos2D = worldToScreen.timesXY(yMovePos);
+    Vec2 zMovePos2D = worldToScreen.timesXY(zMovePos);
+    Vec2 xScalePos2D = worldToScreen.timesXY(xScalePos);
+    Vec2 yScalePos2D = worldToScreen.timesXY(yScalePos);
+    Vec2 zScalePos2D = worldToScreen.timesXY(zScalePos);
+    Vec2 center2D = worldToScreen.timesXY(center);
+    Vec2 xPos2D = worldToScreen.timesXY(xpos);
+    Vec2 yPos2D = worldToScreen.timesXY(ypos);
+    Vec2 zPos2D = worldToScreen.timesXY(zpos);
+
+    // The 'worldToScreen' from the 3D-direction vectors produces 2D-vectors 
+    // with all-positive elements (!?!?). Hence the subtraction of Vec2s.
+
+    (xDir2D = xPos2D.minus(center2D)).normalize();
+    (yDir2D = yPos2D.minus(center2D)).normalize();
+    (zDir2D = zPos2D.minus(center2D)).normalize();
+
+    // Pixel coordinates
+
+    centerPoint = toPoint(center2D);
+    xPoint = toPoint(xPos2D);
+    yPoint = toPoint(yPos2D);
+    zPoint = toPoint(zPos2D);
+
+    boxes[CENTER_INDEX].x  = (int)(centerPoint.x - HANDLE_SIZE/2);
+    boxes[CENTER_INDEX].y  = (int)(centerPoint.y - HANDLE_SIZE/2);
+
+    boxes[X_MOVE_INDEX].x  = (int)(xMovePos2D.x  - HANDLE_SIZE/2);
+    boxes[X_MOVE_INDEX].y  = (int)(xMovePos2D.y  - HANDLE_SIZE/2);
+    boxes[X_SCALE_INDEX].x = (int)(xScalePos2D.x - HANDLE_SIZE/2);
+    boxes[X_SCALE_INDEX].y = (int)(xScalePos2D.y - HANDLE_SIZE/2);
+
+    boxes[Y_MOVE_INDEX].x  = (int)(yMovePos2D.x  - HANDLE_SIZE/2);
+    boxes[Y_MOVE_INDEX].y  = (int)(yMovePos2D.y  - HANDLE_SIZE/2);
+    boxes[Y_SCALE_INDEX].x = (int)(yScalePos2D.x - HANDLE_SIZE/2);
+    boxes[Y_SCALE_INDEX].y = (int)(yScalePos2D.y - HANDLE_SIZE/2);
+
     if (viewMode != UV_MODE)
-      for (int i = 0; i < 2; i++)
-      {
-        boxes[Z_MOVE_INDEX +i].x = (int)( screenZHandle.x - HANDLE_SIZE/2  + i * z2DHandleOffset.x);
-        boxes[Z_MOVE_INDEX +i].y = (int)( screenZHandle.y - HANDLE_SIZE/2  + i * z2DHandleOffset.y);
-      }
+    {
+      boxes[Z_MOVE_INDEX].x  = (int)(zMovePos2D.x  - HANDLE_SIZE/2);
+      boxes[Z_MOVE_INDEX].y  = (int)(zMovePos2D.y  - HANDLE_SIZE/2);
+      boxes[Z_SCALE_INDEX].x = (int)(zScalePos2D.x - HANDLE_SIZE/2);
+      boxes[Z_SCALE_INDEX].y = (int)(zScalePos2D.y - HANDLE_SIZE/2);
+    }
     else
     {
       extraUVBox.x = boxes[X_SCALE_INDEX].x;
       extraUVBox.y = boxes[Y_SCALE_INDEX].y;
     }
+
+    // Choose the handle icons
+
     if (viewMode == XYZ_MODE)
       activeRotationHandleSet = xyzRotHandles;
     else if (viewMode == UV_MODE)
     {
       activeRotationHandleSet = uvRotationHandle;
-      activeRotationHandleSet[0].setAxis(zaxis, xaxis);
+      activeRotationHandleSet[0].setAxis(zDir3D, xDir3D);
     }
     else if (viewMode == PQN_MODE)
       activeRotationHandleSet = pqnRotHandles;
@@ -477,9 +492,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       zColor = handleRed;
       handles = pqnHandleImages;
     }
-    view.drawLine(centerPoint, new Point((int) screenX.x, (int) screenX.y), xColor);
-    view.drawLine(centerPoint, new Point((int) screenY.x, (int) screenY.y), yColor);
-    view.drawLine(centerPoint, new Point((int) screenZ.x, (int) screenZ.y), zColor);
+    view.drawLine(centerPoint, xPoint, xColor);
+    view.drawLine(centerPoint, yPoint, yColor);
+    view.drawLine(centerPoint, zPoint, zColor); // Even in UV-mode. Doesn't hurt.
 
     // Draw the handles.
     view.drawImage(centerhandle, boxes[CENTER_INDEX].x, boxes[CENTER_INDEX].y);
@@ -494,13 +509,14 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
 
     //draw the rotation handles
+    Vec2[] handlePoint;
+    Color  handleColor;
     for (int i = 0; i < activeRotationHandleSet.length; ++i)
     {
-      RotationHandle rotHandle = activeRotationHandleSet[i];
-      for (int j = 0; j < rotHandle.points2d.length-1; j++)
-        view.drawLine(new Point((int) rotHandle.points2d[j].x,   (int) rotHandle.points2d[j].y),
-                      new Point((int) rotHandle.points2d[j+1].x, (int) rotHandle.points2d[j+1].y), 
-                      rotHandle.color);
+      handlePoint = activeRotationHandleSet[i].points2d;
+      handleColor = activeRotationHandleSet[i].color;
+      for (int j = 0; j < handlePoint.length-1; j++)
+        view.drawLine(toPoint(handlePoint[j]), toPoint(handlePoint[j+1]), handleColor);
     }
   }
 
@@ -617,7 +633,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
     if (dragAxis == ALL)
     {
-      Vec2 disp = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
+      Vec2 disp = toVec2(baseClick, ev.getPoint());
       Vec3 drag;
       if (ev.isControlDown())
         drag = view.getCamera().getCameraCoordinates().getZDirection().times(-disp.y*0.01);
@@ -641,18 +657,18 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
     if (dragAxis == X || dragAxis == U || dragAxis == P)
     {
-      dragDir3D = xaxis;
-      dragDir2D = x2DaxisNormed;
+      dragDir3D = xDir3D;
+      dragDir2D = xDir2D;
     }
     else if (dragAxis == Y || dragAxis == V || dragAxis == Q)
     {
-      dragDir3D = yaxis;
-      dragDir2D = y2DaxisNormed;
+      dragDir3D = yDir3D;
+      dragDir2D = yDir2D;
     }
     else
     {
-      dragDir3D = zaxis;
-      dragDir2D = z2DaxisNormed;
+      dragDir3D = zDir3D;
+      dragDir2D = zDir2D;
     }
 
     Vec3 camZDir = view.getCamera().getCameraCoordinates().getZDirection();
@@ -660,7 +676,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     Vec3 camYDir = view.getCamera().getCameraCoordinates().getUpDirection();
     Vec3 camXDir = camZDir.cross(camYDir).unit();
 
-    Vec2 mouseDrag = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
+    Vec2 mouseDrag = toVec2(baseClick, ev.getPoint());
     Vec2 drag2D = dragDir2D.times(mouseDrag.dot(dragDir2D));
     Vec3 dragProjected = camXDir.times(drag2D.x).minus(camYDir.times(drag2D.y));
     Vec3 dirProjected = dragProjected.unit();
@@ -677,11 +693,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     double dragDistance = dragProjected.dot(dragDir3D);
     double axisProjectionScale = Math.abs(dirProjected.dot(dragDir3D));
 
-    // Mouse may have returned to starting line 
-    //   --> drag vector length = 0.0
-    //   --> axis scale = 0.0
-
-    if (axisProjectionScale != 0.0)
+    if (axisProjectionScale != 0.0) // else drag distance = 0 already and needs no scaling
       dragDistance /= axisProjectionScale*axisProjectionScale;
 
     if (isShiftDown)
@@ -699,7 +711,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   {
     boolean isShiftDown = ev.isShiftDown();
 
-    Vec2 disp = new Vec2(ev.getPoint().x - baseClick.x, ev.getPoint().y - baseClick.y );
+    Vec2 disp = toVec2(baseClick, ev.getPoint());
     Vec2 vector = currentRotationHandle.points2d[rotSegment+1].minus(currentRotationHandle.points2d[rotSegment]);
     vector.normalize();
     rotAngle = vector.dot(disp)/70;
@@ -723,8 +735,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     boolean isCtrlDown = ( ev.getModifiers() & ActionEvent.CTRL_MASK ) != 0;
     double scaleX, scaleY, scaleZ;
 
-    Vec2 base = new Vec2(baseClick.x - centerPoint.x, baseClick.y - centerPoint.y);
-    Vec2 current = new Vec2(p.x - centerPoint.x, p.y - centerPoint.y);
+    Vec2 base = toVec2(centerPoint, baseClick);
+    Vec2 current = toVec2(centerPoint, p);
     double scale = base.dot(current);
     if (base.length() < 1)
       scale = 1;
@@ -759,8 +771,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       }
       else if (dragAxis == UV)
       {
-        scaleX = x2DaxisNormed.dot(current)/x2DaxisNormed.dot(base);
-        scaleY = y2DaxisNormed.dot(current)/y2DaxisNormed.dot(base);
+        scaleX = xDir2D.dot(current)/xDir2D.dot(base);
+        scaleY = yDir2D.dot(current)/yDir2D.dot(base);
         if (isShiftDown)
         {
           if (scaleX < 1 && scaleY < 1)
@@ -769,7 +781,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
             scaleX = scaleZ = scaleY = Math.max(scaleX, scaleY);
         }
       }
-      CoordinateSystem coords = new CoordinateSystem(center, zaxis, yaxis);
+      CoordinateSystem coords = new CoordinateSystem(center, zDir3D, yDir3D);
       Mat4 m = Mat4.scale(scaleX, scaleY, scaleZ).times(coords.toLocal());
       m = coords.fromLocal().times(m);
       if (dragAxis == UV)
@@ -812,7 +824,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     The method should be used, when the view is in perspective mode.
     In parallel mode it just return the distToScreen of Camera.
   */
-  
+
   private double calculateProjectionDistance(ViewerCanvas view)
   {
     if (! view.isPerspective())
@@ -828,6 +840,16 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       projectionDist = view.getCamera().getDistToScreen();
 
     return projectionDist;
+  }
+
+  private Point toPoint(Vec2 v)
+  {
+    return new Point((int)Math.round(v.x), (int)Math.round(v.y));
+  }
+
+  private Vec2 toVec2(Point start, Point end)
+  {
+     return new Vec2(end.x - start.x, end.y - start.y);
   }
 
   /**
@@ -865,11 +887,11 @@ public class Compound3DManipulator extends EventSource implements Manipulator
       points3d = new Vec3[segments+1];
       points2d = new Vec2[segments+1];
       if (axis == X || axis == U || axis == P)
-        setAxis(xaxis, yaxis);
+        setAxis(xDir3D, yDir3D);
       else if (axis == Y || axis == V || axis == Q)
-        setAxis(yaxis, zaxis);
+        setAxis(yDir3D, zDir3D);
       else
-        setAxis(zaxis, xaxis);
+        setAxis(zDir3D, xDir3D);
     }
 
     /**

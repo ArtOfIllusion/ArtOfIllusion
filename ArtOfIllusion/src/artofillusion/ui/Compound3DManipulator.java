@@ -455,6 +455,14 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
     findHandleLocations(center, view);
 
+    // Don't draw if the selection too close or behind the viewing point
+    if (view.isPerspective())
+      if (center.
+          minus(view.getCamera().getCameraCoordinates().getOrigin()).
+          dot(view.getCamera().getCameraCoordinates().getZDirection())
+          < 0.5)
+        return;
+
     //draw rotation feedback if appropriate
     if (dragging && dragHandleType == ROTATE)
     {

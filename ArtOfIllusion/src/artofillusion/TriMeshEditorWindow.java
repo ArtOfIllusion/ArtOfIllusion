@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2012 by Peter Eastman
+/* Copyright (C) 1999-2020 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -1360,6 +1360,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
     // Make sure this will still be a valid object.
 
+    boolean multipleBreaks = false;
     for (int i = 0; i < vert.length; i++)
     {
       int e[] = vert[i].getEdges();
@@ -1375,23 +1376,25 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       }
       if (!deleteFace[fprev] && (edge[e[0]].f2 == -1 || deleteFace[edge[e[0]].f1]))
         breaks++;
-      int vertFaceCount[] = new int [vert.length];
-      for (int j = 0; j < face.length; j++)
-        if (!deleteFace[j])
-        {
-          vertFaceCount[face[j].v1]++;
-          vertFaceCount[face[j].v2]++;
-          vertFaceCount[face[j].v3]++;
-        }
-      boolean strayVert = false;
-      for (int j = 0; j < vertFaceCount.length; j++)
-        if (!deleteVert[j] && vertFaceCount[j] == 0)
-          strayVert = true;
-      if (breaks > 1 || strayVert)
+      if (breaks > 1)
+        multipleBreaks = true;
+    }
+    int vertFaceCount[] = new int [vert.length];
+    for (int j = 0; j < face.length; j++)
+      if (!deleteFace[j])
       {
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("illegalDelete")), BStandardDialog.ERROR).showMessageDialog(this);
-        return;
+        vertFaceCount[face[j].v1]++;
+        vertFaceCount[face[j].v2]++;
+        vertFaceCount[face[j].v3]++;
       }
+    boolean strayVert = false;
+    for (int j = 0; j < vertFaceCount.length; j++)
+      if (!deleteVert[j] && vertFaceCount[j] == 0)
+        strayVert = true;
+    if (multipleBreaks || strayVert)
+    {
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("illegalDelete")), BStandardDialog.ERROR).showMessageDialog(this);
+      return;
     }
 
     // Find the new lists of vertices and faces.
@@ -1478,9 +1481,12 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     {
       int r1 = newVertIndex[edge[i].v1];
       int r2 = newVertIndex[edge[i].v2];
-      for (int j = 0; j < newedge.length; j++)
-        if ((r1 == newedge[j].v1 && r2 == newedge[j].v2) || (r1 == newedge[j].v2 && r2 == newedge[j].v1))
-          newedge[j].smoothness = edge[i].smoothness;
+      if (r1 > -1)
+      {
+        for (int j : newmesh.getVertex(r1).getEdges())
+          if ((r1 == newedge[j].v1 && r2 == newedge[j].v2) || (r1 == newedge[j].v2 && r2 == newedge[j].v1))
+            newedge[j].smoothness = edge[i].smoothness;
+      }
     }
     setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {newmesh, theMesh}));
     setMesh(newmesh);

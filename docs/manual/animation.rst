@@ -78,7 +78,7 @@ is held down as well, the score can be scaled. The mouse wheel can also be used 
 .. _keyframes:
 
 Keyframes
-=========
+*********
 
 Animation in Art of Illusion works by defining certain key actions, e.g. moving an object to a certain position,
 defining a particular skeleton pose etc., at specific points in time. These points are called keyframes. Having defined
@@ -160,14 +160,16 @@ mouse button over the relevant track in the list on the score or via the bottom 
 
 .. _rigid_tracks:
 
-6.2.1 Basic Rigid Transformation Tracks
+Basic Rigid Transformation Tracks
+=================================
 
 This refers to tracks that alter the object's position and orientation without any geometric distortion of the object,
 i.e. **Position** and **Rotation** tracks.
 
 .. _pos_track:
 
-**POSITION TRACKS**
+Position Tracks
+~~~~~~~~~~~~~~~
 
 To set up a basic Position Track, select the object and choose **Position -> XYZ (One Track)** from the :ref:`list of
 tracks<tracks>` in the **Animation** Menu. At the most basic level, all you need to do is to move the green time marker
@@ -185,6 +187,7 @@ and plot views below right resulting in the animation below:
 .. _pos_track_op:
 
 POSITION TRACK OPTIONS
+``````````````````````
 
 There are some options available for Position tracks. To bring up the Track Options dialogue, either double-click on the
 track name on the score or select the track and click on **Animation -> Edit Track**. This will display a dialogue box
@@ -274,6 +277,7 @@ own co-ordinate system which is defined via the object layout.
 .. _pos_key_edit:
 
 EDITING POSITION KEYFRAMES
+``````````````````````````
 
 Keyframes can be edited by double-clicking them on the score or by selecting a keyframe from the Position track and
 clicking on **Animation -> Edit Keyframe**. This displays the following dialogue:
@@ -294,7 +298,10 @@ It is also possible to set up separate position tracks to allow independent cont
 directions. This can be done automatically by selecting **Animation -> Add Track to Selected Objects -> Position -> XYZ (3
 Tracks)**. In this instance 3 tracks are produced each with **Track Affects** set to one of X, Y or Z.
 
-**ROTATION TRACKS**
+.. _rot_track:
+
+Rotation Tracks
+~~~~~~~~~~~~~~~
 
 Basic rotation tracks are again created by selecting **Animation -> Add Track to Selected Objects -> Rotation -> XYZ (One
 Track)**. The basic method of setting up a track is similar to Position Tracks; move to the appropriate time, rotate the
@@ -305,7 +312,8 @@ rotating in the x and z axes set up with 2 keyframes:
 
 .. figure:: animation/box_rot.gif
 
-**ROTATION TRACK OPTIONS**
+ROTATION TRACK OPTIONS
+``````````````````````
 
 The options dialogue for Rotations is displayed by double-clicking the track name and looks as follows:
 

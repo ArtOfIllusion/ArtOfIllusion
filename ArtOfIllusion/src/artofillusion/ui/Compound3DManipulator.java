@@ -344,8 +344,17 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     else
     {
-      handleSize = HANDLE_SIZE / view.getScale();
-      len = axisLength / view.getScale();
+      if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+      {
+        double projectionDist = calculateProjectionDistance(view);
+        handleSize = HANDLE_SIZE/projectionDist/5.0;
+        len = axisLength/projectionDist/5.0;
+      }
+      else
+      {
+        handleSize = HANDLE_SIZE/view.getScale();
+        len = axisLength/view.getScale();
+      }
     }
     worldToScreen = view.getCamera().getWorldToScreen();
 
@@ -987,14 +996,11 @@ public class Compound3DManipulator extends EventSource implements Manipulator
 
   private double calculateProjectionDistance(ViewerCanvas view)
   {
-    if (! view.isPerspective())
-      return view.getCamera().getDistToScreen();
-
     double projectionDist;
     if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
     {
       double edgeAngle = (Math.PI - Math.toRadians(((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()))/2.0;
-      projectionDist = Math.tan(edgeAngle)/Camera.DEFAULT_DISTANCE_TO_SCREEN*view.getBounds().height/view.getScale()*10;
+      projectionDist = Math.tan(edgeAngle)/Camera.DEFAULT_DISTANCE_TO_SCREEN*view.getBounds().height/10.0;
     }
     else
       projectionDist = view.getCamera().getDistToScreen();

@@ -69,7 +69,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
-    if (!dragInProgress && manipulator.getViewMode() == Compound3DManipulator.NPQ_MODE && selectionBounds != null)
+    if (!dragInProgress && manipulator.getViewMode() == Compound3DManipulator.PQN_MODE && selectionBounds != null)
     {
       // Calculate the axis directions.
 
@@ -89,7 +89,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
       else
         updir = avgNorm.cross(Vec3.vy());
       updir.normalize();
-      manipulator.setNPQAxes(avgNorm, updir, avgNorm.cross(updir));
+      manipulator.setPQNAxes(updir.cross(avgNorm), updir, avgNorm);
     }
     manipulator.draw(view, selectionBounds);
     if (!dragInProgress)
@@ -184,12 +184,12 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     int selected[] = controller.getSelectionDistance();
     Vec3 v[] = new Vec3 [baseVertPos.length];
     for (int i = 0; i < v.length; i++)
-      {
-        if (selected[i] == 0)
-          v[i] = transform.times(baseVertPos[i]).minus(baseVertPos[i]);
-        else
-          v[i] = new Vec3();
-      }
+    {
+      if (selected[i] == 0)
+        v[i] = transform.times(baseVertPos[i]).minus(baseVertPos[i]);
+      else
+        v[i] = new Vec3();
+    }
     if (theFrame instanceof MeshEditorWindow)
       ((MeshEditorWindow) theFrame).adjustDeltas(v);
     for (int i = 0; i < v.length; i++)
@@ -210,7 +210,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
       if (mode == Compound3DManipulator.XYZ_MODE)
         manipulator.setViewMode(Compound3DManipulator.UV_MODE);
       else if (mode == Compound3DManipulator.UV_MODE)
-        manipulator.setViewMode(Compound3DManipulator.NPQ_MODE);
+        manipulator.setViewMode(Compound3DManipulator.PQN_MODE);
       else
         manipulator.setViewMode(Compound3DManipulator.XYZ_MODE);
       theWindow.updateImage();

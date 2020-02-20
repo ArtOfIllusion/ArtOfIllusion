@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -103,7 +104,7 @@ public class SkinDialog extends BDialog
     coords.setOrigin(coords.getOrigin().plus(centerOffset));
     window.addObject(preview.getObject().getObject(), coords, "Skinned Object "+(counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {window.getScene().getNumObjects()-1}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, window.getScene().getNumObjects()-1));
     window.updateImage();
     dispose();
   }

@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2006 by Peter Eastman
    Modifications copyright (C) 2017 Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -158,7 +159,7 @@ public class CurveViewer extends MeshViewer
               selected[i] = false;
           selected[j] = true;
           ((CurveEditorWindow) controller).findSelectionDistance();
-          currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
+          currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, controller, controller.getSelectionMode(), oldSelection));
           controller.setSelection(selected);
           activeTool.getWindow().updateMenus();
         }
@@ -248,7 +249,7 @@ public class CurveViewer extends MeshViewer
     for (int k = 0; k < selected.length; k++)
       if (selected[k] != oldSelection[k])
       {
-        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
+        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, controller, controller.getSelectionMode(), oldSelection));
         break;
       }
     controller.setSelection(selected);

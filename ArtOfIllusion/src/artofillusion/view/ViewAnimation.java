@@ -1,4 +1,5 @@
 /* Copyright (C) 2016-2019 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -441,7 +442,7 @@ public class ViewAnimation
       if (boundCamera != null)
       {
         boundCamera.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
-        UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, new Object [] {boundCamera.getCoords(), startCoords});
+        UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, boundCamera.getCoords(), startCoords);
         moveChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
         window.setUndoRecord(undo);
       }
@@ -457,7 +458,7 @@ public class ViewAnimation
       CoordinateSystem coords = parent.getChildren()[i].getCoords();
       CoordinateSystem oldCoords = coords.duplicate();
       coords.transformCoordinates(transform);
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
+      undo.addCommand(UndoRecord.COPY_COORDS, coords, oldCoords);
       moveChildren(parent.getChildren()[i], transform, undo);
     }
   }

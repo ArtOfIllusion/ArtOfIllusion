@@ -1,5 +1,5 @@
 /* Copyright (C) 2006-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -405,7 +405,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       ignoreNextChange = true;
       undo = new UndoRecord(window, false);
       for (int i = 0; i < objects.length; i++)
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {objects[i].getCoords(), objects[i].getCoords().duplicate()});
+        undo.addCommand(UndoRecord.COPY_COORDS, objects[i].getCoords(), objects[i].getCoords().duplicate());
     }
     for (int i = 0; i < objects.length; i++)
     {
@@ -447,7 +447,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
     if (objects.length == 0 || objects[0].getName().equals(nameField.getText()))
       return;
     int which = window.getScene().indexOf(objects[0]);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.RENAME_OBJECT, new Object [] {which, objects[0].getName()}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.RENAME_OBJECT, which, objects[0].getName()));
     window.setObjectName(which, nameField.getText());
     if (ev instanceof KeyPressedEvent)
       window.getView().requestFocus(); // This is where they'll probably expect it to go
@@ -495,7 +495,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       for (int i = 0; i < objects.length; i++)
         if (objects[i].getObject().getTexture() != tex)
         {
-          undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].getObject(), objects[i].getObject().duplicate()});
+          undo.addCommand(UndoRecord.COPY_OBJECT, objects[i].getObject(), objects[i].getObject().duplicate());
           objects[i].setTexture(tex, tex.getDefaultMapping(objects[i].getObject()));
         }
       window.setUndoRecord(undo);
@@ -546,7 +546,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       for (int i = 0; i < objects.length; i++)
         if (objects[i].getObject().getMaterial() != mat)
         {
-          undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].getObject(), objects[i].getObject().duplicate()});
+          undo.addCommand(UndoRecord.COPY_OBJECT, objects[i].getObject(), objects[i].getObject().duplicate());
           objects[i].setMaterial(mat, noMaterial ? null : mat.getDefaultMapping(objects[i].getObject()));
         }
       window.setUndoRecord(undo);
@@ -583,7 +583,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       ignoreNextChange = true;
       undo = new UndoRecord(window, false);
       for (int i = 0; i < objects.length; i++)
-        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {objects[i].getObject(), objects[i].getObject().duplicate()});
+        undo.addCommand(UndoRecord.COPY_OBJECT, objects[i].getObject(), objects[i].getObject().duplicate());
     }
     boolean changed = false;
     for (int i = 0; i < objects.length; i++)

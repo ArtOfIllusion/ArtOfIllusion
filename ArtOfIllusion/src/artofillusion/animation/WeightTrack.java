@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -270,7 +271,7 @@ public class WeightTrack extends Track
         new String [] {Translate.text("Weight"), Translate.text("Time"), null, null, "("+Translate.text("left")+")", "("+Translate.text("right")+")"});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(parent)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(parent)));
     key.val = weightSlider.getValue();
     if (sameBox.getState())
       s.setSmoothness(s1Slider.getValue(), s2Slider.getValue());
@@ -297,7 +298,7 @@ public class WeightTrack extends Track
         {Translate.text("trackName"), Translate.text("SmoothingMethod")});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(parent)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(parent)));
     this.setName(nameField.getText());
     smoothingMethod = smoothChoice.getSelectedIndex();
   }

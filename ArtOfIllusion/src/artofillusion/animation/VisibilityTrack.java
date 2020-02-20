@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -248,7 +249,7 @@ public class VisibilityTrack extends Track
 
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(info)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(info)));
     key.val = visibleBox.getState();
     moveKeyframe(which, timeField.getValue());
   }
@@ -263,7 +264,7 @@ public class VisibilityTrack extends Track
         {nameField}, new String [] {Translate.text("trackName")});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(info)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(info)));
     this.setName(nameField.getText());
   }
 }

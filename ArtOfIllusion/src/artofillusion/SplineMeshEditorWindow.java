@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -354,7 +355,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       if (selectMode == modes.getSelection())
         return;
       if (undoItem != null)
-        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
       setSelectionMode(modes.getSelection());
       theView[currentView].getCurrentTool().activate();
     }
@@ -604,7 +605,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   public void selectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected.clone()));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
     setSelection(selected);
@@ -614,7 +615,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
 
   public void deselectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected.clone()));
     for (int i = 0; i < selected.length; i++)
       selected[i] = false;
     setSelection(selected);
@@ -625,7 +626,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   public void extendSelectionCommand()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected.clone()));
     if (selectMode == POINT_MODE)
     {
       int oldDist = tensionDistance;
@@ -663,7 +664,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     boolean newSel[] = new boolean [selected.length];
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = !selected[i];
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
     setSelection(newSel);
   }
 
@@ -700,7 +701,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
       new BStandardDialog("", Translate.text("curveNeeds3Points"), BStandardDialog.INFORMATION).showMessageDialog(this);
       return;
     }
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     v = new MeshVertex [usize-unum][vsize-vnum];
     newus = new float [usize-unum];
     newvs = new float [vsize-vnum];
@@ -820,7 +821,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
         newsel[++j+usize+usplitcount] = true;
       j++;
     }
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     theMesh.setShape(newv, newus, newvs);
     for (int k = 0; k < numParam; k++)
       if (theMesh.getParameterValues()[k] instanceof VertexParameterValue)
@@ -1036,7 +1037,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
     ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("setCurveSmoothness"),
         new Widget [] {smoothness}, new String [] {Translate.text("Smoothness")});
     if (dlg.clickedOk())
-      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, oldMesh}));
+      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, oldMesh));
     else
     {
       theMesh.copyObject(oldMesh);
@@ -1048,7 +1049,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   void reverseNormalsCommand()
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     theMesh.reverseOrientation();
     objectChanged();
     updateImage();
@@ -1058,7 +1059,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
 
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     for (int i = 0; i < smoothItem.length; i++)
       smoothItem[i].setState(false);
     smoothItem[method-2].setState(true);
@@ -1071,7 +1072,7 @@ public class SplineMeshEditorWindow extends MeshEditorWindow implements EditingW
   {
     SplineMesh theMesh = (SplineMesh) objInfo.getObject();
 
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     for (int i = 0; i < closedItem.length; i++)
       closedItem[i].setState(i == item);
     theMesh.setClosed((item == 0 || item == 2), (item == 1 || item == 2));

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes copyrignt (C) 2016 by Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -235,7 +235,7 @@ public class CreateCurveTool extends EditingTool
       UndoRecord undo = new UndoRecord(theWindow, false);
       int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
       ((LayoutWindow) theWindow).addObject(info, undo);
-      undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
+      undo.addCommand(UndoRecord.SET_SCENE_SELECTION, sel);
       theWindow.setUndoRecord(undo);
       ((LayoutWindow) theWindow).setSelection(theWindow.getScene().getNumObjects()-1);
     }

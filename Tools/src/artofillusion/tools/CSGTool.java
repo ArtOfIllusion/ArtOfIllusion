@@ -1,5 +1,6 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
    Modifications Copyright (C) 2019 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -86,7 +87,7 @@ public class CSGTool implements ModellingTool
     info.addTrack(new RotationTrack(info), 1);
     window.addObject(info, null);
     window.setSelection(scene.getNumObjects()-1);
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, new Object [] {scene.getNumObjects()-1}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, scene.getNumObjects()-1));
     window.updateImage();
   }
 }

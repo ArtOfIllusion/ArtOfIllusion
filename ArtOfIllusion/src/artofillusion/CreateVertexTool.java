@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -79,7 +80,7 @@ public class CreateVertexTool extends MeshEditingTool
     target = tmv.findClickTarget(clickPoint, uvw);
     if (target == -1)
       return;
-    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()}));
+    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, mesh, mesh.duplicate()));
     if (mode == MeshEditController.POINT_MODE)
     {
       // Create a new vertex if this is a boundary vertex.  Otherwise, just move it.
@@ -230,7 +231,7 @@ public class CreateVertexTool extends MeshEditingTool
 
     if (edge[vertEdge[0]].f2 != -1)
       return false;
-    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()}));
+    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, mesh, mesh.duplicate()));
 
     // Create a new vertex and two new faces.
 

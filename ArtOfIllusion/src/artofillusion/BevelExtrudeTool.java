@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -145,8 +146,8 @@ public class BevelExtrudeTool extends MeshEditingTool
 
     if (undo == null)
     {
-      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, origMesh});
-      undo.addCommand(UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), controller.getSelection().clone()});
+      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, mesh, origMesh);
+      undo.addCommand(UndoRecord.SET_MESH_SELECTION, controller, controller.getSelectionMode(), controller.getSelection().clone());
     }
     mesh.copyObject(beveler.bevelMesh(height, width));
     controller.setMesh(mesh);

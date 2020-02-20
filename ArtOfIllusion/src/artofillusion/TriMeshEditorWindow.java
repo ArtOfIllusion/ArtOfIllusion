@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2020 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -315,7 +316,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       if (selectMode == modes.getSelection())
         return;
       if (undoItem != null)
-        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+        setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
       setSelectionMode(modes.getSelection());
       theView[currentView].getCurrentTool().activate();
     }
@@ -1161,7 +1162,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void selectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected.clone()));
     for (int i = 0; i < selected.length; i++)
       selected[i] = true;
     if (selectMode == EDGE_MODE)
@@ -1175,7 +1176,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
   public void deselectAllCommand()
   {
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected.clone()));
     for (int i = 0; i < selected.length; i++)
       selected[i] = false;
     setSelection(selected);
@@ -1230,7 +1231,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = (edge[i].f2 == -1);
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
     setSelectionMode(EDGE_MODE);
     setSelection(newSel);
   }
@@ -1240,7 +1241,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   public void selectSelectionBoundaryCommand()
   {
     boolean newSel[] = TriMeshSelectionUtilities.findSelectionBoundary(mesh, selectMode, selected);
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
     setSelectionMode(EDGE_MODE);
     setSelection(newSel);
   }
@@ -1252,7 +1253,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     boolean newSel[] = new boolean [selected.length];
     for (int i = 0; i < newSel.length; i++)
       newSel[i] = !selected[i];
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
     setSelection(newSel);
   }
 
@@ -1266,7 +1267,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotFindEdgeLoop")), BStandardDialog.ERROR).showMessageDialog(this);
       return;
     }
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
     setSelection(newSel);
   }
 
@@ -1280,7 +1281,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotFindEdgeStrip")), BStandardDialog.ERROR).showMessageDialog(this);
       return;
     }
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected));
     setSelection(newSel);
   }
 
@@ -1293,7 +1294,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     boolean selectedVert[] = new boolean [dist.length];
     TriangleMesh.Edge edge[] = theMesh.getEdges();
 
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected.clone()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.SET_MESH_SELECTION, this, selectMode, selected.clone()));
     for (int i = 0; i < edge.length; i++)
       if ((dist[edge[i].v1] == 0 || dist[edge[i].v2] == 0) && !isEdgeHidden(i))
         selectedVert[edge[i].v1] = selectedVert[edge[i].v2] = true;
@@ -1488,7 +1489,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
             newedge[j].smoothness = edge[i].smoothness;
       }
     }
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {newmesh, theMesh}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, newmesh, theMesh));
     setMesh(newmesh);
     updateImage();
   }
@@ -1520,7 +1521,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         newmesh = TriangleMesh.subdivideButterfly(theMesh, selected, Double.MAX_VALUE);
       else
         newmesh = TriangleMesh.subdivideLinear(theMesh, selected);
-      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {newmesh, theMesh}));
+      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, newmesh, theMesh));
       setMesh(newmesh);
 
       // Update the selection.
@@ -1537,7 +1538,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
 
       i = theMesh.getVertices().length;
       newmesh = TriangleMesh.subdivideFaces(theMesh, selected);
-      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {newmesh, theMesh}));
+      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, newmesh, theMesh));
       setMesh(newmesh);
 
       // Update the selection.
@@ -1561,7 +1562,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
             new Widget[] {errorField}, new String[] {Translate.text("maxSurfaceError")});
     if (!dlg.clickedOk())
       return;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
 
     // If we are not in Edge selection mode, convert the selection to edges.
 
@@ -1606,7 +1607,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     if (dlg.showOptionDialog(this, options, options[0]) == 1)
       return;
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     theMesh.copyObject(TriangleMesh.optimizeMesh(theMesh));
     setMesh(theMesh);
     for (int i = 0; i < selected.length; i++)
@@ -1672,8 +1673,8 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
       return;
     double height = heightField.getValue();
     double width = widthField.getValue();
-    UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()});
-    undo.addCommand(UndoRecord.SET_MESH_SELECTION, new Object [] {this, selectMode, selected});
+    UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate());
+    undo.addCommand(UndoRecord.SET_MESH_SELECTION, this, selectMode, selected);
     setUndoRecord(undo);
 
     // Generate the new mesh.
@@ -1898,7 +1899,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         if ((newed[i].v1 == ed[j].v1 && newed[i].v2 == ed[j].v2) || (newed[i].v1 == ed[j].v2 && newed[i].v2 == ed[j].v1))
           newed[i].smoothness = ed[j].smoothness;
     }
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {newmesh, theMesh}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, newmesh, theMesh));
     setMesh(newmesh);
     updateImage();
   }
@@ -2026,7 +2027,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
     PanelDialog dlg = new PanelDialog(this, Translate.text("joinBoundardiesTitle"), content);
     if (!dlg.clickedOk())
       return;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {preview.getObject().getObject(), theMesh}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, preview.getObject().getObject(), theMesh));
     setMesh((Mesh) preview.getObject().getObject());
     updateImage();
   }
@@ -2465,7 +2466,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
         new Widget [] {smoothness}, new String [] {Translate.text("Smoothness")});
     processor.stopProcessing();
     if (dlg.clickedOk())
-      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, oldMesh}));
+      setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, oldMesh));
     else
     {
       theMesh.copyObject(oldMesh);
@@ -2477,7 +2478,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   public void reverseNormalsCommand()
   {
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     theMesh.reverseNormals();
     objectChanged();
     updateImage();
@@ -2487,7 +2488,7 @@ public class TriMeshEditorWindow extends MeshEditorWindow implements EditingWind
   {
     TriangleMesh theMesh = (TriangleMesh) objInfo.getObject();
 
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {theMesh, theMesh.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, theMesh, theMesh.duplicate()));
     for (int i = 0; i < smoothItem.length; i++)
       smoothItem[i].setState(false);
     smoothItem[method].setState(true);

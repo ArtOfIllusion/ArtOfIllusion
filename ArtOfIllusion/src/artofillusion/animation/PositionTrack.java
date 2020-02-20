@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -581,7 +582,7 @@ public class PositionTrack extends Track
         new String [] {"X", "Y", "Z", Translate.text("Time"), null, null, "("+Translate.text("left")+")", "("+Translate.text("right")+")"});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(info)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(info)));
     key.x = xField.getValue();
     key.y = yField.getValue();
     key.z = zField.getValue();
@@ -659,7 +660,7 @@ public class PositionTrack extends Track
         {Translate.text("trackName"), Translate.text("SmoothingMethod"), Translate.text("trackMode"), Translate.text("applyTo"), Translate.text("CoordinateSystem"), "", Translate.text("trackAffects")});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_OBJECT_INFO, info, info.duplicate()));
     this.setName(nameField.getText());
     smoothingMethod = smoothChoice.getSelectedIndex();
     mode = modeChoice.getSelectedIndex();

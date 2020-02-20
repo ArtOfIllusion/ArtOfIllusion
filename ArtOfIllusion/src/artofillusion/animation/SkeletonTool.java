@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -187,7 +188,7 @@ public class SkeletonTool extends EditingTool
       {
         // Create a new joint.
 
-        undo = new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()});
+        undo = new UndoRecord(theWindow, false, UndoRecord.COPY_OBJECT, mesh, mesh.duplicate());
         Joint j, parent = s.getJoint(mv.getSelectedJoint());
         if (parent == null)
           {
@@ -307,7 +308,7 @@ public class SkeletonTool extends EditingTool
       // Adjust a single degree of freedom.
 
       if (undo == null)
-        undo = new UndoRecord(getWindow(), false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()});
+        undo = new UndoRecord(getWindow(), false, UndoRecord.COPY_OBJECT, mesh, mesh.duplicate());
       double dist = clickPoint.x-e.getPoint().x;
       if (invertDragDir)
         dist = -dist;
@@ -368,7 +369,7 @@ public class SkeletonTool extends EditingTool
       objCoords.toLocal().transform(goal);
 
       if (undo == null)
-        undo = new UndoRecord(SkeletonTool.this.getWindow(), false, UndoRecord.COPY_OBJECT, new Object [] {mesh, mesh.duplicate()});
+        undo = new UndoRecord(SkeletonTool.this.getWindow(), false, UndoRecord.COPY_OBJECT, mesh, mesh.duplicate());
       target[jointIndex] = goal;
       converged = ik.solve(target, 100);
       if (!mv.getSkeletonDetached())

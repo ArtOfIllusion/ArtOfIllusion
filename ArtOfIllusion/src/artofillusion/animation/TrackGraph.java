@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -355,7 +356,7 @@ public class TrackGraph extends CustomWidget implements TrackDisplay
               Track tr = sel[i].track;
               for (j = 0; j < i && tr != sel[j].track; j++);
               if (j == i)
-                undo.addCommand(UndoRecord.COPY_TRACK, new Object [] {tr, tr.duplicate(tr.getParent())});
+                undo.addCommand(UndoRecord.COPY_TRACK, tr, tr.duplicate(tr.getParent()));
             }
           window.setUndoRecord(undo);
         }

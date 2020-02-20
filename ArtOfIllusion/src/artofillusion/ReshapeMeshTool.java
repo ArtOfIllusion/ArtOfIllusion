@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -76,7 +77,7 @@ public class ReshapeMeshTool extends MeshEditingTool
     int dx, dy;
 
     if (undo == null)
-      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
+      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, mesh, mesh.getVertexPositions());
     dx = dragPoint.x - clickPoint.x;
     dy = dragPoint.y - clickPoint.y;
     if (e.isShiftDown())
@@ -180,7 +181,7 @@ public class ReshapeMeshTool extends MeshEditingTool
       dx *= 10;
       dy *= 10;
     }
-    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, vert}));
+    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, mesh, vert));
     v = findDraggedPositions(vert[i], vert, dx, dy, (MeshViewer) view, e.isControlDown(), selectDist);
     mesh.setVertexPositions(v);
     controller.objectChanged();

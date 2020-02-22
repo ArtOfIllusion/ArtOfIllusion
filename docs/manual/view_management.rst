@@ -18,9 +18,9 @@ The view can be rotated by using the |rotate view| tool. It can be moved
 by using the |move view| tool. Both of these tools are affected by the
 rotation mode_ of the current view, discussed in greater detail below.
 
-.. |rotate view| image:: basics/camera_rotate.png
+.. |rotate view| image:: basics/camera_rotate.jpg
 
-.. |move view| image:: basics/camera_pan.png
+.. |move view| image:: basics/camera_pan.jpg
 
 View Zoom/Z-depth is controled primarily via the scrollwheel. It is
 also affected by the mode. If your mouse does not have a scrollwheel,

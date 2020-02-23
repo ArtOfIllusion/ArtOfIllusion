@@ -1,6 +1,5 @@
-package artofillusion.tools;
-
 /* Copyright (C) 2006-2013 by Peter Eastman and Julio Sangrador-Patón
+   Modification copyright (C) 2020 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -9,6 +8,8 @@ package artofillusion.tools;
    This program is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
+
+package artofillusion.tools;
 
 import artofillusion.*;
 import artofillusion.math.*;
@@ -262,6 +263,8 @@ public class TextTool implements ModellingTool
               e.printStackTrace();
             }
           }
+          if (type == TextType.Surface)
+            ((TriangleMesh)fullLetterOI.object).reverseNormals();
           if (type == TextType.Solid)
           {
             // Extrude the shape.

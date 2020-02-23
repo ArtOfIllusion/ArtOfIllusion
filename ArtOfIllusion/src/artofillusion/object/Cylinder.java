@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,9 +34,9 @@ public class Cylinder extends Object3D
   private static double sine[], cosine[];
   private static final Property PROPERTIES[] = new Property [] {
     new Property(Translate.text("bottomRadiusX"), 0.0, Double.MAX_VALUE, 1.0),
-      new Property(Translate.text("bottomRadiusZ"), 0.0, Double.MAX_VALUE, 1.0),
-      new Property(Translate.text("radiusRatio"), 0.0, 1.0, 1.0),
-      new Property(Translate.text("Height"), 0.0, Double.MAX_VALUE, 1.0)
+    new Property(Translate.text("bottomRadiusZ"), 0.0, Double.MAX_VALUE, 1.0),
+    new Property(Translate.text("radiusRatio"), 0.0, 1.0, 1.0),
+    new Property(Translate.text("Height"), 0.0, Double.MAX_VALUE, 1.0)
   };
 
   static
@@ -43,10 +44,10 @@ public class Cylinder extends Object3D
     sine = new double [SEGMENTS];
     cosine = new double [SEGMENTS];
     for (int i = 0; i < SEGMENTS; i++)
-      {
-        sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
-        cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
-      }
+    {
+      sine[i] = Math.sin(i*2.0*Math.PI/SEGMENTS);
+      cosine[i] = Math.cos(i*2.0*Math.PI/SEGMENTS);
+    }
   }
 
   public Cylinder(double height, double xradius, double yradius, double ratio)
@@ -124,46 +125,46 @@ public class Cylinder extends Object3D
     y1 = -height/2.0;
     y2 = height/2.0;
     if (ratio > 0.0)
+    {
+      vert = new Vec3 [2*SEGMENTS+2];
+      from = new int [5*SEGMENTS];
+      to = new int [5*SEGMENTS];
+      vert[2*SEGMENTS] = new Vec3(0.0, y1, 0.0);
+      vert[2*SEGMENTS+1] = new Vec3(0.0, y2, 0.0);
+      for (i = 0; i < SEGMENTS; i++)
       {
-        vert = new Vec3 [2*SEGMENTS+2];
-        from = new int [5*SEGMENTS];
-        to = new int [5*SEGMENTS];
-        vert[2*SEGMENTS] = new Vec3(0.0, y1, 0.0);
-        vert[2*SEGMENTS+1] = new Vec3(0.0, y2, 0.0);
-        for (i = 0; i < SEGMENTS; i++)
-          {
-            vert[i] = new Vec3(rx*cosine[i], y1, rz *sine[i]);
-            vert[i+SEGMENTS] = new Vec3(ratio*rx*cosine[i], y2, ratio*rz *sine[i]);
-            from[i] = 2*SEGMENTS;
-            to[i] = i;
-            from[i+SEGMENTS] = i;
-            to[i+SEGMENTS] = (i+1)%SEGMENTS;
-            from[i+2*SEGMENTS] = i;
-            to[i+2*SEGMENTS] = (i+1)%SEGMENTS+SEGMENTS;
-            from[i+3*SEGMENTS] = i+SEGMENTS;
-            to[i+3*SEGMENTS] = (i+1)%SEGMENTS+SEGMENTS;
-            from[i+4*SEGMENTS] = 2*SEGMENTS+1;
-            to[i+4*SEGMENTS] = i+SEGMENTS;
-          }
+        vert[i] = new Vec3(rx*cosine[i], y1, rz *sine[i]);
+        vert[i+SEGMENTS] = new Vec3(ratio*rx*cosine[i], y2, ratio*rz *sine[i]);
+        from[i] = 2*SEGMENTS;
+        to[i] = i;
+        from[i+SEGMENTS] = i;
+        to[i+SEGMENTS] = (i+1)%SEGMENTS;
+        from[i+2*SEGMENTS] = i;
+        to[i+2*SEGMENTS] = (i+1)%SEGMENTS+SEGMENTS;
+        from[i+3*SEGMENTS] = i+SEGMENTS;
+        to[i+3*SEGMENTS] = (i+1)%SEGMENTS+SEGMENTS;
+        from[i+4*SEGMENTS] = 2*SEGMENTS+1;
+        to[i+4*SEGMENTS] = i+SEGMENTS;
       }
+    }
     else
+    {
+      vert = new Vec3 [SEGMENTS+2];
+      from = new int [3*SEGMENTS];
+      to = new int [3*SEGMENTS];
+      vert[SEGMENTS] = new Vec3(0.0, y1, 0.0);
+      vert[SEGMENTS+1] = new Vec3(0.0, y2, 0.0);
+      for (i = 0; i < SEGMENTS; i++)
       {
-        vert = new Vec3 [SEGMENTS+2];
-        from = new int [3*SEGMENTS];
-        to = new int [3*SEGMENTS];
-        vert[SEGMENTS] = new Vec3(0.0, y1, 0.0);
-        vert[SEGMENTS+1] = new Vec3(0.0, y2, 0.0);
-        for (i = 0; i < SEGMENTS; i++)
-          {
-            vert[i] = new Vec3(rx*cosine[i], y1, rz *sine[i]);
-            from[i] = SEGMENTS;
-            to[i] = i;
-            from[i+SEGMENTS] = i;
-            to[i+SEGMENTS] = (i+1)%SEGMENTS;
-            from[i+2*SEGMENTS] = i;
-            to[i+2*SEGMENTS] = SEGMENTS+1;
-          }
+        vert[i] = new Vec3(rx*cosine[i], y1, rz *sine[i]);
+        from[i] = SEGMENTS;
+        to[i] = i;
+        from[i+SEGMENTS] = i;
+        to[i+SEGMENTS] = (i+1)%SEGMENTS;
+        from[i+2*SEGMENTS] = i;
+        to[i+2*SEGMENTS] = SEGMENTS+1;
       }
+    }
     return (cachedWire = new WireframeMesh(vert, from, to));
   }
 
@@ -194,55 +195,55 @@ public class Cylinder extends Object3D
     v[2] = new Vec2(-rx, 0.0);
     v[3] = new Vec2(0.0, rz);
     while (!withinTolerance(v, tol))
+    {
+      vtemp = v;
+      v = new Vec2 [v.length*2];
+      for (i = 0; i < vtemp.length; i++)
       {
-        vtemp = v;
-        v = new Vec2 [v.length*2];
-        for (i = 0; i < vtemp.length; i++)
-          {
-            v[i*2] = vtemp[i];
-            angle = 2.0*Math.PI*(i+0.5)/vtemp.length;
-            v[i*2+1] = new Vec2(rx*Math.cos(angle), -rz *Math.sin(angle));
-          }
+        v[i*2] = vtemp[i];
+        angle = 2.0*Math.PI*(i+0.5)/vtemp.length;
+        v[i*2+1] = new Vec2(rx*Math.cos(angle), -rz *Math.sin(angle));
       }
+    }
 
     // Find the list of faces.
 
     if (ratio == 0.0)
+    {
+      vertices = new Vec3 [v.length+2];
+      faces = new int [v.length*2][];
+      vertices[0] = new Vec3(0.0, y1, 0.0);
+      vertices[v.length+1] = new Vec3(0.0, y2, 0.0);
+      for (i = 0; i < v.length; i++)
       {
-        vertices = new Vec3 [v.length+2];
-        faces = new int [v.length*2][];
-        vertices[0] = new Vec3(0.0, y1, 0.0);
-        vertices[v.length+1] = new Vec3(0.0, y2, 0.0);
-        for (i = 0; i < v.length; i++)
-          {
-            vertices[i+1] = new Vec3(v[i].x, y1, v[i].y);
-            faces[i] = new int[] {i+2, i+1, 0};
-            faces[i+v.length] = new int[] {v.length+1, i+1, i+2};
-          }
-        faces[v.length-1][0] -= v.length;
-        faces[v.length*2-1][2] -= v.length;
+        vertices[i+1] = new Vec3(v[i].x, y1, v[i].y);
+        faces[i] = new int[] {i+2, i+1, 0};
+        faces[i+v.length] = new int[] {v.length+1, i+1, i+2};
       }
+      faces[v.length-1][0] -= v.length;
+      faces[v.length*2-1][2] -= v.length;
+    }
     else
+    {
+      vertices = new Vec3 [v.length*2+2];
+      faces = new int [v.length*4][];
+      vertices[0] = new Vec3(0.0, y1, 0.0);
+      vertices[v.length*2+1] = new Vec3(0.0, y2, 0.0);
+      for (i = 0; i < v.length; i++)
       {
-        vertices = new Vec3 [v.length*2+2];
-        faces = new int [v.length*4][];
-        vertices[0] = new Vec3(0.0, y1, 0.0);
-        vertices[v.length*2+1] = new Vec3(0.0, y2, 0.0);
-        for (i = 0; i < v.length; i++)
-          {
-            vertices[i+1] = new Vec3(v[i].x, y1, v[i].y);
-            vertices[i+v.length+1] = new Vec3(v[i].x*ratio, y2, v[i].y*ratio);
-            faces[i] = new int[] {i+2, i+1, 0};
-            faces[i+v.length] = new int[] {i+v.length+1, i+1, i+2};
-            faces[i+v.length*2] = new int[] {i+v.length+1, i+2, i+v.length+2};
-            faces[i+v.length*3] = new int[] {v.length*2+1, i+v.length+1, i+v.length+2};
-          }
-        faces[v.length-1][0] -= v.length;
-        faces[v.length*2-1][2] -= v.length;
-        faces[v.length*3-1][1] -= v.length;
-        faces[v.length*3-1][2] -= v.length;
-        faces[v.length*4-1][2] -= v.length;
+        vertices[i+1] = new Vec3(v[i].x, y1, v[i].y);
+        vertices[i+v.length+1] = new Vec3(v[i].x*ratio, y2, v[i].y*ratio);
+        faces[i] = new int[] {i+2, i+1, 0};
+        faces[i+v.length] = new int[] {i+v.length+1, i+1, i+2};
+        faces[i+v.length*2] = new int[] {i+v.length+1, i+2, i+v.length+2};
+        faces[i+v.length*3] = new int[] {v.length*2+1, i+v.length+1, i+v.length+2};
       }
+      faces[v.length-1][0] -= v.length;
+      faces[v.length*2-1][2] -= v.length;
+      faces[v.length*3-1][1] -= v.length;
+      faces[v.length*3-1][2] -= v.length;
+      faces[v.length*4-1][2] -= v.length;
+    }
     mesh = new TriangleMesh(vertices, faces);
     edges = mesh.getEdges();
     for (i = 0; i < edges.length; i++)
@@ -264,15 +265,15 @@ public class Cylinder extends Object3D
     point = new Vec2(0.0, 0.0);
     truePoint = new Vec2(0.0, 0.0);
     for (int i = 0; i < v.length/2; i++)
-      {
-        point.x = (v[i].x+v[i+1].x)/2.0;
-        point.y = (v[i].y+v[i+1].y)/2.0;
-        angle = 2.0*Math.PI*(i+0.5)/v.length;
-        truePoint.x = rx*Math.cos(angle);
-        truePoint.y = -rz *Math.sin(angle);
-        if (truePoint.distance(point) > tol)
-          return false;
-      }
+    {
+      point.x = (v[i].x+v[i+1].x)/2.0;
+      point.y = (v[i].y+v[i+1].y)/2.0;
+      angle = 2.0*Math.PI*(i+0.5)/v.length;
+      truePoint.x = rx*Math.cos(angle);
+      truePoint.y = -rz *Math.sin(angle);
+      if (truePoint.distance(point) > tol)
+        return false;
+    }
     return true;
   }
 
@@ -293,67 +294,67 @@ public class Cylinder extends Object3D
 
     v = new Vec2 [] {new Vec2(rx, 0.0), new Vec2(0.0, -rz), new Vec2(-rx, 0.0), new Vec2(0.0, rz)};
     while (!withinTolerance(v, tol))
+    {
+      vtemp = v;
+      v = new Vec2 [v.length*2];
+      for (int i = 0; i < vtemp.length; i++)
       {
-        vtemp = v;
-        v = new Vec2 [v.length*2];
-        for (int i = 0; i < vtemp.length; i++)
-          {
-            v[i*2] = vtemp[i];
-            angle = 2.0*Math.PI*(i+0.5)/vtemp.length;
-            v[i*2+1] = new Vec2(rx*Math.cos(angle), -rz *Math.sin(angle));
-          }
+        v[i*2] = vtemp[i];
+        angle = 2.0*Math.PI*(i+0.5)/vtemp.length;
+        v[i*2+1] = new Vec2(rx*Math.cos(angle), -rz *Math.sin(angle));
       }
+    }
 
     // Build the mesh.
 
     if (ratio == 0.0)
+    {
+      vert = new Vec3 [v.length+2];
+      norm = new Vec3 [v.length+1];
+      tri = new RenderingTriangle [v.length*2];
+      vert[0] = new Vec3(0.0, y1, 0.0);
+      vert[v.length+1] = new Vec3(0.0, y2, 0.0);
+      norm[0] = new Vec3(0.0, y1, 0.0);
+      for (int i = 0; i < v.length; i++)
       {
-        vert = new Vec3 [v.length+2];
-        norm = new Vec3 [v.length+1];
-        tri = new RenderingTriangle [v.length*2];
-        vert[0] = new Vec3(0.0, y1, 0.0);
-        vert[v.length+1] = new Vec3(0.0, y2, 0.0);
-        norm[0] = new Vec3(0.0, y1, 0.0);
-        for (int i = 0; i < v.length; i++)
-          {
-            vert[i+1] = new Vec3(v[i].x, y1, v[i].y);
-            norm[i+1] = new Vec3(v[i].x/(rx*rx), 1.0/(y2-y1), v[i].y/(rz *rz));
-          }
-        for (int i = 0; i < v.length-1; i++)
-          {
-            tri[i] = texMapping.mapTriangle(i+2, i+1, 0, 0, 0, 0, vert);
-            tri[i+v.length] = texMapping.mapTriangle(v.length+1, i+1, i+2, i+1, i+1, i+2, vert);
-          }
-        tri[v.length-1] = texMapping.mapTriangle(1, v.length, 0, 0, 0, 0, vert);
-        tri[v.length*2-1] = texMapping.mapTriangle(v.length+1, v.length, 1, v.length, v.length, 1, vert);
+        vert[i+1] = new Vec3(v[i].x, y1, v[i].y);
+        norm[i+1] = new Vec3(v[i].x/(rx*rx), 1.0/(y2-y1), v[i].y/(rz *rz));
       }
+      for (int i = 0; i < v.length-1; i++)
+      {
+        tri[i] = texMapping.mapTriangle(i+2, i+1, 0, 0, 0, 0, vert);
+        tri[i+v.length] = texMapping.mapTriangle(v.length+1, i+1, i+2, i+1, i+1, i+2, vert);
+      }
+      tri[v.length-1] = texMapping.mapTriangle(1, v.length, 0, 0, 0, 0, vert);
+      tri[v.length*2-1] = texMapping.mapTriangle(v.length+1, v.length, 1, v.length, v.length, 1, vert);
+    }
     else
+    {
+      vert = new Vec3 [v.length*2+2];
+      norm = new Vec3 [v.length+2];
+      tri = new RenderingTriangle [v.length*4];
+      vert[0] = new Vec3(0.0, y1, 0.0);
+      vert[v.length*2+1] = new Vec3(0.0, y2, 0.0);
+      norm[0] = new Vec3(0.0, y1, 0.0);
+      norm[v.length+1] = new Vec3(0.0, y2, 0.0);
+      for (int i = 0; i < v.length; i++)
       {
-        vert = new Vec3 [v.length*2+2];
-        norm = new Vec3 [v.length+2];
-        tri = new RenderingTriangle [v.length*4];
-        vert[0] = new Vec3(0.0, y1, 0.0);
-        vert[v.length*2+1] = new Vec3(0.0, y2, 0.0);
-        norm[0] = new Vec3(0.0, y1, 0.0);
-        norm[v.length+1] = new Vec3(0.0, y2, 0.0);
-        for (int i = 0; i < v.length; i++)
-          {
-            vert[i+1] = new Vec3(v[i].x, y1, v[i].y);
-            vert[i+v.length+1] = new Vec3(v[i].x*ratio, y2, v[i].y*ratio);
-            norm[i+1] = new Vec3(v[i].x/(rx*rx), (1.0-ratio)/(y2-y1), v[i].y/(rz *rz));
-          }
-        for (int i = 0; i < v.length-1; i++)
-          {
-            tri[i] = texMapping.mapTriangle(i+2, i+1, 0, 0, 0, 0, vert);
-            tri[i+v.length] = texMapping.mapTriangle(i+v.length+1, i+1, i+2, i+1, i+1, i+2, vert);
-            tri[i+v.length*2] = texMapping.mapTriangle(i+v.length+1, i+2, i+v.length+2, i+1, i+2, i+2, vert);
-            tri[i+v.length*3] = texMapping.mapTriangle(v.length*2+1, i+v.length+1, i+v.length+2, v.length+1, v.length+1, v.length+1, vert);
-          }
-        tri[v.length-1] = texMapping.mapTriangle(1, v.length, 0, 0, 0, 0, vert);
-        tri[v.length*2-1] = texMapping.mapTriangle(v.length*2, v.length, 1, v.length, v.length, 1, vert);
-        tri[v.length*3-1] = texMapping.mapTriangle(v.length*2, 1, v.length+1, v.length, 1, 1, vert);
-        tri[v.length*4-1] = texMapping.mapTriangle(v.length*2+1, v.length*2, v.length+1, v.length+1, v.length+1, v.length+1, vert);
+        vert[i+1] = new Vec3(v[i].x, y1, v[i].y);
+        vert[i+v.length+1] = new Vec3(v[i].x*ratio, y2, v[i].y*ratio);
+        norm[i+1] = new Vec3(v[i].x/(rx*rx), (1.0-ratio)/(y2-y1), v[i].y/(rz *rz));
       }
+      for (int i = 0; i < v.length-1; i++)
+      {
+        tri[i] = texMapping.mapTriangle(i+2, i+1, 0, 0, 0, 0, vert);
+        tri[i+v.length] = texMapping.mapTriangle(i+v.length+1, i+1, i+2, i+1, i+1, i+2, vert);
+        tri[i+v.length*2] = texMapping.mapTriangle(i+v.length+1, i+2, i+v.length+2, i+1, i+2, i+2, vert);
+        tri[i+v.length*3] = texMapping.mapTriangle(v.length*2+1, i+v.length+1, i+v.length+2, v.length+1, v.length+1, v.length+1, vert);
+      }
+      tri[v.length-1] = texMapping.mapTriangle(1, v.length, 0, 0, 0, 0, vert);
+      tri[v.length*2-1] = texMapping.mapTriangle(v.length*2, v.length, 1, v.length, v.length, 1, vert);
+      tri[v.length*3-1] = texMapping.mapTriangle(v.length*2, 1, v.length+1, v.length, 1, 1, vert);
+      tri[v.length*4-1] = texMapping.mapTriangle(v.length*2+1, v.length*2, v.length+1, v.length+1, v.length+1, v.length+1, vert);
+    }
     for (int i = 0; i < norm.length; i++)
       norm[i].normalize();
     RenderingMesh mesh = new RenderingMesh(vert, norm, tri, texMapping, matMapping);
@@ -387,13 +388,19 @@ public class Cylinder extends Object3D
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    ValueField xField = new ValueField(rx, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(rz, ValueField.POSITIVE, 5);
-    ValueField heightField = new ValueField(height, ValueField.POSITIVE, 5);
+    ValueField xField = new ValueField(rx, ValueField.NONNEGATIVE, 5);
+    ValueField yField = new ValueField(rz, ValueField.NONNEGATIVE, 5);
+    ValueField heightField = new ValueField(height, ValueField.NONNEGATIVE, 5);
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, ratio);
-    ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(),
-        Translate.text("editCylinderTitle"), new Widget [] {xField, yField, ratioSlider, heightField},
-        new String [] {Translate.text("bottomRadiusX"), Translate.text("bottomRadiusZ"), Translate.text("radiusRatio"), Translate.text("Height")});
+    ComponentsDialog dlg = new ComponentsDialog(
+      parent.getFrame(),
+      Translate.text("editCylinderTitle"), 
+      new Widget [] {xField, yField, ratioSlider, heightField},
+      new String [] {Translate.text("bottomRadiusX"), 
+                     Translate.text("bottomRadiusZ"), 
+                     Translate.text("radiusRatio"), 
+                     Translate.text("Height")}
+    );
     if (!dlg.clickedOk())
       return;
     ratio = ratioSlider.getValue();
@@ -494,9 +501,11 @@ public class Cylinder extends Object3D
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Radius", "Z Radius", "Height", "Ratio"},
-        new double [] {2.0*rx, 2.0*rz, height, ratio},
-        new double [][] {{0.0, Double.MAX_VALUE}, {0.0, Double.MAX_VALUE},
-        {0.0, Double.MAX_VALUE}, {0.0, 1.0}});
+                             new double [] {2.0*rx, 2.0*rz, height, ratio},
+                             new double [][] {{0.0, Double.MAX_VALUE}, 
+                                              {0.0, Double.MAX_VALUE},
+                                              {0.0, Double.MAX_VALUE}, 
+                                              {0.0, 1.0}});
   }
 
   /** Return an array containing the names of the graphable values for the keyframes
@@ -530,13 +539,19 @@ public class Cylinder extends Object3D
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     CylinderKeyframe key = (CylinderKeyframe) k;
-    ValueField xField = new ValueField(2.0*key.rx, ValueField.POSITIVE, 5);
-    ValueField yField = new ValueField(2.0*key.ry, ValueField.POSITIVE, 5);
-    ValueField heightField = new ValueField(key.height, ValueField.POSITIVE, 5);
+    ValueField xField = new ValueField(2.0*key.rx, ValueField.NONNEGATIVE, 5);
+    ValueField yField = new ValueField(2.0*key.ry, ValueField.NONNEGATIVE, 5);
+    ValueField heightField = new ValueField(key.height, ValueField.NONNEGATIVE, 5);
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, key.ratio);
-    ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(),
-        Translate.text("editCylinderTitle"), new Widget [] {xField, yField, ratioSlider, heightField},
-        new String [] {Translate.text("bottomRadiusX"), Translate.text("bottomRadiusZ"), Translate.text("radiusRatio"), Translate.text("Height")});
+    ComponentsDialog dlg = new ComponentsDialog(
+      parent.getFrame(),
+      Translate.text("editCylinderTitle"), 
+      new Widget [] {xField, yField, ratioSlider, heightField},
+      new String [] {Translate.text("bottomRadiusX"), 
+                     Translate.text("bottomRadiusZ"), 
+                     Translate.text("radiusRatio"), 
+                     Translate.text("Height")}
+    );
     if (!dlg.clickedOk())
       return;
     key.rx = 0.5*xField.getValue();

@@ -91,13 +91,13 @@ public class MoveScaleRotateObjectTool extends EditingTool
   public void drawOverlay(ViewerCanvas view)
   {
     BoundingBox selectionBounds = findSelectionBounds(view.getCamera());
-    if (!dragInProgress && manipulator.getViewMode() == Compound3DManipulator.NPQ_MODE && selectionBounds != null)
+    if (!dragInProgress && manipulator.getViewMode() == Compound3DManipulator.PQN_MODE && selectionBounds != null)
     {
       // Calculate the axis directions.
 
       ObjectInfo firstObj = getWindow().getSelectedObjects().iterator().next();
       CoordinateSystem coords = firstObj.getCoords();
-      manipulator.setNPQAxes(coords.getUpDirection().cross(coords.getZDirection()), coords.getUpDirection(), coords.getZDirection());
+      manipulator.setPQNAxes(coords.getUpDirection().cross(coords.getZDirection()), coords.getUpDirection(), coords.getZDirection());
     }
     manipulator.draw(view, selectionBounds);
     if (!dragInProgress)
@@ -141,18 +141,24 @@ public class MoveScaleRotateObjectTool extends EditingTool
       int dx = dragPoint.x - clickPoint.x;
       int dy = dragPoint.y - clickPoint.y;
       if (e.isShiftDown() && !e.isControlDown())
-        {
-          if (Math.abs(dx) > Math.abs(dy))
-            dy = 0;
-          else
-            dx = 0;
-        }
+      {
+        if (Math.abs(dx) > Math.abs(dy))
+          dy = 0;
+        else
+          dx = 0;
+      }
       Vec3 v;
       if (e.isControlDown())
         v = view.getCamera().getCameraCoordinates().getZDirection().times(-dy*0.01);
       else
         v = view.getCamera().findDragVector(clickedObject.getCoords().getOrigin(), dx, dy);
-      handleDragged(manipulator.new HandleDraggedEvent(view, Compound3DManipulator.MOVE, Compound3DManipulator.ALL, screenBounds, selectionBounds, e, Mat4.translation(v.x, v.y, v.z)));
+      handleDragged(manipulator.new HandleDraggedEvent(view, 
+                                                       Compound3DManipulator.MOVE, 
+                                                       Compound3DManipulator.ALL, 
+                                                       screenBounds, 
+                                                       selectionBounds, 
+                                                       e, 
+                                                       Mat4.translation(v.x, v.y, v.z)));
     }
     else
       manipulator.mouseDragged(e, view);
@@ -364,7 +370,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
       if (mode == Compound3DManipulator.XYZ_MODE)
         manipulator.setViewMode(Compound3DManipulator.UV_MODE);
       else if (mode == Compound3DManipulator.UV_MODE)
-        manipulator.setViewMode(Compound3DManipulator.NPQ_MODE);
+        manipulator.setViewMode(Compound3DManipulator.PQN_MODE);
       else
         manipulator.setViewMode(Compound3DManipulator.XYZ_MODE);
       theWindow.updateImage();

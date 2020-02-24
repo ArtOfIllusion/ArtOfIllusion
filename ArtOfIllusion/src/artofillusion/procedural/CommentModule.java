@@ -1,4 +1,5 @@
 /* Copyright (C) 2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,7 +17,10 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
-/** This is a Module which displays a comment, but otherwise has no effect on the procedure. */
+/**
+ * This is a Module which displays a comment, but otherwise has no effect on the
+ * procedure.
+ */
 
 public class CommentModule extends ProceduralModule
 {

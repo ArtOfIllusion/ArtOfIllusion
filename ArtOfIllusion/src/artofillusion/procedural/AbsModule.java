@@ -1,6 +1,5 @@
-/* This is a Module which outputs the absolute value of a number. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +16,8 @@ import artofillusion.ui.*;
 
 import java.awt.*;
 
+/* This is a Module which outputs the absolute value of a number. */
+
 public class AbsModule extends ProceduralModule
 {
   private boolean signOk, positive;
@@ -24,8 +25,8 @@ public class AbsModule extends ProceduralModule
 
   public AbsModule(Point position)
   {
-    super(Translate.text("menu.absModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
+    super(Translate.text("menu.absModule"), new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Input", "(0")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Output")},
       position);
   }
 

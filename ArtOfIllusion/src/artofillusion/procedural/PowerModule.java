@@ -1,4 +1,5 @@
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,9 +24,9 @@ public class PowerModule extends ProceduralModule
 
   public PowerModule(Point position)
   {
-    super("Pow", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Exponent", "(1)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
+    super("Pow", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, "Exponent", "(1)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Input", "(0)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Output")},
       position);
     gradient = new Vec3();
   }

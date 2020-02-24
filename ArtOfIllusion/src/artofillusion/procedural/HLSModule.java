@@ -1,20 +1,23 @@
-/* Copyright (C) 2005 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
-This program is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later version.
+   This program is free software; you can redistribute it and/or modify it under the
+   terms of the GNU General Public License as published by the Free Software
+   Foundation; either version 2 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
+   This program is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+   PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
 
 import artofillusion.math.*;
 import java.awt.*;
 
-/** This is a Module which takes three numbers, and uses them as the hue, saturation, and
- value components of a color. */
+/**
+ * This is a Module which takes three numbers, and uses them as the hue,
+ * saturation, and value components of a color.
+ */
 
 public class HLSModule extends ProceduralModule
 {
@@ -24,10 +27,10 @@ public class HLSModule extends ProceduralModule
 
   public HLSModule(Point position)
   {
-   super("HLS", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Hue", "(1)"}),
-     new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Lightness", "(1)"}),
-     new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Saturation", "(1)"})},
-     new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})},
+   super("HLS", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Hue", "(1)"),
+     new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Lightness", "(1)"),
+     new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Saturation", "(1)")},
+     new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Color")},
      position);
    color = new RGBColor(0.0f, 0.0f, 0.0f);
   }

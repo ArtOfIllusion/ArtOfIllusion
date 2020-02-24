@@ -1,4 +1,5 @@
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,10 +25,10 @@ public class InterpModule extends ProceduralModule
 
   public InterpModule(Point position)
   {
-    super(Translate.text("menu.interpolateModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Value 1", "(0)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(1)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Fraction", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Interpolate"})},
+    super(Translate.text("menu.interpolateModule"), new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, "Value 1", "(0)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, "Value 2", "(1)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Fraction", "(0)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Interpolate")},
       position);
     gradient = new Vec3();
     tempVec = new Vec3();

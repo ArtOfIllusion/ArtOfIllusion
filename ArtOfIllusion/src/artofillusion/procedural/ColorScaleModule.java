@@ -1,6 +1,5 @@
-/* This is a Module which outputs the product of a color and a number. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,6 +15,8 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.awt.*;
 
+/* This is a Module which outputs the product of a color and a number. */
+
 public class ColorScaleModule extends ProceduralModule
 {
   RGBColor color;
@@ -24,9 +25,9 @@ public class ColorScaleModule extends ProceduralModule
 
   public ColorScaleModule(Point position)
   {
-    super("\u00D7", new IOPort [] {new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.TOP, new String [] {"Color", '('+Translate.text("white")+')'}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Scale", "(1.0)"})},
-      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Product"})},
+    super("\u00D7", new IOPort[] {new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.TOP, "Color", '('+Translate.text("white")+')'),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, "Scale", "(1.0)")},
+      new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Product")},
       position);
     color = new RGBColor(0.0f, 0.0f, 0.0f);
   }

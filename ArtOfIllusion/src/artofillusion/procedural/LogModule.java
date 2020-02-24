@@ -1,6 +1,5 @@
-/* This is a Module which outputs the natural log of a number. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +14,8 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
+/* This is a Module which outputs the natural log of a number. */
+
 public class LogModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
@@ -23,8 +24,8 @@ public class LogModule extends ProceduralModule
 
   public LogModule(Point position)
   {
-    super("Log", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Value", "(1)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Log"})},
+    super("Log", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Value", "(1)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Log")},
       position);
     gradient = new Vec3();
   }

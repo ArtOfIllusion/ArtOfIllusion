@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,8 +20,10 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
-/** This is a Module which generates a pattern based on Steven Worley's cellular texture
-    basis function. */
+/**
+ * This is a Module which generates a pattern based on Steven Worley's cellular
+ * texture basis function.
+ */
 
 public class CellsModule extends ProceduralModule
 {
@@ -34,12 +37,12 @@ public class CellsModule extends ProceduralModule
 
   public CellsModule(Point position)
   {
-    super(Translate.text("menu.cellsModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Cell"}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Distance 1"}),
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Distance 2"})},
+    super(Translate.text("menu.cellsModule"), new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,"X", "(X)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Y", "(Y)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Z", "(Z)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Cell"),
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Distance 1"),
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Distance 2")},
       position);
     gradient = new Vec3 [] {new Vec3(), new Vec3()};
     gradient1 = new Vec3 [] {gradient[0]};

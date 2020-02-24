@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -453,21 +454,21 @@ public class ImageModule extends ProceduralModule
   {
     if (colorModel == RGB_MODEL)
     {
-      output[1].setDescription(new String [] {Translate.text("Red")});
-      output[2].setDescription(new String [] {Translate.text("Green")});
-      output[3].setDescription(new String [] {Translate.text("Blue")});
+      output[1].setDescription(Translate.text("Red"));
+      output[2].setDescription(Translate.text("Green"));
+      output[3].setDescription(Translate.text("Blue"));
     }
     else if (colorModel == HSV_MODEL)
     {
-      output[1].setDescription(new String [] {Translate.text("Hue")});
-      output[2].setDescription(new String [] {Translate.text("Saturation")});
-      output[3].setDescription(new String [] {Translate.text("Value")});
+      output[1].setDescription(Translate.text("Hue"));
+      output[2].setDescription(Translate.text("Saturation"));
+      output[3].setDescription(Translate.text("Value"));
     }
     else if (colorModel == HLS_MODEL)
     {
-      output[1].setDescription(new String [] {Translate.text("Hue")});
-      output[2].setDescription(new String [] {Translate.text("Lightness")});
-      output[3].setDescription(new String [] {Translate.text("Saturation")});
+      output[1].setDescription(Translate.text("Hue"));
+      output[2].setDescription(Translate.text("Lightness"));
+      output[3].setDescription(Translate.text("Saturation"));
     }
   }
 

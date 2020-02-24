@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,9 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
-/** This is a Module which implements an arbitrary mapping of numbers to colors. */
+/**
+ * This is a Module which implements an arbitrary mapping of numbers to colors.
+ */
 
 public class SpectrumModule extends ProceduralModule
 {
@@ -29,8 +32,8 @@ public class SpectrumModule extends ProceduralModule
 
   public SpectrumModule(Point position)
   {
-    super("Spectrum", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Index", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})},
+    super("Spectrum", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Index", "(0)")},
+      new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Color")},
       position);
     color = new RGBColor [] {new RGBColor(0.0f, 0.0f, 0.0f), new RGBColor(1.0f, 1.0f, 1.0f)};
     index = new double [] {0.0, 1.0};
@@ -40,14 +43,14 @@ public class SpectrumModule extends ProceduralModule
 
   /** Get the list of colors in the table. */
 
-  public RGBColor [] getColors()
+  public RGBColor[] getColors()
   {
     return color;
   }
 
   /** Get the list of input values corresponding to the colors in the table. */
 
-  public double [] getColorPositions()
+  public double[] getColorPositions()
   {
     return index;
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,9 +28,9 @@ public class GainModule extends ProceduralModule
 
   public GainModule(Point position)
   {
-    super(Translate.text("menu.gainModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Gain", "(0.5)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
+    super(Translate.text("menu.gainModule"), new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, "Gain", "(0.5)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Input", "(0)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Output")},
       position);
     gradient = new Vec3();
   }

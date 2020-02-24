@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,8 +31,8 @@ public class ColorModule extends ProceduralModule
 
   public ColorModule(Point position, RGBColor color)
   {
-    super("", new IOPort [] {}, new IOPort [] {
-      new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})},
+    super("", new IOPort[] {}, new IOPort[] {
+      new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Color")},
       position);
     this.color = color;
   }
@@ -85,7 +86,7 @@ public class ColorModule extends ProceduralModule
   protected void drawContents(Graphics2D g)
   {
     g.setColor(color.getColor());
-    g.fillRect(bounds.x+IOPort.SIZE, bounds.y+IOPort.SIZE, 20, 20);
+    g.fillRect(bounds.x + IOPort.SIZE, bounds.y + IOPort.SIZE, 20, 20);
   }
 
   /* Create a duplicate of this module. */

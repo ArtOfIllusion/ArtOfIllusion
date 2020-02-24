@@ -1,6 +1,5 @@
-/* This is a Module which generates a checkerboard pattern. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +16,8 @@ import artofillusion.ui.*;
 
 import java.awt.*;
 
+/* This is a Module which generates a checkerboard pattern. */
+
 public class CheckerModule extends ProceduralModule
 {
   boolean valueOk, gradOk;
@@ -26,10 +27,10 @@ public class CheckerModule extends ProceduralModule
 
   public CheckerModule(Point position)
   {
-    super(Translate.text("menu.checkerModule"), new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"X", "(X)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Y", "(Y)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Z", "(Z)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
+    super(Translate.text("menu.checkerModule"), new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "X", "(X)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Y", "(Y)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Z", "(Z)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Value")},
       position);
     gradient = new Vec3();
   }

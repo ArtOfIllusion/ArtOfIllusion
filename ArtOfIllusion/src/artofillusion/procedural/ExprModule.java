@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
 
@@ -18,7 +18,6 @@ package artofillusion.procedural;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.util.List;
 import java.util.*;
 import java.lang.reflect.*;
 import java.io.*;
@@ -175,8 +174,7 @@ class ModuleLoader {
         try {
             moduleClass = ArtOfIllusion.getClass (name);
         } catch (ClassNotFoundException e) {
-            debug.print ("Couldn't get class for " +
-                                name + ": " + e);
+            debug.print ("Couldn't get class for " + name + ": " + e);
             return dummy ();
 
         }
@@ -206,20 +204,17 @@ class ModuleLoader {
             parameterTypes [0] = Point.class;
             cons = moduleClass.getConstructor (parameterTypes);
         } catch (Exception e) {
-            System.err.println ("Couldn't get constructor for " +
-                                moduleClass.getName() + ": " + e);
+            System.err.println ("Couldn't get constructor for " + moduleClass.getName() + ": " + e);
             return dummy();
         }
         try {
             Object [] wrappedPoint = { new Point () };
             mod = (Module) cons.newInstance (wrappedPoint);
         } catch (InvocationTargetException e) {
-            System.err.println ("Couldn't create a " +
-                                moduleClass.getName() + ": (InvocationTargetException)" + e.getTargetException ());
+            System.err.println ("Couldn't create a " + moduleClass.getName() + ": (InvocationTargetException)" + e.getTargetException ());
             return dummy();
         } catch (Exception e) {
-            System.err.println ("Couldn't create a " +
-                                moduleClass.getName() + ": " + e);
+            System.err.println ("Couldn't create a " + moduleClass.getName() + ": " + e);
             return dummy();
         }
 
@@ -248,24 +243,11 @@ public class ExprModule extends ProceduralModule
 
     public ExprModule(Point position)
     {
-        super("expr", new IOPort []
-            {
-                new IOPort (IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,
-                            new String [] {"Value 1", "(0)"}
-                            ),
-                new IOPort (IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,
-                            new String [] {"Value 2", "(0)"}
-                            ),
-                new IOPort (IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,
-                            new String [] {"Value 3", "(0)"}
-                            )
-                    },
-
-              new IOPort [] {
-                  new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT,
-                             new String [] {"Result"})
-                      },
-              position);
+        super("expr", new IOPort[] {new IOPort (IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,"Value 1", "(0)"),
+          new IOPort (IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,"Value 2", "(0)"),
+          new IOPort (IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT,"Value 3", "(0)")},
+          new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Result")},
+          position);
         inputs = linkFrom;
         setExpr ("x");
         layout ();
@@ -570,7 +552,6 @@ public class ExprModule extends ProceduralModule
     }
 
     OPort prim (boolean get) {
-        Module mod;
         OPort port;
 
         if (get)
@@ -602,8 +583,7 @@ public class ExprModule extends ProceduralModule
             return port;
 
         case Token.MINUS:
-            return binOp (DifferenceModule.class,
-                          createNumberPort (0.0), prim (true));
+            return binOp (DifferenceModule.class, createNumberPort (0.0), prim (true));
         case Token.LP:
             port = expr (true);
             if (currTok.ty != Token.RP) {
@@ -625,9 +605,6 @@ public class ExprModule extends ProceduralModule
         return tok;
     }
     OPort function (String name) {
-        Portref pr = null;
-        Module module;
-        int port;
 
         OPort func = getOPort (name);
 

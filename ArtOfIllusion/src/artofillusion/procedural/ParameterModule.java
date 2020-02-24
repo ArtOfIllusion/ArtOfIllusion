@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,8 +28,8 @@ public class ParameterModule extends ProceduralModule
 
   public ParameterModule(Point position)
   {
-    super(Translate.text("menu.parameterModule"), new IOPort [] {},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
+    super(Translate.text("menu.parameterModule"), new IOPort[] {},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Value")},
       position);
     minVal = 0.0f;
     maxVal = 1.0f;

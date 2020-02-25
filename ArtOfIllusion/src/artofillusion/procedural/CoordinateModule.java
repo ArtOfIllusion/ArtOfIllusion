@@ -38,7 +38,7 @@ public class CoordinateModule extends ProceduralModule
   public CoordinateModule(Point position, int coordinate)
   {
     super(COORD_NAME[coordinate], new IOPort [] {},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {COORD_NAME[coordinate]})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, COORD_NAME[coordinate])},
       position);
     this.coordinate = coordinate;
   }

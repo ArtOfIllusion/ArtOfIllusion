@@ -5,9 +5,19 @@
  */
 package artofillusion.osspecific;
 
+import artofillusion.ArtOfIllusion;
+import artofillusion.LayoutWindow;
+import artofillusion.PreferencesWindow;
 import artofillusion.Scene;
 import artofillusion.TitleWindow;
+import artofillusion.ui.EditingWindow;
+import artofillusion.ui.UIUtilities;
 import buoy.event.MouseClickedEvent;
+import buoy.widget.BFrame;
+import java.awt.GraphicsEnvironment;
+import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
+import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -38,5 +48,32 @@ public class DesktopAdapter {
                 System.out.println("Unable to open scene from : " + file + " due: " + ex.getMessage());
             }
         }
+    }
+    
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    protected void handlePreferences() {
+      Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+      boolean frontIsLayoutWindow = false;
+      for (EditingWindow window : ArtOfIllusion.getWindows())
+        if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
+        {
+          ((LayoutWindow) window).preferencesCommand();
+          frontIsLayoutWindow = true;
+          break;
+        }
+      if (!frontIsLayoutWindow)
+      {
+        BFrame frame = new BFrame();
+        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        frame.setBounds(screenBounds);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                UIUtilities.centerWindow(frame);
+                new PreferencesWindow(frame);
+                frame.dispose();
+            }
+        });
+      }
     }
 }

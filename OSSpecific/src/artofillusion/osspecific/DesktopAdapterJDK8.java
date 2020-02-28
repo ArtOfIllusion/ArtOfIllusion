@@ -42,7 +42,7 @@ public class DesktopAdapterJDK8 extends DesktopAdapter implements AboutHandler, 
 
     @Override
     public void handlePreferences(AppEvent.PreferencesEvent pe) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        handlePreferences();
     }
 
     @Override

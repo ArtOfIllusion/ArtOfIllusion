@@ -43,7 +43,7 @@ public class DesktopAdapterJDK9 extends DesktopAdapter implements AboutHandler, 
 
     @Override
     public void handlePreferences(PreferencesEvent event) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        handlePreferences();
     }
 
     @Override

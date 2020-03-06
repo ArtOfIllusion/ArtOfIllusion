@@ -1,5 +1,24 @@
 Art of Illusion Version History
 
+Latest: (Not in stable release yet)
+
+- Performance improvements to changing topology in triangle meshes
+  (Deleting faces or using bevel/extrude)
+- Bugfix: Setting View-Rotation center in TriMesh Editor respects
+  hidden faces
+- Bugfix: Creation of Root Bone in mesh editors now placed at
+  reasonable Z-depth 
+- Bugfix: Correct face-normal direction for flat meshes created by
+  text tool
+- Bugfix/workaround: prevent crash with some NVIDIA drivers on Windows
+- Enhancements to Primitive Creation tools (Added modifier to allow
+  center placment on click location)
+- Bugfix: Primitive tools much less likely to accidentally create
+  zero-size objects. Creation of zero-size objects will not crash view
+- 3D-manipulator handles various scaling more sensibly
+- Tweak language-selection UI (Language packs shown in their own language)
+- Boolean Modeling tool added option to hide original objects
+
 v3.1.0, July 6, 2019
 
 - Added Russian Localization

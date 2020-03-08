@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,98 +11,107 @@
 
 package artofillusion.osspecific;
 
-import artofillusion.*;
-import artofillusion.ui.*;
-import buoy.event.*;
-import buoy.widget.*;
-import java.awt.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.prefs.*;
+import artofillusion.ArtOfIllusion;
+import artofillusion.DefaultPluginImplementation;
+import artofillusion.LayoutWindow;
+import artofillusion.RecentFiles;
+import artofillusion.Scene;
+import artofillusion.SceneChangedEvent;
+import artofillusion.UndoRecord;
+import artofillusion.ViewerCanvas;
+import artofillusion.ui.EditingTool;
+import artofillusion.ui.EditingWindow;
+import artofillusion.ui.ToolPalette;
+import artofillusion.ui.Translate;
+import artofillusion.ui.UIUtilities;
+import buoy.event.CommandEvent;
+import buoy.widget.BFrame;
+import buoy.widget.BMenu;
+import buoy.widget.BMenuBar;
+import buoy.widget.BMenuItem;
+import buoy.widget.BSeparator;
+import buoy.widget.MenuWidget;
+import buoy.widget.Widget;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Rectangle;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
+import java.util.prefs.Preferences;
 
 /** This is a plugin to make Art of Illusion behave more like a standard Macintosh
     application when running under Mac OS X. */
+public class MacOSPlugin extends DefaultPluginImplementation {
+    
+    private static final boolean isMac = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 
-public class MacOSPlugin implements Plugin, InvocationHandler
-{
-  private boolean usingAppMenu;
-
-  @Override
-  public void processMessage(int message, Object args[])
-  {
-    if (message == APPLICATION_STARTING)
-    {
-      String os = ((String) System.getProperties().get("os.name")).toLowerCase();
-      if (!os.startsWith("mac os x"))
-        return;
-      ArtOfIllusion.addWindow(new MacMenuBarWindow());
-      UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
-      UIUtilities.setStandardDialogInsets(3);
-      try
-      {
-        // Use reflection to set up the application menu.
-
-        Class appClass = Class.forName("com.apple.eawt.Application");
-        Object app = appClass.getMethod("getApplication").invoke(null);
-        appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-        appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-        Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
-        Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class [] {listenerClass}, this);
-        appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
-      }
-      catch (Exception ex)
-      {
-        // An error occured trying to set up the application menu, so just stick with the standard
-        // Quit and Preferences menu items in the File and Edit menus.
-
-        ex.printStackTrace();
-      }
-      usingAppMenu = true;
-    }
-    else if (message == SCENE_WINDOW_CREATED)
-    {
-      final LayoutWindow win = (LayoutWindow) args[0];
-      win.addEventLink(SceneChangedEvent.class, new Object() {
-        void processEvent()
-        {
-          updateWindowProperties(win);
+    @Override
+    protected void onApplicationStarting() {
+        if(!isMac) return;
+        ArtOfIllusion.addWindow(new MacMenuBarWindow());
+        UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
+        UIUtilities.setStandardDialogInsets(3);
+        try {
+            Class.forName("artofillusion.osspecific.DesktopAdapterJDK8").getConstructor().newInstance();
+        } catch (NoClassDefFoundError | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex8) {
+            System.out.println("Unable to instantiate JDK8 adapter. Try new JDK9 one");
+            try {
+                Class.forName("artofillusion.osspecific.DesktopAdapterJDK9").getConstructor().newInstance();
+            } catch (NoClassDefFoundError | ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException ex9) {
+                System.out.println("Unable to instantiate JDK9 adapter.");
+            }
         }
-      });
-      updateWindowProperties(win);
-      if (!usingAppMenu)
-        return;
 
-      // Remove the Quit and Preferences menu items, since we are using the ones in the application
-      // menu instead.
-
-      removeMenuItem(win, Translate.text("menu.file"), Translate.text("menu.quit"));
-      removeMenuItem(win, Translate.text("menu.edit"), Translate.text("menu.preferences"));
     }
-    else if (message == SCENE_SAVED)
+
+    @Override
+    protected void onSceneSaved(File file, LayoutWindow view)
     {
-      LayoutWindow win = (LayoutWindow) args[1];
-      updateWindowProperties(win);
-      win.getComponent().getRootPane().putClientProperty("Window.documentModified", false);
+        if(isMac)
+        {
+            updateWindowProperties(view);
+            view.getComponent().getRootPane().putClientProperty("Window.documentModified", false);
+        }
     }
-  }
+
+    @Override
+    protected void onSceneWindowCreated(final LayoutWindow view) {
+        if(isMac)
+        {
+            view.addEventLink(SceneChangedEvent.class, new Object() {
+                void processEvent() {
+                    updateWindowProperties(view);
+                }
+            });
+            updateWindowProperties(view);
+            view.getComponent().getRootPane().putClientProperty("Window.documentModified", false);
+            // Remove the Quit and Preferences menu items, since we are using the ones in the application
+            // menu instead.
+
+            removeMenuItem(view, Translate.text("menu.file"), Translate.text("menu.quit"));
+            removeMenuItem(view, Translate.text("menu.edit"), Translate.text("menu.preferences"));
+        }
+    }
 
   /** Update the Mac OS X specific client properties. */
 
-  private void updateWindowProperties(LayoutWindow win)
+  private static void updateWindowProperties(LayoutWindow view)
   {
-    win.getComponent().getRootPane().putClientProperty("Window.documentModified", win.isModified());
-    Scene scene = win.getScene();
-    if (scene.getName() != null)
-    {
-      File file = new File(scene.getDirectory(), scene.getName());
-      win.getComponent().getRootPane().putClientProperty("Window.documentFile", file);
-    }
+    view.getComponent().getRootPane().putClientProperty("Window.documentModified", view.isModified());
+    Scene scene = view.getScene();
+    if(null == scene.getName()) return;
+
+    File file = new File(scene.getDirectory(), scene.getName());
+    view.getComponent().getRootPane().putClientProperty("Window.documentFile", file);
+
   }
 
   /** Remove a menu item from a menu in a window.  If it is immediately preceded by a separator,
       also remove that. */
 
-  private void removeMenuItem(BFrame frame, String menu, String item)
+  private static void removeMenuItem(BFrame frame, String menu, String item)
   {
     BMenuBar bar = frame.getMenuBar();
     for (int i = 0; i < bar.getChildCount(); i++)
@@ -125,77 +134,6 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     }
   }
 
-  /** Handle ApplicationListener methods. */
-
-  @Override
-  public Object invoke(Object proxy, Method method, Object args[])
-  {
-    boolean handled = true;
-    if ("handleAbout".equals(method.getName()))
-    {
-      TitleWindow win = new TitleWindow();
-      win.addEventLink(MouseClickedEvent.class, win, "dispose");
-    }
-    else if ("handlePreferences".equals(method.getName()))
-    {
-      Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-      boolean frontIsLayoutWindow = false;
-      for (EditingWindow window : ArtOfIllusion.getWindows())
-        if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
-        {
-          ((LayoutWindow) window).preferencesCommand();
-          frontIsLayoutWindow = true;
-          break;
-        }
-      if (!frontIsLayoutWindow)
-      {
-        BFrame f = new BFrame();
-        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        f.setBounds(screenBounds);
-        UIUtilities.centerWindow(f);
-        new PreferencesWindow(f);
-        f.dispose();
-      }
-    }
-    else if ("handleQuit".equals(method.getName()))
-    {
-      ArtOfIllusion.quit();
-      handled = false;
-    }
-    else if ("handleOpenFile".equals(method.getName()))
-    {
-      try
-      {
-        Method getFilename = args[0].getClass().getMethod("getFilename");
-        String path = (String) getFilename.invoke(args[0]);
-        ArtOfIllusion.newWindow(new Scene(new File(path), true));
-      }
-      catch (Exception ex)
-      {
-        // Nothing we can really do about it...
-
-        ex.printStackTrace();
-      }
-    }
-    else
-      return null;
-
-    // Call setHandled(true) on the event to show we have handled it.
-
-    try
-    {
-      Method setHandled = args[0].getClass().getMethod("setHandled", new Class [] {Boolean.TYPE});
-      setHandled.invoke(args[0], handled);
-    }
-    catch (Exception ex)
-    {
-      // Nothing we can really do about it...
-
-      ex.printStackTrace();
-    }
-    return null;
-  }
-
   /** This is an inner class used to provide a minimal menu bar when all windows are
       closed. */
 
@@ -203,7 +141,6 @@ public class MacOSPlugin implements Plugin, InvocationHandler
   {
     public MacMenuBarWindow()
     {
-      super();
       getComponent().setUndecorated(true);
       setBackground(new Color(0, 0, 0, 0));
       BMenuBar menubar = new BMenuBar();

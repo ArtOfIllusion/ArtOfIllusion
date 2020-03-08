@@ -28,7 +28,7 @@ import javax.swing.SwingUtilities;
  * @author maksim.khramov
  */
 public class DesktopAdapter {
-    
+
     protected void handleAbout() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -36,10 +36,10 @@ public class DesktopAdapter {
                 TitleWindow win = new TitleWindow();
                 win.addEventLink(MouseClickedEvent.class, win, "dispose");
             }
-            
+
         });
     }
-    
+
     protected void handleOpenFiles(List<File> files) {
         for(File file: files) {
             try {
@@ -49,7 +49,7 @@ public class DesktopAdapter {
             }
         }
     }
-    
+
     @SuppressWarnings("ResultOfObjectAllocationIgnored")
     protected void handlePreferences() {
       Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
@@ -63,12 +63,13 @@ public class DesktopAdapter {
         }
       if (!frontIsLayoutWindow)
       {
-        BFrame frame = new BFrame();
-        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        frame.setBounds(screenBounds);
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                buoy.widget.BFrame frame = new BFrame();
+                Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+                frame.setBounds(screenBounds);
                 UIUtilities.centerWindow(frame);
                 new PreferencesWindow(frame);
                 frame.dispose();

@@ -11,7 +11,7 @@
   <property name="assemble" value="${dist}/Plugins" />
   <property name="aoijar" value="${dist}/ArtOfIllusion.jar" />
   <property name="orange-jar" value="OSSpecific/lib/orange-extensions-1.3.0.jar"/>
-  
+
   <property name="JavaVersion" value="7" />
   <property name="args" value="-nowarn" />
 
@@ -26,6 +26,7 @@
     <!-- create the dist directory -->
     <mkdir dir="${dist}" />
     <mkdir dir="${assemble}" />
+    <mkdir dir="${ext-build}" />
   </target>
 
   <target name="compile-ext">
@@ -41,10 +42,10 @@
     <javac srcdir="${src}" destdir="${build}" debug="true" target="${JavaVersion}" source="${JavaVersion}" >
       <compilerarg line="${args}"/>
       <classpath>
-        <path location="${orange-jar}"/> 
+        <path location="${orange-jar}"/>
         <dirset dir="${ext-build}" includes="/**/*.class"/>
 	<path location="${aoijar}"/>
-        
+
       </classpath>
     </javac>
   </target>
@@ -78,4 +79,3 @@
     <delete dir="${docs}" />
   </target>
 </project>
-

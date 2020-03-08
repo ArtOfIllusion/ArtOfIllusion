@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2019 by Petri Ihalainen
+/* Copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ public class ScrollViewTool
   private EditingWindow window;
   private ViewerCanvas view;
   private Camera camera;
-  private double distToPlane;
+  private double distToPlane, scale;
   private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY;
   private int navigationMode, scrollSteps, startOrientation;
   private Vec3 startZ, startUp;
@@ -50,6 +50,7 @@ public class ScrollViewTool
     v.mouseMoving = false;
     view = v;
     view.scrolling = true;
+    scale = view.getScale();
     distToPlane = view.getDistToPlane();
     navigationMode = view.getNavigationMode();
     bounds = view.getBounds();
@@ -106,11 +107,20 @@ public class ScrollViewTool
     if (ArtOfIllusion.getPreferences().getReverseZooming())
       amount *= -1;
     if (view.isPerspective())
+    {
       distToPlane = distToPlane*Math.pow(1.01, amount);
+      distToPlane = Math.max(distToPlane, ViewerCanvas.MINIMUM_ZOOM_DISTANCE);
+    }
     else
     {
-      view.setScale(view.getScale()*Math.pow(1.0/1.01, amount));
-      distToPlane = camera.getDistToScreen()*100.0/view.getScale();
+      scale = view.getScale()*Math.pow(1.0/1.01, amount);
+      distToPlane = camera.getDistToScreen()*100.0/scale;
+      if (distToPlane < ViewerCanvas.MINIMUM_ZOOM_DISTANCE)
+      {
+        distToPlane = ViewerCanvas.MINIMUM_ZOOM_DISTANCE;
+        scale = camera.getDistToScreen()*100.0/distToPlane;
+      }
+      view.setScale(scale);
       camera.setScreenParamsParallel(view.getScale(), bounds.width, bounds.height);
     }
     CoordinateSystem coords = camera.getCameraCoordinates();

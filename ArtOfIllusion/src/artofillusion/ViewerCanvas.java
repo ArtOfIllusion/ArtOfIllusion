@@ -109,6 +109,8 @@ public abstract class ViewerCanvas extends CustomWidget
   public static final int NAVIGATE_TRAVEL_SPACE = 2;
   public static final int NAVIGATE_TRAVEL_LANDSCAPE = 3;
 
+  public static final double MINIMUM_ZOOM_DISTANCE = 1.0E-12; // Closer than this numerical errors start to show
+
   public boolean mouseDown, mouseMoving, tilting, moving, rotating, scrolling, dragging;
 
   /** Create a new ViewerCanvas */
@@ -900,6 +902,7 @@ public abstract class ViewerCanvas extends CustomWidget
     double scalex = bounds.width/(double) screenBounds.width;
     double scaley = bounds.height/(double) screenBounds.height;
     double minScale = (scalex < scaley ? scalex : scaley);
+    minScale = Math.min(minScale, theCamera.getDistToScreen()*100.0/MINIMUM_ZOOM_DISTANCE);
     if (isPerspective())
     {
       // Perspective mode, so adjust the camera position.
@@ -936,6 +939,10 @@ public abstract class ViewerCanvas extends CustomWidget
     Vec3 size = b.getSize();
     double diag = Math.sqrt(size.x*size.x+size.y*size.y+size.z*size.z);
     double newDistToPlane = 100*theCamera.getDistToScreen() / (double)d / 0.9 * diag;
+
+    // The calling I know of have limits of their own but this method is available for others.
+
+    newDistToPlane = Math.max(newDistToPlane, MINIMUM_ZOOM_DISTANCE);
     newCoords.setOrigin(newCenter.plus(newCoords.getZDirection().times(-newDistToPlane-(b.maxz-b.minz) * 0.5)));
     double newScale;
     if (perspective)
@@ -1007,7 +1014,7 @@ public abstract class ViewerCanvas extends CustomWidget
     CoordinateSystem newCoords;
     BoundingBox b;
     double br, z; // box radius, view z coordinate
-    Vec3 bc;   // box center
+    Vec3 bc;      // box center
     Vec3 cx, cy, cz, newCenter;
     cz = theCamera.getCameraCoordinates().getZDirection();
     cy = theCamera.getCameraCoordinates().getUpDirection();
@@ -1059,7 +1066,9 @@ public abstract class ViewerCanvas extends CustomWidget
     }
     else
       projectionDist = theCamera.getDistToScreen();
+
     double newDistToPlane = 100*projectionDist/(double)d/0.9*Math.max(maxx-minx, maxy-miny)+(maxz-minz)*0.5;
+    newDistToPlane = Math.max(newDistToPlane, MINIMUM_ZOOM_DISTANCE); // Attempt to zoom to zero size blanks the view.
     double newScale;
     if (perspective)
       newScale = 100.0;

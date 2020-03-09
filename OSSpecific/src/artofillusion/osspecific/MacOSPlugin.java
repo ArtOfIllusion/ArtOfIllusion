@@ -11,35 +11,16 @@
 
 package artofillusion.osspecific;
 
-import artofillusion.ArtOfIllusion;
-import artofillusion.DefaultPluginImplementation;
-import artofillusion.LayoutWindow;
-import artofillusion.RecentFiles;
-import artofillusion.Scene;
-import artofillusion.SceneChangedEvent;
-import artofillusion.UndoRecord;
-import artofillusion.ViewerCanvas;
-import artofillusion.ui.EditingTool;
-import artofillusion.ui.EditingWindow;
-import artofillusion.ui.ToolPalette;
-import artofillusion.ui.Translate;
-import artofillusion.ui.UIUtilities;
+import artofillusion.*;
+import artofillusion.ui.*;
 import buoy.event.CommandEvent;
-import buoy.widget.BFrame;
-import buoy.widget.BMenu;
-import buoy.widget.BMenuBar;
-import buoy.widget.BMenuItem;
-import buoy.widget.BSeparator;
-import buoy.widget.MenuWidget;
-import buoy.widget.Widget;
+import buoy.widget.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.prefs.PreferenceChangeEvent;
-import java.util.prefs.PreferenceChangeListener;
-import java.util.prefs.Preferences;
+import java.util.prefs.*;
 
 /** This is a plugin to make Art of Illusion behave more like a standard Macintosh
     application when running under Mac OS X. */

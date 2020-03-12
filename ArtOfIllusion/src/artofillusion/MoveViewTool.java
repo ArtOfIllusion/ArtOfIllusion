@@ -208,11 +208,11 @@ public class MoveViewTool extends EditingTool
       Rectangle bounds = view.getBounds();
       if (view.isPerspective())
       {
-        newDist = oldDist*Math.pow(1.0/1.01, (double)dy);
+        newDist = Math.max(oldDist*Math.pow(1.0/1.01, (double)dy), ViewerCanvas.MINIMUM_ZOOM_DISTANCE);
       }
       else
       {
-        double newScale = oldScale*(Math.pow(1.01,(double)dy));
+        double newScale = Math.min(oldScale*(Math.pow(1.01,(double)dy)), cam.getDistToScreen()*100/ViewerCanvas.MINIMUM_ZOOM_DISTANCE);
         view.setScale(newScale);
         cam.setScreenParamsParallel(newScale, bounds.width, bounds.height);
         newDist = cam.getDistToScreen()*100.0/newScale;

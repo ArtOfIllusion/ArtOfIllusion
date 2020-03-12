@@ -1,5 +1,5 @@
 /* Copyright (C) 2007-2009 by Peter Eastman
-   Modifications copyright (C) 2017 Petri Ihalainen
+   Modifications copyright (C) 2017-2020 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,6 @@ public class ViewerScaleControl implements ViewerControl
 {
   private ViewerCanvas view;
   private ValueField scaleField;
-  private double newScale;
 
   @Override
   public Widget createWidget(final ViewerCanvas view)
@@ -35,6 +34,7 @@ public class ViewerScaleControl implements ViewerControl
     this.scaleField = scaleField;
     scaleField.setText("100");
     scaleField.setMinDecimalPlaces(1);
+    scaleField.setValueChecker(new ZoomChecker(view));
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
@@ -54,6 +54,9 @@ public class ViewerScaleControl implements ViewerControl
     scaleField.addEventLink(ValueChangedEvent.class, new Object() {
       void processEvent()
       {
+        if (!scaleField.isValid(scaleField.getValue()))
+          return;
+
         if (! view.isPerspective())
         { 
           view.getViewAnimation().start(view.getCamera().getCameraCoordinates(), view.getRotationCenter(), 
@@ -87,5 +90,23 @@ public class ViewerScaleControl implements ViewerControl
   public String getName()
   {
     return Translate.text("Magnification");
+  }
+
+  private class ZoomChecker implements ValueChecker
+  {
+    private ViewerCanvas view;
+
+    ZoomChecker(ViewerCanvas view)
+    {
+      this.view = view;
+    }
+
+    @Override
+    public boolean isValid(double value)
+    {
+      if (view.isPerspective())
+        return value >= ViewerCanvas.MINIMUM_ZOOM_DISTANCE;
+      return view.getCamera().getDistToScreen()*100/value >= ViewerCanvas.MINIMUM_ZOOM_DISTANCE;
+    }
   }
 }

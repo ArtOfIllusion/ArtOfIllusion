@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2018 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -12,7 +12,6 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
 import artofillusion.image.filter.*;
 import artofillusion.material.*;
@@ -27,7 +26,6 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -52,7 +50,7 @@ public class ArtOfIllusion
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
-  private static ArrayList<EditingWindow> windows = new ArrayList<EditingWindow>();
+  private static LinkedList<EditingWindow> windows = new LinkedList<EditingWindow>();
   private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
@@ -130,7 +128,7 @@ public class ArtOfIllusion
     classTranslations.put("artofillusion.tools.tapDesigner.TapObject", "artofillusion.tapDesigner.TapObject");
     classTranslations.put("artofillusion.tools.tapDesigner.TapLeaf", "artofillusion.tapDesigner.TapLeaf");
   }
-
+  
   public static void main(String args[])
   {
     Translate.setLocale(Locale.getDefault());
@@ -267,19 +265,6 @@ public class ArtOfIllusion
       {
         LayoutWindow fr = new LayoutWindow(scene);        
         windows.add(fr);
-        
-        for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-        {
-          try
-          {
-            plugin.processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
-          }
-          catch (Throwable tx)
-          {
-            tx.printStackTrace();
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-          }
-        }
         fr.setVisible(true);
         fr.arrangeDockableWidgets();
 
@@ -308,26 +293,9 @@ public class ArtOfIllusion
   public static void closeWindow(EditingWindow win)
   {
     if (win.confirmClose())
-      {
-        windows.remove(win);
-        if (win instanceof LayoutWindow)
-        {
-          for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-          {
-            try
-            {
-              plugin.processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
-            }
-            catch (Throwable tx)
-            {
-              tx.printStackTrace();
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-            }
-          }
-        }
-      }
-    if (windows.isEmpty())
-      quit();
+    {
+      windows.remove(win);
+    }
   }
 
   /** Get a list of all open windows. */
@@ -340,27 +308,17 @@ public class ArtOfIllusion
   /** Quit Art of Illusion. */
   public static void quit()
   {
-    for (int i = windows.size()-1; i >= 0; i--)
-    {
-      EditingWindow win = windows.get(i);
-      closeWindow(win);
-      if (windows.contains(win))
-        return;
-    }
-    
-    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-    {
-      try
+      do
       {
-        plugin.processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
-      }
-      catch (Throwable tx)
-      {
-        tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-      }
-    }
-    System.exit(0);
+        EditingWindow ew = windows.peekLast();
+        if(ew.confirmClose())
+        {
+            windows.removeLast();
+        } else
+        {
+            return;
+        }        
+      } while(!windows.isEmpty());
   }
 
   /** Execute all startup scripts. */

@@ -1,4 +1,5 @@
 /* Copyright (C) 2001,2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -48,8 +49,11 @@ public class AutoScroller implements Runnable
 
   private void mouseReleased(MouseReleasedEvent ev)
   {
-    scrollThread.interrupt();
-    scrollThread = null;
+    if(scrollThread != null)
+    {
+      scrollThread.interrupt();
+      scrollThread = null;    
+    }
   }
 
   private void mouseDragged(MouseDraggedEvent ev)
@@ -64,7 +68,7 @@ public class AutoScroller implements Runnable
     while (true)
       {
         SwingUtilities.invokeLater(new Runnable() {
-              @Override
+          @Override
           public void run()
           {
             Dimension scrollSize = sp.getViewSize();

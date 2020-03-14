@@ -49,7 +49,7 @@ public class AutoScroller implements Runnable
 
   private void mouseReleased(MouseReleasedEvent ev)
   {
-    if(null != scrollThread)
+    if(scrollThread != null)
     {
       scrollThread.interrupt();
       scrollThread = null;    

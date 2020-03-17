@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2011 by Peter Eastman
+/* Copyright (C) 2002-2020 by Peter Eastman
    Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -25,7 +25,7 @@ import java.util.prefs.*;
 
 public class MacOSPlugin implements Plugin, InvocationHandler
 {
-  private boolean usingAppMenu;
+  private boolean usingAppMenu, appleApi;
 
   @Override
   public void processMessage(int message, Object args[])
@@ -40,15 +40,35 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       UIUtilities.setStandardDialogInsets(3);
       try
       {
-        // Use reflection to set up the application menu.
+        if (System.getProperty("java.version").startsWith("1.8."))
+        {
+          // Use the old Apple specific API.
 
-        Class appClass = Class.forName("com.apple.eawt.Application");
-        Object app = appClass.getMethod("getApplication").invoke(null);
-        appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-        appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-        Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
-        Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class [] {listenerClass}, this);
-        appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
+          appleApi = true;
+          Class appClass = Class.forName("com.apple.eawt.Application");
+          Object app = appClass.getMethod("getApplication").invoke(null);
+          appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
+          appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
+          Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
+          Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class[]{listenerClass}, this);
+          appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
+        }
+        else
+        {
+          // Use the Desktop API introduced in Java 9.
+
+          appleApi = false;
+          Class aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
+          Class openHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
+          Class preferencesHandlerClass = Class.forName("java.awt.desktop.PreferencesHandler");
+          Class quiteHandlerClass = Class.forName("java.awt.desktop.QuitHandler");
+          Object proxy = Proxy.newProxyInstance(Desktop.class.getClassLoader(), new Class[]{aboutHandlerClass, openHandlerClass, preferencesHandlerClass, quiteHandlerClass}, this);
+          Desktop desktop = Desktop.getDesktop();
+          Desktop.class.getMethod("setAboutHandler", aboutHandlerClass).invoke(desktop, proxy);
+          Desktop.class.getMethod("setOpenFileHandler", openHandlerClass).invoke(desktop, proxy);
+          Desktop.class.getMethod("setPreferencesHandler", preferencesHandlerClass).invoke(desktop, proxy);
+          Desktop.class.getMethod("setQuitHandler", quiteHandlerClass).invoke(desktop, proxy);
+        }
       }
       catch (Exception ex)
       {
@@ -162,6 +182,22 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       ArtOfIllusion.quit();
       handled = false;
     }
+    else if ("handleQuitRequestWith".equals(method.getName()))
+    {
+      ArtOfIllusion.quit();
+      handled = false;
+      try
+      {
+        Method cancelQuit = args[1].getClass().getMethod("cancelQuit");
+        cancelQuit.invoke(args[1]);
+      }
+      catch (Exception ex)
+      {
+        // Nothing we can really do about it...
+
+        ex.printStackTrace();
+      }
+    }
     else if ("handleOpenFile".equals(method.getName()))
     {
       try
@@ -177,21 +213,40 @@ public class MacOSPlugin implements Plugin, InvocationHandler
         ex.printStackTrace();
       }
     }
+    else if ("openFiles".equals(method.getName()))
+    {
+      try
+      {
+        Method getFiles = args[0].getClass().getMethod("getFiles");
+        java.util.List<File> files = (java.util.List<File>) getFiles.invoke(args[0]);
+        for (File file : files)
+          ArtOfIllusion.newWindow(new Scene(file, true));
+      }
+      catch (Exception ex)
+      {
+        // Nothing we can really do about it...
+
+        ex.printStackTrace();
+      }
+    }
     else
       return null;
 
     // Call setHandled(true) on the event to show we have handled it.
 
-    try
+    if (appleApi)
     {
-      Method setHandled = args[0].getClass().getMethod("setHandled", new Class [] {Boolean.TYPE});
-      setHandled.invoke(args[0], handled);
-    }
-    catch (Exception ex)
-    {
-      // Nothing we can really do about it...
+      try
+      {
+        Method setHandled = args[0].getClass().getMethod("setHandled", new Class[]{Boolean.TYPE});
+        setHandled.invoke(args[0], handled);
+      }
+      catch (Exception ex)
+      {
+        // Nothing we can really do about it...
 
-      ex.printStackTrace();
+        ex.printStackTrace();
+      }
     }
     return null;
   }

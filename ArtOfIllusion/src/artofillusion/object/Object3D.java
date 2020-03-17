@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -465,9 +466,9 @@ public abstract class Object3D
         try
           {
             Class mapClass = ArtOfIllusion.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Material.class});
+            Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Material.class);
             theMaterial = theScene.getMaterial(i);
-            setMaterial(theMaterial, (MaterialMapping) con.newInstance(new Object [] {in, this, theMaterial}));
+            setMaterial(theMaterial, (MaterialMapping) con.newInstance(in, this, theMaterial));
           }
         catch (Exception ex)
           {
@@ -480,9 +481,9 @@ public abstract class Object3D
         try
           {
             Class mapClass = ArtOfIllusion.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(new Class [] {DataInputStream.class, Object3D.class, Texture.class});
+            Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
             theTexture = theScene.getTexture(i);
-            setTexture(theTexture, (TextureMapping) con.newInstance(new Object [] {in, this, theTexture}));
+            setTexture(theTexture, (TextureMapping) con.newInstance(in, this, theTexture));
           }
         catch (Exception ex)
           {
@@ -513,8 +514,8 @@ public abstract class Object3D
     try
     {
       Class valueClass = ArtOfIllusion.getClass(in.readUTF());
-      Constructor con = valueClass.getConstructor(new Class [] {DataInputStream.class});
-      return ((ParameterValue) con.newInstance(new Object [] {in}));
+      Constructor con = valueClass.getConstructor(DataInputStream.class);
+      return ((ParameterValue) con.newInstance(in));
     }
     catch (Exception ex)
     {

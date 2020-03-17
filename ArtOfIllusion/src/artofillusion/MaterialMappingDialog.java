@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -119,9 +119,9 @@ public class MaterialMappingDialog extends BDialog
       Class cls = mappings.get(mapChoice.getSelectedIndex());
       if (cls == map.getClass())
         return;
-      Constructor con = cls.getConstructor(new Class [] {Material.class});
+      Constructor con = cls.getConstructor(Material.class);
       Material mat =  obj.getMaterial();
-      setMapping((MaterialMapping) con.newInstance(new Object [] {mat}));
+      setMapping((MaterialMapping) con.newInstance(mat));
       FormContainer content = (FormContainer) getContent();
       content.remove(editingPanel);
       content.add(editingPanel = map.getEditingPanel(obj, preview), 0, 2, 2, 1);

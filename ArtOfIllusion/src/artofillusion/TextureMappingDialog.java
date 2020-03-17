@@ -1,5 +1,5 @@
 /* Copyright (C) 2000,2002-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -133,10 +133,10 @@ public class TextureMappingDialog extends BDialog
       Class cls = mappings.get(mapChoice.getSelectedIndex());
       if (cls == map.getClass())
         return;
-      Constructor con = cls.getConstructor(new Class [] {Object3D.class, Texture.class});
+      Constructor con = cls.getConstructor(Object3D.class, Texture.class);
       Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer)
           : editObj.getTexture();
-      setMapping((TextureMapping) con.newInstance(new Object [] {editObj, tex}));
+      setMapping((TextureMapping) con.newInstance(editObj, tex));
       content.remove(editingPanel);
       content.add(editingPanel = map.getEditingPanel(editObj, preview), 0, 2);
       pack();

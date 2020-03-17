@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -285,11 +286,15 @@ public class Module
     return false;
   }
 
-  /** This method initializes the module in preparation for evaluating the procedure at a
-      new point.  The default implementation does nothing.  Subclasses whose output depends
-      on the point should override this method. */
+  /**
+   * This method initializes the module in preparation for evaluating the
+   * procedure at a new point.The default implementation does nothing.
+   * Subclasses whose output depends on the point should override this method.
+   *
+   * @param point
+   */
   
-  public void init(PointInfo p)
+  public void init(PointInfo point)
   {
   }
   
@@ -332,17 +337,18 @@ public class Module
   {
   }
   
-  /** Create a duplicate of this module.  Subclasses with adjustable parameters should
-      override this. */
-  
+  /**
+   * Create a duplicate of this module. Subclasses with adjustable parameters
+   * should override this.
+   */  
   public Module duplicate()
   {
     try
     {
-      Constructor con = getClass().getConstructor(new Class [] {Point.class});
-      return (Module) con.newInstance(new Object [] {new Point(bounds.x, bounds.y)});
+      Constructor con = getClass().getConstructor(Point.class);
+      return (Module) con.newInstance(new Point(bounds.x, bounds.y));
     }
-    catch (Exception ex)
+    catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex)
     {
       return null;
     }

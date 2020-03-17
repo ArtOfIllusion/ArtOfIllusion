@@ -208,8 +208,7 @@ class ModuleLoader {
             return dummy();
         }
         try {
-            Object [] wrappedPoint = { new Point () };
-            mod = (Module) cons.newInstance (wrappedPoint);
+            mod = (Module) cons.newInstance (new Point ());
         } catch (InvocationTargetException e) {
             System.err.println ("Couldn't create a " + moduleClass.getName() + ": (InvocationTargetException)" + e.getTargetException ());
             return dummy();
@@ -332,7 +331,7 @@ public class ExprModule extends ProceduralModule
     /* Create a duplicate of this module. */
 
     @Override
-    public Module duplicate()
+    public ExprModule duplicate()
     {
         ExprModule mod = new ExprModule(new Point(bounds.x, bounds.y));
 

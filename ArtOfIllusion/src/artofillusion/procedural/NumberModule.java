@@ -91,12 +91,12 @@ public class NumberModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public NumberModule duplicate()
   {
     NumberModule mod = new NumberModule(new Point(bounds.x, bounds.y));
 
     mod.value = value;
-    mod.name = ""+value;
+    mod.name = "" + value;
     return mod;
   }
 

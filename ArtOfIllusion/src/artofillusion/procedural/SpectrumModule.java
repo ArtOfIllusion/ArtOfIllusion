@@ -228,7 +228,7 @@ public class SpectrumModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public SpectrumModule duplicate()
   {
     SpectrumModule mod = new SpectrumModule(new Point(bounds.x, bounds.y));
 

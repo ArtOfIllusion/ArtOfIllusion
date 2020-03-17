@@ -244,7 +244,7 @@ public class NoiseModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public NoiseModule duplicate()
   {
     NoiseModule mod = new NoiseModule(new Point(bounds.x, bounds.y));
 

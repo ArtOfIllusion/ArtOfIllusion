@@ -292,7 +292,7 @@ public class TransformModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public TransformModule duplicate()
   {
     TransformModule mod = new TransformModule(new Point(bounds.x, bounds.y));
 

@@ -250,7 +250,7 @@ public class RandomModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public RandomModule duplicate()
   {
     RandomModule mod = new RandomModule(new Point(bounds.x, bounds.y));
 

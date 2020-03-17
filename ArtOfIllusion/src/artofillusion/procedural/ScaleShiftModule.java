@@ -132,7 +132,7 @@ public class ScaleShiftModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public ScaleShiftModule duplicate()
   {
     ScaleShiftModule mod = new ScaleShiftModule(new Point(bounds.x, bounds.y));
 

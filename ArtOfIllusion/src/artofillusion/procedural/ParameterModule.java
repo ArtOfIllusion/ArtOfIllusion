@@ -169,7 +169,7 @@ public class ParameterModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public ParameterModule duplicate()
   {
     ParameterModule mod = new ParameterModule(new Point(bounds.x, bounds.y));
 

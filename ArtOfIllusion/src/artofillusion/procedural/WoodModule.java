@@ -238,7 +238,7 @@ public class WoodModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public WoodModule duplicate()
   {
     WoodModule module = new WoodModule(new Point(bounds.x, bounds.y));
 

@@ -121,7 +121,7 @@ public class CoordinateModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public CoordinateModule duplicate()
   {
     CoordinateModule mod = new CoordinateModule(new Point(bounds.x, bounds.y), coordinate);
 

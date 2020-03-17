@@ -145,7 +145,7 @@ public class ClipModule extends ProceduralModule
     /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public ClipModule duplicate()
   {
     ClipModule mod = new ClipModule(new Point(bounds.x, bounds.y));
     mod.min = min;

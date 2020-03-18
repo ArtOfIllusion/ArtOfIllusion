@@ -291,7 +291,8 @@ public class Module
    * procedure at a new point.The default implementation does nothing.
    * Subclasses whose output depends on the point should override this method.
    *
-   * @param point
+   * @param point - a point in space for which a module value is being evaluated.
+   * 
    */
   
   public void init(PointInfo point)

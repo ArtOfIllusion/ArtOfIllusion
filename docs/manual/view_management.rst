@@ -267,7 +267,6 @@ In these images, the blue cube has been selected as the rotation point:
           the view
 
 
-
 .. _Space:
 
 Space or Gimbaled Sphere
@@ -312,4 +311,65 @@ Zoom/Z-axis Likewise works the same as Tray_ mode.
 | |spacetext1|           | |spacetext2|           | |spacetext3|           |
 |                        |                        |                        |
 +------------------------+------------------------+------------------------+
+
+
+.. _Fly:
+
+Fly "Boom"
+``````````
+
+This mode allows you to maneuver in three dimensions throughout the
+scene. Rotation takes place around the viewpoint itself - think of
+turning your head to look to the side and up or down.
+
+Zoom/Z-Axis movement happens along the view direction. (But See
+Scroll-Cues_ - it's a little more sophisticated than that)
+
+.. |fly1| image:: view_controls/Fly1.png
+   
+.. |flytext1| replace:: Left and Right pan are relative to the current
+   view direction
+
+.. |fly2| image:: view_controls/Fly2.png
+
+.. |flytext2| replace:: Fly mode can Barrel roll! Pan directions are
+   also relative to the current roll angle.
+
+
+====================== ====================================================
+
+        |fly1|                |flytext1|
+
+        |fly2|                |flytext2|
+
+====================== ====================================================
+
+
+.. _Drive:
+
+Drive or Dolly
+``````````````
+
+This mode is a slightly more flexable version of an old-school camera
+dolly. The viewpoint can rotate up and down, and to the left and right
+along a plane perpendicular to the Y-Axis. 
+
+Zoom/Z-Axis movement happens along a plane perpendicular to the Y-Axis
+in the view direction - think of looking up at the ceiling, then take
+a step forward. (See also Scroll-Cues_ for some of the more advanced
+things you can do here)
+
+
+.. |drive1| image:: view_controls/Drive1.png
+
+.. |drive2| image:: view_controls/Drive2.png
+
+
+======================= ===================================================
+       |drive1|          Left and Right pan are around the camera Y-Axis.
+                         Up and Down pan are stopped at vertical.
+                 
+       |drive2|          Left and Right pan are still around the Y-Axis,
+                         even when the camera is tilted up or down.
+======================= ===================================================
 

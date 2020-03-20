@@ -188,7 +188,7 @@ possible - just try them. You might never go back to the view tools!
 |             |                                                        |
 +-------------+--------------+--------------+------------+-------------+
 |Scroll Wheel |  Move closer/further from   | Move along view axis     |
-|             |  the rotation center.       | (See `Scroll Cues`_ for  |
+|             |  the rotation center.       | (See Scroll-Cues_ for    |
 |             |                             | some of the fine points) |
 +-------------+--------------+--------------+------------+-------------+
 |Alt Scroll   |  Precision Z-movement (Slower)                         |
@@ -372,4 +372,51 @@ things you can do here)
        |drive2|          Left and Right pan are still around the Y-Axis,
                          even when the camera is tilted up or down.
 ======================= ===================================================
+
+
+.. _Scroll-Cues:
+
+Zoom-Control Cue Graphics
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When the view control mode is one of the travel modes, (Drive_ or Fly_)
+using the zoom control has a more complex effect. If the mouse cursor
+is at the center of the view, the zoom behaves as described in the
+applicable section above. Away from the center of the view, some
+additional features come into play.
+
+To guide you in the use of these features, the AOI interface supplies
+*optional* visual guides, called *scroll cues*. These can be enabled
+or disabled through the **Edit &rarr Preferences** Menu. 
+
+The options for when to show the cues are:
+
+Never
+  Uncheck the boxes
+While Scrolling
+  Bring up the cue when the mouse zoom function is active
+On Idle
+  Always on if the view is in an appropriate mode
+
+.. note::
+  The effects that these cues describe are always on! The preferences
+  only control whether to display "sighting targets" to make using them
+  a little bit easier.
+
+For Fly_ mode, the cue is a pair of concentric circles:
+
+.. figure:: view_controls/Fly_Cue.png
+   :width: 90%
+
+For Drive_ mode, the cue is a pair of nested squares. The various zones
+are also a little more complicated than in Fly_ mode.
+
+.. figure:: view_controls/Drive_Cue.png
+   :width: 90%
+
+   The vertical and horizontal lines are for illustration only - the
+   actual cue graphic only conists of the nested squares.
+
+
+
 

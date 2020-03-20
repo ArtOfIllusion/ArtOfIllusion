@@ -1,6 +1,8 @@
 Viewpoint Mangement
 ###################
 
+.. include:: <isonum.txt>
+
 While working on your 3D scene or model, you will probably want to
 move the view around to look at things from multiple perspectives.
 You may also want to move a camera to properly frame a scene for
@@ -387,7 +389,7 @@ additional features come into play.
 
 To guide you in the use of these features, the AOI interface supplies
 *optional* visual guides, called *scroll cues*. These can be enabled
-or disabled through the **Edit &rarr Preferences** Menu. 
+or disabled through the **Edit** |rarr| **Preferences** Menu. 
 
 The options for when to show the cues are:
 
@@ -419,4 +421,72 @@ are also a little more complicated than in Fly_ mode.
 
 
 
+.. _View-Frustrum:
+
+View Frustrum Cue
+~~~~~~~~~~~~~~~~~
+
+Optionally, AOI can display cues that help verify the location and
+orientation of the viewpoint one is moving. This only works in the
+4 viewport configuration.
+
+This cue can be enabled or disabled through **Edit** |rarr|
+**Preferences** You can set the cue to be displayed for any active
+view, or only camera views.
+
+The color of the frustrum is significant: If light blue, you are seeing
+it from the "outside" - as if you are looking over the shoulder of the 
+represented viewpoint. If it is orange, you are looking at it from the
+"inside" - looking back toward the viewpoint.
+
+Perspective Frustrum
+````````````````````
+
+If the view that is being moved is Perspective Projection_, it's
+frustrum will display as a four sided pyramid, with the tip at the
+viewpoint.
+
+.. figure:: view_controls/Perspective_Frustrum.png
+   :width: 90%
+
+   In this shot, the lower-right Viewport, set to 'Camera 1' is being
+   moved.
+
+   Note that the size and shape of the base of the pyramid represent
+   the field of view that is shown in the 'Camera 1' viewport, but
+   the camera itself looks off to infinity within that field of view.
+
+Parallel Frustrum
+`````````````````
+
+If the view that is being moved is Parallel Projection_, it is
+it is represented by a rectangular plane.
+
+.. figure:: view_controls/Parallel_Frustrum.png
+   :width: 90%
+
+   In this shot, the upper-right viewport is being moved.
+
+   The rectangle represents the exact dimensions of the viewport, as
+   if it was embeded in the scene like a sheet of glass.
+
+
+.. _Tilt-Indicator:
+
+Rotation Indicator Dial
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. image:: view_controls/Roll_Indicator.png
+   :align: left
+
+One last cue can be enabled: If you enable 'Show tilt dial' you will
+get visual feedback on how far you have rotated the view when
+performing a barrel roll.
+
+In the image, the view has been rolled approximately 15 |deg|
+counter-clockwise
+
+.. note:: The indicator shows the relative rotation from when you
+   began *this* roll. If you release the mouse, it will reset, and
+   the next roll will start at 0 |deg|
 

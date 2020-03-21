@@ -24,7 +24,7 @@
 
   <target name="compile" depends="init">
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${aoijar}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
+    <javac srcdir="${src}" destdir="${build}" encoding="UTF-8" classpath="${aoijar}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
       <compilerarg line="${args}"/>
     </javac>
   </target>

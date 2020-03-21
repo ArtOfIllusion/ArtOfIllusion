@@ -26,7 +26,7 @@
     <pathconvert property="classpath" refid="libraries" />
 
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
+    <javac srcdir="${src}" destdir="${build}" encoding="UTF-8" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
       <compilerarg line="${args}"/>
     </javac>
   </target>

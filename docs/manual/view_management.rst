@@ -1,3 +1,5 @@
+.. _viewpoint-management:
+
 Viewpoint Mangement
 ###################
 

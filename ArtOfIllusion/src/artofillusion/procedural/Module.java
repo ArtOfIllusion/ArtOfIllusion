@@ -349,7 +349,7 @@ public class Module
       Constructor con = getClass().getConstructor(Point.class);
       return (Module) con.newInstance(new Point(bounds.x, bounds.y));
     }
-    catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex)
+    catch (Exception ex)
     {
       return null;
     }

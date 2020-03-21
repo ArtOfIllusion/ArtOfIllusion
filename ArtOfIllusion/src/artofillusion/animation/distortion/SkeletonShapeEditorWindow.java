@@ -1,5 +1,6 @@
 /* Copyright (C) 2004-2006 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -214,7 +215,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
   @Override
   protected void doOk()
   {
-    parentWindow.setUndoRecord(new UndoRecord(parentWindow, false, UndoRecord.COPY_TRACK, new Object [] {track, track.duplicate(track.getParent())}));
+    parentWindow.setUndoRecord(new UndoRecord(parentWindow, false, UndoRecord.COPY_TRACK, track, track.duplicate(track.getParent())));
     keyframe.getSkeleton().copy(getObject().getSkeleton());
     track.moveKeyframe(keyIndex, keyTime);
     track.getTimecourse().getSmoothness()[keyIndex] = keySmoothness;
@@ -256,7 +257,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
     else
       defaultSkeleton = obj.getSkeleton();
     Object3D editObj = getObject().getObject();
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {editObj, editObj.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT, editObj, editObj.duplicate()));
     editObj.getSkeleton().copy(defaultSkeleton);
     adjustMeshForSkeleton();
     objectChanged();
@@ -276,7 +277,7 @@ public class SkeletonShapeEditorWindow extends MeshEditorWindow implements MeshE
       {
         Skeleton newSkeleton = ((Gesture) key.createObjectKeyframe(actor)).getSkeleton();
         Object3D editObj = getObject().getObject();
-        setUndoRecord(new UndoRecord(SkeletonShapeEditorWindow.this, false, UndoRecord.COPY_OBJECT, new Object [] {editObj, editObj.duplicate()}));
+        setUndoRecord(new UndoRecord(SkeletonShapeEditorWindow.this, false, UndoRecord.COPY_OBJECT, editObj, editObj.duplicate()));
         editObj.getSkeleton().copy(newSkeleton);
         adjustMeshForSkeleton();
         objectChanged();

@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -788,7 +788,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           if (parent instanceof ObjectInfo && v.indexOf(parent) == -1)
             {
               v.addElement(parent);
-              undo.addCommand(UndoRecord.COPY_OBJECT_INFO, new Object [] {parent, ((ObjectInfo) parent).duplicate()});
+              undo.addCommand(UndoRecord.COPY_OBJECT_INFO, parent, ((ObjectInfo) parent).duplicate());
             }
           tr.setEnabled(enable);
         }
@@ -819,7 +819,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               ObjectInfo info = (ObjectInfo) tr.getParent();
               for (int j = 0; j < info.getTracks().length; j++)
                 if (info.getTracks()[j] == tr)
-                  undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, j, tr.duplicate(info)});
+                  undo.addCommand(UndoRecord.SET_TRACK, info, j, tr.duplicate(info));
             }
           Keyframe k = tr.setKeyframe(time, theScene);
           if (k != null)
@@ -861,7 +861,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
               continue;
             if (tr instanceof RotationTrack && rotx && roty && rotz)
               continue;
-            undo.addCommand(UndoRecord.SET_TRACK, new Object [] {info, j, tr.duplicate(info)});
+            undo.addCommand(UndoRecord.SET_TRACK, info, j, tr.duplicate(info));
             Keyframe k = tr.setKeyframeIfModified(time, theScene);
             if (k != null)
               {
@@ -912,7 +912,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           ObjectInfo info = (ObjectInfo) tr.getParent();
           if (modifiedObj.indexOf(info) < 0)
             {
-              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()});
+              undo.addCommand(UndoRecord.SET_TRACK_LIST, info, info.getTracks());
               modifiedObj.addElement(info);
             }
           for (int j = 0; j < info.getTracks().length; j++)
@@ -953,7 +953,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           ObjectInfo info = (ObjectInfo) tr.getParent();
           if (modifiedObj.indexOf(info) < 0)
             {
-              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()});
+              undo.addCommand(UndoRecord.SET_TRACK_LIST, info, info.getTracks());
               modifiedObj.addElement(info);
             }
           info.removeTrack(tr);
@@ -1024,7 +1024,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
                       theScene.replaceObject(info.getObject(), posable, undo);
                     }
                 }
-              undo.addCommand(UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()});
+              undo.addCommand(UndoRecord.SET_TRACK_LIST, info, info.getTracks());
               args[0] = info;
               Track newtrack = (Track) con[which].newInstance(args);
               info.addTrack(newtrack, 0);
@@ -1084,7 +1084,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
           parent = ((Track) parent).getParent();
         if (parent instanceof ObjectInfo)
           window.getScene().applyTracksToObject((ObjectInfo) parent);
-        undo.addCommand(UndoRecord.COPY_TRACK, new Object [] {tr, changedTracks.get(tr)});
+        undo.addCommand(UndoRecord.COPY_TRACK, tr, changedTracks.get(tr));
       }
     window.setUndoRecord(undo);
     window.updateMenus();

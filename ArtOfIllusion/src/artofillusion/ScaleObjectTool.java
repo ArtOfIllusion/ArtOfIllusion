@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -356,7 +357,7 @@ public class ScaleObjectTool extends EditingTool
           {
             ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
             c = info.getCoords();
-            undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
+            undo.addCommand(UndoRecord.COPY_COORDS, c, c.duplicate());
           }
         dragged = true;
       }
@@ -402,8 +403,8 @@ public class ScaleObjectTool extends EditingTool
         ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
         oldObj[i] = info.getObject().duplicate();
         oldCoords[i] = info.getCoords().duplicate();
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.getCoords(), oldCoords[i]});
-        undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {info.getObject(), oldObj[i]});
+        undo.addCommand(UndoRecord.COPY_COORDS, info.getCoords(), oldCoords[i]);
+        undo.addCommand(UndoRecord.COPY_OBJECT, info.getObject(), oldObj[i]);
       }
       dragged = true;
     }

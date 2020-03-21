@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -197,7 +198,7 @@ public class RotateMeshTool extends MeshEditingTool
     Mesh mesh = (Mesh) controller.getObject().getObject();
     Point dragPoint = ev.getMouseEvent().getPoint();
     if (undo == null)
-      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
+      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, mesh, mesh.getVertexPositions());
     double angle = DRAG_SCALE*((dragPoint.x-clickPoint.x)*hdirection + (dragPoint.y-clickPoint.y)*vdirection);
     Vec3 v[] = findRotatedPositions(baseVertPos, angle, (MeshViewer) ev.getView());
     mesh.setVertexPositions(v);

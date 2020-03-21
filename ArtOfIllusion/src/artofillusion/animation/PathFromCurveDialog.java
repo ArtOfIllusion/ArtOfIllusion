@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -297,7 +297,7 @@ public class PathFromCurveDialog extends BDialog
     // Create the position track.
     
     info = objects.get(objList.getSelectedIndex());
-    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.SET_TRACK_LIST, new Object [] {info, info.getTracks()}));
+    window.setUndoRecord(new UndoRecord(window, false, UndoRecord.SET_TRACK_LIST, info, info.getTracks()));
     float smoothness[] = cv.getSmoothness();
     PositionTrack tr = new PositionTrack(info);
     tr.setName(curveName+" Position");

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2020 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -701,7 +701,7 @@ public class ArtOfIllusion
     ObjectInfo obj[] = ObjectInfo.duplicateAll(clipboardObject);
     for (int i = 0; i < obj.length; i++)
       win.addObject(obj[i], undo);
-    undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
+    undo.addCommand(UndoRecord.SET_SCENE_SELECTION, sel);
   }
 
   /** Get the number of objects on the clipboard. */

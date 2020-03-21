@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -216,7 +217,7 @@ public class ShatterTrack extends Track
         Translate.text("disappearanceTime"), Translate.text("gravity"), Translate.text("gravityAxis"), Translate.text("randomness"), Translate.text("CoordinateSystem")});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_OBJECT_INFO, info, info.duplicate()));
     this.setName(nameField.getText());
     startTime = timeField.getValue();
     size = sizeField.getValue();

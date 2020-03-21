@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -92,8 +92,7 @@ public class ObjectTreeElement extends TreeElement
     if (el.getObject() instanceof ObjectInfo)
       {
         if (tree.undo != null)
-          tree.undo.addCommandAtBeginning(UndoRecord.REMOVE_FROM_GROUP, new Object []
-              {info, el.getObject()});
+          tree.undo.addCommandAtBeginning(UndoRecord.REMOVE_FROM_GROUP, info, el.getObject());
         info.addChild((ObjectInfo) el.getObject(), position);
       }
     else if (el.getObject() instanceof Track)
@@ -134,8 +133,7 @@ public class ObjectTreeElement extends TreeElement
       }
     info.removeChild((ObjectInfo) object);
     if (tree.undo != null)
-      tree.undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, new Object []
-          {info, object, pos});
+      tree.undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, info, object, pos);
   }
 
   /* Get the object corresponding to this element. */

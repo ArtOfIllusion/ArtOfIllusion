@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -387,7 +388,7 @@ public class FilterParameterTrack extends Track
     ComponentsDialog dlg = new ComponentsDialog(win, Translate.text("editKeyframe"), widget, label);
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(filter)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(filter)));
     index = 0;
     for (PropertyEditor editor : editors)
     {
@@ -425,7 +426,7 @@ public class FilterParameterTrack extends Track
         {nameField, smoothChoice}, new String [] {Translate.text("trackName"), Translate.text("SmoothingMethod")});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(filter)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(filter)));
     this.setName(nameField.getText());
     smoothingMethod = smoothChoice.getSelectedIndex();
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -146,7 +147,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
     if (undo == null)
     {
       Mesh mesh = (Mesh) controller.getObject().getObject();
-      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
+      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, mesh, mesh.getVertexPositions());
     }
 
     transformMesh(ev.getTransform());
@@ -287,7 +288,7 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
       drag = view.getCamera().getCameraCoordinates().getZDirection().times(-dy*0.01);
     else
       drag = view.getCamera().findDragVector(baseVertPos[i], dx, dy);
-    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, baseVertPos}));
+    theWindow.setUndoRecord(new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, mesh, baseVertPos));
     transformMesh(Mat4.translation(drag.x, drag.y, drag.z));
     theWindow.updateImage();
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -162,7 +163,7 @@ public class RotateObjectTool extends EditingTool
           {
             ObjectInfo info = (ObjectInfo) toMove.elementAt(i);
             c = info.getCoords();
-            undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
+            undo.addCommand(UndoRecord.COPY_COORDS, c, c.duplicate());
           }
         dragged = true;
       }
@@ -288,7 +289,7 @@ public class RotateObjectTool extends EditingTool
         c = info.getCoords();
         origin = rotationCenter[i];
         rotMatrix = Mat4.translation(origin.x, origin.y, origin.z).times(Mat4.axisRotation(rotAxis, angle)).times(Mat4.translation(-origin.x, -origin.y, -origin.z));
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
+        undo.addCommand(UndoRecord.COPY_COORDS, c, c.duplicate());
           c.transformCoordinates(rotMatrix);
       }
     theWindow.getScene().applyTracksAfterModification(toMove);

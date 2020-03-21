@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -160,7 +161,7 @@ public class ScaleMeshTool extends MeshEditingTool
     if (undo == null)
     {
       Mesh mesh = (Mesh) controller.getObject().getObject();
-      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, new Object [] {mesh, mesh.getVertexPositions()});
+      undo = new UndoRecord(theWindow, false, UndoRecord.COPY_VERTEX_POSITIONS, mesh, mesh.getVertexPositions());
     }
     Vec3 scale = scaleMesh(ev);
     theWindow.updateImage();

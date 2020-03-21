@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes copyright (C) 2016-2019 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,7 +17,6 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import static artofillusion.ui.UIUtilities.*;
-import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
 import java.awt.*;
 
@@ -260,7 +260,7 @@ public class MoveViewTool extends EditingTool
           // This view corresponds to an actual camera in the scene.  Create an undo record, and move any children of
           // the camera.
           bound.getCoords().copyCoords(view.getCamera().getCameraCoordinates());
-          UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, new Object [] {bound.getCoords(), oldCoords});
+          UndoRecord undo = new UndoRecord(theWindow, false, UndoRecord.COPY_COORDS, bound.getCoords(), oldCoords);
           moveChildren(bound, bound.getCoords().fromLocal().times(oldCoords.toLocal()), undo);
           theWindow.setUndoRecord(undo);
         }
@@ -277,7 +277,7 @@ public class MoveViewTool extends EditingTool
       CoordinateSystem coords = parent.getChildren()[i].getCoords();
       CoordinateSystem oldCoords = coords.duplicate();
       coords.transformCoordinates(transform);
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
+      undo.addCommand(UndoRecord.COPY_COORDS, coords, oldCoords);
       moveChildren(parent.getChildren()[i], transform, undo);
     }
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2009 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -222,11 +223,11 @@ public class MoveScaleRotateObjectTool extends EditingTool
       for (int i = 0; i < originalCoords.length; i++)
       {
         originalCoords[i] = originalCoords[i].duplicate();
-        undo.addCommand(UndoRecord.COPY_COORDS, new Object[] {objects.get(i).getCoords(), originalCoords[i]});
+        undo.addCommand(UndoRecord.COPY_COORDS, objects.get(i).getCoords(), originalCoords[i]);
         if (ev.getHandleType() == Compound3DManipulator.SCALE)
         {
           originalObjects[i] = originalObjects[i].duplicate();
-          undo.addCommand(UndoRecord.COPY_OBJECT, new Object[] {objects.get(i).getObject(), originalObjects[i]});
+          undo.addCommand(UndoRecord.COPY_OBJECT, objects.get(i).getObject(), originalObjects[i]);
         }
       }
     }
@@ -465,7 +466,7 @@ public class MoveScaleRotateObjectTool extends EditingTool
     for (int i = 0; i < toMove.size(); i++)
     {
       CoordinateSystem c = toMove.get(i).getCoords();
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {c, c.duplicate()});
+      undo.addCommand(UndoRecord.COPY_COORDS, c, c.duplicate());
       c.setOrigin(c.getOrigin().plus(v));
     }
     theWindow.getScene().applyTracksAfterModification(toMove);

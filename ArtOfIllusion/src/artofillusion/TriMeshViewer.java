@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications copyright (C) 2017-2020 Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -384,7 +385,7 @@ public class TriMeshViewer extends MeshViewer
       if (hideEdge[f[i].e3])
         selected[ed[f[i].e3].f1] = selected[ed[f[i].e3].f2] = true;
     }
-    currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
+    currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, controller, controller.getSelectionMode(), oldSelection));
     controller.setSelection(selected);
     currentTool.getWindow().updateMenus();
     if (!e.isShiftDown() && wantHandleClicks)
@@ -508,7 +509,7 @@ public class TriMeshViewer extends MeshViewer
     for (int k = 0; k < selected.length; k++)
       if (selected[k] != oldSelection[k])
       {
-        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, new Object [] {controller, controller.getSelectionMode(), oldSelection}));
+        currentTool.getWindow().setUndoRecord(new UndoRecord(currentTool.getWindow(), false, UndoRecord.SET_MESH_SELECTION, controller, controller.getSelectionMode(), oldSelection));
         break;
       }
     controller.setSelection(selected);

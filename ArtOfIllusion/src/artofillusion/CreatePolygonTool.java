@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modification, Copyright (C) 2020 Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -122,7 +123,7 @@ public class CreatePolygonTool extends EditingTool
         UndoRecord undo = new UndoRecord(theWindow, false);
         int sel[] = ((LayoutWindow) theWindow).getSelectedIndices();
         ((LayoutWindow) theWindow).addObject(objInfo, undo);
-        undo.addCommand(UndoRecord.SET_SCENE_SELECTION, new Object [] {sel});
+        undo.addCommand(UndoRecord.SET_SCENE_SELECTION, sel);
         theWindow.setUndoRecord(undo);
         ((LayoutWindow) theWindow).setSelection(theScene.getNumObjects()-1);
       }

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes copyright (C) 2016-2017 by Maksim Khramov
+   Changes copyright (C) 2016-2020 by Maksim Khramov
    Changes copyright (C) 2017-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -508,7 +508,7 @@ public class SceneViewer extends ViewerCanvas
       }
       if (parentFrame instanceof LayoutWindow)
       {
-        parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {sel}));
+        parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, sel));
         ((LayoutWindow) parentFrame).addToSelection(j);
       }
       else
@@ -709,7 +709,7 @@ public class SceneViewer extends ViewerCanvas
     for (int i = 0; i < newSelection.length && !changed; i++)
       changed = (oldSelection[i] != newSelection[i]);
     if (changed)
-      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, new Object [] {oldSelection}));
+      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.SET_SCENE_SELECTION, oldSelection));
     dragging = false;
   }
 
@@ -722,7 +722,7 @@ public class SceneViewer extends ViewerCanvas
     if (e.getClickCount() == 2 && (activeTool.whichClicks() & EditingTool.OBJECT_CLICKS) != 0 && clickedObject != null && clickedObject.getObject().isEditable())
     {
       final Object3D obj = clickedObject.getObject();
-      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()}));
+      parentFrame.setUndoRecord(new UndoRecord(parentFrame, false, UndoRecord.COPY_OBJECT, obj, obj.duplicate()));
       obj.edit(parentFrame, clickedObject,  new Runnable() {
         @Override
         public void run()
@@ -742,7 +742,7 @@ public class SceneViewer extends ViewerCanvas
     CoordinateSystem coords = obj.getCoords();
     CoordinateSystem oldCoords = coords.duplicate();
     coords.transformCoordinates(transform);
-    undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, oldCoords});
+    undo.addCommand(UndoRecord.COPY_COORDS, coords, oldCoords);
     for (int i = 0; i < obj.getChildren().length; i++)
       moveChildren(obj.getChildren()[i], transform, undo);
   }

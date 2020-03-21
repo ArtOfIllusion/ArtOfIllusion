@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -246,7 +246,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     final Object3D obj = theScene.getObject(sel[0]).getObject();
     if (obj.isEditable())
     {
-      final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
+      final UndoRecord undo = new UndoRecord(this, false, UndoRecord.COPY_OBJECT, obj, obj.duplicate());
       obj.edit(this, theScene.getObject(sel[0]), new Runnable() {
         @Override
         public void run()
@@ -276,8 +276,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     {
       obj[i] = theScene.getObject(sel[i]).getObject();
       coords[i] = theScene.getObject(sel[i]).getCoords();
-      undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj[i], obj[i].duplicate()});
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords[i], coords[i].duplicate()});
+      undo.addCommand(UndoRecord.COPY_OBJECT, obj[i], obj[i].duplicate());
+      undo.addCommand(UndoRecord.COPY_COORDS, coords[i], coords[i].duplicate());
     }
     if (sel.length == 1)
     {
@@ -371,8 +371,8 @@ public class CSGEditorWindow extends ObjectEditorWindow
     {
       obj = theScene.getObject(sel[i]).getObject();
       coords = theScene.getObject(sel[i]).getCoords();
-      undo.addCommand(UndoRecord.COPY_OBJECT, new Object [] {obj, obj.duplicate()});
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, coords.duplicate()});
+      undo.addCommand(UndoRecord.COPY_OBJECT, obj, obj.duplicate());
+      undo.addCommand(UndoRecord.COPY_COORDS, coords, coords.duplicate());
       orig = coords.getOrigin();
       size = obj.getBounds().getSize();
       if (!Double.isNaN(values[0]))
@@ -503,7 +503,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
       bounds = bounds.transformAndOutset(coords.fromLocal());
       center = bounds.getCenter();
       orig = coords.getOrigin();
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, coords.duplicate()});
+      undo.addCommand(UndoRecord.COPY_COORDS, coords, coords.duplicate());
       if (xchoice.getSelectedIndex() == 1)
         orig.x += alignTo.x-bounds.maxx;
       else if (xchoice.getSelectedIndex() == 2)
@@ -555,7 +555,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
 
     for (ObjectInfo info: objects)
     {
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {info.getCoords(), info.getCoords().duplicate()});
+      undo.addCommand(UndoRecord.COPY_COORDS, info.getCoords(), info.getCoords().duplicate());
       info.getCoords().setOrigin(info.getCoords().getOrigin().minus(center));
     }
     updateImage();
@@ -573,7 +573,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     obj = info.getObject();
     if (obj.canConvertToTriangleMesh() == Object3D.CANT_CONVERT)
       return;
-    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
+    setUndoRecord(new UndoRecord(this, false, UndoRecord.COPY_OBJECT_INFO, info, info.duplicate()));
     if (obj.canConvertToTriangleMesh() == Object3D.EXACTLY)
       mesh = obj.convertToTriangleMesh(0.0);
     else

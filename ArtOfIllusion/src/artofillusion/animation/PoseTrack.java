@@ -373,8 +373,7 @@ public class PoseTrack extends Track
   @Override
   public void editKeyframe(LayoutWindow win, int which)
   {
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK,
-			    new Object[] {this, duplicate(info)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(info)));
     info.getObject().editKeyframe(win, tc.getValues()[which], info);
   }
 
@@ -400,7 +399,7 @@ public class PoseTrack extends Track
         {nameField, smoothChoice, modeChoice}, new String [] {Translate.text("trackName"), Translate.text("SmoothingMethod"), Translate.text("trackMode")});
     if (!dlg.clickedOk())
       return;
-    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, new Object [] {this, duplicate(info)}));
+    win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_TRACK, this, duplicate(info)));
     this.setName(nameField.getText());
     smoothingMethod = smoothChoice.getSelectedIndex();
     relative = (modeChoice.getSelectedIndex() == 1);

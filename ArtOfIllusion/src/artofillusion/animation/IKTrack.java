@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2013 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -421,7 +421,7 @@ public class IKTrack extends Track
 
     private void doOk()
     {
-      window.setUndoRecord(new UndoRecord(window, false, UndoRecord.COPY_OBJECT_INFO, new Object [] {info, info.duplicate()}));
+      window.setUndoRecord(new UndoRecord(window, false, UndoRecord.COPY_OBJECT_INFO, info, info.duplicate()));
       IKTrack.this.setName(nameField.getText());
       IKTrack.this.setUseGestures(gesturesBox.getState());
       constraints = tempConstraints;

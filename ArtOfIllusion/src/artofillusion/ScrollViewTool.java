@@ -1,4 +1,5 @@
 /* Copyright (C) 2017-2020 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -233,7 +234,7 @@ public class ScrollViewTool
   {
     if (window != null && boundCamera != null)
     {
-      UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, new Object [] {boundCamera.getCoords(), startCoords});
+      UndoRecord undo = new UndoRecord(window, false, UndoRecord.COPY_COORDS, boundCamera.getCoords(), startCoords);
       moveCameraChildren(boundCamera, boundCamera.getCoords().fromLocal().times(startCoords.toLocal()), undo);
       window.setUndoRecord(undo);
     }
@@ -262,7 +263,7 @@ public class ScrollViewTool
       CoordinateSystem coords = parent.getChildren()[i].getCoords();
       CoordinateSystem previousCoords = coords.duplicate();
       coords.transformCoordinates(transform);
-      undo.addCommand(UndoRecord.COPY_COORDS, new Object [] {coords, previousCoords});
+      undo.addCommand(UndoRecord.COPY_COORDS, coords, previousCoords);
       moveCameraChildren(parent.getChildren()[i], transform, undo);
     }
   }

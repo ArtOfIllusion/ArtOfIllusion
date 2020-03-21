@@ -1,6 +1,5 @@
-/* This is a Module which outputs a weighted average of two colors. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,6 +15,8 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.awt.*;
 
+/* This is a Module which outputs a weighted average of two colors. */
+
 public class BlendModule extends ProceduralModule
 {
   RGBColor blendColor;
@@ -24,10 +25,10 @@ public class BlendModule extends ProceduralModule
 
   public BlendModule(Point position)
   {
-    super(Translate.text("menu.blendModule"), new IOPort [] {new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.TOP, new String [] {"Color 1", '('+Translate.text("black")+')'}),
-      new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Color 2", '('+Translate.text("white")+')'}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Fraction", "(0.5)"})},
-      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Blend"})},
+    super(Translate.text("menu.blendModule"), new IOPort[] {new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.TOP, "Color 1", '('+Translate.text("black")+')'),
+      new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.BOTTOM, "Color 2", '('+Translate.text("white")+')'),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Fraction", "(0.5)")},
+      new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Blend")},
       position);
     blendColor = new RGBColor(0.0f, 0.0f, 0.0f);
   }

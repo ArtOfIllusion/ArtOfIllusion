@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,15 +11,12 @@
 
 package artofillusion.procedural;
 
-import artofillusion.*;
-import artofillusion.math.*;
-import buoy.widget.*;
 import java.awt.*;
-import java.io.*;
-import java.lang.reflect.*;
 
-/** This represents a module in a procedure.  This is an abstract class, whose subclasses
-    represent specific kinds of modules. */
+/**
+ * This represents a module in a procedure. This is an abstract class, whose
+ * subclasses represent specific kinds of modules.
+ */
 
 public class ProceduralModule extends artofillusion.procedural.Module
 {

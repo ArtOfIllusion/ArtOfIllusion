@@ -1,6 +1,5 @@
-/* This is a Module which represents one of the output values of a procedure. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +14,8 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
+/* This is a Module which represents one of the output values of a procedure. */
+
 public class OutputModule extends ProceduralModule
 {
   int width;
@@ -23,8 +24,8 @@ public class OutputModule extends ProceduralModule
 
   public OutputModule(String name, String defaultLabel, double defaultValue, RGBColor defaultColor, int type)
   {
-    super(name, new IOPort [] {new IOPort(type, IOPort.INPUT, IOPort.LEFT, new String [] {name, "("+defaultLabel+")"})},
-      new IOPort [] {}, new Point(0, 0));
+    super(name, new IOPort[] {new IOPort(type, IOPort.INPUT, IOPort.LEFT, name, "(" + defaultLabel + ")")},
+      new IOPort[] {}, new Point(0, 0));
     this.defaultValue = defaultValue;
     this.defaultColor = defaultColor;
   }

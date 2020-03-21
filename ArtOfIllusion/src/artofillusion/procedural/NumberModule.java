@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,15 +27,13 @@ public class NumberModule extends ProceduralModule
 
   public NumberModule(Point position)
   {
-    super("0.0", new IOPort [] {}, new IOPort [] {
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
-      position);
+    this(position, 0);
   }
 
   public NumberModule(Point position, double v)
   {
-    super(Double.toString(v), new IOPort [] {}, new IOPort [] {
-      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Value"})},
+    super(Double.toString(v), new IOPort[] {}, new IOPort[] {
+      new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Value")},
       position);
     value = v;
   }
@@ -115,7 +114,7 @@ public class NumberModule extends ProceduralModule
   public void readFromStream(DataInputStream in, Scene theScene) throws IOException
   {
     value = in.readDouble();
-    name = ""+value;
+    name = "" + value;
     layout();
   }
 }

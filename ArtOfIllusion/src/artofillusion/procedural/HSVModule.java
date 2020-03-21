@@ -1,4 +1,5 @@
-/* Copyright (C) 2000-2005 by Peter Eastman
+/* Copyright (C) 2000-2011 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,8 +14,10 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-/** This is a Module which takes three numbers, and uses them as the hue, saturation, and
-    value components of a color. */
+/**
+ * This is a Module which takes three numbers, and uses them as the hue,
+ * saturation, and value components of a color.
+ */
 
 public class HSVModule extends ProceduralModule
 {
@@ -24,10 +27,10 @@ public class HSVModule extends ProceduralModule
 
   public HSVModule(Point position)
   {
-    super("HSV", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Hue", "(1)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Saturation", "(1)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Value", "(1)"})},
-      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Color"})},
+    super("HSV", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Hue", "(1)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Saturation", "(1)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Value", "(1)")},
+      new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Color")},
       position);
     color = new RGBColor(0.0f, 0.0f, 0.0f);
   }

@@ -1,6 +1,5 @@
-/* This is a Module which outputs the cosine of a number. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,6 +14,8 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
+/* This is a Module which outputs the cosine of a number. */
+
 public class CosineModule extends ProceduralModule
 {
   boolean valueOk, errorOk, gradOk;
@@ -23,8 +24,8 @@ public class CosineModule extends ProceduralModule
 
   public CosineModule(Point position)
   {
-    super("Cos", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Value", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Cosine"})},
+    super("Cos", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Value", "(0)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Cosine")},
       position);
     gradient = new Vec3();
   }

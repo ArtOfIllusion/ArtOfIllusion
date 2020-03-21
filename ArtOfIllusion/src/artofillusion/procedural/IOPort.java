@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2012 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,7 +32,7 @@ public class IOPort
   public static final int RIGHT = 3;
   public static final int SIZE = 5;
   
-  public IOPort(int valueType, int type, int location, String description[])
+  public IOPort(int valueType, int type, int location, String... description)
   {
     this.valueType = valueType;
     this.type = type;
@@ -101,9 +102,7 @@ public class IOPort
 
   public int getIndex()
   {
-    if (type == INPUT)
-      return module.getInputIndex(this);
-    return module.getOutputIndex(this);
+    return (type == INPUT) ? module.getInputIndex(this) : module.getOutputIndex(this);
   }
 
   /** Determine whether a point on the screen is inside this port. */
@@ -115,14 +114,14 @@ public class IOPort
   
   /** Get the description of this port. */
   
-  public String [] getDescription()
+  public String[] getDescription()
   {
     return description;
   }
   
   /** Set the description of this port. */
   
-  public void setDescription(String desc[])
+  public void setDescription(String... desc)
   {
     description = desc;
   }

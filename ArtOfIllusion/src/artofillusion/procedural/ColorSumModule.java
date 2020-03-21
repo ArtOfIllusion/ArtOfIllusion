@@ -1,6 +1,5 @@
-/* This is a Module which outputs the sum of two colors. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,6 +15,8 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import java.awt.*;
 
+/* This is a Module which outputs the sum of two colors. */
+
 public class ColorSumModule extends ProceduralModule
 {
   RGBColor color;
@@ -24,9 +25,9 @@ public class ColorSumModule extends ProceduralModule
 
   public ColorSumModule(Point position)
   {
-    super("+", new IOPort [] {new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.TOP, new String [] {"Color 1", '('+Translate.text("black")+')'}),
-      new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Color 2", '('+Translate.text("black")+')'})},
-      new IOPort [] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Sum"})},
+    super("+", new IOPort[] {new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.TOP, "Color 1", '('+Translate.text("black")+')'),
+      new IOPort(IOPort.COLOR, IOPort.INPUT, IOPort.BOTTOM, "Color 2", '('+Translate.text("black")+')')},
+      new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Sum")},
       position);
     color = new RGBColor(0.0f, 0.0f, 0.0f);
   }

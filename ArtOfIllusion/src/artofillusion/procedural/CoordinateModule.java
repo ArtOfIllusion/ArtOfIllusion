@@ -1,4 +1,5 @@
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -37,7 +38,7 @@ public class CoordinateModule extends ProceduralModule
   public CoordinateModule(Point position, int coordinate)
   {
     super(COORD_NAME[coordinate], new IOPort [] {},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {COORD_NAME[coordinate]})},
+      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, COORD_NAME[coordinate])},
       position);
     this.coordinate = coordinate;
   }
@@ -48,7 +49,7 @@ public class CoordinateModule extends ProceduralModule
   {
     this.coordinate = coordinate;
     name = COORD_NAME[coordinate];
-    output[0].setDescription(new String [] {COORD_NAME[coordinate]});
+    output[0].setDescription(COORD_NAME[coordinate]);
     layout();
   }
 
@@ -143,7 +144,7 @@ public class CoordinateModule extends ProceduralModule
   {
     coordinate = in.readInt();
     name = COORD_NAME[coordinate];
-    output[0].setDescription(new String [] {COORD_NAME[coordinate]});
+    output[0].setDescription(COORD_NAME[coordinate]);
     layout();
   }
 }

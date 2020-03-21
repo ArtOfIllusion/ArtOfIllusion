@@ -1,6 +1,5 @@
-/* This is a Module which outputs the difference of two numbers. */
-
 /* Copyright (C) 2000 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,15 +14,17 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
+/* This is a Module which outputs the difference of two numbers. */
+
 public class DifferenceModule extends ProceduralModule
 {
   Vec3 tempVec;
 
   public DifferenceModule(Point position)
   {
-    super("-", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Value 1", "(0)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Difference"})},
+    super("-", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, "Value 1", "(0)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, "Value 2", "(0)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Difference")},
       position);
     tempVec = new Vec3();
   }

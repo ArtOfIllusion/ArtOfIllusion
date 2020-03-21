@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,8 +14,10 @@ package artofillusion.procedural;
 import artofillusion.math.*;
 import java.awt.*;
 
-/** This is a Module which compares two numbers, and outputs either 0 or 1 depending on
-    which is greater. */
+/**
+ * This is a Module which compares two numbers, and outputs either 0 or 1
+ * depending on which is greater.
+ */
 
 public class CompareModule extends ProceduralModule
 {
@@ -24,9 +27,9 @@ public class CompareModule extends ProceduralModule
 
   public CompareModule(Point position)
   {
-    super(">", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, new String [] {"Value 1", "(0)"}),
-      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, new String [] {"Value 2", "(0)"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Comparison"})},
+    super(">", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.TOP, "Value 1", "(0)"),
+      new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.BOTTOM, "Value 2", "(0)")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Comparison")},
       position);
     gradient = new Vec3();
   }

@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,8 +20,11 @@ import java.awt.*;
 import java.io.*;
 import java.text.*;
 
-/** This is a Module which outputs a user defined function of its input, y = f(x).  It is defined
-    by a set of points (x,y).  For other values of x, the output is determined by interpolation. */
+/**
+ * This is a Module which outputs a user defined function of its input, y =
+ * f(x). It is defined by a set of points (x,y). For other values of x, the
+ * output is determined by interpolation.
+ */
 
 public class FunctionModule extends ProceduralModule
 {
@@ -36,8 +39,8 @@ public class FunctionModule extends ProceduralModule
 
   public FunctionModule(Point position)
   {
-    super("", new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, new String [] {"Input", "(0"})},
-      new IOPort [] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, new String [] {"Output"})},
+    super("", new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.INPUT, IOPort.LEFT, "Input", "(0")},
+      new IOPort[] {new IOPort(IOPort.NUMBER, IOPort.OUTPUT, IOPort.RIGHT, "Output")},
       position);
     x = new double [] {0.0, 1.0};
     y = new double [] {0.0, 1.0};
@@ -48,14 +51,14 @@ public class FunctionModule extends ProceduralModule
 
   /** Get the list of x (input) values. */
 
-  public double [] getX()
+  public double[] getX()
   {
     return x;
   }
 
   /** Get the list of y (output) values. */
 
-  public double [] getY()
+  public double[] getY()
   {
     return y;
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,14 +35,14 @@ public class Procedure
   
   /** Get the list of output modules. */
   
-  public OutputModule [] getOutputModules()
+  public OutputModule[] getOutputModules()
   {
     return output;
   }
   
   /** Get the list of all other modules. */
   
-  public Module [] getModules()
+  public Module[] getModules()
   {
     return module;
   }
@@ -244,10 +245,10 @@ public class Procedure
         for (int i = 0; i < module.length; i++)
           {
             String classname = in.readUTF();
-            Point p = new Point(in.readInt(), in.readInt());
+            Point point = new Point(in.readInt(), in.readInt());
             Class cls = ArtOfIllusion.getClass(classname);
-            Constructor con = cls.getConstructor(new Class [] {Point.class});
-            module[i] = (Module) con.newInstance(new Object [] {p});
+            Constructor con = cls.getConstructor(Point.class);
+            module[i] = (Module) con.newInstance(point);
             module[i].readFromStream(in, theScene);
           }
       }

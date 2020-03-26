@@ -2,6 +2,12 @@ Art of Illusion Version History
 
 Latest: (Not in stable release yet)
 
+- Smoother behavior of coordinateaxes indicator when rotating the view 
+- OSSpecific plugin to work with JDK9+ (mostly relevant for mac)
+- Bugfix: NPE from autoscroller (harmless bug that dropped messy bits
+  in the log)
+- CreatePolygon Tool shows live preview, has expand from center option
+- Bugfix: Prevent View from zooming too close and locking the view
 - Performance improvements to changing topology in triangle meshes
   (Deleting faces or using bevel/extrude)
 - Bugfix: Setting View-Rotation center in TriMesh Editor respects

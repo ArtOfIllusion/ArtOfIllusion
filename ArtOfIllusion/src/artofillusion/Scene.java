@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Changes copyright (C) 2016-2020 by Maksim Khramov
-   Changes copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1227,7 +1227,7 @@ public class Scene
     Class cls;
     Constructor con;
 
-    if (version < 0 || version > 4)
+    if (version < 0 || version > 5)
       throw new InvalidObjectException("");
     loadingErrors = new StringBuffer();
     ambientColor = new RGBColor(in);
@@ -1457,7 +1457,9 @@ public class Scene
     info.setId(in.readInt());
     if (info.getId() >= nextID)
       nextID = info.getId() +1;
+
     info.setVisible(in.readBoolean());
+    info.setLocked(version < 5 ? false : in.readBoolean());
     Integer key = in.readInt();
     obj = table.get(key);
     if (obj == null)
@@ -1567,7 +1569,7 @@ public class Scene
     int i, j, index = 0;
     Hashtable<Object3D, Integer> table = new Hashtable<Object3D, Integer>(objects.size());
 
-    out.writeShort(4);
+    out.writeShort(5);
     ambientColor.writeToFile(out);
     fogColor.writeToFile(out);
     out.writeBoolean(fog);
@@ -1698,6 +1700,7 @@ public class Scene
     out.writeUTF(info.getName());
     out.writeInt(info.getId());
     out.writeBoolean(info.isVisible());
+    out.writeBoolean(info.isLocked());
     key = table.get(info.getObject());
     if (key == null)
       {

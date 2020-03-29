@@ -167,8 +167,7 @@ the dialogue that appears:
 
 The **Width** and **Height** define the size (in pixels) of the 2D image created.
 
-The **Camera** selected defines which view will be rendered. The view can be previewed by selecting the relevant camera
-in one of the view windows and ensuring that the zoom is set to 100.
+The **Camera** selected defines which view will be rendered.
 
 You can select whether to render a **Single Image** or a **Movie**. The **Movie** option actually produces a series of
 consecutively-numbered images which can be converted to a video format by many available graphics packages. See
@@ -249,8 +248,7 @@ right of the dialogue that appears:
 
 The **Width** and **Height** define the size (in pixels) of the 2D image created.
 
-The **Camera** selected defines which view will be rendered. The view can be previewed by selecting the relevant camera
-in one of the view windows and ensuring that the zoom is set to 100.
+The **Camera** selected defines which view will be rendered.
 
 You can select whether to render a **Single Image** or a **Movie**. The **Movie** option produces either a series of
 consecutively-numbered images (which can be converted to a video format by many available graphics packages) or a

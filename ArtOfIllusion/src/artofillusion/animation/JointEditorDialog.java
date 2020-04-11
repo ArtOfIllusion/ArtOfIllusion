@@ -266,7 +266,7 @@ public class JointEditorDialog extends BDialog
       comfortBlock.add(comfortBox, boxgap);
       comfortBlock.add(comfortRow, rowgap);
 
-      stiffBlock.add(new BLabel("Stiffness"), rowfirstontop);
+      stiffBlock.add(Translate.label("Stiffness"), rowfirstontop);
       stiffBlock.add(stiffnessSlider, rowgap);
 
       // Make sure, that all the name labels are the same size. The text is not translated.

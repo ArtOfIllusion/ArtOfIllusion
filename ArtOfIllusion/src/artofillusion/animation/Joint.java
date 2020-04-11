@@ -1,4 +1,5 @@
 /* Copyright (C) 2002,2003 by Peter Eastman
+   Change Copyright (C) Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -41,6 +42,8 @@ public class Joint
       length = new DOF(0.0, Double.MAX_VALUE, d);
       calcAnglesFromCoords(false);
     }
+    if (twist.pos >  90) twist.pos -= 180;
+    if (twist.pos < -90) twist.pos += 180;
     length.fixed = true;
     angle1.loop = angle2.loop = twist.loop = true;
     id = -1;

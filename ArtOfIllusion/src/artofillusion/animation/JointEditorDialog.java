@@ -54,9 +54,10 @@ public class JointEditorDialog extends BDialog
     RowContainer nameRow = new RowContainer();
     nameRow.add(Translate.label("Name"));
     nameRow.add(nameField = new BTextField(joint.name, 20));
-    content.add(nameRow, BorderContainer.NORTH, new LayoutInfo());
+    content.add(nameRow, BorderContainer.NORTH, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(5, 5, 5, 5), null));
+
     FormContainer center = new FormContainer(4, 2);
-    center.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.NONE, new Insets(5, 5, 5, 5), null));
+    center.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(5, 5, 5, 5), null));
     center.add(makeBorder(ang1Panel = new DOFPanel("X Bend", -180.0, 180.0, joint.angle1)), 0, 0);
     center.add(ang1Panel.getGraph(), 1, 0);
     center.add(makeBorder(ang2Panel = new DOFPanel("Y Bend", -180.0, 180.0, joint.angle2)), 2, 0);
@@ -65,6 +66,7 @@ public class JointEditorDialog extends BDialog
     center.add(twistPanel.getGraph(), 1, 1);
     center.add(makeBorder(lengthPanel = new DOFPanel("Length", 0.0, Double.MAX_VALUE, joint.length)), 2, 1);
     content.add(center, BorderContainer.CENTER);
+
     if (joint.parent == null)
       lengthPanel.setEnabled(false);
     RowContainer buttons = new RowContainer();
@@ -72,6 +74,7 @@ public class JointEditorDialog extends BDialog
     buttons.add(cancelButton = Translate.button("cancel", this, "doCancel"));
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
     setResizable(false);
+    addEventLink(WindowClosingEvent.class, this, "doCancel");
     pack();
     setVisible(true);
   }
@@ -118,7 +121,8 @@ public class JointEditorDialog extends BDialog
 
   /** Inner class representing a panel for editing a single degree of freedom. */
 
-  private class DOFPanel extends FormContainer
+  //private class DOFPanel extends FormContainer
+  private class DOFPanel extends ColumnContainer
   {
     public ValueField valField, minField, maxField, minComfortField, maxComfortField;
     public ValueSlider stiffnessSlider;
@@ -129,18 +133,19 @@ public class JointEditorDialog extends BDialog
 
     public DOFPanel(String name, double min, double max, DOF dof)
     {
-      super(3, 7);
+      //super(3, 7);
+      super();
       this.min = min;
       this.max = max;
       this.dof = dof;
 
       // Create the components for the panel.
 
-      valField = new ValueField(dof.pos, ValueField.NONE, 5);
-      minField = new ValueField(dof.min, ValueField.NONE, 5);
-      maxField = new ValueField(dof.max == Double.MAX_VALUE ? Double.NaN : dof.max, ValueField.NONE, 5);
-      minComfortField = new ValueField(dof.minComfort, ValueField.NONE, 5);
-      maxComfortField = new ValueField(dof.maxComfort == Double.MAX_VALUE ? Double.NaN : dof.maxComfort, ValueField.NONE, 5);
+      valField = new ValueField(dof.pos, ValueField.NONE, 6);
+      minField = new ValueField(dof.min, ValueField.NONE, 4);
+      maxField = new ValueField(dof.max == Double.MAX_VALUE ? Double.NaN : dof.max, ValueField.NONE, 4);
+      minComfortField = new ValueField(dof.minComfort, ValueField.NONE, 4);
+      maxComfortField = new ValueField(dof.maxComfort == Double.MAX_VALUE ? Double.NaN : dof.maxComfort, ValueField.NONE, 4);
       valField.setValueChecker(new ValueChecker() {
         @Override
         public boolean isValid(double val)
@@ -217,7 +222,9 @@ public class JointEditorDialog extends BDialog
       maxField.sendValidEventsOnly(false);
       minComfortField.sendValidEventsOnly(false);
       maxComfortField.sendValidEventsOnly(false);
-      stiffnessSlider = new ValueSlider(0.0, 1.0, 50, dof.stiffness);
+      stiffnessSlider = new ValueSlider(0.0, 1.0, 100, dof.stiffness); 
+        ((BSlider)((ArrayList)stiffnessSlider.getChildren()).get(1)).getComponent().setPreferredSize(new Dimension(100, 20));
+        ((BTextField)((ArrayList)stiffnessSlider.getChildren()).get(0)).setColumns(3);
       fixedBox = new BCheckBox(Translate.text("Lock"), dof.fixed);
       rangeBox = new BCheckBox(Translate.text("restrictTotalRange"), dof.min > min || dof.max < max || dof.comfort);
       comfortBox = new BCheckBox(Translate.text("restrictComfortRange"), dof.comfort);
@@ -225,21 +232,63 @@ public class JointEditorDialog extends BDialog
       rangeBox.addEventLink(ValueChangedEvent.class, this, "checkboxChanged");
       comfortBox.addEventLink(ValueChangedEvent.class, this, "checkboxChanged");
 
-      // Lay them out.
+      // Build the UI sub components ...
 
-      add(new BLabel(name), 0, 0);
-      add(valField, 1, 0);
-      add(fixedBox, 2, 0);
-      add(rangeBox, 0, 1, 3, 1);
-      add(minField, 0, 2);
-      add(Translate.label("to"), 1, 2);
-      add(maxField, 2, 2);
-      add(comfortBox, 0, 3, 3, 1);
-      add(minComfortField, 0, 4);
-      add(Translate.label("to"), 1, 4);
-      add(maxComfortField, 2, 4);
-      add(new BLabel("Stiffness"), 0, 5, 3, 1);
-      add(stiffnessSlider, 0, 6, 3, 1);
+      LayoutInfo nogap = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 0), null);
+      setDefaultLayout(nogap);
+      RowContainer[] row = new RowContainer[4];
+      for (int i = 0; i < row.length; i++)
+        row[i] = new RowContainer();
+      ColumnContainer rangeBlock = new ColumnContainer();
+      ColumnContainer comfortBlock = new ColumnContainer();
+      ColumnContainer stiffBlock = new ColumnContainer();
+      RowContainer rangeRow = new RowContainer();
+      RowContainer comfortRow = new RowContainer();
+
+      // ... fill them ...
+  
+      LayoutInfo rowgap = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 4, 0, 4), null);
+      LayoutInfo rowfirst = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 4), null);
+      LayoutInfo rowfirstontop = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 4, 4, 4), null);
+      LayoutInfo boxgap = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 0), null);
+      LayoutInfo underboxgap = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(-2, 0, 0, 0), null);
+      LayoutInfo blockgap = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(4, 0, 4, 0), null);
+
+      rangeRow.add(minField, rowfirst);
+      rangeRow.add(Translate.label("to"), rowgap);
+      rangeRow.add(maxField, rowgap);
+      rangeBlock.add(rangeBox, boxgap);
+      rangeBlock.add(rangeRow, rowgap);
+
+      comfortRow.add(minComfortField, rowfirst);
+      comfortRow.add(Translate.label("to"), rowgap);
+      comfortRow.add(maxComfortField, rowgap);
+      comfortBlock.add(comfortBox, boxgap);
+      comfortBlock.add(comfortRow, rowgap);
+
+      stiffBlock.add(new BLabel("Stiffness"), rowfirstontop);
+      stiffBlock.add(stiffnessSlider, rowgap);
+
+      // Make sure, that all the name labels are the same size. The text is not translated.
+      // The size of the label affects the size of each panel.
+
+      BLabel nameLabel = new BLabel("X-Xxxx");
+      nameLabel.setFont(nameLabel.getFont().deriveFont(Font.BOLD));
+      Dimension nameSize = nameLabel.getPreferredSize();
+      nameLabel.setText(name);
+      nameLabel.getComponent().setPreferredSize(nameSize);
+
+      // ... and add to the panel.
+
+      row[0].add(nameLabel, rowgap);
+      row[0].add(valField, rowgap);
+      row[0].add(fixedBox, boxgap);
+      row[1].add(rangeBlock, blockgap);
+      row[2].add(comfortBlock, blockgap);
+      row[3].add(stiffBlock, blockgap);
+
+      for (RowContainer r : row)
+        add(r);
       updateComponents();
     }
 
@@ -399,6 +448,7 @@ public class JointEditorDialog extends BDialog
       atr_draw.quadrantRotate(1);
       dial = new Ellipse2D.Double(-DIAL_R1, -DIAL_R1, DIAL_R1*2.0, DIAL_R1*2.0);
       trace = new Ellipse2D.Double(-ARM_R1, -ARM_R1, ARM_R1*2.0, ARM_R1*2.0);
+
       Vec2 arm1, arm2;
       double r0;
       for (int i = 0; i < 24; i++)
@@ -410,7 +460,8 @@ public class JointEditorDialog extends BDialog
         arm1 = getValueVector(i*15, r0);
         arm2 = getValueVector(i*15, DIAL_R1);
         marker[i] = new Line2D.Double(arm1.x, arm1.y, arm2.x, arm2.y);
-      }      centerPoint = new Point(GRAPH_SIZE/2, GRAPH_SIZE/2); // Calculated deliberately as odd int/2;
+      }
+      centerPoint = new Point(GRAPH_SIZE/2, GRAPH_SIZE/2); // Calculated deliberately as odd int/2;
     }
 
     private void mousePressed(MousePressedEvent ev)
@@ -617,7 +668,7 @@ public class JointEditorDialog extends BDialog
       g2.setColor(new Color(200, 200, 230));
       g2.draw(trace);
       for (Shape m : marker)
-        g2.draw(m);   
+        g2.draw(m);
 
       int min = (int) (panel.rangeBox.getState() ? panel.minField.getValue() : panel.min);
       int max = (int) (panel.rangeBox.getState() ? panel.maxField.getValue() : panel.max);

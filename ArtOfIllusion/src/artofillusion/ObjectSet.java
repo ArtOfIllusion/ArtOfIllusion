@@ -1,4 +1,5 @@
 /* Copyright (C) 2008 by Peter Eastman
+   Updates copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,6 +30,16 @@ public class ObjectSet
   {
     new Encoder().setPersistenceDelegate(ObjectSet.class, 
         new DefaultPersistenceDelegate(new String[] {"name", "objectIDs"}));
+  }
+
+  /**
+   * No-args costructor for saving/loading metadata
+   */
+
+  public ObjectSet()
+  {
+     name = "";
+     objectIDs = new int[0];
   }
 
   /**
@@ -87,6 +98,15 @@ public class ObjectSet
   }
 
   /**
+   * Set the IDs from saved metadata
+   */
+
+  public void setObjectIDs(int[] objectIDs)
+  {
+     this.objectIDs = objectIDs;
+  }
+
+  /**
    * Get the objects in the set.
    */
 
@@ -100,5 +120,5 @@ public class ObjectSet
         list.add(info);
     }
     return list;
-  } 
+  }
 }

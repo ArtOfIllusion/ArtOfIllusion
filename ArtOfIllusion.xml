@@ -3,16 +3,19 @@
 <project name="ArtOfIllusion" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
+  <property file="build.properties" />
+  <property name="srclib" value="${srclib}" />
+  <property name="dist" value="${dist}" />
+  <property name="docs" value="${docs}" />
+  <property name="lang.version" value="${lang.version}" />
+  <property name="java.args" value="${java.args}" />
+  <property name="java.encoding" value="${java.encoding}" />
+
   <property name="src" value="ArtOfIllusion/src" />
   <property name="build" value="ArtOfIllusion/build" />
-  <property name="docs" value="ArtOfIllusion/docs" />
-  <property name="lib" value="lib" />
-  <property name="dist" value="${basedir}/Live_Application" />
-  <property name="JavaVersion" value="1.6" />
-  <property name="args" value="-nowarn" />
-
+  
   <!-- set of all library jars -->
-  <fileset id="libraries" dir="${lib}" includes="*.jar" />
+  <fileset id="libraries" dir="${srclib}" includes="*.jar" />
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -26,8 +29,14 @@
     <pathconvert property="classpath" refid="libraries" />
 
     <!-- Compile the java code from ${src} into ${build} -->
-    <javac srcdir="${src}" destdir="${build}" encoding="UTF-8" classpath="${classpath}" debug="on" target="${JavaVersion}" source="${JavaVersion}" >
-      <compilerarg line="${args}"/>
+    <javac srcdir="${src}"
+	   destdir="${build}"
+	   encoding="${java.encoding}"
+	   classpath="${classpath}"
+	   debug="on"
+	   target="${lang.version}"
+	   source="${lang.version}" >
+      <compilerarg line="${java.args}"/>
     </javac>
   </target>
 
@@ -53,7 +62,7 @@
     <javadoc packagenames="artofillusion.*"
         sourcepath="${src}"
         classpath="${lib}/*.jar"
-	source="${JavaVersion}"
+	source="${lang.version}"
         defaultexcludes="yes"
 	destdir="${docs}/${ant.project.name}"
         author="true"

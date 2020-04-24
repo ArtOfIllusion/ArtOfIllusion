@@ -3,14 +3,16 @@
 <project name="ArtOfIllusion Full Suite" default="dist" basedir=".">
 
   <!-- set global properties for this build -->
-  <property name="lib" value="lib" />
-  <property name="dist" value="Live_Application" />
-  <property name="docs" value="docs/Javadoc" />
-  <property name="JavaVersion" value="1.6" />
-  <property name="args" value="-nowarn" />
+  <property file="build.properties" />
+  <property name="srclib" value="${srclib}" />
+  <property name="dist" value="${dist}" />
+  <property name="docs" value="${docs}" />
+  <property name="java.version" value="${java.version}" />
+  <property name="java.args" value="${java.args}" />
+  <property name="java.encoding" value="${java.encoding}" />
 
   <!-- set of all library jars -->
-  <fileset id="libraries" dir="${lib}" includes="*.jar" />
+  <fileset id="libraries" dir="${srclib}" includes="*.jar" />
 
   <!-- set of all subproject build files -->
   <fileset id="subproject.files" dir="." includes="*.xml" excludes="build.xml" />
@@ -31,14 +33,16 @@
   <!-- Generate working application artifacts -->
   <target name="dist" depends="init" description="Generate a working full-project application">
     <copy todir="${dist}/lib">
-      <fileset dir="${lib}" includes="*"/>
+      <fileset dir="${srclib}" includes="*"/>
     </copy>
 
     <!-- execute default target for all found Ant files -->
     <subant target="" >
       <property name="dist" value="${dist}" />
-      <property name="lib" value="${lib}"/>
-      <property name="args" value="${args}"/>
+      <property name="srclib" value="${srclib}"/>
+      <property name="java.version" value="${java.version}" />
+      <property name="java.args" value="${java.args}"/>
+      <property name="java.encoding" value="${java.encoding}" />
       <fileset refid="subproject.files" />
     </subant>
   </target>
@@ -49,8 +53,8 @@
    <mkdir dir="${docs}" />
    <javadoc packagenames="artofillusion.*"
      sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src"
-     classpath="${lib}/*.jar"
-     source="${JavaVersion}"
+     classpath="${srclib}/*.jar"
+     source="${java.version}"
      defaultexcludes="yes"
      destdir="${docs}"
      author="true"
@@ -76,7 +80,12 @@
       <pathelement location="Renderers/build" />
       <fileset refid="libraries" />
     </path>
-    <javac srcdir="Tests/src" destdir="Tests/build" classpathref="bin_paths" debug="on" target="${JavaVersion}" source="${JavaVersion}" />
+    <javac srcdir="Tests/src"
+           destdir="Tests/build"
+	   classpathref="bin_paths"
+	   debug="on"
+           target="${lang.version}"
+           source="${lang.version}" />
     <junit printsummary="on" haltonfailure="yes" fork="false">
       <classpath>
         <path refid="bin_paths"/>
@@ -110,18 +119,7 @@
       <arg value="${ant.file}" />
     </java>
     <echo>
-      The 'dist' target accepts the following properties as options:
-
-      dist: directory at which to base the live build. Defaults to ${dist}.
-      args: compile-time arguments to pass to javac. Useful for running
-      various lints, etc. Defaults to ${args}.
-
-      The 'docs' target accepts the following property as an option:
-
-      docs: directory in wish to place the Javadoc. Defaults to ${docs}.
-
-      JavaVersion: which version of the java language and runtime to target.
-      Defaults to ${JavaVersion}.
+      Build options are found in the file 'build.properties'
 
       To override any of these properties for a one time build, pass them to ant in the following form:
 

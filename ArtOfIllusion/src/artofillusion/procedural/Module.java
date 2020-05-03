@@ -239,7 +239,7 @@ public class Module
     for (int i = 0; i < output.length; i++)
       output[i].draw(g);
     drawContents(g);
-    }
+  }
   
   /** Draw the contents of the module.  The default implementation simply draws the name. */
   

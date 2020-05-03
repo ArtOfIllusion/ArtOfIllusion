@@ -15,6 +15,7 @@ import artofillusion.*;
 import artofillusion.math.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.awt.geom.RoundRectangle2D;
 import java.io.*;
 import java.lang.reflect.*;
 
@@ -226,17 +227,19 @@ public class Module
   {
     Stroke currentStroke = g.getStroke();
     g.setColor(Color.lightGray);
-    g.fillRoundRect(bounds.x+1, bounds.y+1, bounds.width-2, bounds.height-2, 3, 3);
+    RoundRectangle2D rr = new RoundRectangle2D.Float((float) bounds.x + 1, (float) bounds.y + 1, (float) bounds.width - 2, (float) bounds.height - 2, 3.0f, 3.0f);
+    g.draw(rr);
     g.setColor(selected ? selectedColor : outlineColor);
     g.setStroke(contourStroke);
-    g.drawRoundRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2, 4, 4);
+    rr.setRoundRect((float) bounds.x - 1, (float) bounds.y - 1, (float) bounds.width + 2, (float) bounds.height + 2, 4.0f, 4.0f);
+    g.draw(rr);
     g.setStroke(currentStroke);
     for (int i = 0; i < input.length; i++)
       input[i].draw(g);
     for (int i = 0; i < output.length; i++)
       output[i].draw(g);
     drawContents(g);
-  }
+    }
   
   /** Draw the contents of the module.  The default implementation simply draws the name. */
   

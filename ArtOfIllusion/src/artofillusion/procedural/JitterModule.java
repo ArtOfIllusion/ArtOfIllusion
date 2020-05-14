@@ -246,7 +246,7 @@ public class JitterModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public JitterModule duplicate()
   {
     JitterModule mod = new JitterModule(new Point(bounds.x, bounds.y));
 

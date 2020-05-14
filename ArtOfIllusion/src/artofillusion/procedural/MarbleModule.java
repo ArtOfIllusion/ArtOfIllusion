@@ -253,7 +253,7 @@ public class MarbleModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public MarbleModule duplicate()
   {
     MarbleModule mod = new MarbleModule(new Point(bounds.x, bounds.y));
 

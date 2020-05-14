@@ -92,7 +92,7 @@ public class ColorModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public ColorModule duplicate()
   {
     ColorModule mod = new ColorModule(new Point(bounds.x, bounds.y));
 

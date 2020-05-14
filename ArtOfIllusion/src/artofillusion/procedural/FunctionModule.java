@@ -387,7 +387,7 @@ public class FunctionModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public FunctionModule duplicate()
   {
     FunctionModule mod = new FunctionModule(new Point(bounds.x, bounds.y));
 

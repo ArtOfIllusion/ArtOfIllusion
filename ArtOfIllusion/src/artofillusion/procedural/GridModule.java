@@ -219,7 +219,7 @@ public class GridModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public GridModule duplicate()
   {
     GridModule mod = new GridModule(new Point(bounds.x, bounds.y));
 

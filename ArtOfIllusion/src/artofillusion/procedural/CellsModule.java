@@ -258,10 +258,10 @@ public class CellsModule extends ProceduralModule
     return true;
   }
 
-  /** Create a duplicate of this module. */
+  /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public CellsModule duplicate()
   {
     CellsModule module = new CellsModule(new Point(bounds.x, bounds.y));
     module.setMetric(cells.getMetric());

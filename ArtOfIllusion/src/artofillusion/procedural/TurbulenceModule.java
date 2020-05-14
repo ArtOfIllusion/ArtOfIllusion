@@ -242,7 +242,7 @@ public class TurbulenceModule extends ProceduralModule
   /* Create a duplicate of this module. */
 
   @Override
-  public Module duplicate()
+  public TurbulenceModule duplicate()
   {
     TurbulenceModule mod = new TurbulenceModule(new Point(bounds.x, bounds.y));
 

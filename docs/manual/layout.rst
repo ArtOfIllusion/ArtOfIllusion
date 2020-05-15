@@ -80,45 +80,20 @@ drop-down menus at the top of each view window.
 The window with 'focus' or the selected window is the one with the thicker outline (the upper left window in the example
 screenshot above). This is relevant for any operations that work on single view windows. To change the selected window,
 simply move the cursor to the required window and click.   All view windows can be panned, zoomed and rotated
-independently using the camera controls: |basics/camera_buttons.jpg| or by using keyboard shortcuts:
+independently using the camera controls: |basics/camera_buttons.jpg| 
 
-Pan Controls:
-
-* Click left on |basics/camera_pan.jpg| then drag in the view window whilst holding the left mouse button down.
-
-* Hold down the right mouse button and drag in any view window.
 
 Zoom/Magnification Controls:
 
-* Select Pan mode by clicking on |basics/camera_pan.jpg| then hold down CTRL while dragging the right mouse button up
+- Select Move mode by clicking on |basics/camera_pan.jpg| then hold down CTRL while dragging the right mouse button up
   (zoom out) or down (zoom in) or
 
-.. _scrollWheel:
+- Use the scroll wheel - scrolling down zooms in and scrolling up zooms out. Holding down ALT while using the scroll wheel zooms in/out faster.
 
-* Use the scroll wheel - scrolling down zooms in and scrolling up zooms out. Holding down ALT while using the scroll
-  wheel zooms in/out faster.
+For a more detailed discussion of the various view options, and advanced ways of moving your viewpoint around the scene, please see :ref:`The Viewpoint Management Chapter.<viewpoint-management>` 
 
-* Magnification of parallel views can also be accomplished by entering an appropriate magnification level from the
-  drop-down menu at the top of each view window.
 
-Rotation Controls:
 
-* Rotation of each view window is achieved by clicking on |basics/camera_rotate.jpg| and then dragging in the relevant
-  view window whilst holding the left mouse button. Holding SHIFT while dragging constrains the rotation to a vertical
-  axis and holding CTRL rotates the view about the axis perpendicular to the screen.
-
-* Alternatively, rotation can be performed by holding down the ALT key while dragging with the mouse. The SHIFT and CTRL
-  modifiers also work with this method.
-
-* If any objects are selected, the centre of the rotation will be at the centre of that selection.
-
-* Rotating any of the fixed-view windows (i.e. front, side and top) means that that view no longer shows that fixed view
-  and thus the name for that view changes to 'other'. Selecting the appropriate view name from the drop-down list will
-  restore the default view.
-
-If there is more than one camera in the scene, it is possible to see the view from any of them by selecting the
-appropriate one from the drop down list. Likewise, if you have any directional lights or spot lights in the scene, the
-drop down list includes options to view the scene from their perspectives. This is useful for aiming lights.
 
 If you find it easier to work with one large window, select Scene -> One View from the top menu bar and the currently
 selected window will fill the workspace.

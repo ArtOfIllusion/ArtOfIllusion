@@ -18,3 +18,4 @@ Art of Illusion Manual
    rendering
    animation
    scripting
+   view_management

@@ -1431,7 +1431,8 @@ public abstract class ViewerCanvas extends CustomWidget
     Vec3 pointInSpace = finder.newPoint(this, pointOnView);
     CoordinateSystem coords = theCamera.getCameraCoordinates().duplicate();
     Vec3 cz = coords.getZDirection();
-    distToPlane = coords.getOrigin().minus(pointInSpace).length();
+    if (perspective)
+      distToPlane = coords.getOrigin().minus(pointInSpace).length();
     Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
     coords.setOrigin(cp);
 

@@ -2,6 +2,9 @@ Art of Illusion Version History
 
 Latest: (Not in stable release yet)
 
+- Improve joint editor controls
+- Better initial orientation of new bones
+- Save object Lock state to file (Breaks file compatibility with old versions)
 - Smoother behavior of coordinateaxes indicator when rotating the view 
 - OSSpecific plugin to work with JDK9+ (mostly relevant for mac)
 - Bugfix: NPE from autoscroller (harmless bug that dropped messy bits

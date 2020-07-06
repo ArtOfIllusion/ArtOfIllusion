@@ -11,26 +11,53 @@
 
 package artofillusion.object;
 import artofillusion.math.*;
+import org.junit.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class ImplicitSphereTest
-{
+{ 
+
+  private static ImplicitSphere[] testSpheres = new ImplicitSphere[20];
+  private static Vec3[] samplePoints = new Vec3[100];
+
+  @BeforeClass
+  public static void setup_spheres_and_test_points()
+  {
+    for (int sphere = 0; sphere < testSpheres.length; sphere++)
+    {
+      double r1 = 0.1 + Math.random();
+      double r2 = 0.1 + Math.random();
+      testSpheres[sphere] = new ImplicitSphere(Math.min(r1, r2),
+                                               Math.max(r1, r2));
+    }
+
+    for (int point = 0; point < samplePoints.length; point++)
+    {
+      /* Factor 2.05 is to cover the entire possible size range of
+       * test spheres (-1.1 to 1.1) Unlike original code, we're not
+       * scaling the test points to a specific sphere.
+       */
+      samplePoints[point] = new Vec3(2.05*(Math.random() - 0.5),
+                                     2.05*(Math.random() - 0.5),
+                                     2.05*(Math.random() - 0.5));
+    }
+  }
+
   private void validateSphere(ImplicitSphere sphere)
   {
     double radius = sphere.getRadius();
     double influence = Math.max(radius, sphere.getInfluenceRadius());
     Vec3 grad = new Vec3();
-    for (int i = 0; i < 10; i++)
+    for (Vec3 point: samplePoints)
     {
-      double x = 2*radius*(Math.random()-0.5);
-      double y = 2*radius*(Math.random()-0.5);
-      double z = 2*radius*(Math.random()-0.5);
 
       // Check the value.
 
-      double value = sphere.getFieldValue(x, y, z, 0, 0);
-      double r = Math.sqrt(x*x+y*y+z*z);
+      double value = sphere.getFieldValue(point.x,
+                                          point.y,
+					  point.z, 0, 0);
+      double r = point.length();
       if (r < radius)
         assertTrue(value > 1);
       else if (r > radius)
@@ -40,14 +67,14 @@ public class ImplicitSphereTest
 
       // Check the gradient.
 
-      sphere.getFieldGradient(x, y, z, 0, 0, grad);
+      sphere.getFieldGradient(point.x, point.y, point.z, 0, 0, grad);
       double step = radius*1e-3;
-      double vx1 = sphere.getFieldValue(x-step, y, z, 0, 0);
-      double vx2 = sphere.getFieldValue(x+step, y, z, 0, 0);
-      double vy1 = sphere.getFieldValue(x, y-step, z, 0, 0);
-      double vy2 = sphere.getFieldValue(x, y+step, z, 0, 0);
-      double vz1 = sphere.getFieldValue(x, y, z-step, 0, 0);
-      double vz2 = sphere.getFieldValue(x, y, z+step, 0, 0);
+      double vx1 = sphere.getFieldValue(point.x-step, point.y, point.z, 0, 0);
+      double vx2 = sphere.getFieldValue(point.x+step, point.y, point.z, 0, 0);
+      double vy1 = sphere.getFieldValue(point.x, point.y-step, point.z, 0, 0);
+      double vy2 = sphere.getFieldValue(point.x, point.y+step, point.z, 0, 0);
+      double vz1 = sphere.getFieldValue(point.x, point.y, point.z-step, 0, 0);
+      double vz2 = sphere.getFieldValue(point.x, point.y, point.z+step, 0, 0);
       assertEquals(0.5*(vx2-vx1)/step, grad.x, 1e-2*value);
       assertEquals(0.5*(vy2-vy1)/step, grad.y, 1e-2*value);
       assertEquals(0.5*(vz2-vz1)/step, grad.z, 1e-2*value);
@@ -57,11 +84,8 @@ public class ImplicitSphereTest
   @Test
   public void testSphere()
   {
-    for (int i = 0; i < 20; i++)
+    for (ImplicitSphere sphere: testSpheres)
     {
-      double r1 = 0.1+Math.random();
-      double r2 = 0.1+Math.random();
-      ImplicitSphere sphere = new ImplicitSphere(Math.min(r1, r2), Math.max(r1, r2));
       validateSphere(sphere);
     }
   }

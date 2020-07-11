@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -517,12 +518,18 @@ public class Raytracer
         if (objBounds[i].maxz > maxz)
           maxz = objBounds[i].maxz;
       }
-    minx -= TOL;
-    miny -= TOL;
-    minz -= TOL;
-    maxx += TOL;
-    maxy += TOL;
-    maxz += TOL;
+
+    double extTol = maxx-minx;
+    if (maxy-miny > extTol) extTol = maxy-miny;
+    if (maxz-minz > extTol) extTol = maxz-minz;
+    extTol *= Raytracer.TOL;
+
+    minx -= extTol;
+    miny -= extTol;
+    minz -= extTol;
+    maxx += extTol;
+    maxy += extTol;
+    maxz += extTol;;
 
     // Create the octree.
 

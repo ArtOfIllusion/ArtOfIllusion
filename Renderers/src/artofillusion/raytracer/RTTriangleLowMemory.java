@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,11 +26,12 @@ public class RTTriangleLowMemory extends RTObject
   RenderingTriangle tri;
   short dropAxis, flags;
   Mat4 toLocal, fromLocal;
-
-  public static final double TOL = 1e-12;
+  private double objectTol;
 
   private static final short BUMP_MAPPED = 1;
   private static final short INTERP_NORMALS = 2;
+
+  public static final double TOL = 1e-12;
 
   public RTTriangleLowMemory(RenderingMesh mesh, int which, Mat4 fromLocal, Mat4 toLocal)
   {
@@ -69,6 +71,13 @@ public class RTTriangleLowMemory extends RTObject
     }
     if (tri.theMesh.mapping.getTexture().hasComponent(Texture.BUMP_COMPONENT))
       flags |= BUMP_MAPPED;
+
+    objectTol = mesh.vert[tri.v1].distance2(mesh.vert[tri.v2]);
+    double d2 = mesh.vert[tri.v2].distance2(mesh.vert[tri.v3]);
+    double d3 = mesh.vert[tri.v3].distance2(mesh.vert[tri.v1]);
+    if (d2 > objectTol) objectTol = d2;
+    if (d3 > objectTol) objectTol = d3;
+    objectTol = Math.sqrt(objectTol)*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -95,13 +104,15 @@ public class RTTriangleLowMemory extends RTObject
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
     RenderingMesh mesh = tri.theMesh;
     Vec3 trueNorm = mesh.faceNorm[tri.index];
+    double intTol = Math.max(objectTol, orig.length()*Raytracer.TOL*0.01);
+
     double vd = trueNorm.dot(dir);
     if (vd == 0.0)
       return SurfaceIntersection.NO_INTERSECTION;  // The ray is parallel to the plane.
     Vec3 vert1 = mesh.vert[tri.v1];
     double v0 = trueNorm.x*(vert1.x-orig.x)+trueNorm.y*(vert1.y-orig.y)+trueNorm.z*(vert1.z-orig.z);
     double t = v0/vd;
-    if (t < TOL)
+    if (t < intTol)
       return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from plane of triangle.
 
     // Determine whether the intersection point is inside the triangle.
@@ -143,15 +154,15 @@ public class RTTriangleLowMemory extends RTObject
     edge2d2x *= denom;
     edge2d2y *= denom;
     double v = edge2d2x*vy - edge2d2y*vx;
-    if (v < -TOL || v > 1.0+TOL)
+    if (v < -objectTol || v > 1.0+objectTol)
       return SurfaceIntersection.NO_INTERSECTION;
     edge2d1x *= denom;
     edge2d1y *= denom;
     double w = vx*edge2d1y - vy*edge2d1x;
-    if (w < -TOL || w > 1.0+TOL)
+    if (w < -objectTol || w > 1.0+objectTol)
       return SurfaceIntersection.NO_INTERSECTION;
     double u = 1.0-v-w;
-    if (u < -TOL || u > 1.0+TOL)
+    if (u < -objectTol || u > 1.0+objectTol)
       return SurfaceIntersection.NO_INTERSECTION;
     TriangleIntersection intersection = (r.rt == null ? new TriangleIntersection() : (TriangleIntersection) r.rt.rtTriPool.getObject());
     intersection.init(this, t, u, v, rix, riy, riz);

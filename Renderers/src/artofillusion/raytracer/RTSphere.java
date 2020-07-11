@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,6 +26,7 @@ public class RTSphere extends RTObject
   double r, r2, cx, cy, cz, param[];
   boolean bumpMapped;
   Mat4 toLocal, fromLocal;
+  private double objectTol;
 
   public static final double TOL = 1e-12;
 
@@ -41,6 +43,7 @@ public class RTSphere extends RTObject
     if (bumpMapped)
       this.fromLocal = fromLocal;
     this.toLocal = toLocal;
+    objectTol = r2*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -67,12 +70,14 @@ public class RTSphere extends RTObject
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2;
     double b, c, d, root, t, t2 = 0.0;
+    double rayTol = orig.length()*Raytracer.TOL*0.01;
+    double intTol = objectTol > rayTol ? objectTol : rayTol;
     int numIntersections;
 
     v1.set(cx-orig.x, cy-orig.y, cz-orig.z);
     b = dir.x*v1.x + dir.y*v1.y + dir.z*v1.z;
     c = v1.x*v1.x + v1.y*v1.y + v1.z*v1.z - r2;
-    if (c > TOL)
+    if (c > intTol)
       {
         // Ray origin is outside sphere.
 
@@ -88,7 +93,7 @@ public class RTSphere extends RTObject
         v2.set(orig.x+t2*dir.x, orig.y+t2*dir.y, orig.z+t2*dir.z);
         projectPoint(v2);
       }
-    else if (c < -TOL)
+    else if (c < -intTol)
       {
         // Ray origin is inside sphere.
 

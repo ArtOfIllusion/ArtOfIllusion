@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,7 +24,7 @@ public class RTImplicitObject extends RTObject
   private ImplicitObject theObject;
   private double minx, miny, minz, maxx, maxy, maxz;
   private double param[];
-  private double tol;
+  private double tol, objectTol;
   private boolean bumpMapped;
   private Mat4 toLocal, fromLocal;
 
@@ -44,6 +45,14 @@ public class RTImplicitObject extends RTObject
     bumpMapped = implicit.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
     this.fromLocal = fromLocal;
+
+    // 'objectTol' is only used on the bounding box. The actual surfaces are traced by 'tol'.
+
+    Vec3 size = bounds.getSize();
+    objectTol = size.x;
+    if (size.y > objectTol) objectTol = size.y;
+    if (size.z > objectTol) objectTol = size.z;
+    objectTol *= TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -74,6 +83,9 @@ public class RTImplicitObject extends RTObject
     Vec3 direction = r.tempVec2;
     direction.set(rdir);
     toLocal.transformDirection(direction);
+    double rayTol = rorig.length()*Raytracer.TOL*0.01;
+    double intTol = objectTol;
+    intTol = intTol > rayTol ? intTol : rayTol;
 
     // First check for intersections with the bounding box.
 
@@ -102,7 +114,7 @@ public class RTImplicitObject extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < intTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     if (direction.y == 0.0)
@@ -128,7 +140,7 @@ public class RTImplicitObject extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < intTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     if (direction.z == 0.0)
@@ -154,7 +166,7 @@ public class RTImplicitObject extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < intTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
 

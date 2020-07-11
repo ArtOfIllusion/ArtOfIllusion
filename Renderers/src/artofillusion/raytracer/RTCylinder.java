@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,6 +27,7 @@ public class RTCylinder extends RTObject
   double rx, rz, height, halfh, rx2, rz2, toprx2, cx, cy, cz, sy, sz, param[];
   boolean bumpMapped, cone, transform, uniform;
   Mat4 toLocal, fromLocal;
+  private double radialTol, linearTol;
 
   public static final double TOL = 1e-12;
   public static final int TOP = 0;
@@ -105,6 +107,11 @@ public class RTCylinder extends RTObject
       topNormal = bottomNormal.times(-1.0);
     bumpMapped = cylinder.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+
+    radialTol = rx2; 
+    if (rz2 > radialTol) radialTol = rz2;
+    radialTol *= TOL;
+    linearTol = height*TOL;
   }
 
   /** Get the MaterialMapping for this object. */
@@ -131,6 +138,9 @@ public class RTCylinder extends RTObject
     Vec3 orig = r.getOrigin(), rdir = r.getDirection();
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2, dir = r.tempVec3;
     double a, b, c, d, e, dist1, dist2, temp1, temp2, mint;
+    double rayTol = orig.length()*Raytracer.TOL*0.01;
+    double intTolRadial = radialTol > rayTol ? radialTol : rayTol;
+    double intTolLinear = linearTol > rayTol ? linearTol : rayTol;
     int intersections, hit = -1;
 
     if (transform)
@@ -155,7 +165,7 @@ public class RTCylinder extends RTObject
         // See if the ray hits the top or bottom face of the cylinder.
 
         temp1 = v1.y/dir.y;
-        if (temp1 > TOL)
+        if (temp1 > intTolLinear)
           {
             a = temp1*dir.x - v1.x;
             b = temp1*dir.z - v1.z;
@@ -168,7 +178,7 @@ public class RTCylinder extends RTObject
         if (!cone)
           {
             temp1 = (v1.y+height)/dir.y;
-            if (temp1 > TOL)
+            if (temp1 > intTolLinear)
               {
                 a = temp1*dir.x - v1.x;
                 b = temp1*dir.z - v1.z;
@@ -227,7 +237,7 @@ public class RTCylinder extends RTObject
     }
     dist1 = Double.MAX_VALUE;
     dist2 = mint;
-    if (c > TOL)  // Ray origin is outside cylinder.
+    if (c > intTolRadial)  // Ray origin is outside cylinder.
       {
         if (b > 0.0)  // Ray points toward cylinder.
           {
@@ -242,7 +252,7 @@ public class RTCylinder extends RTObject
               }
           }
       }
-    else if (c < -TOL)  // Ray origin is inside cylinder.
+    else if (c < -intTolRadial)  // Ray origin is inside cylinder.
       {
         a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
         e = b*b - a*c;

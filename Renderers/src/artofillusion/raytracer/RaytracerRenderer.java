@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2014 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -166,10 +167,11 @@ public class RaytracerRenderer implements Renderer, Runnable
   @Override
   public synchronized void cancelRendering(Scene sc)
   {
-    Thread t = renderThread;
-
     if (theScene != sc)
       return;
+
+    Thread t = renderThread;
+
     renderThread = null;
     if (t == null)
       return;
@@ -1869,6 +1871,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     MaterialIntersection matChange[] = workspace.matChange;
     int i, j, matCount = 0;
 
+    OctreeNode theSame = null;
     do
     {
       RTObject obj[] = node.getObjects();
@@ -1911,10 +1914,12 @@ public class RaytracerRenderer implements Renderer, Runnable
               break;
           }
       }
-      if (node == endNode)
+      if (node == endNode || node == theSame)
         break;
+      theSame = node;
       node = node.findNextNode(r);
     } while (node != null);
+
     if (currentMaterial == null && matCount == 0)
       return true;
 

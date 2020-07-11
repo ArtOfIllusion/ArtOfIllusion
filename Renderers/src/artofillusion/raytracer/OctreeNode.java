@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +12,6 @@
 package artofillusion.raytracer;
 
 import artofillusion.math.*;
-
 import java.util.*;
 
 /** This class represents a node in an octree, used for sorting the objects by location in
@@ -28,9 +28,10 @@ public class OctreeNode
   public RTObject obj[];
   public float minx, maxx, miny, maxy, minz, maxz;
   public float midx, midy, midz;
+  private double nodeTol, rayTol;
   
   private static final int CELLS = 64;
-  private static final RTObject EMPTY_OBJECT_LIST[] = new RTObject [0];
+  private static final RTObject EMPTY_OBJECT_LIST[] = new RTObject[0];
   private static int leftCount[] = new int [CELLS+2];
   private static int rightCount[] = new int [CELLS+2];
 
@@ -48,8 +49,13 @@ public class OctreeNode
     this.maxz = maxz;
     boolean inside[] = new boolean [tri.length];
     int count, i;
-
     parent = parentNode;
+
+    nodeTol = maxx-minx;
+    if (maxy-miny > nodeTol) nodeTol = maxy-miny;
+    if (maxz-minz > nodeTol) nodeTol = maxz-minz;
+    nodeTol *= Raytracer.TOL;
+    rayTol = nodeTol*0.5; // Otherwise completely flat objects might be entirely missed.
 
     // Find which objects are actually inside this node.
 
@@ -149,6 +155,7 @@ public class OctreeNode
 
     if (!contains(pos))
       return null;
+
     current = this;
     while (current.obj == null)
       {
@@ -157,16 +164,16 @@ public class OctreeNode
             if (pos.y > current.midy)
               {
                 if (pos.z > current.midz)
-                  current = current.child[7];
+                    current = current.child[7];
                 else
-                  current = current.child[6];
-              }
+                    current = current.child[6];
+            }
             else
               {
                 if (pos.z > current.midz)
-                  current = current.child[5];
+                    current = current.child[5];
                 else
-                  current = current.child[4];
+                    current = current.child[4];
               }
           }
         else
@@ -174,134 +181,142 @@ public class OctreeNode
             if (pos.y > current.midy)
               {
                 if (pos.z > current.midz)
-                  current = current.child[3];
+                    current = current.child[3];
                 else
-                  current = current.child[2];
+                    current = current.child[2];
               }
             else
               {
                 if (pos.z > current.midz)
-                  current = current.child[1];
+                    current = current.child[1];
                 else
-                  current = current.child[0];
+                    current = current.child[0];
               }
-          }
+        }
       }
     return current;
   }
-  
+
   /** Given a ray which passes through this node, find the next node it passes through.  If this is
       the last node it passes through, return null. */
   
   public OctreeNode findNextNode(Ray r)
   {
+    if (parent == null)
+      return null;
+
     double maxt = Double.MAX_VALUE;
     double dx = 0.0, dy = 0.0, dz = 0.0;
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
 
-    if (parent == null)
-      return null;
-
-    // Find the last point on the ray which is inside this node.
-
-    if (dir.x > Raytracer.TOL)
+    if (dir.x > rayTol)
     {
-      dx = Raytracer.TOL;
+      dx = rayTol;
       double t = (maxx-orig.x)/dir.x;
       if (t < maxt)
         maxt = t;
     }
-    else if (dir.x < -Raytracer.TOL)
+    else if (dir.x < -rayTol)
     {
-      dx = -Raytracer.TOL;
+      dx = -rayTol;
       double t = (minx-orig.x)/dir.x;
       if (t < maxt)
         maxt = t;
     }
-    if (dir.y > Raytracer.TOL)
+    if (dir.y > rayTol)
     {
-      dy = Raytracer.TOL;
+      dy = rayTol;
       double t = (maxy-orig.y)/dir.y;
       if (t < maxt)
         maxt = t;
     }
-    else if (dir.y < -Raytracer.TOL)
+    else if (dir.y < -rayTol)
     {
-      dy = -Raytracer.TOL;
+      dy = -rayTol;
       double t = (miny-orig.y)/dir.y;
       if (t < maxt)
         maxt = t;
     }
-    if (dir.z > Raytracer.TOL)
+    if (dir.z > rayTol)
     {
-      dz = Raytracer.TOL;
+      dz = rayTol;
       double t = (maxz-orig.z)/dir.z;
       if (t < maxt)
         maxt = t;
     }
-    else if (dir.z < -Raytracer.TOL)
+    else if (dir.z < -rayTol)
     {
-      dz = -Raytracer.TOL;
+      dz = -rayTol;
       double t = (minz-orig.z)/dir.z;
       if (t < maxt)
         maxt = t;
     }
 
     // Push it just outside this node, then move up the tree to find a node that
-    // contains it.
+    // contains it. If the point is not outside the node, double the margins 
+    // and retry until it is.
 
-    Vec3 nextPos = r.tempVec1;
-    nextPos.set(orig.x+dir.x*maxt+dx, orig.y+dir.y*maxt+dy, orig.z+dir.z*maxt+dz);
     OctreeNode current = parent;
-    while (!current.contains(nextPos))
+    Vec3 nextPos = r.tempVec1;
+    int attempt = 0;
+    double tolScale;
+    do
     {
-      current = current.parent;
-      if (current == null)
-        return null;
-    }
+      tolScale = Math.pow(2.0, attempt);
+      nextPos.set(orig.x+dir.x*maxt+dx*tolScale, orig.y+dir.y*maxt+dy*tolScale, orig.z+dir.z*maxt+dz*tolScale);
 
-    // Now move back down the tree until we reach a terminal node.
-
-    while (current.obj == null)
-    {
-      if (nextPos.x > current.midx)
+      while (!current.contains(nextPos))
       {
-        if (nextPos.y > current.midy)
+        current = current.parent;
+        if (current == null)
+          return null;
+      }
+      
+      // Now move back down the tree until we reach a terminal node.
+      
+      while (current.obj == null)
+      {
+        if (nextPos.x > current.midx)
         {
-          if (nextPos.z > current.midz)
-            current = current.child[7];
+          if (nextPos.y > current.midy)
+          {
+            if (nextPos.z > current.midz)
+              current = current.child[7];
+            else
+              current = current.child[6];
+          }
           else
-            current = current.child[6];
+          {
+            if (nextPos.z > current.midz)
+              current = current.child[5];
+            else
+              current = current.child[4];
+          }
         }
         else
         {
-          if (nextPos.z > current.midz)
-            current = current.child[5];
+          if (nextPos.y > current.midy)
+          {
+            if (nextPos.z > current.midz)
+              current = current.child[3];
+            else
+              current = current.child[2];
+          }
           else
-            current = current.child[4];
+          {
+            if (nextPos.z > current.midz)
+              current = current.child[1];
+            else
+              current = current.child[0];
+          }
         }
       }
-      else
-      {
-        if (nextPos.y > current.midy)
-        {
-          if (nextPos.z > current.midz)
-            current = current.child[3];
-          else
-            current = current.child[2];
-        }
-        else
-        {
-          if (nextPos.z > current.midz)
-            current = current.child[1];
-          else
-            current = current.child[0];
-        }
-      }
-    }
+      attempt++;
+    }while (current == this && attempt < 64); // 64 like in the rice-on-a-chess-board problem.
+
     return current;
   }
-  
+
   /** This method should be called on the root node of the octree.  Given a ray whose origin is
       outside the node, find the point where it enters the node, and return the terminal node which
       contains that point.  If the ray never intersects this node, return null. */
@@ -394,33 +409,33 @@ public class OctreeNode
 
     // Push it just inside this node.
 
-    mint += Raytracer.TOL;
+    mint += nodeTol;
     Vec3 nextPos = r.tempVec1;
     nextPos.set(orig.x+dir.x*mint, orig.y+dir.y*mint, orig.z+dir.z*mint);
     
     // Return the terminal node which contains the point.
-    
+
     return findNode(nextPos);
   }
-  
+
   /** Analyze the distribution of objects inside this node, and determine the best place at which
       to subdivide it along each axis. */
   
   private void findMidpoints(BoundingBox objBounds[])
   {
-    
     // If the box is much shorter along one axis than the other two, we don't want to subdivide 
     // along that axis, since it would slow down many more rays than it would speed up.
 
     float xsize = maxx-minx;
     float ysize = maxy-miny;
     float zsize = maxz-minz;
+
     double cutoff = (xsize > ysize ? xsize : ysize);
     if (zsize > cutoff)
       cutoff = zsize;
-    cutoff *= 0.1;
-    if (cutoff < 1.0e-2)
-      cutoff = 1.0e-2;
+    cutoff *= 0.2;
+    //if (cutoff < 1.0e-2) // This seems unnecessary. What if the scene is in small scale?
+    //  cutoff = 1.0e-2;
     if (xsize > cutoff)
       midx = findAxisMidpoint(objBounds, 0);
     else
@@ -488,7 +503,7 @@ public class OctreeNode
       }
     }
     if (found)
-      return (float) (limit-Raytracer.TOL);
+      return (float) (limit-nodeTol);
     limit = mid - 1.0f/invwidth;
     found = false;
     for (int i = 0; i < objBounds.length; i++)
@@ -501,7 +516,7 @@ public class OctreeNode
       }
     }
     if (found)
-      return (float) (limit+Raytracer.TOL);
+      return (float) (limit+nodeTol);
     return mid;
   }
 

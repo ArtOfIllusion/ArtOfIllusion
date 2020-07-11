@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,6 +25,7 @@ public class RTEllipsoid extends RTObject
   double rx, ry, rz, rx2, ry2, rz2, cx, cy, cz, sy, sz, param[];
   boolean bumpMapped, transform, uniform;
   Mat4 toLocal, fromLocal;
+  private double objectTol;
 
   public static final double TOL = 1e-12;
 
@@ -103,6 +105,15 @@ public class RTEllipsoid extends RTObject
     sz = rx2/rz2;
     bumpMapped = sphere.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+
+    // I thought this should have been relative to the 2nd powers, but 
+    // even with this there is some other problem that appears first.
+    // This may have to be re-evaluated, in future.
+
+    objectTol = rx;
+    if (ry > objectTol) objectTol = ry;
+    if (rz > objectTol) objectTol = rz;
+    objectTol *= TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -130,6 +141,8 @@ public class RTEllipsoid extends RTObject
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2, dir = r.tempVec3;
     double a, b, c, d, temp1, temp2;
     double dist1, dist2 = 0;
+    double rayTol = orig.length()*Raytracer.TOL*0.01;
+    double intTol = objectTol > rayTol ? objectTol : rayTol;
 
     v1.set(cx-orig.x, cy-orig.y, cz-orig.z);
     if (transform)
@@ -147,12 +160,14 @@ public class RTEllipsoid extends RTObject
     b = dir.x*v1.x + temp1*v1.y + temp2*v1.z;
     c = v1.x*v1.x + sy*v1.y*v1.y + sz*v1.z*v1.z - rx2;
     int numIntersections;
-    if (c > TOL*b)
+
+    if (c > intTol*b)
       {
         // Ray origin is outside ellipsoid.
 
-        if (b <= 0.0)
+        if (b <= intTol)
           return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from the ellipsoid.
+
         a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
         d = b*b - a*c;
         if (d < 0.0)
@@ -164,7 +179,7 @@ public class RTEllipsoid extends RTObject
         v2.set(orig.x+dist2*dir.x, orig.y+dist2*dir.y, orig.z+dist2*dir.z);
         projectPoint(v2);
       }
-    else if (c < -TOL*b)
+    else if (c < -intTol*b)
       {
         // Ray origin is inside ellipsoid.
 

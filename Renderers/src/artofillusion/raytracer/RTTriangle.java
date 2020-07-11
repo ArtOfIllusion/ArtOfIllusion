@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,8 +29,9 @@ public class RTTriangle extends RTObject
   short dropAxis, flags;
   Mat4 toLocal, fromLocal;
   double d, edge2d1x, edge2d1y, edge2d2x, edge2d2y;
+  private double objectTol;
 
-  public static final double TOL = 1e-12;
+  public static final double TOL = 1e-12; // Is there a reason why this is public? Why not use Raytrace.TOL?
 
   private static final short BUMP_MAPPED = 1;
   private static final short INTERP_NORMALS = 2;
@@ -101,6 +103,13 @@ public class RTTriangle extends RTObject
     edge2d2y *= denom;
     if (tri.theMesh.mapping.getTexture().hasComponent(Texture.BUMP_COMPONENT))
       flags |= BUMP_MAPPED;
+
+    objectTol = vert1.distance2(vert2);
+    double d2 = vert2.distance2(vert3);
+    double d3 = vert3.distance2(vert1);
+    if (d2 > objectTol) objectTol = d2;
+    if (d3 > objectTol) objectTol = d3;
+    objectTol = Math.sqrt(objectTol)*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -124,15 +133,17 @@ public class RTTriangle extends RTObject
   @Override
   public SurfaceIntersection checkIntersection(Ray r)
   {
-    double vd, v0, vx, vy;
     Vec3 orig = r.getOrigin(), dir = r.getDirection();
+    double rayTol = orig.length()*Raytracer.TOL*0.01;
+    double intTol = objectTol > rayTol ? objectTol : rayTol;
+    double vd, v0, vx, vy;
 
     vd = trueNorm.dot(dir);
     if (vd == 0.0)
       return SurfaceIntersection.NO_INTERSECTION;  // The ray is parallel to the plane.
     v0 = -(trueNorm.dot(orig)+d);
     double t = v0/vd;
-    if (t < TOL)
+    if (t < intTol)
       return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from plane of triangle.
 
     // Determine whether the intersection point is inside the triangle.
@@ -154,6 +165,7 @@ public class RTTriangle extends RTObject
         vx = rix - vert1.x;
         vy = riy - vert1.y;
     }
+
     double v = edge2d2x*vy - edge2d2y*vx;
     if (v < -TOL || v > 1.0+TOL)
       return SurfaceIntersection.NO_INTERSECTION;
@@ -423,24 +435,24 @@ public class RTTriangle extends RTObject
       if ((rtTri.flags&INTERP_NORMALS) == 0)
         n.set(rtTri.trueNorm);
       else
-        {
-          Vec3 normals[] = rtTri.tri.theMesh.norm;
-          Vec3 norm1 = normals[rtTri.tri.n1];
-          Vec3 norm2 = normals[rtTri.tri.n2];
-          Vec3 norm3 = normals[rtTri.tri.n3];
-          n.x = u*norm1.x + v*norm2.x + w*norm3.x;
-          n.y = u*norm1.y + v*norm2.y + w*norm3.y;
-          n.z = u*norm1.z + v*norm2.z + w*norm3.z;
-          n.normalize();
-        }
+      {
+        Vec3 normals[] = rtTri.tri.theMesh.norm;
+        Vec3 norm1 = normals[rtTri.tri.n1];
+        Vec3 norm2 = normals[rtTri.tri.n2];
+        Vec3 norm3 = normals[rtTri.tri.n3];
+        n.x = u*norm1.x + v*norm2.x + w*norm3.x;
+        n.y = u*norm1.y + v*norm2.y + w*norm3.y;
+        n.z = u*norm1.z + v*norm2.z + w*norm3.z;
+        n.normalize();
+      }
       rtTri.tri.getTextureSpec(spec, -n.dot(viewDir), u, v, w, size, time);
       if ((rtTri.flags&BUMP_MAPPED) != 0)
-        {
-          rtTri.fromLocal.transformDirection(spec.bumpGrad);
-          n.scale(spec.bumpGrad.dot(n)+1.0);
-          n.subtract(spec.bumpGrad);
-          n.normalize();
-        }
+       {
+         rtTri.fromLocal.transformDirection(spec.bumpGrad);
+         n.scale(spec.bumpGrad.dot(n)+1.0);
+         n.subtract(spec.bumpGrad);
+         n.normalize();
+       }
     }
 
     @Override

@@ -503,21 +503,21 @@ public class Raytracer
     minx = miny = minz = Double.MAX_VALUE;
     maxx = maxy = maxz = -Double.MAX_VALUE;
     for (i = 0; i < sceneObject.length; i++)
-      {
-        objBounds[i] = sceneObject[i].getBounds();
-        if (objBounds[i].minx < minx)
-          minx = objBounds[i].minx;
-        if (objBounds[i].maxx > maxx)
-          maxx = objBounds[i].maxx;
-        if (objBounds[i].miny < miny)
-          miny = objBounds[i].miny;
-        if (objBounds[i].maxy > maxy)
-          maxy = objBounds[i].maxy;
-        if (objBounds[i].minz < minz)
-          minz = objBounds[i].minz;
-        if (objBounds[i].maxz > maxz)
-          maxz = objBounds[i].maxz;
-      }
+    {
+      objBounds[i] = sceneObject[i].getBounds();
+      if (objBounds[i].minx < minx)
+        minx = objBounds[i].minx;
+      if (objBounds[i].maxx > maxx)
+        maxx = objBounds[i].maxx;
+      if (objBounds[i].miny < miny)
+        miny = objBounds[i].miny;
+      if (objBounds[i].maxy > maxy)
+        maxy = objBounds[i].maxy;
+      if (objBounds[i].minz < minz)
+        minz = objBounds[i].minz;
+      if (objBounds[i].maxz > maxz)
+        maxz = objBounds[i].maxz;
+    }
 
     double extTol = maxx-minx;
     if (maxy-miny > extTol) extTol = maxy-miny;
@@ -534,8 +534,9 @@ public class Raytracer
     // Create the octree.
 
     rootNode = new OctreeNode(Math.nextAfter((float) minx, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxx, Double.POSITIVE_INFINITY),
-        Math.nextAfter((float) miny, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxy, Double.POSITIVE_INFINITY),
-        Math.nextAfter((float) minz, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxz, Double.POSITIVE_INFINITY), sceneObject, objBounds, null);
+                              Math.nextAfter((float) miny, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxy, Double.POSITIVE_INFINITY),
+                              Math.nextAfter((float) minz, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxz, Double.POSITIVE_INFINITY), 
+                              sceneObject, objBounds, null);
 
     // Find the nodes which contain the camera and the lights.
 

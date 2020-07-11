@@ -275,83 +275,83 @@ public class RTTriangleLowMemory extends RTObject
     double dirx = p2.x-p1.x, diry = p2.y-p1.y, dirz = p2.z-p1.z;
     double len = Math.sqrt(dirx*dirx + diry*diry + dirz*dirz);
     if (dirx == 0.0)
-      {
-        if (p1.x < node.minx || p1.x > node.maxx)
-          return false;
-      }
+    {
+      if (p1.x < node.minx || p1.x > node.maxx)
+        return false;
+    }
     else
+    {
+      t1 = (node.minx-p1.x)*len/dirx;
+      t2 = (node.maxx-p1.x)*len/dirx;
+      if (t1 < t2)
       {
-        t1 = (node.minx-p1.x)*len/dirx;
-        t2 = (node.maxx-p1.x)*len/dirx;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     if (diry == 0.0)
-      {
-        if (p1.y < node.miny || p1.y > node.maxy)
-          return false;
-      }
+    {
+      if (p1.y < node.miny || p1.y > node.maxy)
+        return false;
+    }
     else
+    {
+      t1 = (node.miny-p1.y)*len/diry;
+      t2 = (node.maxy-p1.y)*len/diry;
+      if (t1 < t2)
       {
-        t1 = (node.miny-p1.y)*len/diry;
-        t2 = (node.maxy-p1.y)*len/diry;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     if (dirz == 0.0)
-      {
-        if (p1.z < node.minz || p1.z > node.maxz)
-          return false;
-      }
+    {
+      if (p1.z < node.minz || p1.z > node.maxz)
+        return false;
+    }
     else
+    {
+      t1 = (node.minz-p1.z)*len/dirz;
+      t2 = (node.maxz-p1.z)*len/dirz;
+      if (t1 < t2)
       {
-        t1 = (node.minz-p1.z)*len/dirz;
-        t2 = (node.maxz-p1.z)*len/dirz;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     return true;
   }
 
@@ -426,24 +426,24 @@ public class RTTriangleLowMemory extends RTObject
       if ((rtTri.flags&INTERP_NORMALS) == 0)
         n.set(rtTri.tri.theMesh.faceNorm[rtTri.tri.index]);
       else
-        {
-          Vec3 normals[] = rtTri.tri.theMesh.norm;
-          Vec3 norm1 = normals[rtTri.tri.n1];
-          Vec3 norm2 = normals[rtTri.tri.n2];
-          Vec3 norm3 = normals[rtTri.tri.n3];
-          n.x = u*norm1.x + v*norm2.x + w*norm3.x;
-          n.y = u*norm1.y + v*norm2.y + w*norm3.y;
-          n.z = u*norm1.z + v*norm2.z + w*norm3.z;
-          n.normalize();
-        }
+      {
+        Vec3 normals[] = rtTri.tri.theMesh.norm;
+        Vec3 norm1 = normals[rtTri.tri.n1];
+        Vec3 norm2 = normals[rtTri.tri.n2];
+        Vec3 norm3 = normals[rtTri.tri.n3];
+        n.x = u*norm1.x + v*norm2.x + w*norm3.x;
+        n.y = u*norm1.y + v*norm2.y + w*norm3.y;
+        n.z = u*norm1.z + v*norm2.z + w*norm3.z;
+        n.normalize();
+      }
       rtTri.tri.getTextureSpec(spec, -n.dot(viewDir), u, v, w, size, time);
       if ((rtTri.flags&BUMP_MAPPED) != 0)
-        {
-          rtTri.fromLocal.transformDirection(spec.bumpGrad);
-          n.scale(spec.bumpGrad.dot(n)+1.0);
-          n.subtract(spec.bumpGrad);
-          n.normalize();
-        }
+      {
+        rtTri.fromLocal.transformDirection(spec.bumpGrad);
+        n.scale(spec.bumpGrad.dot(n)+1.0);
+        n.subtract(spec.bumpGrad);
+        n.normalize();
+      }
     }
 
     @Override

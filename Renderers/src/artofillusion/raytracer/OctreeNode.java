@@ -106,23 +106,23 @@ public class OctreeNode
         if (splitz)
           child[1] = new OctreeNode(minx, midx, miny, midy, midz, maxz, obj, objBounds, this);
         if (splity)
-          {
-            child[2] = new OctreeNode(minx, midx, midy, maxy, minz, midz, obj, objBounds, this);
-            if (splitz)
-              child[3] = new OctreeNode(minx, midx, midy, maxy, midz, maxz, obj, objBounds, this);
-          }
+        {
+          child[2] = new OctreeNode(minx, midx, midy, maxy, minz, midz, obj, objBounds, this);
+          if (splitz)
+            child[3] = new OctreeNode(minx, midx, midy, maxy, midz, maxz, obj, objBounds, this);
+        }
         if (splitx)
+        {
+          child[4] = new OctreeNode(midx, maxx, miny, midy, minz, midz, obj, objBounds, this);
+          if (splitz)
+            child[5] = new OctreeNode(midx, maxx, miny, midy, midz, maxz, obj, objBounds, this);
+          if (splity)
           {
-            child[4] = new OctreeNode(midx, maxx, miny, midy, minz, midz, obj, objBounds, this);
+            child[6] = new OctreeNode(midx, maxx, midy, maxy, minz, midz, obj, objBounds, this);
             if (splitz)
-              child[5] = new OctreeNode(midx, maxx, miny, midy, midz, maxz, obj, objBounds, this);
-            if (splity)
-              {
-                child[6] = new OctreeNode(midx, maxx, midy, maxy, minz, midz, obj, objBounds, this);
-                if (splitz)
-                  child[7] = new OctreeNode(midx, maxx, midy, maxy, midz, maxz, obj, objBounds, this);
-              }
+              child[7] = new OctreeNode(midx, maxx, midy, maxy, midz, maxz, obj, objBounds, this);
           }
+        }
         obj = null;
       }
   }
@@ -158,42 +158,42 @@ public class OctreeNode
 
     current = this;
     while (current.obj == null)
+    {
+      if (pos.x > current.midx)
       {
-        if (pos.x > current.midx)
-          {
-            if (pos.y > current.midy)
-              {
-                if (pos.z > current.midz)
-                    current = current.child[7];
-                else
-                    current = current.child[6];
-            }
-            else
-              {
-                if (pos.z > current.midz)
-                    current = current.child[5];
-                else
-                    current = current.child[4];
-              }
-          }
+        if (pos.y > current.midy)
+        {
+          if (pos.z > current.midz)
+            current = current.child[7];
+          else
+            current = current.child[6];
+        }
         else
-          {
-            if (pos.y > current.midy)
-              {
-                if (pos.z > current.midz)
-                    current = current.child[3];
-                else
-                    current = current.child[2];
-              }
-            else
-              {
-                if (pos.z > current.midz)
-                    current = current.child[1];
-                else
-                    current = current.child[0];
-              }
+        {
+          if (pos.z > current.midz)
+            current = current.child[5];
+          else
+            current = current.child[4];
         }
       }
+      else
+      {
+        if (pos.y > current.midy)
+        {
+          if (pos.z > current.midz)
+              current = current.child[3];
+          else
+              current = current.child[2];
+        }
+        else
+        {
+          if (pos.z > current.midz)
+              current = current.child[1];
+          else
+              current = current.child[0];
+        }
+      }
+    }
     return current;
   }
 
@@ -329,83 +329,83 @@ public class OctreeNode
     // Find the point where the ray enters this node (if it does at all).
 
     if (dir.x == 0.0)
-      {
-        if (orig.x < minx || orig.x > maxx)
-          return null;
-      }
+    {
+      if (orig.x < minx || orig.x > maxx)
+        return null;
+    }
     else
+    {
+      t1 = (minx-orig.x)/dir.x;
+      t2 = (maxx-orig.x)/dir.x;
+      if (t1 < t2)
       {
-        t1 = (minx-orig.x)/dir.x;
-        t2 = (maxx-orig.x)/dir.x;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || maxt < 0.0)
-          return null;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || maxt < 0.0)
+        return null;
+    }
     if (dir.y == 0.0)
-      {
-        if (orig.y < miny || orig.y > maxy)
-          return null;
-      }
+    {
+      if (orig.y < miny || orig.y > maxy)
+        return null;
+    }
     else
+    {
+      t1 = (miny-orig.y)/dir.y;
+      t2 = (maxy-orig.y)/dir.y;
+      if (t1 < t2)
       {
-        t1 = (miny-orig.y)/dir.y;
-        t2 = (maxy-orig.y)/dir.y;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || maxt < 0.0)
-          return null;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || maxt < 0.0)
+        return null;
+    }
     if (dir.z == 0.0)
-      {
-        if (orig.z < minz || orig.z > maxz)
-          return null;
-      }
+    {
+      if (orig.z < minz || orig.z > maxz)
+        return null;
+    }
     else
+    {
+      t1 = (minz-orig.z)/dir.z;
+      t2 = (maxz-orig.z)/dir.z;
+      if (t1 < t2)
       {
-        t1 = (minz-orig.z)/dir.z;
-        t2 = (maxz-orig.z)/dir.z;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || maxt < 0.0)
-          return null;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || maxt < 0.0)
+        return null;
+    }
 
     // Push it just inside this node.
 

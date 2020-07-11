@@ -284,83 +284,83 @@ public class RTTriangle extends RTObject
     double dirx = p2.x-p1.x, diry = p2.y-p1.y, dirz = p2.z-p1.z;
     double len = Math.sqrt(dirx*dirx + diry*diry + dirz*dirz);
     if (dirx == 0.0)
-      {
-        if (p1.x < node.minx || p1.x > node.maxx)
-          return false;
-      }
+    {
+      if (p1.x < node.minx || p1.x > node.maxx)
+        return false;
+    }
     else
+    {
+      t1 = (node.minx-p1.x)*len/dirx;
+      t2 = (node.maxx-p1.x)*len/dirx;
+      if (t1 < t2)
       {
-        t1 = (node.minx-p1.x)*len/dirx;
-        t2 = (node.maxx-p1.x)*len/dirx;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     if (diry == 0.0)
-      {
-        if (p1.y < node.miny || p1.y > node.maxy)
-          return false;
-      }
+    {
+      if (p1.y < node.miny || p1.y > node.maxy)
+        return false;
+    }
     else
+    {
+      t1 = (node.miny-p1.y)*len/diry;
+      t2 = (node.maxy-p1.y)*len/diry;
+      if (t1 < t2)
       {
-        t1 = (node.miny-p1.y)*len/diry;
-        t2 = (node.maxy-p1.y)*len/diry;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     if (dirz == 0.0)
-      {
-        if (p1.z < node.minz || p1.z > node.maxz)
-          return false;
-      }
+    {
+      if (p1.z < node.minz || p1.z > node.maxz)
+        return false;
+    }
     else
+    {
+      t1 = (node.minz-p1.z)*len/dirz;
+      t2 = (node.maxz-p1.z)*len/dirz;
+      if (t1 < t2)
       {
-        t1 = (node.minz-p1.z)*len/dirz;
-        t2 = (node.maxz-p1.z)*len/dirz;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     return true;
   }
 

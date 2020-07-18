@@ -59,7 +59,7 @@ public class WeightTrack extends Track
   /* Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object parent)
+  public WeightTrack duplicate(Object parent)
   {
     WeightTrack t = new WeightTrack((Track) parent);
 

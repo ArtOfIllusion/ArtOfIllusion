@@ -18,7 +18,6 @@ import artofillusion.animation.PoseTrack;
 import artofillusion.animation.WeightTrack;
 import artofillusion.image.ComplexImage;
 import artofillusion.image.filter.ImageFilter;
-import artofillusion.math.BoundingBox;
 import artofillusion.math.CoordinateSystem;
 import artofillusion.test.util.StreamUtil;
 import java.io.DataInputStream;
@@ -37,35 +36,18 @@ import org.junit.Test;
 public class SceneCameraTest
 {
   
+
   @Test
-  public void testGetCameraBounds() {
+  public void checkSceneCameraIsPerspectiveByDefault() {
+
     SceneCamera camera = new SceneCamera();
-    BoundingBox cBox = camera.getBounds();
-    Assert.assertEquals(-0.25, cBox.minx, 0);
-    Assert.assertEquals(0.25, cBox.maxx, 0);
-    
-    Assert.assertEquals(-0.15, cBox.miny, 0);
-    Assert.assertEquals(0.20, cBox.maxy, 0);
-    
-    Assert.assertEquals(-0.20, cBox.minz, 0);
-    Assert.assertEquals(0.20, cBox.maxz, 0);
-  }
-  
-  
-  @Test
-  public void testCreateSceneCamera() {
-    
-    
-    SceneCamera camera = new SceneCamera();
-    ObjectInfo camObj = new ObjectInfo(camera, new CoordinateSystem(), "Camera");
     Assert.assertTrue(camera.isPerspective());
-    Assert.assertEquals(camera, camObj.getObject());
-    Assert.assertNull(camObj.getTracks());
+
     
   }
   
   @Test
-  public void testGetEmptySceneCameraFilters() {
+  public void getEmptySceneCameraFilters() {
     SceneCamera camera = new SceneCamera();
     Assert.assertTrue(camera.isPerspective());
     Assert.assertNotNull(camera.getImageFilters());
@@ -74,7 +56,7 @@ public class SceneCameraTest
  
   
   @Test
-  public void testSetAndGetImageFiltersForCamera() {
+  public void setAndGetImageFiltersForCamera() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter()});
     ImageFilter[] filters = camera.getImageFilters();
@@ -84,7 +66,7 @@ public class SceneCameraTest
   
   
   @Test
-  public void testDuplicateCameraWithFilters() {
+  public void duplicateCameraWithFilters() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter(), new DummyImageFilter()});
     
@@ -96,14 +78,14 @@ public class SceneCameraTest
   
   
   @Test(expected = ClassCastException.class)
-  public void testCopyCameraFromBadObject() {
+  public void copyCameraFromBadObject() {
     SceneCamera camera = new SceneCamera();
     camera.copyObject(new NullObject());
   }
   
   
   @Test
-  public void testCopyCameraSimple() {
+  public void copyCameraSimple() {
     SceneCamera camera = new SceneCamera();
     SceneCamera source = new SceneCamera();
     
@@ -128,7 +110,7 @@ public class SceneCameraTest
   
   
   @Test
-  public void testCopyCameraWithFilters() {
+  public void copyCameraWithFilters() {
     SceneCamera camera = new SceneCamera();
     SceneCamera source = new SceneCamera();
     
@@ -153,7 +135,7 @@ public class SceneCameraTest
 
   
   @Test
-  public void testConfigurePoseTrackForCameraNoFilters() {
+  public void configurePoseTrackForCameraWithNoFilters() {
     SceneCamera camera = new SceneCamera();
     
     
@@ -162,14 +144,12 @@ public class SceneCameraTest
     
     Assert.assertEquals(1, pTrack.getSubtracks().length);
     Assert.assertTrue(pTrack.getSubtracks()[0] instanceof WeightTrack);
-    
-    
-    System.out.println(Arrays.toString(pTrack.getValueNames()));
+
   }
   
   
   @Test
-  public void testConfigurePoseTrackForCameraSingleFilter() {
+  public void configurePoseTrackForCameraSingleFilter() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter()});
     
@@ -185,7 +165,7 @@ public class SceneCameraTest
   
 
   @Test
-  public void testConfigurePoseTrackForCameraDoubleFilters() {
+  public void configurePoseTrackForCameraDoubleFilters() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter(), new DummyImageFilter()});
     
@@ -208,7 +188,7 @@ public class SceneCameraTest
   }
 
   @Test
-  public void testGetCameraDesiredComponents2() {
+  public void getCameraDesiredComponents2() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter(), new DummyImageFilter2()});
 
@@ -217,7 +197,7 @@ public class SceneCameraTest
   
   
   @Test
-  public void testGetCameraExtraDesiredComponents() {
+  public void getCameraExtraDesiredComponents() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter()});
     camera.setExtraRequiredComponents(ComplexImage.ALPHA);
@@ -225,7 +205,7 @@ public class SceneCameraTest
   }
 
   @Test
-  public void testGetCameraExtraDesiredComponents2() {
+  public void getCameraExtraDesiredComponents2() {
     SceneCamera camera = new SceneCamera();
     camera.setImageFilters(new ImageFilter[] {new DummyImageFilter(), new DummyImageFilter2()});
     camera.setExtraRequiredComponents(ComplexImage.ALPHA);
@@ -233,7 +213,7 @@ public class SceneCameraTest
   }
   
   @Test
-  public void testFilterDuplicate() {
+  public void duplicateCameraFilter() {
     DummyImageFilter filter = new DummyImageFilter();
     ImageFilter duplicate = filter.duplicate();
     Assert.assertNotNull(duplicate);
@@ -244,7 +224,7 @@ public class SceneCameraTest
   
   @Test(expected = InvalidObjectException.class)
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
-  public void testCreateSceneCameraFromStreamBadObject3dVersion() throws IOException {
+  public void createSceneCameraFromStreamBadObject3dVersion() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(4);
     wrap.putShort((short)2); // Base Object3d version
     
@@ -255,7 +235,7 @@ public class SceneCameraTest
   
   @Test(expected = InvalidObjectException.class)
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
-  public void testCreateSceneCameraFromStreamBadCameraVersion() throws IOException {
+  public void createSceneCameraFromStreamBadCameraVersion() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(4);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)4); // Scene Camera object version
@@ -265,7 +245,7 @@ public class SceneCameraTest
   
   @Test(expected = InvalidObjectException.class)
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
-  public void testCreateSceneCameraFromStreamBadCameraNegativeVersion() throws IOException {
+  public void createSceneCameraFromStreamBadCameraNegativeVersion() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(4);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)-1); // Scene Camera object version
@@ -275,7 +255,7 @@ public class SceneCameraTest
   
 
   @Test
-  public void testCreateSceneCameraFromStreamVersion0NoCameraFilters() throws IOException {
+  public void createSceneCameraFromStreamVersion0NoCameraFilters() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(100);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)0); // Scene Camera object version
@@ -295,7 +275,7 @@ public class SceneCameraTest
 
 
   @Test
-  public void testCreateSceneCameraFromStreamVersion2() throws IOException {
+  public void createSceneCameraFromStreamVersion2() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(100);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)2); // Scene Camera object version
@@ -316,7 +296,7 @@ public class SceneCameraTest
   }
   
   @Test
-  public void testCreateSceneCameraFromStreamVersion3() throws IOException {
+  public void createSceneCameraFromStreamVersion3() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(100);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)3); // Scene Camera object version
@@ -339,7 +319,7 @@ public class SceneCameraTest
   
   
   @Test(expected = IOException.class)
-  public void testCreateSceneCameraFromStreamBadFilter() throws IOException {
+  public void createSceneCameraFromStreamBadFilter() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(100);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)3); // Scene Camera object version
@@ -368,7 +348,7 @@ public class SceneCameraTest
   
   
   @Test
-  public void testCreateSceneCameraFromStreamSingleGoodFilter() throws IOException {
+  public void сreateSceneCameraFromStreamSingleGoodFilter() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(200);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)3); // Scene Camera object version
@@ -400,7 +380,7 @@ public class SceneCameraTest
   }  
   
   @Test
-  public void testCreateSceneCameraFromStreamDoubleGoodFilter() throws IOException {
+  public void сreateSceneCameraFromStreamDoubleGoodFilter() throws IOException {
     ByteBuffer wrap = ByteBuffer.allocate(200);
     wrap.putShort((short)1); // Base Object3d version
     wrap.putShort((short)3); // Scene Camera object version

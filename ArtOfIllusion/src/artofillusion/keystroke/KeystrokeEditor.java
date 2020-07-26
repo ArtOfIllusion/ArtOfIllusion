@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,6 +18,11 @@ import artofillusion.script.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashSet;
+import java.util.Set;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
  * This class presents a user interface for editing a single KeystrokeRecord.  To use it, invoke
@@ -25,16 +31,29 @@ import java.awt.event.*;
 
 public class KeystrokeEditor extends BDialog
 {
-  private BTextField keyField, nameField;
-  private BComboBox languageChoice;
-  private ScriptEditor scriptArea;
-  private BButton okButton;
+  private final BTextField keyField;
+  private final BTextField nameField;
+  private final BComboBox languageChoice;
+
+  private final RSyntaxTextArea syntaxTextArea;
+  private final BButton okButton;
   private KeystrokeRecord record;
 
-  private static final int RESERVED_CODES[] = new int [] {
-      KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN,
-      KeyEvent.VK_ENTER, KeyEvent.VK_ESCAPE, KeyEvent.VK_TAB, KeyEvent.VK_SHIFT,
-      KeyEvent.VK_ALT, KeyEvent.VK_CONTROL, KeyEvent.VK_META
+  private static final Set<Integer> reserved = new HashSet<Integer>() {
+    {
+      add(KeyEvent.VK_LEFT);
+      add(KeyEvent.VK_RIGHT);
+      add(KeyEvent.VK_UP);
+      add(KeyEvent.VK_DOWN);
+      add(KeyEvent.VK_ENTER);
+      add(KeyEvent.VK_ESCAPE);
+      add(KeyEvent.VK_TAB);
+      add(KeyEvent.VK_SHIFT);
+      add(KeyEvent.VK_ALT);
+      add(KeyEvent.VK_CONTROL);
+      add(KeyEvent.VK_META);
+
+    }
   };
 
   /**
@@ -65,7 +84,12 @@ public class KeystrokeEditor extends BDialog
     nameField = new BTextField(record.getName());
     languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
     languageChoice.setSelectedValue(record.getLanguage());
-    scriptArea = new ScriptEditor(record.getScript());
+
+    syntaxTextArea = new RSyntaxTextArea(record.getScript(), 25, 100);
+    syntaxTextArea.setTabSize(2);
+    syntaxTextArea.setCodeFoldingEnabled(true);
+    syntaxTextArea.setSyntaxEditingStyle(record.getLanguage().equalsIgnoreCase("groovy") ? SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
+
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE);
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null);
     content.add(Translate.label("Key"), 0, 0, rightLayout);
@@ -75,7 +99,7 @@ public class KeystrokeEditor extends BDialog
     content.add(nameField, 1, 1, fillLayout);
     content.add(languageChoice, 1, 2, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE));
     content.add(Translate.label("Script"), 0, 3, 2, 1, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-    content.add(scriptArea.createContainer(), 0, 4, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
+    content.add(new AWTWidget(new RTextScrollPane(syntaxTextArea)), 0, 4, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     RowContainer buttons = new RowContainer();
     content.add(buttons, 0, 5, 2, 1);
     okButton = Translate.button("ok", this, "clickedOk");
@@ -89,7 +113,7 @@ public class KeystrokeEditor extends BDialog
   {
     record.setName(nameField.getText());
     record.setLanguage(languageChoice.getSelectedValue().toString());
-    record.setScript(scriptArea.getText());
+    record.setScript(syntaxTextArea.getText());
     dispose();
   }
 
@@ -104,13 +128,12 @@ public class KeystrokeEditor extends BDialog
     okButton.setEnabled(record.getKeyCode() != 0);
   }
 
-  private void setKey(KeyPressedEvent ev)
+  private void setKey(KeyPressedEvent event)
   {
-    int code = ev.getKeyCode();
-    for (int i = 0; i < RESERVED_CODES.length; i++)
-      if (code == RESERVED_CODES[i])
-        return;
-    int modifiers = ev.getModifiers() & (KeyEvent.ALT_MASK+KeyEvent.SHIFT_MASK);
+    int code = event.getKeyCode();
+    if(reserved.contains(code)) return;
+
+    int modifiers = event.getModifiers() & (KeyEvent.ALT_DOWN_MASK + KeyEvent.SHIFT_DOWN_MASK);
     record.setKeyCode(code);
     record.setModifiers(modifiers);
     keyField.setText(KeystrokePreferencesPanel.getKeyDescription(code, modifiers));

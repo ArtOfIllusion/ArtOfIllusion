@@ -322,6 +322,7 @@ public class ScriptedObject extends ObjectCollection
   /** Allow the user to edit the script. */
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
     new ScriptedObjectEditorWindow(parent, info, cb);

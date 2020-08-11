@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,18 +14,13 @@ package artofillusion.script;
 import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
-import buoy.widget.*;
-import java.awt.*;
 import java.io.*;
 
 /** This class presents a user interface for entering scripts to be executed. */
 
-public class ExecuteScriptWindow extends BFrame
+public class ExecuteScriptWindow extends ScriptWindowBase
 {
-  private LayoutWindow window;
-  private ScriptEditor scriptText;
-  private BComboBox languageChoice;
-  private String scriptName;
+  private final LayoutWindow window;
 
   private static File scriptDir;
   private static String lastScript;
@@ -34,33 +30,38 @@ public class ExecuteScriptWindow extends BFrame
   {
     super(lastScriptName);
     scriptName = lastScriptName;
-    BorderContainer content = new BorderContainer();
-    setContent(content);
+
     window = win;
-    if (scriptDir == null)
-      scriptDir = new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY);
-    scriptText = new ScriptEditor("");
-    if (lastScript != null)
-      scriptText.setText(lastScript);
-    content.add(scriptText.createContainer(), BorderContainer.CENTER);
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
-    RowContainer languageRow = new RowContainer();
-    languageRow.add(Translate.label("language"));
-    languageRow.add(languageChoice);
-    content.add(languageRow, BorderContainer.NORTH, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
-    RowContainer buttons = new RowContainer();
-    content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-    buttons.add(Translate.button("executeScript", this, "executeScript"));
-    buttons.add(Translate.button("Load", "...", this, "loadScript"));
-    buttons.add(Translate.button("Save", "...", this, "saveScript"));
-    buttons.add(Translate.button("close", this, "closeWindow"));
-    addEventLink(WindowClosingEvent.class, this, "closeWindow");
+    if (scriptDir == null) scriptDir = new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY);
+    
+    if (lastScript != null) scriptText.setText(lastScript);
     scriptText.setCaretPosition(0);
+
+    getButtons().add(Translate.button("executeScript", this, "executeScript"));
+    getButtons().add(Translate.button("Load", "...", this, "loadScript"));
+    getButtons().add(Translate.button("Save", "...", this, "saveScript"));
+    getButtons().add(Translate.button("close", this, "closeWindow"));
+    
+    addEventLink(WindowClosingEvent.class, this, "closeWindow");
+    
     pack();
-    UIUtilities.centerWindow(this);
-    scriptText.requestFocus();
+    this.getComponent().setLocationRelativeTo(null);
     setVisible(true);
+    scriptText.requestFocus();
   }
+
+  @Override
+  protected void setScriptFolder(File target)
+  {
+    scriptDir = target;
+  }
+
+  @Override
+  protected File getScriptFolder()
+  {
+    return scriptDir;
+  }
+
 
   private void closeWindow()
   {
@@ -68,93 +69,31 @@ public class ExecuteScriptWindow extends BFrame
     dispose();
   }
 
-  /** Prompt the user to load a script. */
-
-  private void loadScript()
-  {
-    BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectScriptToLoad"));
-    fc.setDirectory(scriptDir);
-    fc.showDialog(this);
-    if (fc.getSelectedFile() == null)
-      return;
-    scriptDir = fc.getDirectory();
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    File f = fc.getSelectedFile();
-    try
-    {
-      BufferedReader in = new BufferedReader(new FileReader(f));
-      StringBuilder buf = new StringBuilder();
-      int c;
-      while ((c = in.read()) != -1)
-        buf.append((char) c);
-      in.close();
-      scriptText.setText(buf.toString());
-      scriptText.setCaretPosition(0);
-    }
-    catch (Exception ex)
-    {
-      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-    }
-    String filename = fc.getSelectedFile().getName();
-    try
-    {
-      languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
-    }
-    catch (IllegalArgumentException ex)
-    {
-      languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
-    }
-    setScriptNameFromFile(filename);
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
 
   /** Prompt the user to save a script. */
 
-  private void saveScript()
+  @Override
+  protected void saveScript()
   {
-    BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
-    fc.setDirectory(scriptDir);
-    fc.setSelectedFile(new File(scriptDir, scriptName+'.'+ScriptRunner.getFilenameExtension((String) languageChoice.getSelectedValue())));
-    fc.showDialog(this);
-    if (fc.getSelectedFile() == null)
-      return;
-    scriptDir = fc.getDirectory();
-
-    // Write the script to disk.
-
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    File f = fc.getSelectedFile();
-    try
-    {
-      BufferedWriter out = new BufferedWriter(new FileWriter(f));
-      out.write(scriptText.getText().toCharArray());
-      out.close();
-    }
-    catch (Exception ex)
-    {
-      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-    }
-    setScriptNameFromFile(fc.getSelectedFile().getName());
+    super.saveScript();
 
     // Update the Scripts menus in all windows.
-
-    EditingWindow allWindows[] = ArtOfIllusion.getWindows();
-    for (int i = 0; i < allWindows.length; i++)
-      if (allWindows[i] instanceof LayoutWindow)
-        ((LayoutWindow) allWindows[i]).rebuildScriptsMenu();
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    for (EditingWindow editingWindow : ArtOfIllusion.getWindows())
+    {
+      if (editingWindow instanceof LayoutWindow)
+      {
+        ((LayoutWindow) editingWindow).rebuildScriptsMenu();
+      }
+    }
+    
   }
 
   /** Set the script name based on the name of a file that was loaded or saved. */
 
-  private void setScriptNameFromFile(String filename)
+  @Override
+  protected void setScriptNameFromFile(String filename)
   {
-    if (filename.contains("."))
-      scriptName = filename.substring(0, filename.lastIndexOf("."));
-    else
-      scriptName = filename;
+    super.setScriptNameFromFile(filename);
     lastScriptName = scriptName;
     setTitle(scriptName);
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,17 +18,16 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.util.Optional;
 
 /** This class presents a user interface for entering object scripts. */
 
-public class ScriptedObjectEditorWindow extends BFrame
+public class ScriptedObjectEditorWindow extends ScriptWindowBase
 {
-  private EditingWindow window;
-  private ObjectInfo info;
-  private ScriptEditor scriptText;
-  private BComboBox languageChoice;
-  private String scriptName;
-  private Runnable onClose;
+  private final EditingWindow window;
+  private final ObjectInfo info;
+
+  private Optional<Runnable> closeCallback = Optional.empty();
 
   private static File scriptDir;
 
@@ -36,121 +36,48 @@ public class ScriptedObjectEditorWindow extends BFrame
     super("Script '"+ obj.getName() +"'");
     window = parent;
     info = obj;
-    this.onClose = onClose;
+    this.closeCallback = Optional.ofNullable(onClose);
     scriptName = "Untitled";
-    if (scriptDir == null)
-      scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
-    BorderContainer content = new BorderContainer();
-    setContent(content);
-    scriptText = new ScriptEditor(((ScriptedObject) info.getObject()).getScript());
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
-    languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
-    RowContainer languageRow = new RowContainer();
-    languageRow.add(Translate.label("language"));
-    languageRow.add(languageChoice);
-    content.add(languageRow, BorderContainer.NORTH, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
-    content.add(BOutline.createBevelBorder(scriptText.createContainer(), false), BorderContainer.CENTER);
-    RowContainer buttons = new RowContainer();
-    content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
-    buttons.add(Translate.button("ok", this, "commitChanges"));
-    buttons.add(Translate.button("Load", "...", this, "loadScript"));
-    buttons.add(Translate.button("Save", "...", this, "saveScript"));
-    buttons.add(Translate.button("scriptParameters", this, "editParameters"));
-    buttons.add(Translate.button("cancel", this, "dispose"));
-    addEventLink(WindowClosingEvent.class, this, "commitChanges");
+    if (scriptDir == null) scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
+
+    scriptText.setText(((ScriptedObject) info.getObject()).getScript());
     scriptText.setCaretPosition(0);
+    
+    
+    languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
+
+    getButtons().add(Translate.button("ok", this, "commitChanges"));
+    getButtons().add(Translate.button("Load", "...", this, "loadScript"));
+    getButtons().add(Translate.button("Save", "...", this, "saveScript"));
+    getButtons().add(Translate.button("scriptParameters", this, "editParameters"));
+    getButtons().add(Translate.button("cancel", this, "dispose"));
+    addEventLink(WindowClosingEvent.class, this, "commitChanges");
+    
     pack();
-    UIUtilities.centerWindow(this);
-    scriptText.requestFocus();
+    this.getComponent().setLocationRelativeTo(null);
     setVisible(true);
+    scriptText.requestFocus();
   }
+
+  @Override
+  protected void setScriptFolder(File target)
+  {
+    scriptDir = target;
+  }
+
+  @Override
+  protected File getScriptFolder()
+  {
+    return scriptDir;
+  }
+
 
   /** Display a dialog for editing the parameters. */
 
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   private void editParameters()
   {
     new ParametersDialog();
-  }
-
-  /** Prompt the user to load a script. */
-
-  private void loadScript()
-  {
-    BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectScriptToLoad"));
-    fc.setDirectory(scriptDir);
-    fc.showDialog(this);
-    if (fc.getSelectedFile() == null)
-      return;
-    scriptDir = fc.getDirectory();
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    File f = fc.getSelectedFile();
-    try
-      {
-      BufferedReader in = new BufferedReader(new FileReader(f));
-      StringBuilder buf = new StringBuilder();
-      int c;
-      while ((c = in.read()) != -1)
-        buf.append((char) c);
-      in.close();
-      scriptText.setText(buf.toString());
-      }
-    catch (Exception ex)
-      {
-      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-      }
-    String filename = fc.getSelectedFile().getName();
-    try
-    {
-      languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
-    }
-    catch (IllegalArgumentException ex)
-    {
-      languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
-    }
-    setScriptNameFromFile(filename);
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
-
-  /** Prompt the user to save a script. */
-
-  private void saveScript()
-  {
-    BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
-    fc.setDirectory(scriptDir);
-    fc.setSelectedFile(new File(scriptDir, scriptName+'.'+ScriptRunner.getFilenameExtension((String) languageChoice.getSelectedValue())));
-    fc.showDialog(this);
-    if (fc.getSelectedFile() == null)
-      return;
-    scriptDir = fc.getDirectory();
-
-    // Write the script to disk.
-
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    File f = fc.getSelectedFile();
-    try
-    {
-      BufferedWriter out = new BufferedWriter(new FileWriter(f));
-      out.write(scriptText.getText().toCharArray());
-      out.close();
-    }
-    catch (Exception ex)
-    {
-      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-    }
-    setScriptNameFromFile(fc.getSelectedFile().getName());
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
-
-  /** Set the script name based on the name of a file that was loaded or saved. */
-
-  private void setScriptNameFromFile(String filename)
-  {
-    if (filename.contains("."))
-      scriptName = filename.substring(0, filename.lastIndexOf("."));
-    else
-      scriptName = filename;
   }
 
   /** Commit changes to the scripted object. */
@@ -162,8 +89,9 @@ public class ScriptedObjectEditorWindow extends BFrame
     so.setScript(scriptText.getText());
     so.setLanguage(languageChoice.getSelectedValue().toString());
     so.sceneChanged(info, window.getScene());
-    if (onClose != null)
-      onClose.run();
+
+    closeCallback.ifPresent(action -> action.run());
+    
     window.updateImage();
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     dispose();

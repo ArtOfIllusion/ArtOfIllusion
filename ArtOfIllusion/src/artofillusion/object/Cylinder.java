@@ -501,7 +501,7 @@ public class Cylinder extends Object3D
   public void configurePoseTrack(PoseTrack track)
   {
     track.setGraphableValues(new String [] {"X Radius", "Z Radius", "Height", "Ratio"},
-                             new double [] {2.0*rx, 2.0*rz, height, ratio},
+                             new double [] {rx, rz, height, ratio},
                              new double [][] {{0.0, Double.MAX_VALUE}, 
                                               {0.0, Double.MAX_VALUE},
                                               {0.0, Double.MAX_VALUE}, 
@@ -520,7 +520,7 @@ public class Cylinder extends Object3D
 
   public double [] getDefaultPoseValues()
   {
-    return new double [] {2.0*rx, 2.0*rz, height, ratio};
+    return new double [] {rx, rz, height, ratio};
   }
 
   /** Get the allowed range for graphable values for keyframes returned by getPoseKeyframe().
@@ -539,9 +539,9 @@ public class Cylinder extends Object3D
   public void editKeyframe(EditingWindow parent, Keyframe k, ObjectInfo info)
   {
     CylinderKeyframe key = (CylinderKeyframe) k;
-    ValueField xField = new ValueField(2.0*key.rx, ValueField.NONNEGATIVE, 5);
-    ValueField yField = new ValueField(2.0*key.ry, ValueField.NONNEGATIVE, 5);
-    ValueField heightField = new ValueField(key.height, ValueField.NONNEGATIVE, 5);
+    ValueField xField = new ValueField(key.rx, ValueField.NONNEGATIVE, 7);
+    ValueField yField = new ValueField(key.ry, ValueField.NONNEGATIVE, 7);
+    ValueField heightField = new ValueField(key.height, ValueField.NONNEGATIVE, 7);
     ValueSlider ratioSlider = new ValueSlider(0.0, 1.0, 100, key.ratio);
     ComponentsDialog dlg = new ComponentsDialog(
       parent.getFrame(),
@@ -554,8 +554,8 @@ public class Cylinder extends Object3D
     );
     if (!dlg.clickedOk())
       return;
-    key.rx = 0.5*xField.getValue();
-    key.ry = 0.5*yField.getValue();
+    key.rx = xField.getValue();
+    key.ry = yField.getValue();
     key.ratio = ratioSlider.getValue();
     key.height = heightField.getValue();
   }

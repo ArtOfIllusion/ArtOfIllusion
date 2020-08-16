@@ -18,7 +18,7 @@ import java.io.*;
 
 /** This class presents a user interface for entering scripts to be executed. */
 
-public class ExecuteScriptWindow extends ScriptWindowBase
+public final class ExecuteScriptWindow extends ScriptWindowBase
 {
   private final LayoutWindow window;
 
@@ -79,12 +79,8 @@ public class ExecuteScriptWindow extends ScriptWindowBase
 
     // Update the Scripts menus in all windows.
     for (EditingWindow editingWindow : ArtOfIllusion.getWindows())
-    {
       if (editingWindow instanceof LayoutWindow)
-      {
         ((LayoutWindow) editingWindow).rebuildScriptsMenu();
-      }
-    }
     
   }
 

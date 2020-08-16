@@ -11,15 +11,7 @@
 package artofillusion.script;
 
 import artofillusion.ui.Translate;
-import buoy.widget.AWTWidget;
-import buoy.widget.BComboBox;
-import buoy.widget.BFileChooser;
-import buoy.widget.BFrame;
-import buoy.widget.BMenu;
-import buoy.widget.BMenuBar;
-import buoy.widget.BorderContainer;
-import buoy.widget.LayoutInfo;
-import buoy.widget.RowContainer;
+import buoy.widget.*;
 import java.awt.Cursor;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,7 +29,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
  *
  * @author MaksK
  */
-public class ScriptWindowBase extends BFrame
+class ScriptWindowBase extends BFrame
 {
   protected final RSyntaxTextArea scriptText;
   
@@ -115,8 +107,8 @@ public class ScriptWindowBase extends BFrame
   protected void setScriptFolder(File target) {
   }
 
-  private static final FileNameExtensionFilter filter1 = new FileNameExtensionFilter("Groovy Script", "groovy");
-  private static final FileNameExtensionFilter filter0 = new FileNameExtensionFilter("Bean Shell Script", "bsh");
+  private static final FileNameExtensionFilter groovyScriptExtension = new FileNameExtensionFilter("Groovy Script", "groovy");
+  private static final FileNameExtensionFilter beanShellScriptExtension = new FileNameExtensionFilter("Bean Shell Script", "bsh");
   /**
    * Prompt the user to load a script.
    */
@@ -125,9 +117,9 @@ public class ScriptWindowBase extends BFrame
 
     BFileChooser chooser = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectScriptToLoad"));
     
-    chooser.getComponent().addChoosableFileFilter(filter0);
-    chooser.getComponent().addChoosableFileFilter(filter1);
-    chooser.setFileFilter(filter0);
+    chooser.getComponent().addChoosableFileFilter(beanShellScriptExtension);
+    chooser.getComponent().addChoosableFileFilter(groovyScriptExtension);
+    chooser.setFileFilter(beanShellScriptExtension);
     
     chooser.setDirectory(getScriptFolder());
     chooser.showDialog(this);

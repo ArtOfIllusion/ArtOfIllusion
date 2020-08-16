@@ -22,7 +22,7 @@ import java.util.Optional;
 
 /** This class presents a user interface for entering object scripts. */
 
-public class ScriptedObjectEditorWindow extends ScriptWindowBase
+public final class ScriptedObjectEditorWindow extends ScriptWindowBase
 {
   private final EditingWindow window;
   private final ObjectInfo info;

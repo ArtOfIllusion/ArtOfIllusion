@@ -103,16 +103,22 @@ public class ImplicitSphereTest
         double radius = sphere.getRadius();
         double value = sphere.getFieldValue(point.x, point.y, point.z, 0, 0);
         sphere.getFieldGradient(point.x, point.y, point.z, 0, 0, grad);
-        double step = radius*1e-3;
+        double step = radius*1e-4;
         double vx1 = sphere.getFieldValue(point.x-step, point.y, point.z, 0, 0);
         double vx2 = sphere.getFieldValue(point.x+step, point.y, point.z, 0, 0);
         double vy1 = sphere.getFieldValue(point.x, point.y-step, point.z, 0, 0);
         double vy2 = sphere.getFieldValue(point.x, point.y+step, point.z, 0, 0);
         double vz1 = sphere.getFieldValue(point.x, point.y, point.z-step, 0, 0);
         double vz2 = sphere.getFieldValue(point.x, point.y, point.z+step, 0, 0);
-        assertEquals(0.5*(vx2-vx1)/step, grad.x, 1e-2*value);
-        assertEquals(0.5*(vy2-vy1)/step, grad.y, 1e-2*value);
-        assertEquals(0.5*(vz2-vz1)/step, grad.z, 1e-2*value);
+        double gradient = (vx2-vx1)/step;
+	assertEquals("X-grad" + representTestPair(point, sphere),
+                     0.5*gradient, grad.x, 1e-5*Math.abs(grad.x));
+        gradient = (vy2-vy1)/step;
+	assertEquals("Y-grad" + representTestPair(point, sphere),
+                     0.5*gradient, grad.y, 1e-5*Math.abs(grad.y));
+        gradient = (vz2-vz1)/step;
+	assertEquals("Z-grad" + representTestPair(point, sphere),
+                     0.5*gradient, grad.z, 1e-5*Math.abs(grad.z));
       }
     }
   }

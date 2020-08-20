@@ -230,7 +230,7 @@ public class ArtOfIllusion
 
   public static String getMajorVersion()
   {
-    return "3.1";
+    return "3.2";
   }
 
   /** Get the application preferences object. */

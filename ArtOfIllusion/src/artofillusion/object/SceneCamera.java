@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications Copyright 2016 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -347,7 +348,7 @@ public class SceneCamera extends Object3D
   {
     SceneCamera sc = (SceneCamera) obj;
 
-    sc.distToPlane = distToPlane;
+    distToPlane = sc.distToPlane;
     fov = sc.fov;
     depthOfField = sc.depthOfField;
     focalDist = sc.focalDist;

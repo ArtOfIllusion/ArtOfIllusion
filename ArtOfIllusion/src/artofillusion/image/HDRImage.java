@@ -647,7 +647,7 @@ public class HDRImage extends ImageMap
   /** Serialize an image to an output stream. */
 
   @Override
-  public void writeToFile(DataOutputStream out, Scene scene) throws IOException
+  public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(1); // version number
     out.writeInt(width[0]);

@@ -770,7 +770,7 @@ public class MIPMappedImage extends ImageMap
   /** Serialize an image to an output stream. */
 
   @Override
-  public void writeToFile(DataOutputStream out, Scene scene) throws IOException
+  public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     BufferedImage bi = getImage(0);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -1586,7 +1586,7 @@ public class Scene
     for(ImageMap image: images)
     {
       out.writeUTF(image.getClass().getName());
-      image.writeToFile(out, this);
+      image.writeToStream(out, this);
     }
 
     // Save the materials.

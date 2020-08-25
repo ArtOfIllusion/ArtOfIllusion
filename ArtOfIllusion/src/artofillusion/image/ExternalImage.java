@@ -385,12 +385,12 @@ public class ExternalImage extends ImageMap
   @Deprecated
   public void writeToFile(DataOutputStream out) throws IOException
   {
-    writeToFile(out, null);
+    writeToStream(out, null);
   }
   
   /** Write to data stream. Scene is used to determine the relative path to the external file. */
   @Override
-  public void writeToFile(DataOutputStream out, Scene scene) throws IOException
+  public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(0); // ExternalImage was not exixting in AoI 3.0.3 and earlier
     if (connected)

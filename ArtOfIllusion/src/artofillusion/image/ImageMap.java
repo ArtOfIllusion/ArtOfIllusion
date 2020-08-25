@@ -253,5 +253,5 @@ public abstract class ImageMap
       
       which reconstructs an image from its serialized representation. */
 
-  public abstract void writeToFile(DataOutputStream out, Scene scene) throws IOException;
+  public abstract void writeToStream(DataOutputStream out, Scene scene) throws IOException;
 }

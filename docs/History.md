@@ -2,6 +2,11 @@ Art of Illusion Version History
 
 Latest: (Not in stable release yet)
 
+- Fix bug with distance to plane(View rotates around this distance) 
+    when copying/duplicating Scene Camera
+- Fix display bug with Cylinder pose track
+- Fix bug with duplicating pose tracks - subtracks handled correctly
+- Update to jogl 2.4.0-rc-20200307 fixes several compatibility bugs
 - Improve joint editor controls
 - Better initial orientation of new bones
 - Save object Lock state to file (Breaks file compatibility with old versions)

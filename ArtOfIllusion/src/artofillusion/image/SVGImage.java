@@ -1,5 +1,6 @@
 /* Copyright (C) 2011-2012 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -467,7 +468,7 @@ public class SVGImage extends ImageMap
   /** Serialize an image to an output stream. */
 
   @Override
-  public void writeToStream(DataOutputStream out) throws IOException
+  public void writeToFile(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(1);
     out.writeInt(xml.length);

@@ -1,4 +1,5 @@
 /* Copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,7 +13,6 @@ package artofillusion.image;
 
 import artofillusion.*;
 import artofillusion.math.*;
-import buoy.widget.BStandardDialog;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
@@ -21,8 +21,7 @@ import javax.imageio.*;
 
 public class ExternalImage extends ImageMap
 {
-  private File externalFile;
-  private String loadingError, imageType;
+  private String imageType;
   private ImageMap imageMap;
   private int w, h;
   private String type, lastAbsolutePath, lastRelativePath;
@@ -86,23 +85,18 @@ public class ExternalImage extends ImageMap
   @Override
   public File getFile()
   {
-    if (! connected)
-      return null;
-    return imageFile;
+    return connected ? imageFile : null;
   }
 
   public String getPath()
   {
-    if (connected)
-      return imageFile.getAbsolutePath();
-    return lastAbsolutePath;
+    return connected ? imageFile.getAbsolutePath() : lastAbsolutePath;
   }
 
+  @Override
   public String getType()
   {
-    if (connected)
-      return imageMap.getType();
-    return (imageType);
+    return connected ? imageMap.getType() : imageType;
   }
 
   @Override
@@ -384,20 +378,19 @@ public class ExternalImage extends ImageMap
   }
 
   /** @deprecated <br> 
-      Use writeToStream(DataOutputStream out, Scene scene) instead. <p>
+      Use writeToFile(DataOutputStream out, Scene scene) instead. <p>
       This will save the ExternalImage to the stream, but the relative path will 
       be replaced by absolute path as the path to the saved scene is missing */
 
-  @Override
   @Deprecated
-  public void writeToStream(DataOutputStream out) throws IOException
+  public void writeToFile(DataOutputStream out) throws IOException
   {
-    writeToStream(out, null);
+    writeToFile(out, null);
   }
   
   /** Write to data stream. Scene is used to determine the relative path to the external file. */
-  
-  public void writeToStream(DataOutputStream out, Scene scene) throws IOException
+  @Override
+  public void writeToFile(DataOutputStream out, Scene scene) throws IOException
   {
     out.writeShort(0); // ExternalImage was not exixting in AoI 3.0.3 and earlier
     if (connected)

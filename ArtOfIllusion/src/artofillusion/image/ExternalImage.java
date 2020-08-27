@@ -378,12 +378,12 @@ public class ExternalImage extends ImageMap
   }
 
   /** @deprecated <br> 
-      Use writeToFile(DataOutputStream out, Scene scene) instead. <p>
+      Use writeToStrean(DataOutputStream out, Scene scene) instead. <p>
       This will save the ExternalImage to the stream, but the relative path will 
       be replaced by absolute path as the path to the saved scene is missing */
 
   @Deprecated
-  public void writeToFile(DataOutputStream out) throws IOException
+  public void writeToStream(DataOutputStream out) throws IOException
   {
     writeToStream(out, null);
   }

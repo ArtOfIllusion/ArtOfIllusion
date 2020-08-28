@@ -12,13 +12,11 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
 import artofillusion.image.filter.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.procedural.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -27,12 +25,11 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.List;
-import java.lang.reflect.*;
+
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -515,25 +512,30 @@ public class ArtOfIllusion
   /** Load a scene from a file, and open a new window containing it.  The BFrame is used for
       displaying dialogs. */
 
-  public static void openScene(File f, BFrame fr)
+  public static void openScene(File file, BFrame frame)
   {
     // Open the file and read the scene.
 
     try
     {
-      Scene sc = new Scene(f, true);
-      if (sc.errorsOccurredInLoading())
-        new BStandardDialog("", new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new BScrollPane(new BTextArea(sc.getLoadingErrors()))}, BStandardDialog.ERROR).showMessageDialog(fr);
-      newWindow(sc);
-      RecentFiles.addRecentFile(f);
+      Scene scene = new Scene(file, true);
+      List<String> errors = scene.getErrors();
+      if (!errors.isEmpty())
+      {
+        String allErrors = String.join("\n", errors);
+        new BStandardDialog("", new Object[] {UIUtilities.breakString(Translate.text("errorLoadingScenePart")), new BScrollPane(new BTextArea(allErrors))}, BStandardDialog.ERROR).showMessageDialog(frame);
+    }
+
+      newWindow(scene);
+      RecentFiles.addRecentFile(file);
     }
     catch (InvalidObjectException ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), BStandardDialog.ERROR).showMessageDialog(fr);
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("errorLoadingWholeScene")), BStandardDialog.ERROR).showMessageDialog(frame);
     }
     catch (IOException ex)
     {
-      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(fr);
+      new BStandardDialog("", new String [] {Translate.text("errorLoadingFile"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(frame);
     }
   }
 

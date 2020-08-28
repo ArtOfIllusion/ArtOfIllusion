@@ -45,11 +45,17 @@ public class Scene
   private TextureMapping environMapping;
   private int gridSubdivisions, environMode, framesPerSecond, nextID;
   private double fogDist, gridSpacing, time;
-  private boolean fog, showGrid, snapToGrid, errorsLoading;
+  private boolean fog, showGrid, snapToGrid;
   private String name, directory;
 
   private ParameterValue environParamValue[];
-  private StringBuffer loadingErrors;
+
+  private final List<String> errors = new ArrayList<>();
+
+  public List<String> getErrors()
+  {
+    return Collections.unmodifiableList(errors);
+  }
 
   public static final int HANDLE_SIZE = 4;
   public static final int ENVIRON_SOLID = 0;
@@ -1159,21 +1165,6 @@ public class Scene
     return sel;
   }
 
-  /** Return true if any errors occurred while loading the scene.  The scene is still valid
-      and usable, but some objects in it were not loaded correctly. */
-
-  public boolean errorsOccurredInLoading()
-  {
-    return errorsLoading;
-  }
-
-  /** Get a description of any errors which occurred while loading the scene. */
-
-  public String getLoadingErrors()
-  {
-    return (loadingErrors == null ? "" : loadingErrors.toString());
-  }
-
   /** The following constructor is used for reading files.  If fullScene is false, only the
       Textures and Materials are read. */
 
@@ -1229,7 +1220,7 @@ public class Scene
 
     if (version < 0 || version > 5)
       throw new InvalidObjectException("");
-    loadingErrors = new StringBuffer();
+
     ambientColor = new RGBColor(in);
     fogColor = new RGBColor(in);
     fog = in.readBoolean();
@@ -1291,13 +1282,12 @@ public class Scene
               {
                 ex.printStackTrace();
                 if (ex instanceof ClassNotFoundException)
-                  loadingErrors.append(Translate.text("errorFindingClass", classname)).append('\n');
+                  errors.add(Translate.text("errorFindingClass", classname));
                 else
-                  loadingErrors.append(Translate.text("errorInstantiatingClass", classname)).append('\n');
+                  errors.add(Translate.text("errorInstantiatingClass", classname));
                 UniformMaterial m = new UniformMaterial();
                 m.setName("<unreadable>");
                 materials.addElement(m);
-                errorsLoading = true;
               }
           }
         catch (Exception ex)
@@ -1331,13 +1321,12 @@ public class Scene
               {
                 ex.printStackTrace();
                 if (ex instanceof ClassNotFoundException)
-                  loadingErrors.append(Translate.text("errorFindingClass", classname)).append('\n');
+                  errors.add(Translate.text("errorFindingClass", classname));
                 else
-                  loadingErrors.append(Translate.text("errorInstantiatingClass", classname)).append('\n');
+                  errors.add(Translate.text("errorInstantiatingClass", classname));
                 UniformTexture t = new UniformTexture();
                 t.setName("<unreadable>");
                 textures.addElement(t);
-                errorsLoading = true;
               }
           }
         catch (Exception ex)
@@ -1483,12 +1472,12 @@ public class Scene
                 else
                   ex.printStackTrace();
                 if (ex instanceof ClassNotFoundException)
-                  loadingErrors.append(info.getName()).append(": ").append(Translate.text("errorFindingClass", classname)).append('\n');
+                  errors.add(info.getName() + ": " + Translate.text("errorFindingClass", classname));
                 else
-                  loadingErrors.append(info.getName()).append(": ").append(Translate.text("errorInstantiatingClass", classname)).append('\n');
+                  errors.add(info.getName() + ": " + Translate.text("errorInstantiatingClass", classname));
                 obj = new NullObject();
                 info.setName("<unreadable> "+ info.getName());
-                errorsLoading = true;
+
               }
             table.put(key, obj);
           }

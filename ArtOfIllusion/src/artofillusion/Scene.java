@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.*;
 import java.beans.*;
+import java.util.function.Supplier;
 
 /** The Scene class describes a collection of objects, arranged relative to each other to
     form a scene, as well as the available textures and materials, environment options, etc. */
@@ -66,7 +67,7 @@ public class Scene
 
   public Scene()
   {
-    UniformTexture defTex = new UniformTexture();
+    Texture defTex = new UniformTexture().setNameFluent("Default Texture");
 
     objects = new Vector<ObjectInfo>();
     materials = new Vector<Material>();
@@ -76,7 +77,7 @@ public class Scene
     metadataMap = new HashMap<String, Object>();
     textureListeners = new Vector<ListChangeListener>();
     materialListeners = new Vector<ListChangeListener>();
-    defTex.setName("Default Texture");
+
     textures.addElement(defTex);
     ambientColor = new RGBColor(0.3f, 0.3f, 0.3f);
     environColor = new RGBColor(0.0f, 0.0f, 0.0f);
@@ -1208,8 +1209,59 @@ public class Scene
     initFromStream(in, fullScene);
   }
 
+  @SuppressWarnings("UseOfObsoleteCollectionType")
+  private static Vector<Named> loadSceneAsset(DataInputStream source, Scene scene, Supplier<Named> stub) throws IOException
+  {
+      int counter = source.readInt();
+      Vector<Named> result = new Vector<>(counter);
+
+      for (int i = 0; i < counter; i++)
+      {
+        String className;
+        byte[] bytes;
+
+        //Unrecoverable IOException may thrown from next block..
+        {
+          className = source.readUTF();
+          bytes = new byte[source.readInt()];
+          source.readFully(bytes);
+        }
+        //Now lookup class by Name. Process ClassNotFound Exception as recovarable error and add stub asset to result
+        Class<?> clazz;
+        try
+        {
+          clazz = ArtOfIllusion.getClass(className);
+        }
+        catch(ClassNotFoundException cnfe) //Exception thrown once class not found across loaded plugins...
+        {
+          result.add((Named)stub.get().setNameFluent("<unreadable>"));
+          scene.errors.add(Translate.text("errorFindingClass", className));
+          continue;
+        }
+        if(clazz == null) // Null class returns from ArtofIllusion.getClass when no loaded plugins at all
+        {
+          result.add((Named)stub.get().setNameFluent("<unreadable>"));
+          scene.errors.add(Translate.text("errorFindingClass", className));
+          continue;
+        }
+        try
+        {
+          Constructor<?> ctor = clazz.getConstructor(DataInputStream.class, Scene.class);
+          InputStream byteStream = new DataInputStream(new ByteArrayInputStream(bytes));
+          result.add((Named)ctor.newInstance(byteStream, scene));
+        }
+        catch(IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex)
+        {
+          result.add((Named)stub.get().setNameFluent("<unreadable>"));
+          scene.errors.add(Translate.text("errorInstantiatingClass", className));
+        }
+      }
+      return result;
+  }
+
   /** Initialize the scene based on information read from an input stream. */
 
+  @SuppressWarnings("UseOfObsoleteCollectionType")
   private void initFromStream(DataInputStream in, boolean fullScene) throws IOException, InvalidObjectException
   {
     int count;
@@ -1259,82 +1311,10 @@ public class Scene
     }
 
     // Read the materials.
-
-    count = in.readInt();
-    materials = new Vector<Material>(count);
-    for (int i = 0; i < count; i++)
-      {
-        try
-          {
-            String classname = in.readUTF();
-            int len = in.readInt();
-            byte bytes[] = new byte [len];
-            in.readFully(bytes);
-            cls = ArtOfIllusion.getClass(classname);
-            try
-              {
-                if (cls == null)
-                  throw new IOException("Unknown class: "+classname);
-                con = cls.getConstructor(DataInputStream.class, Scene.class);
-                materials.addElement((Material) con.newInstance(new DataInputStream(new ByteArrayInputStream(bytes)), this));
-              }
-            catch (Exception ex)
-              {
-                ex.printStackTrace();
-                if (ex instanceof ClassNotFoundException)
-                  errors.add(Translate.text("errorFindingClass", classname));
-                else
-                  errors.add(Translate.text("errorInstantiatingClass", classname));
-                UniformMaterial m = new UniformMaterial();
-                m.setName("<unreadable>");
-                materials.addElement(m);
-              }
-          }
-        catch (Exception ex)
-          {
-            ex.printStackTrace();
-            throw new IOException();
-          }
-      }
+    materials = (Vector)Scene.loadSceneAsset(in, this, UniformMaterial::new);
 
     // Read the textures.
-
-    count = in.readInt();
-    textures = new Vector<Texture>(count);
-    for (int i = 0; i < count; i++)
-      {
-        try
-          {
-            String classname = in.readUTF();
-            int len = in.readInt();
-            byte bytes[] = new byte [len];
-            in.readFully(bytes);
-            cls = ArtOfIllusion.getClass(classname);
-            try
-              {
-                if (cls == null)
-                  throw new IOException("Unknown class: "+classname);
-                con = cls.getConstructor(DataInputStream.class, Scene.class);
-                textures.addElement((Texture) con.newInstance(new DataInputStream(new ByteArrayInputStream(bytes)), this));
-              }
-            catch (Exception ex)
-              {
-                ex.printStackTrace();
-                if (ex instanceof ClassNotFoundException)
-                  errors.add(Translate.text("errorFindingClass", classname));
-                else
-                  errors.add(Translate.text("errorInstantiatingClass", classname));
-                UniformTexture t = new UniformTexture();
-                t.setName("<unreadable>");
-                textures.addElement(t);
-              }
-          }
-        catch (Exception ex)
-          {
-            ex.printStackTrace();
-            throw new IOException();
-          }
-      }
+    textures = (Vector)Scene.loadSceneAsset(in, this, UniformTexture::new);
 
     // Read the objects.
 

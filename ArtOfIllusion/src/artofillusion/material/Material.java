@@ -20,7 +20,7 @@ import java.io.*;
     internal color and transparency, index of refraction, etc.  This is distinct from the
     surface properties, which are described by a Texture object. */
 
-public abstract class Material
+public abstract class Material implements Named<Material>
 {
   protected String name;
   protected double refraction = 1.0;
@@ -38,6 +38,7 @@ public abstract class Material
 
   /** Get the name of the material. */
 
+  @Override
   public String getName()
   {
     return name;
@@ -45,6 +46,7 @@ public abstract class Material
 
   /** Change the name of the material. */
 
+  @Override
   public void setName(String name)
   {
     this.name = name;

@@ -20,7 +20,7 @@ import java.io.*;
     transparency, displacement, etc.  This is distinct from the interior bulk properties,
     which are described by a Material object. */
 
-public abstract class Texture
+public abstract class Texture implements Named<Texture>
 {
   protected String name;
   protected int id = nextID++;
@@ -45,6 +45,7 @@ public abstract class Texture
 
   /** Get the name of the texture. */
 
+  @Override
   public String getName()
   {
     return name;
@@ -52,7 +53,8 @@ public abstract class Texture
 
   /** Change the name of the texture. */
 
-  public void setName(String name)
+  @Override
+  public void  setName(String name)
   {
     this.name = name;
   }

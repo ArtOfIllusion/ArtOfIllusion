@@ -942,7 +942,7 @@ public class Scene
 
   public ObjectInfo getObject(int i)
   {
-    return objects.elementAt(i);
+    return objects.get(i);
   }
 
   /** Get the object with the specified name, or null if there is none.  If
@@ -950,26 +950,14 @@ public class Scene
 
   public ObjectInfo getObject(String name)
   {
-    for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo info = objects.elementAt(i);
-        if (info.getName().equals(name))
-          return info;
-      }
-    return null;
+    return objects.stream().filter(info -> info.getName().equals(name)).findFirst().orElse(null);
   }
 
   /** Get the object with the specified ID, or null if there is none. */
 
   public ObjectInfo getObjectById(int id)
   {
-    for (int i = 0; i < objects.size(); i++)
-    {
-      ObjectInfo info = objects.elementAt(i);
-      if (info.getId() == id)
-        return info;
-    }
-    return null;
+    return objects.stream().filter(info -> info.getId() == id).findFirst().orElse(null);
   }
 
   /** Get all objects in the Scene in the form of a List.
@@ -990,6 +978,27 @@ public class Scene
   {
     return Collections.unmodifiableList(objects);
   }
+  
+  /*
+    Get all materials from scene as List
+  */
+
+  public List<Material> getMaterials()
+  {
+    return Collections.unmodifiableList(materials);
+  }
+
+  /*
+    Get all textures from scene as List
+  */
+
+  public List<Texture> getTextures()
+  {
+    return Collections.unmodifiableList(textures);
+  }
+
+
+
   /** Get the index of the specified object. */
 
   public int indexOf(ObjectInfo info)
@@ -1039,7 +1048,7 @@ public class Scene
 
   public Texture getTexture(int i)
   {
-    return textures.elementAt(i);
+    return textures.get(i);
   }
 
   /** Get the texture with the specified name, or null if there is none.  If
@@ -1047,13 +1056,7 @@ public class Scene
 
   public Texture getTexture(String name)
   {
-    for (int i = 0; i < textures.size(); i++)
-      {
-        Texture tex = textures.elementAt(i);
-        if (tex.getName().equals(name))
-          return tex;
-      }
-    return null;
+    return textures.stream().filter(asset -> asset.getName().equals(name)).findFirst().orElse(null);
   }
 
   /** Get the number of materials in this scene. */
@@ -1067,7 +1070,7 @@ public class Scene
 
   public Material getMaterial(int i)
   {
-    return materials.elementAt(i);
+    return materials.get(i);
   }
 
   /** Get the material with the specified name, or null if there is none.  If
@@ -1075,13 +1078,7 @@ public class Scene
 
   public Material getMaterial(String name)
   {
-    for (int i = 0; i < materials.size(); i++)
-      {
-        Material mat = materials.elementAt(i);
-        if (mat.getName().equals(name))
-          return mat;
-      }
-    return null;
+    return materials.stream().filter(asset -> asset.getName().equals(name)).findFirst().orElse(null);
   }
 
   /** Get the index of the specified material. */
@@ -1102,7 +1099,7 @@ public class Scene
 
   public ImageMap getImage(int i)
   {
-    return images.elementAt(i);
+    return images.get(i);
   }
 
   /** Get the index of the specified image map. */
@@ -1116,7 +1113,7 @@ public class Scene
 
   public Texture getDefaultTexture()
   {
-    return textures.elementAt(0);
+    return textures.get(0);
   }
 
   /**

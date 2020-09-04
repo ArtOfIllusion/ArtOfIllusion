@@ -233,6 +233,12 @@ public class ArtOfIllusion
     return "3.1";
   }
 
+
+  public static String getBuildInfo()
+  {
+    return java.util.Objects.toString(ArtOfIllusion.class.getPackage()
+	    .getImplementationVersion(), "Missing Build Data!");    
+  }
   /** Get the application preferences object. */
 
   public static ApplicationPreferences getPreferences()

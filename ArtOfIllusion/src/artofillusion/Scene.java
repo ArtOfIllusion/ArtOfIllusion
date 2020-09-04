@@ -1261,7 +1261,6 @@ public class Scene
 
   /** Initialize the scene based on information read from an input stream. */
 
-  @SuppressWarnings("UseOfObsoleteCollectionType")
   private void initFromStream(DataInputStream in, boolean fullScene) throws IOException, InvalidObjectException
   {
     int count;

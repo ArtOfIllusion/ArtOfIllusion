@@ -1209,7 +1209,6 @@ public class Scene
     initFromStream(in, fullScene);
   }
 
-  @SuppressWarnings("UseOfObsoleteCollectionType")
   private static Vector<Named> loadSceneAsset(DataInputStream source, Scene scene, Supplier<Named> stub) throws IOException
   {
       int counter = source.readInt();

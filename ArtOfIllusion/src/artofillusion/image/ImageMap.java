@@ -1,5 +1,6 @@
 /* Copyright (C) 2001-2002 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +12,7 @@
 
 package artofillusion.image;
 
+import artofillusion.Scene;
 import artofillusion.math.*;
 import java.awt.*;
 import java.io.*;
@@ -251,5 +253,5 @@ public abstract class ImageMap
       
       which reconstructs an image from its serialized representation. */
 
-  public abstract void writeToStream(DataOutputStream out) throws IOException;
+  public abstract void writeToStream(DataOutputStream out, Scene scene) throws IOException;
 }

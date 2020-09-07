@@ -1580,17 +1580,11 @@ public class Scene
     // Save the image maps.
 
     out.writeInt(images.size());
-    for (i = 0; i < images.size(); i++)
-      {
-        ImageMap img = images.elementAt(i);
-        out.writeUTF(img.getClass().getName());
-        if (img.getClass() == ExternalImage.class)
-        {
-          ((ExternalImage)img).writeToStream(out, this);
-        }
-        else
-          img.writeToStream(out);
-      }
+    for(ImageMap image: images)
+    {
+      out.writeUTF(image.getClass().getName());
+      image.writeToStream(out, this);
+    }
 
     // Save the materials.
 

@@ -1,5 +1,6 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +12,7 @@
 
 package artofillusion.image;
 
+import artofillusion.Scene;
 import artofillusion.math.*;
 import java.awt.*;
 import java.awt.image.*;
@@ -768,7 +770,7 @@ public class MIPMappedImage extends ImageMap
   /** Serialize an image to an output stream. */
 
   @Override
-  public void writeToStream(DataOutputStream out) throws IOException
+  public void writeToStream(DataOutputStream out, Scene scene) throws IOException
   {
     BufferedImage bi = getImage(0);
     ByteArrayOutputStream baos = new ByteArrayOutputStream();

@@ -451,13 +451,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     fileMenu.add(Translate.menuItem("close", this, "closeSceneAction"));
     fileMenu.addSeparator();
 
-    Collections.sort(translators, new Comparator<Translator>()
-    {
-      @Override
-      public int compare(Translator t1, Translator t2) {
-          return t1.getName().compareTo(t2.getName());
-      }
-    });
+    Collections.sort(translators, Comparator.comparing(Translator::getName));
 
     for (Translator translator: translators)
     {
@@ -556,14 +550,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private void createToolsMenu()
   {
     List<ModellingTool> modellingTools = PluginRegistry.getPlugins(ModellingTool.class);
-    Collections.sort(modellingTools, new Comparator<ModellingTool>()
-    {
-      @Override
-      public int compare(ModellingTool m1, ModellingTool m2)
-      {
-        return m1.getName().compareTo(m2.getName());
-      }
-    });
+    Collections.sort(modellingTools, Comparator.comparing(ModellingTool::getName));
     
     
     toolsMenu = Translate.menu("tools");

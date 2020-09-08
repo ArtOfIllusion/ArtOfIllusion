@@ -898,7 +898,7 @@ problems when moving bones using IK . To avoid this, the movements of each bone 
 on the joint at the end of the bone and selecting Skeleton -> Edit Bone . This will display a dialogue similar to that
 below:
 
-.. figure:: modelling/edit_bone.jpg
+.. figure:: modelling/edit_bone.png
 
 At the top is the name of the bone and this can be changed to anything you like.
 
@@ -910,13 +910,14 @@ the outer circle can be grabbed and moved around to alter the relevant degree of
 
 Rotation around either the X or Y direction can be completely disabled by checking the **Lock** box. Alternatively, the
 maximum angles of bend in each direction can be restricted by checking the Restrict Total Range box and then entering
-the extreme values in the 2 boxes below. This 'blacks out' the forbidden range of angles in the circular device. In
+the extreme values in the 2 boxes below. This marks out the forbidden range of angles in the circular device in a light
+red color. In
 addition, you can set another range with the Restrict Comfort Range which is the range that the bone will normally
-reside in and will only go outside when forced to. The circular device shows in grey the range of angles outside of the
+reside in and will only go outside when forced to. The circular device shows in yellow the range of angles outside of the
 Comfort Range. Finally there is the ability to set the **Stiffness** of the joint which is a way of making some joints
 in the chain more easily bent than others.
 
-Apart from be able to bend the joint, there is the ability to **Twist** it, i.e. spin it around its axis. The controls
+Apart from being able to bend the joint, there is the ability to **Twist** it, i.e. spin it around its axis. The controls
 on this are the same as the X and Y bends.
 
 Finally there is the **Length** control which allows the bone to be stretched and compressed along its length. Again

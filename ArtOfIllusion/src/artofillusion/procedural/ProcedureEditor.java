@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2012 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -99,10 +100,10 @@ public class ProcedureEditor extends CustomWidget
     FormContainer top = new FormContainer(new double [] {0.0, 0.0, 1.0, 0.0, 0.0}, new double [] {1.0});
     top.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(0, 0, 0, 5), null));
     top.add(Translate.button("properties", this, "actionPerformed"), 0, 0);
-    if (owner.canEditName())
+    if (owner instanceof Named)
     {
       top.add(new BLabel(Translate.text("Name")+':'), 1, 0);
-      top.add(nameField = new BTextField(owner.getName()), 2, 0);
+      top.add(nameField = new BTextField(((Named)owner).getName()), 2, 0);
     }
     top.add(Translate.button("ok", this, "doOk"), 3, 0);
     top.add(Translate.button("cancel", this, "actionPerformed"), 4, 0);
@@ -421,8 +422,8 @@ public class ProcedureEditor extends CustomWidget
 
   private void doOk()
   {
-    if (owner.canEditName())
-      owner.setName(nameField.getText());
+    if (owner instanceof Named)
+    ((Named)owner).setName(nameField.getText());
     owner.acceptEdits(this);
     owner.disposePreview(preview);
     parent.dispose();

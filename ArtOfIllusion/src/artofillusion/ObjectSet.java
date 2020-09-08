@@ -1,5 +1,6 @@
 /* Copyright (C) 2008 by Peter Eastman
    Updates copyright (C) 2020 by Petri Ihalainen
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +22,7 @@ import java.beans.*;
  * saved selections.
  */
 
-public class ObjectSet
+public class ObjectSet implements Named<ObjectSet>
 {
   private String name;
   private int objectIDs[];
@@ -83,9 +84,10 @@ public class ObjectSet
    * Set the name of this ObjectSet.
    */
 
-  public void setName(String name)
+  public ObjectSet setName(String name)
   {
     this.name = name;
+    return this;
   }
 
   /**

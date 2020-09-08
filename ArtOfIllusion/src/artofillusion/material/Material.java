@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -47,9 +48,10 @@ public abstract class Material implements Named<Material>
   /** Change the name of the material. */
 
   @Override
-  public void setName(String name)
+  public Material setName(String name)
   {
     this.name = name;
+    return this;
   }
 
   /** Get the index of refraction. */  
@@ -118,7 +120,7 @@ public abstract class Material implements Named<Material>
   
   public abstract Material duplicate();
 
-  /** Allow the user to interactively edit the naterial.  parent is a WindowWidget which can be used as a
+  /** Allow the user to interactively edit the material.  parent is a WindowWidget which can be used as a
    parent for Dialogs, and sc is the Scene which this Material is part of.  Subclasses should override
    this to implement editing. */
 

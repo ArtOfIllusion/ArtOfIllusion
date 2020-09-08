@@ -67,7 +67,7 @@ public class Scene
 
   public Scene()
   {
-    Texture defTex = new UniformTexture().setNameFluent("Default Texture");
+    Texture defTex = new UniformTexture().setName("Default Texture");
 
     objects = new Vector<ObjectInfo>();
     materials = new Vector<Material>();
@@ -1233,13 +1233,13 @@ public class Scene
         }
         catch(ClassNotFoundException cnfe) //Exception thrown once class not found across loaded plugins...
         {
-          result.add((Named)stub.get().setNameFluent("<unreadable>"));
+          result.add((Named)stub.get().setName("<unreadable>"));
           scene.errors.add(Translate.text("errorFindingClass", className));
           continue;
         }
         if(clazz == null) // Null class returns from ArtofIllusion.getClass when no loaded plugins at all
         {
-          result.add((Named)stub.get().setNameFluent("<unreadable>"));
+          result.add((Named)stub.get().setName("<unreadable>"));
           scene.errors.add(Translate.text("errorFindingClass", className));
           continue;
         }
@@ -1251,7 +1251,7 @@ public class Scene
         }
         catch(IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException ex)
         {
-          result.add((Named)stub.get().setNameFluent("<unreadable>"));
+          result.add((Named)stub.get().setName("<unreadable>"));
           scene.errors.add(Translate.text("errorInstantiatingClass", className));
         }
       }

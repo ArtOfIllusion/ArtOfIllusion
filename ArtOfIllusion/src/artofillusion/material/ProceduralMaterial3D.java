@@ -346,14 +346,6 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     return false;
   }
 
-  /** Determine whether the procedure may be renamed. */
-
-  @Override
-  public boolean canEditName()
-  {
-    return true;
-  }
-
   /** This is called when the user clicks OK in the procedure editor. */
 
   @Override

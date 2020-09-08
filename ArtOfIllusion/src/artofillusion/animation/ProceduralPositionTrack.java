@@ -622,14 +622,6 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
     return true;
   }
 
-  /** Determine whether the procedure may be renamed. */
-
-  @Override
-  public boolean canEditName()
-  {
-    return true;
-  }
-
   /** This is called when the user clicks OK in the procedure editor. */
 
   @Override

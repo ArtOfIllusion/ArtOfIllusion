@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,7 @@ import java.util.*;
 /** This is an abstract class representing an aspect of the scene which changes with time.
     Tracks are typically defined either by a Timecourse or a Procedure. */
 
-public abstract class Track
+public abstract class Track implements Named<Track>
 {
   protected String name;
   protected boolean enabled = true, quantized = true;
@@ -41,9 +42,10 @@ public abstract class Track
   
   /** Set the name of the track. */
   
-  public void setName(String name)
+  public Track setName(String name)
   {
     this.name = name;
+    return this;
   }
   
   /** Returns whether the track is currently enabled. */

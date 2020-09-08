@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +28,7 @@ import java.util.*;
     There may be several ObjectInfos in a scene which all reference
     the same Object3D.  In that case, they are live duplicates of each other. */
 
-public class ObjectInfo
+public class ObjectInfo implements Named<ObjectInfo>
 {
   public Object3D object;
   public CoordinateSystem coords;
@@ -452,9 +453,10 @@ public class ObjectInfo
 
   /** Set the name of this object. */
 
-  public void setName(String name)
+  public ObjectInfo setName(String name)
   {
     this.name = name;
+    return this;
   }
 
   /** Get whether this object is visible. */

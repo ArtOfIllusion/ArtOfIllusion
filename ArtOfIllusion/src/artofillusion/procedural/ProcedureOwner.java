@@ -1,4 +1,5 @@
 /* Copyright (C) 2002 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -38,18 +39,6 @@ public interface ProcedureOwner
   /** Determine whether the procedure may contain View Angle modules. */
   
   public boolean allowViewAngle();
-  
-  /** Determine whether the procedure may be renamed. */
-  
-  public boolean canEditName();
-  
-  /** Get the name of the procedure. */
-  
-  public String getName();
-  
-  /** Set the name of the procedure. */
-  
-  public void setName(String name);
   
   /** This is called when the user clicks OK in the procedure editor. */
   

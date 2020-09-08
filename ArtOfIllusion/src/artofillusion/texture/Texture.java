@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,9 +55,10 @@ public abstract class Texture implements Named<Texture>
   /** Change the name of the texture. */
 
   @Override
-  public void  setName(String name)
+  public Texture setName(String name)
   {
     this.name = name;
+    return this;
   }
   
   /** Determine whether this texture has a non-zero value anywhere for a particular component.

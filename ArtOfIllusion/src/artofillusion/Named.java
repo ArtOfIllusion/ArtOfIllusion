@@ -17,11 +17,6 @@ package artofillusion;
 public interface Named<T> {
 
     public String getName();
-    public void setName(String name);
+    public T setName(String name);
 
-    default T setNameFluent(String name)
-    {
-      setName(name);
-      return (T)this;
-    }
 }

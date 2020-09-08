@@ -1,5 +1,6 @@
 /* Copyright (C) 2013 by Peter Eastman
    Changes copyright (C) 2017 by Maksim Khramov
+   Changes/refactor (C) 2020 by Lucas Stanek
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,6 +17,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 import java.util.*;
+import static java.lang.Math.*;
 
 public class ImplicitSphereTest
 { 
@@ -41,20 +43,19 @@ public class ImplicitSphereTest
   {
     for (int sphere = 0; sphere < testSpheres; sphere++)
     {
-      double r1 = 0.1 + Math.random();
-      double r2 = 0.1 + Math.random();
-      ImplicitSphere currentSphere = new ImplicitSphere(Math.min(r1, r2),
-                                                        Math.max(r1, r2));
+      double r1 = 0.1 + random();
+      double r2 = 0.1 + random();
+      ImplicitSphere currentSphere = new ImplicitSphere(min(r1, r2),
+                                                        max(r1, r2));
 
       for (int point = 0; point < samplePoints; point++)
       {
         /* Factor 2.05 is to cover the entire possible size range of
-         * test spheres (-1.1 to 1.1) Unlike original code, we're not
-         * scaling the test points to a specific sphere.
+         * test spheres (-1.1 to 1.1) 
          */
-        Vec3 currentPoint = new Vec3(2.05*(Math.random() - 0.5),
-                                     2.05*(Math.random() - 0.5),
-                                     2.05*(Math.random() - 0.5));
+        Vec3 currentPoint = new Vec3(2.05*(random() - 0.5),
+                                     2.05*(random() - 0.5),
+                                     2.05*(random() - 0.5));
 
         pairs.add(new TestPair(currentSphere, currentPoint));
       }
@@ -93,7 +94,8 @@ public class ImplicitSphereTest
            {
              double value = p.sphere.getFieldValue(p.point.x, p.point.y,
                                                    p.point.z, 0, 0);
-             assertTrue(printPair(p) + "\nValue:" + value, 1 > value && value > 0);
+             assertTrue(printPair(p) + "\nValue:" + value,
+                        1 > value && value > 0);
            }); 
   }
 
@@ -101,7 +103,7 @@ public class ImplicitSphereTest
   public void gradient_estimate_within_delta()
   {
     pairs.stream()
-         .filter(p -> Math.abs(p.point.length() - p.sphere.getInfluenceRadius())
+         .filter(p -> abs(p.point.length() - p.sphere.getInfluenceRadius())
                       > p.sphere.getRadius() * 1e-4)
          .forEach(p ->
            {
@@ -110,14 +112,11 @@ public class ImplicitSphereTest
                                        0, 0, grad);
              Vec3 estGrad = estimateGradient(p);
              assertEquals("X-grad" + printPair(p),
-                          0.5 * estGrad.x, grad.x,
-                          1e-4*Math.abs(grad.x));
+                          0.5 * estGrad.x, grad.x, 1e-4 * abs(grad.x));
              assertEquals("Y-grad" + printPair(p),
-                          0.5 * estGrad.y, grad.y,
-                          1e-4*Math.abs(grad.y));
+                          0.5 * estGrad.y, grad.y, 1e-4 * abs(grad.y));
              assertEquals("Z-grad" + printPair(p),
-                          0.5 * estGrad.z, grad.z,
-                          1e-4*Math.abs(grad.z));
+                          0.5 * estGrad.z, grad.z, 1e-4 * abs(grad.z));
             });
   }
 
@@ -129,7 +128,7 @@ public class ImplicitSphereTest
   public void gradient_estimate_at_influence_edge()
   {
     pairs.stream()
-         .filter(p -> Math.abs(p.point.length() - p.sphere.getInfluenceRadius())
+         .filter(p -> abs(p.point.length() - p.sphere.getInfluenceRadius())
                       <= p.sphere.getRadius() * 1e-4)
          .forEach(p ->
            {
@@ -138,14 +137,11 @@ public class ImplicitSphereTest
                                        0, 0, grad);
              Vec3 estGrad = estimateGradient(p);
              assertEquals("X-grad" + printPair(p),
-                          Math.signum(0.5 * estGrad.x),
-                          Math.signum(grad.x), .01);
+                          signum(0.5 * estGrad.x), signum(grad.x), .01);
              assertEquals("Y-grad" + printPair(p),
-                          Math.signum(0.5 * estGrad.y),
-                          Math.signum(grad.y), .01);
+                          signum(0.5 * estGrad.y), signum(grad.y), .01);
              assertEquals("Z-grad" + printPair(p),
-                          Math.signum(0.5 * estGrad.z),
-                          Math.signum(grad.z), .01);
+                          signum(0.5 * estGrad.z), signum(grad.z), .01);
            });  
   }
 

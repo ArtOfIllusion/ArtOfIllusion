@@ -112,11 +112,11 @@ public class ImplicitSphereTest
                                        0, 0, grad);
              Vec3 estGrad = estimateGradient(p);
              assertEquals("X-grad" + printPair(p),
-                          0.5 * estGrad.x, grad.x, 1e-4 * abs(grad.x));
+                          estGrad.x, grad.x, 1e-4 * abs(grad.x));
              assertEquals("Y-grad" + printPair(p),
-                          0.5 * estGrad.y, grad.y, 1e-4 * abs(grad.y));
+                          estGrad.y, grad.y, 1e-4 * abs(grad.y));
              assertEquals("Z-grad" + printPair(p),
-                          0.5 * estGrad.z, grad.z, 1e-4 * abs(grad.z));
+                          estGrad.z, grad.z, 1e-4 * abs(grad.z));
             });
   }
 
@@ -137,11 +137,11 @@ public class ImplicitSphereTest
                                        0, 0, grad);
              Vec3 estGrad = estimateGradient(p);
              assertEquals("X-grad" + printPair(p),
-                          signum(0.5 * estGrad.x), signum(grad.x), .01);
+                          signum(estGrad.x), signum(grad.x), .01);
              assertEquals("Y-grad" + printPair(p),
-                          signum(0.5 * estGrad.y), signum(grad.y), .01);
+                          signum(estGrad.y), signum(grad.y), .01);
              assertEquals("Z-grad" + printPair(p),
-                          signum(0.5 * estGrad.z), signum(grad.z), .01);
+                          signum(estGrad.z), signum(grad.z), .01);
            });  
   }
 
@@ -156,7 +156,8 @@ public class ImplicitSphereTest
     double vy2 = sphere.getFieldValue(point.x, point.y+step, point.z, 0, 0);
     double vz1 = sphere.getFieldValue(point.x, point.y, point.z-step, 0, 0);
     double vz2 = sphere.getFieldValue(point.x, point.y, point.z+step, 0, 0);
-    return new Vec3((vx2-vx1)/step, (vy2-vy1)/step, (vz2-vz1)/step);
+    return new Vec3((vx2-vx1)/(2 * step),
+		    (vy2-vy1)/(2 * step), (vz2-vz1)/(2 * step));
   }
 
   private String printPair(TestPair pair)

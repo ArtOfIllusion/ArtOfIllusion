@@ -53,6 +53,8 @@
       <manifest>
         <attribute name="Main-Class" value="artofillusion.ArtOfIllusion"/>
         <attribute name="Class-Path" value="${libraries}"/>
+        <attribute name="Implementation-Version" value="${git.revision}"/>
+        <attribute name="Build-Time" value="${TODAY} at ${TSTAMP}"/>
       </manifest>
     </jar>
   </target>

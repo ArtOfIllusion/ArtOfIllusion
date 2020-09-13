@@ -839,6 +839,30 @@ public class SceneTest {
       assertTrue(cameras.get(0).getObject() instanceof SceneCamera ); 
       
     }
+
+
+    @Test
+    public void sceneGetSingleAddedObjectIndex() {
+        CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
+        ObjectInfo info = new ObjectInfo(new NullObject(), coords, "Null Object");
+
+        scene.addObject(info, null);
+
+        assertEquals(0, scene.indexOf(info));
+
+    }
+
+    @Test
+    public void sceneGetMissedObjectIndex() {
+        CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
+        ObjectInfo info = new ObjectInfo(new NullObject(), coords, "Null Object");
+
+        scene.addObject(info, null);
+
+        ObjectInfo missed = new ObjectInfo(new Sphere(1.0, 1.0, 1.0), coords, "Not added to Scene object");
+        assertEquals(-1, scene.indexOf(missed));
+
+    }
     
 
 }

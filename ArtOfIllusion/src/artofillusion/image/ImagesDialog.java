@@ -1,6 +1,6 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
-   Changes copyright 2019 by Maksim Khramov
+   Changes copyright 2019-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -32,15 +32,14 @@ public class ImagesDialog extends BDialog
 {
   private Scene theScene;
   private WindowWidget parent;
-  private int selection, dialogHeight, dialogWidth, frameWidth, cOff=0;
+  private int selection, dialogHeight, dialogWidth, cOff=0;
   private BScrollPane sp;
   private ImagesCanvas ic;
   private BButton b[];
   private Color selectedColor;
   private int previewSize = 100, canvasWidth = 5;
-  private LayoutInfo fillTight, fillLoose, fillLowRight;
+  private LayoutInfo fillLoose;
   private ImageMap selectedImage;
-  private Timer timer;
   
   public ImagesDialog(WindowWidget fr, Scene sc, ImageMap selected)
   {
@@ -70,7 +69,7 @@ public class ImagesDialog extends BDialog
     buttonArea.add(buttonGridLow, new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE, new Insets(0,0,10,0), null));
 
     b = new BButton[9];
-    fillTight = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH);
+    
     fillLoose  = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, new Insets(2,2,2,2), new Dimension(0,0));
     
     buttonGridUp.add(b[0]  = Translate.button("load", "...", this, "doLoad"), 0, 0, fillLoose);
@@ -545,12 +544,10 @@ public class ImagesDialog extends BDialog
             g.drawImage(linkedIcon,(i%w)*gridw+1+cOff, (i/w)*gridh+9+previewSize-iconSize, getComponent());
           else
             g.drawImage(linkBrokenIcon,(i%w)*gridw+1+cOff, (i/w)*gridh+9+previewSize-iconSize, getComponent());
-        for (int t = 0; t < theScene.getNumTextures(); t++)
-          if (theScene.getTexture(t).usesImage(currentImage))
-            inUse = true;
-        if (inUse)
+
+        if(theScene.getTextures().stream().anyMatch(texture -> texture.usesImage(currentImage)))
           g.drawImage(inUseIcon,(i%w)*gridw+9+cOff+previewSize-iconSize, (i/w)*gridh+9+previewSize-iconSize, getComponent());
-        inUse = false;
+
       }
     }
 
@@ -650,28 +647,15 @@ public class ImagesDialog extends BDialog
 
     private void addUnusedImagesTable(boolean intent) // intent = to delete or not
     {
-      unusedImages = new ArrayList<ImageMap>();
-      ImageMap im;
-      boolean unused;
-      FormContainer unusedTable;
-      BScrollPane tableScroller;
-
-      BufferedImage bg, nameTag;
-      Image prev;
-      Color textBG = new Color(223,223,223);
-
+      unusedImages = new ArrayList<>();
       for (int i = 0; i < theScene.getNumImages(); i++)
       {
-        im = theScene.getImage(i);
-        unused = true;
-        for (int t = 0; t < theScene.getNumTextures(); t++)
-          if (theScene.getTexture(t).usesImage(im))
-            unused = false;
-        if (unused)
-          unusedImages.add(im);
+        ImageMap im = theScene.getImage(i);
+        if(theScene.getTextures().stream().anyMatch(texture -> texture.usesImage(im))) continue;
+        unusedImages.add(im);
       }
             
-      unusedTable = new FormContainer(3,unusedImages.size());
+      FormContainer unusedTable = new FormContainer(3,unusedImages.size());
       unusedTable.setColumnWeight(1, 10.0);
       removeBox = new BCheckBox[unusedImages.size()];
       
@@ -681,6 +665,10 @@ public class ImagesDialog extends BDialog
       for (int u = 0; u < unusedImages.size(); u++)
         nameTagWidth = fm.stringWidth(unusedImages.get(u).getName());
       nameTagWidth = Math.max(nameTagWidth+20, 200);
+
+      BufferedImage bg, nameTag;
+      Image preview;
+      Color textBG = new Color(223,223,223);
       
       if (unusedImages.size() > 0)
       {
@@ -689,13 +677,13 @@ public class ImagesDialog extends BDialog
           removeBox[u] = new BCheckBox("", intent);
           String imageName = unusedImages.get(u).getName();
           if (imageName.isEmpty())
-          imageName = Translate.text("unNamed");
+            imageName = Translate.text("unNamed");
           bg = iconBackground(40,4,207,8);
-          prev = unusedImages.get(u).getPreview(40);
+          preview = unusedImages.get(u).getPreview(40);
           nameTag = new BufferedImage(nameTagWidth, 40, BufferedImage.TYPE_INT_RGB);
           
           Graphics2D gp = bg.createGraphics();
-          gp.drawImage(prev, (40-prev.getWidth(null))/2, (40-prev.getHeight(null))/2, getComponent());
+          gp.drawImage(preview, (40-preview.getWidth(null))/2, (40-preview.getHeight(null))/2, getComponent());
           BLabel imageLabel = new BLabel(new ImageIcon(bg));
           
           Graphics2D gn = nameTag.createGraphics();
@@ -757,6 +745,7 @@ public class ImagesDialog extends BDialog
       for (BCheckBox b: removeBox) b.setState(false);
     }
 
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private void deleteAndReturn()
     {
       int count = 0;

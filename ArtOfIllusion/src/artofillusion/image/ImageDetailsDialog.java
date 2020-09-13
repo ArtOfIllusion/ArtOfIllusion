@@ -1,6 +1,6 @@
 /* Copyright (C) 2017 by Petri Ihalainen
    Some methods copyright (C) by Peter Eastman
-   Changes copyright 2019 by Maksim Khramov
+   Changes copyright 2019-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,39 +22,40 @@ import javax.imageio.*;
 import java.io.*;
 import buoy.event.*;
 import buoy.widget.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
+import java.util.stream.Collectors;
+import java.util.List;
 
 public class ImageDetailsDialog extends BDialog
 {
     private WindowWidget parent;
     private Scene scene;
     private ImageMap im;
-    private ArrayList<String> texturesUsing;
-    private ArrayList<Integer> indicesUsing;
+    private List<String> texturesUsing;
     private ColumnContainer fields;
     private BLabel imageField; 
     private FormContainer infoTable; 
-    private RowContainer buttonField, dataField; 
+    private RowContainer buttonField; 
     private BufferedImage canvasImage;
-    private BButton okButton, cancelButton, refreshButton, reconnectButton, convertButton, exportButton;
+    private BButton refreshButton, reconnectButton, convertButton, exportButton;
     private BLabel[] title, data; 
     private Color defaultTextColor, errorTextColor, hilightTextColor, currentTextColor;
 
-    public ImageDetailsDialog(WindowWidget parent, Scene scene, ImageMap im)
+    public ImageDetailsDialog(WindowWidget parent, Scene scene, ImageMap image)
     {
         super(parent, "Image data", true);
         this.parent = parent;
         this.scene = scene;
-        this.im = im;
+        this.im = image;
         LayoutInfo left = new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 10), null);
-        LayoutInfo top = new LayoutInfo(LayoutInfo.NORTH, LayoutInfo.NONE);
         
-        createWhereUsedLists();    
+        texturesUsing = scene.getTextures().stream().
+                filter(texture -> texture.usesImage(im)).
+                map(texture -> texture.getName()).
+                collect(Collectors.toList());
+
         setContent(fields = new ColumnContainer());
-        fields.add(imageField  = new BLabel());
-        fields.add(infoTable   = new FormContainer(2, 7+texturesUsing.size()));
+        fields.add(imageField = new BLabel());
+        fields.add(infoTable = new FormContainer(2, 7 + texturesUsing.size()));
         fields.add(buttonField = new RowContainer());
         
         Font boldFont = new BLabel().getFont().deriveFont(Font.BOLD);
@@ -88,7 +89,7 @@ public class ImageDetailsDialog extends BDialog
         buttonField.add(reconnectButton = Translate.button("reconnectImage", "...", this, "reconnectImage")); 
         buttonField.add(convertButton = Translate.button("convertImage", this, "convertToLocal"));
         buttonField.add(exportButton = Translate.button("exportImage", "...", this, "exportImage"));
-        buttonField.add(okButton =  Translate.button("ok", this, "closeDetailsDialog"));
+        buttonField.add(Translate.button("ok", this, "closeDetailsDialog"));
         
         if (im instanceof ExternalImage)
             exportButton.setEnabled(false);
@@ -140,7 +141,7 @@ public class ImageDetailsDialog extends BDialog
             data[3].setText(((ExternalImage)im).getPath());
         if (!im.getUserCreated().isEmpty())
             data[4].setText(im.getUserCreated() + " - " + im.getDateCreated() + " - " + im.getZoneCreated());
-        if (!im.getUserEdited().isEmpty())            
+        if (!im.getUserEdited().isEmpty())
             data[5].setText(im.getUserEdited() + " - " + im.getDateEdited() + " - " + im.getZoneEdited());
     }
 
@@ -163,20 +164,6 @@ public class ImageDetailsDialog extends BDialog
                 else
                     canvasImage.setRGB(x, y, rgb2);
             }
-    }
-
-    private void createWhereUsedLists()
-    {
-        texturesUsing = new ArrayList();
-        indicesUsing = new ArrayList();
-        for (int t = 0; t < scene.getNumTextures(); t++)
-        {
-            if (scene.getTexture(t).usesImage(im))
-            {
-                texturesUsing.add(scene.getTexture(t).getName());
-                indicesUsing.add(t);
-            }
-        }
     }
     
     private void paintImage()

@@ -177,8 +177,8 @@ public class Scene
     }
 
     // Now apply tracks to all dependent objects.
-
-    objects.forEach(info -> { applyTracksToObject(info, processed, changed, indexOf(info)); });
+    AtomicInteger index = new AtomicInteger();
+    objects.forEach(info -> { applyTracksToObject(info, processed, changed, index.getAndIncrement()); });
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -542,7 +542,9 @@ public class Scene
   {
     Material mat = materials.remove(which);
     materialListeners.forEach(listener -> listener.itemRemoved(which, mat));
-    objects.stream().filter(item -> item.getObject().getMaterial() == mat).forEach(item -> item.setMaterial(null, null));
+    objects.stream()
+           .filter(item -> item.getObject().getMaterial() == mat)
+           .forEach(item -> item.setMaterial(null, null));
   }
 
   /**
@@ -807,10 +809,12 @@ public class Scene
 
   public void objectModified(Object3D obj)
   {
-    objects.stream().filter(item -> item.getObject() == obj).forEach(item -> {
-      item.clearCachedMeshes();
-      item.setPose(null);
-    });
+    objects.stream()
+           .filter(item -> item.getObject() == obj)
+           .forEach(item -> {
+              item.clearCachedMeshes();
+              item.setPose(null);
+           });
   }
 
   /**
@@ -999,7 +1003,9 @@ public class Scene
   
   public List<ObjectInfo> getCameras()
   {
-    return objects.stream().filter(item -> item.getObject() instanceof SceneCamera).collect(Collectors.toList());
+    return objects.stream()
+                  .filter(item -> item.getObject() instanceof SceneCamera)
+                  .collect(Collectors.toList());
   }
 
   /** Get the index of the specified texture. */
@@ -1043,7 +1049,9 @@ public class Scene
 
   public Material getMaterial(String name)
   {
-    return materials.stream().filter(asset -> asset.getName().equals(name)).findFirst().orElse(null);
+    return materials.stream()
+                    .filter(asset -> asset.getName().equals(name))
+                    .findFirst().orElse(null);
   }
 
   /** Get the index of the specified material. */

@@ -246,7 +246,7 @@ public class ImagesDialog extends BDialog
 
   private void purge()
   {
-    new PurgeDialog(true);
+    new PurgeDialog(true).setVisible(true);
     ic.imagesChanged();
     hilightButtons();
   }
@@ -642,7 +642,7 @@ public class ImagesDialog extends BDialog
       setResizable(false);
       addAsListener(this);
       addEventLink(WindowClosingEvent.class, this, "close");
-      setVisible(true);
+
     }
 
     private void addUnusedImagesTable(boolean intent) // intent = to delete or not
@@ -745,7 +745,6 @@ public class ImagesDialog extends BDialog
       for (BCheckBox b: removeBox) b.setState(false);
     }
 
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
     private void deleteAndReturn()
     {
       int count = 0;
@@ -758,7 +757,7 @@ public class ImagesDialog extends BDialog
         deleteSelectedImages();
         ic.imagesChanged();
         dispose();
-        new PurgeDialog(false);
+        new PurgeDialog(false).setVisible(true);
       }
     }
 

@@ -26,8 +26,8 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.*;
 import java.beans.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /** The Scene class describes a collection of objects, arranged relative to each other to
     form a scene, as well as the available textures and materials, environment options, etc. */
@@ -134,8 +134,9 @@ public class Scene
   {
     time = t;
     boolean processed[] = new boolean [objects.size()];
-    AtomicInteger index = new AtomicInteger();
-    objects.forEach(item -> applyTracksToObject(item, processed, null, index.getAndIncrement()));
+    IntStream.range(0, objects.size()).forEach(index -> {
+        applyTracksToObject(objects.get(index), processed, null, index);
+    });
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -177,8 +178,9 @@ public class Scene
     }
 
     // Now apply tracks to all dependent objects.
-    AtomicInteger index = new AtomicInteger();
-    objects.forEach(info -> { applyTracksToObject(info, processed, changed, index.getAndIncrement()); });
+    IntStream.range(0, objects.size()).forEach(index -> {
+        applyTracksToObject(objects.get(index), processed, changed, index);
+    });
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -985,8 +987,9 @@ public class Scene
     {
       // Build an index for fast lookup
       objectIndexMap = new HashMap<>();
-      AtomicInteger index = new AtomicInteger();
-      objects.forEach(item -> objectIndexMap.put(item, index.getAndIncrement()));
+      IntStream.range(0, objects.size()).forEach(index -> {
+        objectIndexMap.put(objects.get(index), index);
+      });
     }
 
     return objectIndexMap.getOrDefault(info, -1);

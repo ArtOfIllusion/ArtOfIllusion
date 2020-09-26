@@ -42,8 +42,11 @@ public class Joint
       length = new DOF(0.0, Double.MAX_VALUE, d);
       calcAnglesFromCoords(false);
     }
-    if (twist.pos >  90) twist.pos -= 180;
-    if (twist.pos < -90) twist.pos += 180;
+    if (twist.pos < -90 || twist.pos >  90)
+    {
+      twist.pos -= (180*Math.signum(twist.pos));
+      recalcCoords(false); // A new bone does not have children
+    }
     length.fixed = true;
     angle1.loop = angle2.loop = twist.loop = true;
     id = -1;

@@ -70,11 +70,8 @@ public class GroovyScriptEngine implements ScriptEngine
 
     try
     {
-        long t1 = System.currentTimeMillis();
         Script script = cache.computeIfAbsent(hash, (String text) -> { return shell.parse(text); });
         script.run();
-        long t2 = System.currentTimeMillis();
-        System.out.println("Execution time: " + (t2 -t1) + " ms");
         
     }
     catch (CompilationFailedException e)

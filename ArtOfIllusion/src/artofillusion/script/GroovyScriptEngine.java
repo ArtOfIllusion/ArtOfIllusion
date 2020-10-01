@@ -1,6 +1,5 @@
-package artofillusion.script;
-
 /* Copyright (C) 2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,6 +9,7 @@ package artofillusion.script;
    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
+package artofillusion.script;
 
 import artofillusion.*;
 import groovy.lang.*;
@@ -23,14 +23,16 @@ import java.util.*;
  */
 public class GroovyScriptEngine implements ScriptEngine
 {
-  private CompilerConfiguration config;
+  private CompilerConfiguration config = new CompilerConfiguration();
   private GroovyShell shell;
   private StringBuilder imports;
   private int numImports = 0;
 
+  private Map<String, Script> cache = new HashMap<>();
+  
   public GroovyScriptEngine(ClassLoader parent)
   {
-    config = new CompilerConfiguration();
+    
     shell = new GroovyShell(parent, new Binding(), config);
     imports = new StringBuilder();
   }
@@ -59,15 +61,21 @@ public class GroovyScriptEngine implements ScriptEngine
     imports.append("import ").append(packageOrClass).append(";\n");
     numImports++;
   }
-
+  
   @Override
-  public void executeScript(String script, Map<String, Object> variables) throws ScriptException
+  public void executeScript(String scriptBody, Map<String, Object> variables) throws ScriptException
   {
+    variables.forEach((key, value) -> shell.setVariable(key, value));
+    String hash = imports.toString() + scriptBody;
+
     try
     {
-      for (Map.Entry<String, Object> entry : variables.entrySet())
-        shell.setVariable(entry.getKey(), entry.getValue());
-      shell.evaluate(imports.toString()+script);
+        long t1 = System.currentTimeMillis();
+        Script script = cache.computeIfAbsent(hash, (String text) -> { return shell.parse(text); });
+        script.run();
+        long t2 = System.currentTimeMillis();
+        System.out.println("Execution time: " + (t2 -t1) + " ms");
+        
     }
     catch (CompilationFailedException e)
     {

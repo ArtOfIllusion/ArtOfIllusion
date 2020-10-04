@@ -40,7 +40,9 @@ public class OutputModule extends ProceduralModule
   @Override
   public void calcSize()
   {
-    super.calcSize();
+    bounds.width = defaultMetrics.stringWidth(name) + IOPort.SIZE * 4;
+    bounds.height = defaultMetrics.getMaxAscent() + defaultMetrics.getMaxDescent() + IOPort.SIZE * 4;
+    
     if (width > 0)
       bounds.width = width;
   }

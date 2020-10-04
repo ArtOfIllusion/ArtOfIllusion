@@ -22,19 +22,11 @@ import java.io.*;
 
 public class ColorModule extends ProceduralModule
 {
-  RGBColor color;
+  private RGBColor color  = new RGBColor(1.0f, 1.0f, 1.0f);
 
   public ColorModule(Point position)
   {
-    this(position, new RGBColor(1.0f, 1.0f, 1.0f));
-  }
-
-  public ColorModule(Point position, RGBColor color)
-  {
-    super("", new IOPort[] {}, new IOPort[] {
-      new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Color")},
-      position);
-    this.color = color;
+    super("", new IOPort[] {}, new IOPort[] {new IOPort(IOPort.COLOR, IOPort.OUTPUT, IOPort.RIGHT, "Color")}, position);
   }
 
   /** Get the color. */

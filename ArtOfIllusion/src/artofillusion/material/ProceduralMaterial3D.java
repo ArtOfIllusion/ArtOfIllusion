@@ -233,7 +233,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
       // to maintain the old default value.
 
       if (!output[0].inputConnected(0))
-        linkModuleToOutput(new ColorModule(new Point(800, 10), new RGBColor(1.0f, 1.0f, 1.0f)), output[0]);
+        linkModuleToOutput(new ColorModule(new Point(800, 10)), output[0]);
       if (output[1].inputConnected(0))
         linkModuleToOutput(new NumberModule(new Point(800, 115), 1.0), output[3]);
       if (!output[5].inputConnected(0))

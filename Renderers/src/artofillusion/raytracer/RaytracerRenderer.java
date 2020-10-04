@@ -220,6 +220,8 @@ public class RaytracerRenderer implements Renderer, Runnable
         minRaysChoice.add(Integer.toString(i));
         maxRaysChoice.add(Integer.toString(i));
       }
+      minRaysChoice.setPreferredVisibleRows(minRaysChoice.getItemCount()); // The scroll bar appeared just to scroll one item's worth...
+      maxRaysChoice.setPreferredVisibleRows(maxRaysChoice.getItemCount());
       ColumnContainer boxes = new ColumnContainer();
       generalPanel.add(boxes);
       boxes.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));

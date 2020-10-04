@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,6 +26,7 @@ public class RTCube extends RTObject
   protected double param[];
   private boolean bumpMapped, transform;
   protected Mat4 toLocal, fromLocal;
+  private double objectTol;
 
   public static final double TOL = 1e-12;
 
@@ -103,6 +105,11 @@ public class RTCube extends RTObject
     }
     bumpMapped = cube.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+    
+    objectTol = xsize;
+    if (ysize > objectTol) objectTol = ysize;
+    if (zsize > objectTol) objectTol = zsize;
+    objectTol *= TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -128,6 +135,9 @@ public class RTCube extends RTObject
   {
     Vec3 rorig = r.getOrigin(), rdir = r.getDirection();
     Vec3 origin, direction;
+    double rayTol = rorig.length()*Raytracer.TOL*0.01;
+    double intTol = objectTol > rayTol ? objectTol : rayTol;
+
     if (transform)
     {
       origin = r.tempVec1;
@@ -167,7 +177,7 @@ public class RTCube extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < intTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     if (direction.y == 0.0)
@@ -193,7 +203,7 @@ public class RTCube extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < intTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     if (direction.z == 0.0)
@@ -219,12 +229,12 @@ public class RTCube extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < intTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     int numIntersections;
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2, trueNorm = r.tempVec3;
-    if (mint < TOL)
+    if (mint < intTol)
     {
       v1.set(rorig.x+maxt*rdir.x, rorig.y+maxt*rdir.y, rorig.z+maxt*rdir.z);
       mint = maxt;

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,6 +27,7 @@ public class RTCylinder extends RTObject
   double rx, rz, height, halfh, rx2, rz2, toprx2, cx, cy, cz, sy, sz, param[];
   boolean bumpMapped, cone, transform, uniform;
   Mat4 toLocal, fromLocal;
+  private double radialTol, linearTol;
 
   public static final double TOL = 1e-12;
   public static final int TOP = 0;
@@ -45,53 +47,53 @@ public class RTCylinder extends RTObject
     cone = false;
     transform = true;
     if (vy.y == 1.0)
-      {
-        if (vx.x == 1.0 || vx.x == -1.0)
-          {
-            rx = size.x/2.0;
-            rz = size.z/2.0;
-            transform = false;
-          }
-        else if (vx.z == 1.0 || vx.z == -1.0)
-          {
-            rx = size.z/2.0;
-            rz = size.x/2.0;
-            transform = false;
-          }
-        if (transform == false && ratio == 0.0)
-          cone = true;
-      }
-    else if (vy.y == -1.0 && ratio != 0.0)
-      {
-        if (vx.x == 1.0 || vx.x == -1.0)
-          {
-            rx = size.x/2.0;
-            rz = size.z/2.0;
-            transform = false;
-          }
-        else if (vx.z == 1.0 || vx.z == -1.0)
-          {
-            rx = size.z/2.0;
-            rz = size.x/2.0;
-            transform = false;
-          }
-        if (transform == false)
-          {
-            rx *= ratio;
-            rz *= ratio;
-            ratio = 1.0/ratio;
-          }
-      }
-    height = size.y;
-    halfh = height/2.0;
-    if (transform)
+    {
+      if (vx.x == 1.0 || vx.x == -1.0)
       {
         rx = size.x/2.0;
         rz = size.z/2.0;
-        if (ratio == 0.0)
-          cone = true;
-        this.fromLocal = fromLocal;
+        transform = false;
       }
+      else if (vx.z == 1.0 || vx.z == -1.0)
+      {
+        rx = size.z/2.0;
+        rz = size.x/2.0;
+        transform = false;
+      }
+      if (transform == false && ratio == 0.0)
+        cone = true;
+    }
+    else if (vy.y == -1.0 && ratio != 0.0)
+    {
+      if (vx.x == 1.0 || vx.x == -1.0)
+      {
+        rx = size.x/2.0;
+        rz = size.z/2.0;
+        transform = false;
+      }
+      else if (vx.z == 1.0 || vx.z == -1.0)
+      {
+        rx = size.z/2.0;
+        rz = size.x/2.0;
+        transform = false;
+      }
+      if (transform == false)
+      {
+        rx *= ratio;
+        rz *= ratio;
+        ratio = 1.0/ratio;
+      }
+    }
+    height = size.y;
+    halfh = height/2.0;
+    if (transform)
+    {
+      rx = size.x/2.0;
+      rz = size.z/2.0;
+      if (ratio == 0.0)
+        cone = true;
+      this.fromLocal = fromLocal;
+    }
     cx = fromLocal.m14/fromLocal.m44;
     cy = fromLocal.m24/fromLocal.m44;
     cz = fromLocal.m34/fromLocal.m44;
@@ -105,6 +107,11 @@ public class RTCylinder extends RTObject
       topNormal = bottomNormal.times(-1.0);
     bumpMapped = cylinder.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+
+    radialTol = rx2; 
+    if (rz2 > radialTol) radialTol = rz2;
+    radialTol *= TOL;
+    linearTol = height*TOL;
   }
 
   /** Get the MaterialMapping for this object. */
@@ -131,79 +138,82 @@ public class RTCylinder extends RTObject
     Vec3 orig = r.getOrigin(), rdir = r.getDirection();
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2, dir = r.tempVec3;
     double a, b, c, d, e, dist1, dist2, temp1, temp2, mint;
+    double rayTol = orig.length()*Raytracer.TOL*0.01;
+    double intTolRadial = radialTol > rayTol ? radialTol : rayTol;
+    double intTolLinear = linearTol > rayTol ? linearTol : rayTol;
     int intersections, hit = -1;
 
     if (transform)
-      {
-        v1.set(cx-orig.x, cy-orig.y, cz-orig.z);
-        toLocal.transformDirection(v1);
-        v1.y -= halfh;
-        dir.set(rdir);
-        toLocal.transformDirection(dir);
-      }
+    {
+      v1.set(cx-orig.x, cy-orig.y, cz-orig.z);
+      toLocal.transformDirection(v1);
+      v1.y -= halfh;
+      dir.set(rdir);
+      toLocal.transformDirection(dir);
+    }
     else
-      {
-        v1.set(cx-orig.x, cy-orig.y-halfh, cz-orig.z);
-        if (uniform)
-          dir = rdir;
-        else
-          dir.set(rdir);
-      }
+    {
+      v1.set(cx-orig.x, cy-orig.y-halfh, cz-orig.z);
+      if (uniform)
+        dir = rdir;
+      else
+        dir.set(rdir);
+    }
     mint = Double.MAX_VALUE;
     if (dir.y != 0.0)
+    {
+      // See if the ray hits the top or bottom face of the cylinder.
+
+      temp1 = v1.y/dir.y;
+      if (temp1 > intTolLinear)
       {
-        // See if the ray hits the top or bottom face of the cylinder.
-
-        temp1 = v1.y/dir.y;
-        if (temp1 > TOL)
-          {
-            a = temp1*dir.x - v1.x;
-            b = temp1*dir.z - v1.z;
-            if (a*a+sz*b*b < rx2)
-              {
-                hit = BOTTOM;
-                mint = temp1;
-              }
-          }
-        if (!cone)
-          {
-            temp1 = (v1.y+height)/dir.y;
-            if (temp1 > TOL)
-              {
-                a = temp1*dir.x - v1.x;
-                b = temp1*dir.z - v1.z;
-                if (a*a+sz*b*b < toprx2)
-                  {
-                    if (mint < Double.MAX_VALUE)
-                      {
-                        // The ray hit both the top and bottom faces, so we know it
-                        // didn't hit the sides.
-
-                        intersections = 2;
-                        if (temp1 < mint)
-                          {
-                            hit = TOP;
-                            dist1 = temp1;
-                            dist2 = mint;
-                          }
-                        else
-                          {
-                            dist1 = mint;
-                            dist2 = temp1;
-                          }
-                        v1.set(orig.x+dist1*rdir.x, orig.y+dist1*rdir.y, orig.z+dist1*rdir.z);
-                        v2.set(orig.x+dist2*rdir.x, orig.y+dist2*rdir.y, orig.z+dist2*rdir.z);
-                        return new CylinderIntersection(this, intersections, hit, v1, v2, dist1, dist2);
-                      }
-                    else
-                      {
-                        hit = TOP;
-                        mint = temp1;
-                      }
-                  }
-              }
-          }
+        a = temp1*dir.x - v1.x;
+        b = temp1*dir.z - v1.z;
+        if (a*a+sz*b*b < rx2)
+        {
+          hit = BOTTOM;
+          mint = temp1;
+        }
       }
+      if (!cone)
+      {
+        temp1 = (v1.y+height)/dir.y;
+        if (temp1 > intTolLinear)
+        {
+          a = temp1*dir.x - v1.x;
+          b = temp1*dir.z - v1.z;
+          if (a*a+sz*b*b < toprx2)
+          {
+            if (mint < Double.MAX_VALUE)
+            {
+              // The ray hit both the top and bottom faces, so we know it
+              // didn't hit the sides.
+
+              intersections = 2;
+              if (temp1 < mint)
+              {
+                hit = TOP;
+                dist1 = temp1;
+                dist2 = mint;
+              }
+              else
+              {
+                dist1 = mint;
+                dist2 = temp1;
+              }
+              v1.set(orig.x+dist1*rdir.x, orig.y+dist1*rdir.y, orig.z+dist1*rdir.z);
+              v2.set(orig.x+dist2*rdir.x, orig.y+dist2*rdir.y, orig.z+dist2*rdir.z);
+              return new CylinderIntersection(this, intersections, hit, v1, v2, dist1, dist2);
+            }
+            else
+            {
+              hit = TOP;
+              mint = temp1;
+            }
+          }
+        }
+      }
+    }
 
     // Now see if it hits the sides of the cylinder.
 
@@ -227,47 +237,47 @@ public class RTCylinder extends RTObject
     }
     dist1 = Double.MAX_VALUE;
     dist2 = mint;
-    if (c > TOL)  // Ray origin is outside cylinder.
-      {
-        if (b > 0.0)  // Ray points toward cylinder.
+    if (c > intTolRadial)  // Ray origin is outside cylinder.
+    {
+      if (b > 0.0)  // Ray points toward cylinder.
+        {
+          a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
+          e = b*b - a*c;
+          if (e >= 0.0)
           {
-            a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
-            e = b*b - a*c;
-            if (e >= 0.0)
-              {
-                temp1 = Math.sqrt(e);
-                dist1 = (b - temp1)/a;
-                if (dist2 == Double.MAX_VALUE)
-                  dist2 = (b + temp1)/a;
-              }
+            temp1 = Math.sqrt(e);
+            dist1 = (b - temp1)/a;
+            if (dist2 == Double.MAX_VALUE)
+              dist2 = (b + temp1)/a;
           }
-      }
-    else if (c < -TOL)  // Ray origin is inside cylinder.
+        }
+    }
+    else if (c < -intTolRadial)  // Ray origin is inside cylinder.
+    {
+      a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
+      e = b*b - a*c;
+      if (e >= 0.0)
+        dist1 = (b + Math.sqrt(e))/a;
+    }
+    else  // Ray origin is on the surface of the cylinder.
+    {
+      if (b > 0.0)  // Ray points into cylinder.
       {
         a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
         e = b*b - a*c;
         if (e >= 0.0)
           dist1 = (b + Math.sqrt(e))/a;
       }
-    else  // Ray origin is on the surface of the cylinder.
-      {
-        if (b > 0.0)  // Ray points into cylinder.
-          {
-            a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
-            e = b*b - a*c;
-            if (e >= 0.0)
-              dist1 = (b + Math.sqrt(e))/a;
-          }
-      }
+    }
     if (dist1 < mint)
+    {
+      a = dist1*dir.y-v1.y;
+      if (a > 0.0 && a < height)
       {
-        a = dist1*dir.y-v1.y;
-        if (a > 0.0 && a < height)
-          {
-            hit = SIDE;
-            mint = dist1;
-          }
+        hit = SIDE;
+        mint = dist1;
       }
+    }
     if (mint == Double.MAX_VALUE)
       return SurfaceIntersection.NO_INTERSECTION;
     if (dist2 < mint)
@@ -283,10 +293,10 @@ public class RTCylinder extends RTObject
     if (dist2 == Double.MAX_VALUE)
       intersections = 1;
     else
-      {
-        intersections = 2;
-        v2.set(orig.x+dist2*rdir.x, orig.y+dist2*rdir.y, orig.z+dist2*rdir.z);
-      }
+    {
+      intersections = 2;
+      v2.set(orig.x+dist2*rdir.x, orig.y+dist2*rdir.y, orig.z+dist2*rdir.z);
+    }
     return new CylinderIntersection(this, intersections, hit, v1, v2, dist1, dist2);
   }
 
@@ -320,10 +330,10 @@ public class RTCylinder extends RTObject
     if (transform)
       return (new BoundingBox(-rx, rx, -halfh, halfh, -rz, rz)).transformAndOutset(fromLocal);
     else if (toprx2 > rx2)
-      {
-        double xrad = Math.sqrt(toprx2), zrad = Math.sqrt(rz2*toprx2/rx2);
-        return new BoundingBox(cx-xrad, cx+xrad, cy-halfh, cy+halfh, cz-zrad, cz+zrad);
-      }
+    {
+      double xrad = Math.sqrt(toprx2), zrad = Math.sqrt(rz2*toprx2/rx2);
+      return new BoundingBox(cx-xrad, cx+xrad, cy-halfh, cy+halfh, cz-zrad, cz+zrad);
+    }
     else
       return new BoundingBox(cx-rx, cx+rx, cy-halfh, cy+halfh, cz-rz, cz+rz);
   }
@@ -337,24 +347,24 @@ public class RTCylinder extends RTObject
 
     BoundingBox bb = node.getBounds();
     if (transform)
-      {
-        bb = bb.transformAndOutset(toLocal);
-        if (bb.miny > halfh || bb.maxy < -halfh)
-          return false;
-        x = 0.0;
-        z = 0.0;
-        if (bb.minx > 0.0)
-          x = bb.minx;
-        else if (bb.maxx < 0.0)
-          x = bb.maxx;
-        if (bb.minz > 0.0)
-          z = bb.minz;
-        else if (bb.maxz < 0.0)
-          z = bb.maxz;
-        if (x*x + sz*z*z > rx2)
-          return false;
-        return true;
-      }
+    {
+      bb = bb.transformAndOutset(toLocal);
+      if (bb.miny > halfh || bb.maxy < -halfh)
+        return false;
+      x = 0.0;
+      z = 0.0;
+      if (bb.minx > 0.0)
+        x = bb.minx;
+      else if (bb.maxx < 0.0)
+        x = bb.maxx;
+      if (bb.minz > 0.0)
+        z = bb.minz;
+      else if (bb.maxz < 0.0)
+        z = bb.maxz;
+      if (x*x + sz*z*z > rx2)
+        return false;
+      return true;
+    }
     if (bb.miny > cy+halfh || bb.maxy < cy-halfh)
       return false;
     x = cx;
@@ -475,10 +485,10 @@ public class RTCylinder extends RTObject
       if (cylinder.uniform)
         map.getTransparency(pos, trans, angle, size, time, cylinder.param);
       else
-        {
-          cylinder.toLocal.transform(pos);
-          map.getTransparency(pos, trans, angle, size, time, cylinder.param);
-        }
+      {
+        cylinder.toLocal.transform(pos);
+        map.getTransparency(pos, trans, angle, size, time, cylinder.param);
+      }
     }
 
     @Override

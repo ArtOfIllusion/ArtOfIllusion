@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -502,33 +503,40 @@ public class Raytracer
     minx = miny = minz = Double.MAX_VALUE;
     maxx = maxy = maxz = -Double.MAX_VALUE;
     for (i = 0; i < sceneObject.length; i++)
-      {
-        objBounds[i] = sceneObject[i].getBounds();
-        if (objBounds[i].minx < minx)
-          minx = objBounds[i].minx;
-        if (objBounds[i].maxx > maxx)
-          maxx = objBounds[i].maxx;
-        if (objBounds[i].miny < miny)
-          miny = objBounds[i].miny;
-        if (objBounds[i].maxy > maxy)
-          maxy = objBounds[i].maxy;
-        if (objBounds[i].minz < minz)
-          minz = objBounds[i].minz;
-        if (objBounds[i].maxz > maxz)
-          maxz = objBounds[i].maxz;
-      }
-    minx -= TOL;
-    miny -= TOL;
-    minz -= TOL;
-    maxx += TOL;
-    maxy += TOL;
-    maxz += TOL;
+    {
+      objBounds[i] = sceneObject[i].getBounds();
+      if (objBounds[i].minx < minx)
+        minx = objBounds[i].minx;
+      if (objBounds[i].maxx > maxx)
+        maxx = objBounds[i].maxx;
+      if (objBounds[i].miny < miny)
+        miny = objBounds[i].miny;
+      if (objBounds[i].maxy > maxy)
+        maxy = objBounds[i].maxy;
+      if (objBounds[i].minz < minz)
+        minz = objBounds[i].minz;
+      if (objBounds[i].maxz > maxz)
+        maxz = objBounds[i].maxz;
+    }
+
+    double extTol = maxx-minx;
+    if (maxy-miny > extTol) extTol = maxy-miny;
+    if (maxz-minz > extTol) extTol = maxz-minz;
+    extTol *= Raytracer.TOL;
+
+    minx -= extTol;
+    miny -= extTol;
+    minz -= extTol;
+    maxx += extTol;
+    maxy += extTol;
+    maxz += extTol;;
 
     // Create the octree.
 
     rootNode = new OctreeNode(Math.nextAfter((float) minx, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxx, Double.POSITIVE_INFINITY),
-        Math.nextAfter((float) miny, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxy, Double.POSITIVE_INFINITY),
-        Math.nextAfter((float) minz, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxz, Double.POSITIVE_INFINITY), sceneObject, objBounds, null);
+                              Math.nextAfter((float) miny, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxy, Double.POSITIVE_INFINITY),
+                              Math.nextAfter((float) minz, Double.NEGATIVE_INFINITY), Math.nextAfter((float) maxz, Double.POSITIVE_INFINITY), 
+                              sceneObject, objBounds, null);
 
     // Find the nodes which contain the camera and the lights.
 

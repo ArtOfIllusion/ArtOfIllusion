@@ -12,6 +12,7 @@
 package artofillusion.procedural;
 
 import java.awt.*;
+import java.util.Arrays;
 
 /** This is the graphical representation of an input or output port on a module. */
 
@@ -24,8 +25,10 @@ public class IOPort
   
   public static final int INPUT = 0;
   public static final int OUTPUT = 1;
+  
   public static final int NUMBER = 0;
   public static final int COLOR = 1;
+  
   public static final int TOP = 0;
   public static final int BOTTOM = 1;
   public static final int LEFT = 2;
@@ -134,14 +137,35 @@ public class IOPort
       g.setColor(Color.BLACK);
     else
       g.setColor(Color.BLUE);
-    if (location == TOP)
-      g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y+SIZE}, 3);
-    else if (location == BOTTOM)
-      g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y-SIZE}, 3);
-    else if (location == LEFT)
-      g.fillPolygon(new int[] {x, x, x+SIZE}, new int[] {y+SIZE, y-SIZE, y}, 3);
-    else if (location == RIGHT)
-      g.fillPolygon(new int[] {x-SIZE, x-SIZE, x}, new int[] {y+SIZE, y-SIZE, y}, 3);
+    
+    switch (location) {
+      case TOP:
+        g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y+SIZE}, 3);
+        break;
+      case BOTTOM:
+        g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y-SIZE}, 3);
+        break;
+      case LEFT:
+        g.fillPolygon(new int[] {x, x, x+SIZE}, new int[] {y+SIZE, y-SIZE, y}, 3);
+        break;
+     case RIGHT:
+        g.fillPolygon(new int[] {x-SIZE, x-SIZE, x}, new int[] {y+SIZE, y-SIZE, y}, 3);
+        break;
+     default:
+        break;
+      }
   }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("IOPort{valueType=").append(valueType == COLOR ? "Color" : "Number");
+        sb.append(", type=").append(type == INPUT ? "Input" : "Output");
+        sb.append(", description=").append(Arrays.toString(description));
+        sb.append('}');
+        return sb.toString();
+    }
+  
+  
 }
 

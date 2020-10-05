@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.zip.*;
 import java.beans.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
 
 /** The Scene class describes a collection of objects, arranged relative to each other to
     form a scene, as well as the available textures and materials, environment options, etc. */
@@ -134,9 +134,8 @@ public class Scene
   {
     time = t;
     boolean processed[] = new boolean [objects.size()];
-    IntStream.range(0, objects.size()).forEach(index -> {
-        applyTracksToObject(objects.get(index), processed, null, index);
-    });
+    for (int i = 0; i < objects.size(); i++)
+      applyTracksToObject(objects.get(i), processed, null, i);
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -178,9 +177,8 @@ public class Scene
     }
 
     // Now apply tracks to all dependent objects.
-    IntStream.range(0, objects.size()).forEach(index -> {
-        applyTracksToObject(objects.get(index), processed, changed, index);
-    });
+    for (int i = 0; i < objects.size(); i++)
+      applyTracksToObject(objects.get(i), processed, changed, i);
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -987,9 +985,8 @@ public class Scene
     {
       // Build an index for fast lookup
       objectIndexMap = new HashMap<>();
-      IntStream.range(0, objects.size()).forEach(index -> {
-        objectIndexMap.put(objects.get(index), index);
-      });
+      for (int i = 0; i < objects.size(); i++)
+        objectIndexMap.put(objects.get(i), i);
     }
 
     return objectIndexMap.getOrDefault(info, -1);

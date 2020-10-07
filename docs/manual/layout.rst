@@ -297,7 +297,7 @@ the importer also allows OBJ materials to be imported. Simply select the OBJ fil
 will be automatically read and converted to an AoI texture. The model will automatically be scaled on import to better
 fit AoI scale units.
 
-.. _file_menu:
+.. _Export:
 
 **Export** AoI can save 3D models/scenes in 3D formats other than AoI. Export can be made to either Wavefront OBJ, VRML
 or Povray v3.5 files including partial support for textures. You can select whether to export the whole scene or just
@@ -320,11 +320,12 @@ There are additional options for VRML and Povray as shown in the dialogues below
 
    Povray export option dialogue
 
-.. _file_menu:
 
 .. _ext_link:
 
 Link to External Object
+
+.. figure:: basics/external_obj_dial.jpg
 
 This is a way of using an object from another AoI file in the current scene via a dynamic link to that file. Using this
 method, changes made to the source object automatically affect any files which have links to that object.  This allows,
@@ -371,8 +372,6 @@ The menu looks like this:
 **Select Children** selects all objects that are 'children' of currently selected objects.
 
 **Select All** selects all the objects in the scene.
-
-.. _edit_menu:
 
 **Make Live Duplicate** makes a special copy of any currently selected object in that they are dynamically linked so
 that any changes made to one are automatically made to all other live duplicates. Note that this method of copying uses
@@ -445,6 +444,7 @@ The default shortcuts are:
 
 ============  =========================
 ============  =========================
+Backspace     Delete Selection
 Delete        Delete Selection
 1             Display Mode: Wireframe
 2             Display Mode: Flat
@@ -584,8 +584,6 @@ keys moves the points by 10 pixels.
 There is also the ability to set up additional keyboard shortcuts via  Edit -> Preferences -> Shortcuts tab.
 
 .. |basics/camera_buttons.jpg| image:: basics/camera_buttons.jpg
-
-.. |basics/camera_pan.jpg| image:: basics/camera_pan.jpg
 
 .. |basics/camera_pan.jpg| image:: basics/camera_pan.jpg
 

@@ -50,14 +50,15 @@ The screenshot below shows the main window:
 .. figure:: basics/screenshot.jpg
 
 Note that since version 1.8, Art of Illusion uses a UI based on Java Swing. This means that the 'Look and Feel' of the
-interface can be customised to a certain extent. There are many Look and Feels available as downloads from the internet
-(e.g. www.javootoo.com). To set one to work with AoI, you need to create a simple Startup Script (see
-:ref:`here<startup_scripts>` for details).  Also, since version 2.5, plugins can alter the display, icons etc.
+interface can be customised to a certain extent.
+(see :ref:`the scripting chapter<startup_scripts>` for details).  Also, since version 2.5, plugins can alter the display, icons etc.
 
 .. _theme:
 
 See the DisplayModelIcons and ElectricWaxTheme downloadable through the Scripts and Plugins Manager - these plugins will
 transform the above into a display like this:
+
+.. figure:: basics/screenshot_newtheme.jpg
 
 .. _panels:
 

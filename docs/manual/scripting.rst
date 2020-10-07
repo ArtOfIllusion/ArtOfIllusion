@@ -70,7 +70,7 @@ be entered directly or loaded from disk. Use the **Save** command to save the sc
 Scripting Tutorial on the AoI web site for details of actual script programming.
 
 One use of Startup Scripts is to set the Look and Feel of the interface which is possible on version 1.8 or later of
-AoI. Look and Feels can be downloaded from the internet (e.g. www.javootoo.com). In most cases, you need to put the
+AoI. Look and Feels can be downloaded from the internet. Just search "Swing Look and Feel" in your favorite search engine. In most cases, you need to put the
 downloaded .jar file in your Java Runtime Environment (JRE)/lib/ext folder. You then need to write a one-line Startup
 script as in the example below:
 

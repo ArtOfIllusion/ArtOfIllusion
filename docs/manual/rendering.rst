@@ -216,7 +216,7 @@ of output.
 seen and the render can optimise performance by not drawing them. On some occasions, however, e.g. inside closed
 objects, the backfaces will be seen and this option will need be to be unchecked.
 
-.. _raster_hdri
+.. _raster_hdri:
 
 **Generate High Dynamic Image** If this is turned off, then the pixel colours in the rendered image(s) are a combination
 of red, blue and green channels, each with a range of 0 - 255. This limits the range of intensities present in an image.

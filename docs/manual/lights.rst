@@ -94,7 +94,7 @@ Object List or via the **Edit** menu, allows only 2 parameters to be specified:
 **Intensity** - allows the brightness to be specified. This value is independent of position.
 
 **Angular Radius** defines the physical size of the light. This only has an effect if Soft Shadows are switched on
-when rendering with the :ref:`Raytracer<raytrace>`. Increasing the angular radius has the effect of making shadows
+when rendering with the :ref:`Raytracer<raytracer>`. Increasing the angular radius has the effect of making shadows
 softer at their edges.
 
 Type is as defined above for point lights.

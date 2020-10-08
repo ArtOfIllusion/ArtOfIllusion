@@ -1,3 +1,5 @@
+.. _modelling-tools:
+
 Modelling Tools
 ***************
 

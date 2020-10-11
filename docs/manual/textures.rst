@@ -755,8 +755,8 @@ ways. We describe below how each one was created.
 Here is the procedure for the first one:
 
 .. figure:: textures/pt_image_brick.jpg
-The basis of this texture is a brick-like image consisting of red bricks (R=1,G=0,B=0) and green mortar (R=0,G=1,B=0)
-as shown below:
+
+The basis of this texture is a brick-like image consisting of red bricks (R=1,G=0,B=0) and green mortar (R=0,G=1,B=0) as shown below:
 
 .. figure:: textures/brick_image.jpg
 

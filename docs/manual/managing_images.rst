@@ -27,7 +27,7 @@ The icon symbols
 .. |usedimg| image:: managing_images/used.png
    
 .. |usedtxt| replace:: **Paper clip:** A texture or material is using the image.
-   |*- Images that are in use cannot be deleted.*
+   *- Images that are in use cannot be deleted.*
   
 .. |linkedimg| image:: managing_images/linked.png
    

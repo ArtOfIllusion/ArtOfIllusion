@@ -1311,6 +1311,4 @@ need to have Java Media Framework installed for this to work. See the Installati
 
 .. |animation/pose_add.jpg| image:: animation/pose_add.jpg
 
-.. |animation/anim_coord_set.jpg| image:: animation/anim_coord_set.jpg
-
 .. |animation/anim_set.jpg| image:: animation/anim_set.jpg

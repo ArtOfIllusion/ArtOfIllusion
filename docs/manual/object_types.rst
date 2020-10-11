@@ -22,7 +22,7 @@ while dragging forces all 3 dimensions to be equal.
 
 For cylinders, the top:bottom ratio can be set to form tapered cylinders (including cones) prior to drawing by
 double-clicking on the cylinder icon. This ratio can also be edited after drawing (see
-:ref:`editing_objects<edit_object>`).
+:ref:`editing_objects<edit object>`).
 
 .. figure:: modelling/cube_dial.jpg
 
@@ -213,7 +213,7 @@ Spline Meshes
 =============
 
 Splines are smooth surfaces the shape of which are determined by control points and the type of smoothing applied.
- Splines can be created by applying the various modelling_tools to existing objects (usually curves) or directly by
+ Splines can be created by applying the various :ref:`Modeling Tools<modelling-tools>` to existing objects (usually curves) or directly by
 clicking on |modelling/spline_icon.jpg|
 
 Before doing that, you can select some of the spline properties by double-clicking on that same icon. This brings up the
@@ -395,7 +395,7 @@ the difference between a sphere surface represented by a spline mesh and by a tr
 .. figure:: modelling/spline_v_tri.jpg
 
 The fact that the surface is composed of triangles means that triangle meshes are more versatile than spline meshes.
-Meshes are either created directly from objects or by using :ref:`modelling tools<modelling_tools>` on existing mesh
+Meshes are either created directly from objects or by using :ref:`modelling tools<modelling-tools>` on existing mesh
 objects.
 
 To create a triangle mesh version of any existing geometric object, simply click on the object in the Object List and
@@ -618,11 +618,9 @@ to mesh geometry have a more predictable effect on the surface. See example belo
 **Hide Selection** allows selected geometry to be hidden as shown on the right. This is useful when editing complex
 meshes where visibility is can be a problem due to overlying geometry.
 
-**Show All** shows all currently hidden geometry.
-
 .. figure:: modelling/trimesh_hide.jpg
 
-.. _hide:
+**Show All** shows all currently hidden geometry.
 
 **Mesh Tension** - similar to the spline mesh tool, this causes points around those currently selected to move with them.
 See :ref:`here<mesh_tension>` for more details.
@@ -1093,8 +1091,6 @@ transparent display mode (as shown) means that you can see the appropriate view 
 .. |modelling/cylinder.jpg| image:: modelling/cylinder.jpg
 
 .. |modelling/scale.jpg| image:: modelling/scale.jpg
-
-.. |modelling/inter_curve_icon.jpg| image:: modelling/inter_curve_icon.jpg
 
 .. |modelling/inter_curve_icon.jpg| image:: modelling/inter_curve_icon.jpg
 

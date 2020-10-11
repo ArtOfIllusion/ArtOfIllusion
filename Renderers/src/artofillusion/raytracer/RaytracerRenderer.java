@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2014 by Peter Eastman
+   Modifications copyright © 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -53,11 +54,12 @@ public class RaytracerRenderer implements Renderer, Runnable
   protected int giMode = GI_NONE, scatterMode = SCATTER_SINGLE, globalPhotons = 10000, globalNeighborPhotons = 200, causticsPhotons = 10000, causticsNeighborPhotons = 100, volumePhotons = 10000, volumeNeighborPhotons = 100;
   protected float minRayIntensity = 0.01f, floatImage[][], depthImage[], errorImage[], objectImage[];
   protected boolean fog, depth = false, gloss = false, softShadows = false, caustics = false, transparentBackground = false, adaptive = true, roulette = false, reducedMemory = false;
+  protected boolean useGloss, useSoftShadows;
   protected boolean needCopyToUI = true, isPreview;
   protected PhotonMap globalMap, causticsMap, volumeMap;
   protected BoundingBox materialBounds;
   protected ThreadLocal<RenderWorkspace> threadWorkspace;
-
+  
   public static final int GI_NONE = 0;
   public static final int GI_AMBIENT_OCCLUSION = 1;
   public static final int GI_MONTE_CARLO = 2;
@@ -831,6 +833,8 @@ public class RaytracerRenderer implements Renderer, Runnable
     if (antialiasLevel == 0)
       minRaysInUse = maxRaysInUse = 1;
     smoothScale = smoothing*2.0*Math.tan(sceneCamera.getFieldOfView()*Math.PI/360.0)/height;
+    useGloss = gloss && antialiasLevel > 0;
+    useSoftShadows = softShadows && antialiasLevel > 0;
 
     // Rendering is done in two phases.  In the first phase, we send one ray per pixel, ordered so that a
     // rough image appears quickly then progressively becomes more detailed.
@@ -1644,13 +1648,13 @@ public class RaytracerRenderer implements Renderer, Runnable
           temp.normalize();
         }
         workspace.ray[treeDepth+1].newID();
-        int numRays = (gloss && spec.cloudiness != 0.0 ? glossRays : 1);
+        int numRays = (useGloss && spec.cloudiness != 0.0 ? glossRays : 1);
         if (transmitted && transparentBackground)
           workspace.transparency[treeDepth] = 0.0;
         for (int i = 0; i < numRays; i++)
         {
           workspace.ray[treeDepth+1].getDirection().set(temp);
-          if (gloss)
+          if (useGloss)
             randomizeDirection(workspace.ray[treeDepth+1].getDirection(), norm, random, spec.cloudiness, rayNumber+treeDepth+1);
           spawnRay(workspace, treeDepth+1, nextNode, second, nextMaterial, oldMaterial, nextMatTrans, oldMatTrans, rayNumber, totalDist, transmitted, diffuse);
           workspace.color[treeDepth+1].scale(1.0/numRays);
@@ -1686,11 +1690,11 @@ public class RaytracerRenderer implements Renderer, Runnable
       }
       workspace.ray[treeDepth+1].getOrigin().set(intersectionPoint);
       workspace.ray[treeDepth+1].newID();
-      int numRays = (gloss && spec.roughness != 0.0 ? glossRays : 1);
+      int numRays = (useGloss && spec.roughness != 0.0 ? glossRays : 1);
       for (int i = 0; i < numRays; i++)
       {
         workspace.ray[treeDepth+1].getDirection().set(temp);
-        if (gloss)
+        if (useGloss)
           randomizeDirection(workspace.ray[treeDepth+1].getDirection(), norm, random, spec.roughness, rayNumber+treeDepth+1+i);
         spawnRay(workspace, treeDepth+1, nextNode, SurfaceIntersection.NO_INTERSECTION, currentMaterial, prevMaterial, currentMatTrans, prevMatTrans, rayNumber, totalDist, false, diffuse);
         workspace.color[treeDepth+1].scale(1.0/numRays);
@@ -1799,11 +1803,14 @@ public class RaytracerRenderer implements Renderer, Runnable
     for (i = raytracer.getLights().length-1; i >= 0; i--)
     {
       RTLight light = raytracer.getLights()[i];
-      int numRays = (light.getSoftShadows() ? shadowRays : 1);
+      int numRays = (useSoftShadows && light.getSoftShadows() ? shadowRays : 1);
       for (int j = 0; j < numRays; j++)
       {
         lt = light.getLight();
-        distToLight = light.findRayToLight(pos, r, this, rayNumber+treeDepth+1+j);
+        if (useSoftShadows)
+          distToLight = light.findRayToLight(pos, r, this, rayNumber+treeDepth+1+j);
+        else
+          distToLight = light.findRayToLight(pos, r, this, -1);
         r.newID();
 
         // Now scan through the list of objects, and see if the light is blocked.

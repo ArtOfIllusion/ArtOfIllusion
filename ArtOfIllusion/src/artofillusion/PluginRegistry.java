@@ -42,15 +42,31 @@ public class PluginRegistry
 
   public static void scanPlugins()
   {
-    File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
+    File dir = new File(ArtOfIllusion.CORE_PLUGINS);
     if (!dir.exists())
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
       return;
     }
+    scanPlugins(dir);
+
+    if(!ArtOfIllusion.CORE_PLUGINS.equals(ArtOfIllusion.PLUGIN_DIRECTORY))
+    {
+      dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
+
+      if (!dir.exists())
+      {
+        new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
+        return;
+      }
+      scanPlugins(dir);
+    }
+  }
 
     // Scan the plugins directory, and parse the index in every jar file.
 
+  private static void scanPlugins(File dir)
+  {
     HashSet<JarInfo> jars = new HashSet<JarInfo>();
     for (String file : dir.list())
     {

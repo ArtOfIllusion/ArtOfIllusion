@@ -43,8 +43,9 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class ArtOfIllusion
 {
-  public static final String APP_DIRECTORY, PLUGIN_DIRECTORY;
+  public static final String APP_DIRECTORY, CORE_DIRECTORY, PLUGIN_DIRECTORY;
   public static final String TOOL_SCRIPT_DIRECTORY, OBJECT_SCRIPT_DIRECTORY, STARTUP_SCRIPT_DIRECTORY;
+  public static final String CORE_PLUGINS, CORE_TOOL_SCRIPTS, CORE_OBJECT_SCRIPTS;
   public static final ImageIcon APP_ICON;
 
   private static ApplicationPreferences preferences;
@@ -82,9 +83,27 @@ public class ArtOfIllusion
 
     // Set up the standard directories.
 
-    APP_DIRECTORY = dir;
+    CORE_DIRECTORY = dir;
+    CORE_PLUGINS = new File(CORE_DIRECTORY, "Plugins").getAbsolutePath();
+    File scripts = new File(CORE_DIRECTORY, "Scripts");
+    CORE_TOOL_SCRIPTS = new File(scripts, "Tools").getAbsolutePath();
+    CORE_OBJECT_SCRIPTS = new File(scripts, "Objects").getAbsolutePath();
+
+    String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+    if (os.contains("mac") || os.contains("darwin"))
+    {
+      File prelude = new File(System.getProperty("user.home"));
+      prelude = new File(prelude, "Library");
+      prelude = new File(prelude, "Application Support");
+      APP_DIRECTORY = new File(prelude, "Art Of Illusion " + getVersion())
+                               .getAbsolutePath();
+    } else
+    {
+      APP_DIRECTORY = CORE_DIRECTORY;
+    }
+
     PLUGIN_DIRECTORY = new File(APP_DIRECTORY, "Plugins").getAbsolutePath();
-    File scripts = new File(APP_DIRECTORY, "Scripts");
+    scripts = new File(APP_DIRECTORY, "Scripts");
     TOOL_SCRIPT_DIRECTORY = new File(scripts, "Tools").getAbsolutePath();
     OBJECT_SCRIPT_DIRECTORY = new File(scripts, "Objects").getAbsolutePath();
     STARTUP_SCRIPT_DIRECTORY = new File(scripts, "Startup").getAbsolutePath();

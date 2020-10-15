@@ -623,6 +623,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     scriptMenu.removeAll();
     addScriptsToMenu(scriptMenu, new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY));
+    if (! ArtOfIllusion.APP_DIRECTORY.equals(ArtOfIllusion.CORE_DIRECTORY))
+       addScriptsToMenu(scriptMenu, new File(ArtOfIllusion.CORE_TOOL_SCRIPTS));
   }
 
   private void addScriptsToMenu(BMenu menu, File dir)

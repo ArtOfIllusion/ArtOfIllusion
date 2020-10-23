@@ -394,6 +394,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       giModeChoice.addEventLink(ValueChangedEvent.class, illumListener);
       causticsBox.addEventLink(ValueChangedEvent.class, illumListener);
       scatterModeChoice.addEventLink(ValueChangedEvent.class, illumListener);
+      giModeChoice.dispatchEvent(new ValueChangedEvent(giModeChoice));
     }
     if (needCopyToUI)
       copyConfigurationToUI();
@@ -440,6 +441,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     // Generate events to force appropriate components to be enabled or disabled.
 
     aliasChoice.dispatchEvent(new ValueChangedEvent(aliasChoice));
+    giModeChoice.dispatchEvent(new ValueChangedEvent(giModeChoice));
   }
 
   @Override

@@ -83,12 +83,12 @@ public class RenderSetupDialog
     top.add(heightField = new ValueField((double) height, ValueField.POSITIVE+ValueField.INTEGER), 1, 1);
     movieGroup = new RadioButtonGroup();
     movieGroup.addEventLink(SelectionChangedEvent.class, this, "enableMovieComponents");
-    top.add(new BRadioButton("Single Image", !movie, movieGroup), 1, 2);
+    top.add(new BRadioButton(Translate.text("SingleImage"), !movie, movieGroup), 1, 2);
     top.add(startField = new ValueField(startTime, ValueField.NONE), 1, 3);
     top.add(endField = new ValueField(endTime, ValueField.NONE), 1, 4);
     top.add(new BLabel(Translate.text("Renderer")+":"), 2, 0, labelLayout);
     top.add(new BLabel(Translate.text("Camera")+":"), 2, 1, labelLayout);
-    top.add(movieBox = new BRadioButton("Movie", movie, movieGroup), 2, 2);
+    top.add(movieBox = new BRadioButton(Translate.text("Movie"), movie, movieGroup), 2, 2);
     top.add(new BLabel(Translate.text("FramesPerSec")+":"), 2, 3, labelLayout);
     top.add(new BLabel(Translate.text("ImagesPerFrame")+":"), 2, 4, labelLayout);
     top.add(rendChoice = new BComboBox(), 3, 0);

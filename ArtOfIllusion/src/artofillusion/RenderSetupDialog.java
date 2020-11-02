@@ -31,6 +31,8 @@ public class RenderSetupDialog
   private static final List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
   private final List<ObjectInfo> cameras;
   private final Scene theScene;
+  private Map<String, Object> rendererConfiguration;
+  private Renderer lastConfiguredRenderer;
   private BComboBox rendChoice, camChoice;
   private BRadioButton movieBox;
   private RadioButtonGroup movieGroup;
@@ -116,6 +118,8 @@ public class RenderSetupDialog
     loadRenderSettings(theScene);
     content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     enableMovieComponents();
+    lastConfiguredRenderer = currentRenderer;
+    rendererConfiguration  = currentRenderer.getConfiguration();
     PanelDialog dlg = new PanelDialog(parent, Translate.text("renderTitle"), content);
     if (dlg.clickedOk())
       doRender();
@@ -123,10 +127,12 @@ public class RenderSetupDialog
 
   private void doRender()
   {
+    checkModified();
     recordConfiguration();
     theScene.setMetadata("RenderSetupDialog settings", getConfiguration());
     if (currentRenderer.recordConfiguration())
     {
+      checkRendererModified();
       theScene.setMetadata(currentRenderer.getClass().getName()+" settings", currentRenderer.getConfiguration());
       ObjectInfo cameraInfo = cameras.get(currentCamera);
       Camera cam = new Camera();
@@ -209,6 +215,24 @@ public class RenderSetupDialog
     subimagesField.setEnabled(enable);
   }
 
+  /** 
+    Check if any of the valaues on the UI differ from the last recorded ones. 
+    If so set LayutWindow know.*/
+
+  private void checkModified()
+  {
+    if (width  != (int) widthField.getValue() ||
+        height != (int) heightField.getValue() ||
+        movie  != movieBox.getState() ||
+        startTime != startField.getValue() ||
+        endTime != endField.getValue() ||
+        fps != (int) fpsField.getValue() ||
+        subimages != (int) subimagesField.getValue() ||
+        currentCamera != camChoice.getSelectedIndex() ||
+        lastConfiguredRenderer != currentRenderer)
+      ((LayoutWindow)parent).setModified();
+  }
+
   private void recordConfiguration()
   {
     width = (int) widthField.getValue();
@@ -249,9 +273,8 @@ public class RenderSetupDialog
     subimagesField.setValue(subimages);
   }
 
-  /**
-   * See if the scene contains saved settings for the dialog and load them.
-   */
+  /** See if the scene contains saved settings for the dialog and load them. */
+
   private static void loadDialogSettings(Scene scene)
   {
     try
@@ -304,9 +327,8 @@ public class RenderSetupDialog
     }
   }
 
-  /**
-   * See if the scene contains saved settings for the current renderer and load them.
-   */
+  /** See if the scene contains saved settings for the current renderer and load them. */
+
   private static void loadRenderSettings(Scene scene)
   {
     try
@@ -323,5 +345,47 @@ public class RenderSetupDialog
     {
       // Unexpected objects in the map.  Just ignore.
     }
+  }
+
+  /** Compare the last recorded renderer setting to those that were recorded at dialog open.
+      If changes are found, mark the scene modified. */
+
+  private void checkRendererModified()
+  {
+    if (lastConfiguredRenderer != currentRenderer)
+    {
+      ((LayoutWindow)parent).setModified();
+      return;
+    }
+    boolean modified = false;
+    Object recValue, curValue;
+    String recKey;
+    for (Map.Entry<String, Object> recordedEntry : rendererConfiguration.entrySet())
+    {
+      recKey   = recordedEntry.getKey();
+      recValue = recordedEntry.getValue();
+      for (Map.Entry<String, Object> currentEntry : currentRenderer.getConfiguration().entrySet())
+      {
+        curValue = currentEntry.getValue();
+        if (recKey.equals(currentEntry.getKey()))
+        {
+          if (recValue instanceof Boolean)
+            if ((boolean)recValue != (boolean)curValue)
+              modified = true;
+          if (recValue instanceof Integer)
+            if ((int)recValue != (int)curValue)
+              modified = true;
+          if (recValue instanceof Number && !(recValue instanceof Integer)) // 'else if' did not work right
+            if (((Number)recValue).doubleValue() != ((Number)curValue).doubleValue())
+              modified = true;
+          if (recValue instanceof String) // No Strings in built-in renderers, but who knows...?
+            if (!((String)recValue).equals((String)curValue))
+              modified = true;
+        }
+      }
+    }
+    if (modified)
+      ((LayoutWindow)parent).setModified();
+    return;
   }
 }

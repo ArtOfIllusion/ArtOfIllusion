@@ -147,7 +147,7 @@ public class ConstraintTrack extends Track
   /** Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object obj)
+  public ConstraintTrack duplicate(Object obj)
   {
     ConstraintTrack t = new ConstraintTrack((ObjectInfo) obj);
 
@@ -162,7 +162,7 @@ public class ConstraintTrack extends Track
     t.pos = new Vec3(pos);
     t.orient = new Vec3(orient);
     t.faceToward = faceToward.duplicate();
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     return t;
   }
 
@@ -184,7 +184,7 @@ public class ConstraintTrack extends Track
     pos = new Vec3(t.pos);
     orient = new Vec3(t.orient);
     faceToward.copy(t.faceToward);
-    theWeight = (WeightTrack) t.theWeight.duplicate(t);
+    theWeight = t.theWeight.duplicate(t);
   }
 
   /** Get a list of all keyframe times for this track. */
@@ -224,14 +224,6 @@ public class ConstraintTrack extends Track
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
-  }
-
-  /** Determine whether this track can be added as a child of an object. */
-
-  @Override
-  public boolean canAcceptAsParent(Object obj)
-  {
-    return (obj instanceof ObjectInfo);
   }
 
   /** Get the parent object of this track. */

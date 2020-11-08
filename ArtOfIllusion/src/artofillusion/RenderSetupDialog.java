@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,9 +28,11 @@ import java.util.List;
 public class RenderSetupDialog
 {
   private final BFrame parent;
-  private final List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
+  private static final List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
   private final List<ObjectInfo> cameras;
   private final Scene theScene;
+  private Map<String, Object> rendererConfiguration;
+  private Renderer lastConfiguredRenderer;
   private BComboBox rendChoice, camChoice;
   private BRadioButton movieBox;
   private RadioButtonGroup movieGroup;
@@ -105,29 +108,31 @@ public class RenderSetupDialog
     enableMovieComponents();
     content.add(top, BorderContainer.NORTH);
 
+    // Load the last dialog settings from metadata
+
+    loadDialogSettings(theScene);
+    copyConfigurationToUI();
+
     // Add the panel containing renderer-specific options.
 
     loadRenderSettings(theScene);
     content.add(currentRenderer.getConfigPanel(), BorderContainer.CENTER, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     enableMovieComponents();
+    lastConfiguredRenderer = currentRenderer;
+    rendererConfiguration  = currentRenderer.getConfiguration();
     PanelDialog dlg = new PanelDialog(parent, Translate.text("renderTitle"), content);
-    content.remove(BorderContainer.CENTER);
     if (dlg.clickedOk())
       doRender();
   }
 
   private void doRender()
   {
-    width = (int) widthField.getValue();
-    height = (int) heightField.getValue();
-    movie = movieBox.getState();
-    startTime = startField.getValue();
-    endTime = endField.getValue();
-    fps = (int) fpsField.getValue();
-    subimages = (int) subimagesField.getValue();
-    currentCamera = camChoice.getSelectedIndex();
+    checkModified();
+    recordConfiguration();
+    theScene.setMetadata("RenderSetupDialog settings", getConfiguration());
     if (currentRenderer.recordConfiguration())
     {
+      checkRendererModified();
       theScene.setMetadata(currentRenderer.getClass().getName()+" settings", currentRenderer.getConfiguration());
       ObjectInfo cameraInfo = cameras.get(currentCamera);
       Camera cam = new Camera();
@@ -159,7 +164,18 @@ public class RenderSetupDialog
 
   public static void renderImmediately(BFrame parent, Scene theScene)
   {
-    // Find the camera to render from.
+    // Load the last used settings if available
+
+    loadDialogSettings(theScene);
+    if (currentRenderer == null)
+    {
+      currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
+      currentRenderer.getConfigPanel();
+      currentRenderer.recordConfiguration();
+    }
+    loadRenderSettings(theScene);
+
+    // Find the camera to render from or return if none are present.
 
     List<ObjectInfo> cameras = theScene.getCameras();
     if (cameras.isEmpty())
@@ -172,11 +188,6 @@ public class RenderSetupDialog
 
     // Render the image.
 
-    if (currentRenderer == null)
-      currentRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer();
-    currentRenderer.getConfigPanel();
-    currentRenderer.recordConfiguration();
-    loadRenderSettings(theScene);
     Camera cam = new Camera();
     ObjectInfo cameraInfo = cameras.get(currentCamera);
     SceneCamera sc = (SceneCamera) cameraInfo.getObject();
@@ -204,9 +215,120 @@ public class RenderSetupDialog
     subimagesField.setEnabled(enable);
   }
 
-  /**
-   * See if the scene contains saved settings for the current renderer and load them.
-   */
+  /** 
+    Check if any of the valaues on the UI differ from the last recorded ones. 
+    If so set LayutWindow know.*/
+
+  private void checkModified()
+  {
+    if (width  != (int) widthField.getValue() ||
+        height != (int) heightField.getValue() ||
+        movie  != movieBox.getState() ||
+        startTime != startField.getValue() ||
+        endTime != endField.getValue() ||
+        fps != (int) fpsField.getValue() ||
+        subimages != (int) subimagesField.getValue() ||
+        currentCamera != camChoice.getSelectedIndex() ||
+        lastConfiguredRenderer != currentRenderer)
+      ((LayoutWindow)parent).setModified();
+  }
+
+  private void recordConfiguration()
+  {
+    width = (int) widthField.getValue();
+    height = (int) heightField.getValue();
+    movie = movieBox.getState();
+    startTime = startField.getValue();
+    endTime = endField.getValue();
+    fps = (int) fpsField.getValue();
+    subimages = (int) subimagesField.getValue();
+    currentCamera = camChoice.getSelectedIndex();
+  }
+
+  private Map<String, Object> getConfiguration()
+  {
+    HashMap<String, Object> map = new HashMap<String, Object>();
+    map.put("rendererName", currentRenderer.getName());
+    map.put("currentCamera", currentCamera);
+    map.put("width", width);
+    map.put("height", height);
+    map.put("fps", fps);
+    map.put("subimages", subimages);
+    map.put("startTime", startTime);
+    map.put("endTime", endTime);
+    map.put("movie", movie); 
+    return map;
+  }
+
+  private void copyConfigurationToUI()
+  {
+    rendChoice.setSelectedValue(currentRenderer.getName());
+    camChoice.setSelectedIndex(currentCamera);
+    movieBox.setState(movie);
+    widthField.setValue(width);
+    heightField.setValue(height);
+    startField.setValue(startTime);
+    endField.setValue(endTime);
+    fpsField.setValue(fps);
+    subimagesField.setValue(subimages);
+  }
+
+  /** See if the scene contains saved settings for the dialog and load them. */
+
+  private static void loadDialogSettings(Scene scene)
+  {
+    try
+    {
+      Object settings = scene.getMetadata("RenderSetupDialog settings");
+      if (settings instanceof Map)
+      {
+        Map<String, Object> savedSettings = (Map<String, Object>) settings;
+        for (Map.Entry<String, Object> entry : savedSettings.entrySet())
+        {
+          String rendererName;
+          switch (entry.getKey())
+          {
+            case "rendererName" : 
+              rendererName = (String)entry.getValue();
+              for (Renderer r : renderers)
+                if (r.getName().equals(rendererName))
+                  currentRenderer = r;
+              break;
+            case "currentCamera": 
+              currentCamera = (Integer)entry.getValue(); 
+              break;
+            case "width": 
+              width = (Integer)entry.getValue(); 
+              break;
+            case "height": 
+              height = (Integer)entry.getValue(); 
+              break;
+            case "fps": 
+              fps = (Integer)entry.getValue(); 
+              break;
+            case "subimages": 
+              subimages = (Integer)entry.getValue(); 
+              break;
+            case "startTime": 
+              startTime = ((Number) entry.getValue()).doubleValue(); 
+              break;
+            case "endTime": 
+              startTime = ((Number) entry.getValue()).doubleValue(); 
+              break;
+            case "movie": 
+              movie = (Boolean)entry.getValue(); 
+              break;
+          }
+        }
+      }
+    }
+    catch (ClassCastException ex)
+    {
+    }
+  }
+
+  /** See if the scene contains saved settings for the current renderer and load them. */
+
   private static void loadRenderSettings(Scene scene)
   {
     try
@@ -223,5 +345,47 @@ public class RenderSetupDialog
     {
       // Unexpected objects in the map.  Just ignore.
     }
+  }
+
+  /** Compare the last recorded renderer setting to those that were recorded at dialog open.
+      If changes are found, mark the scene modified. */
+
+  private void checkRendererModified()
+  {
+    if (lastConfiguredRenderer != currentRenderer)
+    {
+      ((LayoutWindow)parent).setModified();
+      return;
+    }
+    boolean modified = false;
+    Object recValue, curValue;
+    String recKey;
+    for (Map.Entry<String, Object> recordedEntry : rendererConfiguration.entrySet())
+    {
+      recKey   = recordedEntry.getKey();
+      recValue = recordedEntry.getValue();
+      for (Map.Entry<String, Object> currentEntry : currentRenderer.getConfiguration().entrySet())
+      {
+        curValue = currentEntry.getValue();
+        if (recKey.equals(currentEntry.getKey()))
+        {
+          if (recValue instanceof Boolean)
+            if ((boolean)recValue != (boolean)curValue)
+              modified = true;
+          if (recValue instanceof Integer)
+            if ((int)recValue != (int)curValue)
+              modified = true;
+          if (recValue instanceof Number && !(recValue instanceof Integer)) // 'else if' did not work right
+            if (((Number)recValue).doubleValue() != ((Number)curValue).doubleValue())
+              modified = true;
+          if (recValue instanceof String) // No Strings in built-in renderers, but who knows...?
+            if (!((String)recValue).equals((String)curValue))
+              modified = true;
+        }
+      }
+    }
+    if (modified)
+      ((LayoutWindow)parent).setModified();
+    return;
   }
 }

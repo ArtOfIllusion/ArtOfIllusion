@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016-2020 by Maksim Khramov
-   Changes copyright (C) 2017-2019 by Petri Ihalainen
+   Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1761,7 +1761,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (theScene.getName() == null)
       saveAsCommand();
     else
+    {
       modified = !ArtOfIllusion.saveScene(theScene, this);
+      updateMenus();
+    }
   }
 
   public void saveAsCommand()
@@ -1792,6 +1795,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.setDirectory(fc.getDirectory().getAbsolutePath());
     setTitle(name);
     modified = !ArtOfIllusion.saveScene(theScene, this);
+
+    // The UI seems to react to something somewhere in the saving process and 
+    // updateMenus() even without this, but that probably can not be quaranteed.
+
+    updateMenus(); 
   }
 
   public void undoCommand()

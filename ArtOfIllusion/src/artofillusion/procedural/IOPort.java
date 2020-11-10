@@ -12,7 +12,6 @@
 package artofillusion.procedural;
 
 import java.awt.*;
-import java.util.Arrays;
 
 /** This is the graphical representation of an input or output port on a module. */
 
@@ -155,16 +154,6 @@ public class IOPort
         break;
       }
   }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("IOPort{valueType=").append(valueType == COLOR ? "Color" : "Number");
-        sb.append(", type=").append(type == INPUT ? "Input" : "Output");
-        sb.append(", description=").append(Arrays.toString(description));
-        sb.append('}');
-        return sb.toString();
-    }
   
   
 }

@@ -2,6 +2,8 @@ Art of Illusion Version History
 
 Latest: (Not in stable release yet)
 
+- Traditional Chinese Translation added courtesy of Distance Learning Center 
+  at the Chinese Culture University (Open Source Software for School project) 
 - Fix bug with distance to plane(View rotates around this distance) 
     when copying/duplicating Scene Camera
 - Fix display bug with Cylinder pose track

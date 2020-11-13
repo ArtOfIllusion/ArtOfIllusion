@@ -18,13 +18,17 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
+
 /** This class presents a user interface for entering object scripts. */
 
 public class ScriptedObjectEditorWindow extends BFrame
 {
   private EditingWindow window;
   private ObjectInfo info;
-  private ScriptEditor scriptText;
+  private RSyntaxTextArea scriptText;
   private BComboBox languageChoice;
   private String scriptName;
   private Runnable onClose;
@@ -42,14 +46,20 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
     BorderContainer content = new BorderContainer();
     setContent(content);
-    scriptText = new ScriptEditor(((ScriptedObject) info.getObject()).getScript());
+    scriptText = new RSyntaxTextArea(((ScriptedObject) info.getObject()).getScript(), 25, 100);
+    scriptText.setTabSize(2);
+    scriptText.setCodeFoldingEnabled(true);
+    content.add(new AWTWidget(new RTextScrollPane(scriptText))
+                             , BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
     languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
     languageRow.add(languageChoice);
-    content.add(languageRow, BorderContainer.NORTH, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
-    content.add(BOutline.createBevelBorder(scriptText.createContainer(), false), BorderContainer.CENTER);
+    content.add(languageRow, BorderContainer.NORTH,
+                new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
+    content.add(BOutline.createBevelBorder(new AWTWidget(new RTextScrollPane(scriptText)),
+               false), BorderContainer.CENTER);
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
     buttons.add(Translate.button("ok", this, "commitChanges"));
@@ -58,11 +68,22 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("scriptParameters", this, "editParameters"));
     buttons.add(Translate.button("cancel", this, "dispose"));
     addEventLink(WindowClosingEvent.class, this, "commitChanges");
+    languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
     scriptText.setCaretPosition(0);
     pack();
+    updateLanguage();
     UIUtilities.centerWindow(this);
     scriptText.requestFocus();
     setVisible(true);
+  }
+
+  /** Make syntax highlighing match current scripting language */
+
+  private void updateLanguage()
+  {
+    scriptText.setSyntaxEditingStyle(
+        "groovy".equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
+           SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
   }
 
   /** Display a dialog for editing the parameters. */
@@ -110,6 +131,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     }
     setScriptNameFromFile(filename);
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    updateLanguage();
   }
 
   /** Prompt the user to save a script. */

@@ -20,6 +20,7 @@ import artofillusion.object.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import buoy.widget.BStandardDialog;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
@@ -50,6 +51,7 @@ public class Scene
 
   private ParameterValue environParamValue[];
   private StringBuffer loadingErrors;
+  public  boolean itemListChanged = false;
 
   public static final int HANDLE_SIZE = 4;
   public static final int ENVIRON_SOLID = 0;
@@ -133,12 +135,19 @@ public class Scene
     time = t;
     boolean processed[] = new boolean [objects.size()];
     for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo info = objects.elementAt(i);
-        applyTracksToObject(info, processed, null, i);
-      }
-    for (ObjectInfo obj : objects)
+    {
+      ObjectInfo info = objects.elementAt(i);
+      applyTracksToObject(info, processed, null, i);
+    }
+    
+    // Let's make sure that the scene survives the cases of ScriptedObjects 
+    // changing the content of the scene.
+
+    Vector<ObjectInfo> objectsBefore = new Vector<ObjectInfo>(objects);
+    itemListChanged = false;
+    for (ObjectInfo obj : objectsBefore)
       obj.getObject().sceneChanged(obj, this);
+    itemListChanged = ! objectsBefore.equals(objects);
   }
 
   /** Modify an object (and any objects that depend on it) based on its tracks at the current time. */
@@ -470,8 +479,7 @@ public class Scene
       info.addTrack(new RotationTrack(info), 1);
     }
     if (info.getObject().canSetTexture() && info.getObject().getTextureMapping() == null)
-        info.setTexture(getDefaultTexture(),
-			getDefaultTexture().getDefaultMapping(info.getObject()));
+        info.setTexture(getDefaultTexture(), getDefaultTexture().getDefaultMapping(info.getObject()));
 
     info.getObject().sceneChanged(info, this);
     objects.insertElementAt(info, index);
@@ -1442,6 +1450,8 @@ public class Scene
     textureListeners = new Vector<ListChangeListener>();
     materialListeners = new Vector<ListChangeListener>();
     setTime(0.0);
+    if (itemListChanged)
+      new BStandardDialog("Warning", "A ScriptedObject may be editing the Scene.",  BStandardDialog.WARNING).showMessageDialog(null);
   }
 
   private ObjectInfo readObjectFromFile(DataInputStream in, Hashtable<Integer, Object3D> table, int version) throws IOException, InvalidObjectException

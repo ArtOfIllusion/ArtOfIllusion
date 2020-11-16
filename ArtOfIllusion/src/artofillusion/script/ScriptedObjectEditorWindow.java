@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
-
+   Modifications Copyright (C) 2020 by Petri Ihalainen
+ 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
    Foundation; either version 2 of the License, or (at your option) any later version.
@@ -17,6 +18,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
 
 /** This class presents a user interface for entering object scripts. */
 
@@ -157,6 +159,10 @@ public class ScriptedObjectEditorWindow extends BFrame
 
   private void commitChanges()
   {
+    // Let's take a snapshot od the scene before we run the ScriptedObject
+
+    ArrayList<ObjectInfo> objectsBeforeRun = new ArrayList(window.getScene().getAllObjects());
+
     ScriptedObject so = (ScriptedObject) info.getObject();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     so.setScript(scriptText.getText());
@@ -167,6 +173,14 @@ public class ScriptedObjectEditorWindow extends BFrame
     window.updateImage();
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     dispose();
+
+    // Compare the snapshot to the current scene and inform the user if necessary.
+
+    if (! objectsBeforeRun.equals(window.getScene().getAllObjects()))
+    {
+      ((LayoutWindow)window).rebuildItemList();
+      new BStandardDialog("Warning", "This ScriptedObject edits the Scene.",  BStandardDialog.WARNING).showMessageDialog(null);
+    }
   }
 
   /** This is an inner class for editing the list of parameters on the object. */

@@ -313,7 +313,7 @@ public class RenderSetupDialog
               startTime = ((Number) entry.getValue()).doubleValue(); 
               break;
             case "endTime": 
-              startTime = ((Number) entry.getValue()).doubleValue(); 
+              endTime = ((Number) entry.getValue()).doubleValue(); 
               break;
             case "movie": 
               movie = (Boolean)entry.getValue(); 

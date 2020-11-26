@@ -17,12 +17,16 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rtextarea.RTextScrollPane;
+
 /** This class presents a user interface for entering scripts to be executed. */
 
 public class ExecuteScriptWindow extends BFrame
 {
   private LayoutWindow window;
-  private ScriptEditor scriptText;
+  private RSyntaxTextArea scriptText;
   private BComboBox languageChoice;
   private String scriptName;
 
@@ -39,10 +43,11 @@ public class ExecuteScriptWindow extends BFrame
     window = win;
     if (scriptDir == null)
       scriptDir = new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY);
-    scriptText = new ScriptEditor("");
-    if (lastScript != null)
-      scriptText.setText(lastScript);
-    content.add(scriptText.createContainer(), BorderContainer.CENTER);
+    scriptText = new RSyntaxTextArea(lastScript, 25, 100);
+    scriptText.setTabSize(2);
+    scriptText.setCodeFoldingEnabled(true);
+    content.add(new AWTWidget(new RTextScrollPane(scriptText))
+               , BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
@@ -55,11 +60,22 @@ public class ExecuteScriptWindow extends BFrame
     buttons.add(Translate.button("Save", "...", this, "saveScript"));
     buttons.add(Translate.button("close", this, "closeWindow"));
     addEventLink(WindowClosingEvent.class, this, "closeWindow");
+    languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
     scriptText.setCaretPosition(0);
     pack();
+    updateLanguage();
     UIUtilities.centerWindow(this);
     scriptText.requestFocus();
     setVisible(true);
+  }
+
+  /** Make syntax highlighting match current scripting language */
+
+  private void updateLanguage()
+  {
+    scriptText.setSyntaxEditingStyle(
+        "groovy".equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
+          SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
   }
 
   private void closeWindow()
@@ -107,6 +123,7 @@ public class ExecuteScriptWindow extends BFrame
     }
     setScriptNameFromFile(filename);
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    updateLanguage();
   }
 
   /** Prompt the user to save a script. */

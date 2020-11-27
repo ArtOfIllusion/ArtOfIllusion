@@ -73,43 +73,43 @@ public class RTSphere extends RTObject
     b = dir.x*v1.x + dir.y*v1.y + dir.z*v1.z;
     c = v1.x*v1.x + v1.y*v1.y + v1.z*v1.z - r2;
     if (c > TOL)
-      {
-        // Ray origin is outside sphere.
+    {
+      // Ray origin is outside sphere.
 
-        if (b <= 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from center of sphere.
-        d = b*b - c;
-        if (d < 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;
-        numIntersections = 2;
-        root = Math.sqrt(d);
-        t = b - root;
-        t2 = b + root;
-        v2.set(orig.x+t2*dir.x, orig.y+t2*dir.y, orig.z+t2*dir.z);
-        projectPoint(v2);
-      }
+      if (b <= 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from center of sphere.
+      d = b*b - c;
+      if (d < 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;
+      numIntersections = 2;
+      root = Math.sqrt(d);
+      t = b - root;
+      t2 = b + root;
+      v2.set(orig.x+t2*dir.x, orig.y+t2*dir.y, orig.z+t2*dir.z);
+      projectPoint(v2);
+    }
     else if (c < -TOL)
-      {
-        // Ray origin is inside sphere.
+    {
+      // Ray origin is inside sphere.
 
-        d = b*b - c;
-        if (d < 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;
-        numIntersections = 1;
-        t = b + Math.sqrt(d);
-      }
+      d = b*b - c;
+      if (d < 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;
+      numIntersections = 1;
+      t = b + Math.sqrt(d);
+    }
     else
-      {
-        // Ray origin is on the surface of the sphere.
+    {
+      // Ray origin is on the surface of the sphere.
 
-        if (b <= 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from center of sphere.
-        d = b*b - c;
-        if (d < 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;
-        numIntersections = 1;
-        t = b + Math.sqrt(d);
-      }
+      if (b <= 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from center of sphere.
+      d = b*b - c;
+      if (d < 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;
+      numIntersections = 1;
+      t = b + Math.sqrt(d);
+    }
     v1.set(orig.x+t*dir.x, orig.y+t*dir.y, orig.z+t*dir.z);
     projectPoint(v1);
     return new SphereIntersection(this, numIntersections, v1, v2, t, t2);

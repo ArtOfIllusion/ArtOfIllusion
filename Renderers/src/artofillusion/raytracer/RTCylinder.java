@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,6 +32,8 @@ public class RTCylinder extends RTObject
   public static final int TOP = 0;
   public static final int BOTTOM = 1;
   public static final int SIDE = 2;
+
+  private double linearTol, radialTol;
 
   public RTCylinder(Cylinder cylinder, Mat4 fromLocal, Mat4 toLocal, double param[])
   {
@@ -105,6 +108,11 @@ public class RTCylinder extends RTObject
       topNormal = bottomNormal.times(-1.0);
     bumpMapped = cylinder.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+
+    linearTol = (Math.max(Math.max(Math.abs(fromLocal.m14), (Math.abs(fromLocal.m24))),(Math.abs(fromLocal.m34))) +
+                 Math.max(Math.max(rx, rz), height));
+    radialTol = Math.max(Math.max(rx2, rz2), linearTol)*TOL;
+    linearTol *= TOL;
   }
 
   /** Get the MaterialMapping for this object. */
@@ -155,7 +163,7 @@ public class RTCylinder extends RTObject
       // See if the ray hits the top or bottom face of the cylinder.
 
       temp1 = v1.y/dir.y;
-      if (temp1 > TOL)
+      if (temp1 > linearTol)
       {
         a = temp1*dir.x - v1.x;
         b = temp1*dir.z - v1.z;
@@ -168,7 +176,7 @@ public class RTCylinder extends RTObject
       if (!cone)
       {
         temp1 = (v1.y+height)/dir.y;
-        if (temp1 > TOL)
+        if (temp1 > linearTol)
         {
           a = temp1*dir.x - v1.x;
           b = temp1*dir.z - v1.z;
@@ -227,7 +235,7 @@ public class RTCylinder extends RTObject
     }
     dist1 = Double.MAX_VALUE;
     dist2 = mint;
-    if (c > TOL)  // Ray origin is outside cylinder.
+    if (c > radialTol)  // Ray origin is outside cylinder.
     {
       if (b > 0.0)  // Ray points toward cylinder.
       {
@@ -242,7 +250,7 @@ public class RTCylinder extends RTObject
         }
       }
     }
-    else if (c < -TOL)  // Ray origin is inside cylinder.
+    else if (c < -radialTol)  // Ray origin is inside cylinder.
     {
       a = dir.x*dir.x + temp1*dir.z - temp2*temp2;
       e = b*b - a*c;

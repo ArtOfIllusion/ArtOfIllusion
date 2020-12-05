@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,9 +31,10 @@ public class RTTriangle extends RTObject
   double d, edge2d1x, edge2d1y, edge2d2x, edge2d2y;
 
   public static final double TOL = 1e-12;
-
   private static final short BUMP_MAPPED = 1;
   private static final short INTERP_NORMALS = 2;
+
+  private double triangleTol;
 
   public RTTriangle(RenderingMesh mesh, int which, Mat4 fromLocal, Mat4 toLocal)
   {
@@ -101,6 +103,12 @@ public class RTTriangle extends RTObject
     edge2d2y *= denom;
     if (tri.theMesh.mapping.getTexture().hasComponent(Texture.BUMP_COMPONENT))
       flags |= BUMP_MAPPED;
+
+    triangleTol = (Math.max(Math.max(Math.abs(fromLocal.m14), Math.abs(fromLocal.m24)), Math.abs(fromLocal.m34)) +
+                   Math.max(Math.max(Math.max(Math.max(vert1.x, vert2.x), vert3.x) - Math.min(Math.min(vert1.x, vert2.x), vert3.x),
+                                     Math.max(Math.max(vert1.y, vert2.y), vert3.y) - Math.min(Math.min(vert1.y, vert2.y), vert3.y)),
+                                     Math.max(Math.max(vert1.z, vert2.z), vert3.z) - Math.min(Math.min(vert1.z, vert2.z), vert3.z))
+                  )*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -132,7 +140,7 @@ public class RTTriangle extends RTObject
       return SurfaceIntersection.NO_INTERSECTION;  // The ray is parallel to the plane.
     v0 = -(trueNorm.dot(orig)+d);
     double t = v0/vd;
-    if (t < TOL)
+    if (t < triangleTol)
       return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from plane of triangle.
 
     // Determine whether the intersection point is inside the triangle.

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,6 +27,8 @@ public class RTEllipsoid extends RTObject
   Mat4 toLocal, fromLocal;
 
   public static final double TOL = 1e-12;
+
+  double ellipsoidTol;
 
   public RTEllipsoid(Sphere sphere, Mat4 fromLocal, Mat4 toLocal, double param[])
   {
@@ -103,6 +106,8 @@ public class RTEllipsoid extends RTObject
     sz = rx2/rz2;
     bumpMapped = sphere.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+    ellipsoidTol = (Math.max(Math.max(Math.abs(fromLocal.m14), (Math.abs(fromLocal.m24))),(Math.abs(fromLocal.m34))) +
+                    Math.max(Math.max(rx, ry), rz))*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -147,7 +152,8 @@ public class RTEllipsoid extends RTObject
     b = dir.x*v1.x + temp1*v1.y + temp2*v1.z;
     c = v1.x*v1.x + sy*v1.y*v1.y + sz*v1.z*v1.z - rx2;
     int numIntersections;
-    if (c > TOL*b)
+
+    if (c > ellipsoidTol*b)
     {
       // Ray origin is outside ellipsoid.
 
@@ -164,7 +170,7 @@ public class RTEllipsoid extends RTObject
       v2.set(orig.x+dist2*dir.x, orig.y+dist2*dir.y, orig.z+dist2*dir.z);
       projectPoint(v2);
     }
-    else if (c < -TOL*b)
+    else if (c < -ellipsoidTol*b)
     {
       // Ray origin is inside ellipsoid.
 

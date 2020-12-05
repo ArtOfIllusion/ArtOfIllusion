@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,6 +29,8 @@ public class RTSphere extends RTObject
 
   public static final double TOL = 1e-12;
 
+  private double sphereTol;
+
   public RTSphere(Sphere sphere, Mat4 fromLocal, Mat4 toLocal, double param[])
   {
     theSphere = sphere;
@@ -41,6 +44,8 @@ public class RTSphere extends RTObject
     if (bumpMapped)
       this.fromLocal = fromLocal;
     this.toLocal = toLocal;
+    sphereTol = Math.max(Math.max(Math.abs(fromLocal.m14), Math.abs(fromLocal.m24)), Math.abs(fromLocal.m34))+r;
+    sphereTol = Math.max(sphereTol, r2)*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -72,7 +77,7 @@ public class RTSphere extends RTObject
     v1.set(cx-orig.x, cy-orig.y, cz-orig.z);
     b = dir.x*v1.x + dir.y*v1.y + dir.z*v1.z;
     c = v1.x*v1.x + v1.y*v1.y + v1.z*v1.z - r2;
-    if (c > TOL)
+    if (c > sphereTol)
     {
       // Ray origin is outside sphere.
 
@@ -88,7 +93,7 @@ public class RTSphere extends RTObject
       v2.set(orig.x+t2*dir.x, orig.y+t2*dir.y, orig.z+t2*dir.z);
       projectPoint(v2);
     }
-    else if (c < -TOL)
+    else if (c < -sphereTol)
     {
       // Ray origin is inside sphere.
 

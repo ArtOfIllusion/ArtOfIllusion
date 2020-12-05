@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,6 +28,8 @@ public class RTCube extends RTObject
   protected Mat4 toLocal, fromLocal;
 
   public static final double TOL = 1e-12;
+
+  private double cubeTol;
 
   public RTCube(Cube cube, Mat4 fromLocal, Mat4 toLocal, double param[])
   {
@@ -103,6 +106,8 @@ public class RTCube extends RTObject
     }
     bumpMapped = cube.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+    cubeTol = (Math.max(Math.max(Math.abs(fromLocal.m14), (Math.abs(fromLocal.m24))),(Math.abs(fromLocal.m34))) + 
+               Math.max(Math.max(xsize, ysize), zsize))*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -128,6 +133,7 @@ public class RTCube extends RTObject
   {
     Vec3 rorig = r.getOrigin(), rdir = r.getDirection();
     Vec3 origin, direction;
+
     if (transform)
     {
       origin = r.tempVec1;
@@ -167,7 +173,7 @@ public class RTCube extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < cubeTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     if (direction.y == 0.0)
@@ -193,7 +199,7 @@ public class RTCube extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < cubeTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     if (direction.z == 0.0)
@@ -219,12 +225,12 @@ public class RTCube extends RTObject
         if (t1 < maxt)
           maxt = t1;
       }
-      if (mint > maxt || maxt < TOL)
+      if (mint > maxt || maxt < cubeTol)
         return SurfaceIntersection.NO_INTERSECTION;
     }
     int numIntersections;
     Vec3 v1 = r.tempVec1, v2 = r.tempVec2, trueNorm = r.tempVec3;
-    if (mint < TOL)
+    if (mint < cubeTol)
     {
       v1.set(rorig.x+maxt*rdir.x, rorig.y+maxt*rdir.y, rorig.z+maxt*rdir.z);
       mint = maxt;

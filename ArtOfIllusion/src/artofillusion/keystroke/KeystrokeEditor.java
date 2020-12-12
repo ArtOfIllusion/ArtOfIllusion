@@ -20,7 +20,9 @@ import java.awt.*;
 import java.awt.event.*;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.Style;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
@@ -74,6 +76,12 @@ public class KeystrokeEditor extends BDialog
     languageChoice.setSelectedValue(record.getLanguage());
 
     syntaxTextArea = new RSyntaxTextArea(record.getScript(), 25, 100);
+    SyntaxScheme scheme = syntaxTextArea.getSyntaxScheme();
+    Style style = scheme.getStyle(SyntaxScheme.COMMENT_EOL);
+    Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
+    scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
+    scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
+    syntaxTextArea.setAnimateBracketMatching(false);
     syntaxTextArea.setTabSize(2);
     syntaxTextArea.setCodeFoldingEnabled(true);
     syntaxTextArea.setSyntaxEditingStyle(record.getLanguage().equalsIgnoreCase("groovy") ? SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);

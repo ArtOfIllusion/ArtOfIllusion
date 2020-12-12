@@ -18,7 +18,9 @@ import java.awt.*;
 import java.io.*;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.Style;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 /** This class presents a user interface for entering scripts to be executed. */
@@ -44,6 +46,13 @@ public class ExecuteScriptWindow extends BFrame
     if (scriptDir == null)
       scriptDir = new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY);
     scriptText = new RSyntaxTextArea(lastScript, 25, 100);
+    SyntaxScheme scheme = scriptText.getSyntaxScheme();
+    Style style = scheme.getStyle(SyntaxScheme.COMMENT_EOL);
+    Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
+    scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
+    scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
+
+    scriptText.setAnimateBracketMatching(false);
     scriptText.setTabSize(2);
     scriptText.setCodeFoldingEnabled(true);
     content.add(new AWTWidget(new RTextScrollPane(scriptText))

@@ -19,11 +19,11 @@
     <path></path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
-    <minVersion>1.6.0</minVersion>
+    <minVersion>1.8.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
-    <maxHeapSize>1536</maxHeapSize>
+    <maxHeapSize>16384</maxHeapSize>
     <opt>-Dsun.java2d.noddraw=true</opt>
     <opt>-Djava.library.path=lib</opt>
   </jre>

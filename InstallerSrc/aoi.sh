@@ -56,7 +56,7 @@ if [ -z "$JAVACMD" ]; then
 fi 
 
 #default mem
-MEM=-Xmx1500m
+MEM=-Xmx16g
 
 #java command line options
 for option in "$@"; do

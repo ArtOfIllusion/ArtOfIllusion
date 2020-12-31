@@ -73,10 +73,7 @@ fi
 if [ -e $AOIPATH/lib/gluegen-rt.jar ]; then
 	JOGL="$AOIPATH/gluegen-rt.jar"
 fi
-if [ -e $AOIPATH/lib/jmf.jar ]; then
-	JMF="$AOIPATH/jmf.jar"
-fi
-JAVACMD="$JAVACMD $MEM -cp $AOIPATH/ArtOfIllusion.jar:$JOGL:$JMF artofillusion.ArtOfIllusion"
+JAVACMD="$JAVACMD $MEM -cp $AOIPATH/ArtOfIllusion.jar:$JOGL artofillusion.ArtOfIllusion"
 
 #AoI command line options
 for option in "$@"; do

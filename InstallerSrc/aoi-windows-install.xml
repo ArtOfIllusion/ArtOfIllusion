@@ -5,7 +5,7 @@
 <!-- Application Information -->
     <info>
        <appname>ArtOfIllusion</appname>
-       <appversion>3.0.3</appversion>
+       <appversion>3.2.0</appversion>
        <authors>
            <author name="Peter Eastman" email="peastman@users.sourceforge.net"/>
        </authors>
@@ -54,10 +54,6 @@
         <res id="HTMLInfoPanel.info_deu" src="./InstallHTML/WindowsInstall_deu.html"/>
 
 
-        <!-- localization of the info panel -->
-        <res id="userInputLang.xml_eng" src="userInputLang.xml_eng"/>
-        <res id="userInputLang.xml_fra" src="userInputLang.xml_fra"/>
-        <res id="userInputLang.xml_deu" src="userInputLang.xml_deu"/>
         <res id="shortcutSpec.xml" src="shortcutSpec.xml"/> 
 	<!--  <res id="ProcessPanel.Spec.xml" src="ProcessPanel.Spec.xml"/> -->
         <!-- localization of resource strings -->
@@ -74,7 +70,7 @@
         <panel classname="TargetPanel"/> 
         <panel classname="PacksPanel"/>
         <panel classname="InstallPanel"/>
-		<panel classname="ShortcutPanel"/>		
+	<panel classname="ShortcutPanel"/>		
         <panel classname="FinishPanel"/> 
     </panels>
     <!-- The packs section. -->
@@ -89,7 +85,7 @@
             </file>
         </pack>
 
-	<pack id="jogl-windows" name="Jogamp JOGL 2.3.2" preselected="yes" required="no">
+	<pack id="jogl-windows" name="Jogamp JOGL" preselected="yes" required="no">
             <description>OpenGL support for Windows</description>
             <fileset dir="jogl-windows" targetdir="$INSTALL_PATH/lib">
                 <include name="*" />

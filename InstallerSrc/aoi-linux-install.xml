@@ -43,11 +43,6 @@
         <res id="HTMLInfoPanel.info_fra" src="./InstallHTML/LinuxInstall_fra.html"/>
         <res id="HTMLInfoPanel.info_eng" src="./InstallHTML/LinuxInstall_eng.html"/>
         <res id="HTMLInfoPanel.info_deu" src="./InstallHTML/LinuxInstall_deu.html"/>
-	<!-- <res id="userInputSpec.xml" src="userInputSpec.xml"/> -->
-        <!-- localization of the info panel -->
-        <res id="userInputLang.xml_eng" src="userInputLang.xml_eng" />
-        <res id="userInputLang.xml_fra" src="userInputLang.xml_fra" />
-        <res id="userInputLang.xml_deu" src="userInputLang.xml_deu" />
         <res src="shortcutSpec.xml" id="shortcutSpec.xml"/> 
         <res id="ProcessPanel.Spec.xml" src="ProcessPanel.Spec.xml" />
         <!-- localization of resource strings -->
@@ -98,14 +93,14 @@
             </executable>
         </pack>
 
-	<pack id="jogl-linux" name="Jogamp JOGL 2.3.2" preselected="yes" required="no">
-            <description>OpenGL support for 32 and 64 bit Intel-compatible OS</description>
+	<pack id="jogl" name="Jogamp JOGL" preselected="yes" required="no">
+            <description>OpenGL support</description>
             <fileset dir="jogl-linux" targetdir="$INSTALL_PATH/lib">
                 <include name="*" />
             </fileset>
         </pack>
 
-	<pack id="desktopPanelTitle" name="Desktop File Handling" required="no">
+	<pack id="DesktopIntegration" name="Desktop File Handling" required="no">
             <os family="unix" />
           <description>File assocation and icon</description>
             <!-- desktop post install script -->

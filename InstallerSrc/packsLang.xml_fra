@@ -4,16 +4,12 @@
 
 <izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
     <!-- General installer strings -->
-    <str id="desktopPanelTitle" txt="Intégration bureau Gnome/KDE (free desktop)"/>
-    <str id="desktopPanelTitle.description" txt="Association de fichiers .aoi et icône"/>
-    <str id="jogl-linux-i586" txt="Jogl 1.0.0 pour i586"/>
-    <str id="jogl-linux-i586.description" txt="Rendu OpenGL. Cette option améliore les performances d'affichage, mais peux se révéler incompatible avec votre système. Si Art of Illusion ne peut être lancé après l'installation, réinstallez sans cette option."/>
-    <str id="jogl-linux-AMD64" txt="Jogl 1.0.0 pour AMD64"/>
-    <str id="jogl-linux-AMD64.description" txt="Rendu OpenGL. Cette option améliore les performances d'affichage, mais peux se révéler incompatible avec votre système. Si Art of Illusion ne peut être lancé après l'installation, réinstallez sans cette option."/>
-    <str id="jogl-windows-i586" txt="Jogl 1.0.0 pour AMD64"/>
-    <str id="jogl-windows-i586.description" txt="Rendu OpenGL. Cette option améliore les performances d'affichage, mais peux se révéler incompatible avec votre système. Si Art of Illusion ne peut être lancé après l'installation, réinstallez sans cette option."/>
-    <str id="JMF" txt="JMF"/>
-    <str id="JMF.description" txt="Java Media Framework (utilisé pour sauver des animations au format Quicktime, à télécharger d'abord)"/>
+    <str id="DesktopIntegration" txt="Intégration bureau Gnome/KDE (free desktop)"/>
+    <str id="DesktopIntegration.description" txt="Association de fichiers .aoi et icône"/>
+    <str id="jogl" txt="JOGL 2.4.0"/>
+    <str id="jogl.description" txt="Rendu OpenGL. Cette option améliore les performances d'affichage, mais peux se révéler incompatible avec votre système. Si Art of Illusion ne peut être lancé après l'installation, réinstallez sans cette option."/>
+    <str id="jogl-windows" txt="JOGL 2.4.0"/>
+    <str id="jogl-windows.description" txt="Rendu OpenGL. Cette option améliore les performances d'affichage, mais peux se révéler incompatible avec votre système. Si Art of Illusion ne peut être lancé après l'installation, réinstallez sans cette option."/>
     <str id="core" txt="Base AoI"/>
     <str id="core.description" txt="Constituants AoI de base"/>
 </izpack:langpack>

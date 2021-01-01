@@ -1,100 +1,91 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
-<!-- Art of Illusion IzPack installer xml definition file --> 
+<!-- Art of Illusion IzPack installer xml definition file -->
 
 <izpack:installation version="5.0" xmlns:izpack="http://izpack.org/schema/installation">
-<!-- Application Information -->
-    <info>
-       <appname>ArtOfIllusion</appname>
-       <appversion>3.2.0</appversion>
-       <authors>
-           <author name="Peter Eastman" email="peastman@users.sourceforge.net"/>
-       </authors>
-       <url>http://www.artofillusion.org/</url>
+  <!-- Application Information -->
+  <info>
+    <appname>ArtOfIllusion</appname>
+    <appversion>3.2.0</appversion>
+    <authors>
+      <author name="Peter Eastman" email="peastman@users.sourceforge.net"/>
+    </authors>
+    <url>http://www.artofillusion.org/</url>
+  </info>
 
-    </info>
+  <!-- The gui preferences indication -->
+  <!-- Flexible and in the screen proportions -->
+  <guiprefs height="580" resizable="yes" width="640">
+    <!-- GUI addaption for more informations see "Modifying the GUI" in the documentation -->
+    <modifier key="layoutAnchor" value="CENTER"/>
+    <modifier key="headingPanelCounter" value="progressbar"/>
+    <modifier key="headingPanelCounterPos" value="inNavigationPanel"/>
+    <modifier key="allYGap" value="3"/>
+    <modifier key="paragraphYGap" value="10"/>
+    <modifier key="filler1YGap" value="5"/>
+    <modifier key="filler3XGap" value="10"/>
+    <modifier key="useSplashScreen" value="3000"/>
+  </guiprefs>
 
-    <!-- The gui preferences indication -->
-    <!-- Flexible and in the screen proportions -->
-    <guiprefs height="580" resizable="yes" width="640">
+  <!-- The locale section (english and french packages) -->
+  <locale>
+    <langpack iso3="eng"/>
+    <langpack iso3="fra"/>
+    <langpack iso3="deu"/>
+  </locale>
 
-	
-	<!-- GUI addaption for more informations see "Modifying the GUI" in the documentation -->
-        <modifier key="layoutAnchor" value="CENTER"/>
-        <modifier key="headingPanelCounter" value="progressbar"/>
-        <modifier key="headingPanelCounterPos" value="inNavigationPanel"/>
-        <modifier key="allYGap" value="3"/>
-        <modifier key="paragraphYGap" value="10"/>
-        <modifier key="filler1YGap" value="5"/>
-        <modifier key="filler3XGap" value="10"/>
-    </guiprefs>
-
-    <!-- The locale section (english and french packages) -->
-    <locale>
-        <langpack iso3="eng"/>
-        <langpack iso3="fra"/>
-        <langpack iso3="deu"/>
-    </locale>
-
-    <!-- Variables. -->
-    <variables>
-        <variable name="TargetPanel.dir.windows" value="${USER_HOME}\Programs\ArtOfIllusion"/>
-    </variables>
+  <!-- Variables. -->
+  <variables>
+    <variable name="TargetPanel.dir.windows" value="${USER_HOME}\Programs\ArtOfIllusion"/>
+  </variables>
 
 
 
-    <!-- The resources section. The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.    -->
-    <resources>
-        <res id="ImagePanel.img" src="installscreen.jpg"/>
-        <res id="HTMLHelloPanel.splash" src="./InstallHTML/splash.html"/>
-        <res id="LicencePanel.licence" src="Licence.txt"/>
-        <res id="HTMLInfoPanel.info" src="./InstallHTML/WindowsInstall_eng.html"/>
-        <!-- localization of the info panel -->
-        <res id="HTMLInfoPanel.info_fra" src="./InstallHTML/WindowsInstall_fra.html"/>
-        <res id="HTMLInfoPanel.info_eng" src="./InstallHTML/WindowsInstall_eng.html"/>
-        <res id="HTMLInfoPanel.info_deu" src="./InstallHTML/WindowsInstall_deu.html"/>
+  <!-- The resources section. The ids must be these ones if you want to use the LicencePanel and/or the InfoPanel.    -->
+  <resources>
+    <res id="Splash.image" src="installscreen.jpg"/>
+    <res id="CustomLangPack.xml" src="customizeInstaller.xml_eng"/>
+    <res id="LicencePanel.licence" src="Licence.txt"/>
+    <res id="shortcutSpec.xml" src="shortcutSpec.xml"/>
+    <!-- localization of resource strings -->
+    <res id="packsLang.xml_fra" src="packsLang.xml_fra"/>
+    <res id="packsLang.xml_eng" src="packsLang.xml_eng"/>
+    <res id="packsLang.xml_deu" src="packsLang.xml_deu"/>
+  </resources>
 
+  <!-- The panels section. We indicate here which panels we want to use. The order will be respected. -->
+  <panels>
+    <panel classname="LicencePanel" id="licence"/>
+    <panel classname="TargetPanel"/>
+    <panel classname="PacksPanel"/>
+    <panel classname="InstallPanel"/>
+    <panel classname="ShortcutPanel"/>
+    <panel classname="SimpleFinishPanel"/>
+  </panels>
 
-        <res id="shortcutSpec.xml" src="shortcutSpec.xml"/> 
-	<!--  <res id="ProcessPanel.Spec.xml" src="ProcessPanel.Spec.xml"/> -->
-        <!-- localization of resource strings -->
-        <res id="packsLang.xml_fra" src="packsLang.xml_fra"/>
-        <res id="packsLang.xml_eng" src="packsLang.xml_eng"/>
-        <res id="packsLang.xml_deu" src="packsLang.xml_deu"/>
-    </resources>
-    <!-- The panels section. We indicate here which panels we want to use. The order will be respected. -->
-    <panels>
-        <panel classname="HTMLHelloPanel" id="splash"/>
-     
-        <panel classname="HTMLInfoPanel" id="info"/>
-        <panel classname="LicencePanel" id="licence"/>
-        <panel classname="TargetPanel"/> 
-        <panel classname="PacksPanel"/>
-        <panel classname="InstallPanel"/>
-	<panel classname="ShortcutPanel"/>		
-        <panel classname="FinishPanel"/> 
-    </panels>
-    <!-- The packs section. -->
-    <packs>
-        <pack id="core" name="AoI Base" required="yes">
-          <description>Art of Illusion base files</description>
-            <fileset dir="../InstallerBuild/ArtOfIllusion" targetdir="$INSTALL_PATH">
-                <include name="**" />
-            </fileset>
-            <file src="aoi.ico" targetdir="$INSTALL_PATH">
-                <os family="windows" />
-            </file>
-        </pack>
+  <!-- The packs section. -->
+  <packs>
+    <pack id="core" name="AoI Base" required="yes">
+      <description>Art of Illusion base files</description>
+      <fileset dir="../InstallerBuild/ArtOfIllusion" targetdir="$INSTALL_PATH">
+        <include name="**" />
+      </fileset>
+      <file src="aoi.ico" targetdir="$INSTALL_PATH">
+        <os family="windows" />
+      </file>
+      <file src="Art of Illusion.exe" targetdir="$INSTALL_PATH"/>
+      <file src="RemoveAoI.exe" targetdir="$INSTALL_PATH"/>
+    </pack>
 
-	<pack id="jogl-windows" name="Jogamp JOGL" preselected="yes" required="no">
-            <description>OpenGL support for Windows</description>
-            <fileset dir="jogl-windows" targetdir="$INSTALL_PATH/lib">
-                <include name="*" />
-            </fileset>
-        </pack>
-    </packs>
+    <pack id="jogl-windows" name="Jogamp JOGL" preselected="yes" required="no">
+      <description>OpenGL support for Windows</description>
+      <fileset dir="jogl-windows" targetdir="$INSTALL_PATH/lib">
+        <include name="*" />
+      </fileset>
+    </pack>
+  </packs>
 
-    <natives>
-        <native type="izpack" name="ShellLink.dll"/>
-	<native type="izpack" name="ShellLink_x64.dll"/>
-    </natives>
-</izpack:installation> 
+  <natives>
+    <native type="izpack" name="ShellLink.dll"/>
+    <native type="izpack" name="ShellLink_x64.dll"/>
+  </natives>
+</izpack:installation>

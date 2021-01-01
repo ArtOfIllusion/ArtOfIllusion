@@ -1,35 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <launch4jConfig>
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>../InstallerBuild/install.jar</jar>
-  <outfile>../InstallerBuild/ArtOfIllusion310-Windows.exe</outfile>
+  <jar>install.jar</jar>
+  <outfile>ArtOfIllusion-3.2.0-Windows.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>http://java.com/download</downloadUrl>
-  <supportUrl></supportUrl>
-  <customProcName>false</customProcName>
+  <downloadUrl>https://adoptopenjdk.net</downloadUrl>
+  <supportUrl>https://sourceforge.net/p/aoi/discussion</supportUrl>
   <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
   <icon>aoi.ico</icon>
   <jre>
-    <path></path>
-    <minVersion>1.6.0</minVersion>
+    <path>%JAVA_HOME%;%PATH%</path>
+    <minVersion>1.8.0</minVersion>
     <maxVersion></maxVersion>
-    <dontUsePrivateJres>false</dontUsePrivateJres>
-    <initialHeapSize>0</initialHeapSize>
-    <maxHeapSize>0</maxHeapSize>
+    <jdkPreference>preferJre</jdkPreference>
+    <runtimeBits>64/32</runtimeBits>
   </jre>
   <versionInfo>
     <fileVersion>1.1.0.0</fileVersion>
     <txtFileVersion>1.1.0</txtFileVersion>
     <fileDescription>Art of Illusion Package for Windows</fileDescription>
     <copyright>2019 Peter Eastman et. al.</copyright>
-    <productVersion>3.1.0.0</productVersion>
-    <txtProductVersion>Stable 3.1.0</txtProductVersion>
-    <productName>Art of Illusion Windows</productName>
-    <companyName></companyName>
-    <internalName>Art of Illusion Windows</internalName>
-    <originalFilename>AoIWin.exe</originalFilename>
+    <productVersion>3.2.0.0</productVersion>
+    <txtProductVersion>3.2.0</txtProductVersion>
+    <productName>Art of Illusion for Windows</productName>
+    <internalName>Art of Illusion</internalName>
+    <originalFilename>ArtOfIllusion-3.2.0-Windows.exe</originalFilename>
+    <language>ENGLISH_US</language>
   </versionInfo>
 </launch4jConfig>

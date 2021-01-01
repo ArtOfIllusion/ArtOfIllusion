@@ -14,7 +14,21 @@
     initialState="normal"
     programGroup="yes"
     desktop="yes"
-    applications="yes"
+    applications="no"
+    startMenu="no"
+    startup="no"/>
+  <shortcut
+    name="Uninstall Art of Illusion"
+    target="$INSTALL_PATH\RemoveAoI.exe"
+    commandLine=""
+    workingDirectory="$INSTALL_PATH"
+    description="Uninstall the Art of Illusion application and its components"
+    iconFile=""
+    iconIndex="0"
+    initialState="normal"
+    programGroup="yes"
+    desktop="no"
+    applications="no"
     startMenu="no"
     startup="no"/>
 </izpack:shortcuts>

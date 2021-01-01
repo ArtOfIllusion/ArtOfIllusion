@@ -2,19 +2,19 @@
 <launch4jConfig>
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
-  <jar>ArtOfIllusion.jar</jar>
-  <outfile>Art of Illusion.exe</outfile>
+  <jar>Uninstaller/uninstaller.jar</jar>
+  <outfile>UninstallAoI.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
   <downloadUrl>https://adoptopenjdk.net</downloadUrl>
   <supportUrl>https://sourceforge.net/p/aoi/discussion/</supportUrl>
-  <customProcName>Art Of Illusion 3.2.0</customProcName>
+  <customProcName>Uninstall Art Of Illusion 3.2.0</customProcName>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon>aoi.ico</icon>
+  <icon></icon>
   <jre>
     <path>%JAVA_HOME%;%PATH%</path>
     <bundledJre64Bit>false</bundledJre64Bit>
@@ -28,16 +28,16 @@
     <opt>-Djava.library.path=lib</opt>
   </jre>
   <versionInfo>
-    <fileVersion>3.2.0.0</fileVersion>
-    <txtFileVersion>3.2.0</txtFileVersion>
-    <fileDescription>Art of Illusion launcher</fileDescription>
-    <copyright>2019 Peter Eastman et. al.</copyright>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>1</txtFileVersion>
+    <fileDescription>Art of Illusion Uninstaller</fileDescription>
+    <copyright>2020 Lucas Stanek</copyright>
     <productVersion>3.2.0.0</productVersion>
     <txtProductVersion>3.2.0</txtProductVersion>
     <productName>Art of Illusion</productName>
     <companyName></companyName>
     <internalName>AoI</internalName>
-    <originalFilename>Art of Illusion.exe</originalFilename>
+    <originalFilename>Uninstall Art of Illusion.exe</originalFilename>
     <trademarks></trademarks>
     <language>ENGLISH_US</language>
   </versionInfo>

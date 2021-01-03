@@ -67,17 +67,12 @@ for option in "$@"; do
 		MEM=""
 	fi
 done
-if [ -e $AOIPATH/lib/jogl.jar ]; then
-	JOGL="$AOIPATH/jogl.jar"
-fi
-if [ -e $AOIPATH/lib/gluegen-rt.jar ]; then
-	JOGL="$AOIPATH/gluegen-rt.jar"
-fi
-JAVACMD="$JAVACMD $MEM -cp $AOIPATH/ArtOfIllusion.jar:$JOGL artofillusion.ArtOfIllusion"
+
+JAVACMD="$JAVACMD $MEM -jar $AOIPATH/ArtOfIllusion.jar"
 
 #AoI command line options
 for option in "$@"; do
-	if [ "$option" = "${option%-*}" ]; then
+	if [ "$option" = "${option#-*}" ]; then
 		JAVACMD="$JAVACMD $option"
 	fi
 done

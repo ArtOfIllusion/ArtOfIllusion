@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF8" standalone="yes" ?>
+<izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
+  <str id="installer.reversetitle" txt="Installing Art Of Illusion, Version 3.2.0" />
+</izpack:langpack>

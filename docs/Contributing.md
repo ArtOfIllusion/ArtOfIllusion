@@ -7,18 +7,13 @@ So, you would like to contribute to Art of Illusion? Great! Here's how.
 There are several things you can do to help that do not require
 any programing ability.
 
- * [Report a bug](https://sourceforge.net/p/aoi/bugs/)
- * [Propose a new feature](https://sourceforge.net/p/aoi/feature-requests/)
+ * [Report a bug or propose a new feature](https://github.com/ArtOfIllusion/ArtOfIllusion/issues)
  * If you speak a language other than English, you can contribute,
 review, or update a translation
  * Create a tutorial
- * Help update the website, www.artofillusion.org. We're currently in
-the middle of re-designing the site. Please see the
-[github project](https://github.com/ArtOfIllusion/AOI-website) for
-details.
 
-If you would like to help with any of these, please drop in to
-the [discussion forums.](https://sourecforge.net/p/aoi/discussion)
+If you need help getting started with any of these, please drop in to
+the [discussion forums.](https://sourceforge.net/p/aoi/discussion)
 
 ------------------------------------------------------
 
@@ -44,8 +39,10 @@ If you came here with a specific bug or feature in mind, feel free to
 work on it. 
 
 If you are searching for a project, browse through our
-[bug](https://sourceforge.net/p/aoi/bugs) and
-[feature](https://sourceforge.net/p/aoi/feature-requests) lists.
+[issue list](https://github.com/ArtOfIllusion/ArtOfIllusion/issues)
+or the [legacy sourceforge issue trackers](https://sourceforge.net/p/aoi/_list/tickets)
+**Note:** many of the tickets listed there are very old, and may not be
+releveant to current AOI.
 If you are not sure how much experience or time might be required
 for a specific project, ask on the
 [forums.](https://sourceforge.net/p/aoi/discussion)
@@ -72,6 +69,7 @@ public class Example
   public static String blocks = "Braces should be on the left.";
   public static String blockDetails = "Indent them the same as the enclosing declaration.";
   public static int indentStatementsInsideBlockSpaces = 2;
+  public static int maxLineLength = 72; // For better visual scanning
 
   public void longParameterLists(boolean areStacked,
                                  String toPrevent,

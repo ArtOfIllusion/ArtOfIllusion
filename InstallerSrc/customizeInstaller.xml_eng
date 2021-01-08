@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF8" standalone="yes" ?>
 <izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
   <str id="installer.reversetitle" txt="Installing Art Of Illusion, Version 3.2.0" />
+  <str id="TargetPanel.notwritable"
+    txt="The selected Directory cannot be written! Some directories require
+    special permissions to be written to. You can install AOI in such a location
+    by clicking &quot;Cancel,&quot; and re-running this installer as an admin.
+    NOTE: If you do this, you will also have to run Art Of Illusion as an admin
+    whenever you want to install or update plugins.
+    WE DO NOT recommend running Art Of Illusion as admin for normal use." />
 </izpack:langpack>

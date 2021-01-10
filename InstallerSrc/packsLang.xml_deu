@@ -4,16 +4,12 @@
 
 <izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
     <!-- General installer strings -->
-    <str id="desktopPanelTitle" txt="Gnome/KDE (free desktop) Desktop Einbindung"/>
-    <str id="gnomePanelTitle.description" txt="Desktop Dateiverknüpfung und Icon"/>
-    <str id="jogl-linux-i586" txt="Jogl 1.0.0 for i586"/>
-    <str id="jogl-linux-i586.description" txt="OpenGL Rendering Unterstützung. Diese Option steigert die Grafikperformance, ist aber möglicherweise inkompatibel mit der verwendeten Hardware. Falls Art of Illusion nicht startet, - bitte ohne diese Option nochmals installieren."/>
-    <str id="jogl-windows-i586" txt="Jogl 1.0.0 für i586"/>
-    <str id="jogl-windows-i586.description" txt="OpenGL Rendering Unterstützung. Diese Option steigert die Grafikperformance, ist aber möglicherweise inkompatibel mit der verwendeten Hardware. Falls Art of Illusion nicht startet, - bitte ohne diese Option nochmals installieren."/>
-    <str id="jogl-linux-AMD64" txt="Jogl 1.0.0 for AMD64"/>
-    <str id="jogl-linux-AMD64.description" txt="OpenGL Rendering Unterstützung. Diese Option steigert die Grafikperformance, ist aber möglicherweise inkompatibel mit der verwendeten Hardware. Falls Art of Illusion nicht startet, - bitte ohne diese Option nochmals installieren."/>
-    <str id="JMF" txt="JMF"/>
-    <str id="JMF.description" txt="Java Media Framework (wird nur benötigt um Animationen direkt im Quicktime Format zu speichern - bitte zuvor Datei runterladen)"/>
+    <str id="DesktopIntegration" txt="Gnome/KDE (free desktop) Desktop Einbindung"/>
+    <str id="DesktopIntegration.description" txt="Desktop Dateiverknüpfung und Icon"/>
+    <str id="jogl" txt="JOGL 2.4.0"/>
+    <str id="jogl.description" txt="OpenGL Rendering Unterstützung. Diese Option steigert die Grafikperformance, ist aber möglicherweise inkompatibel mit der verwendeten Hardware. Falls Art of Illusion nicht startet, - bitte ohne diese Option nochmals installieren."/>
+    <str id="jogl-windows" txt="JOGL 2.4.0"/>
+    <str id="jogl-windows.description" txt="OpenGL Rendering Unterstützung. Diese Option steigert die Grafikperformance, ist aber möglicherweise inkompatibel mit der verwendeten Hardware. Falls Art of Illusion nicht startet, - bitte ohne diese Option nochmals installieren."/>
     <str id="core" txt="AoI Basis Dateinen"/>
     <str id="core.description" txt="AoI Kern Dateien"/>
 </izpack:langpack>

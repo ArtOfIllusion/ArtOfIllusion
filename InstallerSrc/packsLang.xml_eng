@@ -4,16 +4,16 @@
 
 <izpack:langpack version="5.0" xmlns:izpack="http://izpack.org/schema/langpack">
     <!-- General installer strings -->
-    <str id="desktopPanelTitle" txt="Gnome/KDE (free desktop) desktop integration"/>
-    <str id="gnomePanelTitle.description" txt="Desktop file assocation and icon"/>
-    <str id="jogl-linux-i586" txt="JOGL 1.1.1 (32 bit)"/>
-    <str id="jogl-linux-i586.description" txt="OpenGL rendering support for 32 bit OS. Install only the version appropriate for your OS (32 or 64 bit). This improves performance, but is incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option."/>
-    <str id="jogl-windows-i586" txt="JOGL 1.1.1 (32 bit)"/>
-    <str id="jogl-windows-i586.description" txt="OpenGL rendering support for 32 bit OS. Install only the version appropriate for your OS (32 or 64 bit). This improves performance, but is incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option."/>
-    <str id="jogl-linux-AMD64" txt="JOGL 1.1.1 (64 bit)"/>
-    <str id="jogl-linux-AMD64.description" txt="OpenGL rendering support for 64 bit OS. Install only the version appropriate for your OS (32 or 64 bit). This improves performance, but is incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option."/>
-    <str id="jogl-windows-AMD64" txt="JOGL 1.1.1 (64 bit)"/>
-    <str id="jogl-windows-AMD64.description" txt="OpenGL rendering support for 64 bit OS. Install only the version appropriate for your OS (32 or 64 bit). This improves performance, but is incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option."/>
-    <str id="core" txt="AoI Base files"/>
-    <str id="core.description" txt="AoI core files"/>
+    <str id="DesktopIntegration" txt="Gnome/KDE (free desktop) desktop integration"/>
+    <str id="DesktopIntegration.description" txt="Desktop file assocation, icon, and menu items. Compatible with any free desktop compliant Desktop Environment."/>
+    <str id="jogl" txt="JOGL 2.4.0"/>
+    <str id="jogl.description" txt="OpenGL rendering support for interactive diplays while editing.
+
+This can improve editing performance, but in rare cases may be incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option.
+
+Support is provided for 32 and 64 bit Intel compatible, as well as ARM-v6hf"/>
+    <str id="jogl-windows" txt="JOGL 2.4.0"/>
+    <str id="jogl-windows.description" txt="OpenGL rendering support for interactive displays. This can improve editing performance, but may be incompatible with some systems. If Art of Illusion fails to launch after install, reinstall without this option. Both 32 bit and 64 bitplatforms are supported."/>
+    <str id="core" txt="AoI Core files"/>
+    <str id="core.description" txt="AoI core application files and default plugins"/>
 </izpack:langpack>

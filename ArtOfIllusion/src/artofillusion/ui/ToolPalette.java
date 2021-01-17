@@ -217,8 +217,7 @@ public class ToolPalette extends CustomWidget
           ((ObjectEditorWindow)window).toolChanged(tool[i]);
       }
     }
- 
-    }
+  }
 
   private void mouseClicked(MouseClickedEvent e)
   {

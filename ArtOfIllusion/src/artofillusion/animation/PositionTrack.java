@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -197,10 +197,12 @@ public class PositionTrack extends Track
     tc.addTimepoint(k, time, s);
   }
 
-  /** Set a keyframe at the specified time, based on the current state of the Scene. */
+  /**
+   * {@inheritDoc}
+   */
 
   @Override
-  public Keyframe setKeyframe(double time, Scene sc)
+  public Keyframe setKeyframe(double time)
   {
     Vec3 pos = info.getCoords().getOrigin();
 
@@ -231,10 +233,10 @@ public class PositionTrack extends Track
       the new Keyframe, or null if none was set. */
 
   @Override
-  public Keyframe setKeyframeIfModified(double time, Scene sc)
+  public Keyframe setKeyframeIfModified(double time)
   {
     if (tc.getTimes().length == 0)
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     VectorKeyframe pos = (VectorKeyframe) tc.evaluate(time, smoothingMethod);
     Vec3 current = info.getCoords().getOrigin();
 
@@ -258,7 +260,7 @@ public class PositionTrack extends Track
     if ((enablex && Math.abs(pos.x-current.x) > 1e-10) ||
         (enabley && Math.abs(pos.y-current.y) > 1e-10) ||
         (enablez && Math.abs(pos.z-current.z) > 1e-10))
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     return null;
   }
 

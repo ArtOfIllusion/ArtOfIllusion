@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -94,10 +94,12 @@ public class VisibilityTrack extends Track
     tc.addTimepoint(k, time, s);
   }
 
-  /* Set a keyframe at the specified time, based on the current state of the Scene. */
+  /**
+   * {@inheritDoc}
+   */
 
   @Override
-  public Keyframe setKeyframe(double time, Scene sc)
+  public Keyframe setKeyframe(double time)
   {
     Keyframe k = new BooleanKeyframe(info.isVisible());
     tc.addTimepoint(k, time, new Smoothness());
@@ -109,14 +111,14 @@ public class VisibilityTrack extends Track
       the new Keyframe, or null if none was set. */
 
   @Override
-  public Keyframe setKeyframeIfModified(double time, Scene sc)
+  public Keyframe setKeyframeIfModified(double time)
   {
     if (tc.getTimes().length == 0)
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     BooleanKeyframe v = (BooleanKeyframe) tc.evaluate(time, Timecourse.LINEAR);
     if (v.val == info.isVisible())
       return null;
-    return setKeyframe(time, sc);
+    return setKeyframe(time);
   }
 
   /* Move a keyframe to a new time, and return its new position in the list. */

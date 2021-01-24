@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
+   Changes copyright (C) 2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -152,9 +153,11 @@ public abstract class Track
   {
   }
   
-  /** Set a keyframe at the specified time, based on the current state of the Scene. */
+  /** 
+   * Set a Track keyframe at the specified time.
+   */
   
-  public Keyframe setKeyframe(double time, Scene sc)
+  public Keyframe setKeyframe(double time)
   {
     return null;
   }
@@ -163,7 +166,7 @@ public abstract class Track
       if and only if the Scene does not match the current state of the track.  Return
       the new keyframe, or null if none was set. */
   
-  public Keyframe setKeyframeIfModified(double time, Scene sc)
+  public Keyframe setKeyframeIfModified(double time)
   {
     return null;
   }

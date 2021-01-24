@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -821,7 +821,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
                 if (info.getTracks()[j] == tr)
                   undo.addCommand(UndoRecord.SET_TRACK, info, j, tr.duplicate(info));
             }
-          Keyframe k = tr.setKeyframe(time, theScene);
+          Keyframe k = tr.setKeyframe(time);
           if (k != null)
             newkeys.addElement(new SelectionInfo(tr, k));
         }
@@ -862,7 +862,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
             if (tr instanceof RotationTrack && rotx && roty && rotz)
               continue;
             undo.addCommand(UndoRecord.SET_TRACK, info, j, tr.duplicate(info));
-            Keyframe k = tr.setKeyframeIfModified(time, theScene);
+            Keyframe k = tr.setKeyframeIfModified(time);
             if (k != null)
               {
                 newkeys.addElement(new SelectionInfo(tr, k));

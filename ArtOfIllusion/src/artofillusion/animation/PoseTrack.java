@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -135,10 +135,12 @@ public class PoseTrack extends Track
     tc.addTimepoint(k, time, s);
   }
 
-  /** Set a keyframe at the specified time, based on the current state of the Scene. */
+  /**
+   * {@inheritDoc}
+   */
 
   @Override
-  public Keyframe setKeyframe(double time, Scene sc)
+  public Keyframe setKeyframe(double time)
   {
     Keyframe pose = info.getObject().getPoseKeyframe();
 
@@ -151,16 +153,16 @@ public class PoseTrack extends Track
       the new Keyframe, or null if none was set. */
 
   @Override
-  public Keyframe setKeyframeIfModified(double time, Scene sc)
+  public Keyframe setKeyframeIfModified(double time)
   {
     for (int i = 0; i < subtracks.length; i++)
-      subtracks[i].setKeyframeIfModified(time, sc);
+      subtracks[i].setKeyframeIfModified(time);
     if (tc.getTimes().length == 0)
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     Keyframe pose1 = tc.evaluate(time, smoothingMethod);
     Keyframe pose2 = info.getPose() == null ? info.getObject().getPoseKeyframe() : info.getPose();
     if (!pose1.equals(pose2))
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     return null;
   }
 

@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -179,10 +179,12 @@ public class RotationTrack extends Track
     tc.addTimepoint(k, time, s);
   }
 
-  /** Set a keyframe at the specified time, based on the current state of the Scene. */
+  /**
+   * {@inheritDoc}
+   */
 
   @Override
-  public Keyframe setKeyframe(double time, Scene sc)
+  public Keyframe setKeyframe(double time)
   {
     RotationKeyframe r = null;
     CoordinateSystem c = null;
@@ -221,10 +223,10 @@ public class RotationTrack extends Track
       the new Keyframe, or null if none was set. */
 
   @Override
-  public Keyframe setKeyframeIfModified(double time, Scene sc)
+  public Keyframe setKeyframeIfModified(double time)
   {
     if (tc.getTimes().length == 0)
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     RotationKeyframe rot = (RotationKeyframe) tc.evaluate(time, smoothingMethod);
     RotationKeyframe current = null;
     Joint j = (joint > -1 && mode == ABSOLUTE ? info.getSkeleton().getJoint(joint) : null);
@@ -256,7 +258,7 @@ public class RotationTrack extends Track
         (!enabley || Math.abs(rot.y-current.y) < 1e-10) &&
         (!enablez || Math.abs(rot.z-current.z) < 1e-10))
       return null;
-    return setKeyframe(time, sc);
+    return setKeyframe(time);
   }
 
   /** Move a keyframe to a new time, and return its new position in the list. */

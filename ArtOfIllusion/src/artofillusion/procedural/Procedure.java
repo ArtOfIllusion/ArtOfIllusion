@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +18,8 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
+
 
 /** This represents a procedure for calculating a set of values (typically, the parameters
     for a texture or material). */
@@ -43,6 +45,14 @@ public class Procedure
   public Module[] getModules()
   {
     return modules.toArray(new Module[0]);
+  }
+    
+  public Stream<Module> getModulesStream() {
+    return modules.stream();
+  }
+  
+  public <T extends Module> Stream<T> getModules(Class<T> clazz) {
+    return (Stream<T>)modules.stream().filter(clazz::isInstance);
   }
   
   /** Get the index of a particular module. */

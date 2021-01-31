@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2008 by Peter Eastman
+   Changes copyright (C) 2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,6 +21,7 @@ import buoy.event.*;
 
 import java.awt.*;
 import java.io.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** This is a Texture3D which uses a Procedure to calculate its properties. */
 
@@ -171,17 +173,18 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
     return proc;
   }
 
-  /** Determine whether this Texture uses the specified image. */
+  /** Determine whether this Texture uses the specified image.
+     * @param image image to check usage
+     * @return check result
+  */
 
   @Override
   public boolean usesImage(ImageMap image)
   {
-    artofillusion.procedural.Module modules[] = proc.getModules();
-
-    for (int i = 0; i < modules.length; i++)
-      if (modules[i] instanceof ImageModule && ((ImageModule) modules[i]).getMap() == image)
-        return true;
-    return false;
+    return proc.getModules(ImageModule.class).
+      filter(module -> module.getMap() == image).
+      findFirst().
+      isPresent();
   }
 
   @Override
@@ -208,21 +211,11 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public TextureParameter[] getParameters()
   {
-    artofillusion.procedural.Module module[] = proc.getModules();
-    int count = 0;
-
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        count++;
-    TextureParameter params[] = new TextureParameter [count];
-    count = 0;
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        {
-          params[count] = ((ParameterModule) module[i]).getParameter(this);
-          ((ParameterModule) module[i]).setIndex(count++);
-        }
-    return params;
+    AtomicInteger index = new AtomicInteger();
+    return  proc.getModules(ParameterModule.class).
+            peek(module -> module.setIndex(index.getAndIncrement())).
+            map(item -> item.getParameter(this)).
+            toArray(TextureParameter[]::new);
   }
 
   @Override

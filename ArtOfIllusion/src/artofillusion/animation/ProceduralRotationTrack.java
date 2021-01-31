@@ -20,6 +20,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /** This is a Track which uses a procedure to control the orientation of an object. */
 
@@ -416,23 +417,13 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
 
   /** Find all the parameters for the procedure. */
 
-  private TextureParameter[] findParameters()
+  private TextureParameter[] getParameters()
   {
-    artofillusion.procedural.Module module[] = proc.getModules();
-    int count = 0;
-
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        count++;
-    TextureParameter params[] = new TextureParameter [count];
-    count = 0;
-    for (int i = 0; i < module.length; i++)
-      if (module[i] instanceof ParameterModule)
-        {
-          params[count] = ((ParameterModule) module[i]).getParameter(this);
-          ((ParameterModule) module[i]).setIndex(count++);
-        }
-    return params;
+    AtomicInteger index = new AtomicInteger();
+    return  proc.getModules(ParameterModule.class).
+            peek(module -> module.setIndex(index.getAndIncrement())).
+            map(item -> item.getParameter(this)).
+            toArray(TextureParameter[]::new);
   }
 
   /* Write a serialized representation of this track to a stream. */
@@ -495,7 +486,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
     else
       relObject = new ObjectRef();
     theWeight.initFromStream(in, scene);
-    parameter = findParameters();
+    parameter = getParameters();
   }
 
   /* Present a window in which the user can edit the specified keyframe. */
@@ -622,7 +613,7 @@ public class ProceduralRotationTrack extends Track implements ProcedureOwner
   {
     EditingWindow win = editor.getEditingWindow();
     win.setUndoRecord(new UndoRecord(win, false, UndoRecord.COPY_OBJECT_INFO, info, info.duplicate()));
-    TextureParameter newparams[] = findParameters();
+    TextureParameter newparams[] = getParameters();
     int index[] = new int [newparams.length];
     for (int i = 0; i < newparams.length; i++)
       {

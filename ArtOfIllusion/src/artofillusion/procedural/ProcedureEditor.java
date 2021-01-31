@@ -568,32 +568,27 @@ public class ProcedureEditor extends CustomWidget
     Point pos = e.getPoint();
     if (e.getClickCount() == 2)
       {
-        // See if the click was on a module.  If so, call its edit() method.
-        
-        Module module[] = proc.getModules();
-        for (Module mod : module)
-          if (mod.getBounds().contains(pos))
-            {
-              saveState(false);
-              if (mod.edit(this, theScene))
-                {
-                  repaint();
-                  updatePreview();
-                }
-              else
-                undo();
-              return;
-            }
+        // See if the click was on a module.  If so, call its edit() method.        
+        proc.getModulesStream().
+            filter(module -> module.getBounds().contains(pos)).
+            findFirst().ifPresent(this::editModule);
       }
+  }
+  
+  private void editModule(Module module) {
+      saveState(false);
+      if(module.edit(this, theScene)) 
+      {
+          repaint();
+          updatePreview();
+      }
+      else undo();
   }
 
   /** Respond to mouse presses. */
 
   protected void mousePressed(MousePressedEvent e)
   {
-    OutputModule output[] = proc.getOutputModules();
-    Module module[] = proc.getModules();
-    Link link[] = proc.getLinks();
     IOPort port;
     int i;
 
@@ -604,6 +599,7 @@ public class ProcedureEditor extends CustomWidget
 
     // First see if the mouse was pressed on a port.
     
+    Module module[] = proc.getModules();
     for (i = 0; i < module.length; i++)
       {
         port = module[i].getClickedPort(clickPos);
@@ -614,6 +610,8 @@ public class ProcedureEditor extends CustomWidget
             return;
           }
       }
+    
+    OutputModule output[] = proc.getOutputModules();
     for (i = 0; i < output.length; i++)
       {
         port = output[i].getClickedPort(clickPos);
@@ -658,7 +656,7 @@ public class ProcedureEditor extends CustomWidget
         }
 
     // See if the mouse was pressed on a link.
-    
+    Link link[] = proc.getLinks();
     for (i = 0; i < link.length; i++)
       {
         int tol = 2;
@@ -783,20 +781,20 @@ public class ProcedureEditor extends CustomWidget
         boolean isInput = (dragFromPort.getType() == IOPort.INPUT);
         if (dragToPort != null)
           dragToPort = null;
-        OutputModule output[] = proc.getOutputModules();
-        Module module[] = proc.getModules();
-        for (Module mod : module)
-          {
-            IOPort port[] = isInput ? mod.getOutputPorts() : mod.getInputPorts();
-            for (int j = 0; j < port.length; j++)
-              if (isInput || !mod.inputConnected(j))
-                if (port[j].getValueType() == dragFromPort.getValueType() && port[j].contains(pos))
-                  dragToPort = port[j];
-            if (dragToPort != null)
-              break;
-          }
+                
+        for (Module mod : proc.getModules())
+        {
+          IOPort port[] = isInput ? mod.getOutputPorts() : mod.getInputPorts();
+          for (int j = 0; j < port.length; j++)
+            if (isInput || !mod.inputConnected(j))
+              if (port[j].getValueType() == dragFromPort.getValueType() && port[j].contains(pos))
+                dragToPort = port[j];
+          if (dragToPort != null)
+            break;
+        }
+        
         if (!isInput)
-          for (OutputModule mod : output)
+          for (OutputModule mod : proc.getOutputModules())
             {
               IOPort port[] = mod.getInputPorts();
               for (int j = 0; j < port.length; j++)

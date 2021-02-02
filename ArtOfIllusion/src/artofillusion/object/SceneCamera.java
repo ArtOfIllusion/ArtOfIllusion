@@ -33,7 +33,7 @@ public class SceneCamera extends Object3D
   private ImageFilter filter[];
   private int extraComponents;
 
-  private static BoundingBox bounds;
+  private static final BoundingBox bounds = new BoundingBox(-0.25, 0.25, -0.15, 0.20, -0.2, 0.2);
   private static WireframeMesh mesh;
   private static final int SEGMENTS = 8;
   private static final Property PROPERTIES[] = new Property [] {
@@ -49,7 +49,6 @@ public class SceneCamera extends Object3D
     int i, t[], f[], to[], from[], index = 0;
     Vec3 vert[];
 
-    bounds = new BoundingBox(-0.25, 0.25, -0.15, 0.20, -0.2, 0.2);
     sine = new double [SEGMENTS];
     cosine = new double [SEGMENTS];
     for (i = 0; i < SEGMENTS; i++)

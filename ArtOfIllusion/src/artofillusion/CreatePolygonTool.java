@@ -276,14 +276,14 @@ public class CreatePolygonTool extends EditingTool
     });
     RadioButtonGroup fillRadio = new RadioButtonGroup();
     openButton = new BRadioButton(Translate.text("Open") +  " (" + Translate.text("Curve") + ")", !drawFilled, fillRadio);
-    filledButton = new BRadioButton(Translate.text("Filled") +  " (" + Translate.text("Triangle mesh") + ")", drawFilled, fillRadio);
+    filledButton = new BRadioButton(Translate.text("Filled") +  " (" + Translate.text("triangleMesh") + ")", drawFilled, fillRadio);
     if (shape == Curve.NO_SMOOTHING)
       shapeChoice.setSelectedIndex(0);
     else if (shape == Curve.INTERPOLATING)
       shapeChoice.setSelectedIndex(1);
     else
       shapeChoice.setSelectedIndex(2);
-    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("Define polygon"),
+    ComponentsDialog dlg = new ComponentsDialog(theFrame, Translate.text("definePolygon"),
                            new Widget [] {sidesField, shapeChoice, openButton, filledButton},
                            new String [] {Translate.text("Sides"), Translate.text("Shape"), "Interior", " "});
     if (!dlg.clickedOk())

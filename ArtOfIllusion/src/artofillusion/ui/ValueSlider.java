@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2005 by Peter Eastman
+   Modification copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -149,7 +150,13 @@ public class ValueSlider extends WidgetContainer
 
       int digits = (int) Math.floor(Math.log(Math.abs(value))/Math.log(10.0));
       double scale = Math.pow(10.0, digits < 0 ? 2-digits : 3);
-      text = Double.toString(Math.round(value*scale)/scale);
+
+      // Math.round can only handle values up to Long.MAX_VALUE
+
+      if (Math.abs(value) > 1e15)
+        text = Double.toString(Math.rint(value*scale)/scale);
+      else
+        text = Double.toString(Math.round(value*scale)/scale);
     }
     if (!text.equals(field.getText()))
       field.setText(text);

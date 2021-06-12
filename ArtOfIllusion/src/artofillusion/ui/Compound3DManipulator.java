@@ -810,9 +810,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
         drag = view.getCamera().findDragVector(dragStartPosition, disp.x, disp.y);
       if (isShiftDown)
       {
-        drag.x = gridSize*Math.round(drag.x/gridSize);
-        drag.y = gridSize*Math.round(drag.y/gridSize);
-        drag.z = gridSize*Math.round(drag.z/gridSize);
+        drag.x = gridSize*roundValue(drag.x/gridSize);
+        drag.y = gridSize*roundValue(drag.y/gridSize);
+        drag.z = gridSize*roundValue(drag.z/gridSize);
       }
       Mat4 transform = Mat4.translation(drag.x, drag.y, drag.z);
       dispatchEvent(new HandleDraggedEvent(view, dragHandleType, dragAxis, bounds, selectionBounds, ev, transform));
@@ -868,7 +868,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     if (isShiftDown)
     {
       dragDistance /= gridSize;
-      dragDistance = Math.round(dragDistance);
+      dragDistance = roundValue(dragDistance);
       dragDistance *= gridSize;
     }
     Vec3 drag3D = dragDir3D.times(dragDistance);
@@ -1016,6 +1016,11 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private Vec2 toVec2(Point start, Point end)
   {
      return new Vec2(end.x - start.x, end.y - start.y);
+  }
+
+  private double roundValue(double val)
+  {
+     return Math.abs(val) > 1.0e15 ? Math.rint(val) : Math.round(val);
   }
 
   /**

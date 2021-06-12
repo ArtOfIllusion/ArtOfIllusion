@@ -1249,6 +1249,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setTime(double time)
   {
     theScene.setTime(time);
+    if (theScene.itemListChanged)
+      rebuildItemList(); // The user sees the change. The problem has been pointed out before, so let's just show the effect.
     theScore.setTime(time);
     theScore.repaint();
     itemTree.repaint();

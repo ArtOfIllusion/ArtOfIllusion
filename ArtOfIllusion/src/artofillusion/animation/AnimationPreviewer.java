@@ -1,5 +1,6 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -154,6 +155,8 @@ public class AnimationPreviewer implements Runnable
       {
         final double time = startTime+i/(double) fps;
         theScene.setTime(time);
+        if (theScene.itemListChanged)
+          window.rebuildItemList();
         SceneCamera sc = (SceneCamera) sceneCamera.getObject();
         cam.setCameraCoordinates(sceneCamera.getCoords().duplicate());
         cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
@@ -161,7 +164,7 @@ public class AnimationPreviewer implements Runnable
         try
         {
           EventQueue.invokeAndWait(new Runnable() {
-                      @Override
+            @Override
             public void run()
             {
               setLabels(time, frame);
@@ -255,6 +258,8 @@ public class AnimationPreviewer implements Runnable
     {
     }
     theScene.setTime(originalTime);
+      if (theScene.itemListChanged)
+        window.rebuildItemList();
     display.dispose();
   }
 

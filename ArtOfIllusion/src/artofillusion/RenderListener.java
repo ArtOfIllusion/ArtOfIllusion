@@ -1,4 +1,5 @@
 /* Copyright (C) 2002,2003 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,12 +21,16 @@ public interface RenderListener
   /** The renderer may call this method periodically during rendering, to notify the listener that more of the
       image is complete. */
   
-  public void imageUpdated(Image image);
+  default void imageUpdated(Image image)
+  {     
+  }
   
   /** The renderer may call this method periodically during rendering, to give the listener text descriptions
       of the current status of rendering. */
   
-  public void statusChanged(String status);
+  default void statusChanged(String status)
+  {
+  }
   
   /** This method will be called when rendering is complete. */
   
@@ -33,5 +38,8 @@ public interface RenderListener
   
   /** This method will be called if rendering is canceled. */
   
-  public void renderingCanceled();
+  default void renderingCanceled()
+  {      
+  }
+  
 }

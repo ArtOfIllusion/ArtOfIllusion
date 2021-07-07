@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2008 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -330,28 +331,12 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
     UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
   }
 
-  /** Determine whether the procedure may contain View Angle modules. */
-
-  @Override
-  public boolean allowViewAngle()
-  {
-    return false;
-  }
-
   /** Determine whether the procedure may contain Parameter modules. */
 
   @Override
   public boolean allowParameters()
   {
     return false;
-  }
-
-  /** Determine whether the procedure may be renamed. */
-
-  @Override
-  public boolean canEditName()
-  {
-    return true;
   }
 
   /** This is called when the user clicks OK in the procedure editor. */

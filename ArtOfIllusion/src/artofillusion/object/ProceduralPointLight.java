@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -534,18 +534,6 @@ public class ProceduralPointLight extends PointLight
     public void disposePreview(Object preview)
     {
       UIUtilities.findWindow((MaterialPreviewer) preview).dispose();
-    }
-
-    @Override
-    public boolean allowParameters()
-    {
-      return true;
-    }
-
-    @Override
-    public boolean allowViewAngle()
-    {
-      return false;
     }
 
     @Override

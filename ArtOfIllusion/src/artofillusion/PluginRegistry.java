@@ -1,6 +1,6 @@
-/* Copyright (C) 2007-2009 by Peter Eastman
+ /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2018-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -204,16 +204,10 @@ public class PluginRegistry
         registerResource(info.type, info.id, jar.loader, info.name, info.locale);
       }
     }
-    catch(NoClassDefFoundError ncdfe)
+    catch(LinkageError | Exception ex)
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
-      ncdfe.printStackTrace();      
-    }
-    catch (Exception ex)
-    {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
-      System.err.println("*** Exception while initializing plugin "+jar.file.getName()+":");
+      System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");
       ex.printStackTrace();
     }
   }

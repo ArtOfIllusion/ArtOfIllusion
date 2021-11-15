@@ -204,7 +204,7 @@ public class PluginRegistry
         registerResource(info.type, info.id, jar.loader, info.name, info.locale);
       }
     }
-    catch(LinkageError | Exception ex)
+    catch(Error | Exception ex)
     {
       new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
       System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");

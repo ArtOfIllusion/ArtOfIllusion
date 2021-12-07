@@ -268,7 +268,6 @@ public class ArtOfIllusion
     
     numNewWindows++;
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run()
       {
         LayoutWindow fr = new LayoutWindow(scene);        
@@ -289,16 +288,61 @@ public class ArtOfIllusion
         fr.setVisible(true);
         fr.arrangeDockableWidgets();
 
-        // If the user opens a file immediately after running the program, close the empty
-        // scene window.
+        /* If the user opens a file immediately after running the program,
+         * close the empty scene window. Delayed to work around timing bugs
+         * when interacting with macOS and GLJPanels.
+         */
 
-        for (int i = windows.size()-2; i >= 0; i--)
-          if (windows.get(i) instanceof LayoutWindow)
+        SwingWorker autoCloseUnmodified = new SwingWorker<Boolean, Void>()
+        {
+          @Override
+          public Boolean doInBackground()
           {
-            LayoutWindow win = (LayoutWindow) windows.get(i);
-            if (win.getScene().getName() == null && !win.isModified())
-              closeWindow(win);
+            try
+            {
+              Thread.sleep(1000); //500 worked ; 250 failed
+            }
+            catch (InterruptedException ex)
+            {
+              System.out.println(ex);
+            }
+
+            if (windows.size() > 1)
+            {
+              for (EditingWindow window : windows)
+              {
+                if (window instanceof LayoutWindow 
+                  && ((LayoutWindow)window).getScene().getName() == null
+                  && ((LayoutWindow)window).isModified() == false
+                  ) closeWindow(window);
+              }
+            }
+            return true;
           }
+
+          @Override
+          public void done()
+          {
+            try
+            {
+              Boolean result = get();
+            }
+            catch (InterruptedException ignore) {}
+            catch (java.util.concurrent.ExecutionException e)
+            {
+              String why = null;
+              Throwable cause = e.getCause();
+              if (cause != null)
+              {
+                why = cause.getMessage();
+              } else {
+                why = e.getMessage();
+              }
+              System.err.println("Error: " + why);
+            }
+          }
+        };
+        autoCloseUnmodified.execute();
       }
     });    
   }

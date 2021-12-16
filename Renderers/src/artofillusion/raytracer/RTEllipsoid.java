@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,6 +28,8 @@ public class RTEllipsoid extends RTObject
 
   public static final double TOL = 1e-12;
 
+  double ellipsoidTol;
+
   public RTEllipsoid(Sphere sphere, Mat4 fromLocal, Mat4 toLocal, double param[])
   {
     Vec3 radii = sphere.getRadii();
@@ -36,63 +39,63 @@ public class RTEllipsoid extends RTObject
     uniform = sphere.getTextureMapping() instanceof UniformMapping;
     transform = true;
     if (vx.x == 1.0 || vx.x == -1.0)
-      {
-        if (vy.y == 1.0 || vy.y == -1.0)
-          {
-            rx = radii.x;
-            ry = radii.y;
-            rz = radii.z;
-            transform = false;
-          }
-        else if (vy.z == 1.0 || vy.z == -1.0)
-          {
-            rx = radii.x;
-            ry = radii.z;
-            rz = radii.y;
-            transform = false;
-          }
-      }
-    else if (vx.y == 1.0 || vx.y == -1.0)
-      {
-        if (vy.x == 1.0 || vy.x == -1.0)
-          {
-            rx = radii.y;
-            ry = radii.x;
-            rz = radii.z;
-            transform = false;
-          }
-        else if (vy.z == 1.0 || vy.z == -1.0)
-          {
-            rx = radii.y;
-            ry = radii.z;
-            rz = radii.x;
-            transform = false;
-          }
-      }
-    else if (vx.z == 1.0 || vx.z == -1.0)
-      {
-        if (vy.x == 1.0 || vy.x == -1.0)
-          {
-            rx = radii.z;
-            ry = radii.x;
-            rz = radii.y;
-            transform = false;
-          }
-        else if (vy.y == 1.0 || vy.y == -1.0)
-          {
-            rx = radii.z;
-            ry = radii.y;
-            rz = radii.x;
-            transform = false;
-          }
-      }
-    if (transform)
+    {
+      if (vy.y == 1.0 || vy.y == -1.0)
       {
         rx = radii.x;
         ry = radii.y;
         rz = radii.z;
-        this.fromLocal = fromLocal;
+        transform = false;
       }
+      else if (vy.z == 1.0 || vy.z == -1.0)
+      {
+        rx = radii.x;
+        ry = radii.z;
+        rz = radii.y;
+        transform = false;
+      }
+    }
+    else if (vx.y == 1.0 || vx.y == -1.0)
+    {
+      if (vy.x == 1.0 || vy.x == -1.0)
+      {
+        rx = radii.y;
+        ry = radii.x;
+        rz = radii.z;
+        transform = false;
+      }
+      else if (vy.z == 1.0 || vy.z == -1.0)
+      {
+        rx = radii.y;
+        ry = radii.z;
+        rz = radii.x;
+        transform = false;
+      }
+    }
+    else if (vx.z == 1.0 || vx.z == -1.0)
+    {
+      if (vy.x == 1.0 || vy.x == -1.0)
+      {
+        rx = radii.z;
+        ry = radii.x;
+        rz = radii.y;
+        transform = false;
+      }
+      else if (vy.y == 1.0 || vy.y == -1.0)
+      {
+        rx = radii.z;
+        ry = radii.y;
+        rz = radii.x;
+        transform = false;
+      }
+    }
+    if (transform)
+    {
+      rx = radii.x;
+      ry = radii.y;
+      rz = radii.z;
+      this.fromLocal = fromLocal;
+    }
     cx = fromLocal.m14/fromLocal.m44;
     cy = fromLocal.m24/fromLocal.m44;
     cz = fromLocal.m34/fromLocal.m44;
@@ -103,6 +106,8 @@ public class RTEllipsoid extends RTObject
     sz = rx2/rz2;
     bumpMapped = sphere.getTexture().hasComponent(Texture.BUMP_COMPONENT);
     this.toLocal = toLocal;
+    ellipsoidTol = (Math.max(Math.max(Math.abs(fromLocal.m14), (Math.abs(fromLocal.m24))),(Math.abs(fromLocal.m34))) +
+                    Math.max(Math.max(rx, ry), rz))*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -133,11 +138,11 @@ public class RTEllipsoid extends RTObject
 
     v1.set(cx-orig.x, cy-orig.y, cz-orig.z);
     if (transform)
-      {
-        toLocal.transformDirection(v1);
-        dir.set(rdir);
-        toLocal.transformDirection(dir);
-      }
+    {
+      toLocal.transformDirection(v1);
+      dir.set(rdir);
+      toLocal.transformDirection(dir);
+    }
     else if (uniform)
       dir = rdir;
     else
@@ -147,47 +152,48 @@ public class RTEllipsoid extends RTObject
     b = dir.x*v1.x + temp1*v1.y + temp2*v1.z;
     c = v1.x*v1.x + sy*v1.y*v1.y + sz*v1.z*v1.z - rx2;
     int numIntersections;
-    if (c > TOL*b)
-      {
-        // Ray origin is outside ellipsoid.
 
-        if (b <= 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from the ellipsoid.
-        a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
-        d = b*b - a*c;
-        if (d < 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;
-        numIntersections = 2;
-        temp1 = Math.sqrt(d);
-        dist1 = (b - temp1)/a;
-        dist2 = (b + temp1)/a;
-        v2.set(orig.x+dist2*dir.x, orig.y+dist2*dir.y, orig.z+dist2*dir.z);
-        projectPoint(v2);
-      }
-    else if (c < -TOL*b)
-      {
-        // Ray origin is inside ellipsoid.
+    if (c > ellipsoidTol*b)
+    {
+      // Ray origin is outside ellipsoid.
 
-        a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
-        d = b*b - a*c;
-        if (d < 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;
-        numIntersections = 1;
-        dist1 = (b + Math.sqrt(d))/a;
-      }
+      if (b <= 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from the ellipsoid.
+      a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
+      d = b*b - a*c;
+      if (d < 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;
+      numIntersections = 2;
+      temp1 = Math.sqrt(d);
+      dist1 = (b - temp1)/a;
+      dist2 = (b + temp1)/a;
+      v2.set(orig.x+dist2*dir.x, orig.y+dist2*dir.y, orig.z+dist2*dir.z);
+      projectPoint(v2);
+    }
+    else if (c < -ellipsoidTol*b)
+    {
+      // Ray origin is inside ellipsoid.
+
+      a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
+      d = b*b - a*c;
+      if (d < 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;
+      numIntersections = 1;
+      dist1 = (b + Math.sqrt(d))/a;
+    }
     else
-      {
-        // Ray origin is on the surface of the ellipsoid.
+    {
+      // Ray origin is on the surface of the ellipsoid.
 
-        if (b <= 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from the ellipsoid.
-        a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
-        d = b*b - a*c;
-        if (d < 0.0)
-          return SurfaceIntersection.NO_INTERSECTION;
-        numIntersections = 1;
-        dist1 = (b + Math.sqrt(d))/a;
-      }
+      if (b <= 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from the ellipsoid.
+      a = dir.x*dir.x + temp1*dir.y + temp2*dir.z;
+      d = b*b - a*c;
+      if (d < 0.0)
+        return SurfaceIntersection.NO_INTERSECTION;
+      numIntersections = 1;
+      dist1 = (b + Math.sqrt(d))/a;
+    }
     v1.set(orig.x+dist1*rdir.x, orig.y+dist1*rdir.y, orig.z+dist1*rdir.z);
     projectPoint(v1);
     return new EllipsoidIntersection(this, numIntersections, v1, v2, dist1, dist2);
@@ -233,16 +239,16 @@ public class RTEllipsoid extends RTObject
 
     BoundingBox bb = node.getBounds();
     if (transform)
-      {
-        bb = bb.transformAndOutset(toLocal);
-        centerx = centery = centerz = 0.0;
-      }
+    {
+      bb = bb.transformAndOutset(toLocal);
+      centerx = centery = centerz = 0.0;
+    }
     else
-      {
-        centerx = cx;
-        centery = cy;
-        centerz = cz;
-      }
+    {
+      centerx = cx;
+      centery = cy;
+      centerz = cz;
+    }
     Vec3 c = new Vec3(centerx, centery, centerz);
 
     // Find the nearest point of the box to the ellipsoid.

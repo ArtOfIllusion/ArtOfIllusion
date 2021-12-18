@@ -1,5 +1,5 @@
 /* Copyright (C) 2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,15 +26,21 @@ public class RecentFiles
   private static final int MAX_RECENT = 10;
 
   /** Given a BMenu, fill it in with a list of items for recent files. */
-
+  public static BMenu createRecentMenu()
+  {
+      BMenu rfm = Translate.menu("openRecent");
+      createMenu(rfm);
+      return rfm;
+  }
+  
   public static void createMenu(BMenu menu)
   {
     menu.removeAll();
     Preferences pref = Preferences.userNodeForPackage(RecentFiles.class);
-    String recent[] = pref.get("recentFiles", "").split(File.pathSeparator);
-    for (int i = 0; i < recent.length; i++)
+    String recentFiles[] = pref.get("recentFiles", "").split(File.pathSeparator);
+    for (String recent: recentFiles)
     {
-      final File file = new File(recent[i]);
+      final File file = new File(recent);
       BMenuItem item = new BMenuItem(file.getName());
       menu.add(item);
       item.addEventLink(CommandEvent.class, new Object() {

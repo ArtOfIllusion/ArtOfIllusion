@@ -80,7 +80,7 @@ public class RecentFiles
     for (EditingWindow window : ArtOfIllusion.getWindows())
     {
         if (window instanceof LayoutWindow) {
-            createMenu(((LayoutWindow) window).recentFilesMenu);
+            createMenu(((LayoutWindow) window).getRecentFilesMenu());
         }
     }
   }

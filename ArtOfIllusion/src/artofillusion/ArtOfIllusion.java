@@ -307,15 +307,13 @@ public class ArtOfIllusion
               System.out.println(ex);
             }
 
-            if (windows.size() > 1)
+            for (EditingWindow window : windows)
             {
-              for (EditingWindow window : windows)
-              {
-                if (window instanceof LayoutWindow 
+              if (window instanceof LayoutWindow
+                  && window != fr  
                   && ((LayoutWindow)window).getScene().getName() == null
                   && ((LayoutWindow)window).isModified() == false
                   ) closeWindow(window);
-              }
             }
             return true;
           }

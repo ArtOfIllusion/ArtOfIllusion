@@ -26,12 +26,6 @@ public class RecentFiles
   private static final int MAX_RECENT = 10;
 
   /** Given a BMenu, fill it in with a list of items for recent files. */
-  public static BMenu createRecentMenu()
-  {
-      BMenu rfm = Translate.menu("openRecent");
-      createMenu(rfm);
-      return rfm;
-  }
   
   public static void createMenu(BMenu menu)
   {

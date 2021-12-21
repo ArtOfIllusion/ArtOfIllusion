@@ -459,9 +459,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     exportMenu = Translate.menu("export");
     
     fileMenu.add(Translate.menuItem("new", this, "newSceneAction"));
-    fileMenu.add(Translate.menuItem("open", this, "openSceneAction"));
-    fileMenu.add(RecentFiles.createRecentMenu());
-    
+    fileMenu.add(Translate.menuItem("open", this, "openSceneAction"));   
+    fileMenu.add(recentFilesMenu = Translate.menu("openRecent"));
+    RecentFiles.createMenu(recentFilesMenu);
+        
     fileMenu.add(Translate.menuItem("close", this, "closeSceneAction"));
     fileMenu.addSeparator();
     Collections.sort(translators, Comparator.comparing(Translator::getName));

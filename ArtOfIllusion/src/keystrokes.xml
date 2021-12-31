@@ -14,6 +14,7 @@
 			else
 				window.deleteCommand();
 		}
+        </keystroke>
 	<keystroke name="Delete Selection" code="127" modifiers="0" >if (window instanceof LayoutWindow)
 		{
 			score = window.getScore();
@@ -28,8 +29,7 @@
 				window.deleteJointCommand();
 			else
 				window.deleteCommand();
-		}
-	</keystroke>
+		}	
 	</keystroke>
 	<keystroke name="Display Mode: Flat" code="50" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_FLAT);window.updateMenus();</keystroke>
 	<keystroke name="Display Mode: Smooth" code="51" modifiers="0">window.getView().setRenderMode(ViewerCanvas.RENDER_SMOOTH); window.updateMenus();</keystroke>

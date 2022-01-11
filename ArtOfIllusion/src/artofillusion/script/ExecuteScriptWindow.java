@@ -98,41 +98,46 @@ public class ExecuteScriptWindow extends BFrame
   private void loadScript()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.OPEN_FILE, Translate.text("selectScriptToLoad"));
+    // Save the current program working directory
+    File workingDir = fc.getDirectory();
     fc.setDirectory(scriptDir);
     fc.showDialog(this);
-    if (fc.getSelectedFile() == null)
-      return;
-    scriptDir = fc.getDirectory();
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    File f = fc.getSelectedFile();
-    try
+    if (fc.getSelectedFile() != null)
     {
-      BufferedReader in = new BufferedReader(new FileReader(f));
-      StringBuilder buf = new StringBuilder();
-      int c;
-      while ((c = in.read()) != -1)
-        buf.append((char) c);
-      in.close();
-      scriptText.setText(buf.toString());
-      scriptText.setCaretPosition(0);
+      scriptDir = fc.getDirectory();
+      setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      File f = fc.getSelectedFile();
+      try
+      {
+        BufferedReader in = new BufferedReader(new FileReader(f));
+        StringBuilder buf = new StringBuilder();
+        int c;
+        while ((c = in.read()) != -1)
+          buf.append((char) c);
+        in.close();
+        scriptText.setText(buf.toString());
+        scriptText.setCaretPosition(0);
+      }
+      catch (Exception ex)
+      {
+        new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
+          ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      }
+      String filename = fc.getSelectedFile().getName();
+      try
+      {
+        languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
+      }
+      catch (IllegalArgumentException ex)
+      {
+        languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
+      }
+      setScriptNameFromFile(filename);
+      setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+      updateLanguage();
     }
-    catch (Exception ex)
-    {
-      new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-    }
-    String filename = fc.getSelectedFile().getName();
-    try
-    {
-      languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
-    }
-    catch (IllegalArgumentException ex)
-    {
-      languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
-    }
-    setScriptNameFromFile(filename);
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-    updateLanguage();
+    // Restore program working directory for other filechoosers
+    fc.setDirectory(workingDir);
   }
 
   /** Prompt the user to save a script. */
@@ -140,38 +145,41 @@ public class ExecuteScriptWindow extends BFrame
   private void saveScript()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
+    // Save current program working directory
+    File workingDir = fc.getDirectory();
     fc.setDirectory(scriptDir);
     fc.setSelectedFile(new File(scriptDir, scriptName+'.'+ScriptRunner.getFilenameExtension((String) languageChoice.getSelectedValue())));
     fc.showDialog(this);
-    if (fc.getSelectedFile() == null)
-      return;
-    scriptDir = fc.getDirectory();
-
-    // Write the script to disk.
-
-    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    File f = fc.getSelectedFile();
-    try
+    if (fc.getSelectedFile() != null)
     {
-      BufferedWriter out = new BufferedWriter(new FileWriter(f));
-      out.write(scriptText.getText().toCharArray());
-      out.close();
+      scriptDir = fc.getDirectory();
+  
+      // Write the script to disk.
+      setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+      File f = fc.getSelectedFile();
+      try
+      {
+        BufferedWriter out = new BufferedWriter(new FileWriter(f));
+        out.write(scriptText.getText().toCharArray());
+        out.close();
+      }
+      catch (Exception ex)
+      {
+        new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
+          ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+      }
+      setScriptNameFromFile(fc.getSelectedFile().getName());
+  
+      // Update the Scripts menus in all windows.
+      EditingWindow allWindows[] = ArtOfIllusion.getWindows();
+      for (int i = 0; i < allWindows.length; i++)
+        if (allWindows[i] instanceof LayoutWindow)
+          ((LayoutWindow) allWindows[i]).rebuildScriptsMenu();
+      setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
-    catch (Exception ex)
-    {
-      new BStandardDialog(null, new String [] {Translate.text("errorWritingScript"),
-        ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-    }
-    setScriptNameFromFile(fc.getSelectedFile().getName());
-
-    // Update the Scripts menus in all windows.
-
-    EditingWindow allWindows[] = ArtOfIllusion.getWindows();
-    for (int i = 0; i < allWindows.length; i++)
-      if (allWindows[i] instanceof LayoutWindow)
-        ((LayoutWindow) allWindows[i]).rebuildScriptsMenu();
-    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-  }
+    // Restore program working directory
+    fc.setDirectory(workingDir);
+ }
 
   /** Set the script name based on the name of a file that was loaded or saved. */
 

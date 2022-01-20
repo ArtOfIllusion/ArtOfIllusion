@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2008 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,6 +36,7 @@ public class TubeTool implements ModellingTool
      message, or bring up the extrude window. */
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
@@ -49,6 +51,6 @@ public class TubeTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", UIUtilities.breakString("You must select a single curve from which to make a tube."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:tube.tool.message")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }
 }

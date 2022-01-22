@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,6 +37,7 @@ public class SkinTool implements ModellingTool
      message, or bring up the extrude window. */
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
@@ -50,7 +52,7 @@ public class SkinTool implements ModellingTool
       }
     if (curves.size() < 2)
       {
-        new BStandardDialog("", UIUtilities.breakString("You must select two or more curves to create a skin across."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+        new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:skin.tool.message.curves")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
         return;
       }
     Curve c = (Curve) curves.elementAt(0).getObject();
@@ -59,17 +61,17 @@ public class SkinTool implements ModellingTool
         Curve c2 = (Curve) curves.elementAt(i).getObject();
         if (c2.getVertices().length != c.getVertices().length)
           {
-            new BStandardDialog("", UIUtilities.breakString("All the curves must have the same number of points."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:skin.tool.curves.same.points")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
             return;
           }
         if (c2.isClosed() != c.isClosed())
           {
-            new BStandardDialog("", UIUtilities.breakString("You cannot create a skin between a closed curve and an open one."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:skin.tool.curve.same.close")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
             return;
           }
         if (c2.getSmoothingMethod() != c.getSmoothingMethod() && c.getSmoothingMethod() != Mesh.NO_SMOOTHING && c2.getSmoothingMethod() != Mesh.NO_SMOOTHING)
           {
-            new BStandardDialog("", UIUtilities.breakString("You cannot create a skin between an interpolating curve and an approximating one."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtool:skin.tool.curve.same.type")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
             return;
           }
       }

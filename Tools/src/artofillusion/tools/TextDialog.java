@@ -1,4 +1,5 @@
 /* Copyright (C) 2013 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,7 +36,7 @@ public class TextDialog extends BDialog
   private final BCheckBox boldBox, italicBox;
   private final ValueField thicknessValue;
   private final ObjectPreviewCanvas preview;
-  private final BButton okButton, cancelButton;
+  private final BButton okButton;
   private ArrayList<ObjectInfo> objects;
 
   /**
@@ -114,7 +115,7 @@ public class TextDialog extends BDialog
     content.add(preview, 1, 1, 1, 5, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     RowContainer buttonsRow = new RowContainer();
     buttonsRow.add(okButton = Translate.button("ok", this, "doOk"));
-    buttonsRow.add(cancelButton = Translate.button("cancel", this, "dispose"));
+    buttonsRow.add(Translate.button("cancel", this, "dispose"));
     content.add(buttonsRow, 0, 6, 2, 1);
     pack();
     UIUtilities.centerDialog(this, window);

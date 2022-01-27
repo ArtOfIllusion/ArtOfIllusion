@@ -38,7 +38,7 @@ public class SkinDialog extends BDialog
 
   public SkinDialog(LayoutWindow window, Vector curves)
   {
-    super(window, Translate.text("stdtools:skin.dialog.title"), true);
+    super(window, Translate.text("Tools:skin.dialog.title"), true);
     this.window = window;
     curve = new ObjectInfo [curves.size()];
     reverse = new boolean [curves.size()];
@@ -60,9 +60,9 @@ public class SkinDialog extends BDialog
     ColumnContainer col = new ColumnContainer();
     content.add(col, 1, 0);
     col.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
-    col.add(upButton = Translate.button("stdtools:skin.dialog.move.up", this, "doMoveUp"));    
-    col.add(downButton = Translate.button("stdtools:skin.dialog.move.down", this, "doMoveDown"));    
-    col.add(reverseBox = new BCheckBox(Translate.text("stdtools:skin.dialog.reverse"), false));
+    col.add(upButton = Translate.button("Tools:skin.dialog.move.up", this, "doMoveUp"));    
+    col.add(downButton = Translate.button("Tools:skin.dialog.move.down", this, "doMoveDown"));    
+    col.add(reverseBox = new BCheckBox(Translate.text("Tools:skin.dialog.reverse"), false));
     reverseBox.addEventLink(ValueChangedEvent.class, this, "selectionChanged");
     content.add(preview = new ObjectPreviewCanvas(null), 2, 0);
     preview.setPreferredSize(new Dimension(150, 150));

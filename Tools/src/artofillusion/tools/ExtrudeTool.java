@@ -53,7 +53,7 @@ public class ExtrudeTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:extrude.tool.messsage")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    new BStandardDialog("", UIUtilities.breakString(Translate.text("Tools:extrude.tool.messsage")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }
 
   /** Extrude a curve into a spline mesh.

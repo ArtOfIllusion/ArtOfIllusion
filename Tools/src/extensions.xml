@@ -5,7 +5,7 @@
     <description>
         This plugin contains the standard modeling tools which are included with Art of Illusion.
     </description>
-    <resource type="TranslateBundle" id="stdtools" name="Bundle"/>
+    <resource type="TranslateBundle" id="Tools" name="Bundle"/>
     <plugin class="artofillusion.tools.ArrayTool"/>
     <plugin class="artofillusion.tools.CSGTool"/>
     <plugin class="artofillusion.tools.ExtrudeTool">

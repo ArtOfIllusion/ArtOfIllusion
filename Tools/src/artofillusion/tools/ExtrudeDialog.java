@@ -41,7 +41,7 @@ public class ExtrudeDialog extends BDialog
 
   public ExtrudeDialog(LayoutWindow window)
   {
-    super(window, Translate.text("stdtools:extrude.dialog.name"), true);
+    super(window, Translate.text("Tools:extrude.dialog.name"), true);
     this.window = window;
     Scene scene = window.getScene();
     int selection[] = window.getSelectedIndices();
@@ -72,16 +72,16 @@ public class ExtrudeDialog extends BDialog
     FormContainer content = new FormContainer(4, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
-    content.add(Translate.label("stdtools:extrude.target.label"), 0, 0, 2, 1);
+    content.add(Translate.label("Tools:extrude.target.label"), 0, 0, 2, 1);
     content.add(objChoice = new BComboBox(), 0, 1, 2, 1);
     for (int i = 0; i < objects.size(); i++)
       objChoice.add(objects.get(i).getName());
     objChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
-    content.add(Translate.label("stdtools:extrude.direction.label"), 0, 2, 2, 1);
+    content.add(Translate.label("Tools:extrude.direction.label"), 0, 2, 2, 1);
     pathGroup = new RadioButtonGroup();
-    content.add(xBox = new BRadioButton(Translate.text("stdtools:extrude.xaxis"), true, pathGroup), 0, 3);
-    content.add(yBox = new BRadioButton(Translate.text("stdtools:extrude.yaxis"), true, pathGroup), 0, 4);
-    content.add(zBox = new BRadioButton(Translate.text("stdtools:extrude.zaxis"), true, pathGroup), 0, 5);
+    content.add(xBox = new BRadioButton(Translate.text("Tools:extrude.xaxis"), true, pathGroup), 0, 3);
+    content.add(yBox = new BRadioButton(Translate.text("Tools:extrude.yaxis"), true, pathGroup), 0, 4);
+    content.add(zBox = new BRadioButton(Translate.text("Tools:extrude.zaxis"), true, pathGroup), 0, 5);
     content.add(pathBox = new BRadioButton("Curve", true, pathGroup), 0, 6);
     content.add(vectorBox = new BRadioButton("Vector", true, pathGroup), 0, 7);
     pathBox.setEnabled(paths.size() > 0);
@@ -98,20 +98,20 @@ public class ExtrudeDialog extends BDialog
     pathChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
     RowContainer vectorRow = new RowContainer();
     content.add(vectorRow, 1, 7);
-    vectorRow.add(Translate.label("stdtools:extrude.xaxis"));
+    vectorRow.add(Translate.label("Tools:extrude.xaxis"));
     vectorRow.add(xField = new ValueField(0.0, ValueField.NONE, 4));
     xField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    vectorRow.add(Translate.label("stdtools:extrude.yaxis"));
+    vectorRow.add(Translate.label("Tools:extrude.yaxis"));
     vectorRow.add(yField = new ValueField(0.0, ValueField.NONE, 4));
     yField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    vectorRow.add(Translate.label("stdtools:extrude.zaxis"));
+    vectorRow.add(Translate.label("Tools:extrude.zaxis"));
     vectorRow.add(zField = new ValueField(1.0, ValueField.NONE, 4));
     zField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    content.add(orientBox = new BCheckBox(Translate.text("stdtools:extrude.follws.curve.label"), true), 0, 8, 2, 1);
+    content.add(orientBox = new BCheckBox(Translate.text("Tools:extrude.follws.curve.label"), true), 0, 8, 2, 1);
     orientBox.addEventLink(ValueChangedEvent.class, this, "stateChanged");
-    content.add(Translate.label("stdtools:extrude.segments.label"), 2, 0);
-    content.add(Translate.label("stdtools:extrude.twist.value.label"), 2, 1);
-    content.add(Translate.label("stdtools:extrude.surface.accuracy.label"), 2, 2);
+    content.add(Translate.label("Tools:extrude.segments.label"), 2, 0);
+    content.add(Translate.label("Tools:extrude.twist.value.label"), 2, 1);
+    content.add(Translate.label("Tools:extrude.surface.accuracy.label"), 2, 2);
     content.add(segField = new ValueField(1.0, ValueField.POSITIVE+ValueField.INTEGER, 5), 3, 0);
     content.add(angleField = new ValueField(0.0, ValueField.NONE, 5), 3, 1);
     content.add(tolField = new ValueField(0.1, ValueField.POSITIVE, 5), 3, 2);

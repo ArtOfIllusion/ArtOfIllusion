@@ -43,7 +43,7 @@ public class ArrayTool implements ModellingTool
   public void commandSelected(LayoutWindow window)
   {
         if (window.getSelectedIndices().length < 1)
-            new BStandardDialog("", Translate.text("stdtools:array.tool.message"), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            new BStandardDialog("", Translate.text("Tools:array.tool.message"), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
         else
             new ArrayDialog(window);
   }

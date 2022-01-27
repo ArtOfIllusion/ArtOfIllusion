@@ -37,7 +37,7 @@ public class TubeDialog extends BDialog
 
   public TubeDialog(LayoutWindow window, ObjectInfo curve)
   {
-    super(window, Translate.text("stdtools:tube.dialog.name"), true);
+    super(window, Translate.text("Tools:tube.dialog.name"), true);
     this.window = window;
     curveInfo = curve;
     theCurve = (Curve) curve.getObject();
@@ -48,11 +48,11 @@ public class TubeDialog extends BDialog
     FormContainer content = new FormContainer(4, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-    content.add(Translate.label("stdtools:tube.width.label"), 0, 0);
-    content.add(Translate.label("stdtools:tube.cap.ends.label"), 0, 1);
+    content.add(Translate.label("Tools:tube.width.label"), 0, 0);
+    content.add(Translate.label("Tools:tube.cap.ends.label"), 0, 1);
     content.add(thicknessField = new ValueField(0.1, ValueField.POSITIVE, 5), 1, 0);
     thicknessField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    content.add(endsChoice = new BComboBox(new String [] {Translate.text("stdtools:tube.cap.end.open"), Translate.text("stdtools:tube.cap.end.flat")}), 1, 1);
+    content.add(endsChoice = new BComboBox(new String [] {Translate.text("Tools:tube.cap.end.open"), Translate.text("Tools:tube.cap.end.flat")}), 1, 1);
     endsChoice.setEnabled(!theCurve.isClosed());
     endsChoice.addEventLink(ValueChangedEvent.class, this, "makeObject");
     content.add(preview = new ObjectPreviewCanvas(null), 0, 2, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));

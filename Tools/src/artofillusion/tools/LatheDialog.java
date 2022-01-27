@@ -38,7 +38,7 @@ public class LatheDialog extends BDialog
 
   public LatheDialog(LayoutWindow window, ObjectInfo curve)
   {
-    super(window, Translate.text("stdtools:lathe.dialog.name"), true);
+    super(window, Translate.text("Tools:lathe.dialog.name"), true);
     this.window = window;
     theCurve = (Curve) curve.getObject();
     curveInfo = curve;
@@ -48,18 +48,18 @@ public class LatheDialog extends BDialog
     FormContainer content = new FormContainer(3, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
-    content.add(Translate.label("stdtools:lathe.axis.select.label"), 0, 0, 2, 1);
+    content.add(Translate.label("Tools:lathe.axis.select.label"), 0, 0, 2, 1);
     axisGroup = new RadioButtonGroup();
-    content.add(xBox = new BRadioButton(Translate.text("stdtools:lathe.rotate.xaxis"), false, axisGroup), 0, 1, 2, 1);
-    content.add(yBox = new BRadioButton(Translate.text("stdtools:lathe.rotate.yaxis"), true, axisGroup), 0, 2, 2, 1);
-    content.add(zBox = new BRadioButton(Translate.text("stdtools:lathe.rotate.zaxis"), false, axisGroup), 0, 3, 2, 1);
-    content.add(endsBox = new BRadioButton(Translate.text("stdtools:lathe.rotate.endpoints"), false, axisGroup), 0, 4, 2, 1);
+    content.add(xBox = new BRadioButton(Translate.text("Tools:lathe.rotate.xaxis"), false, axisGroup), 0, 1, 2, 1);
+    content.add(yBox = new BRadioButton(Translate.text("Tools:lathe.rotate.yaxis"), true, axisGroup), 0, 2, 2, 1);
+    content.add(zBox = new BRadioButton(Translate.text("Tools:lathe.rotate.zaxis"), false, axisGroup), 0, 3, 2, 1);
+    content.add(endsBox = new BRadioButton(Translate.text("Tools:lathe.rotate.endpoints"), false, axisGroup), 0, 4, 2, 1);
     axisGroup.addEventLink(SelectionChangedEvent.class, this, "makeObject");
-    content.add(Translate.label("stdtools:lathe.rotation.angle.label"), 0, 5, 2, 1);
+    content.add(Translate.label("Tools:lathe.rotation.angle.label"), 0, 5, 2, 1);
     content.add(angleSlider = new ValueSlider(0.0, 360.0, 180, 360.0), 0, 6, 2, 1);
     angleSlider.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    content.add(Translate.label("stdtools:lathe.radius.label"), 0, 7);
-    content.add(Translate.label("stdtools:lathe.segments.label"), 0, 8);
+    content.add(Translate.label("Tools:lathe.radius.label"), 0, 7);
+    content.add(Translate.label("Tools:lathe.segments.label"), 0, 8);
     content.add(radiusField = new ValueField(0.0, ValueField.NONE), 1, 7);
     content.add(segmentsField = new ValueField(8.0, ValueField.POSITIVE+ValueField.INTEGER), 1, 8);
     radiusField.addEventLink(ValueChangedEvent.class, this, "makeObject");

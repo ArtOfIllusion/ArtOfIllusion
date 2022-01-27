@@ -51,6 +51,6 @@ public class TubeTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:tube.tool.message")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    new BStandardDialog("", UIUtilities.breakString(Translate.text("Tools:tube.tool.message")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }
 }

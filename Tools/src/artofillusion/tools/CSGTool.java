@@ -64,7 +64,7 @@ public class CSGTool implements ModellingTool
     }
     if (inputObj.size() < 2 || closedCount < 1)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtools:csg.tool.message")),  BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("Tools:csg.tool.message")),  BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
       return;
     }
     CSGObject newobj = new CSGObject(inputObj.elementAt(0), inputObj.elementAt(1), CSGObject.UNION);

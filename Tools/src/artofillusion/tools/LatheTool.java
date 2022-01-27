@@ -56,7 +56,7 @@ public class LatheTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", Translate.text("stdtools:lathe.tool.mesage"), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    new BStandardDialog("", Translate.text("Tools:lathe.tool.mesage"), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }
 
   /**

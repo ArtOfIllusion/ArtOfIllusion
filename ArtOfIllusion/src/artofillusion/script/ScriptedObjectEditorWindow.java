@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Editions copyright (C) 2022 by Petri Ihalainen 
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -75,7 +76,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("Save", "...", this, "saveScript"));
     buttons.add(Translate.button("scriptParameters", this, "editParameters"));
     buttons.add(Translate.button("cancel", this, "dispose"));
-    addEventLink(WindowClosingEvent.class, this, "commitChanges");
+    addEventLink(WindowClosingEvent.class, this, "dispose");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
     scriptText.setCaretPosition(0);
     pack();
@@ -230,10 +231,10 @@ public class ScriptedObjectEditorWindow extends BFrame
       name = new String [script.getNumParameters()];
       value = new double [script.getNumParameters()];
       for (int i = 0; i < name.length; i++)
-        {
-          name[i] = script.getParameterName(i);
-          value[i] = script.getParameterValue(i);
-        }
+      {
+        name[i] = script.getParameterName(i);
+        value[i] = script.getParameterValue(i);
+      }
       content.add(UIUtilities.createScrollingList(paramList = new BList()), 0, 0, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
       paramList.setPreferredVisibleRows(5);
       buildParameterList();
@@ -279,17 +280,17 @@ public class ScriptedObjectEditorWindow extends BFrame
       }
       current = which;
       if (which == -1 || which >= name.length)
-        {
-          nameField.setEnabled(false);
-          valueField.setEnabled(false);
-        }
+      {
+        nameField.setEnabled(false);
+        valueField.setEnabled(false);
+      }
       else
-        {
-          nameField.setEnabled(true);
-          valueField.setEnabled(true);
-          nameField.setText(name[which]);
-          valueField.setValue(value[which]);
-        }
+      {
+        nameField.setEnabled(true);
+        valueField.setEnabled(true);
+        nameField.setText(name[which]);
+        valueField.setValue(value[which]);
+      }
     }
 
     /** Deal with changes to the text fields. */
@@ -299,10 +300,10 @@ public class ScriptedObjectEditorWindow extends BFrame
       if (current < 0 || current > name.length)
         return;
       if (ev.getWidget() == nameField)
-        {
-          name[current] = nameField.getText();
-//          paramList.replaceItem(name[current], current);
-        }
+      {
+        name[current] = nameField.getText();
+        //  paramList.replaceItem(name[current], current);
+      }
       else
         value[current] = valueField.getValue();
     }
@@ -346,13 +347,13 @@ public class ScriptedObjectEditorWindow extends BFrame
       String newName[] = new String [name.length-1];
       double newValue[] = new double [value.length-1];
       for (int i = 0, j = 0; i < name.length; i++)
-        {
-          if (i == which)
-            continue;
-          newName[j] = name[i];
-          newValue[j] = value[i];
-          j++;
-        }
+      {
+        if (i == which)
+          continue;
+        newName[j] = name[i];
+        newValue[j] = value[i];
+        j++;
+      }
       name = newName;
       value = newValue;
       buildParameterList();

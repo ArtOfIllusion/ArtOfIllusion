@@ -1436,7 +1436,7 @@ public abstract class ViewerCanvas extends CustomWidget
     Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
     coords.setOrigin(cp);
 
-    if(null != animation) animation.start(coords, pointInSpace, scale, orientation, navigation);
+    if(animation != null) animation.start(coords, pointInSpace, scale, orientation, navigation);
   }
 
   /** Show feedback to the user in response to a mouse drag, by drawing a Shape over the

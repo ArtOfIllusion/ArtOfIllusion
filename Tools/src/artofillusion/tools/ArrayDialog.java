@@ -154,7 +154,7 @@ public class ArrayDialog extends BDialog
     groupBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     panel.add(duplicateBox = new BCheckBox(Translate.text("Tools:array.skip.first"), !spec.dupFirst), 1, 0);
     duplicateBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
-    panel.add(liveBox = new BCheckBox(Translate.text("Tools:array.coopies.live"), spec.live), 1, 1);
+    panel.add(liveBox = new BCheckBox(Translate.text("Tools:array.copies.live"), spec.live), 1, 1);
     liveBox.addEventLink(ValueChangedEvent.class, this, "updateSpec");
     return panel;
   }

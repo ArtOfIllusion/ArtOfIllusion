@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes Copyrignt (C) 2016-2020 Petri Ihalainen
-   Changes copyright (C) 2016-2018 by Maksim Khramov
+   Changes copyright (C) 2016-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -1436,7 +1436,7 @@ public abstract class ViewerCanvas extends CustomWidget
     Vec3 cp = pointInSpace.plus(cz.times(-distToPlane));
     coords.setOrigin(cp);
 
-    animation.start(coords, pointInSpace, scale, orientation, navigation);
+    if(animation != null) animation.start(coords, pointInSpace, scale, orientation, navigation);
   }
 
   /** Show feedback to the user in response to a mouse drag, by drawing a Shape over the

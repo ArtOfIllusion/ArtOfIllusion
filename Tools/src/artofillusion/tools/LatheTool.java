@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -40,6 +41,7 @@ public class LatheTool implements ModellingTool
      message, or bring up the extrude window. */
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
@@ -54,7 +56,7 @@ public class LatheTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", "You must select a single curve to lathe.", BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    new BStandardDialog("", Translate.text("Tools:lathe.tool.mesage"), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }
 
   /**

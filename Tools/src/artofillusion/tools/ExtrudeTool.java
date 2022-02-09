@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,6 +37,7 @@ public class ExtrudeTool implements ModellingTool
      message, or bring up the extrude window. */
 
   @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
   public void commandSelected(LayoutWindow window)
   {
     Scene scene = window.getScene();
@@ -51,7 +53,7 @@ public class ExtrudeTool implements ModellingTool
             return;
           }
       }
-    new BStandardDialog("", UIUtilities.breakString("You must select a curve or open surface to extrude and, optionally, a curve along which to extrude it."), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+    new BStandardDialog("", UIUtilities.breakString(Translate.text("Tools:extrude.tool.messsage")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
   }
 
   /** Extrude a curve into a spline mesh.

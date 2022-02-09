@@ -1,6 +1,6 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
    Modifications Copyright (C) 2019 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -64,9 +64,7 @@ public class CSGTool implements ModellingTool
     }
     if (inputObj.size() < 2 || closedCount < 1)
     {
-      new BStandardDialog("", 
-                          UIUtilities.breakString("You must select two objects for boolean modelling, at least one of which must be solid."), 
-                          BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+      new BStandardDialog("", UIUtilities.breakString(Translate.text("Tools:csg.tool.message")),  BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
       return;
     }
     CSGObject newobj = new CSGObject(inputObj.elementAt(0), inputObj.elementAt(1), CSGObject.UNION);
@@ -82,7 +80,7 @@ public class CSGTool implements ModellingTool
       inputObj.elementAt(0).setVisible(false);
       inputObj.elementAt(1).setVisible(false);
     }
-    ObjectInfo info = new ObjectInfo(newobj, new CoordinateSystem(center, Vec3.vz(), Vec3.vy()), "Boolean "+(counter++));
+    ObjectInfo info = new ObjectInfo(newobj, new CoordinateSystem(center, Vec3.vz(), Vec3.vy()), "Boolean " + (counter++));
     info.addTrack(new PositionTrack(info), 0);
     info.addTrack(new RotationTrack(info), 1);
     window.addObject(info, null);

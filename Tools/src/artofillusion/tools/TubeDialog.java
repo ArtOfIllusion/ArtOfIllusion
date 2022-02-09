@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ public class TubeDialog extends BDialog
   Curve theCurve;
   ObjectInfo curveInfo;
   Tube theTube;
-  BButton okButton, cancelButton;
+
   ValueField thicknessField;
   BComboBox endsChoice;
   ObjectPreviewCanvas preview;
@@ -37,7 +37,7 @@ public class TubeDialog extends BDialog
 
   public TubeDialog(LayoutWindow window, ObjectInfo curve)
   {
-    super(window, "Tube", true);
+    super(window, Translate.text("Tools:tube.dialog.name"), true);
     this.window = window;
     curveInfo = curve;
     theCurve = (Curve) curve.getObject();
@@ -48,19 +48,19 @@ public class TubeDialog extends BDialog
     FormContainer content = new FormContainer(4, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-    content.add(new BLabel("Tube Width"), 0, 0);
-    content.add(new BLabel("Cap Ends"), 0, 1);
+    content.add(Translate.label("Tools:tube.width.label"), 0, 0);
+    content.add(Translate.label("Tools:tube.cap.ends.label"), 0, 1);
     content.add(thicknessField = new ValueField(0.1, ValueField.POSITIVE, 5), 1, 0);
     thicknessField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    content.add(endsChoice = new BComboBox(new String [] {"Open Ends", "Flat Ends"}), 1, 1);
+    content.add(endsChoice = new BComboBox(new String [] {Translate.text("Tools:tube.cap.end.open"), Translate.text("Tools:tube.cap.end.flat")}), 1, 1);
     endsChoice.setEnabled(!theCurve.isClosed());
     endsChoice.addEventLink(ValueChangedEvent.class, this, "makeObject");
     content.add(preview = new ObjectPreviewCanvas(null), 0, 2, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null));
     preview.setPreferredSize(new Dimension(150, 150));
     RowContainer buttons = new RowContainer();
     content.add(buttons, 0, 3, 2, 1, new LayoutInfo());
-    buttons.add(okButton = Translate.button("ok", this, "doOk"));
-    buttons.add(cancelButton = Translate.button("cancel", this, "dispose"));
+    buttons.add(Translate.button("ok", this, "doOk"));
+    buttons.add(Translate.button("cancel", this, "dispose"));
     makeObject();
     pack();
     UIUtilities.centerDialog(this, window);

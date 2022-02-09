@@ -1,5 +1,5 @@
 /* Copyright (C) 2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +14,7 @@ package artofillusion.script;
 import artofillusion.*;
 import groovy.lang.*;
 import org.codehaus.groovy.control.*;
-
+import org.codehaus.groovy.runtime.StackTraceUtils;
 import java.io.*;
 import java.util.*;
 
@@ -74,9 +74,10 @@ public class GroovyScriptEngine implements ScriptEngine
         script.run();
         
     }
-    catch (CompilationFailedException e)
-    {
-      throw new ScriptException(e.getMessage(), -1);
+    catch(GroovyRuntimeException gre) {
+      Throwable tt = StackTraceUtils.sanitize(gre);
+      int ln = tt.getStackTrace()[0].getLineNumber() - numImports;
+      throw new ScriptException(tt.getMessage(), ln);
     }
   }
 

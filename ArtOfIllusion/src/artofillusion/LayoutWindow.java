@@ -71,6 +71,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private List<ModellingTool> modellingTools;
   protected Preferences preferences;
 
+  public OpenEditorsList editor;
+
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
 
@@ -83,8 +85,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     undoStack = new UndoStack();
     sceneChangedEvent = new SceneChangedEvent(this);
     uiEventProcessor = new ActionProcessor();
+    editor = new OpenEditorsList();
     createItemList();
     objectListShown = true;
+
 
     // Create the four SceneViewer panels.
 
@@ -3042,5 +3046,54 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     }
     updateImage();
     dispatchSceneChangedEvent(); // To be safe, since we can't rely on scripts to set undo records or call setModified().
+  }
+
+  public static class OpenEditorsList extends ArrayList<Object[]>
+  {
+    OpenEditorsList()
+    {
+      super();
+    }
+    
+    public boolean add(Object editor, Object editee)
+    {
+      for(int i = 0; i < this.size(); i++)
+        if (get(i)[1] == editee)
+        {
+          try
+          {
+             // This should help if the editor crashed and therefore was not removed from the list
+             // The editors are expected to be buoy WundowWidgets
+             // For other types you need to use 'remove' and what ever it takes to terminate the tool.
+
+             WindowWidget e = (WindowWidget)get(i)[0];
+             remove(e);
+             e.dispose();
+          }
+          catch (Exception x){}
+        }
+      add(new Object[]{editor, editee});
+      return true;
+    }
+
+    @Override
+    public boolean remove(Object editor)
+    {
+      for(int i = 0; i < this.size(); i++)
+        if (get(i)[0] == editor)
+        {
+          super.remove(i);
+          return true;
+        }
+      return false;
+    }
+
+    public Object existing(Object editee)
+    {
+      for(int i = 0; i < this.size(); i++)
+        if (get(i)[1] == editee)
+          return(get(i)[0]);
+      return null;
+    }
   }
 }

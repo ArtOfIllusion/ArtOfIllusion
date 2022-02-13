@@ -13,6 +13,7 @@ package artofillusion.script;
 import artofillusion.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
+
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
@@ -75,7 +76,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("Save", "...", this, "saveScript"));
     buttons.add(Translate.button("scriptParameters", this, "editParameters"));
     buttons.add(Translate.button("cancel", this, "dispose"));
-    addEventLink(WindowClosingEvent.class, this, "commitChanges");
+    addEventLink(WindowClosingEvent.class, this, "dispose");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
     scriptText.setCaretPosition(0);
     pack();
@@ -206,6 +207,14 @@ public class ScriptedObjectEditorWindow extends BFrame
     window.updateImage();
     setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     dispose();
+  }
+  
+  @Override
+  public void dispose()
+  {
+    if (window != null && window instanceof LayoutWindow)
+      ((LayoutWindow)window).editor.remove(this);
+    super.dispose();
   }
 
   /** This is an inner class for editing the list of parameters on the object. */

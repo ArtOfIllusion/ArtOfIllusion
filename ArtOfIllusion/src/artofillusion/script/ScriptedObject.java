@@ -319,12 +319,23 @@ public class ScriptedObject extends ObjectCollection
     return true;
   }
 
-  /** Allow the user to edit the script. */
+  /** Allow the user to edit the script. If an editor is already open, bring it to front*/
 
   @Override
   public void edit(EditingWindow parent, ObjectInfo info, Runnable cb)
   {
-    new ScriptedObjectEditorWindow(parent, info, cb);
+    ScriptedObjectEditorWindow currentEditor = (ScriptedObjectEditorWindow)((LayoutWindow)parent).editor.existing(this);
+
+    // The '!isVisible()' happens if the editor was diposed but not removed from the list
+    // The 'add' method removes non-visible WindowWidgets, but other types need 'remove'
+
+    if (currentEditor == null || !currentEditor.isVisible())
+    {
+      if (parent instanceof LayoutWindow)
+        ((LayoutWindow)parent).editor.add(new ScriptedObjectEditorWindow(parent, info, cb), this);
+    }
+    else
+      currentEditor.toFront(); // 'toFront()' does not work from LayouWinodow: After the call LW 'toFronts' itself.
   }
 
   /** This constructor reconstructs a ScriptedObject from an input stream. */

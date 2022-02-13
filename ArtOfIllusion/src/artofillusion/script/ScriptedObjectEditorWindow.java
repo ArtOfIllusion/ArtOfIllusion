@@ -27,7 +27,7 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 /** This class presents a user interface for entering object scripts. */
 
-public class ScriptedObjectEditorWindow extends BFrame
+public class ScriptedObjectEditorWindow extends BDialog
 {
   private EditingWindow window;
   private ObjectInfo info;

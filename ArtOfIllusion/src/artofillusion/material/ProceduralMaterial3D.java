@@ -17,8 +17,8 @@ import artofillusion.procedural.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
 import buoy.event.*;
-
-import java.awt.*;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.*;
 
 /** This is a Material3D which uses a Procedure to calculate its properties. */
@@ -28,7 +28,7 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   private Procedure proc;
   private boolean shadows;
   private double stepSize, antialiasing;
-  private ThreadLocal renderingProc;
+  private ThreadLocal<Procedure> renderingProc;
 
   public ProceduralMaterial3D()
   {
@@ -61,9 +61,9 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal() {
+    renderingProc = new ThreadLocal<Procedure>() {
       @Override
-      protected Object initialValue()
+      protected Procedure initialValue()
       {
         Procedure localProc = createProcedure();
         localProc.copy(proc);
@@ -145,12 +145,10 @@ public class ProceduralMaterial3D extends Material3D implements ProcedureOwner
   @Override
   public boolean usesImage(ImageMap image)
   {
-    artofillusion.procedural.Module modules[] = proc.getModules();
-
-    for (int i = 0; i < modules.length; i++)
-      if (modules[i] instanceof ImageModule && ((ImageModule) modules[i]).getMap() == image)
-        return true;
-    return false;
+    return proc.getModules(ImageModule.class).
+            filter(module -> module.getMap() == image).
+            findFirst().
+            isPresent();
   }
 
   /** The material scatters light if there is anything connected to the scattering output. */

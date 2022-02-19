@@ -13,6 +13,7 @@
 package artofillusion;
 
 import artofillusion.image.*;
+import artofillusion.image.filter.ImageFilter
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
@@ -151,6 +152,7 @@ public class ArtOfIllusion
     PluginRegistry.addCategory(Material.class);
     PluginRegistry.addCategory(TextureMapping.class);
     PluginRegistry.addCategory(MaterialMapping.class);
+    PluginRegistry.addCategory(ImageFilter.class);
     PluginRegistry.addCategory(artofillusion.procedural.Module.class);
     PluginRegistry.registerPlugin(new UniformTexture());
     PluginRegistry.registerPlugin(new ImageMapTexture());

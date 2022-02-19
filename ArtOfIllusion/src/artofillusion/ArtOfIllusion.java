@@ -13,7 +13,7 @@
 package artofillusion;
 
 import artofillusion.image.*;
-import artofillusion.image.filter.ImageFilter
+import artofillusion.image.filter.ImageFilter;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;

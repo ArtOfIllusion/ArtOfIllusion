@@ -85,7 +85,7 @@
    <pathconvert property="classpath" refid="libraries" />
    <mkdir dir="${docs}" />
    <javadoc packagenames="artofillusion.*"
-     sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src"
+     sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src:Filters/src"
      classpath="${classpath}"
      source="${lang.version}"
      defaultexcludes="yes"

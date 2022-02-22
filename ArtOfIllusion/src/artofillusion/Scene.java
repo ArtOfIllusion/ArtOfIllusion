@@ -134,8 +134,8 @@ public class Scene
   {
     time = t;
     boolean processed[] = new boolean [objects.size()];
-    for (int i = 0; i < objects.size(); i++)
-      applyTracksToObject(objects.get(i), processed, null, i);
+    objects.forEach(item ->
+        applyTracksToObject(item, processed, null, objects.indexOf(item)));
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -177,8 +177,8 @@ public class Scene
     }
 
     // Now apply tracks to all dependent objects.
-    for (int i = 0; i < objects.size(); i++)
-      applyTracksToObject(objects.get(i), processed, changed, i);
+    objects.forEach(item ->
+        applyTracksToObject(item, processed, changed, objects.indexOf(item)));
     objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
@@ -985,8 +985,7 @@ public class Scene
     {
       // Build an index for fast lookup
       objectIndexMap = new HashMap<>();
-      for (int i = 0; i < objects.size(); i++)
-        objectIndexMap.put(objects.get(i), i);
+      objects.forEach(item -> objectIndexMap.put(item, objects.indexOf(item)));
     }
 
     return objectIndexMap.getOrDefault(info, -1);
@@ -1027,7 +1026,11 @@ public class Scene
 
   public Texture getTexture(String name)
   {
-    return textures.stream().filter(asset -> asset.getName().equals(name)).findFirst().orElse(null);
+    return textures.stream()
+                   .filter(asset -> asset.getName()
+                                         .equals(name))
+                                         .findFirst()
+                                         .orElse(null);
   }
 
   /** Get the number of materials in this scene. */

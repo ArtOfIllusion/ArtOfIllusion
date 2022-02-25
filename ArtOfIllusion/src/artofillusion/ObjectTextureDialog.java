@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -142,13 +142,13 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     texButtonRow.add(texMapButton = Translate.button("editMapping", this, "doEditTextureMapping"));
     texButtonRow.add(newTextureChoice = new BComboBox());
     newTextureChoice.add(Translate.text("button.newTexture"));
-    
+
     for (Texture texture : PluginRegistry.getPlugins(Texture.class))
     {
       try
       {
-        Method mtd = texture.getClass().getMethod("getTypeName", (Class<?>[])null);
-        newTextureChoice.add(mtd.invoke(null, (Object[])null));
+        Method mtd = texture.getClass().getMethod("getTypeName");
+        newTextureChoice.add(mtd.invoke(null));
       }
       catch (Exception ex)
       {
@@ -180,8 +180,8 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     {
       try
       {
-        Method mtd = material.getClass().getMethod("getTypeName", (Class<?>[])null);
-        newMaterialChoice.add(mtd.invoke(null, (Object[])null));
+        Method mtd = material.getClass().getMethod("getTypeName");
+        newMaterialChoice.add(mtd.invoke(null));
       }
       catch (Exception ex)
       {
@@ -362,6 +362,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
   private void buildParamList()
   {
+    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Build Params list ");
     // Find a list of all parameters, both for the entire texture and for the selected layer.
 
     TextureParameter params[];
@@ -499,7 +500,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     List<Texture> textureTypes = PluginRegistry.getPlugins(Texture.class);
     try
     {
-      Texture tex = textureTypes.get(index-1).getClass().newInstance();
+      Texture tex = textureTypes.get(index-1).getClass().getDeclaredConstructor().newInstance();
       int j = 0;
       String name = "";
       do
@@ -532,7 +533,7 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
     List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
     try
     {
-      Material mat = materialTypes.get(index-1).getClass().newInstance();
+      Material mat = materialTypes.get(index-1).getClass().getDeclaredConstructor().newInstance();
       int j = 0;
       String name = "";
       do

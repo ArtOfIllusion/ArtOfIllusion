@@ -1,4 +1,5 @@
 /* Copyright (C) 2011 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -125,7 +126,7 @@ public class ModuleMenu extends CustomWidget
         try
         {
           Class<? extends Module> moduleClass = plugins.get(i).getClass();
-          category.add(new Entry((moduleClass.newInstance()).getName(), moduleClass, new Object[0]));
+          category.add(new Entry((moduleClass.getDeclaredConstructor().newInstance()).getName(), moduleClass, new Object[0]));
         }
         catch (Exception ex)
         {

@@ -362,7 +362,6 @@ public class ObjectTextureDialog extends BDialog implements ListChangeListener
 
   private void buildParamList()
   {
-    System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Build Params list ");
     // Find a list of all parameters, both for the entire texture and for the selected layer.
 
     TextureParameter params[];

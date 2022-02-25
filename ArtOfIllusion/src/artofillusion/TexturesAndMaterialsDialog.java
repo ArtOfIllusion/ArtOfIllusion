@@ -1,5 +1,5 @@
 /* Copyright (C) 2011 by Helge Hansen and Peter Eastman
-   Changes copyright (C) 2016 by Maksim Khramov
+   Changes copyright (C) 2016-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -398,7 +398,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         } while (theScene.getMaterial(name) != null);
         try
         {
-          Material mat = materialTypes.get(newType-textureTypes.size()).getClass().newInstance();
+          Material mat = materialTypes.get(newType-textureTypes.size()).getClass().getDeclaredConstructor().newInstance();
           mat.setName(name);
           theScene.addMaterial(mat);
           mat.edit(parentFrame.getFrame(), theScene);
@@ -422,7 +422,7 @@ public class TexturesAndMaterialsDialog extends BDialog
         } while (theScene.getTexture(name) != null);
         try
         {
-          Texture tex = textureTypes.get(newType).getClass().newInstance();
+          Texture tex = textureTypes.get(newType).getClass().getDeclaredConstructor().newInstance();
           tex.setName(name);
           theScene.addTexture(tex);
           tex.edit(this, theScene);

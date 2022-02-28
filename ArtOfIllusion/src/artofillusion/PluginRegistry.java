@@ -1,6 +1,6 @@
  /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018-2021 by Maksim Khramov
+   Changes copyright (C) 2018-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -190,7 +190,7 @@ public class PluginRegistry
         addCategory(jar.loader.loadClass(category));
       for (String pluginName : jar.plugins)
       {
-        Object plugin = jar.loader.loadClass(pluginName).newInstance();
+        Object plugin = jar.loader.loadClass(pluginName).getDeclaredConstructor().newInstance();
         registerPlugin(plugin);
         classNameMap.put(pluginName, plugin);
       }

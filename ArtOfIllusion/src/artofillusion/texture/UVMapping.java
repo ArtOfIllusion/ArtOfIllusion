@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,7 +32,8 @@ public class UVMapping extends Mapping2D
     super(theObject, theTexture);
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "UV";
   }
@@ -58,7 +60,8 @@ public class UVMapping extends Mapping2D
     return vparam;
   }
 
-  public static boolean legalMapping(Object3D obj, Texture tex)
+  @Override
+  public boolean legalMapping(Object3D obj, Texture tex)
   {
     while (obj instanceof ObjectWrapper)
       obj = ((ObjectWrapper) obj).getWrappedObject();

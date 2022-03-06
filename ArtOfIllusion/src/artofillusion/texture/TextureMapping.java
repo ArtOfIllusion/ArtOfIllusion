@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,7 +19,7 @@ import java.io.*;
 
 /** A TextureMapping describes the mapping of a Texture's texture coordinates to points on 
    the surface of an object.  It operates in two ways.  First, it generates RenderingTriangles
-   whic contain the necessary information to be rendered.  Second, since some renderers can
+   which contain the necessary information to be rendered.  Second, since some renderers can
    directly render certain objects without ever breaking them into triangles, it must be able
    to directly calculate the material properties for a point in space.
    <p>
@@ -39,9 +40,9 @@ public abstract class TextureMapping
       <p>
       public MappingSubclass(Object3D obj, Texture texture)
       <p>
-      In addition, every subclass must include a method of the form
+      In addition, every subclass must override
       <p>
-      public static boolean legalMapping(Object3D obj, Texture texture)
+      public legalMapping(Object3D obj, Texture texture)
       <p>
       which returns true if the mapping can be used with the specified object and Texture.  
       Finally, every subclass must include a constructor with the signature
@@ -64,9 +65,14 @@ public abstract class TextureMapping
   /** Get the name of this type of mapping.  Subclasses should override this method to return
       an appropriate name. */
   
-  public static String getName()
+  public String getName()
   {
     return "";
+  }
+  
+  public boolean legalMapping(Object3D obj, Texture tex)
+  {
+    return false;
   }
   
   /** Given the vertices to be mapped and their normal vectors, generate a RenderingTriangle.

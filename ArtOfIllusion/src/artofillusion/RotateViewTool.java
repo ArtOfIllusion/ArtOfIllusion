@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
    Changes copyright (C) 2016-2019 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -17,11 +17,8 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import static artofillusion.ui.UIUtilities.*;
-import artofillusion.view.*;
-import artofillusion.texture.UVMappingWindow;
 import buoy.event.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
 
@@ -51,12 +48,6 @@ public class RotateViewTool extends EditingTool
   {
     super.activate();
     theWindow.setHelpText(Translate.text("rotateViewTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override

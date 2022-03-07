@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyright (C) 2016, 2019 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -42,12 +42,6 @@ public class CreateCylinderTool extends EditingTool
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createCylinderTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override

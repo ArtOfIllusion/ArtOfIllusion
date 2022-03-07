@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -38,12 +38,6 @@ public class CreateLightTool extends EditingTool
   {
     super.activate();
     theWindow.setHelpText(Translate.text("createLightTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override

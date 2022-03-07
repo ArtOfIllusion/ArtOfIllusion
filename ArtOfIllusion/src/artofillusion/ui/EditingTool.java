@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes Copyright 2016 by Petri Ihalainen
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +22,7 @@ import buoy.widget.*;
  * selected, the editing tool responds to events in the scene or object viewer.
  * <p>
  * An EditingTool specifies what types of mouse clicks it wants to receive by the value it
- * returns from its whichClicks() method.  This should be a sum of the contants OBJECT_CLICKS
+ * returns from its whichClicks() method.  This should be a sum of the constants OBJECT_CLICKS
  * (for mouse clicks on objects), HANDLE_CLICKS (for mouse clicks on handles), and ALL_CLICKS
  * (for all mouse clicks regardless of what they are on).  The exact definition of an "object"
  * or "handle" is not specified.  It is up to the ViewerCanvas generating the events to decide

@@ -44,3 +44,19 @@ object ArtOfIllusion extends AOIModule {
 object Filters extends AOIModule {
   def moduleDeps = Seq(ArtOfIllusion)
 }
+
+object OSSpecific extends AOIModule {
+  def moduleDeps = Seq(ArtOfIllusion)
+}
+
+object Renderers extends AOIModule {
+  def moduleDeps = Seq(ArtOfIllusion)
+}
+
+object Tools extends AOIModule {
+  def moduleDeps = Seq(ArtOfIllusion)
+}
+
+object Translators extends AOIModule {
+  def moduleDeps = Seq(ArtOfIllusion)
+}

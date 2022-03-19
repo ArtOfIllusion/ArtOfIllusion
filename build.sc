@@ -45,7 +45,7 @@ object ArtOfIllusion extends AOIModule {
 
   def gitVersion = T.input {
     os.proc("git", "describe", "--first-parent", "--tags", "--always", "--dirty")
-      .call().out.text()
+      .call().out.text().stripTrailing()
   }
 
   def libJarPaths = T {

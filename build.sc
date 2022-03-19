@@ -42,6 +42,28 @@ object Common extends Module {
 
 object ArtOfIllusion extends AOIModule {
   def mainClass = Some("artofillusion.ArtOfIllusion")
+
+  def gitVersion = T.input {
+    os.proc("git", "describe", "--first-parent", "--tags", "--always", "--dirty")
+      .call().out.text()
+  }
+
+  def libJarPaths = T {
+    upstreamAssemblyClasspath()
+      .map(_.path.last.prependedAll("lib/"))
+      .iterator
+      .mkString(" ")
+  }
+  /**
+   * Manifest for ArtOfIllusion requires appropriate Classpath entries
+   * and a git version signature
+   */
+  def manifest: T[mill.modules.Jvm.JarManifest] = T {
+    super.manifest()
+      .add("Implementation-Version" -> gitVersion.apply())
+      .add("Class-Path" -> libJarPaths())
+
+  }
 }
 
 object Filters extends AOIModule {
@@ -62,4 +84,31 @@ object Tools extends AOIModule {
 
 object Translators extends AOIModule {
   def moduleDeps = Seq(ArtOfIllusion)
+}
+
+object Suite extends AOIModule {
+
+  def stage = T {
+    os.makeDir.all(T.dest / "lib")
+    os.makeDir.all(T.dest / "Plugins")
+    os.makeDir.all(T.dest / "Textures and Materials")
+    os.makeDir.all(T.dest / "Scripts" / "Tools")
+    os.makeDir.all(T.dest / "Scripts" / "Startup")
+    os.makeDir.all(T.dest / "Scripts" / "Objects")
+
+    upstreamAssemblyClasspath()
+      .map(_.path)
+      .filter(p => os.exists(p) && os.isFile(p))
+      .iterator
+      .foreach(p => os.copy(p, T.dest / "lib" / p.last ))
+
+    os.copy(ArtOfIllusion.jar().path, T.dest / "ArtOfIllusion.jar")
+
+
+    os.copy((Filters.jar().path), T.dest / "Plugins" / Filters.artifactName().concat(".jar"))
+    os.copy((OSSpecific.jar().path), T.dest / "Plugins" / OSSpecific.artifactName().concat(".jar"))
+    os.copy((Renderers.jar().path), T.dest / "Plugins" / Renderers.artifactName().concat(".jar"))
+    os.copy((Tools.jar().path), T.dest / "Plugins" / Tools.artifactName().concat(".jar"))
+    os.copy((Translators.jar().path), T.dest / "Plugins" / Translators.artifactName().concat(".jar"))
+  }
 }

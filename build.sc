@@ -4,26 +4,11 @@ import coursier.maven.MavenRepository
 
 trait AOIModule extends JavaModule {
 
-  def repositoriesTask = T.task { super.repositoriesTask() ++ Seq(
-    // Official JOGL project has not put the 2.4.0 RC on maven.
-    // This is an alternate location
-    MavenRepository("https://maven.jzy3d.org/releases/")
-  ) }
-
   def ivyDeps = Agg(
-    ivy"org.jogamp.gluegen:gluegen-rt:v2.4.0-rc-20210111",
-    ivy"org.jogamp.jogl:jogl-all:v2.4.0-rc-20210111",
     ivy"gov.nist.math:jama:1.0.3",
     ivy"com.fifesoft:rsyntaxtextarea:3.1.6",
     ivy"org.apache.groovy:groovy:4.0.0"
   )
-
-  def nativeDeps(platform: String) = T.task {
-    Agg(
-      ivy"org.jogamp.jogl:jogl-all-natives-${platform}:v2.4.0-rc-20210111",
-      ivy"org.jogamp.gluegen:gluegen-rt-natives-${platform}:v2.4.0-rc-20210111"
-    )
-  }
 
   def unmanagedClasspath = Agg(
     PathRef(millSourcePath / os.up / "lib" / "Buoy.jar"),
@@ -42,6 +27,14 @@ object Common extends Module {
       mill.modules.Util.download(
         "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar",
         os.rel / "bsh.jar"
+      ),
+      mill.modules.Util.download(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt.jar",
+        os.rel / "gluegen-rt.jar"
+      ),
+      mill.modules.Util.download(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all.jar",
+        os.rel / "jogl-all.jar"
       )
     )
   }
@@ -128,10 +121,15 @@ object Suite extends AOIModule {
 
   def localDeploy = T.persistent {
     os.copy(stage().path, T.dest, replaceExisting = true, mergeFolders = true)
-    resolveDeps(nativeDeps(System.getProperty("os.name").toLowerCase() ++ "-" ++ System.getProperty("os.arch")))
-      .apply()
-      .iterator
-      .foreach(p => os.copy.into(p.path, T.dest / "lib", replaceExisting = true, mergeFolders = true))
+    val osPlatform = System.getProperty("os.name").toLowerCase() ++ "-" ++ System.getProperty("os.arch")
+    mill.modules.Util.download(
+      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-".concat(osPlatform ++ ".jar"),
+      os.rel / "lib" / "gluegen-rt-natives-".concat(osPlatform ++ ".jar")
+    )
+    mill.modules.Util.download(
+      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-".concat(osPlatform ++ ".jar"),
+      os.rel / "lib" / "jogl-all-natives-".concat(osPlatform ++ ".jar")
+    )
     PathRef(T.dest)
   }
 }

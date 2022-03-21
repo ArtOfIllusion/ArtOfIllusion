@@ -11,12 +11,19 @@ trait AOIModule extends JavaModule {
   ) }
 
   def ivyDeps = Agg(
-    ivy"org.jogamp.gluegen:gluegen-rt:v2.4.0-rc4",
-    ivy"org.jogamp.jogl:jogl-all:v2.4.0-rc4",
+    ivy"org.jogamp.gluegen:gluegen-rt:v2.4.0-rc-20210111",
+    ivy"org.jogamp.jogl:jogl-all:v2.4.0-rc-20210111",
     ivy"gov.nist.math:jama:1.0.3",
     ivy"com.fifesoft:rsyntaxtextarea:3.1.6",
     ivy"org.apache.groovy:groovy:4.0.0"
   )
+
+  def nativeDeps(platform: String) = T.task {
+    Agg(
+      ivy"org.jogamp.jogl:jogl-all-natives-${platform}:v2.4.0-rc-20210111",
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-${platform}:v2.4.0-rc-20210111"
+    )
+  }
 
   def unmanagedClasspath = Agg(
     PathRef(millSourcePath / os.up / "lib" / "Buoy.jar"),
@@ -62,7 +69,6 @@ object ArtOfIllusion extends AOIModule {
     super.manifest()
       .add("Implementation-Version" -> gitVersion.apply())
       .add("Class-Path" -> libJarPaths())
-
   }
 }
 
@@ -88,6 +94,10 @@ object Translators extends AOIModule {
 
 object Suite extends AOIModule {
 
+  def launch() = T.command {
+    os.proc("java", "-jar", localDeploy().path / "ArtOfIllusion.jar").call(cwd = localDeploy().path)
+  }
+
   def stage = T {
     os.makeDir.all(T.dest / "lib")
     os.makeDir.all(T.dest / "Plugins")
@@ -104,11 +114,24 @@ object Suite extends AOIModule {
 
     os.copy(ArtOfIllusion.jar().path, T.dest / "ArtOfIllusion.jar")
 
-
     os.copy((Filters.jar().path), T.dest / "Plugins" / Filters.artifactName().concat(".jar"))
     os.copy((OSSpecific.jar().path), T.dest / "Plugins" / OSSpecific.artifactName().concat(".jar"))
     os.copy((Renderers.jar().path), T.dest / "Plugins" / Renderers.artifactName().concat(".jar"))
     os.copy((Tools.jar().path), T.dest / "Plugins" / Tools.artifactName().concat(".jar"))
     os.copy((Translators.jar().path), T.dest / "Plugins" / Translators.artifactName().concat(".jar"))
+    mill.modules.Util.download("http://aoisp.sourceforge.net/AoIRepository/Plugins/SPManager/SPManager-3_0.jar",
+      os.rel / "Plugins" / "SPManager.jar")
+    mill.modules.Util.download("http://aoisp.sourceforge.net/AoIRepository/Plugins/SPManager/PostInstall-3_0.jar",
+      os.rel / "Plugins" / "PostInstall.jar")
+    PathRef(T.dest)
+  }
+
+  def localDeploy = T.persistent {
+    os.copy(stage().path, T.dest, replaceExisting = true, mergeFolders = true)
+    resolveDeps(nativeDeps(System.getProperty("os.name").toLowerCase() ++ "-" ++ System.getProperty("os.arch")))
+      .apply()
+      .iterator
+      .foreach(p => os.copy.into(p.path, T.dest / "lib", replaceExisting = true, mergeFolders = true))
+    PathRef(T.dest)
   }
 }

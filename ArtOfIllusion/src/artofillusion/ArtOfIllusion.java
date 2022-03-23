@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2022 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -17,7 +17,6 @@ import artofillusion.image.filter.ImageFilter;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.procedural.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -27,10 +26,9 @@ import buoy.widget.*;
 import buoy.xml.*;
 
 import java.io.*;
-import java.net.*;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
-import java.lang.reflect.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -61,31 +59,17 @@ public class ArtOfIllusion
     // most, but not all, platforms, so in case of a problem we fall back to using
     // user.dir.
 
-    String dir = System.getProperty("user.dir");
-    try
-      {
-        URL url = ArtOfIllusion.class.getResource("/artofillusion/ArtOfIllusion.class");
-        if (url.toString().startsWith("jar:"))
-          {
-            String furl = url.getFile();
-            furl = furl.substring(0, furl.indexOf('!'));
-            dir = new File(new URL(furl).getFile()).getParent();
-            if (!new File(dir).exists())
-              dir = System.getProperty("user.dir");
-          }
-      }
-      catch (Exception ex)
-      {
-      }
+
 
     // Set up the standard directories.
 
-    APP_DIRECTORY = dir;
-    PLUGIN_DIRECTORY = new File(APP_DIRECTORY, "Plugins").getAbsolutePath();
-    File scripts = new File(APP_DIRECTORY, "Scripts");
-    TOOL_SCRIPT_DIRECTORY = new File(scripts, "Tools").getAbsolutePath();
-    OBJECT_SCRIPT_DIRECTORY = new File(scripts, "Objects").getAbsolutePath();
-    STARTUP_SCRIPT_DIRECTORY = new File(scripts, "Startup").getAbsolutePath();
+    APP_DIRECTORY = Paths.get(System.getProperty("user.dir")).getParent().toString();
+    PLUGIN_DIRECTORY = Paths.get(APP_DIRECTORY, "Plugins").toString();
+
+    TOOL_SCRIPT_DIRECTORY = Paths.get(APP_DIRECTORY, "Scripts", "Tools").toString();
+    OBJECT_SCRIPT_DIRECTORY = Paths.get(APP_DIRECTORY, "Scripts", "Objects").toString();
+    STARTUP_SCRIPT_DIRECTORY = Paths.get(APP_DIRECTORY, "Scripts", "Startup").toString();
+
 
     // Load the application's icon.
 
@@ -136,7 +120,7 @@ public class ArtOfIllusion
     {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     }
-    catch (Exception ex)
+    catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex)
     {
     }
 
@@ -235,6 +219,13 @@ public class ArtOfIllusion
     return preferences;
   }
 
+  /*
+    Method is created for testing purposes to setup preferences at test time.
+  */
+  public static void setPreferences(ApplicationPreferences prefs)
+  {
+    preferences = prefs;
+  }
   /** Create a new Scene, and display it in a window. */
 
   public static void newWindow()

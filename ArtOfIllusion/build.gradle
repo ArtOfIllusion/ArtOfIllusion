@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'application'
+    id "com.palantir.git-version" version "0.12.2"
+}
+
+description = 'ArtOfIllusion'
+
+mainClassName = 'artofillusion.ArtOfIllusion'
+
+jar {
+    manifest {
+        attributes('Main-Class': 'artofillusion.ArtOfIllusion', "Implementation-Version": gitVersion())
+    }
+}
+
+distributions {
+    main { contents { 
+            from("../Plugins") { into("Plugins") }
+            from("../Textures And Materials") { into("Textures And Materials") }
+            from("../Scripts") { into("Scripts") }
+        } 
+    }
+}
+
+tasks.distTar.enabled = false
+
+

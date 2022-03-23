@@ -1,0 +1,9 @@
+description = 'Renderers'
+
+dependencies {
+    implementation project(':ArtOfIllusion')
+}
+
+tasks.withType(Jar) {
+    destinationDir = file("${rootProject.projectDir}/Plugins")
+}

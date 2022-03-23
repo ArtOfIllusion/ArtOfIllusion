@@ -1,0 +1,10 @@
+description = 'OSSpecific'
+
+dependencies {
+    implementation project(':ArtOfIllusion')
+}
+
+tasks.withType(Jar) {
+    destinationDir = file("${rootProject.projectDir}/Plugins")
+}
+        

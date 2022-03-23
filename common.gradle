@@ -1,0 +1,44 @@
+apply plugin: 'java'
+apply plugin: 'base'
+apply plugin: 'idea'
+
+sourceCompatibility = '11'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']   
+        }
+    }
+    test {
+        java {
+            srcDirs = ['test']
+        }
+    }
+
+}
+
+dependencies {
+    
+    implementation("org.jogamp.gluegen:gluegen-rt-main:2.3.2")
+    implementation("org.jogamp.jogl:jogl-all-main:2.3.2")
+
+    implementation group: 'com.kitfox.svg', name: 'svg-salamander', version: '1.0'
+    implementation group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+    implementation group: 'org.beanshell', name: 'bsh', version: '2.0b5'
+    implementation group: 'org.apache.groovy', name: 'groovy', version: '4.0.0'
+    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.2.0'
+    
+    // only buoy and QuickTimeWriter need to be local. Other locals can be removed
+    implementation fileTree(dir: '../lib', include: '*.jar')
+    
+}
+

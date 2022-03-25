@@ -32,6 +32,9 @@ import java.util.List;
 public class TexturesAndMaterialsDialog extends BDialog
 {
   private static final File assetsFolder = new File(ArtOfIllusion.APP_DIRECTORY, "Textures and Materials");
+  static {
+    if(!assetsFolder.exists()) assetsFolder.mkdir();
+  }
   Scene theScene;
   EditingWindow parentFrame;
   BTree libraryList;

@@ -14,11 +14,31 @@ jar {
     }
 }
 
+task createAssetsFolder() {
+        ext {
+            buildDir = layout.buildDirectory.dir('assets')
+        }
+        doFirst {
+            File.createTempDir().with {
+                def dir = new File(buildDir.get().asFile, 'Textures And Materials')
+                dir.mkdirs()
+            }
+        }
+        outputs.dir(buildDir)
+}
+
+tasks.assembleDist.configure {
+  dependsOn('createAssetsFolder')
+}
+
 distributions {
     main { contents { 
             from("../Plugins") { into("Plugins") }
-            from("../Textures And Materials") { into("Textures And Materials") }
             from("../Scripts") { into("Scripts") }
+            from tasks.createAssetsFolder {
+                    includeEmptyDirs = true
+            } 
+            from("../Textures And Materials") { into("Textures And Materials") }
         } 
     }
 }

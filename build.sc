@@ -14,29 +14,68 @@ trait AOIModule extends JavaModule {
     PathRef(millSourcePath / os.up / "lib" / "Buoy.jar"),
     PathRef(millSourcePath / os.up / "lib" / "Buoyx.jar"),
     PathRef(millSourcePath / os.up / "lib" / "QuickTimeWriter.jar")
-  ) ++ Common.unmanagedDownloads.apply()
+  ) ++ Common.unmanagedJavaDownloads.apply()
 }
 
 object Common extends Module {
-  def unmanagedDownloads = T {
+  def unmanagedJavaDownloads = T {
     Agg(
-      mill.modules.Util.download(
-        "https://github.com/blackears/svgSalamander/releases/download/v1.1.3/svgSalamander-1.1.3.jar",
-        os.rel / "svgSalamander.jar"
-      ),
-      mill.modules.Util.download(
-        "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar",
-        os.rel / "bsh.jar"
-      ),
-      mill.modules.Util.download(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt.jar",
-        os.rel / "gluegen-rt.jar"
-      ),
-      mill.modules.Util.download(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all.jar",
-        os.rel / "jogl-all.jar"
-      )
+      downloadFile(
+        "https://github.com/blackears/svgSalamander/releases/download/v1.1.3/svgSalamander-1.1.3.jar"),
+      downloadFile(
+        "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all.jar")
     )
+  }
+
+  def joglLinuxNatives = T {
+    Agg(
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-i586.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-amd64.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-armv6hf.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-aarch64.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-i586.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-amd64.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-armv6hf.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-aarch64.jar")
+    )
+  }
+    def joglWindowsNatives = T {
+      Agg(
+        downloadFile(
+          "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-windows-i586.jar"),
+        downloadFile(
+          "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-windows-amd64.jar"),
+        downloadFile(
+          "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-windows-i586.jar"),
+        downloadFile(
+          "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-windows-amd64.jar")
+      )
+    }
+
+  def joglMacOSXNatives = T {
+    Agg(
+      downloadFile(
+      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-macosx-universal.jar"),
+      downloadFile(
+        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-macosx-universal.jar")
+    )
+  }
+
+  def downloadFile(url: String)(implicit ctx: mill.util.Ctx.Dest)= {
+    val fileName = url.split("/".charAt(0)).last
+    mill.modules.Util.download(url, os.rel / fileName)
   }
 }
 
@@ -88,7 +127,7 @@ object Translators extends AOIModule {
 object Suite extends AOIModule {
 
   def launch() = T.command {
-    os.proc("java", "-jar", localDeploy().path / "ArtOfIllusion.jar").call(cwd = localDeploy().path)
+    os.proc("java", "-jar", localDeploy().path / "ArtOfIllusion.jar").call()
   }
 
   def stage = T {
@@ -121,15 +160,18 @@ object Suite extends AOIModule {
 
   def localDeploy = T.persistent {
     os.copy(stage().path, T.dest, replaceExisting = true, mergeFolders = true)
-    val osPlatform = System.getProperty("os.name").toLowerCase() ++ "-" ++ System.getProperty("os.arch")
-    mill.modules.Util.download(
-      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-".concat(osPlatform ++ ".jar"),
-      os.rel / "lib" / "gluegen-rt-natives-".concat(osPlatform ++ ".jar")
-    )
-    mill.modules.Util.download(
-      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-".concat(osPlatform ++ ".jar"),
-      os.rel / "lib" / "jogl-all-natives-".concat(osPlatform ++ ".jar")
-    )
+    val osName = System.getProperty("os.name").toLowerCase()
+    val natives = osName match {
+      case x if osName.contains("linux") => Common.joglLinuxNatives.apply()
+      case x if osName.contains(("windows")) => Common.joglWindowsNatives.apply()
+      case x if osName.contains("mac") | osName.contains("osx") => Common.joglMacOSXNatives.apply()
+     }
+
+    natives
+      .map(_.path)
+      .iterator
+      .foreach(p => os.copy(p, T.dest / "lib" / p.last, replaceExisting = true))
+
     PathRef(T.dest)
   }
 }

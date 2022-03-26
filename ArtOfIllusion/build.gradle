@@ -8,6 +8,14 @@ description = 'ArtOfIllusion'
 
 mainClassName = 'artofillusion.ArtOfIllusion'
 
+distZip {
+   exclude('**/*natives*.jar')
+}
+
+installDist {
+   exclude('**/*natives*.jar')
+}
+
 jar {
     manifest {
         attributes('Main-Class': 'artofillusion.ArtOfIllusion', "Implementation-Version": gitVersion())
@@ -31,14 +39,20 @@ tasks.assembleDist.configure {
   dependsOn('createAssetsFolder')
 }
 
+
 distributions {
-    main { contents { 
+
+    main { 
+
+        contents {
+          
             from("../Plugins") { into("Plugins") }
             from("../Scripts") { into("Scripts") }
             from tasks.createAssetsFolder {
                     includeEmptyDirs = true
             } 
             from("../Textures And Materials") { into("Textures And Materials") }
+
         } 
     }
 }

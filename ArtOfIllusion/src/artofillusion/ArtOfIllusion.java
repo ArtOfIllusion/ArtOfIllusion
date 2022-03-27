@@ -26,6 +26,7 @@ import buoy.widget.*;
 import buoy.xml.*;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
@@ -59,11 +60,27 @@ public class ArtOfIllusion
     // most, but not all, platforms, so in case of a problem we fall back to using
     // user.dir.
 
+    String dir = System.getProperty("user.dir");
+    try
+      {
+        URL url = ArtOfIllusion.class.getResource("/artofillusion/ArtOfIllusion.class");
+        if (url.toString().startsWith("jar:"))
+          {
+            String furl = url.getFile();
+            furl = furl.substring(0, furl.indexOf('!'));
+            dir = new File(new URL(furl).getFile()).getParent();
+            if (!new File(dir).exists())
+              dir = System.getProperty("user.dir");
+          }
+      }
+      catch (Exception ex)
+      {
+      }
 
 
     // Set up the standard directories.
 
-    APP_DIRECTORY = Paths.get(System.getProperty("user.dir")).getParent().toString();
+    APP_DIRECTORY = Paths.get(dir).getParent().toString();
     PLUGIN_DIRECTORY = Paths.get(APP_DIRECTORY, "Plugins").toString();
 
     TOOL_SCRIPT_DIRECTORY = Paths.get(APP_DIRECTORY, "Scripts", "Tools").toString();
@@ -120,7 +137,7 @@ public class ArtOfIllusion
     {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     }
-    catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException ex)
+    catch (Exception ex)
     {
     }
 
@@ -219,13 +236,6 @@ public class ArtOfIllusion
     return preferences;
   }
 
-  /*
-    Method is created for testing purposes to setup preferences at test time.
-  */
-  public static void setPreferences(ApplicationPreferences prefs)
-  {
-    preferences = prefs;
-  }
   /** Create a new Scene, and display it in a window. */
 
   public static void newWindow()

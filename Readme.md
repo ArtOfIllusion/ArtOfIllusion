@@ -26,7 +26,7 @@ General questions or requests for help can be taken to our
 ArtOfIllusion is built using the [mill build tool.](https://com-lihaoyi.github.io/mill/)
 A wrapper script is included. Just run:
 
-`./millw Suite.launch` to build and launch the application.
+`./millw Suite.run` to build and launch the application.
 (Windows users should use `./millw.bat`)
 
 More detailed [building documentation](./docs/Building.md) is also available.

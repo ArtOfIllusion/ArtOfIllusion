@@ -93,6 +93,10 @@ object ArtOfIllusion extends JavaModule {
       .add("Implementation-Version" -> gitVersion.apply())
       .add("Class-Path" -> libJarPaths())
   }
+
+  object test extends Tests with TestModule.Junit4 {
+    def runClasspath = super.runClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
+  }
 }
 
 trait PluginModule extends JavaModule{
@@ -100,9 +104,14 @@ trait PluginModule extends JavaModule{
   def compileClasspath = super.compileClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
 }
 
+object Renderers extends PluginModule {
+  object test extends Tests with TestModule.Junit4 {
+    def runClasspath = super.runClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
+  }
+}
+
 object Filters extends PluginModule
 object OSSpecific extends PluginModule
-object Renderers extends PluginModule
 object Tools extends PluginModule
 object Translators extends PluginModule
 

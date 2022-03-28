@@ -1,4 +1,5 @@
 import mill._
+import mill.modules.Util.download
 import scalalib._
 
 object ArtOfIllusion extends JavaModule {
@@ -17,56 +18,56 @@ object ArtOfIllusion extends JavaModule {
       "https://github.com/blackears/svgSalamander/releases/download/v1.1.3/svgSalamander-1.1.3.jar"),
     downloadFile(
       "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar"),
-    downloadFile(
-      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt.jar"),
-    downloadFile(
-      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all.jar")
-    )
+    download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt/v2.4.0-rc4/gluegen-rt-v2.4.0-rc4.jar",
+      os.rel / "gluegen-rt.jar"),
+    download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all/v2.4.0-rc4/jogl-all-v2.4.0-rc4.jar",
+      os.rel / "jogl-all.jar")
+  )
 
   def joglLinuxNatives = T {
     Agg(
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-i586.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-amd64.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-armv6hf.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-linux-aarch64.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-i586.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-amd64.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-armv6hf.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-linux-aarch64.jar")
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-i586/v2.4.0-rc4/gluegen-rt-natives-linux-i586-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-linux-i586.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-amd64/v2.4.0-rc4/gluegen-rt-natives-linux-amd64-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-linux-amd64.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-armv6hf/v2.4.0-rc4/gluegen-rt-natives-linux-armv6hf-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-linux-armv6hf.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-aarch64/v2.4.0-rc4/gluegen-rt-natives-linux-aarch64-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-linux-aarch64.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-i586/v2.4.0-rc4/jogl-all-natives-linux-i586-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-linux-i586-v2.4.0-rc4.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-amd64/v2.4.0-rc4/jogl-all-natives-linux-amd64-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-linux-amd64.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-armv6hf/v2.4.0-rc4/jogl-all-natives-linux-armv6hf-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-linux-armv6hf.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-aarch64/v2.4.0-rc4/jogl-all-natives-linux-aarch64-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-linux-aarch64-v2.4.0-rc4.jar")
     )
   }
 
   def joglWindowsNatives = T {
     Agg(
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-windows-i586.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-windows-amd64.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-windows-i586.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-windows-amd64.jar")
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-windows-i586/v2.4.0-rc4/gluegen-rt-natives-windows-i586-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-windows-i586.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-windows-amd64/v2.4.0-rc4/gluegen-rt-natives-windows-amd64-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-windows-amd64.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-windows-i586/v2.4.0-rc4/jogl-all-natives-windows-i586-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-windows-i586-v2.4.0-rc4.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-windows-amd64/v2.4.0-rc4/jogl-all-natives-windows-amd64-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-windows-amd64-v2.4.0-rc4.jar")
     )
   }
 
   def joglMacOSXNatives = T {
     Agg(
-      downloadFile(
-      "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/gluegen-rt-natives-macosx-universal.jar"),
-      downloadFile(
-        "https://jogamp.org/deployment/archive/rc/v2.4.0-rc-20210111/jar/jogl-all-natives-macosx-universal.jar")
+      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-macosx-universal/v2.4.0-rc4/gluegen-rt-natives-macosx-universal-v2.4.0-rc4.jar",
+        os.rel / "gluegen-rt-natives-macosx-universal.jar"),
+      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-macosx-universal/v2.4.0-rc4/jogl-all-natives-macosx-universal-v2.4.0-rc4.jar",
+        os.rel / "jogl-all-natives-macosx-universal-v2.4.0-rc4.jar")
     )
   }
 
-  def downloadFile(url: String)(implicit ctx: mill.util.Ctx.Dest)= {
+  def downloadFile(url: String)(implicit ctx: mill.util.Ctx.Dest) = {
     val fileName = url.split("/".charAt(0)).last
     mill.modules.Util.download(url, os.rel / fileName)
   }
@@ -84,6 +85,7 @@ object ArtOfIllusion extends JavaModule {
       .iterator
       .mkString(" ")
   }
+
   /**
    * Manifest for ArtOfIllusion requires appropriate Classpath entries
    * and a git version signature
@@ -99,8 +101,9 @@ object ArtOfIllusion extends JavaModule {
   }
 }
 
-trait PluginModule extends JavaModule{
+trait PluginModule extends JavaModule {
   def moduleDeps = Seq(ArtOfIllusion)
+
   def compileClasspath = super.compileClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
 }
 
@@ -111,8 +114,11 @@ object Renderers extends PluginModule {
 }
 
 object Filters extends PluginModule
+
 object OSSpecific extends PluginModule
+
 object Tools extends PluginModule
+
 object Translators extends PluginModule
 
 object Suite extends Module {
@@ -134,7 +140,7 @@ object Suite extends Module {
       .map(_.path)
       .filter(p => os.exists(p) && os.isFile(p))
       .iterator
-      .foreach(p => os.copy(p, T.dest / "lib" / p.last ))
+      .foreach(p => os.copy(p, T.dest / "lib" / p.last))
 
     os.copy(ArtOfIllusion.jar().path, T.dest / "ArtOfIllusion.jar")
 
@@ -157,7 +163,7 @@ object Suite extends Module {
       case x if osName.contains("linux") => ArtOfIllusion.joglLinuxNatives.apply()
       case x if osName.contains("windows") => ArtOfIllusion.joglWindowsNatives.apply()
       case x if osName.contains("mac") | osName.contains("osx") => ArtOfIllusion.joglMacOSXNatives.apply()
-     }
+    }
 
     natives
       .map(_.path)

@@ -2,6 +2,8 @@ plugins {
     id 'java'
     id 'application'
     id "com.palantir.git-version" version "0.12.2"
+    id 'edu.sc.seis.launch4j' version '2.5.2'
+    id "kr.motd.sphinx" version "2.10.0"
 }
 
 description = 'ArtOfIllusion'
@@ -28,8 +30,10 @@ task createAssetsFolder() {
         }
         doFirst {
             File.createTempDir().with {
-                def dir = new File(buildDir.get().asFile, 'Textures And Materials')
-                dir.mkdirs()
+                new File(buildDir.get().asFile, 'Textures And Materials').mkdirs()
+                new File(buildDir.get().asFile, 'Scripts/Tools').mkdirs()
+                new File(buildDir.get().asFile, 'Scripts/Objects').mkdirs()
+                new File(buildDir.get().asFile, 'Scripts/Startup').mkdirs()
             }
         }
         outputs.dir(buildDir)
@@ -45,18 +49,33 @@ distributions {
     main { 
 
         contents {
-          
+            from("${project.buildDir}/launch4j") { into("bin") }
             from("../Plugins") { into("Plugins") }
             from("../Scripts") { into("Scripts") }
             from tasks.createAssetsFolder {
                     includeEmptyDirs = true
             } 
-            from("../Textures And Materials") { into("Textures And Materials") }
-
+            from("../Textures And Materials") { into("Textures And Materials") } 
+		
         } 
     }
 }
 
 tasks.distTar.enabled = false
 
+launch4j {
+  mainClassName = 'artofillusion.ArtOfIllusion'
+  dontWrapJar = true
+  outfile = "Art Of Illusion.exe"
+  icon = "${rootProject.projectDir}/InstallerSrc/aoi.ico"
+  libraryDir = "../lib"
+  
+}
+
+sphinx {
+  sourceDirectory = "${rootProject.projectDir}/docs/manual"
+  configDirectory = "${rootProject.projectDir}/docs/manual"
+}
+
+installDist.dependsOn createExe
 

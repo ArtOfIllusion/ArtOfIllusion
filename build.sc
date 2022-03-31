@@ -105,6 +105,10 @@ object Suite extends Module with Common {
       )
   }
 
+  def manual = T {
+    os.proc("sphinx-build", "-b", "html", millSourcePath / os.up / "docs" / "manual", T.dest).call()
+  }
+
   def launch(args: String*) = T.command {
     os.proc("java", args, "-jar", localDeploy().path / "ArtOfIllusion.jar").call()
   }

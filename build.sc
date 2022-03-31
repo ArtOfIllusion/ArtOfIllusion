@@ -1,4 +1,6 @@
 import mill._
+import mill.define.Sources
+import mill.modules.Jvm
 import mill.modules.Util.download
 import scalalib._
 
@@ -69,7 +71,39 @@ object Tools extends PluginModule
 object Translators extends PluginModule
 
 object Suite extends Module with Common {
-  def pluginModules: Seq[PluginModule] = Seq(Filters, OSSpecific, Renderers, Tools, Translators)
+
+  def combinedSources = T.task {
+    ArtOfIllusion.sources() ++
+      Filters.sources() ++
+      OSSpecific.sources() ++
+      Renderers.sources() ++
+      Tools.sources() ++
+      Translators.sources()
+  }
+
+  def javadoc = T {
+    val javadocDir = T.dest / "Javadoc"
+    os.makeDir.all(javadocDir)
+    val files = Lib.findSourceFiles(combinedSources(), Seq("java"))
+    val options = javadocOptions() ++ Seq("-d", javadocDir.toNIO.toString)
+
+    if (files.nonEmpty)
+      Jvm.runSubprocess(
+        commandArgs = Seq(
+          "javadoc"
+        ) ++ options ++
+          Seq(
+            "-classpath",
+            compileClasspath()
+              .map(_.path)
+              .filter(_.ext != "pom")
+              .mkString(java.io.File.pathSeparator)
+          ) ++
+          files.map(_.toString),
+        envArgs = Map(),
+        workingDir = T.dest
+      )
+  }
 
   def launch(args: String*) = T.command {
     os.proc("java", args, "-jar", localDeploy().path / "ArtOfIllusion.jar").call()

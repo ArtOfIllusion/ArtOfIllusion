@@ -73,12 +73,22 @@ object Translators extends PluginModule
 object Suite extends Module with Common {
 
   def combinedSources = T.task {
-    ArtOfIllusion.sources() ++
+     ArtOfIllusion.sources() ++
       Filters.sources() ++
       OSSpecific.sources() ++
       Renderers.sources() ++
       Tools.sources() ++
       Translators.sources()
+
+  }
+
+  def sourceFiles = T.task {
+    os.write(T.dest / "file-list",
+      Lib.findSourceFiles(combinedSources(), Seq("java"))
+        .map(_.toString())
+        .mkString(" ")
+    )
+    PathRef(T.dest / "file-list")
   }
 
   def javadoc = T {
@@ -99,7 +109,7 @@ object Suite extends Module with Common {
               .filter(_.ext != "pom")
               .mkString(java.io.File.pathSeparator)
           ) ++
-          files.map(_.toString),
+          Seq(sourceFiles().path.toString().prependedAll("@")),
         envArgs = Map(),
         workingDir = T.dest
       )

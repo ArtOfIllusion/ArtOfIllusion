@@ -7,5 +7,7 @@ Thumbs.db
 **/.xvpics/
 .DS_Store
 
+.idea
 .gradle
-/build/
+**/build/
+*.iml

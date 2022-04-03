@@ -24,6 +24,7 @@ import artofillusion.view.ViewAnimation;
 import artofillusion.keystroke.*;
 import buoy.event.*;
 import buoy.widget.*;
+import buoy.xml.IconResource;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -55,6 +56,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   TreeList itemTree;
   Scene theScene;
   BMenuBar menubar;
+  BMenu newScriptMenu;
   BMenu fileMenu, recentFilesMenu, editMenu, objectMenu, createMenu, toolsMenu, viewMenu, scriptMenu;
   BMenu animationMenu, editKeyframeMenu, sceneMenu;
   BMenu addTrackMenu, positionTrackMenu, rotationTrackMenu, distortionMenu;
@@ -70,7 +72,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private SceneChangedEvent sceneChangedEvent;
   private List<ModellingTool> modellingTools;
   protected Preferences preferences;
-
+  private BMenu editScriptMenu;   
+  private BMenu recentScriptMenu;
+  public static final ImageIcon [] LANGUAGE_ICONS = {
+      new IconResource("artofillusion/Icons/" + ScriptRunner.LANGUAGES [0] + ".png"),
+      new IconResource("artofillusion/Icons/" + ScriptRunner.LANGUAGES [1] + ".png")
+  };
+ 
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
 
@@ -575,9 +583,40 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     
     toolsMenu.addSeparator();
     toolsMenu.add(Translate.menuItem("createScriptObject", this, "createScriptObjectCommand"));
-    toolsMenu.add(Translate.menuItem("editScript", this, "editScriptCommand"));
+    
+    this.editScriptMenu= Translate.menu("editToolScript");
+    this.editScriptMenu.add(newScriptMenu = Translate.menu("newScript"));
+    for (String language : ScriptRunner.LANGUAGES){
+        BMenuItem item = new BMenuItem(language);
+        item.addEventLink(CommandEvent.class, this, "newScriptCommand");
+        item.setActionCommand("newScript");
+        item.getComponent().putClientProperty("language", language);
+        newScriptMenu.add (item);
+    }
+    editScriptMenu.add(this.recentScriptMenu = Translate.menu("recentScript"));
+    // TODO : vérifier la possibilité de réouverture d'un script "untitled" qui n'a pas été sauvegardé
+    BMenuItem other;
+    editScriptMenu.add (other = Translate.menuItem("editScript", this, "editScriptCommand"));
+    other.getComponent().putClientProperty("filepath", ExecuteScriptWindow.NEW_SCRIPT_NAME);
+    toolsMenu.add(editScriptMenu);
+    
     toolsMenu.add(scriptMenu = Translate.menu("scripts"));
     rebuildScriptsMenu();
+  }
+  
+  public void editScriptCommand (CommandEvent ev) 
+  {
+    BMenuItem item = (BMenuItem)ev.getWidget();
+    String scriptAbsolutePath = (String) item.getComponent().getClientProperty("filepath");
+    // We don't test the language for the filepath because it should be ok
+    new ExecuteScriptWindow(this, scriptAbsolutePath, ScriptRunner.getLanguageForFilename(scriptAbsolutePath));
+  }
+  
+  public void newScriptCommand (CommandEvent ev) 
+  {
+    BMenuItem item = (BMenuItem)ev.getWidget();
+    String language = (String) item.getComponent().getClientProperty("language");
+    new ExecuteScriptWindow(this, ExecuteScriptWindow.NEW_SCRIPT_NAME, language);
   }
   
   /*
@@ -617,13 +656,25 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   }
 
   /** Rebuild the list of tool scripts in the Tools menu.  This should be called whenever a
-      script has been added to or deleted from the Scripts/Tools directory on disk. */
-
+      script has been added to or deleted from the Scripts/Tools directory on disk. 
+  */
   public void rebuildScriptsMenu()
   {
     scriptMenu.removeAll();
     addScriptsToMenu(scriptMenu, new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY));
+    rebuildRecentScriptsMenu();
   }
+
+    public void rebuildRecentScriptsMenu() {
+        recentScriptMenu.removeAll();
+        for (String fileAbsolutePath : ExecuteScriptWindow.RECENT_SCRIPTS) {
+            BMenuItem item = new BMenuItem(new File (fileAbsolutePath).getName());
+            item.addEventLink(CommandEvent.class, this, "editScriptCommand");
+            item.setActionCommand("editScript");
+            item.getComponent().putClientProperty("filepath", fileAbsolutePath);
+            recentScriptMenu.add (item);
+        }
+    }
 
   private void addScriptsToMenu(BMenu menu, File dir)
   {
@@ -642,17 +693,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
       else
       {
-        try
-        {
-          ScriptRunner.getLanguageForFilename(file);
+        if (ScriptRunner.getLanguageForFilename(file) != null) {
           BMenuItem item = new BMenuItem(file.substring(0, file.lastIndexOf('.')));
           item.setActionCommand(f.getAbsolutePath());
           item.addEventLink(CommandEvent.class, this, "executeScriptCommand");
           menu.add(item);
-        }
-        catch (IllegalArgumentException ex)
-        {
-          // This file isn't a known scripting language.
         }
       }
     }
@@ -2091,14 +2136,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void transformObjectCommand()
   {
-    int i, sel[] = getSelectedIndices();
+    int sel[] = getSelectedIndices();
     TransformDialog dlg;
-    ObjectInfo info;
-    Object3D obj;
-    CoordinateSystem coords;
-    Vec3 orig, size, center;
     double values[];
-    Mat4 m;
 
     if (sel.length == 0)
       return;
@@ -2112,70 +2152,61 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       return;
     values = dlg.getValues();
 
-    // Find the center of all selected objects.
-
-    BoundingBox bounds = null;
-    for (i = 0; i < sel.length; i++)
-    {
-      info = theScene.getObject(sel[i]);
-      if (bounds == null)
-        bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
-      else
-        bounds = bounds.merge(info.getBounds().transformAndOutset(info.getCoords().fromLocal()));
-    }
-    center = bounds.getCenter();
+    Vec3 center = findSelectedObjectsCenter(theScene, sel);
     if (dlg.applyToChildren())
       sel = getSelectionWithChildren();
+    Vec3 movement = new Vec3(0, 0, 0);
+    Vec3 resize = new Vec3(1, 1, 1);
+    if (!Double.isNaN(values[0]))
+      movement.x = values[0];
+    if (!Double.isNaN(values[1]))
+      movement.y = values[1];
+    if (!Double.isNaN(values[2]))
+      movement.z = values[2];
+    if (!Double.isNaN(values[6]))
+      resize.x = values[6];
+    if (!Double.isNaN(values[7]))
+      resize.y = values[7];
+    if (!Double.isNaN(values[8]))
+      resize.z = values[8];
 
-    // Determine the rotation matrix.
+    applyTransformToSelected (movement, resize, 
+            sel, dlg.useSelectionCenter(), center, determineRotationMatrix(values[3], values [4], values [5]));
+    updateImage();
+  }
 
-    m = Mat4.identity();
-    if (!Double.isNaN(values[3]))
-      m = m.times(Mat4.xrotation(values[3]*Math.PI/180.0));
-    if (!Double.isNaN(values[4]))
-      m = m.times(Mat4.yrotation(values[4]*Math.PI/180.0));
-    if (!Double.isNaN(values[5]))
-      m = m.times(Mat4.zrotation(values[5]*Math.PI/180.0));
+    /** Apply the change to all the selected objects
+     * 
+     */
+  public void applyTransformToSelected (Vec3 movement, Vec3 resize, 
+          int sel [], boolean useSelectionCenter, Vec3 center, Mat4 m) {
     UndoRecord undo = new UndoRecord(this, false);
     HashSet<Object3D> scaledObjects = new HashSet<Object3D>();
-    for (i = 0; i < sel.length; i++)
+    for (int i = 0; i < sel.length; i++)
     {
-      info = theScene.getObject(sel[i]);
-      obj = info.getObject();
-      coords = info.getCoords();
+      final ObjectInfo info = theScene.getObject(sel[i]);
+      final Object3D obj = info.getObject();
+      final CoordinateSystem coords = info.getCoords();
       if (!scaledObjects.contains(obj))
         undo.addCommand(UndoRecord.COPY_OBJECT, obj, obj.duplicate());
       undo.addCommand(UndoRecord.COPY_COORDS, coords, coords.duplicate());
-      orig = coords.getOrigin();
-      size = obj.getBounds().getSize();
-      if (!Double.isNaN(values[0]))
-        orig.x += values[0];
-      if (!Double.isNaN(values[1]))
-        orig.y += values[1];
-      if (!Double.isNaN(values[2]))
-        orig.z += values[2];
-      if (!Double.isNaN(values[6]))
-        size.x *= values[6];
-      if (!Double.isNaN(values[7]))
-        size.y *= values[7];
-      if (!Double.isNaN(values[8]))
-        size.z *= values[8];
-      if (dlg.useSelectionCenter())
+      Vec3 orig = coords.getOrigin();
+      orig.add(movement);
+      Vec3 size = obj.getBounds().getSize();
+      size.multiply(resize);
+      if (useSelectionCenter)
       {
         Vec3 neworig = orig.minus(center);
-        if (!Double.isNaN(values[6]))
-          neworig.x *= values[6];
-        if (!Double.isNaN(values[7]))
-          neworig.y *= values[7];
-        if (!Double.isNaN(values[8]))
-          neworig.z *= values[8];
+        neworig.multiply(resize);
         coords.setOrigin(neworig);
+        // We actually don't need to do this if no rotation has been specified
         coords.transformCoordinates(m);
         coords.setOrigin(coords.getOrigin().plus(center));
       }
       else
       {
         coords.setOrigin(orig);
+        // We actually don't need to do this if no rotation has been specified
         coords.transformAxes(m);
       }
       if (!scaledObjects.contains(obj))
@@ -2184,18 +2215,46 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         scaledObjects.add(obj);
       }
     }
-    for (i = 0; i < sel.length; i++)
+    for (int i = 0; i < sel.length; i++)
     {
-      info = theScene.getObject(sel[i]);
-      theScene.objectModified(info.getObject());
+        theScene.objectModified(theScene.getObject(sel[i]).getObject());
     }
-    ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+    final ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
     for (int index : sel)
       modified.add(theScene.getObject(index));
     theScene.applyTracksAfterModification(modified);
     setUndoRecord(undo);
-    updateImage();
   }
+    /** Determine a rotation matrix given the appropriate angles
+     */
+        
+    public static Mat4 determineRotationMatrix(double x, double y, double z) {
+        Mat4 m = Mat4.identity();
+        if (!Double.isNaN(x))
+            m = m.times(Mat4.xrotation(x*Math.PI/180.0));
+        if (!Double.isNaN(y))
+            m = m.times(Mat4.yrotation(y*Math.PI/180.0));
+        if (!Double.isNaN(z))
+            m = m.times(Mat4.zrotation(z*Math.PI/180.0));
+        return m;
+    }
+
+    /** Find the center of all selected objects.
+     */
+    public static Vec3 findSelectedObjectsCenter(Scene scene, int[] sel) {
+        if (sel.length == 0)
+            throw new ArrayIndexOutOfBoundsException("No object selected.");
+        BoundingBox bounds = null;
+        for (int i = 0; i < sel.length; i++)
+        {
+            ObjectInfo info = scene.getObject(sel[i]);
+            if (bounds == null)
+                bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
+            else
+                bounds = bounds.merge(info.getBounds().transformAndOutset(info.getCoords().fromLocal()));
+        }   
+        return bounds.getCenter();
+    }
 
   public void alignObjectsCommand()
   {
@@ -2640,11 +2699,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     updateImage();
   }
 
-  public void editScriptCommand()
-  {
-    new ExecuteScriptWindow(this);
-  }
-  
   public void createScriptObjectCommand()
   {
     // Prompt the user to select a name and, optionally, a predefined script.
@@ -2657,16 +2711,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (files != null)
       for (String file : files)
       {
-        try
-        {
-          ScriptRunner.getLanguageForFilename(file);
-          scriptChoice.add(file.substring(0, file.lastIndexOf(".")));
-          scriptNames.add(file);
-        }
-        catch (IllegalArgumentException ex)
-        {
-          // This file isn't a known scripting language.
-        }
+          if (ScriptRunner.getLanguageForFilename(file) != null) {
+            scriptChoice.add(file.substring(0, file.lastIndexOf(".")));
+            scriptNames.add(file);
+          }
       }
     ComponentsDialog dlg = new ComponentsDialog(this, Translate.text("newScriptedObject"),
       new Widget [] {nameField, scriptChoice}, new String [] {Translate.text("Name"), Translate.text("Script")});
@@ -2684,6 +2732,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptNames.get(scriptChoice.getSelectedIndex()-1));
         scriptText = ArtOfIllusion.loadFile(f);
         language = ScriptRunner.getLanguageForFilename(f.getName());
+        if (language == null) {
+            // Predefined scripts are supposed to have a correct extension, 
+            // so it's ok to throw an exception here
+            throw new IOException ("Unrecognized extension for " + f.getName());
+        }
       }
       catch (IOException ex)
       {
@@ -3024,17 +3077,18 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     try
     {
       language = ScriptRunner.getLanguageForFilename(f.getName());
+      if (language == null)
+            // Predefined scripts are supposed to have a correct extension, 
+            // so it's ok to throw an exception here
+            throw new IOException ("Unrecognized extension for " + f.getName());
       scriptText = ArtOfIllusion.loadFile(f);
+      ToolScript script = ScriptRunner.parseToolScript(language, scriptText);
+      script.execute(this);
     }
     catch (IOException ex)
     {
       new BStandardDialog("", new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
       return;
-    }
-    try
-    {
-      ToolScript script = ScriptRunner.parseToolScript(language, scriptText);
-      script.execute(this);
     }
     catch (Exception e)
     {

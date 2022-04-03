@@ -32,13 +32,13 @@ public class BeanshellScriptEngine implements ScriptEngine
   @Override
   public String getName()
   {
-    return "BeanShell";
+    return ScriptRunner.LANGUAGES[0];
   }
 
   @Override
   public String getFilenameExtension()
   {
-    return "bsh";
+    return ScriptRunner.EXTENSIONS[0];
   }
 
   @Override
@@ -80,7 +80,14 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
     catch (EvalError e)
     {
-      throw new ScriptException(e.getMessage(), e.getErrorLineNumber()-1, e);
+        int line;
+        try {
+            line = e.getErrorLineNumber () - 1;
+        }
+        catch (NullPointerException npe) {
+            line = -1;
+        }
+      throw new ScriptException(e.getMessage(), line, e);
     }
   }
 

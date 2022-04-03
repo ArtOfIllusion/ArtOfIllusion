@@ -21,9 +21,12 @@ import java.util.*;
 
 public class ScriptRunner
 {
-  public static final String LANGUAGES[] = {"Groovy", "BeanShell"};
+  public static final String [] LANGUAGES = {"BeanShell", "Groovy"};
+  public static final String [] EXTENSIONS = {"bsh", "groovy"};
   private static SearchlistClassLoader parentLoader;
   private static PrintStream output;
+  // This means all scripts share the same script engine
+  // QUESTION Is this intended?
   private static final HashMap<String, ScriptEngine> engines = new HashMap<String, ScriptEngine>();
   private static final String IMPORTS[] = {"artofillusion.*", "artofillusion.image.*", "artofillusion.material.*",
       "artofillusion.math.*", "artofillusion.object.*", "artofillusion.script.*", "artofillusion.texture.*",
@@ -42,9 +45,9 @@ public class ScriptRunner
             parentLoader.add(plugin);
         }
         ScriptEngine engine;
-        if (language.equals("Groovy"))
+        if (language.equals(LANGUAGES[1]))
           engine = new GroovyScriptEngine(parentLoader);
-        else if (language.equals("BeanShell"))
+        else if (language.equals(LANGUAGES[0]))
           engine = new BeanshellScriptEngine(parentLoader);
         else
           throw new IllegalArgumentException("Unknown name for scripting language: "+language);
@@ -56,8 +59,12 @@ public class ScriptRunner
           }
         catch (Exception e)
           {
+            // TODO FIXME NOOOOOO
             e.printStackTrace();
           }
+        // TODO Use a ScriptOutputPanel or something like this
+        // ..so we don't have to close the window everytime
+	// ..and we can associate an output to the corresponding script
         output = new PrintStream(new ScriptOutputWindow());
         engine.setOutput(output);
       }
@@ -153,14 +160,14 @@ public class ScriptRunner
     return line;
   }
 
-  /** Given the name of a file, determine what language it contains based on the extension. */
-
+  /** Given the name of a file, determine what language it contains based on the extension. 
+   @return null if the language is not recognized*/
   public static String getLanguageForFilename(String filename)
   {
     for (String language : LANGUAGES)
       if (filename.endsWith("."+getScriptEngine(language).getFilenameExtension()))
         return language;
-    throw new IllegalArgumentException("Filename \""+filename+"\" does not match any recognized scripting language.");
+    return null;
   }
 
   /** Return the standard filename extension to use for a language. */

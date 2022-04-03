@@ -40,13 +40,13 @@ public class GroovyScriptEngine implements ScriptEngine
   @Override
   public String getName()
   {
-    return "Groovy";
+    return ScriptRunner.LANGUAGES[1];
   }
 
   @Override
   public String getFilenameExtension()
   {
-    return "groovy";
+    return ScriptRunner.EXTENSIONS[1];
   }
 
   @Override

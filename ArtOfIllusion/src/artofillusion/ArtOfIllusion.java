@@ -410,23 +410,24 @@ public class ArtOfIllusion
     
     for (String file : files)
     {
-      try
-      {
         String language = ScriptRunner.getLanguageForFilename(file);
-        try
+        if (language != null) {
+            try 
+            {
+              String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
+              ScriptRunner.executeScript(language, script, variables);
+            }
+            catch (IOException ex)
+            {
+              ex.printStackTrace();
+            }
+          }
+        else 
         {
-          String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
-          ScriptRunner.executeScript(language, script, variables);
+            // TODO translate this
+            // TODO use some debugging tools instead of System.err
+          System.err.println ("Unrecognized script language for " + file);
         }
-        catch (IOException ex)
-        {
-          ex.printStackTrace();
-        }
-      }
-      catch (IllegalArgumentException ex)
-      {
-        // This file isn't a known scripting language.
-      }
     }
   }
 

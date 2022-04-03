@@ -1,6 +1,6 @@
 /* Copyright (C) 2001-2002 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,8 +35,10 @@ public abstract class ImageMap
   protected String zoneEdited  = new String();
 
   /** @deprecated */
+  @Deprecated
   public static final int PREVIEW_WIDTH = 50;
   /** @deprecated */
+  @Deprecated
   public static final int PREVIEW_HEIGHT = 50;
   public static final int PREVIEW_SIZE_DEFAULT = 50;
   public static final int PREVIEW_SIZE_TEMPLATE = 256;

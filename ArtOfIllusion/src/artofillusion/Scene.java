@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2022 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -821,7 +821,7 @@ public class Scene
    * Set one object to be selected, deselecting all other objects.
    * @deprecated Call setSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void setSelection(int which)
   {
     clearSelection();
@@ -833,7 +833,7 @@ public class Scene
    * Set a list of objects to be selected, deselecting all other objects.
    * @deprecated Call setSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void setSelection(int which[])
   {
     clearSelection();
@@ -850,7 +850,7 @@ public class Scene
    * Add an object to the list of selected objects.
    * @deprecated Call addToSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void addToSelection(int which)
   {
     ObjectInfo info = objects.elementAt(which);
@@ -864,7 +864,7 @@ public class Scene
    * Deselect all objects.
    * @deprecated Call clearSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void clearSelection()
   {
     if (selection.isEmpty()) return;
@@ -878,7 +878,7 @@ public class Scene
    * Deselect a particular object.
    * @deprecated Call removeFromSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void removeFromSelection(int which)
   {
     ObjectInfo info = objects.elementAt(which);
@@ -1096,7 +1096,7 @@ public class Scene
    * Get a list of the indices of all selected objects.
    * @deprecated Call getSelectedIndices() or getSelectedObjects() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public int [] getSelection()
   {
     int sel[] = new int [selection.size()];
@@ -1111,7 +1111,7 @@ public class Scene
    * selected objects.
    * @deprecated Call getSelectionWithChildren() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public int [] getSelectionWithChildren()
   {
     int count = 0;

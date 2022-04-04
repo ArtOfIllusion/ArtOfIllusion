@@ -4,7 +4,7 @@ import mill.modules.Jvm
 import mill.modules.Util.download
 import scalalib._
 
-trait Common extends JavaModule {
+trait Common extends JavaModule { common =>
 
   def ivyDeps = T {
     super.ivyDeps() ++ Agg(
@@ -17,10 +17,14 @@ trait Common extends JavaModule {
   def unmanagedClasspath = T {
     super.unmanagedClasspath() ++
     Agg(
-    PathRef(millSourcePath / os.up / "lib" / "Buoy.jar"),
-    PathRef(millSourcePath / os.up / "lib" / "Buoyx.jar"),
-    PathRef(millSourcePath / os.up / "lib" / "QuickTimeWriter.jar")
+    PathRef(T.workspace / "lib" / "Buoy.jar"),
+    PathRef(T.workspace / "lib" / "Buoyx.jar"),
+    PathRef(T.workspace / "lib" / "QuickTimeWriter.jar")
   ) ++ Cache.unmanagedFiles()
+  }
+
+  trait Tests extends super.Tests with TestModule.Junit4 {
+    override def unmanagedClasspath = common.unmanagedClasspath()
   }
 }
 
@@ -50,9 +54,7 @@ object ArtOfIllusion extends Common {
       .add("Class-Path" -> libJarPaths())
   }
 
-  object test extends Tests with TestModule.Junit4 with Common {
-    def runClasspath = super.runClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
-  }
+  object test extends Tests
 }
 
 trait PluginModule extends Common {
@@ -60,9 +62,7 @@ trait PluginModule extends Common {
 }
 
 object Renderers extends PluginModule {
-  object test extends Tests with TestModule.Junit4 with Common {
-    def runClasspath = super.runClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
-  }
+  object test extends Tests
 }
 
 object Filters extends PluginModule

@@ -97,10 +97,8 @@ object Suite extends Module with Common {
   def javadoc = T {
     val javadocDir = T.dest / "Javadoc"
     os.makeDir.all(javadocDir)
-    val files = Lib.findSourceFiles(combinedSources(), Seq("java"))
     val options = javadocOptions() ++ Seq("-d", javadocDir.toNIO.toString)
 
-    if (files.nonEmpty)
       Jvm.runSubprocess(
         commandArgs = Seq(
           "javadoc"
@@ -119,7 +117,7 @@ object Suite extends Module with Common {
   }
 
   def manual = T {
-    os.proc("sphinx-build", "-b", "html", millSourcePath / os.up / "docs" / "manual", T.dest).call()
+    os.proc("sphinx-build", "-b", "html", T.workspace / "docs" / "manual", T.dest).call()
   }
 
   def launch(args: String*) = T.command {
@@ -134,7 +132,7 @@ object Suite extends Module with Common {
     os.makeDir.all(T.dest / "Scripts" / "Startup")
     os.makeDir.all(T.dest / "Scripts" / "Objects")
 
-    ArtOfIllusion.upstreamAssemblyClasspath()
+    compileClasspath()
       .map(_.path)
       .filter(p => os.exists(p) && os.isFile(p))
       .iterator

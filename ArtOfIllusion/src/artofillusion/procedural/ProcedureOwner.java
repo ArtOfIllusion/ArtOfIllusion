@@ -1,4 +1,5 @@
 /* Copyright (C) 2002 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,27 +22,43 @@ public interface ProcedureOwner
   
   /** Create an object which displays a preview of the procedure. */
   
-  public Object getPreview(ProcedureEditor editor);
+  default Object getPreview(ProcedureEditor editor)
+  {
+    return null;
+  }
   
   /** Update the display of the preview. */
   
-  public void updatePreview(Object preview);
+  default void updatePreview(Object preview)
+  {    
+  }
   
   /** Dispose of the preview object when the editor is closed. */
   
-  public void disposePreview(Object preview);
+  default void disposePreview(Object preview)
+  {    
+  }
   
   /** Determine whether the procedure may contain Parameter modules. */
   
-  public boolean allowParameters();
+  default boolean allowParameters()
+  {
+    return true;
+  }
   
   /** Determine whether the procedure may contain View Angle modules. */
   
-  public boolean allowViewAngle();
+  default boolean allowViewAngle()
+  {
+    return false;
+  }
   
   /** Determine whether the procedure may be renamed. */
   
-  public boolean canEditName();
+  default boolean canEditName()
+  {
+    return true;
+  }
   
   /** Get the name of the procedure. */
   

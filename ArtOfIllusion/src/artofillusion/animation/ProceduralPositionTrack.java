@@ -584,52 +584,6 @@ public class ProceduralPositionTrack extends Track implements ProcedureOwner
     return Translate.text("procPosTrackTitle");
   }
 
-  /** Create an object which displays a preview of the procedure. */
-
-  @Override
-  public Object getPreview(ProcedureEditor editor)
-  {
-    return null;
-  }
-
-  /** Update the display of the preview. */
-
-  @Override
-  public void updatePreview(Object preview)
-  {
-  }
-
-  /** Dispose of the preview object when the editor is closed. */
-
-  @Override
-  public void disposePreview(Object preview)
-  {
-  }
-
-  /** Determine whether the procedure may contain View Angle modules. */
-
-  @Override
-  public boolean allowViewAngle()
-  {
-    return false;
-  }
-
-  /** Determine whether the procedure may contain Parameter modules. */
-
-  @Override
-  public boolean allowParameters()
-  {
-    return true;
-  }
-
-  /** Determine whether the procedure may be renamed. */
-
-  @Override
-  public boolean canEditName()
-  {
-    return true;
-  }
-
   /** This is called when the user clicks OK in the procedure editor. */
 
   @Override

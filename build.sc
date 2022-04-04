@@ -6,13 +6,16 @@ import scalalib._
 
 trait Common extends JavaModule {
 
-  def ivyDeps = Agg(
+  def ivyDeps = T {
+    super.ivyDeps() ++ Agg(
     ivy"gov.nist.math:jama:1.0.3",
     ivy"com.fifesoft:rsyntaxtextarea:3.1.6",
     ivy"org.apache.groovy:groovy:4.0.0"
   )
+  }
 
   def unmanagedClasspath = T {
+    super.unmanagedClasspath() ++
     Agg(
     PathRef(millSourcePath / os.up / "lib" / "Buoy.jar"),
     PathRef(millSourcePath / os.up / "lib" / "Buoyx.jar"),
@@ -47,7 +50,7 @@ object ArtOfIllusion extends Common {
       .add("Class-Path" -> libJarPaths())
   }
 
-  object test extends Tests with TestModule.Junit4 {
+  object test extends Tests with TestModule.Junit4 with Common {
     def runClasspath = super.runClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
   }
 }
@@ -57,7 +60,7 @@ trait PluginModule extends Common {
 }
 
 object Renderers extends PluginModule {
-  object test extends Tests with TestModule.Junit4 {
+  object test extends Tests with TestModule.Junit4 with Common {
     def runClasspath = super.runClasspath() ++ ArtOfIllusion.upstreamAssemblyClasspath()
   }
 }

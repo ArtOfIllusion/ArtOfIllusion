@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+
+<project name="ArtOfIllusion Full Suite" default="run" basedir=".">
+
+    <condition property="MILL_COMMAND" value="millw.bat" else="./millw">
+        <os family="windows"/>
+    </condition>
+
+    <target name="compile" description="Compile project sourcefiles">
+        <exec executable="${MILL_COMMAND}" failifexecutionfails="true" logerror="true">
+            <arg value="__.compile"/>
+        </exec>
+    </target>
+
+    <target name="clean">
+        <exec executable="${MILL_COMMAND}" failifexecutionfails="true" logerror="true">
+            <arg value="clean"/>
+        </exec>
+    </target>
+
+    <target name="run">
+        <exec executable="${MILL_COMMAND}" failifexecutionfails="true" logerror="true">
+            <arg value="Suite.launch"/>
+        </exec>
+    </target>
+
+    <target name="run-debug" description="Run a local deployment. Suspends and waits for a debugger to attach.">
+        <exec executable="${MILL_COMMAND}" failifexecutionfails="true" logerror="true">
+            <arg value="Suite.launch"/>
+            <arg value="-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=y"/>
+        </exec>
+    </target>
+
+    <!--Netbeans has a weird debugger rule. When you first debug, it will generate a 'debug-nb' task in
+	'bproject/ide-targets.xml'. Delete the file. In the 'project.xml' change the debug action script
+	value to 'build.xml'. After that, it will just run. -->
+    <target name="debug-nb" description="Support for netBeans debug - all others ignore!">
+        <nbjpdastart addressproperty="jpda.address" name="ArtOfIllusion Full Suite" transport="dt_socket"/>
+        <exec executable="${MILL_COMMAND}" failifexecutionfails="true" logerror="true">
+            <arg value="Suite.localDeploy"/>
+        </exec>
+        <java jar="out/Suite/localDeploy.dest/ArtOfIllusion.jar" fork="true">
+            <jvmarg value="-agentlib:jdwp=transport=dt_socket,address=${jpda.address}"/>
+        </java>
+    </target>
+</project>

@@ -75,45 +75,13 @@ object Translators extends PluginModule
 
 object Suite extends Module with Common {
 
-  def combinedSources = T.task {
+  def docSources = T.sources {
      ArtOfIllusion.sources() ++
       Filters.sources() ++
       OSSpecific.sources() ++
       Renderers.sources() ++
       Tools.sources() ++
       Translators.sources()
-
-  }
-
-  def sourceFiles = T.task {
-    os.write(T.dest / "file-list",
-      Lib.findSourceFiles(combinedSources(), Seq("java"))
-        .map(_.toString())
-        .mkString(" ")
-    )
-    PathRef(T.dest / "file-list")
-  }
-
-  def javadoc = T {
-    val javadocDir = T.dest / "Javadoc"
-    os.makeDir.all(javadocDir)
-    val options = javadocOptions() ++ Seq("-d", javadocDir.toNIO.toString)
-
-      Jvm.runSubprocess(
-        commandArgs = Seq(
-          "javadoc"
-        ) ++ options ++
-          Seq(
-            "-classpath",
-            compileClasspath()
-              .map(_.path)
-              .filter(_.ext != "pom")
-              .mkString(java.io.File.pathSeparator)
-          ) ++
-          Seq(sourceFiles().path.toString().prependedAll("@")),
-        envArgs = Map(),
-        workingDir = T.dest
-      )
   }
 
   def manual = T {

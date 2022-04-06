@@ -1,17 +1,22 @@
+import coursier.MavenRepository
 import mill._
-import mill.define.Sources
-import mill.modules.Jvm
-import mill.modules.Util.download
 import scalalib._
 
 trait Common extends JavaModule { common =>
 
+  def repositoriesTask = T.task {
+    super.repositoriesTask() ++ Seq(
+      MavenRepository("https://maven.jzy3d.org/releases/"))
+  }
+
   def ivyDeps = T {
     super.ivyDeps() ++ Agg(
-    ivy"gov.nist.math:jama:1.0.3",
-    ivy"com.fifesoft:rsyntaxtextarea:3.1.6",
-    ivy"org.apache.groovy:groovy:4.0.0"
-  )
+      ivy"gov.nist.math:jama:1.0.3",
+      ivy"com.fifesoft:rsyntaxtextarea:3.1.6",
+      ivy"org.apache.groovy:groovy:4.0.0",
+      ivy"org.jogamp.gluegen:gluegen-rt:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all:v2.4.0-rc4"
+    )
   }
 
   def unmanagedClasspath = T {
@@ -39,7 +44,7 @@ object ArtOfIllusion extends Common {
 
   def libJarPaths = T {
     upstreamAssemblyClasspath()
-      .map(_.path.last.prependedAll("lib/"))
+      .map(_.path.last.replace("-v2.4.0-rc4", "").prependedAll("lib/"))
       .iterator
       .mkString(" ")
   }
@@ -76,12 +81,18 @@ object Translators extends PluginModule
 object Suite extends Module with Common {
 
   def docSources = T.sources {
-     ArtOfIllusion.sources() ++
+    ArtOfIllusion.sources() ++
       Filters.sources() ++
       OSSpecific.sources() ++
       Renderers.sources() ++
       Tools.sources() ++
       Translators.sources()
+  }
+
+ // def docJarUseArgsFile = T.task{true}
+
+  def javadocOptions = T {
+    super.javadocOptions() ++ Seq("-quiet")
   }
 
   def manual = T {
@@ -104,7 +115,7 @@ object Suite extends Module with Common {
       .map(_.path)
       .filter(p => os.exists(p) && os.isFile(p))
       .iterator
-      .foreach(p => os.copy(p, T.dest / "lib" / p.last))
+      .foreach(p => os.copy(p, T.dest / "lib" / p.last.replace("-v2.4.0-rc4", "")))
 
     os.copy(ArtOfIllusion.jar().path, T.dest / "ArtOfIllusion.jar")
 
@@ -120,19 +131,21 @@ object Suite extends Module with Common {
     PathRef(T.dest)
   }
 
+  def localNativeDeps(osName: String) = T.task {
+    resolveDeps(osName match {
+      case x if osName.toLowerCase().contains("linux") => Cache.joglLinuxNatives
+      case x if osName.toLowerCase().contains("windows") => Cache.joglWindowsNatives
+      case x if osName.toLowerCase().contains("mac") | osName.contains("osx") => Cache.joglMacOSXNatives
+    }).apply()
+      .map(_.path)
+  }
+
   def localDeploy = T.persistent {
     os.copy(stage().path, T.dest, replaceExisting = true, mergeFolders = true)
-    val osName = System.getProperty("os.name").toLowerCase()
-    val natives = osName match {
-      case x if osName.contains("linux") => Cache.joglLinuxNatives()
-      case x if osName.contains("windows") => Cache.joglWindowsNatives()
-      case x if osName.contains("mac") | osName.contains("osx") => Cache.joglMacOSXNatives()
-    }
-
-    natives
-      .map(_.path)
+    localNativeDeps(System.getProperty("os.name"))
+      .apply()
       .iterator
-      .foreach(p => os.copy(p, T.dest / "lib" / p.last, replaceExisting = true))
+      .foreach(p => os.copy(p, T.dest / "lib" / p.last.replace("-v2.4.0-rc4", ""), replaceExisting = true))
 
     PathRef(T.dest)
   }
@@ -147,54 +160,36 @@ object Cache extends Module{
       downloadFile(
         "https://github.com/blackears/svgSalamander/releases/download/v1.1.3/svgSalamander-1.1.3.jar"),
       downloadFile(
-        "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt/v2.4.0-rc4/gluegen-rt-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all/v2.4.0-rc4/jogl-all-v2.4.0-rc4.jar",
-        os.rel / "jogl-all.jar")
+        "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar")
     )
   }
 
   def joglLinuxNatives = T {
     Agg(
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-i586/v2.4.0-rc4/gluegen-rt-natives-linux-i586-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-linux-i586.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-amd64/v2.4.0-rc4/gluegen-rt-natives-linux-amd64-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-linux-amd64.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-armv6hf/v2.4.0-rc4/gluegen-rt-natives-linux-armv6hf-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-linux-armv6hf.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-linux-aarch64/v2.4.0-rc4/gluegen-rt-natives-linux-aarch64-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-linux-aarch64.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-i586/v2.4.0-rc4/jogl-all-natives-linux-i586-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-linux-i586-v2.4.0-rc4.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-amd64/v2.4.0-rc4/jogl-all-natives-linux-amd64-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-linux-amd64.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-armv6hf/v2.4.0-rc4/jogl-all-natives-linux-armv6hf-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-linux-armv6hf.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-linux-aarch64/v2.4.0-rc4/jogl-all-natives-linux-aarch64-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-linux-aarch64-v2.4.0-rc4.jar")
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-linux-i586:v2.4.0-rc4",
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-linux-amd64:v2.4.0-rc4",
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-linux-armv6hf:v2.4.0-rc4",
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-linux-aarch64:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-linux-i586:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-linux-amd64:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-linux-armv6hf:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-linux-aarch64:v2.4.0-rc4"
     )
   }
 
   def joglWindowsNatives = T {
     Agg(
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-windows-i586/v2.4.0-rc4/gluegen-rt-natives-windows-i586-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-windows-i586.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-windows-amd64/v2.4.0-rc4/gluegen-rt-natives-windows-amd64-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-windows-amd64.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-windows-i586/v2.4.0-rc4/jogl-all-natives-windows-i586-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-windows-i586-v2.4.0-rc4.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-windows-amd64/v2.4.0-rc4/jogl-all-natives-windows-amd64-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-windows-amd64-v2.4.0-rc4.jar")
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-windows-i586:v2.4.0-rc4",
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-windows-amd64:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-windows-i586:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-windows-amd64:v2.4.0-rc4"
     )
   }
 
   def joglMacOSXNatives = T {
     Agg(
-      download("https://maven.jzy3d.org/releases/org/jogamp/gluegen/gluegen-rt-natives-macosx-universal/v2.4.0-rc4/gluegen-rt-natives-macosx-universal-v2.4.0-rc4.jar",
-        os.rel / "gluegen-rt-natives-macosx-universal.jar"),
-      download("https://maven.jzy3d.org/releases/org/jogamp/jogl/jogl-all-natives-macosx-universal/v2.4.0-rc4/jogl-all-natives-macosx-universal-v2.4.0-rc4.jar",
-        os.rel / "jogl-all-natives-macosx-universal-v2.4.0-rc4.jar")
+      ivy"org.jogamp.gluegen:gluegen-rt-natives-macosx-universal:v2.4.0-rc4",
+      ivy"org.jogamp.jogl:jogl-all-natives-macosx-universal:v2.4.0-rc4"
     )
   }
 

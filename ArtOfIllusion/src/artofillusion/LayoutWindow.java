@@ -594,12 +594,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         newScriptMenu.add (item);
     }
     editScriptMenu.add(this.recentScriptMenu = Translate.menu("recentScript"));
-    // TODO : vérifier la possibilité de réouverture d'un script "untitled" qui n'a pas été sauvegardé
     BMenuItem other;
     editScriptMenu.add (other = Translate.menuItem("editScript", this, "editScriptCommand"));
     other.getComponent().putClientProperty("filepath", ExecuteScriptWindow.NEW_SCRIPT_NAME);
     toolsMenu.add(editScriptMenu);
-    
     toolsMenu.add(scriptMenu = Translate.menu("scripts"));
     rebuildScriptsMenu();
   }
@@ -609,14 +607,26 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     BMenuItem item = (BMenuItem)ev.getWidget();
     String scriptAbsolutePath = (String) item.getComponent().getClientProperty("filepath");
     // We don't test the language for the filepath because it should be ok
-    new ExecuteScriptWindow(this, scriptAbsolutePath, ScriptRunner.getLanguageForFilename(scriptAbsolutePath));
+    try {
+        new ExecuteScriptWindow(this, scriptAbsolutePath, ScriptRunner.getLanguageForFilename(scriptAbsolutePath));
+    }
+    catch (IOException ioe) {
+        new BStandardDialog(null, new String [] {Translate.text("errorOpeningScript"),
+            scriptAbsolutePath + (ioe.getMessage() == null ? "" : ioe.getMessage())}, BStandardDialog.ERROR).showMessageDialog(this);
+    }
   }
   
   public void newScriptCommand (CommandEvent ev) 
   {
     BMenuItem item = (BMenuItem)ev.getWidget();
     String language = (String) item.getComponent().getClientProperty("language");
-    new ExecuteScriptWindow(this, ExecuteScriptWindow.NEW_SCRIPT_NAME, language);
+    try {
+        new ExecuteScriptWindow(this, ExecuteScriptWindow.NEW_SCRIPT_NAME, language);
+    }
+    catch (IOException ioe) {
+        new BStandardDialog(null, new String [] {Translate.text("errorCreatingScript"),
+           language + " : " + (ioe.getMessage() == null ? "" : ioe.getMessage())}, BStandardDialog.ERROR).showMessageDialog(this);
+    }
   }
   
   /*
@@ -667,7 +677,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     public void rebuildRecentScriptsMenu() {
         recentScriptMenu.removeAll();
-        for (String fileAbsolutePath : ExecuteScriptWindow.RECENT_SCRIPTS) {
+        for (String fileAbsolutePath : ExecuteScriptWindow.getRecentScripts()) {
             BMenuItem item = new BMenuItem(new File (fileAbsolutePath).getName());
             item.addEventLink(CommandEvent.class, this, "editScriptCommand");
             item.setActionCommand("editScript");

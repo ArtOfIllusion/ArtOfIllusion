@@ -19,11 +19,17 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.TreeMap;
+import java.util.prefs.Preferences;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.Style;
@@ -38,46 +44,87 @@ public class ExecuteScriptWindow extends BFrame
   private LayoutWindow window;
   private RSyntaxTextArea scriptText;
   private BComboBox languageChoice;
-  // TODO Translate this?
-  public static final String NEW_SCRIPT_NAME = "Untitled";
+  public static final String NEW_SCRIPT_NAME = Translate.text ("untitled");
   private String scriptPath;
 
-  // TODO should this be static? It's actually the last directory used for scripts, 
+  // QUESTION should this be static? It's actually the last directory used for scripts, 
   // is there a reason it is shared among all editing windows? 
   private static File scriptDir= new File(ArtOfIllusion.TOOL_SCRIPT_DIRECTORY);
-  public static final Set<String> RECENT_SCRIPTS = new LinkedHashSet<String> ();
   private String language;
-    private final BButton save;
-    private final BButton executeSelected;
-    private final BButton executeToCursor;
-    private static final int EDITORS_OFFSET = 32;
-    private static ArrayList <String> openedScripts = new ArrayList<String> ();
+  private final BButton save;
+  private final BButton executeSelected;
+  private final BButton executeToCursor;
+  private static final int EDITORS_OFFSET = 32;
+  private static ArrayList <String> openedScripts = new ArrayList<String> ();
+
+    /**
+     * Adds a script path to the recent scripts list. 
+     * This uses a mapping to the current (now) timestamp ; the file paths are in the order of their timestamps, 
+     * so the older is first. The list is truncated to RecentFiles.MAX_RECENT elements. 
+     * @see artofillusion.RecentFiles#MAX_RECENT
+     * @param filePath 
+     */
+    public static void addRecentScript(String filePath)
+    {
+        final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
+        final String recentFiles[] = pref.get("recentFiles", "").split(File.pathSeparator);
+        final String recentFilesTimes[] = pref.get("recentFilesTimes", "").split(";");
+        Map <Long, String> fileTimes = new TreeMap<> ();
+        for (int fileIndex = 0; fileIndex < recentFiles.length; fileIndex++) {
+            if (!recentFilesTimes [fileIndex].equals ("") // Case of no recent file
+                    && !recentFiles [fileIndex].equals(filePath)) // If the current file already has a timestamp it will be updated below
+                fileTimes.put(Long.valueOf(recentFilesTimes [fileIndex]), recentFiles[fileIndex]);
+        }
+        fileTimes.put (new Date().getTime(), filePath);
+        // truncate the map to the max items selected, removing the first 
+        // (it is the oldest because its timestamp is smaller)
+        if (fileTimes.size() > RecentFiles.MAX_RECENT) {
+            final Long minFileTime = (Long) fileTimes.keySet().toArray() [1];
+            fileTimes = ((TreeMap <Long, String>) fileTimes).tailMap(minFileTime);
+        }
+        pref.put("recentFiles", String.join (File.pathSeparator, fileTimes.values()));
+        final Set<Long> times = fileTimes.keySet();
+        String joinedTimes = "";
+        for (Long time : times) {
+            joinedTimes += ";" + time.toString();
+        }
+        pref.put("recentFilesTimes", joinedTimes.substring(1));
+    }
     
-    /** This is used to track the "changed" status of the script being edited. */
-    private class ScriptKeyListener implements KeyListener {
+    public static String [] getRecentScripts()
+    {
+        final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
+        // The files are ordered by ascending Date, so we need to revert this to get the most recent in to
+        final java.util.List<String> recentScripts = Arrays.asList (pref.get("recentFiles", "").split(File.pathSeparator));
+        Collections.reverse(recentScripts);
+        return recentScripts.toArray(new String [0]);
+    } 
 
-        @Override
-        public void keyTyped(KeyEvent e) {
-            save.setEnabled(true);        
-        }
+  /** This is used to track the "changed" status of the script being edited. */
+  private class ScriptKeyListener implements KeyListener {
 
-        @Override
-        public void keyPressed(KeyEvent e) {
-        }
+      @Override
+      public void keyTyped(KeyEvent e) {
+          save.setEnabled(true);        
+      }
 
-        @Override
-        public void keyReleased(KeyEvent e) {
-        }
+      @Override
+      public void keyPressed(KeyEvent e) {
+      }
+
+      @Override
+      public void keyReleased(KeyEvent e) {
+      }
         
     }
     
-    /**
-     * 
-     * @param win
-     * @param scriptAbsolutePath ExecuteScriptWindow.NEW_SCRIPT_NAME if this is a new script
-     * @param scriptLanguage May be null (scriptLanguage unknown) if this is a new script
-     */
-  public ExecuteScriptWindow(LayoutWindow win, String scriptAbsolutePath, String scriptLanguage)
+  /**
+   * 
+   * @param win
+   * @param scriptAbsolutePath ExecuteScriptWindow.NEW_SCRIPT_NAME if this is a new script
+   * @param scriptLanguage May be null (scriptLanguage unknown) if this is a new script
+   */
+  public ExecuteScriptWindow(LayoutWindow win, String scriptAbsolutePath, String scriptLanguage) throws IOException
   {
     super(scriptAbsolutePath);
     setScriptNameFromFile(scriptAbsolutePath);
@@ -91,13 +138,7 @@ public class ExecuteScriptWindow extends BFrame
     window = win;
     String editorTextContent = "";
     if (scriptLanguage != null && scriptAbsolutePath.contains(".")) {
-        try {
-            editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
-        } catch (IOException ex) {
-            Logger.getLogger(ExecuteScriptWindow.class.getName()).log(Level.SEVERE, null, ex);
-            // TODO FIXME Disable editing and saving since loading has failed
-            // TODO display a dialog box error explaining this
-        }
+        editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
     scriptText = new RSyntaxTextArea(editorTextContent, 25, 100);
     scriptText.addKeyListener(new ScriptKeyListener());
@@ -113,6 +154,7 @@ public class ExecuteScriptWindow extends BFrame
     content.add(new AWTWidget(new RTextScrollPane(scriptText))
                , BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice.getComponent().setRenderer(new LanguageRenderer());
     BorderContainer tools = new BorderContainer ();
     content.add(tools, BorderContainer.NORTH);
     RowContainer buttons = new RowContainer();
@@ -154,6 +196,29 @@ public class ExecuteScriptWindow extends BFrame
     setVisible(true);
     updateEditableStatus(NEW_SCRIPT_NAME, scriptAbsolutePath);
   }
+  
+  class LanguageRenderer extends JLabel implements ListCellRenderer {
+
+        @Override
+        public Component getListCellRendererComponent(JList list, Object value, 
+                int index, boolean isSelected, boolean hasFocus)
+        {
+            String selectedLanguage = ((String)value);
+            final ImageIcon languageIcon = new ImageIcon (getClass().getResource("/artofillusion/Icons/"
+                    + selectedLanguage + ".png"));
+            if (isSelected) {
+                setBackground(list.getSelectionBackground());
+                setForeground(list.getSelectionForeground());
+            } else {
+                setBackground(list.getBackground());
+                setForeground(list.getForeground());
+            }
+            setIcon (languageIcon);
+            setText (selectedLanguage);
+            return this;
+        }
+      
+  }
 
     private void updateEditableStatus(String previousScriptAbsoluePath, String scriptAbsolutePath) {
         if (!previousScriptAbsoluePath.equals(scriptAbsolutePath)) {    
@@ -187,9 +252,29 @@ public class ExecuteScriptWindow extends BFrame
 
   private void closeWindow()
   {
-    // TODO Warning message if the script hasn't been saved
-    dispose();
-    openedScripts.remove(scriptPath);
+    // Default action in the options dialog is "close anyway"
+    int action = 1;
+    // Warning message if the script hasn't been saved
+    if (save.isEnabled())
+    {
+        action = new BStandardDialog(null, new String [] {Translate.text("unsavedChanges"),
+              Translate.text("unsavedChangesPrompt")}, BStandardDialog.ERROR)
+                .showOptionDialog(this, new String []{
+                    Translate.text("saveAndClose"), 
+                    Translate.text("discardChangesAndclose"), 
+                    Translate.text("cancelClosing")}, scriptPath);
+    }
+    // Action 0 is save and close
+    if (action == 0)
+    {
+      saveScript();
+    }
+    // Action 2 is cancel closing
+    if (action != 2)
+    {
+      dispose();
+      openedScripts.remove(scriptPath);
+    }
   }
 
   /** Prompt the user to load a script. */
@@ -233,17 +318,19 @@ public class ExecuteScriptWindow extends BFrame
         }
         else
         {
-            // TODO translate
             new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-              "Unsupported file extension for " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
+              Translate.text("unsupportedFileExtension") + " : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
         }
       }
       catch (Exception ex)
       {
+          // TODO remove this
+          ex.printStackTrace();
         new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
           ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
       }
     }
+    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     // Restore program working directory for other filechoosers
     fc.setDirectory(workingDir);
   }
@@ -253,7 +340,7 @@ public class ExecuteScriptWindow extends BFrame
   private void saveScriptAs()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
-    // TODO FIXME Est-ce que ces manipulations de répertoires sont vraiment nécessaires?
+    // QUESTION Are all those directory changes really needed?
     // Save current program working directory
     File workingDir = fc.getDirectory();
     fc.setDirectory(scriptDir);
@@ -331,14 +418,8 @@ public class ExecuteScriptWindow extends BFrame
    */
   private void setScriptNameFromFile(String filePath)
   {
-      /*
-    if (filePath.contains("."))
-      scriptPath = filePath.substring(0, filePath.lastIndexOf("."));
-    else
-      scriptPath = filePath;
-      */
     if (filePath != NEW_SCRIPT_NAME)
-        RECENT_SCRIPTS.add(filePath);
+        addRecentScript(filePath);
     setTitle(filePath);
   }
 
@@ -371,33 +452,34 @@ public class ExecuteScriptWindow extends BFrame
     scriptText.requestFocus();
   }
 
-    public void executeText(final String text) {
-        try
-        {
-            ToolScript script = ScriptRunner.parseToolScript(language, text);
-            script.execute(window);
-        }
-        catch (Exception e)
-        {
-            int line = ScriptRunner.displayError(language, e);
-            if (line > -1)
-            {
-                // Find the start of the line containing the error.
-                int index = 0;
-                for (int i = 0; i < line-1; i++)
-                {
-                    int next = text.indexOf('\n', index);
-                    if (next == -1)
-                    {
-                        index = -1;
-                        break;
-                    }
-                    index = next+1;
-                }
-                if (index > -1)
-                    scriptText.setCaretPosition(index);
-                scriptText.requestFocus();
-            }
-        }
-    }
+  public void executeText(final String text)
+  {
+      try
+      {
+          ToolScript script = ScriptRunner.parseToolScript(language, text);
+          script.execute(window);
+      }
+      catch (Exception e)
+      {
+          int line = ScriptRunner.displayError(language, e);
+          if (line > -1)
+          {
+              // Find the start of the line containing the error.
+              int index = 0;
+              for (int i = 0; i < line-1; i++)
+              {
+                  int next = text.indexOf('\n', index);
+                  if (next == -1)
+                  {
+                      index = -1;
+                      break;
+                  }
+                  index = next+1;
+              }
+              if (index > -1)
+                  scriptText.setCaretPosition(index);
+              scriptText.requestFocus();
+          }
+      }
+  }
 }

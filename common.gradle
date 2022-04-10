@@ -30,7 +30,16 @@ sourceSets {
 }
 
 dependencies {
-    
+    implementation('org.buoy:Buoy') {
+     version {
+      branch = 'master'
+     }
+    }
+    testImplementation('junit:junit:4.12') {
+        exclude group: 'org.hamcrest'
+    }
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
+
     implementation("org.jogamp.gluegen:gluegen-rt-main:2.3.2")
     implementation("org.jogamp.jogl:jogl-all-main:2.3.2")
 

@@ -49,9 +49,7 @@ dependencies {
     implementation group: 'org.apache.groovy', name: 'groovy', version: '4.0.0'
     implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.2.0'
     
-    // only buoy and QuickTimeWriter need to be local. Other locals can be removed
-    implementation fileTree(dir: '../lib', include: '*.jar')
-    
+    implementation group: 'com.github.stephenc.monte', name: 'monte-screen-recorder', version: '0.7.7.0'    
 }
 
 javadoc { 

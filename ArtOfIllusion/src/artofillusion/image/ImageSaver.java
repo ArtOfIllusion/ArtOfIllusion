@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +15,7 @@ import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import ch.randelshofer.media.quicktime.*;
+
 
 import java.awt.*;
 import java.awt.image.*;
@@ -22,6 +23,7 @@ import java.io.*;
 import java.text.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
+import org.monte.media.quicktime.QuickTimeWriter;
 
 /** This class is used to save rendered images to disk. */
 
@@ -82,7 +84,7 @@ public class ImageSaver
     if (format == FORMAT_QUICKTIME && this.clickedOk())
     {
       qt = new QuickTimeWriter(new File(directory, name));
-      qt.addVideoTrack(QuickTimeWriter.VideoFormat.JPG, fps, width, height);
+      qt.addVideoTrack(QuickTimeWriter.VIDEO_JPEG, fps, width, height);
       qt.setCompressionQuality(0, (float) quality*0.01f);
     }
   }
@@ -195,7 +197,7 @@ public class ImageSaver
       Graphics2D g = buffer.createGraphics();
       g.drawImage(img.getImage(), 0, 0, parent.getComponent());
       g.dispose();
-      qt.writeFrame(0, buffer, 1);
+      qt.write(0, buffer, 1);
       return true;
     }
     if (index != Integer.MIN_VALUE)

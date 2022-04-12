@@ -136,7 +136,8 @@ public class Scene
     boolean processed[] = new boolean [objects.size()];
     objects.forEach(item ->
         applyTracksToObject(item, processed, null, objects.indexOf(item)));
-    objects.forEach(item -> item.getObject().sceneChanged(item, this));
+    for (ObjectInfo obj : objects)
+      obj.getObject().sceneChanged(obj, this);
   }
 
   /** Modify an object (and any objects that depend on it) based on its tracks at the current time. */

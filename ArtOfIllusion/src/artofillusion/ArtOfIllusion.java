@@ -411,7 +411,7 @@ public class ArtOfIllusion
     for (String file : files)
     {
         String language = ScriptRunner.getLanguageForFilename(file);
-        if (language != null) {
+        if (language != ScriptRunner.UNKNOWN_LANGUAGE) {
             try 
             {
               String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
@@ -424,9 +424,7 @@ public class ArtOfIllusion
           }
         else 
         {
-            // TODO translate this
-            // TODO use some debugging tools instead of System.err
-          System.err.println ("Unrecognized script language for " + file);
+          System.err.println (Translate.text ("unsupportedFileExtension") + " : " + file);
         }
     }
   }

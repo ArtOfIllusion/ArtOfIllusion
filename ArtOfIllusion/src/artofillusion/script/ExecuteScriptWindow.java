@@ -18,13 +18,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.prefs.Preferences;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -57,6 +51,8 @@ public class ExecuteScriptWindow extends BFrame
   private static final int EDITORS_OFFSET = 32;
   private static ArrayList <String> openedScripts = new ArrayList<String> ();
 
+    private javax.swing.filechooser.FileFilter scriptFileFilter;
+    
     /**
      * Adds a script path to the recent scripts list. 
      * This uses a mapping to the current (now) timestamp ; the file paths are in the order of their timestamps, 
@@ -121,8 +117,8 @@ public class ExecuteScriptWindow extends BFrame
   /**
    * 
    * @param win
-   * @param scriptAbsolutePath ExecuteScriptWindow.NEW_SCRIPT_NAME if this is a new script
-   * @param scriptLanguage May be null (scriptLanguage unknown) if this is a new script
+   * @param scriptAbsolutePath {@link ExecuteScriptWindow#NEW_SCRIPT_NAME} if this is a new script
+   * @param scriptLanguage May be {@link ScriptRunner#UNKNOWN_LANGUAGE} if this is a new script
    */
   public ExecuteScriptWindow(LayoutWindow win, String scriptAbsolutePath, String scriptLanguage) throws IOException
   {
@@ -130,14 +126,21 @@ public class ExecuteScriptWindow extends BFrame
     setScriptNameFromFile(scriptAbsolutePath);
     language = scriptLanguage;
     scriptPath = scriptAbsolutePath;
+     // Get the extensions dynamically
+      final java.util.List <String> extensions = new ArrayList <String>();
+      for (String language : ScriptRunner.getLanguageNames ()) {
+          extensions.add (ScriptRunner.getFilenameExtension(language));
+      }
+      scriptFileFilter = new javax.swing.filechooser.FileNameExtensionFilter(
+        "Script files", (String[]) extensions.toArray(new String [0]));
 
-    // TODO Add output panel and an error panel ; 
-    // TODO make sure the scripts outputs are redirected to those
+    // TODO FIXME the edit zone does not maximize when the panel is maximized
+    // TODO FIXME Same problem when the window is put to the side
     BorderContainer content = new BorderContainer();
     setContent(content);
     window = win;
     String editorTextContent = "";
-    if (scriptLanguage != null && scriptAbsolutePath.contains(".")) {
+    if (scriptLanguage != ScriptRunner.UNKNOWN_LANGUAGE && scriptAbsolutePath.contains(".")) {
         editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
     scriptText = new RSyntaxTextArea(editorTextContent, 25, 100);
@@ -153,7 +156,7 @@ public class ExecuteScriptWindow extends BFrame
     scriptText.setCodeFoldingEnabled(true);
     content.add(new AWTWidget(new RTextScrollPane(scriptText))
                , BorderContainer.CENTER);
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.getComponent().setRenderer(new LanguageRenderer());
     BorderContainer tools = new BorderContainer ();
     content.add(tools, BorderContainer.NORTH);
@@ -176,7 +179,7 @@ public class ExecuteScriptWindow extends BFrame
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
     languageRow.add(languageChoice);
-    if (scriptLanguage != null) {
+    if (scriptLanguage != ScriptRunner.UNKNOWN_LANGUAGE) {
         languageChoice.setSelectedValue(scriptLanguage);
         languageChoice.setEnabled(false);
     }
@@ -241,12 +244,14 @@ public class ExecuteScriptWindow extends BFrame
         }
     }
 
-  /** Make syntax highlighting match current scripting language */
-
+  /**
+   * Make syntax highlighting match current scripting language 
+   * {@link  ScriptRunner#Language}
+   */
   private void updateLanguage()
   {
     scriptText.setSyntaxEditingStyle(
-        ScriptRunner.LANGUAGES[1].equalsIgnoreCase(language) ?
+        ScriptRunner.Language.GROOVY.name.equalsIgnoreCase(language) ?
           SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
   }
 
@@ -285,8 +290,8 @@ public class ExecuteScriptWindow extends BFrame
     // Save the current program working directory
     File workingDir = fc.getDirectory();
     fc.setDirectory(scriptDir);
-    fc.showDialog(this);
-    if (fc.getSelectedFile() != null)
+    fc.getComponent ().setFileFilter(scriptFileFilter);
+    if (fc.showDialog(this))
     {
       scriptDir = fc.getDirectory();
       setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -299,7 +304,7 @@ public class ExecuteScriptWindow extends BFrame
         scriptText.setCaretPosition(0);
         String filename = fc.getSelectedFile().getName();
         String fileLanguage = ScriptRunner.getLanguageForFilename(filename);
-        if (fileLanguage != null)
+        if (fileLanguage != ScriptRunner.UNKNOWN_LANGUAGE)
         {
             languageChoice.setSelectedValue(fileLanguage);
             languageChoice.setEnabled(false);
@@ -346,10 +351,9 @@ public class ExecuteScriptWindow extends BFrame
     fc.setDirectory(scriptDir);
     if (language == null) 
         language = (String) languageChoice.getSelectedValue();
-    fc.setSelectedFile(new File(scriptDir, scriptPath/*+'.'+
-            ScriptRunner.getFilenameExtension(language)*/));
-    fc.showDialog(this);
-    if (fc.getSelectedFile() != null)
+    fc.setSelectedFile(new File(scriptPath));
+    fc.getComponent ().setFileFilter(scriptFileFilter);
+    if (fc.showDialog(this))
     {
       scriptDir = fc.getDirectory();
   
@@ -443,8 +447,10 @@ public class ExecuteScriptWindow extends BFrame
     scriptText.requestFocus();
   }
   
-          /** Execute the script. */
-
+  /** Execute the script. */
+  // TODO : disable the execute buttons when the script starts, 
+  // replace them with a "stop" button, 
+  // re-enable them after the script ends or is stopped.
   private void executeScript()
   {
     executeText(scriptText.getText());

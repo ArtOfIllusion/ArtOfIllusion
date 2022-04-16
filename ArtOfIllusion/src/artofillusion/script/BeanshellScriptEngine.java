@@ -22,7 +22,7 @@ import bsh.*;
 public class BeanshellScriptEngine implements ScriptEngine
 {
   Interpreter interp;
-
+  
   public BeanshellScriptEngine(ClassLoader parent)
   {
     interp = new Interpreter();
@@ -32,13 +32,13 @@ public class BeanshellScriptEngine implements ScriptEngine
   @Override
   public String getName()
   {
-    return ScriptRunner.LANGUAGES[0];
+    return ScriptRunner.Language.BEANSHELL.name;
   }
 
   @Override
   public String getFilenameExtension()
   {
-    return ScriptRunner.EXTENSIONS[0];
+    return ScriptRunner.Language.BEANSHELL.fileNameExtension;
   }
 
   @Override

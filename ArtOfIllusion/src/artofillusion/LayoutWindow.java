@@ -74,10 +74,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   protected Preferences preferences;
   private BMenu editScriptMenu;   
   private BMenu recentScriptMenu;
-  public static final ImageIcon [] LANGUAGE_ICONS = {
-      new IconResource("artofillusion/Icons/" + ScriptRunner.LANGUAGES [0] + ".png"),
-      new IconResource("artofillusion/Icons/" + ScriptRunner.LANGUAGES [1] + ".png")
-  };
+  public static final ImageIcon [] LANGUAGE_ICONS;
+  static {
+      final List <ImageIcon> icons = new ArrayList <ImageIcon>();
+      for (String language : ScriptRunner.getLanguageNames ()) {
+          icons.add (new IconResource("artofillusion/Icons/" + language + ".png"));
+      }
+      LANGUAGE_ICONS = (ImageIcon[]) icons.toArray(new ImageIcon [0]);
+  }
  
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
       Instead, call ModellingApp.newWindow(Scene s). */
@@ -586,7 +590,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     
     this.editScriptMenu= Translate.menu("editToolScript");
     this.editScriptMenu.add(newScriptMenu = Translate.menu("newScript"));
-    for (String language : ScriptRunner.LANGUAGES){
+    for (String language : ScriptRunner.getLanguageNames()){
         BMenuItem item = new BMenuItem(language);
         item.addEventLink(CommandEvent.class, this, "newScriptCommand");
         item.setActionCommand("newScript");
@@ -703,7 +707,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
       else
       {
-        if (ScriptRunner.getLanguageForFilename(file) != null) {
+        if (ScriptRunner.getLanguageForFilename(file) != ScriptRunner.UNKNOWN_LANGUAGE) {
           BMenuItem item = new BMenuItem(file.substring(0, file.lastIndexOf('.')));
           item.setActionCommand(f.getAbsolutePath());
           item.addEventLink(CommandEvent.class, this, "executeScriptCommand");
@@ -2209,14 +2213,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         Vec3 neworig = orig.minus(center);
         neworig.multiply(resize);
         coords.setOrigin(neworig);
-        // We actually don't need to do this if no rotation has been specified
         coords.transformCoordinates(m);
         coords.setOrigin(coords.getOrigin().plus(center));
       }
       else
       {
         coords.setOrigin(orig);
-        // We actually don't need to do this if no rotation has been specified
         coords.transformAxes(m);
       }
       if (!scaledObjects.contains(obj))
@@ -2721,7 +2723,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (files != null)
       for (String file : files)
       {
-          if (ScriptRunner.getLanguageForFilename(file) != null) {
+          if (ScriptRunner.getLanguageForFilename(file) != ScriptRunner.UNKNOWN_LANGUAGE) {
             scriptChoice.add(file.substring(0, file.lastIndexOf(".")));
             scriptNames.add(file);
           }
@@ -2734,7 +2736,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     // If they are using a predefined script, load it.
 
     String scriptText = "";
-    String language = ScriptRunner.LANGUAGES[0];
+    String language;
     if (scriptChoice.getSelectedIndex() > 0)
     {
       try
@@ -2742,7 +2744,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptNames.get(scriptChoice.getSelectedIndex()-1));
         scriptText = ArtOfIllusion.loadFile(f);
         language = ScriptRunner.getLanguageForFilename(f.getName());
-        if (language == null) {
+        if (language == ScriptRunner.UNKNOWN_LANGUAGE) {
             // Predefined scripts are supposed to have a correct extension, 
             // so it's ok to throw an exception here
             throw new IOException ("Unrecognized extension for " + f.getName());
@@ -2753,6 +2755,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         new BStandardDialog("", new String [] {Translate.text("errorReadingScript"), ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
         return;
       }
+    }
+    else {
+        // Default language : Beanshell
+        language = ScriptRunner.Language.BEANSHELL.name;
     }
     ScriptedObject obj = new ScriptedObject(scriptText, language);
     ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(), nameField.getText());
@@ -3087,7 +3093,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     try
     {
       language = ScriptRunner.getLanguageForFilename(f.getName());
-      if (language == null)
+      if (language == ScriptRunner.UNKNOWN_LANGUAGE)
             // Predefined scripts are supposed to have a correct extension, 
             // so it's ok to throw an exception here
             throw new IOException ("Unrecognized extension for " + f.getName());

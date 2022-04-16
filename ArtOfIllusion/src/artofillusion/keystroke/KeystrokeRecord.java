@@ -10,6 +10,8 @@
 
 package artofillusion.keystroke;
 
+import artofillusion.script.ScriptRunner;
+
 /**
  * This class contains information about a keyboard shortcut which automates some operation.
  * A keystroke pairs a key description (key code and modifier) with a Beanshell script to execute
@@ -55,7 +57,7 @@ public class KeystrokeRecord
 
   public KeystrokeRecord(int keyCode, int modifiers, String name, String script)
   {
-    this(keyCode, modifiers, name, script, "BeanShell");
+    this(keyCode, modifiers, name, script, ScriptRunner.Language.BEANSHELL.name);
   }
 
   public int getKeyCode()

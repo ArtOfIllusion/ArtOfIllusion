@@ -72,7 +72,7 @@ public class KeystrokeEditor extends BDialog
     keyField.setEditable(false);
     keyField.addEventLink(KeyPressedEvent.class, this, "setKey");
     nameField = new BTextField(record.getName());
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.setSelectedValue(record.getLanguage());
 
     syntaxTextArea = new RSyntaxTextArea(record.getScript(), 25, 100);

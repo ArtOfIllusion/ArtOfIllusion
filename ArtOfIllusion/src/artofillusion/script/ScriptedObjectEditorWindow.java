@@ -59,7 +59,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     scriptText.setCodeFoldingEnabled(true);
     content.add(new AWTWidget(new RTextScrollPane(scriptText))
                              , BorderContainer.CENTER);
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
@@ -92,7 +92,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   private void updateLanguage()
   {
     scriptText.setSyntaxEditingStyle(
-        ScriptRunner.LANGUAGES[1].equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
+        ScriptRunner.Language.GROOVY.name.equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
            SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
   }
 
@@ -119,7 +119,7 @@ public class ScriptedObjectEditorWindow extends BFrame
       File f = fc.getSelectedFile();
       String filename = fc.getSelectedFile().getName();
       String language = ScriptRunner.getLanguageForFilename(filename);
-      if (language != null) {
+      if (language != ScriptRunner.UNKNOWN_LANGUAGE) {
             languageChoice.setSelectedValue(language);
             // TODO We should not even load the file but issue a message instead and return
           try

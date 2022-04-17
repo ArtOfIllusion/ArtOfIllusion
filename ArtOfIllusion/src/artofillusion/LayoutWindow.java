@@ -2150,9 +2150,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void transformObjectCommand()
   {
-    int sel[] = getSelectedIndices();
+    int i, sel[] = getSelectedIndices();
     TransformDialog dlg;
+    ObjectInfo info;
+    Object3D obj;
+    CoordinateSystem coords;
+    Vec3 orig, size, center;
     double values[];
+    Mat4 m;
 
     if (sel.length == 0)
       return;
@@ -2166,26 +2171,88 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       return;
     values = dlg.getValues();
 
-    Vec3 center = findSelectedObjectsCenter(theScene, sel);
+    // Find the center of all selected objects.
+
+    BoundingBox bounds = null;
+    for (i = 0; i < sel.length; i++)
+    {
+      info = theScene.getObject(sel[i]);
+      if (bounds == null)
+        bounds = info.getBounds().transformAndOutset(info.getCoords().fromLocal());
+      else
+        bounds = bounds.merge(info.getBounds().transformAndOutset(info.getCoords().fromLocal()));
+    }
+    center = bounds.getCenter();
     if (dlg.applyToChildren())
       sel = getSelectionWithChildren();
-    Vec3 movement = new Vec3(0, 0, 0);
-    Vec3 resize = new Vec3(1, 1, 1);
-    if (!Double.isNaN(values[0]))
-      movement.x = values[0];
-    if (!Double.isNaN(values[1]))
-      movement.y = values[1];
-    if (!Double.isNaN(values[2]))
-      movement.z = values[2];
-    if (!Double.isNaN(values[6]))
-      resize.x = values[6];
-    if (!Double.isNaN(values[7]))
-      resize.y = values[7];
-    if (!Double.isNaN(values[8]))
-      resize.z = values[8];
 
-    applyTransformToSelected (movement, resize, 
-            sel, dlg.useSelectionCenter(), center, determineRotationMatrix(values[3], values [4], values [5]));
+    // Determine the rotation matrix.
+
+    m = Mat4.identity();
+    if (!Double.isNaN(values[3]))
+      m = m.times(Mat4.xrotation(values[3]*Math.PI/180.0));
+    if (!Double.isNaN(values[4]))
+      m = m.times(Mat4.yrotation(values[4]*Math.PI/180.0));
+    if (!Double.isNaN(values[5]))
+      m = m.times(Mat4.zrotation(values[5]*Math.PI/180.0));
+    UndoRecord undo = new UndoRecord(this, false);
+    HashSet<Object3D> scaledObjects = new HashSet<Object3D>();
+    for (i = 0; i < sel.length; i++)
+    {
+      info = theScene.getObject(sel[i]);
+      obj = info.getObject();
+      coords = info.getCoords();
+      if (!scaledObjects.contains(obj))
+        undo.addCommand(UndoRecord.COPY_OBJECT, obj, obj.duplicate());
+      undo.addCommand(UndoRecord.COPY_COORDS, coords, coords.duplicate());
+      orig = coords.getOrigin();
+      size = obj.getBounds().getSize();
+      if (!Double.isNaN(values[0]))
+        orig.x += values[0];
+      if (!Double.isNaN(values[1]))
+        orig.y += values[1];
+      if (!Double.isNaN(values[2]))
+        orig.z += values[2];
+      if (!Double.isNaN(values[6]))
+        size.x *= values[6];
+      if (!Double.isNaN(values[7]))
+        size.y *= values[7];
+      if (!Double.isNaN(values[8]))
+        size.z *= values[8];
+      if (dlg.useSelectionCenter())
+      {
+        Vec3 neworig = orig.minus(center);
+        if (!Double.isNaN(values[6]))
+          neworig.x *= values[6];
+        if (!Double.isNaN(values[7]))
+          neworig.y *= values[7];
+        if (!Double.isNaN(values[8]))
+          neworig.z *= values[8];
+        coords.setOrigin(neworig);
+        coords.transformCoordinates(m);
+        coords.setOrigin(coords.getOrigin().plus(center));
+      }
+      else
+      {
+        coords.setOrigin(orig);
+        coords.transformAxes(m);
+      }
+      if (!scaledObjects.contains(obj))
+      {
+        obj.setSize(size.x, size.y, size.z);
+        scaledObjects.add(obj);
+      }
+    }
+    for (i = 0; i < sel.length; i++)
+    {
+      info = theScene.getObject(sel[i]);
+      theScene.objectModified(info.getObject());
+    }
+    ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+    for (int index : sel)
+      modified.add(theScene.getObject(index));
+    theScene.applyTracksAfterModification(modified);
+    setUndoRecord(undo);
     updateImage();
   }
 

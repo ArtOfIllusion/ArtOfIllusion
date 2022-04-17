@@ -64,35 +64,19 @@ public class ExecuteScriptWindow extends BFrame
     {
         final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
         final String recentFiles[] = pref.get("recentFiles", "").split(File.pathSeparator);
-        final String recentFilesTimes[] = pref.get("recentFilesTimes", "").split(";");
-        Map <Long, String> fileTimes = new TreeMap<> ();
-        for (int fileIndex = 0; fileIndex < recentFiles.length; fileIndex++) {
-            if (!recentFilesTimes [fileIndex].equals ("") // Case of no recent file
-                    && !recentFiles [fileIndex].equals(filePath)) // If the current file already has a timestamp it will be updated below
-                fileTimes.put(Long.valueOf(recentFilesTimes [fileIndex]), recentFiles[fileIndex]);
-        }
-        fileTimes.put (new Date().getTime(), filePath);
-        // truncate the map to the max items selected, removing the first 
-        // (it is the oldest because its timestamp is smaller)
-        if (fileTimes.size() > RecentFiles.MAX_RECENT) {
-            final Long minFileTime = (Long) fileTimes.keySet().toArray() [1];
-            fileTimes = ((TreeMap <Long, String>) fileTimes).tailMap(minFileTime);
-        }
-        pref.put("recentFiles", String.join (File.pathSeparator, fileTimes.values()));
-        final Set<Long> times = fileTimes.keySet();
-        String joinedTimes = "";
-        for (Long time : times) {
-            joinedTimes += ";" + time.toString();
-        }
-        pref.put("recentFilesTimes", joinedTimes.substring(1));
+        java.util.List<String> newRecentFiles = new ArrayList<String>();
+        newRecentFiles.add (filePath);
+        for (String recentFile : recentFiles) 
+                    if (!recentFile.equals(filePath)) // If the current file already has a timestamp it will be updated below
+                        newRecentFiles.add (recentFile);
+        pref.put("recentFiles", String.join (File.pathSeparator, 
+                (String []) newRecentFiles.subList(0, 10).toArray(new String[0])));
     }
     
     public static String [] getRecentScripts()
     {
         final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
-        // The files are ordered by ascending Date, so we need to revert this to get the most recent in to
         final java.util.List<String> recentScripts = Arrays.asList (pref.get("recentFiles", "").split(File.pathSeparator));
-        Collections.reverse(recentScripts);
         return recentScripts.toArray(new String [0]);
     } 
 

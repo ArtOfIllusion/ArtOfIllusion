@@ -23,7 +23,7 @@ import java.util.prefs.*;
 
 public class RecentFiles
 {
-  public static final int MAX_RECENT = 10;
+  static final int MAX_RECENT = 10;
 
   /** Given a BMenu, fill it in with a list of items for recent files. */
 
@@ -31,7 +31,7 @@ public class RecentFiles
   {
     menu.removeAll();
     Preferences pref = Preferences.userNodeForPackage(RecentFiles.class);
-    String recent[] = pref.get("recentFiles", "").split(File.pathSeparator);
+    String recent[] = pref.get(RECENT_FILES, "").split(File.pathSeparator);
     for (int i = 0; i < recent.length; i++)
     {
       final File file = new File(recent[i]);
@@ -45,6 +45,7 @@ public class RecentFiles
       });
     }
   }
+    private static final String RECENT_FILES = "recentFiles";
 
   /** Add a File to the list of recent files. */
 
@@ -54,7 +55,7 @@ public class RecentFiles
 
     String newPath = file.getAbsolutePath();
     Preferences pref = Preferences.userNodeForPackage(RecentFiles.class);
-    String recent[] = pref.get("recentFiles", "").split(File.pathSeparator);
+    String recent[] = pref.get(RECENT_FILES, "").split(File.pathSeparator);
     ArrayList<String> newFiles = new ArrayList<String>();
     newFiles.add(newPath);
     for (int i = 0; i < recent.length && newFiles.size() < MAX_RECENT; i++)
@@ -67,7 +68,7 @@ public class RecentFiles
         fileList.append(File.pathSeparator);
       fileList.append(newFiles.get(i));
     }
-    pref.put("recentFiles", fileList.toString());
+    pref.put(RECENT_FILES, fileList.toString());
 
     // Rebuild the menus in all open windows.
 

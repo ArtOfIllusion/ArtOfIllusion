@@ -313,7 +313,6 @@ public class ExecuteScriptWindow extends BFrame
       }
       catch (Exception ex)
       {
-          // TODO remove this
           ex.printStackTrace();
         new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
           ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
@@ -329,7 +328,6 @@ public class ExecuteScriptWindow extends BFrame
   private void saveScriptAs()
   {
     BFileChooser fc = new BFileChooser(BFileChooser.SAVE_FILE, Translate.text("saveScriptToFile"));
-    // QUESTION Are all those directory changes really needed?
     // Save current program working directory
     File workingDir = fc.getDirectory();
     fc.setDirectory(scriptDir);
@@ -362,13 +360,11 @@ public class ExecuteScriptWindow extends BFrame
 
       setScriptNameFromFile(fc.getSelectedFile().getAbsolutePath());
       // Update the Scripts menus in all windows.
-        for (EditingWindow edWin : ArtOfIllusion.getWindows())
-        {
-            if (edWin instanceof LayoutWindow)
-            {
-                ((LayoutWindow) edWin).rebuildScriptsMenu();
-            }
-        }
+      for (EditingWindow edWin : ArtOfIllusion.getWindows())
+      {
+         if (edWin instanceof LayoutWindow)
+           ((LayoutWindow) edWin).rebuildScriptsMenu();
+      }
       setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
     save.setEnabled(false);
@@ -432,9 +428,6 @@ public class ExecuteScriptWindow extends BFrame
   }
   
   /** Execute the script. */
-  // TODO : disable the execute buttons when the script starts, 
-  // replace them with a "stop" button, 
-  // re-enable them after the script ends or is stopped.
   private void executeScript()
   {
     executeText(scriptText.getText());

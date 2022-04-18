@@ -2,6 +2,8 @@ import coursier.MavenRepository
 import mill._
 import scalalib._
 
+import scala.util.Properties.osName
+
 trait Common extends JavaModule { common =>
 
   def repositoriesTask = T.task {
@@ -78,7 +80,23 @@ object Tools extends PluginModule
 
 object Translators extends PluginModule
 
-object Suite extends Module with Common {
+object Suite extends mill.Cross[SuiteModule]("linux", "windows", "mac", "all")
+
+class SuiteModule(platform: String) extends Common {
+
+  def nativeDeps = T.task {
+    platform match {
+      case "linux" => Cache.joglLinuxNatives()
+      case "windows" => Cache.joglWindowsNatives()
+      case "mac" => Cache.joglMacOSXNatives()
+      case "all" => Cache.joglAllNatives()
+    }
+  }
+
+  def ivyDeps = T {
+    super.ivyDeps() ++
+      nativeDeps()
+  }
 
   def docSources = T.sources {
     ArtOfIllusion.sources() ++
@@ -89,18 +107,12 @@ object Suite extends Module with Common {
       Translators.sources()
   }
 
- // def docJarUseArgsFile = T.task{true}
-
   def javadocOptions = T {
     super.javadocOptions() ++ Seq("-quiet")
   }
 
   def manual = T {
     os.proc("sphinx-build", "-b", "html", T.workspace / "docs" / "manual", T.dest).call()
-  }
-
-  def launch(args: String*) = T.command {
-    os.proc("java", args, "-jar", localDeploy().path / "ArtOfIllusion.jar").call()
   }
 
   def stage = T {
@@ -128,25 +140,6 @@ object Suite extends Module with Common {
       os.rel / "Plugins" / "SPManager.jar")
     mill.modules.Util.download("http://aoisp.sourceforge.net/AoIRepository/Plugins/SPManager/PostInstall-3_0.jar",
       os.rel / "Plugins" / "PostInstall.jar")
-    PathRef(T.dest)
-  }
-
-  def localNativeDeps(osName: String) = T.task {
-    resolveDeps(osName match {
-      case x if osName.toLowerCase().contains("linux") => Cache.joglLinuxNatives
-      case x if osName.toLowerCase().contains("windows") => Cache.joglWindowsNatives
-      case x if osName.toLowerCase().contains("mac") | osName.contains("osx") => Cache.joglMacOSXNatives
-    }).apply()
-      .map(_.path)
-  }
-
-  def localDeploy = T.persistent {
-    os.copy(stage().path, T.dest, replaceExisting = true, mergeFolders = true)
-    localNativeDeps(System.getProperty("os.name"))
-      .apply()
-      .iterator
-      .foreach(p => os.copy(p, T.dest / "lib" / p.last.replace("-v2.4.0-rc4", ""), replaceExisting = true))
-
     PathRef(T.dest)
   }
 }
@@ -193,8 +186,35 @@ object Cache extends Module{
     )
   }
 
+  def joglAllNatives = T {
+    joglWindowsNatives() ++
+    joglLinuxNatives() ++
+    joglMacOSXNatives()
+  }
+
   def downloadFile(url: String)(implicit ctx: mill.util.Ctx.Dest) = {
     val fileName = url.split("/".charAt(0)).last
     mill.modules.Util.download(url, os.rel / fileName)
+  }
+}
+
+def installLocal() = T.command {
+  val srcpath = Suite(localPlatform()).stage().path
+  val installpath = T.workspace / "LocalInstall"
+  os.copy(srcpath, installpath, replaceExisting = true, createFolders=true, mergeFolders = true)
+  //A little redundant, but we want to make sure that we only have the *current* libs
+  os.copy.over(srcpath / "lib", installpath / "lib")
+  PathRef(installpath)
+}
+
+def launch(args: String*) = T.command {
+  os.proc("java", args, "-jar", installLocal().apply().path / "ArtOfIllusion.jar").call()
+}
+
+def localPlatform() = {
+  osName match {
+    case x if osName.toLowerCase().contains("linux") => "linux"
+    case x if osName.toLowerCase().contains("mac") | osName.contains("osx") => "mac"
+    case x if osName.toLowerCase().contains("windows") => "win"
   }
 }

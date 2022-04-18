@@ -29,13 +29,13 @@
 
     <target name="run">
         <exec executable="${MILL_COMMAND}" failifexecutionfails="true" vmlauncher="${VM_LAUNCHER}">
-            <arg value="Suite.launch"/>
+            <arg value="launch"/>
         </exec>
     </target>
 
     <target name="run-debug" description="Run a local deployment. Suspends and waits for a debugger to attach.">
         <exec executable="${MILL_COMMAND}" failifexecutionfails="true" vmlauncher="${VM_LAUNCHER}">
-            <arg value="Suite.launch"/>
+            <arg value="launch"/>
             <arg value="-agentlib:jdwp=transport=dt_socket,server=y,address=8000,suspend=y"/>
         </exec>
     </target>
@@ -46,9 +46,9 @@
     <target name="debug-nb" description="Support for netBeans debug - all others ignore!">
         <nbjpdastart addressproperty="jpda.address" name="ArtOfIllusion Full Suite" transport="dt_socket"/>
         <exec executable="${MILL_COMMAND}" failifexecutionfails="true" vmlauncher="false">
-            <arg value="Suite.localDeploy"/>
+            <arg value="installLocal"/>
         </exec>
-        <java jar="out/Suite/localDeploy.dest/ArtOfIllusion.jar" fork="true">
+        <java jar="LocalInstall/ArtOfIllusion.jar" fork="true">
             <jvmarg value="-agentlib:jdwp=transport=dt_socket,address=${jpda.address}"/>
         </java>
     </target>

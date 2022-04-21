@@ -118,8 +118,6 @@ public class ExecuteScriptWindow extends BFrame
       scriptFileFilter = new javax.swing.filechooser.FileNameExtensionFilter(
         "Script files", (String[]) extensions.toArray(new String [0]));
 
-    // TODO FIXME the edit zone does not maximize when the panel is maximized
-    // TODO FIXME Same problem when the window is put to the side
     BorderContainer content = new BorderContainer();
     setContent(content);
     window = win;
@@ -246,12 +244,12 @@ public class ExecuteScriptWindow extends BFrame
     // Warning message if the script hasn't been saved
     if (save.isEnabled())
     {
-        action = new BStandardDialog(null, new String [] {Translate.text("unsavedChanges"),
-              Translate.text("unsavedChangesPrompt")}, BStandardDialog.ERROR)
-                .showOptionDialog(this, new String []{
-                    Translate.text("saveAndClose"), 
-                    Translate.text("discardChangesAndclose"), 
-                    Translate.text("cancelClosing")}, scriptPath);
+      action = new BStandardDialog(null, new String [] {Translate.text("unsavedChanges"),
+        Translate.text("unsavedChangesPrompt")}, BStandardDialog.ERROR)
+          .showOptionDialog(this, new String []{
+            Translate.text("saveAndClose"), 
+            Translate.text("discardChangesAndClose"), 
+            Translate.text("cancelClosing")}, scriptPath);
     }
     // Action 0 is save and close
     if (action == 0)
@@ -290,30 +288,31 @@ public class ExecuteScriptWindow extends BFrame
         String fileLanguage = ScriptRunner.getLanguageForFilename(filename);
         if (fileLanguage != ScriptRunner.UNKNOWN_LANGUAGE)
         {
-            languageChoice.setSelectedValue(fileLanguage);
-            languageChoice.setEnabled(false);
-            setScriptNameFromFile(fc.getSelectedFile().getAbsolutePath());
-            for (EditingWindow edWindow: ArtOfIllusion.getWindows()) {
-                if (edWindow instanceof LayoutWindow)
-                {
-                    ((LayoutWindow) edWindow).rebuildRecentScriptsMenu();
-                }
+          language = fileLanguage;
+          languageChoice.setSelectedValue(fileLanguage);
+          languageChoice.setEnabled(false);
+          setScriptNameFromFile(fc.getSelectedFile().getAbsolutePath());
+          for (EditingWindow edWindow: ArtOfIllusion.getWindows()) {
+            if (edWindow instanceof LayoutWindow)
+            {
+              ((LayoutWindow) edWindow).rebuildRecentScriptsMenu();
             }
-            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            updateLanguage();
-            // disable the "Save" button, 
-            // to be re-enabled as soon as the text changes
-            save.setEnabled(false);
+          }
+          setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          updateLanguage();
+          // disable the "Save" button, 
+          // to be re-enabled as soon as the text changes
+          save.setEnabled(false);
         }
         else
         {
-            new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-              Translate.text("unsupportedFileExtension") + " : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
+          new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
+            Translate.text("unsupportedFileExtension") + " : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
         }
       }
       catch (Exception ex)
       {
-          ex.printStackTrace();
+        ex.printStackTrace();
         new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
           ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
       }
@@ -331,8 +330,8 @@ public class ExecuteScriptWindow extends BFrame
     // Save current program working directory
     File workingDir = fc.getDirectory();
     fc.setDirectory(scriptDir);
-    if (language == null) 
-        language = (String) languageChoice.getSelectedValue();
+    if (language == ScriptRunner.UNKNOWN_LANGUAGE) 
+      language = (String) languageChoice.getSelectedValue();
     fc.setSelectedFile(new File(scriptPath));
     fc.getComponent ().setFileFilter(scriptFileFilter);
     if (fc.showDialog(this))
@@ -376,6 +375,9 @@ public class ExecuteScriptWindow extends BFrame
    */
   private void saveScript()
   {
+     if (language == ScriptRunner.UNKNOWN_LANGUAGE) 
+       language = (String) languageChoice.getSelectedValue();
+
     // Write the script to disk.
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     File f = new File (scriptPath);
@@ -439,8 +441,12 @@ public class ExecuteScriptWindow extends BFrame
   {
       try
       {
-          ToolScript script = ScriptRunner.parseToolScript(language, text);
-          script.execute(window);
+        String scriptLanguage = (language == ScriptRunner.UNKNOWN_LANGUAGE)? 
+          (String) languageChoice.getSelectedValue():
+          language;
+
+        ToolScript script = ScriptRunner.parseToolScript(scriptLanguage, text);
+        script.execute(window);
       }
       catch (Exception e)
       {

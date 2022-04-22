@@ -410,22 +410,23 @@ public class ArtOfIllusion
     
     for (String file : files)
     {
-        String language = ScriptRunner.getLanguageForFilename(file);
-        if (language != ScriptRunner.UNKNOWN_LANGUAGE) {
-            try 
-            {
-              String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
-              ScriptRunner.executeScript(language, script, variables);
-            }
-            catch (IOException ex)
-            {
-              ex.printStackTrace();
-            }
-          }
-        else 
+      String language = ScriptRunner.getLanguageForFilename(file);
+      if (language != ScriptRunner.UNKNOWN_LANGUAGE)
         {
-          System.err.println (Translate.text ("unsupportedFileExtension") + " : " + file);
+        try 
+          {
+            String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
+            ScriptRunner.executeScript(language, script, variables);
+          }
+        catch (IOException ex)
+          {
+            ex.printStackTrace();
+          }
         }
+      else 
+      {
+        System.err.println (Translate.text ("unsupportedFileExtension") + " : " + file);
+      }
     }
   }
 

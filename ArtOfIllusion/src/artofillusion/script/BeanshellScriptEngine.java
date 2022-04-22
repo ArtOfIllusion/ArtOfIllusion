@@ -80,13 +80,15 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
     catch (EvalError e)
     {
-        int line;
-        try {
-            line = e.getErrorLineNumber () - 1;
-        }
-        catch (NullPointerException npe) {
-            line = -1;
-        }
+      int line;
+      try
+      {
+        line = e.getErrorLineNumber () - 1;
+      }
+      catch (NullPointerException npe)
+      {
+        line = -1;
+      }
       throw new ScriptException(e.getMessage(), line, e);
     }
   }

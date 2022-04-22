@@ -76,8 +76,6 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("scriptParameters", this, "editParameters"));
     buttons.add(Translate.button("cancel", this, "dispose"));
     addEventLink(WindowClosingEvent.class, this, "commitChanges");
-    // TODO Prendre en compte le Ctrl-S ci-dessous
-    //addEventLink(KeyPressedEvent.class, this, "saveCurrentScript");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
     scriptText.setCaretPosition(0);
     pack();
@@ -119,32 +117,32 @@ public class ScriptedObjectEditorWindow extends BFrame
       File f = fc.getSelectedFile();
       String filename = fc.getSelectedFile().getName();
       String language = ScriptRunner.getLanguageForFilename(filename);
-      if (language != ScriptRunner.UNKNOWN_LANGUAGE) {
-            languageChoice.setSelectedValue(language);
-            // TODO We should not even load the file but issue a message instead and return
-          try
-          {
-            BufferedReader in = new BufferedReader(new FileReader(f));
-            StringBuilder buf = new StringBuilder();
-            int c;
-            while ((c = in.read()) != -1)
-              buf.append((char) c);
-            in.close();
-            scriptText.setText(buf.toString());
-          }
-          catch (Exception ex)
-          {
-            new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-              ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
-          }
-          setScriptNameFromFile(filename);
-          setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-          updateLanguage();
+      if (language != ScriptRunner.UNKNOWN_LANGUAGE)
+      {
+        languageChoice.setSelectedValue(language);
+        try
+        {
+          BufferedReader in = new BufferedReader(new FileReader(f));
+          StringBuilder buf = new StringBuilder();
+          int c;
+          while ((c = in.read()) != -1)
+            buf.append((char) c);
+          in.close();
+          scriptText.setText(buf.toString());
+        }
+        catch (Exception ex)
+        {
+          new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
+            ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+        }
+        setScriptNameFromFile(filename);
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        updateLanguage();
       }
-      else {
-          // TODO translate
-            new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-              "Unrecognized file language : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
+      else
+      {
+        new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
+          "Unrecognized file language : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
       }
     }
     // Restore working directory

@@ -62,41 +62,45 @@ public class ExecuteScriptWindow extends BFrame
      */
     public static void addRecentScript(String filePath)
     {
-        final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
-        final String recentFiles[] = pref.get("recentFiles", "").split(File.pathSeparator);
-        java.util.List<String> newRecentFiles = new ArrayList<String>();
-        newRecentFiles.add (filePath);
-        for (String recentFile : recentFiles) 
-                    if (!recentFile.equals(filePath)) // If the current file already has a timestamp it will be updated below
-                        newRecentFiles.add (recentFile);
-        pref.put("recentFiles", String.join (File.pathSeparator, 
-                (String []) newRecentFiles.subList(0, 10).toArray(new String[0])));
+      final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
+      final String recentFiles[] = pref.get("recentFiles", "").split(File.pathSeparator);
+      java.util.List<String> newRecentFiles = new ArrayList<String>();
+      newRecentFiles.add (filePath);
+      for (String recentFile : recentFiles) 
+        if (!recentFile.equals(filePath)) // If the current file already has a timestamp it will be updated below
+          newRecentFiles.add (recentFile);
+      pref.put("recentFiles", String.join (File.pathSeparator, 
+        (String []) newRecentFiles.subList(0, 10).toArray(new String[0])));
     }
     
     public static String [] getRecentScripts()
     {
-        final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
-        final java.util.List<String> recentScripts = Arrays.asList (pref.get("recentFiles", "").split(File.pathSeparator));
-        return recentScripts.toArray(new String [0]);
+      final Preferences pref = Preferences.userNodeForPackage(ExecuteScriptWindow.class);
+      final java.util.List<String> recentScripts = Arrays.asList (pref.get("recentFiles", "").split(File.pathSeparator));
+      return recentScripts.toArray(new String [0]);
     } 
 
   /** This is used to track the "changed" status of the script being edited. */
-  private class ScriptKeyListener implements KeyListener {
+  private class ScriptKeyListener implements KeyListener
+  {
 
-      @Override
-      public void keyTyped(KeyEvent e) {
-          save.setEnabled(true);        
-      }
-
-      @Override
-      public void keyPressed(KeyEvent e) {
-      }
-
-      @Override
-      public void keyReleased(KeyEvent e) {
-      }
-        
+    @Override
+    public void keyTyped(KeyEvent e)
+    {
+      save.setEnabled(true);        
     }
+
+    @Override
+    public void keyPressed(KeyEvent e)
+    {
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e)
+    {
+    }
+
+  }
     
   /**
    * 
@@ -110,13 +114,14 @@ public class ExecuteScriptWindow extends BFrame
     setScriptNameFromFile(scriptAbsolutePath);
     language = scriptLanguage;
     scriptPath = scriptAbsolutePath;
-     // Get the extensions dynamically
-      final java.util.List <String> extensions = new ArrayList <String>();
-      for (String language : ScriptRunner.getLanguageNames ()) {
-          extensions.add (ScriptRunner.getFilenameExtension(language));
-      }
-      scriptFileFilter = new javax.swing.filechooser.FileNameExtensionFilter(
-        "Script files", (String[]) extensions.toArray(new String [0]));
+    // Get the extensions dynamically
+    final java.util.List <String> extensions = new ArrayList <String>();
+    for (String language : ScriptRunner.getLanguageNames ())
+    {
+      extensions.add (ScriptRunner.getFilenameExtension(language));
+    }
+    scriptFileFilter = new javax.swing.filechooser.FileNameExtensionFilter(
+      "Script files", (String[]) extensions.toArray(new String [0]));
 
     BorderContainer content = new BorderContainer();
     setContent(content);
@@ -136,8 +141,8 @@ public class ExecuteScriptWindow extends BFrame
     scriptText.setAnimateBracketMatching(false);
     scriptText.setTabSize(2);
     scriptText.setCodeFoldingEnabled(true);
-    content.add(new AWTWidget(new RTextScrollPane(scriptText))
-               , BorderContainer.CENTER);
+    content.add(new AWTWidget(new RTextScrollPane(scriptText)),
+      BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.getComponent().setRenderer(new LanguageRenderer());
     BorderContainer tools = new BorderContainer ();
@@ -161,9 +166,10 @@ public class ExecuteScriptWindow extends BFrame
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
     languageRow.add(languageChoice);
-    if (scriptLanguage != ScriptRunner.UNKNOWN_LANGUAGE) {
-        languageChoice.setSelectedValue(scriptLanguage);
-        languageChoice.setEnabled(false);
+    if (scriptLanguage != ScriptRunner.UNKNOWN_LANGUAGE)
+    {
+      languageChoice.setSelectedValue(scriptLanguage);
+      languageChoice.setEnabled(false);
     }
     tools.add(languageRow, BorderContainer.EAST, new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
     //buttons.add(Translate.button("close", this, "closeWindow"));
@@ -182,49 +188,53 @@ public class ExecuteScriptWindow extends BFrame
     updateEditableStatus(NEW_SCRIPT_NAME, scriptAbsolutePath);
   }
   
-  class LanguageRenderer extends JLabel implements ListCellRenderer {
-
-        @Override
-        public Component getListCellRendererComponent(JList list, Object value, 
-                int index, boolean isSelected, boolean hasFocus)
-        {
-            String selectedLanguage = ((String)value);
-            final ImageIcon languageIcon = new ImageIcon (getClass().getResource("/artofillusion/Icons/"
-                    + selectedLanguage + ".png"));
-            if (isSelected) {
-                setBackground(list.getSelectionBackground());
-                setForeground(list.getSelectionForeground());
-            } else {
-                setBackground(list.getBackground());
-                setForeground(list.getForeground());
-            }
-            setIcon (languageIcon);
-            setText (selectedLanguage);
-            return this;
-        }
-      
+  class LanguageRenderer extends JLabel implements ListCellRenderer  
+  {
+    @Override
+    public Component getListCellRendererComponent(JList list, Object value, 
+            int index, boolean isSelected, boolean hasFocus)
+    {
+      String selectedLanguage = ((String)value);
+      final ImageIcon languageIcon = new ImageIcon (getClass().getResource("/artofillusion/Icons/"
+              + selectedLanguage + ".png"));
+      if (isSelected)
+      {
+        setBackground(list.getSelectionBackground());
+        setForeground(list.getSelectionForeground());
+      } 
+      else
+      {
+        setBackground(list.getBackground());
+        setForeground(list.getForeground());
+      }
+      setIcon (languageIcon);
+      setText (selectedLanguage);
+      return this;
+    }
   }
 
-    private void updateEditableStatus(String previousScriptAbsoluePath, String scriptAbsolutePath) {
-        if (!previousScriptAbsoluePath.equals(scriptAbsolutePath)) {    
-            if (openedScripts.contains(scriptAbsolutePath))
-            {
-                scriptText.setEditable(false);
-                scriptText.setEnabled(false);
-                scriptText.setBackground(Color.LIGHT_GRAY);
-                new BStandardDialog(null, new String [] {Translate.text("alreadyOpenedScript"),
-                    "This window is read-only : this script is open in other window(s) " + scriptAbsolutePath}, BStandardDialog.ERROR).showMessageDialog(this);
-           }
-            else
-            {
-                scriptText.setEditable(true);
-                scriptText.setEnabled(true);
-                scriptText.setBackground(Color.WHITE);
-            }
-            openedScripts.remove(previousScriptAbsoluePath);
-            openedScripts.add(scriptAbsolutePath);
-        }
+  private void updateEditableStatus(String previousScriptAbsoluePath, String scriptAbsolutePath)
+  {
+    if (!previousScriptAbsoluePath.equals(scriptAbsolutePath))
+    {    
+      if (openedScripts.contains(scriptAbsolutePath))
+      {
+          scriptText.setEditable(false);
+          scriptText.setEnabled(false);
+          scriptText.setBackground(Color.LIGHT_GRAY);
+          new BStandardDialog(null, new String [] {Translate.text("alreadyOpenedScript"),
+              "This window is read-only : this script is open in other window(s) " + scriptAbsolutePath}, BStandardDialog.ERROR).showMessageDialog(this);
+      }
+      else
+      {
+          scriptText.setEditable(true);
+          scriptText.setEnabled(true);
+          scriptText.setBackground(Color.WHITE);
+      }
+      openedScripts.remove(previousScriptAbsoluePath);
+      openedScripts.add(scriptAbsolutePath);
     }
+  }
 
   /**
    * Make syntax highlighting match current scripting language 
@@ -292,11 +302,10 @@ public class ExecuteScriptWindow extends BFrame
           languageChoice.setSelectedValue(fileLanguage);
           languageChoice.setEnabled(false);
           setScriptNameFromFile(fc.getSelectedFile().getAbsolutePath());
-          for (EditingWindow edWindow: ArtOfIllusion.getWindows()) {
+          for (EditingWindow edWindow: ArtOfIllusion.getWindows())
+          {
             if (edWindow instanceof LayoutWindow)
-            {
               ((LayoutWindow) edWindow).rebuildRecentScriptsMenu();
-            }
           }
           setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
           updateLanguage();
@@ -439,36 +448,36 @@ public class ExecuteScriptWindow extends BFrame
 
   public void executeText(final String text)
   {
-      try
-      {
-        String scriptLanguage = (language == ScriptRunner.UNKNOWN_LANGUAGE)? 
-          (String) languageChoice.getSelectedValue():
-          language;
+    try
+    {
+      String scriptLanguage = (language == ScriptRunner.UNKNOWN_LANGUAGE)? 
+        (String) languageChoice.getSelectedValue():
+        language;
 
-        ToolScript script = ScriptRunner.parseToolScript(scriptLanguage, text);
-        script.execute(window);
-      }
-      catch (Exception e)
+      ToolScript script = ScriptRunner.parseToolScript(scriptLanguage, text);
+      script.execute(window);
+    }
+    catch (Exception e)
+    {
+      int line = ScriptRunner.displayError(language, e);
+      if (line > -1)
       {
-          int line = ScriptRunner.displayError(language, e);
-          if (line > -1)
-          {
-              // Find the start of the line containing the error.
-              int index = 0;
-              for (int i = 0; i < line-1; i++)
-              {
-                  int next = text.indexOf('\n', index);
-                  if (next == -1)
-                  {
-                      index = -1;
-                      break;
-                  }
-                  index = next+1;
-              }
-              if (index > -1)
-                  scriptText.setCaretPosition(index);
-              scriptText.requestFocus();
-          }
+        // Find the start of the line containing the error.
+        int index = 0;
+        for (int i = 0; i < line-1; i++)
+        {
+            int next = text.indexOf('\n', index);
+            if (next == -1)
+            {
+                index = -1;
+                break;
+            }
+            index = next+1;
+        }
+        if (index > -1)
+          scriptText.setCaretPosition(index);
+        scriptText.requestFocus();
       }
+    }
   }
 }

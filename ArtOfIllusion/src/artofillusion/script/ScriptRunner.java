@@ -30,32 +30,34 @@ public class ScriptRunner
       "artofillusion.ui.*", "buoy.event.*", "buoy.widget.*"};
   public static final String UNKNOWN_LANGUAGE = "?";
   
-  public enum Language {
-      BEANSHELL ("BeanShell", "bsh", BeanshellScriptEngine.class), 
-      GROOVY ("Groovy", "groovy", GroovyScriptEngine.class);
-      public final String name; 
-      public final String fileNameExtension;
-      public final Class <? extends ScriptEngine> engineClass;
-      Language (String name, String extension, Class <? extends ScriptEngine> engineClass) {
-          this.name = name;
-          this.fileNameExtension = extension;
-          this.engineClass = engineClass;
-      }
+  public enum Language
+  {
+    BEANSHELL ("BeanShell", "bsh", BeanshellScriptEngine.class), 
+    GROOVY ("Groovy", "groovy", GroovyScriptEngine.class);
+    public final String name; 
+    public final String fileNameExtension;
+    public final Class <? extends ScriptEngine> engineClass;
+    Language (String name, String extension, Class <? extends ScriptEngine> engineClass)
+    {
+      this.name = name;
+      this.fileNameExtension = extension;
+      this.engineClass = engineClass;
+    }
   }
 
   private static final String [] languageNames;
   
-  static {
-      List <String> names = new ArrayList <String> ();
-      for (Language l : Language.values()) {
-          names.add(l.name);
-      }
-      languageNames = (String[]) names.toArray(new String [0]);
+  static
+  {
+    List <String> names = new ArrayList <String> ();
+    for (Language l : Language.values())
+      names.add(l.name);
+    languageNames = (String[]) names.toArray(new String [0]);
   }
   
-    public static String[] getLanguageNames() {
-        return languageNames;
-    }
+  public static String[] getLanguageNames() {
+    return languageNames;
+  }
   
   
   /** Get the ScriptEngine for running scripts written in a particular language. */
@@ -73,27 +75,28 @@ public class ScriptRunner
         ScriptEngine engine;
         Class <? extends ScriptEngine> languageEngine = null;
         for (Language implementedLanguage : Language.values()) {
-            if (implementedLanguage.name.equals (language)) languageEngine = implementedLanguage.engineClass;
+          if (implementedLanguage.name.equals (language)) languageEngine = implementedLanguage.engineClass;
         }
         if (languageEngine == null)
-            throw new IllegalArgumentException("Unknown name for scripting language: "+language);
+          throw new IllegalArgumentException("Unknown name for scripting language: "+language);
         try
         {
-            engine = languageEngine.getConstructor (ClassLoader.class).newInstance(parentLoader);
-        } catch (Exception ex)
+          engine = languageEngine.getConstructor (ClassLoader.class).newInstance(parentLoader);
+        }
+        catch (Exception ex)
         {
-            throw new ScriptException ("Could not create a script engine of class " + languageEngine, -1, ex);
+          throw new ScriptException ("Could not create a script engine of class " + languageEngine, -1, ex);
         } 
         engines.put(language, engine);
         try
-          {
-            for (String packageName : IMPORTS)
-              engine.addImport(packageName);
-          }
+        {
+          for (String packageName : IMPORTS)
+            engine.addImport(packageName);
+        }
         catch (Exception e)
-          {
-            throw new ScriptException ("Could not import the required packages (" + IMPORTS.toString() + ")", -1, e);
-          }
+        {
+          throw new ScriptException ("Could not import the required packages (" + IMPORTS.toString() + ")", -1, e);
+        }
         output = new PrintStream(new ScriptOutputWindow());
         engine.setOutput(output);
       }
@@ -105,13 +108,13 @@ public class ScriptRunner
   public static void executeScript(String language, String script, Map<String, Object> variables)
   {
     try
-      {
-        getScriptEngine(language).executeScript(script, variables);
-      }
+    {
+      getScriptEngine(language).executeScript(script, variables);
+    }
     catch (ScriptException e)
-      {
-        System.out.println("Error in line "+e.getLineNumber()+": "+e.getMessage());
-      }
+    {
+      System.out.println("Error in line "+e.getLineNumber()+": "+e.getMessage());
+    }
   }
   
   /** Parse a Tool script. */

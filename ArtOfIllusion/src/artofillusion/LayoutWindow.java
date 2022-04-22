@@ -75,11 +75,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   private BMenu editScriptMenu;   
   private BMenu recentScriptMenu;
   public static final ImageIcon [] LANGUAGE_ICONS;
-  static {
-      final List <ImageIcon> icons = new ArrayList <ImageIcon>();
-      for (String language : ScriptRunner.getLanguageNames ()) {
-          icons.add (new IconResource("artofillusion/Icons/" + language + ".png"));
-      }
+  static
+  {
+    final List <ImageIcon> icons = new ArrayList <ImageIcon>();
+    for (String language : ScriptRunner.getLanguageNames ()) {
+      icons.add (new IconResource("artofillusion/Icons/" + language + ".png"));
+    }
       LANGUAGE_ICONS = (ImageIcon[]) icons.toArray(new ImageIcon [0]);
   }
  
@@ -590,12 +591,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     
     this.editScriptMenu= Translate.menu("editToolScript");
     this.editScriptMenu.add(newScriptMenu = Translate.menu("newScript"));
-    for (String language : ScriptRunner.getLanguageNames()){
-        BMenuItem item = new BMenuItem(language);
-        item.addEventLink(CommandEvent.class, this, "newScriptCommand");
-        item.setActionCommand("newScript");
-        item.getComponent().putClientProperty("language", language);
-        newScriptMenu.add (item);
+    for (String language : ScriptRunner.getLanguageNames())
+    {
+      BMenuItem item = new BMenuItem(language);
+      item.addEventLink(CommandEvent.class, this, "newScriptCommand");
+      item.setActionCommand("newScript");
+      item.getComponent().putClientProperty("language", language);
+      newScriptMenu.add (item);
     }
     editScriptMenu.add(this.recentScriptMenu = Translate.menu("recentScript"));
     BMenuItem other;
@@ -611,12 +613,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     BMenuItem item = (BMenuItem)ev.getWidget();
     String scriptAbsolutePath = (String) item.getComponent().getClientProperty("filepath");
     // We don't test the language for the filepath because it should be ok
-    try {
-        new ExecuteScriptWindow(this, scriptAbsolutePath, ScriptRunner.getLanguageForFilename(scriptAbsolutePath));
+    try
+    {
+      new ExecuteScriptWindow(this, scriptAbsolutePath, ScriptRunner.getLanguageForFilename(scriptAbsolutePath));
     }
-    catch (IOException ioe) {
-        new BStandardDialog(null, new String [] {Translate.text("errorOpeningScript"),
-            scriptAbsolutePath + (ioe.getMessage() == null ? "" : ioe.getMessage())}, BStandardDialog.ERROR).showMessageDialog(this);
+    catch (IOException ioe)
+    {
+      new BStandardDialog(null, new String [] {Translate.text("errorOpeningScript"),
+        scriptAbsolutePath + (ioe.getMessage() == null ? "" : ioe.getMessage())}, BStandardDialog.ERROR).showMessageDialog(this);
     }
   }
   
@@ -624,12 +628,14 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   {
     BMenuItem item = (BMenuItem)ev.getWidget();
     String language = (String) item.getComponent().getClientProperty("language");
-    try {
-        new ExecuteScriptWindow(this, ExecuteScriptWindow.NEW_SCRIPT_NAME, language);
+    try
+    {
+      new ExecuteScriptWindow(this, ExecuteScriptWindow.NEW_SCRIPT_NAME, language);
     }
-    catch (IOException ioe) {
-        new BStandardDialog(null, new String [] {Translate.text("errorCreatingScript"),
-           language + " : " + (ioe.getMessage() == null ? "" : ioe.getMessage())}, BStandardDialog.ERROR).showMessageDialog(this);
+    catch (IOException ioe)
+    {
+      new BStandardDialog(null, new String [] {Translate.text("errorCreatingScript"),
+        language + " : " + (ioe.getMessage() == null ? "" : ioe.getMessage())}, BStandardDialog.ERROR).showMessageDialog(this);
     }
   }
   
@@ -679,15 +685,17 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     rebuildRecentScriptsMenu();
   }
 
-    public void rebuildRecentScriptsMenu() {
-        recentScriptMenu.removeAll();
-        for (String fileAbsolutePath : ExecuteScriptWindow.getRecentScripts()) {
-            BMenuItem item = new BMenuItem(new File (fileAbsolutePath).getName());
-            item.addEventLink(CommandEvent.class, this, "editScriptCommand");
-            item.setActionCommand("editScript");
-            item.getComponent().putClientProperty("filepath", fileAbsolutePath);
-            recentScriptMenu.add (item);
-        }
+    public void rebuildRecentScriptsMenu()
+    {
+      recentScriptMenu.removeAll();
+      for (String fileAbsolutePath : ExecuteScriptWindow.getRecentScripts())
+      {
+        BMenuItem item = new BMenuItem(new File (fileAbsolutePath).getName());
+        item.addEventLink(CommandEvent.class, this, "editScriptCommand");
+        item.setActionCommand("editScript");
+        item.getComponent().putClientProperty("filepath", fileAbsolutePath);
+        recentScriptMenu.add (item);
+      }
     }
 
   private void addScriptsToMenu(BMenu menu, File dir)
@@ -707,7 +715,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
       else
       {
-        if (ScriptRunner.getLanguageForFilename(file) != ScriptRunner.UNKNOWN_LANGUAGE) {
+        if (ScriptRunner.getLanguageForFilename(file) != ScriptRunner.UNKNOWN_LANGUAGE)
+        {
           BMenuItem item = new BMenuItem(file.substring(0, file.lastIndexOf('.')));
           item.setActionCommand(f.getAbsolutePath());
           item.addEventLink(CommandEvent.class, this, "executeScriptCommand");
@@ -2732,10 +2741,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         File f = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY, scriptNames.get(scriptChoice.getSelectedIndex()-1));
         scriptText = ArtOfIllusion.loadFile(f);
         language = ScriptRunner.getLanguageForFilename(f.getName());
-        if (language == ScriptRunner.UNKNOWN_LANGUAGE) {
-            // Predefined scripts are supposed to have a correct extension, 
-            // so it's ok to throw an exception here
-            throw new IOException ("Unrecognized extension for " + f.getName());
+        if (language == ScriptRunner.UNKNOWN_LANGUAGE)
+        {
+          // Predefined scripts are supposed to have a correct extension, 
+          // so it's ok to throw an exception here
+          throw new IOException ("Unrecognized extension for " + f.getName());
         }
       }
       catch (IOException ex)
@@ -2744,9 +2754,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         return;
       }
     }
-    else {
-        // Default language : Beanshell
-        language = ScriptRunner.Language.BEANSHELL.name;
+    else
+    {
+      // Default language : Beanshell
+      language = ScriptRunner.Language.BEANSHELL.name;
     }
     ScriptedObject obj = new ScriptedObject(scriptText, language);
     ObjectInfo info = new ObjectInfo(obj, new CoordinateSystem(), nameField.getText());
@@ -3082,9 +3093,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       language = ScriptRunner.getLanguageForFilename(f.getName());
       if (language == ScriptRunner.UNKNOWN_LANGUAGE)
-            // Predefined scripts are supposed to have a correct extension, 
-            // so it's ok to throw an exception here
-            throw new IOException ("Unrecognized extension for " + f.getName());
+        // Predefined scripts are supposed to have a correct extension, 
+        // so it's ok to throw an exception here
+        throw new IOException ("Unrecognized extension for " + f.getName());
       scriptText = ArtOfIllusion.loadFile(f);
       ToolScript script = ScriptRunner.parseToolScript(language, scriptText);
       script.execute(this);

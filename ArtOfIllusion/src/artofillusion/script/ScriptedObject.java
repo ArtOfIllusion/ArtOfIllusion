@@ -36,9 +36,13 @@ public class ScriptedObject extends ObjectCollection
     paramValue = new double [0];
   }
 
+  /**
+   * Beanshell is the default when no language is specified. 
+   * @param scriptText 
+   */
   public ScriptedObject(String scriptText)
-  {
-    this(scriptText, ScriptRunner.LANGUAGES[0]);
+  { 
+    this(scriptText, ScriptRunner.Language.BEANSHELL.name);
   }
 
   /** Get the script which defines this object. */

@@ -32,7 +32,6 @@ public class GroovyScriptEngine implements ScriptEngine
   
   public GroovyScriptEngine(ClassLoader parent)
   {
-    
     shell = new GroovyShell(parent, new Binding(), config);
     imports = new StringBuilder();
   }
@@ -40,13 +39,13 @@ public class GroovyScriptEngine implements ScriptEngine
   @Override
   public String getName()
   {
-    return "Groovy";
+    return ScriptRunner.Language.GROOVY.name;
   }
 
   @Override
   public String getFilenameExtension()
   {
-    return "groovy";
+    return ScriptRunner.Language.GROOVY.fileNameExtension;
   }
 
   @Override

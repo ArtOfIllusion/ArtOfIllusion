@@ -22,7 +22,7 @@ import bsh.*;
 public class BeanshellScriptEngine implements ScriptEngine
 {
   Interpreter interp;
-
+  
   public BeanshellScriptEngine(ClassLoader parent)
   {
     interp = new Interpreter();
@@ -32,13 +32,13 @@ public class BeanshellScriptEngine implements ScriptEngine
   @Override
   public String getName()
   {
-    return "BeanShell";
+    return ScriptRunner.Language.BEANSHELL.name;
   }
 
   @Override
   public String getFilenameExtension()
   {
-    return "bsh";
+    return ScriptRunner.Language.BEANSHELL.fileNameExtension;
   }
 
   @Override
@@ -80,7 +80,16 @@ public class BeanshellScriptEngine implements ScriptEngine
     }
     catch (EvalError e)
     {
-      throw new ScriptException(e.getMessage(), e.getErrorLineNumber()-1, e);
+      int line;
+      try
+      {
+        line = e.getErrorLineNumber () - 1;
+      }
+      catch (NullPointerException npe)
+      {
+        line = -1;
+      }
+      throw new ScriptException(e.getMessage(), line, e);
     }
   }
 

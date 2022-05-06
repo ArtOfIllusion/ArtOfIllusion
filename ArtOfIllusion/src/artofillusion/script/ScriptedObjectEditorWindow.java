@@ -59,7 +59,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     scriptText.setCodeFoldingEnabled(true);
     content.add(new AWTWidget(new RTextScrollPane(scriptText))
                              , BorderContainer.CENTER);
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
@@ -90,7 +90,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   private void updateLanguage()
   {
     scriptText.setSyntaxEditingStyle(
-        "groovy".equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
+        ScriptRunner.Language.GROOVY.name.equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
            SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
   }
 
@@ -115,33 +115,35 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptDir = fc.getDirectory();
       setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       File f = fc.getSelectedFile();
-      try
+      String filename = fc.getSelectedFile().getName();
+      String language = ScriptRunner.getLanguageForFilename(filename);
+      if (language != ScriptRunner.UNKNOWN_LANGUAGE)
       {
-        BufferedReader in = new BufferedReader(new FileReader(f));
-        StringBuilder buf = new StringBuilder();
-        int c;
-        while ((c = in.read()) != -1)
-          buf.append((char) c);
-        in.close();
-        scriptText.setText(buf.toString());
+        languageChoice.setSelectedValue(language);
+        try
+        {
+          BufferedReader in = new BufferedReader(new FileReader(f));
+          StringBuilder buf = new StringBuilder();
+          int c;
+          while ((c = in.read()) != -1)
+            buf.append((char) c);
+          in.close();
+          scriptText.setText(buf.toString());
+        }
+        catch (Exception ex)
+        {
+          new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
+            ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+        }
+        setScriptNameFromFile(filename);
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        updateLanguage();
       }
-      catch (Exception ex)
+      else
       {
         new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-          ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+          "Unrecognized file language : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
       }
-      String filename = fc.getSelectedFile().getName();
-      try
-      {
-        languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
-      }
-      catch (IllegalArgumentException ex)
-      {
-        languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
-      }
-      setScriptNameFromFile(filename);
-      setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-      updateLanguage();
     }
     // Restore working directory
     fc.setDirectory(workingDir);

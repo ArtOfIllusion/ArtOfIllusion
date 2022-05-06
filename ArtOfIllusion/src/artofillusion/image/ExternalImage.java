@@ -64,7 +64,7 @@ public class ExternalImage extends ImageMap
     catch(Exception e)
     {
       // ExternalImage will not be created, no values need to be set.
-      throw new InterruptedException();
+      throw new InterruptedException(e.getMessage());
     }
   }
 

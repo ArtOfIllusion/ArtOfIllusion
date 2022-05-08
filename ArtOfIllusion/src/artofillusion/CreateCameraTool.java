@@ -16,37 +16,19 @@ import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.ui.*;
 import buoy.event.*;
-import java.awt.*;
 
 /** CreateCameraTool is an EditingTool used for creating SceneCamera objects. */
 
+@EditingTool.ButtonImage("camera")
+@EditingTool.Tooltip("createCameraTool.tipText")
+@EditingTool.ActivatedToolText("createCameraTool.helpText")
 public class CreateCameraTool extends EditingTool
 {
   static int counter = 2;
-  Point clickPoint;
 
   public CreateCameraTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("camera");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCameraTool.helpText"));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCameraTool.tipText");
-  }
-
-  @Override
-  public void mousePressed(WidgetMouseEvent e, ViewerCanvas view)
-  {
   }
 
   @Override

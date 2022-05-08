@@ -20,6 +20,8 @@ import java.awt.*;
 
 /** CreateVertexTool is an EditingTool used for adding vertices to triangle meshes. */
 
+@EditingTool.ButtonImage("createVertex")
+@EditingTool.Tooltip("createVertexTool.tipText")
 public class CreateVertexTool extends MeshEditingTool
 {
   private Point clickPoint;
@@ -30,7 +32,6 @@ public class CreateVertexTool extends MeshEditingTool
   public CreateVertexTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("createVertex");
   }
 
   @Override
@@ -53,12 +54,6 @@ public class CreateVertexTool extends MeshEditingTool
       theWindow.setHelpText(Translate.text("createVertexTool.helpText.edge"));
     else
       theWindow.setHelpText(Translate.text("createVertexTool.helpText.face"));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createVertexTool.tipText");
   }
 
   @Override

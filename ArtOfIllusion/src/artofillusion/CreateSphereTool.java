@@ -20,7 +20,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** CreateSphereTool is an EditingTool used for creating Sphere objects. */
-
+@EditingTool.ButtonImage("sphere")
+@EditingTool.Tooltip("createSphereTool.tipText")
+@EditingTool.ActivatedToolText("createSphereTool.helpText")
 public class CreateSphereTool extends EditingTool
 {
   static int counter = 1;
@@ -32,20 +34,6 @@ public class CreateSphereTool extends EditingTool
   public CreateSphereTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("sphere");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createSphereTool.helpText"));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createSphereTool.tipText");
   }
 
   @Override

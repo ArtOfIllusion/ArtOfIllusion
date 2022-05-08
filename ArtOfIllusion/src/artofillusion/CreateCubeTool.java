@@ -21,7 +21,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** CreateCubeTool is an EditingTool used for creating Cube objects. */
-
+@EditingTool.ButtonImage("cube")
+@EditingTool.Tooltip("createCubeTool.tipText")
+@EditingTool.ActivatedToolText("createCubeTool.helpText")
 public class CreateCubeTool extends EditingTool
 {
   static int counter = 1;
@@ -33,20 +35,6 @@ public class CreateCubeTool extends EditingTool
   public CreateCubeTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("cube");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCubeTool.helpText"));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCubeTool.tipText");
   }
 
   @Override

@@ -21,7 +21,8 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** CreateSplineMeshTool is an EditingTool used for creating SplineMesh objects. */
-
+@EditingTool.ButtonImage("splineMesh")
+@EditingTool.Tooltip("createSplineMeshTool.tipText")
 public class CreateSplineMeshTool extends EditingTool
 {
   static int counter = 1;
@@ -42,7 +43,6 @@ public class CreateSplineMeshTool extends EditingTool
   public CreateSplineMeshTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("splineMesh");
   }
 
   @Override
@@ -68,12 +68,6 @@ public class CreateSplineMeshTool extends EditingTool
     theWindow.setHelpText(Translate.text("createSplineMeshTool.helpText",
       new Object [] {Integer.toString(usize), Integer.toString(vsize),
       Translate.text("createSplineMeshTool."+shapeDesc).toLowerCase(), Translate.text("menu."+smoothingDesc).toLowerCase()}));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createSplineMeshTool.tipText");
   }
 
   @Override

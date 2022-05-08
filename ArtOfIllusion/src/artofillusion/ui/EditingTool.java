@@ -16,6 +16,12 @@ import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Optional;
+
 /**
  * EditingTool is the superclass of tools for editing objects or scenes.  An EditingTool
  * has an image which appears in a tool palette, allowing the tool to be selected.  When
@@ -52,11 +58,16 @@ public abstract class EditingTool
   protected BFrame theFrame;
   protected ToolButton button;
   
+  private final Optional<ButtonImage> buttonImage = Optional.ofNullable(this.getClass().getAnnotation(ButtonImage.class));
+  private final Optional<Tooltip> tooltip = Optional.ofNullable(this.getClass().getAnnotation(Tooltip.class));
+  private final Optional<ActivatedToolText> helpText = Optional.ofNullable(this.getClass().getAnnotation(ActivatedToolText.class));
+  
   public EditingTool(EditingWindow win)
   {
     theWindow = win;
     if (win != null)
       theFrame = win.getFrame();
+    buttonImage.ifPresent(imageAnnotation -> initButton(imageAnnotation.value()));
   }
   
   /** Get the EditingWindow to which this tool belongs. */
@@ -82,7 +93,7 @@ public abstract class EditingTool
   
   public String getToolTipText()
   {
-    return null;
+    return tooltip.isPresent() ? Translate.text(tooltip.get().value()) : null;
   }
   
   public static final int ALL_CLICKS = 1;
@@ -165,6 +176,7 @@ public abstract class EditingTool
   {
     theWindow.setTool(this);
     button.setSelected(true);
+    helpText.ifPresent(text -> theWindow.setHelpText(Translate.text(text.value())));
   }
   
   public void deactivate()
@@ -184,5 +196,23 @@ public abstract class EditingTool
 
   public void iconDoubleClicked()
   {
+  }
+  
+  @Target(value = ElementType.TYPE)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  public static @interface Tooltip {
+      String value();
+  }
+
+  @Target(value = ElementType.TYPE)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  public static @interface ButtonImage {
+      String value();
+  }
+
+  @Target(value = ElementType.TYPE)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  public static @interface ActivatedToolText {
+      String value();
   }
 }

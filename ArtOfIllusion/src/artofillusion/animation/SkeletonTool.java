@@ -21,7 +21,8 @@ import java.awt.*;
 import java.text.*;
 
 /** SkeletonTool is an EditingTool used for manipulating the skeletons of objects. */
-
+@EditingTool.ButtonImage("skeleton")
+@EditingTool.Tooltip("skeletonTool.tipText")
 public class SkeletonTool extends EditingTool
 {
   private static final int CLICK_TOL = 6;
@@ -46,7 +47,6 @@ public class SkeletonTool extends EditingTool
   {
     super(fr);
     this.allowCreating = allowCreating;
-    initButton("skeleton");
     clickedHandle = -1;
     helpText = Translate.text(allowCreating ? "skeletonTool.helpText" : "skeletonTool.helpTextNoCreate");
   }
@@ -56,12 +56,6 @@ public class SkeletonTool extends EditingTool
   {
     super.activate();
     theWindow.setHelpText(helpText);
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("skeletonTool.tipText");
   }
 
   /** Find the positions of all the degree-of-freedom handles. */

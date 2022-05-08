@@ -21,10 +21,12 @@ import buoy.event.*;
 import java.awt.*;
 
 /** MoveViewTool is an EditingTool used for moving the viewpoint. */
+@EditingTool.ButtonImage("moveView")
+@EditingTool.Tooltip("moveViewTool.tipText")
+@EditingTool.ActivatedToolText("moveViewTool.helpText")
 public class MoveViewTool extends EditingTool
 {
   private Point clickPoint;
-  private Mat4 viewToWorld;
   private Vec3 clickPos, oldRotCenter, oldCamPos;
   private boolean controlDown;
   private CoordinateSystem oldCoords;
@@ -34,26 +36,12 @@ public class MoveViewTool extends EditingTool
   public MoveViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("moveView");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
   }
 
   @Override
   public boolean hilightSelection()
   {
       return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveViewTool.tipText");
   }
 
   @Override

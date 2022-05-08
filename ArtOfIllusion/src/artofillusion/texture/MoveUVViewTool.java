@@ -17,7 +17,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** MoveUVViewTool is an EditingTool used for moving the viewpoint in the UV editing window. */
-
+@EditingTool.ButtonImage("moveView")
+@EditingTool.Tooltip("moveViewTool.tipText")
+@EditingTool.ActivatedToolText("moveViewTool.helpText")
 public class MoveUVViewTool extends EditingTool
 {
   private Point clickPoint;
@@ -28,26 +30,12 @@ public class MoveUVViewTool extends EditingTool
   public MoveUVViewTool(EditingWindow fr)
   {
     super(fr);
-    initButton("moveView");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("moveViewTool.helpText"));
   }
 
   @Override
   public boolean hilightSelection()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveViewTool.tipText");
   }
 
   @Override

@@ -21,7 +21,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** RotateViewTool is an EditingTool for rotating the viewpoint around the origin. */
-
+@EditingTool.ButtonImage("rotateView")
+@EditingTool.Tooltip("rotateViewTool.tipText")
+@EditingTool.ActivatedToolText("rotateViewTool.helpText")
 public class RotateViewTool extends EditingTool
 {
   private static final double DRAG_SCALE = 0.01;
@@ -42,24 +44,11 @@ public class RotateViewTool extends EditingTool
     super(fr);
     initButton("rotateView");
   }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("rotateViewTool.helpText"));
-  }
-
+  
   @Override
   public boolean hilightSelection()
   {
       return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("rotateViewTool.tipText");
   }
 
   @Override

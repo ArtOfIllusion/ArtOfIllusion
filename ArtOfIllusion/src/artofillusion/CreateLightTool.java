@@ -21,6 +21,9 @@ import java.awt.geom.*;
 
 /** CreateLightTool is an EditingTool used for creating PointLight objects. */
 
+@EditingTool.ButtonImage("light")
+@EditingTool.Tooltip("createLightTool.tipText")
+@EditingTool.ActivatedToolText("createLightTool.helpText")
 public class CreateLightTool extends EditingTool
 {
   static int counter = 2;
@@ -30,20 +33,6 @@ public class CreateLightTool extends EditingTool
   public CreateLightTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("light");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createLightTool.helpText"));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createLightTool.tipText");
   }
 
   @Override

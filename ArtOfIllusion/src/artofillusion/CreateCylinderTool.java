@@ -21,7 +21,9 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** CreateCylinderTool is an EditingTool used for creating Cylinder objects. */
-
+@EditingTool.ButtonImage("cylinder")
+@EditingTool.Tooltip("createCylinderTool.tipText")
+@EditingTool.ActivatedToolText("createCylinderTool.helpText")
 public class CreateCylinderTool extends EditingTool
 {
   static int counter = 1;
@@ -34,20 +36,6 @@ public class CreateCylinderTool extends EditingTool
   public CreateCylinderTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("cylinder");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCylinderTool.helpText"));
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCylinderTool.tipText");
   }
 
   @Override

@@ -17,7 +17,6 @@ import artofillusion.image.filter.ImageFilter;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.procedural.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
@@ -30,7 +29,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.List;
-import java.lang.reflect.*;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -169,7 +167,7 @@ public class ArtOfIllusion
     PluginRegistry.registerPlugin(new LinearMaterialMapping(null, null));
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
-    PluginRegistry.scanPlugins();
+    List<String> pluginsLoadResults = PluginRegistry.scanPlugins();
     ThemeManager.initThemes();
     preferences = new ApplicationPreferences();
     KeystrokeManager.loadRecords();
@@ -187,7 +185,7 @@ public class ArtOfIllusion
       catch (Throwable tx)
       {
         tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginInitError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
+        pluginsLoadResults.add(Translate.text("pluginInitError", plugin.getClass().getSimpleName()));
       }
     }
     
@@ -204,7 +202,17 @@ public class ArtOfIllusion
     }
     runStartupScripts();
     if (numNewWindows == 0)
-      newWindow();
+      newWindow(); 
+    if(!pluginsLoadResults.isEmpty()) {
+      BTextArea report = new BTextArea(String.join("\n\n", pluginsLoadResults));
+      JTextArea area = report.getComponent();
+      area.setPreferredSize(new java.awt.Dimension(500, 200));
+      area.setFont(area.getFont().deriveFont(12f));
+      area.setLineWrap(true);
+      area.setEditable(false);
+      area.setWrapStyleWord(true);      
+      SwingUtilities.invokeLater(() -> new BStandardDialog("Art Of Illusion", new Object[] { new BScrollPane(report) }, BStandardDialog.ERROR).showMessageDialog(null));
+    }
     title.dispose();
   }
 

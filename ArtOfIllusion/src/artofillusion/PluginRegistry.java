@@ -110,13 +110,9 @@ public class PluginRegistry
         
         for (JarInfo info : jars)
         {
-          if (info.file == null)
-          {
-            results.add("The following plugin were not loaded because their imports could not be resolved: " + "(plugin loaded from ClassLoader)");
-          } else 
-          {
-            results.add("The following plugin were not loaded because their imports could not be resolved: " + info.file.getName());
-          }
+          Object source = "(plugin loaded from ClassLoader)";
+          if (info.file != null) source = info.file.getName();
+          results.add(Translate.text("cannotLoadPlugin", source));
         }
         
         break;

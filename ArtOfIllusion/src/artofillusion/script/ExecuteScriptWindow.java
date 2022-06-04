@@ -69,8 +69,7 @@ public class ExecuteScriptWindow extends BFrame
       for (String recentFile : recentFiles) 
         if (!recentFile.equals(filePath)) // If the current file already has a timestamp it will be updated below
           newRecentFiles.add (recentFile);
-      pref.put("recentFiles", String.join (File.pathSeparator, 
-        (String []) newRecentFiles.subList(0, 10).toArray(new String[0])));
+      pref.put("recentFiles", String.join (File.pathSeparator, newRecentFiles.subList(0, java.lang.Math.min(newRecentFiles.size(), 10))));
     }
     
     public static String [] getRecentScripts()

@@ -1,9 +1,3 @@
 rootProject.name = 'ArtOfIllusion'
 
-sourceControl {
-   gitRepository("https://github.com/makiam/Buoy.git") {
-    producesModule("org.buoy:Buoy")
-   }
-}
-
 include ':ArtOfIllusion', ':Filters', ':OSSpecific', ':Renderers', ':Tools', ':Translators', ':SPManager', 'PostInstall'

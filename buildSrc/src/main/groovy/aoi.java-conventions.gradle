@@ -1,0 +1,45 @@
+plugins {
+	id 'base'
+ 	id 'java' 
+}
+
+sourceCompatibility = '18'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://jitpack.io'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']   
+        }
+    }
+    test {
+        java {
+            srcDirs = ['test']
+        }
+    }
+
+}
+
+dependencies {
+    implementation 'com.github.makiam:Buoy:1.0.0'
+
+    testImplementation('junit:junit:4.12') {
+        exclude group: 'org.hamcrest'
+    }
+    testImplementation 'org.hamcrest:hamcrest-library:1.3'
+
+}
+
+javadoc { 
+    failOnError false
+}

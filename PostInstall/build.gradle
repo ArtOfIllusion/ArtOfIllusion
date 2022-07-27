@@ -1,6 +1,7 @@
 
 plugins {
     id "de.undercouch.download" version "5.0.2"
+    id 'aoi.java-conventions' 
 }
 
 description = "PostInstall"

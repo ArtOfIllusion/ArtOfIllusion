@@ -1701,7 +1701,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     setTime(theScene.getTime() - 1.0/theScene.getFramesPerSecond());    
   }
   
-  private static final Map<String, Integer> bmap = Map.of("moveKeyFrames", EditKeyframesDialog.MOVE,
+  private static final Map<String, Integer> bmap = Map.of("moveKeyframes", EditKeyframesDialog.MOVE,
           "copyKeyframes", EditKeyframesDialog.COPY, "rescaleKeyframes", EditKeyframesDialog.RESCALE,
           "loopKeyframes", EditKeyframesDialog.LOOP, "deleteKeyframes", EditKeyframesDialog.DELETE);
   

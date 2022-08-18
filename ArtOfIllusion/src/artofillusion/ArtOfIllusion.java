@@ -92,41 +92,14 @@ public class ArtOfIllusion
     ImageIcon icon = new IconResource("artofillusion/Icons/appIcon.png");
     APP_ICON = (icon.getIconWidth() == -1 ? null : icon);
 
-    // Build a table of classes which have moved.
-
-    classTranslations.put("artofillusion.tools.CSGObject", "artofillusion.object.CSGObject");
-    classTranslations.put("artofillusion.Cube", "artofillusion.object.Cube");
-    classTranslations.put("artofillusion.Curve", "artofillusion.object.Curve");
-    classTranslations.put("artofillusion.Cylinder", "artofillusion.object.Cylinder");
-    classTranslations.put("artofillusion.DirectionalLight", "artofillusion.object.DirectionalLight");
-    classTranslations.put("artofillusion.NullObject", "artofillusion.object.NullObject");
-    classTranslations.put("artofillusion.PointLight", "artofillusion.object.PointLight");
-    classTranslations.put("artofillusion.SceneCamera", "artofillusion.object.SceneCamera");
-    classTranslations.put("artofillusion.Sphere", "artofillusion.object.Sphere");
-    classTranslations.put("artofillusion.SplineMesh", "artofillusion.object.SplineMesh");
-    classTranslations.put("artofillusion.SpotLight", "artofillusion.object.SpotLight");
-    classTranslations.put("artofillusion.TriangleMesh", "artofillusion.object.TriangleMesh");
-    classTranslations.put("artofillusion.Tube", "artofillusion.object.Tube");
-    classTranslations.put("artofillusion.CylindricalMapping", "artofillusion.texture.CylindricalMapping");
-    classTranslations.put("artofillusion.ImageMapTexture", "artofillusion.texture.ImageMapTexture");
-    classTranslations.put("artofillusion.LayeredMapping", "artofillusion.texture.LayeredMapping");
-    classTranslations.put("artofillusion.LayeredTexture", "artofillusion.texture.LayeredTexture");
-    classTranslations.put("artofillusion.LinearMapping3D", "artofillusion.texture.LinearMapping3D");
-    classTranslations.put("artofillusion.procedural.ProceduralTexture2D", "artofillusion.texture.ProceduralTexture2D");
-    classTranslations.put("artofillusion.procedural.ProceduralTexture3D", "artofillusion.texture.ProceduralTexture3D");
-    classTranslations.put("artofillusion.ProjectionMapping", "artofillusion.texture.ProjectionMapping");
-    classTranslations.put("artofillusion.SphericalMapping", "artofillusion.texture.SphericalMapping");
-    classTranslations.put("artofillusion.UniformMapping", "artofillusion.texture.UniformMapping");
-    classTranslations.put("artofillusion.UniformTexture", "artofillusion.texture.UniformTexture");
-    classTranslations.put("artofillusion.LinearMaterialMapping", "artofillusion.material.LinearMaterialMapping");
-    classTranslations.put("artofillusion.procedural.ProceduralMaterial3D", "artofillusion.material.ProceduralMaterial3D");
-    classTranslations.put("artofillusion.UniformMaterial", "artofillusion.material.UniformMaterial");
-    classTranslations.put("artofillusion.UniformMaterialMapping", "artofillusion.material.UniformMaterialMapping");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapDesignerObjectCollection", "artofillusion.tapDesigner.TapDesignerObjectCollection");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapTube", "artofillusion.tapDesigner.TapTube");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapSplineMesh", "artofillusion.tapDesigner.TapSplineMesh");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapObject", "artofillusion.tapDesigner.TapObject");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapLeaf", "artofillusion.tapDesigner.TapLeaf");
+    // Build a table of classes which have moved.    
+    try {        
+        Properties translations = new Properties();
+        translations.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("mappings.properties"));
+        classTranslations.putAll((Map)translations);
+    } catch(IOException ioe) {        
+    }
+    
   }
 
   public static void main(String args[])

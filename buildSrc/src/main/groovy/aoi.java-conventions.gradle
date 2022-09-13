@@ -6,6 +6,15 @@ plugins {
 sourceCompatibility = '18'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
+[compileJava, compileTestJava]*.options.collect {options ->
+  options.debug = true
+  options.deprecation = true
+  options.compilerArgs.add '-Xlint'
+  options.compilerArgs.add '-Xlint:-unchecked'
+  options.compilerArgs.add '-Xlint:-serial'
+  options.compilerArgs.add '-Xlint:-rawtypes'
+}
+
 repositories {
     mavenCentral()
     maven {

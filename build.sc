@@ -14,7 +14,7 @@ trait Common extends JavaModule { common =>
   def ivyDeps = T {
     super.ivyDeps() ++ Agg(
       ivy"gov.nist.math:jama:1.0.3",
-      ivy"com.fifesoft:rsyntaxtextarea:3.1.6",
+      ivy"com.fifesoft:rsyntaxtextarea:3.3.1",
       ivy"org.apache.groovy:groovy:4.0.0",
       ivy"org.jogamp.gluegen:gluegen-rt:v2.4.0-rc4",
       ivy"org.jogamp.jogl:jogl-all:v2.4.0-rc4"
@@ -153,7 +153,7 @@ object Cache extends Module{
       downloadFile(
         "https://github.com/blackears/svgSalamander/releases/download/v1.1.3/svgSalamander-1.1.3.jar"),
       downloadFile(
-        "https://github.com/beanshell/beanshell/releases/download/2.1.0/bsh-2.1.0.jar")
+        "https://github.com/beanshell/beanshell/releases/download/2.1.1/bsh-2.1.1.jar")
     )
   }
 

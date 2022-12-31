@@ -81,6 +81,7 @@ public class KeystrokeEditor extends BDialog
     Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
     scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
     scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
+    scheme.setStyle(SyntaxScheme.COMMENT_DOCUMENTATION, newStyle);
     syntaxTextArea.setAnimateBracketMatching(false);
     syntaxTextArea.setTabSize(2);
     syntaxTextArea.setCodeFoldingEnabled(true);

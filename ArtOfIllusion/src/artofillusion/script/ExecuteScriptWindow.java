@@ -136,6 +136,7 @@ public class ExecuteScriptWindow extends BFrame
     Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
     scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
     scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
+    scheme.setStyle(SyntaxScheme.COMMENT_DOCUMENTATION, newStyle);
 
     scriptText.setAnimateBracketMatching(false);
     scriptText.setTabSize(2);

@@ -137,7 +137,8 @@ public class ExecuteScriptWindow extends BFrame
     scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
     scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
     scheme.setStyle(SyntaxScheme.COMMENT_DOCUMENTATION, newStyle);
-
+    scriptText.setPaintMatchedBracketPair(true);
+    scriptText.setMatchedBracketBorderColor(Color.decode("0xEAEAFF"));
     scriptText.setAnimateBracketMatching(false);
     scriptText.setTabSize(2);
     scriptText.setCodeFoldingEnabled(true);

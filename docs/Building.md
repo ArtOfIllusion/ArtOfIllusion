@@ -2,11 +2,11 @@
 
 ## Quickstart for the experienced developer:
 
- * Run `millw launch` to build and launch the main application. You can
+ * `millw run` builds and launchs the main application. You can
 pass additional arguments to the JVM, such as `-Xmx=` values and debug
 transport linkages.
- * `mill _.test` to run the test suites
- * `mill clean` to clear interim build artifacts and force a complete
+ * `mill _.test` runs the test suites.
+ * `mill clean` clears interim build artifacts and forces a complete
 build on the next run.
  * There is a very thin ant wrapper in `build.xml`. The targets there
 are intended to ease integration with IDEs, particularly Intellij Idea

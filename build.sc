@@ -207,7 +207,7 @@ def installLocal() = T.command {
   PathRef(installpath)
 }
 
-def launch(args: String*) = T.command {
+def run(args: String*) = T.command {
   os.proc("java", args, "-jar", installLocal().apply().path / "ArtOfIllusion.jar").call()
 }
 

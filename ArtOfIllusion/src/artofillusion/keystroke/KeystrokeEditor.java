@@ -1,5 +1,6 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
    Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2023 by Lucas Stanek
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,10 +20,7 @@ import artofillusion.script.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.Style;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
@@ -76,17 +74,15 @@ public class KeystrokeEditor extends BDialog
     languageChoice.setSelectedValue(record.getLanguage());
 
     syntaxTextArea = new RSyntaxTextArea(record.getScript(), 25, 100);
-    SyntaxScheme scheme = syntaxTextArea.getSyntaxScheme();
-    Style style = scheme.getStyle(SyntaxScheme.COMMENT_EOL);
-    Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
-    scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
-    scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
-    scheme.setStyle(SyntaxScheme.COMMENT_DOCUMENTATION, newStyle);
-    syntaxTextArea.setMatchedBracketBorderColor(Color.decode("0xEAEAFF"));
-    syntaxTextArea.setPaintMatchedBracketPair(true);
-    syntaxTextArea.setAnimateBracketMatching(false);
-    syntaxTextArea.setTabSize(2);
-    syntaxTextArea.setCodeFoldingEnabled(true);
+    try
+    {
+      Theme theme = Theme.load(getClass().getResourceAsStream("/scriptEditorTheme.xml"));
+      theme.apply(syntaxTextArea);
+    } catch (Exception e) //shouldn't happen unless we are pointing at a non-existant file
+    {
+      e.printStackTrace();
+    }
+
     syntaxTextArea.setSyntaxEditingStyle(record.getLanguage().equalsIgnoreCase("groovy") ? SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
 
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE);

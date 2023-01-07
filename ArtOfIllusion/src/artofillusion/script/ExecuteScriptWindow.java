@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Changes Copyright (C) 2023 by Lucas Stanek
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,10 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.Style;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
+import org.fife.ui.rsyntaxtextarea.*;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 /** This class presents a user interface for entering scripts to be executed. */
@@ -130,18 +128,18 @@ public class ExecuteScriptWindow extends BFrame
         editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
     scriptText = new RSyntaxTextArea(editorTextContent, 25, 100);
-    scriptText.addKeyListener(new ScriptKeyListener());
-    SyntaxScheme scheme = scriptText.getSyntaxScheme();
-    Style style = scheme.getStyle(SyntaxScheme.COMMENT_EOL);
-    Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
-    scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
-    scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
-    scheme.setStyle(SyntaxScheme.COMMENT_DOCUMENTATION, newStyle);
-    scriptText.setPaintMatchedBracketPair(true);
-    scriptText.setMatchedBracketBorderColor(Color.decode("0xEAEAFF"));
-    scriptText.setAnimateBracketMatching(false);
-    scriptText.setTabSize(2);
     scriptText.setCodeFoldingEnabled(true);
+    scriptText.addKeyListener(new ScriptKeyListener());
+
+    try
+    {
+      Theme theme = Theme.load(getClass().getResourceAsStream("/scriptEditorTheme.xml"));
+      theme.apply(scriptText);
+    } catch (Exception e) //shouldn't happen unless we are pointing at a non-existant file
+    {
+      e.printStackTrace();
+    }
+
     content.add(new AWTWidget(new RTextScrollPane(scriptText)),
       BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());

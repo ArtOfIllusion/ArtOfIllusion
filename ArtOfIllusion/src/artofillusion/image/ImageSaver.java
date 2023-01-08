@@ -23,7 +23,7 @@ import java.io.*;
 import java.text.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
-import org.monte.media.quicktime.QuickTimeWriter;
+import ch.randelshofer.media.quicktime.QuickTimeWriter;
 
 /** This class is used to save rendered images to disk. */
 
@@ -84,7 +84,7 @@ public class ImageSaver
     if (format == FORMAT_QUICKTIME && this.clickedOk())
     {
       qt = new QuickTimeWriter(new File(directory, name));
-      qt.addVideoTrack(QuickTimeWriter.VIDEO_JPEG, fps, width, height);
+      qt.addVideoTrack(QuickTimeWriter.VideoFormat.JPG, fps, width, height);
       qt.setCompressionQuality(0, (float) quality*0.01f);
     }
   }
@@ -197,7 +197,7 @@ public class ImageSaver
       Graphics2D g = buffer.createGraphics();
       g.drawImage(img.getImage(), 0, 0, parent.getComponent());
       g.dispose();
-      qt.write(0, buffer, 1);
+      qt.writeFrame(0, buffer, 1);
       return true;
     }
     if (index != Integer.MIN_VALUE)
@@ -291,7 +291,7 @@ public class ImageSaver
 
   private static void writeJpegToStream(Image im, OutputStream out, int quality) throws IOException
   {
-    ImageWriter writer = (ImageWriter) ImageIO.getImageWritersBySuffix("jpeg").next();
+    ImageWriter writer = ImageIO.getImageWritersBySuffix("jpeg").next();
     ImageOutputStream ios = ImageIO.createImageOutputStream(out);
     writer.setOutput(ios);
     ImageWriteParam param = writer.getDefaultWriteParam();

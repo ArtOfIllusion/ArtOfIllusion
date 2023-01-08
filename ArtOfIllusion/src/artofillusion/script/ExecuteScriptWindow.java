@@ -124,11 +124,11 @@ public class ExecuteScriptWindow extends BFrame
     setContent(content);
     window = win;
     String editorTextContent = "";
-    if (scriptLanguage != ScriptRunner.UNKNOWN_LANGUAGE && scriptAbsolutePath.contains(".")) {
-        editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
+    if (scriptLanguage != ScriptRunner.UNKNOWN_LANGUAGE && scriptAbsolutePath.contains("."))
+    {
+      editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
     scriptText = new RSyntaxTextArea(editorTextContent, 25, 100);
-    scriptText.setCodeFoldingEnabled(true);
     scriptText.addKeyListener(new ScriptKeyListener());
 
     try
@@ -140,8 +140,10 @@ public class ExecuteScriptWindow extends BFrame
       e.printStackTrace();
     }
 
-    content.add(new AWTWidget(new RTextScrollPane(scriptText)),
-      BorderContainer.CENTER);
+    scriptText.setCodeFoldingEnabled(true);
+    scriptText.setTabSize(2);
+
+    content.add(new AWTWidget(new RTextScrollPane(scriptText)), BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.getComponent().setRenderer(new LanguageRenderer());
     BorderContainer tools = new BorderContainer ();

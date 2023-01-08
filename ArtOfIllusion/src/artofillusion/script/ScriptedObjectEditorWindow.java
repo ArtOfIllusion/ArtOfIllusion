@@ -47,7 +47,6 @@ public class ScriptedObjectEditorWindow extends BFrame
     BorderContainer content = new BorderContainer();
     setContent(content);
     scriptText = new RSyntaxTextArea(((ScriptedObject) info.getObject()).getScript(), 25, 100);
-    scriptText.setCodeFoldingEnabled(true);
 
     try
     {
@@ -57,6 +56,9 @@ public class ScriptedObjectEditorWindow extends BFrame
     {
       e.printStackTrace();
     }
+
+    scriptText.setCodeFoldingEnabled(true);
+    scriptText.setTabSize(2);
 
     content.add(new AWTWidget(new RTextScrollPane(scriptText))
                              , BorderContainer.CENTER);

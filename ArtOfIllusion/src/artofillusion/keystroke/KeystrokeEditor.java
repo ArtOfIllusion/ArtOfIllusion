@@ -83,7 +83,12 @@ public class KeystrokeEditor extends BDialog
       e.printStackTrace();
     }
 
-    syntaxTextArea.setSyntaxEditingStyle(record.getLanguage().equalsIgnoreCase("groovy") ? SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
+    syntaxTextArea.setSyntaxEditingStyle(record.getLanguage()
+                                               .equalsIgnoreCase("groovy")
+                                               ? SyntaxConstants.SYNTAX_STYLE_GROOVY
+                                               : SyntaxConstants.SYNTAX_STYLE_JAVA);
+    syntaxTextArea.setCodeFoldingEnabled(true);
+    syntaxTextArea.setTabSize(2);
 
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE);
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null);

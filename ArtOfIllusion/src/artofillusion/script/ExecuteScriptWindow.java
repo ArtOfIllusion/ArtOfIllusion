@@ -128,20 +128,8 @@ public class ExecuteScriptWindow extends BFrame
     {
       editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
-    scriptText = new RSyntaxTextArea(editorTextContent, 25, 100);
+    scriptText = ScriptEditingWidget.getScriptWidget(editorTextContent);
     scriptText.addKeyListener(new ScriptKeyListener());
-
-    try
-    {
-      Theme theme = Theme.load(getClass().getResourceAsStream("/scriptEditorTheme.xml"));
-      theme.apply(scriptText);
-    } catch (Exception e) //shouldn't happen unless we are pointing at a non-existant file
-    {
-      e.printStackTrace();
-    }
-
-    scriptText.setCodeFoldingEnabled(true);
-    scriptText.setTabSize(2);
 
     content.add(new AWTWidget(new RTextScrollPane(scriptText)), BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());

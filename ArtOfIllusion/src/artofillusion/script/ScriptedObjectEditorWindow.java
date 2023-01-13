@@ -19,16 +19,13 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
-import org.fife.ui.rsyntaxtextarea.*;
-import org.fife.ui.rtextarea.RTextScrollPane;
-
 /** This class presents a user interface for entering object scripts. */
 
 public class ScriptedObjectEditorWindow extends BFrame
 {
   private EditingWindow window;
   private ObjectInfo info;
-  private RSyntaxTextArea scriptText;
+  private ScriptEditingWidget scriptWidget;
   private BComboBox languageChoice;
   private String scriptName;
   private Runnable onClose;
@@ -46,10 +43,9 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
     BorderContainer content = new BorderContainer();
     setContent(content);
-    scriptText = ScriptEditingWidget.getScriptWidget(((ScriptedObject) info.getObject()).getScript());
+    scriptWidget = new ScriptEditingWidget(((ScriptedObject) info.getObject()).getScript());
 
-    content.add(new AWTWidget(new RTextScrollPane(scriptText))
-                             , BorderContainer.CENTER);
+    content.add(scriptWidget, BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
     RowContainer languageRow = new RowContainer();
@@ -57,8 +53,8 @@ public class ScriptedObjectEditorWindow extends BFrame
     languageRow.add(languageChoice);
     content.add(languageRow, BorderContainer.NORTH,
                 new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
-    content.add(BOutline.createBevelBorder(new AWTWidget(new RTextScrollPane(scriptText)),
-               false), BorderContainer.CENTER);
+    content.add(BOutline.createBevelBorder(scriptWidget, false)
+               , BorderContainer.CENTER);
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
     buttons.add(Translate.button("ok", this, "commitChanges"));
@@ -68,11 +64,11 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("cancel", this, "dispose"));
     addEventLink(WindowClosingEvent.class, this, "commitChanges");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
-    scriptText.setCaretPosition(0);
+    scriptWidget.textComponent().setCaretPosition(0);
     pack();
     updateLanguage();
     UIUtilities.centerWindow(this);
-    scriptText.requestFocus();
+    scriptWidget.requestFocus();
     setVisible(true);
   }
 
@@ -80,9 +76,7 @@ public class ScriptedObjectEditorWindow extends BFrame
 
   private void updateLanguage()
   {
-    scriptText.setSyntaxEditingStyle(
-        ScriptRunner.Language.GROOVY.name.equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
-           SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
+    scriptWidget.setLanguage((String) languageChoice.getSelectedValue());
   }
 
   /** Display a dialog for editing the parameters. */
@@ -119,7 +113,7 @@ public class ScriptedObjectEditorWindow extends BFrame
           while ((c = in.read()) != -1)
             buf.append((char) c);
           in.close();
-          scriptText.setText(buf.toString());
+          scriptWidget.setScriptText(buf.toString());
         }
         catch (Exception ex)
         {
@@ -160,7 +154,7 @@ public class ScriptedObjectEditorWindow extends BFrame
       try
       {
         BufferedWriter out = new BufferedWriter(new FileWriter(f));
-        out.write(scriptText.getText().toCharArray());
+        out.write(scriptWidget.getScriptText().toCharArray());
         out.close();
       }
       catch (Exception ex)
@@ -191,7 +185,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   {
     ScriptedObject so = (ScriptedObject) info.getObject();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    so.setScript(scriptText.getText());
+    so.setScript(scriptWidget.getScriptText());
     so.setLanguage(languageChoice.getSelectedValue().toString());
     so.sceneChanged(info, window.getScene());
     if (onClose != null)

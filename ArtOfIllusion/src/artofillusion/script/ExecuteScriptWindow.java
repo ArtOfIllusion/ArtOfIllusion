@@ -26,15 +26,12 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import org.fife.ui.rsyntaxtextarea.*;
-import org.fife.ui.rtextarea.RTextScrollPane;
-
 /** This class presents a user interface for entering scripts to be executed. */
 
 public class ExecuteScriptWindow extends BFrame
 {
   private LayoutWindow window;
-  private RSyntaxTextArea scriptText;
+  private ScriptEditingWidget scriptWidget;
   private BComboBox languageChoice;
   public static final String NEW_SCRIPT_NAME = Translate.text ("untitled");
   private String scriptPath;
@@ -128,10 +125,10 @@ public class ExecuteScriptWindow extends BFrame
     {
       editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
-    scriptText = ScriptEditingWidget.getScriptWidget(editorTextContent);
-    scriptText.addKeyListener(new ScriptKeyListener());
+    scriptWidget = new ScriptEditingWidget(editorTextContent);
+    scriptWidget.textComponent().addKeyListener(new ScriptKeyListener());
 
-    content.add(new AWTWidget(new RTextScrollPane(scriptText)), BorderContainer.CENTER);
+    content.add(scriptWidget, BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.getComponent().setRenderer(new LanguageRenderer());
     BorderContainer tools = new BorderContainer ();
@@ -164,7 +161,7 @@ public class ExecuteScriptWindow extends BFrame
     //buttons.add(Translate.button("close", this, "closeWindow"));
     addEventLink(WindowClosingEvent.class, this, "closeWindow");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
-    scriptText.setCaretPosition(0);
+    scriptWidget.textComponent().setCaretPosition(0);
     pack();
     updateLanguage();
     UIUtilities.centerWindow(this);
@@ -172,7 +169,7 @@ public class ExecuteScriptWindow extends BFrame
     int editorFrameOffset = EDITORS_OFFSET*openedScripts.size();
     setBounds(new Rectangle(this.getBounds().x + editorFrameOffset, this.getBounds().y + editorFrameOffset, 
             this.getBounds().width, this.getBounds().height));
-    scriptText.requestFocus();
+    scriptWidget.requestFocus();
     setVisible(true);
     updateEditableStatus(NEW_SCRIPT_NAME, scriptAbsolutePath);
   }
@@ -206,20 +203,12 @@ public class ExecuteScriptWindow extends BFrame
   {
     if (!previousScriptAbsoluePath.equals(scriptAbsolutePath))
     {    
-      if (openedScripts.contains(scriptAbsolutePath))
-      {
-          scriptText.setEditable(false);
-          scriptText.setEnabled(false);
-          scriptText.setBackground(Color.LIGHT_GRAY);
-          new BStandardDialog(null, new String [] {Translate.text("alreadyOpenedScript"),
-              "This window is read-only : this script is open in other window(s) " + scriptAbsolutePath}, BStandardDialog.ERROR).showMessageDialog(this);
-      }
-      else
-      {
-          scriptText.setEditable(true);
-          scriptText.setEnabled(true);
-          scriptText.setBackground(Color.WHITE);
-      }
+      boolean isOpen = openedScripts.contains(scriptAbsolutePath);
+      scriptWidget.setEditable(!isOpen);
+      if (isOpen) new BStandardDialog(null
+                      , new String [] {Translate.text("alreadyOpenedScript")
+                      , "This window is read-only : this script is open in other window(s) " + scriptAbsolutePath}
+                      , BStandardDialog.ERROR).showMessageDialog(this);
       openedScripts.remove(previousScriptAbsoluePath);
       openedScripts.add(scriptAbsolutePath);
     }
@@ -231,9 +220,7 @@ public class ExecuteScriptWindow extends BFrame
    */
   private void updateLanguage()
   {
-    scriptText.setSyntaxEditingStyle(
-        ScriptRunner.Language.GROOVY.name.equalsIgnoreCase(language) ?
-          SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
+    scriptWidget.setLanguage(language);
   }
 
   private void closeWindow()
@@ -279,10 +266,10 @@ public class ExecuteScriptWindow extends BFrame
       File f = fc.getSelectedFile();
       try
       {
-        scriptText.setText(ArtOfIllusion.loadFile(f));
+        scriptWidget.setScriptText(ArtOfIllusion.loadFile(f));
         updateEditableStatus(scriptPath, fc.getSelectedFile().getAbsolutePath());
         scriptPath = fc.getSelectedFile().getAbsolutePath();
-        scriptText.setCaretPosition(0);
+        scriptWidget.textComponent().setCaretPosition(0);
         String filename = fc.getSelectedFile().getName();
         String fileLanguage = ScriptRunner.getLanguageForFilename(filename);
         if (fileLanguage != ScriptRunner.UNKNOWN_LANGUAGE)
@@ -342,7 +329,7 @@ public class ExecuteScriptWindow extends BFrame
       try
       {
         BufferedWriter out = new BufferedWriter(new FileWriter(f));
-        out.write(scriptText.getText().toCharArray());
+        out.write(scriptWidget.getScriptText().toCharArray());
         out.close();
       }
       catch (Exception ex)
@@ -382,7 +369,7 @@ public class ExecuteScriptWindow extends BFrame
     try
     {
       BufferedWriter out = new BufferedWriter(new FileWriter(f));
-      out.write(scriptText.getText().toCharArray());
+      out.write(scriptWidget.getScriptText().toCharArray());
       out.close();
     }
     catch (Exception ex)
@@ -409,30 +396,32 @@ public class ExecuteScriptWindow extends BFrame
 
   private void executeSelected()
   {
-    executeText(scriptText.getSelectedText());
+    executeText(scriptWidget.textComponent().getSelectedText());
     window.updateImage();
-    scriptText.requestFocus();
+    scriptWidget.requestFocus();
   }
   
   private void executeToCursor() 
   {
-    final String substringAfterCaret = scriptText.getText().substring(scriptText.getCaretPosition());
+    final String substringAfterCaret = scriptWidget.getScriptText()
+                 .substring(scriptWidget.textComponent().getCaretPosition());
     int charactersUntilEndOfLine = substringAfterCaret.indexOf("\n");
     if (charactersUntilEndOfLine == -1)
         charactersUntilEndOfLine = substringAfterCaret.length();
-    final String textToEndOfCaretLine = scriptText.getText().substring(
-            0, scriptText.getCaretPosition() + charactersUntilEndOfLine);
+    final String textToEndOfCaretLine = scriptWidget.getScriptText()
+                 .substring(0, scriptWidget.textComponent().getCaretPosition()
+                               + charactersUntilEndOfLine);
     executeText(textToEndOfCaretLine);
     window.updateImage();
-    scriptText.requestFocus();
+    scriptWidget.requestFocus();
   }
   
   /** Execute the script. */
   private void executeScript()
   {
-    executeText(scriptText.getText());
+    executeText(scriptWidget.getScriptText());
     window.updateImage();
-    scriptText.requestFocus();
+    scriptWidget.requestFocus();
   }
 
   public void executeText(final String text)
@@ -464,8 +453,8 @@ public class ExecuteScriptWindow extends BFrame
             index = next+1;
         }
         if (index > -1)
-          scriptText.setCaretPosition(index);
-        scriptText.requestFocus();
+          scriptWidget.textComponent().setCaretPosition(index);
+        scriptWidget.requestFocus();
       }
     }
   }

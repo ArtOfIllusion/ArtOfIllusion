@@ -17,27 +17,96 @@
 
 package artofillusion.script;
 
+import java.awt.Color;
+import javax.swing.text.JTextComponent;
+import buoy.widget.Widget;
+
 import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 /**
  * Shared code for setting up an editing widget for aoi scripts.
+ *
+ * This is a widget that can display and edit script text, in either
+ * Groovy or Beanshell. It exists primarily to provide a unified
+ * styling across the various script editors. It has a fixed preferred
+ * size. Saving, loading, and evaluation of the scripts should be
+ * handled by the calling code.
  */
 
-public class ScriptEditingWidget
+public class ScriptEditingWidget extends Widget
 {
-  public static RSyntaxTextArea getScriptWidget(String script)
+  private RSyntaxTextArea textArea;
+
+  public ScriptEditingWidget(String script)
   {
-    RSyntaxTextArea widget = new RSyntaxTextArea(script, 25, 100);
+    textArea = new RSyntaxTextArea(script, 25, 100);
     try{
       Theme theme = Theme.load(ScriptEditingWidget.class
-                               .getResourceAsStream("/scriptEditorTheme.xml"));
-      theme.apply(widget);
-    } catch (Exception e) //shouldn't happen unless we are pointing at a non-existant file
+          .getResourceAsStream("/scriptEditorTheme.xml"));
+      theme.apply(textArea);
+    } catch (Exception e)
     {
+      //shouldn't happen unless we are pointing at a non-existant file
       e.printStackTrace();
     }
-    widget.setAnimateBracketMatching(false);
-    widget.setTabSize(2);
-    return widget;
+    textArea.setAnimateBracketMatching(false);
+    textArea.setTabSize(2);
+
+    component = new RTextScrollPane(textArea);
+  }
+
+  //TODO: migrate to constant, rather than string
+  public void setLanguage(String lang)
+  {
+    textArea.setSyntaxEditingStyle(lang.equalsIgnoreCase("groovy")
+                                   ? SyntaxConstants.SYNTAX_STYLE_GROOVY
+                                   : SyntaxConstants.SYNTAX_STYLE_JAVA);
+  }
+
+  public String getScriptText()
+  {
+    return textArea.getText();
+  }
+
+  public void setScriptText(String text)
+  {
+    textArea.setText(text);
+  }
+
+  public void requestFocus()
+  {
+    textArea.requestFocus();
+  }
+
+  /**
+   * Pass through the underlying implementing text component.
+   *
+   * This is primarily useful for advanced manipulations of the script
+   * text, such as substring analysis. User classes don't need to know
+   * exactly what the implementing type is.
+   */
+
+  public JTextComponent textComponent()
+  {
+    return textArea;
+  }
+
+
+  /**
+   * Set whether this widget should be editable.?
+   *
+   * Defaults to "true".
+   * If "false", the widget acts as a read-only highlighted view of the
+   * script.
+   *
+   * @param editable Whether the loaded script should be editable. 
+   */
+
+  public void setEditable(boolean editable)
+  {
+    textArea.setEditable(editable);
+    textArea.setEnabled(editable);
+    textArea.setBackground(editable? Color.WHITE : Color.LIGHT_GRAY);
   }
 }

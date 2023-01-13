@@ -20,9 +20,6 @@ import artofillusion.script.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import org.fife.ui.rsyntaxtextarea.*;
-import org.fife.ui.rtextarea.RTextScrollPane;
-
 /**
  * This class presents a user interface for editing a single KeystrokeRecord.  To use it, invoke
  * the static editKeystroke() method.
@@ -34,7 +31,7 @@ public class KeystrokeEditor extends BDialog
   private final BTextField nameField;
   private final BComboBox languageChoice;
 
-  private final RSyntaxTextArea syntaxTextArea;
+  private final ScriptEditingWidget scriptWidget; 
   private final BButton okButton;
   private KeystrokeRecord record;
 
@@ -73,13 +70,8 @@ public class KeystrokeEditor extends BDialog
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.setSelectedValue(record.getLanguage());
 
-    syntaxTextArea = ScriptEditingWidget.getScriptWidget(record.getScript());
-
-
-    syntaxTextArea.setSyntaxEditingStyle(record.getLanguage()
-                                               .equalsIgnoreCase("groovy")
-                                               ? SyntaxConstants.SYNTAX_STYLE_GROOVY
-                                               : SyntaxConstants.SYNTAX_STYLE_JAVA);
+    scriptWidget = new ScriptEditingWidget(record.getScript());
+    scriptWidget.setLanguage(record.getLanguage());
 
     LayoutInfo rightLayout = new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE);
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null);
@@ -90,7 +82,7 @@ public class KeystrokeEditor extends BDialog
     content.add(nameField, 1, 1, fillLayout);
     content.add(languageChoice, 1, 2, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE));
     content.add(Translate.label("Script"), 0, 3, 2, 1, new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, null, null));
-    content.add(new AWTWidget(new RTextScrollPane(syntaxTextArea)), 0, 4, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
+    content.add(scriptWidget, 0, 4, 2, 1, new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH));
     RowContainer buttons = new RowContainer();
     content.add(buttons, 0, 5, 2, 1);
     okButton = Translate.button("ok", this, "clickedOk");
@@ -104,7 +96,7 @@ public class KeystrokeEditor extends BDialog
   {
     record.setName(nameField.getText());
     record.setLanguage(languageChoice.getSelectedValue().toString());
-    record.setScript(syntaxTextArea.getText());
+    record.setScript(scriptWidget.getScriptText());
     dispose();
   }
 

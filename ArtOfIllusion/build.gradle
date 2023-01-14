@@ -34,7 +34,7 @@ dependencies {
     implementation group: 'gov.nist.math', name: 'jama', version: '1.0.3'
     implementation group: 'com.googlecode.matrix-toolkits-java', name: 'mtj', version: '0.9.14'
 
-    implementation group: 'org.beanshell', name: 'bsh', version: '2.0b5'
+    implementation group: 'org.beanshell', name: 'bsh', version: '3.0.0-SNAPSHOT'
     implementation group: 'org.apache.groovy', name: 'groovy', version: '4.0.0'
     
     implementation fileTree(dir: '../lib', include: '*.jar')

@@ -51,7 +51,7 @@ dependencies {
 jar {
     manifest {
         def allc = configurations.default + configurations.universal + configurations.osx
-        attributes('Main-Class': "${mainClassName}", "Class-Path": allc.collect { it.getName() }.join(' '), "Implementation-Version": gitVersion())
+        attributes('Main-Class': '${mainClassName}', "Class-Path": allc.collect { it.getName().replace("-${joglVersion}","") }.join(' '), "Implementation-Version": gitVersion())
     }
 }
 
@@ -101,7 +101,7 @@ distributions {
                     includeEmptyDirs = true
             } 
             from("../Textures And Materials") { into("Textures And Materials") }
-            from(configurations.universal) { into("lib") }
+            from(configurations.universal) { into("lib")  rename {String name -> name.replace("-${joglVersion}","") }}
     }
     
     mac.contents {        

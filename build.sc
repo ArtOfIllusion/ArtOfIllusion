@@ -215,6 +215,6 @@ def localPlatform() = {
   osName match {
     case x if osName.toLowerCase().contains("linux") => "linux"
     case x if osName.toLowerCase().contains("mac") | osName.contains("osx") => "mac"
-    case x if osName.toLowerCase().contains("windows") => "win"
+    case x if osName.toLowerCase().contains("windows") => "windows"
   }
 }

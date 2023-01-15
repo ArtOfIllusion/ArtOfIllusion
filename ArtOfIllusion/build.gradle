@@ -82,9 +82,9 @@ launch4j {
   libraryDir = "../lib"  
 }
 
-assemble.dependsOn createExe
-installDist.dependsOn createExe
-distZip.dependsOn createExe
+assemble.dependsOn subprojects.jar, createExe
+installDist.dependsOn subprojects.jar, createExe
+distZip.dependsOn subprojects.jar, createExe
 
 
 tasks.withType(Zip){

@@ -12,7 +12,6 @@ mainClassName = 'artofillusion.ArtOfIllusion'
 
 
 configurations {
-    universal.extendsFrom implementation
     osx.extendsFrom implementation
 }
 
@@ -25,11 +24,13 @@ dependencies {
     implementation("org.jogamp.gluegen:gluegen-rt:${joglVersion}")
     implementation("org.jogamp.jogl:jogl-all:${joglVersion}")
     
-    universal("org.jogamp.gluegen:gluegen-rt-natives-linux-amd64:${joglVersion}")
-    universal("org.jogamp.gluegen:gluegen-rt-natives-windows-amd64:${joglVersion}")
-    universal("org.jogamp.jogl:jogl-all-natives-linux-amd64:${joglVersion}")
-    universal("org.jogamp.jogl:jogl-all-natives-windows-amd64:${joglVersion}")
-    
+    implementation("org.jogamp.gluegen:gluegen-rt-natives-linux-amd64:${joglVersion}")
+    implementation("org.jogamp.gluegen:gluegen-rt-natives-windows-amd64:${joglVersion}")
+    implementation("org.jogamp.jogl:jogl-all-natives-linux-amd64:${joglVersion}")
+    implementation("org.jogamp.jogl:jogl-all-natives-windows-amd64:${joglVersion}")
+    implementation("org.jogamp.gluegen:gluegen-rt-natives-macosx-universal:${joglVersion}")
+    implementation("org.jogamp.jogl:jogl-all-natives-macosx-universal:${joglVersion}")
+
     osx("org.jogamp.gluegen:gluegen-rt-natives-macosx-universal:${joglVersion}")
     osx("org.jogamp.jogl:jogl-all-natives-macosx-universal:${joglVersion}")
     
@@ -41,7 +42,7 @@ dependencies {
     implementation group: 'org.apache.groovy', name: 'groovy', version: '4.0.0'
     
     implementation fileTree(dir: '../lib', include: '*.jar')
-    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.3.0'
+    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.3.1'
     
     testImplementation 'org.mockito:mockito-core:3.+'
     
@@ -49,8 +50,7 @@ dependencies {
 
 jar {
     manifest {
-        def allc = configurations.default + configurations.universal + configurations.osx
-        attributes('Main-Class': "${mainClassName}", "Class-Path": allc.collect { it.getName().replace("-${joglVersion}","") }.join(' '), "Implementation-Version": gitVersion())
+        attributes('Main-Class': '${mainClassName}', "Class-Path": configurations.default.collect { it.getName() }.join(' '), "Implementation-Version": gitVersion())
     }
 }
 
@@ -93,6 +93,7 @@ tasks.withType(Zip){
 
 distributions {
     main.contents {
+            it.exclude("*macosx*").rename {String name -> name.replace("-${joglVersion}","") }
             from("$buildDir/${launch4j.outputDir}/${launch4j.outfile}") { into("bin") }
             from("${rootDir}/Plugins") { into("Plugins") }
             from("../Scripts") { into("Scripts") }
@@ -100,9 +101,8 @@ distributions {
                     includeEmptyDirs = true
             } 
             from("../Textures And Materials") { into("Textures And Materials") }
-            from(configurations.universal) { into("lib")  rename {String name -> name.replace("-${joglVersion}","") }}
     }
-    
+
     mac.contents {        
         into("${description}.app/Contents") { from("${rootProject.projectDir}/InstallerSrc/apple/") {
                 include "Info.plist"
@@ -116,7 +116,7 @@ distributions {
         }
         into("${description}.app/Contents/Resources") { from("${rootProject.projectDir}/InstallerSrc/apple/") { include "*.icns"}}
         into("${description}.app/Contents/Resources/Java") { from(jar) }
-        into("${description}.app/Contents/Resources/Java") { from(configurations.osx) }
+        into("${description}.app/Contents/Resources/Java") { from(configurations.osx).exclude("*windows*").exclude("*linux*") }
         into("${description}.app/Contents/Resources/Plugins") { from("${rootDir}/Plugins") }
         into("${description}.app/Contents/Resources/Scripts") { from("../Scripts") }
         into("${description}.app/Contents/Resources/Textures And Materials") { from("../Textures And Materials") }

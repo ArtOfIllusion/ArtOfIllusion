@@ -96,7 +96,7 @@ public class KeystrokeEditor extends BDialog
   {
     record.setName(nameField.getText());
     record.setLanguage(languageChoice.getSelectedValue().toString());
-    record.setScript(scriptWidget.getScriptText());
+    record.setScript(scriptWidget.getContent().getText());
     dispose();
   }
 

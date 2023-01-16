@@ -17,12 +17,10 @@
 
 package artofillusion.script;
 
-import java.awt.Color;
-import javax.swing.text.JTextComponent;
-import buoy.widget.Widget;
+import buoy.widget.*;
 
 import org.fife.ui.rsyntaxtextarea.*;
-import org.fife.ui.rtextarea.RTextScrollPane;
+import org.fife.ui.rtextarea.Gutter;
 
 /**
  * Shared code for setting up an editing widget for aoi scripts.
@@ -34,79 +32,61 @@ import org.fife.ui.rtextarea.RTextScrollPane;
  * handled by the calling code.
  */
 
-public class ScriptEditingWidget extends Widget
+public class ScriptEditingWidget extends BScrollPane
 {
-  private RSyntaxTextArea textArea;
-
   public ScriptEditingWidget(String script)
   {
-    textArea = new RSyntaxTextArea(script, 25, 100);
+    super(new RSTextArea(script, 25, 100), SCROLLBAR_AS_NEEDED, SCROLLBAR_ALWAYS);
+
+    setRowHeader(new AWTWidget(new Gutter(getContent().getComponent())));
+
     try{
       Theme theme = Theme.load(ScriptEditingWidget.class
           .getResourceAsStream("/scriptEditorTheme.xml"));
-      theme.apply(textArea);
+      theme.apply(getContent().getComponent());
     } catch (Exception e)
     {
       //shouldn't happen unless we are pointing at a non-existant file
       e.printStackTrace();
     }
-    textArea.setAnimateBracketMatching(false);
-    textArea.setTabSize(2);
 
-    component = new RTextScrollPane(textArea);
+    getContent().getComponent().setAnimateBracketMatching(false);
+    getContent().getComponent().setTabSize(2);
   }
 
   //TODO: migrate to constant, rather than string
   public void setLanguage(String lang)
   {
-    textArea.setSyntaxEditingStyle(lang.equalsIgnoreCase("groovy")
+    getContent().getComponent().setSyntaxEditingStyle(lang.equalsIgnoreCase("groovy")
                                    ? SyntaxConstants.SYNTAX_STYLE_GROOVY
                                    : SyntaxConstants.SYNTAX_STYLE_JAVA);
   }
 
-  public String getScriptText()
+  public RSTextArea getContent()
   {
-    return textArea.getText();
+    return (RSTextArea) super.getContent();
   }
 
-  public void setScriptText(String text)
+  public static class RSTextArea extends BTextArea
   {
-    textArea.setText(text);
-  }
+    public RSTextArea(String contents, int rows, int columns)
+    {
+      super(contents, rows, columns);
+    }
 
-  public void requestFocus()
-  {
-    textArea.requestFocus();
-  }
+    protected RSyntaxTextArea createComponent()
+    {
+      return new RSyntaxTextArea();
+    }
 
-  /**
-   * Pass through the underlying implementing text component.
-   *
-   * This is primarily useful for advanced manipulations of the script
-   * text, such as substring analysis. User classes don't need to know
-   * exactly what the implementing type is.
-   */
+    public RSyntaxTextArea getComponent()
+    {
+      return (RSyntaxTextArea) component;
+    }
 
-  public JTextComponent textComponent()
-  {
-    return textArea;
-  }
-
-
-  /**
-   * Set whether this widget should be editable.?
-   *
-   * Defaults to "true".
-   * If "false", the widget acts as a read-only highlighted view of the
-   * script.
-   *
-   * @param editable Whether the loaded script should be editable. 
-   */
-
-  public void setEditable(boolean editable)
-  {
-    textArea.setEditable(editable);
-    textArea.setEnabled(editable);
-    textArea.setBackground(editable? Color.WHITE : Color.LIGHT_GRAY);
+    public void setBackground(java.awt.Color color)
+    {
+      getComponent().setBackground(color);
+    }
   }
 }

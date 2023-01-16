@@ -64,7 +64,7 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("cancel", this, "dispose"));
     addEventLink(WindowClosingEvent.class, this, "commitChanges");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
-    scriptWidget.textComponent().setCaretPosition(0);
+    scriptWidget.getContent().setCaretPosition(0);
     pack();
     updateLanguage();
     UIUtilities.centerWindow(this);
@@ -113,7 +113,7 @@ public class ScriptedObjectEditorWindow extends BFrame
           while ((c = in.read()) != -1)
             buf.append((char) c);
           in.close();
-          scriptWidget.setScriptText(buf.toString());
+          scriptWidget.getContent().setText(buf.toString());
         }
         catch (Exception ex)
         {
@@ -154,7 +154,7 @@ public class ScriptedObjectEditorWindow extends BFrame
       try
       {
         BufferedWriter out = new BufferedWriter(new FileWriter(f));
-        out.write(scriptWidget.getScriptText().toCharArray());
+        out.write(scriptWidget.getContent().getText().toCharArray());
         out.close();
       }
       catch (Exception ex)
@@ -185,7 +185,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   {
     ScriptedObject so = (ScriptedObject) info.getObject();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    so.setScript(scriptWidget.getScriptText());
+    so.setScript(scriptWidget.getContent().getText());
     so.setLanguage(languageChoice.getSelectedValue().toString());
     so.sceneChanged(info, window.getScene());
     if (onClose != null)

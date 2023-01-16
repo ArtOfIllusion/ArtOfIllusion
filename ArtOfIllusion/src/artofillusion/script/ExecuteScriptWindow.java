@@ -16,8 +16,6 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.*;
 import java.util.*;
 import java.util.prefs.Preferences;
@@ -74,28 +72,11 @@ public class ExecuteScriptWindow extends BFrame
       return recentScripts.toArray(new String [0]);
     } 
 
-  /** This is used to track the "changed" status of the script being edited. */
-  private class ScriptKeyListener implements KeyListener
-  {
-
-    @Override
-    public void keyTyped(KeyEvent e)
+    public void scriptWasEdited()
     {
-      save.setEnabled(true);        
+      save.setEnabled(true);
     }
 
-    @Override
-    public void keyPressed(KeyEvent e)
-    {
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e)
-    {
-    }
-
-  }
-    
   /**
    * 
    * @param win
@@ -126,7 +107,7 @@ public class ExecuteScriptWindow extends BFrame
       editorTextContent = ArtOfIllusion.loadFile(new File (scriptAbsolutePath));
     }
     scriptWidget = new ScriptEditingWidget(editorTextContent);
-    scriptWidget.textComponent().addKeyListener(new ScriptKeyListener());
+    scriptWidget.getContent().addEventLink(KeyTypedEvent.class, this, "scriptWasEdited");
 
     content.add(scriptWidget, BorderContainer.CENTER);
     languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
@@ -161,7 +142,7 @@ public class ExecuteScriptWindow extends BFrame
     //buttons.add(Translate.button("close", this, "closeWindow"));
     addEventLink(WindowClosingEvent.class, this, "closeWindow");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
-    scriptWidget.textComponent().setCaretPosition(0);
+    scriptWidget.getContent().setCaretPosition(0);
     pack();
     updateLanguage();
     UIUtilities.centerWindow(this);
@@ -204,7 +185,9 @@ public class ExecuteScriptWindow extends BFrame
     if (!previousScriptAbsoluePath.equals(scriptAbsolutePath))
     {    
       boolean isOpen = openedScripts.contains(scriptAbsolutePath);
-      scriptWidget.setEditable(!isOpen);
+      scriptWidget.getContent().setEditable(!isOpen);
+      scriptWidget.getContent().setEnabled(!isOpen);
+      scriptWidget.getContent().setBackground(isOpen? Color.LIGHT_GRAY : Color.WHITE);
       if (isOpen) new BStandardDialog(null
                       , new String [] {Translate.text("alreadyOpenedScript")
                       , "This window is read-only : this script is open in other window(s) " + scriptAbsolutePath}
@@ -266,10 +249,10 @@ public class ExecuteScriptWindow extends BFrame
       File f = fc.getSelectedFile();
       try
       {
-        scriptWidget.setScriptText(ArtOfIllusion.loadFile(f));
+        scriptWidget.getContent().setText(ArtOfIllusion.loadFile(f));
         updateEditableStatus(scriptPath, fc.getSelectedFile().getAbsolutePath());
         scriptPath = fc.getSelectedFile().getAbsolutePath();
-        scriptWidget.textComponent().setCaretPosition(0);
+        scriptWidget.getContent().setCaretPosition(0);
         String filename = fc.getSelectedFile().getName();
         String fileLanguage = ScriptRunner.getLanguageForFilename(filename);
         if (fileLanguage != ScriptRunner.UNKNOWN_LANGUAGE)
@@ -329,7 +312,7 @@ public class ExecuteScriptWindow extends BFrame
       try
       {
         BufferedWriter out = new BufferedWriter(new FileWriter(f));
-        out.write(scriptWidget.getScriptText().toCharArray());
+        out.write(scriptWidget.getContent().getText().toCharArray());
         out.close();
       }
       catch (Exception ex)
@@ -369,7 +352,7 @@ public class ExecuteScriptWindow extends BFrame
     try
     {
       BufferedWriter out = new BufferedWriter(new FileWriter(f));
-      out.write(scriptWidget.getScriptText().toCharArray());
+      out.write(scriptWidget.getContent().getText().toCharArray());
       out.close();
     }
     catch (Exception ex)
@@ -396,20 +379,20 @@ public class ExecuteScriptWindow extends BFrame
 
   private void executeSelected()
   {
-    executeText(scriptWidget.textComponent().getSelectedText());
+    executeText(scriptWidget.getContent().getSelectedText());
     window.updateImage();
     scriptWidget.requestFocus();
   }
   
   private void executeToCursor() 
   {
-    final String substringAfterCaret = scriptWidget.getScriptText()
-                 .substring(scriptWidget.textComponent().getCaretPosition());
+    final String substringAfterCaret = scriptWidget.getContent().getText()
+                 .substring(scriptWidget.getContent().getCaretPosition());
     int charactersUntilEndOfLine = substringAfterCaret.indexOf("\n");
     if (charactersUntilEndOfLine == -1)
         charactersUntilEndOfLine = substringAfterCaret.length();
-    final String textToEndOfCaretLine = scriptWidget.getScriptText()
-                 .substring(0, scriptWidget.textComponent().getCaretPosition()
+    final String textToEndOfCaretLine = scriptWidget.getContent().getText()
+                 .substring(0, scriptWidget.getContent().getCaretPosition()
                                + charactersUntilEndOfLine);
     executeText(textToEndOfCaretLine);
     window.updateImage();
@@ -419,7 +402,7 @@ public class ExecuteScriptWindow extends BFrame
   /** Execute the script. */
   private void executeScript()
   {
-    executeText(scriptWidget.getScriptText());
+    executeText(scriptWidget.getContent().getText());
     window.updateImage();
     scriptWidget.requestFocus();
   }
@@ -453,7 +436,7 @@ public class ExecuteScriptWindow extends BFrame
             index = next+1;
         }
         if (index > -1)
-          scriptWidget.textComponent().setCaretPosition(index);
+          scriptWidget.getContent().setCaretPosition(index);
         scriptWidget.requestFocus();
       }
     }

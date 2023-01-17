@@ -256,15 +256,14 @@ public class TriangleMesh extends Object3D implements FacetedMesh
     BUTTERFLY_COEFF[6] = new double [] {1.0, 0.125, -0.125, 0.0, -0.125, 0.125, 0.0};
   }
 
-  /** The constructor takes three arguments.  v[] is an array containing the vertices.
-      faces[][] is an N by 3 array containing the indices of the vertices which define each
-      face.  The vertices for each face must be listed in order, such that they go
-      counter-clockwise when viewed from the outside of the mesh.  All faces must have a
-      consistent vertex order, such that the object has a well defined outer surface.
-      This is true even if the mesh does not form a closed surface.  It is an error to
-      call the constructor with a faces[][] array which does not meet this condition, and
-      the results are undefined.  norm[] contains the normal vector at each vertex.  If
-      any element of norm[] is null, flat shading will be used around that vertex. */
+  /** Create a new TriangleMesh using the provided vertex locations and
+   * face topology.
+   *
+   * Creates Vertex objects from the provided positions. The topology
+   * provided must be a valid manifold surface.
+   *
+   * @see TriangleMesh(Vertex[], int[][])
+   */
 
   public TriangleMesh(Vec3 v[], int faces[][])
   {
@@ -274,6 +273,21 @@ public class TriangleMesh extends Object3D implements FacetedMesh
       vt[i] = new Vertex(v[i]);
     setShape(vt, faces);
   }
+
+  /** Create a new TriangleMesh using the provided vertices and face topology.
+   *
+   * The vertices for each face must be listed in counter-clockwise
+   * order when viewed from the outside of the mesh. All faces must have
+   * a consistent vertex order, such that the object has a well-defined
+   * outer surface. (That is, the surface must be a manifold.)
+   * This is true even if the mesh does not form a closed surface. It
+   * is an error to call the constructor with a faces[][] array which
+   * does not meet this condition, and the results are undefined.
+   *
+   * @param v[]: An array containing the vertices.
+   * @param faces[][] An N by 3 array containing the indices of the
+   * vertices which define each face.
+   */
 
   public TriangleMesh(Vertex v[], int faces[][])
   {

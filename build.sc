@@ -14,7 +14,7 @@ trait Common extends JavaModule { common =>
   def ivyDeps = T {
     super.ivyDeps() ++ Agg(
       ivy"gov.nist.math:jama:1.0.3",
-      ivy"com.fifesoft:rsyntaxtextarea:3.3.1",
+      ivy"com.fifesoft:rsyntaxtextarea:3.3.2",
       ivy"org.apache.groovy:groovy:4.0.0",
       ivy"org.jogamp.gluegen:gluegen-rt:v2.4.0-rc4",
       ivy"org.jogamp.jogl:jogl-all:v2.4.0-rc4"

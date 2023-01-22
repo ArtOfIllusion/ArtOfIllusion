@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
    Changes Copyright (C) 2023 by Lucas Stanek
+   Changes Copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,6 +20,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.prefs.Preferences;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -155,28 +157,15 @@ public class ExecuteScriptWindow extends BFrame
     updateEditableStatus(NEW_SCRIPT_NAME, scriptAbsolutePath);
   }
   
-  class LanguageRenderer extends JLabel implements ListCellRenderer  
+  class LanguageRenderer extends DefaultListCellRenderer
   {
+    
     @Override
-    public Component getListCellRendererComponent(JList list, Object value, 
-            int index, boolean isSelected, boolean hasFocus)
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean hasFocus)
     {
-      String selectedLanguage = ((String)value);
-      final ImageIcon languageIcon = new ImageIcon (getClass().getResource("/artofillusion/Icons/"
-              + selectedLanguage + ".png"));
-      if (isSelected)
-      {
-        setBackground(list.getSelectionBackground());
-        setForeground(list.getSelectionForeground());
-      } 
-      else
-      {
-        setBackground(list.getBackground());
-        setForeground(list.getForeground());
-      }
-      setIcon (languageIcon);
-      setText (selectedLanguage);
-      return this;
+      JLabel cc = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
+      cc.setIcon(new ImageIcon(getClass().getResource("/artofillusion/Icons/" + value + ".png")));      
+      return cc;
     }
   }
 

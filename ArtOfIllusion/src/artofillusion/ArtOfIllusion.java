@@ -100,7 +100,7 @@ public class ArtOfIllusion
     }
     
   }
-  
+
   public static void main(String args[])
   {
     Translate.setLocale(Locale.getDefault());

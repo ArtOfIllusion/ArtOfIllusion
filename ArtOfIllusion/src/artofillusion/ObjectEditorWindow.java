@@ -498,7 +498,7 @@ public abstract class ObjectEditorWindow extends BFrame implements EditingWindow
         ArtOfIllusion.showErrors(errors);
     }
   }
-  
+
   /**
    * This is overridden to notify all plugins when the window is closed.
    */

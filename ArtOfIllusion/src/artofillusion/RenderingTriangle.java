@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2005 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,8 +25,8 @@ public abstract class RenderingTriangle implements Cloneable
   public int index, v1, v2, v3, n1, n2, n3;
   public RenderingMesh theMesh;
 
-  private static double EMPTY_ARRAY[] = new double [0];
-  protected static ThreadLocal tempParamValues = new ThreadLocal(); // Used when rendering layered textures
+  private static final double EMPTY_ARRAY[] = new double [0];
+  protected static ThreadLocal<double[]> tempParamValues = new ThreadLocal<>(); // Used when rendering layered textures
 
   public RenderingTriangle(int v1, int v2, int v3, int n1, int n2, int n3)
   {
@@ -81,7 +82,7 @@ public abstract class RenderingTriangle implements Cloneable
     ParameterValue param[] = theMesh.param;
     if (param.length == 0)
       return EMPTY_ARRAY; // Avoid creating unnecessary objects during rendering.
-    double value[] = (double []) tempParamValues.get();
+    double[] value = tempParamValues.get();
     if (value != null)
       return value;
     value = new double [param.length];

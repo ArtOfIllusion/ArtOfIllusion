@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -242,9 +242,9 @@ public class PointLight extends Light
       case 0:
         return color.duplicate();
       case 1:
-        return new Double(intensity);
+        return Double.valueOf(intensity);
       case 2:
-        return new Double(decayRate);
+        return Double.valueOf(decayRate);
       case 3:
         return radius;
       case 4:

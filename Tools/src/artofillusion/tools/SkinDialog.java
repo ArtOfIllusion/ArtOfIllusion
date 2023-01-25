@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
-   Changes copyright (C) 2020-2022 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -36,7 +36,7 @@ public class SkinDialog extends BDialog
 
   private static int counter = 1;
 
-  public SkinDialog(LayoutWindow window, Vector curves)
+  public SkinDialog(LayoutWindow window, Vector<ObjectInfo> curves)
   {
     super(window, Translate.text("Tools:skin.dialog.title"), true);
     this.window = window;
@@ -51,7 +51,7 @@ public class SkinDialog extends BDialog
     content.add(UIUtilities.createScrollingList(curveList = new BList()), 0, 0);
     for (int i = 0; i < curves.size(); i++)
     {
-      curve[i] = (ObjectInfo) curves.elementAt(i);
+      curve[i] = curves.elementAt(i);
       curveList.add(curve[i].getName());
     }
     curveList.setMultipleSelectionEnabled(false);

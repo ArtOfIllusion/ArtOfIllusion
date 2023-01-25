@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +14,6 @@ package artofillusion;
 import artofillusion.image.filter.*;
 import artofillusion.material.*;
 import artofillusion.object.*;
-import artofillusion.procedural.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
@@ -24,7 +24,7 @@ import java.util.List;
 /**
  * @deprecated This class is deprecated.  Use {@link ArtOfIllusion} and {@link PluginRegistry} instead.
  */
-
+@Deprecated
 public class ModellingApp
 {
   public static final String MAJOR_VERSION = ArtOfIllusion.getMajorVersion();
@@ -63,36 +63,36 @@ public class ModellingApp
 
   public static Renderer[] getRenderers()
   {
-    return (Renderer[]) PluginRegistry.getPlugins(Renderer.class).toArray(new Renderer[0]);
+    return PluginRegistry.getPlugins(Renderer.class).toArray(new Renderer[0]);
   }
   
   /** Get a list of all installed Plugins. */
 
   public static Plugin[] getPlugins()
   {
-    return (Plugin[]) PluginRegistry.getPlugins(Plugin.class).toArray(new Plugin[0]);
+    return PluginRegistry.getPlugins(Plugin.class).toArray(new Plugin[0]);
   }
 
   /** Get a list of all available Translators. */
 
   public static Translator[] getTranslators()
   {
-    return (Translator[]) PluginRegistry.getPlugins(Translator.class).toArray(new Translator[0]);
+    return PluginRegistry.getPlugins(Translator.class).toArray(new Translator[0]);
   }
   
   /** Get a list of all available ModellingTools. */
   
   public static ModellingTool[] getModellingTools()
   {
-    return (ModellingTool[]) PluginRegistry.getPlugins(ModellingTool.class).toArray(new ModellingTool[0]);
+    return PluginRegistry.getPlugins(ModellingTool.class).toArray(new ModellingTool[0]);
   }
   
   /** Get a list of all available Texture classes. */
 
-  public static Class[] getTextureTypes()
+  public static Class<?>[] getTextureTypes()
   {
-    List instances = PluginRegistry.getPlugins(Texture.class);
-    Class classes[] = new Class[instances.size()];
+    List<Texture> instances = PluginRegistry.getPlugins(Texture.class);
+    Class<?> classes[] = new Class<?>[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
     return classes;
@@ -100,10 +100,10 @@ public class ModellingApp
   
   /** Get a list of all available Material classes. */
 
-  public static Class[] getMaterialTypes()
+  public static Class<?>[] getMaterialTypes()
   {
-    List instances = PluginRegistry.getPlugins(Material.class);
-    Class classes[] = new Class[instances.size()];
+    List<Material> instances = PluginRegistry.getPlugins(Material.class);
+    Class<?>[] classes = new Class<?>[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
     return classes;
@@ -111,10 +111,10 @@ public class ModellingApp
   
   /** Get a list of all available TextureMapping classes. */
 
-  public static Class[] getTextureMappings()
+  public static Class<?>[] getTextureMappings()
   {
-    List instances = PluginRegistry.getPlugins(TextureMapping.class);
-    Class classes[] = new Class[instances.size()];
+    List<TextureMapping> instances = PluginRegistry.getPlugins(TextureMapping.class);
+    Class<?>[] classes = new Class<?>[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
     return classes;
@@ -122,10 +122,10 @@ public class ModellingApp
   
   /** Get a list of all available MaterialMapping classes. */
 
-  public static Class[] getMaterialMappings()
+  public static Class<?>[] getMaterialMappings()
   {
-    List instances = PluginRegistry.getPlugins(MaterialMapping.class);
-    Class classes[] = new Class[instances.size()];
+    List<MaterialMapping> instances = PluginRegistry.getPlugins(MaterialMapping.class);
+    Class<?>[] classes = new Class<?>[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
     return classes;
@@ -133,10 +133,10 @@ public class ModellingApp
   
   /** Get a list of all available ImageFilter classes. */
 
-  public static Class[] getImageFilters()
+  public static Class<?>[] getImageFilters()
   {
-    List instances = PluginRegistry.getPlugins(ImageFilter.class);
-    Class classes[] = new Class[instances.size()];
+    List<ImageFilter> instances = PluginRegistry.getPlugins(ImageFilter.class);
+    Class<?>[] classes = new Class<?>[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
     return classes;
@@ -144,10 +144,10 @@ public class ModellingApp
 
   /** Get a list of all plugin-defined procedural Module classes. */
 
-  public static Class[] getModules()
+  public static Class<?>[] getModules()
   {
-    List instances = PluginRegistry.getPlugins(artofillusion.procedural.Module.class);
-    Class classes[] = new Class[instances.size()];
+    List<artofillusion.procedural.Module> instances = PluginRegistry.getPlugins(artofillusion.procedural.Module.class);
+    Class<?>[] classes = new Class<?>[instances.size()];
     for (int i = 0; i < classes.length; i++)
       classes[i] = instances.get(i).getClass();
     return classes;
@@ -268,7 +268,7 @@ public class ModellingApp
   /** Get a class specified by name.  This checks both the system classes, and all plugins.
       It also accounts for classes which changed packages in version 1.3. */
   
-  public static Class getClass(String name) throws ClassNotFoundException
+  public static Class<?> getClass(String name) throws ClassNotFoundException
   {
     return ArtOfIllusion.getClass(name);
   }

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2011 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -473,11 +473,11 @@ public class Tube extends Curve
     if (interactive && cachedMesh != null)
       return cachedMesh;
 
-    Vector<MeshVertex> vert = new Vector<MeshVertex>();
-    Vector<Vec3> norm = new Vector<Vec3>();
-    Vector<int[]> face = new Vector<int[]>();
+    Vector<MeshVertex> vert = new Vector<>();
+    Vector<Vec3> norm = new Vector<>();
+    Vector<int[]> face = new Vector<>();
     
-    Vector param = new Vector();
+    Vector<double[]> param = new Vector<>();
     
     subdivideSurface(tol, vert, norm, face, param);
     Vec3 v[] = new Vec3 [vert.size()];
@@ -506,7 +506,7 @@ public class Tube extends Curve
         {
           double val[] = new double [v.length];
           for (int j = 0; j < val.length; j++)
-            val[j] = ((double []) param.elementAt(j))[i];
+            val[j] = param.elementAt(j)[i];
           tubeParamValue[i] = new VertexParameterValue(val);
         }
         else
@@ -557,11 +557,11 @@ public class Tube extends Curve
   {
     // Subdivide the surface and create the triangle mesh.
 
-    Vector<MeshVertex> vert = new Vector<MeshVertex>();
-    Vector<Vec3> norm = new Vector<Vec3>();
-    Vector<int[]> face = new Vector<int[]>();
+    Vector<MeshVertex> vert = new Vector<>();
+    Vector<Vec3> norm = new Vector<>();
+    Vector<int[]> face = new Vector<>();
     
-    Vector param = new Vector();
+    Vector<double[]> param = new Vector<>();
     
     subdivideSurface(tol, vert, norm, face, param);
     Vec3 v[] = new Vec3 [vert.size()];
@@ -584,7 +584,7 @@ public class Tube extends Curve
         {
           double val[] = new double [v.length];
           for (int j = 0; j < val.length; j++)
-            val[j] = ((double []) param.elementAt(j))[i];
+            val[j] = param.elementAt(j)[i];
           tubeParamValue[i] = new VertexParameterValue(val);
         }
         else
@@ -613,7 +613,7 @@ public class Tube extends Curve
       It subdivides the surface and fills in the vectors with lists of vertices, normals,
       faces, and parameter values. */
 
-  private void subdivideSurface(double tol, Vector<MeshVertex> vert, Vector<Vec3> norm, Vector<int []> face, Vector param)
+  private void subdivideSurface(double tol, Vector<MeshVertex> vert, Vector<Vec3> norm, Vector<int []> face, Vector<double[]> param)
   {
     // Subdivide the central curve to the desired tolerance.
 

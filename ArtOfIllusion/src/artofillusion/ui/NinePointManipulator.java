@@ -1,4 +1,5 @@
 /* Copyright (C) 2006 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -91,7 +92,7 @@ public class NinePointManipulator extends EventSource implements Manipulator
 
   public NinePointManipulator(Image images[])
   {
-    this.images = (Image[]) images.clone();
+    this.images = images.clone();
     for (int i = 0; i < images.length; i++)
       if (images[i] != null)
       {

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2015 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -149,7 +149,7 @@ public class OBJImporter
           if (vertIndex.length != fields.length-1)
             vertIndex = new VertexInfo [fields.length-1];
           for (int i = 0; i < vertIndex.length; i++)
-            vertIndex[i] = parseVertexSpec(fields[i+1], vertex, texture, normal, lineno);
+            vertIndex[i] = parseVertexSpec(fields[i+1], vertex.size(), texture.size(), normal.size(), lineno);
           for (int i = 0; i < face.size(); i++)
           {
             if (fields.length == 4)
@@ -493,7 +493,7 @@ public class OBJImporter
   /** Parse the specification for a vertex and return the index of the vertex
       to use. */
 
-  private static VertexInfo parseVertexSpec(String spec, Vector vertex, Vector texture, Vector normal, int lineno) throws Exception
+  private static VertexInfo parseVertexSpec(String spec, int vertex, int texture, int normal, int lineno) throws Exception
   {
     VertexInfo info = new VertexInfo();
     StringTokenizer st = new StringTokenizer(spec, "/", true);
@@ -512,11 +512,11 @@ public class OBJImporter
             int index = Integer.parseInt(value);
             int total;
             if (i == 0)
-              total = vertex.size();
+              total = vertex;
             else if (i == 1)
-              total = texture.size();
+              total = texture;
             else
-              total = normal.size();
+              total = normal;
             if (index < 0)
               index += total;
             else

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Some parts copyright (C) 2005 by Nik Trevallyn-Jones
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -413,9 +413,9 @@ public class VRMLExporter
       }
     else if (obj instanceof ObjectCollection)
       {
-        Enumeration e = ((ObjectCollection) obj).getObjects(info, false, theScene);
+        Enumeration<ObjectInfo> e = ((ObjectCollection) obj).getObjects(info, false, theScene);
         while (e.hasMoreElements())
-          writeObject((ObjectInfo) e.nextElement(), info, out, tol, smooth, indent+2, theScene, textureExporter);
+          writeObject(e.nextElement(), info, out, tol, smooth, indent+2, theScene, textureExporter);
       }
     else
       {

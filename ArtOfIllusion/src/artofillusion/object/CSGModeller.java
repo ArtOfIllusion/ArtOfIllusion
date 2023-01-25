@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2015 by Peter Eastman and Marco Brenco
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -71,10 +72,10 @@ public class CSGModeller
 
     // Create the lists of vertices, edges, and faces for each mesh.
 
-    vert1 = new Vector<VertexInfo>();
-    vert2 = new Vector<VertexInfo>();
-    face1 = new Vector<FaceInfo>();
-    face2 = new Vector<FaceInfo>();
+    vert1 = new Vector<>();
+    vert2 = new Vector<>();
+    face1 = new Vector<>();
+    face2 = new Vector<>();
     TriangleMesh.Vertex vert[] = (TriangleMesh.Vertex []) obj1.getVertices();
     Mat4 trans = coords1.fromLocal();
     for (int i = 0; i < vert.length; i++)
@@ -120,9 +121,9 @@ public class CSGModeller
 
   public TriangleMesh getMesh(int op, Texture texture)
   {
-    Vector<VertexInfo> allVert = new Vector<VertexInfo>();
-    Vector<int[]> faceIndex = new Vector<int[]>();
-    Vector<float[]> faceSmoothness = new Vector<float[]>();
+    Vector<VertexInfo> allVert = new Vector<>();
+    Vector<int[]> faceIndex = new Vector<>();
+    Vector<float[]> faceSmoothness = new Vector<>();
     int index1[] = new int [vert1.size()], index2[] = new int [vert2.size()];
     int firstBoundary = -1, faces1;
 
@@ -1584,21 +1585,21 @@ public class CSGModeller
   /* Mark a vertex as inside or outside, the recursively call this routine for vertices
      of adjacent faces. */
 
-  private void markVertex(int which, int value, Vector v1, Vector f1, int vertFace[][], int stackDepth)
+  private void markVertex(int which, int value, Vector<VertexInfo> v1, Vector<FaceInfo> f1, int vertFace[][], int stackDepth)
   {
-    VertexInfo v = (VertexInfo) v1.elementAt(which);
+    VertexInfo v = v1.elementAt(which);
     v.type = value;
     if (stackDepth == 500)
       return; // Limit recursion to prevent stack overflows.
     for (int i = 0; i < vertFace[which].length; i++)
     {
-      FaceInfo f = (FaceInfo) f1.elementAt(vertFace[which][i]);
+      FaceInfo f = f1.elementAt(vertFace[which][i]);
       if (f.type == UNKNOWN || f.type == value)
       {
         f.type = value;
-        VertexInfo vi1 = (VertexInfo) v1.elementAt(f.v1);
-        VertexInfo vi2 = (VertexInfo) v1.elementAt(f.v2);
-        VertexInfo vi3 = (VertexInfo) v1.elementAt(f.v3);
+        VertexInfo vi1 = v1.elementAt(f.v1);
+        VertexInfo vi2 = v1.elementAt(f.v2);
+        VertexInfo vi3 = v1.elementAt(f.v3);
         if (vi1.type == UNKNOWN)
           markVertex(f.v1, value, v1, f1, vertFace, stackDepth+1);
         if (vi2.type == UNKNOWN)
@@ -1698,11 +1699,11 @@ public class CSGModeller
     float smoothness1, smoothness2, smoothness3;
     double distRoot, min, max;
 
-    public FaceInfo(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3)
+    public FaceInfo(int v1, int v2, int v3, Vector<VertexInfo> vertices, float s1, float s2, float s3)
     {
-      Vec3 vert1 = ((VertexInfo) vertices.elementAt(v1)).r;
-      Vec3 vert2 = ((VertexInfo) vertices.elementAt(v2)).r;
-      Vec3 vert3 = ((VertexInfo) vertices.elementAt(v3)).r;
+      Vec3 vert1 = vertices.elementAt(v1).r;
+      Vec3 vert2 = vertices.elementAt(v2).r;
+      Vec3 vert3 = vertices.elementAt(v3).r;
       Vec3 normal = vert2.minus(vert1).cross(vert3.minus(vert1));
       double length = normal.length();
       if (length > 0.0)
@@ -1711,12 +1712,12 @@ public class CSGModeller
       init(v1, v2, v3, vertices, s1, s2, s3, normal, dist);
     }
 
-    public FaceInfo(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
+    public FaceInfo(int v1, int v2, int v3, Vector<VertexInfo> vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
     {
       init(v1, v2, v3, vertices, s1, s2, s3, norm, distRoot);
     }
 
-    private void init(int v1, int v2, int v3, Vector vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
+    private void init(int v1, int v2, int v3, Vector<VertexInfo> vertices, float s1, float s2, float s3, Vec3 norm, double distRoot)
     {
       this.norm = norm;
       this.distRoot = distRoot;
@@ -1728,9 +1729,9 @@ public class CSGModeller
       smoothness3 = s3;
       type = UNKNOWN;
       double minx, miny, minz, maxx, maxy, maxz;
-      Vec3 vert1 = ((VertexInfo) vertices.elementAt(v1)).r;
-      Vec3 vert2 = ((VertexInfo) vertices.elementAt(v2)).r;
-      Vec3 vert3 = ((VertexInfo) vertices.elementAt(v3)).r;
+      Vec3 vert1 = vertices.elementAt(v1).r;
+      Vec3 vert2 = vertices.elementAt(v2).r;
+      Vec3 vert3 = vertices.elementAt(v3).r;
       minx = Math.min(Math.min(vert1.x, vert2.x), vert3.x);
       miny = Math.min(Math.min(vert1.y, vert2.y), vert3.y);
       minz = Math.min(Math.min(vert1.z, vert2.z), vert3.z);

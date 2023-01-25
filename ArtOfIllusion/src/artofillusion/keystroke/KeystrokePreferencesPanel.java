@@ -1,5 +1,5 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,7 +39,7 @@ public class KeystrokePreferencesPanel extends FormContainer
   {
     super(new double [] {1}, new double [] {1, 0});
     KeystrokeRecord allRecords[] = KeystrokeManager.getAllRecords();
-    records = new ArrayList<KeystrokeRecord>(allRecords.length);
+    records = new ArrayList<>(allRecords.length);
     for (int i = 0; i < allRecords.length; i++)
       records.add(allRecords[i]);
     table = new BTable(new KeystrokeTableModel());
@@ -163,8 +163,7 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void sortRecords()
   {
-    final Comparator stringComparator = Collator.getInstance(Translate.getLocale());
-    Collections.sort(records, new Comparator<KeystrokeRecord>()
+    Collections.sort(records, new Comparator<>()
     {
       @Override
       public int compare(KeystrokeRecord r1, KeystrokeRecord r2)
@@ -180,7 +179,7 @@ public class KeystrokePreferencesPanel extends FormContainer
           s1 = r1.getName();
           s2 = r2.getName();
         }
-        return stringComparator.compare(s1, s2);
+        return Collator.getInstance(Translate.getLocale()).compare(s1, s2);
       }
     });
     ((KeystrokeTableModel) table.getModel()).fireTableDataChanged();

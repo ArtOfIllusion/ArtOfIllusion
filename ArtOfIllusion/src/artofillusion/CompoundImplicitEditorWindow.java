@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -113,7 +113,7 @@ public class CompoundImplicitEditorWindow extends ObjectEditorWindow
     menubar.add(viewMenu);
     viewMenu.add(displayMenu = Translate.menu("displayMode"));
     displayItem = new BCheckBoxMenuItem [5];
-    ViewerCanvas view = (ViewerCanvas) theView[currentView];
+    ViewerCanvas view = theView[currentView];
     displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
     displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_FLAT));
     displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH));

@@ -1,6 +1,6 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -38,7 +38,7 @@ public class HDRImage extends ImageMap
   {
     buildMipMaps(r, g, b, e, xres, yres);
     findAverage();
-    preview = new SoftReference(null);
+    preview = new SoftReference<>(null);
   }
 
   /** Given the r, g, b, and e arrays for an image, this method builds the full set of mipmaps for it. */
@@ -196,8 +196,8 @@ public class HDRImage extends ImageMap
     }
     else
     {
-      w = Math.max(Math.min(size, (int)Math.round(size*aspectRatio)),1);
-      h = Math.max(Math.min(size, (int)Math.round(size/aspectRatio)),1);
+      w = Math.max(Math.min(size, Math.round(size*aspectRatio)),1);
+      h = Math.max(Math.min(size, Math.round(size/aspectRatio)),1);
     }
     int data[] = new int [w*h];
     float xstep = width[0]/(float) w;
@@ -586,7 +586,7 @@ public class HDRImage extends ImageMap
     if (previewSize == size && image != null)
       return image;
     image = createPreview(size);
-    preview = new SoftReference(image);
+    preview = new SoftReference<>(image);
     return image;
   }
 
@@ -640,7 +640,7 @@ public class HDRImage extends ImageMap
       
       buildMipMaps(map[0], map[1], map[2], map[3], w, h);
       findAverage();
-      preview = new SoftReference(null);
+      preview = new SoftReference<>(null);
     }
   }
 

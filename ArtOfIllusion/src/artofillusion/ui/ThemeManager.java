@@ -1,6 +1,6 @@
 /* Copyright (C) 2007 by François Guillet
    Some parts copyright 2007 by Peter Eastman
-   Changes copyright (C) 2017-2022 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
  This program is free software; you can redistribute it and/or modify it under the
  terms of the GNU General Public License as published by the Free Software
@@ -130,7 +130,7 @@ public class ThemeManager {
       private final String name;
       public final String author;
       public final String description;
-      public final Class buttonClass;
+      public final Class<?> buttonClass;
       //this is the button style parameters for this theme.
       //Relevant XML node is passed onto the button class so it can parse
       //it and deliver button style parameters the theme will give the buttons
@@ -190,7 +190,7 @@ public class ThemeManager {
         if (node != null) {
             String className = getAttribute(node, "class");
             Object properties = null;
-            Class cls = DefaultToolButton.class;
+            Class<?> cls = DefaultToolButton.class;
             try {
               cls = resource.getClassLoader().loadClass(className);
               Method m = cls.getMethod("readPropertiesFromXMLNode", Node.class);
@@ -267,11 +267,11 @@ public class ThemeManager {
      */
     public static class ButtonStyle
     {
-        protected Class ownerType;
+        protected Class<?> ownerType;
         protected int width = -1;
         protected int height = -1;
 
-        protected Map<String, String> attributes = new HashMap<String, String>();
+        protected Map<String, String> attributes = new HashMap<>();
         protected ButtonStyle next;
 
         /**
@@ -499,7 +499,7 @@ public class ThemeManager {
       int colon = name.indexOf(':');
       if (colon > -1)
       {
-        defaultSource = (ThemeInfo) themeIdMap.get(name.substring(0, colon));
+        defaultSource = themeIdMap.get(name.substring(0, colon));
         name = name.substring(colon+1);
       }
       URL url = null;
@@ -596,8 +596,8 @@ public class ThemeManager {
      */
     public static ToolButton getToolButton(Object owner, String iconName)
     {
-        Class buttonClass = selectedTheme.buttonClass;
-        Constructor ctor;
+        Class<?> buttonClass = selectedTheme.buttonClass;
+        Constructor<?> ctor;
         URL url = getIconURL(iconName);
         ImageIcon selected = null;
 
@@ -719,15 +719,15 @@ public class ThemeManager {
     {
       if (themeList != null)
         throw new IllegalStateException("The themes have already been initialized.");
-      themeIdMap = new HashMap<String, ThemeInfo>();
+      themeIdMap = new HashMap<>();
       documentBuilderFactory = DocumentBuilderFactory.newInstance();
-      List resources = PluginRegistry.getResources("UITheme");
-      ArrayList<ThemeInfo> list = new ArrayList<ThemeInfo>();
+      List<PluginRegistry.PluginResource> resources = PluginRegistry.getResources("UITheme");
+      ArrayList<ThemeInfo> list = new ArrayList<>();
       for (int i = 0; i < resources.size(); i++)
       {
         try
         {
-          ThemeInfo themeInfo = new ThemeInfo((PluginRegistry.PluginResource) resources.get(i));
+          ThemeInfo themeInfo = new ThemeInfo(resources.get(i));
           list.add(themeInfo);
         }
         catch (Exception ex)

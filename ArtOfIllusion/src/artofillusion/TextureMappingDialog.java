@@ -1,5 +1,5 @@
 /* Copyright (C) 2000,2002-2004 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ public class TextureMappingDialog extends BDialog
 {
   private FormContainer content;
   private Object3D origObj, editObj;
-  private Vector<Class> mappings;
+  private Vector<Class<?>> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private TextureMapping map, oldMapping;
@@ -56,7 +56,7 @@ public class TextureMappingDialog extends BDialog
 
     // Make a list of all texture mappings which can be used for this object and texture.
 
-    mappings = new Vector<Class>();
+    mappings = new Vector<>();
     for (TextureMapping mapping: PluginRegistry.getPlugins(TextureMapping.class))
     {
       try
@@ -93,7 +93,7 @@ public class TextureMappingDialog extends BDialog
       try
       {
         Method mtd = mappings.get(i).getMethod("getName");
-        mapChoice.add((String) mtd.invoke(null, null));
+        mapChoice.add((String) mtd.invoke(null));
         if (mappings.get(i) == map.getClass())
           mapChoice.setSelectedIndex(i);
       }
@@ -130,10 +130,10 @@ public class TextureMappingDialog extends BDialog
   {
     try
     {
-      Class cls = mappings.get(mapChoice.getSelectedIndex());
+      Class<?> cls = mappings.get(mapChoice.getSelectedIndex());
       if (cls == map.getClass())
         return;
-      Constructor con = cls.getConstructor(Object3D.class, Texture.class);
+      Constructor<?> con = cls.getConstructor(Object3D.class, Texture.class);
       Texture tex = layered ? ((LayeredMapping) editObj.getTextureMapping()).getLayer(layer)
           : editObj.getTexture();
       setMapping((TextureMapping) con.newInstance(editObj, tex));

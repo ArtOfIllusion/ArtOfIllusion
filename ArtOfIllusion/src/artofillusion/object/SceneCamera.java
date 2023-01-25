@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications Copyright 2016 by Petri Ihalainen
-   Changes copyright (C) 2020-2022 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -543,7 +543,7 @@ public class SceneCamera extends Object3D
       {
         for (int i = 0; i < filter.length; i++)
         {
-          Class cls = ArtOfIllusion.getClass(in.readUTF());
+          Class<?> cls = ArtOfIllusion.getClass(in.readUTF());
           filter[i] = (ImageFilter) cls.getDeclaredConstructor().newInstance();
           filter[i].initFromStream(in, theScene);
         }

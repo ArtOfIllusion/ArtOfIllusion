@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2009 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -111,9 +112,9 @@ public class UIUtilities
     w.setFont(UIUtilities.getDefaultFont());
     if (w instanceof WidgetContainer && !(w instanceof BMenuBar))
     {
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
+      Iterator<Widget> children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
-        applyDefaultFont((Widget) children.next());
+        applyDefaultFont(children.next());
     }
   }
   
@@ -132,9 +133,9 @@ public class UIUtilities
     if (w instanceof WidgetContainer)
     {
       w.setBackground(color);
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
+      Iterator<Widget> children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
-        applyBackground((Widget) children.next(), color);
+        applyBackground(children.next(), color);
     }
     else if (w instanceof BLabel)
       w.setBackground(color);
@@ -148,9 +149,9 @@ public class UIUtilities
   {
     if (w instanceof WidgetContainer)
     {
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
+      Iterator<Widget> children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
-        applyTextColor((Widget) children.next(), color);
+        applyTextColor(children.next(), color);
     }
     else if (w instanceof BLabel || w instanceof BCheckBox || w instanceof BRadioButton)
       w.getComponent().setForeground(color);
@@ -199,7 +200,7 @@ public class UIUtilities
     if (lines < 2)
       return new String [] {s};
     int lineLength = s.length()/lines;
-    Vector<String> line = new Vector<String>();
+    Vector<String> line = new Vector<>();
     int index = 0;
     while (index+lineLength < s.length())
     {
@@ -223,9 +224,9 @@ public class UIUtilities
     w.setEnabled(enabled);
     if (w instanceof WidgetContainer)
     {
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
+      Iterator<Widget> children = ((WidgetContainer) w).getChildren().iterator();
       while (children.hasNext())
-        setEnabled((Widget) children.next(), enabled);
+        setEnabled(children.next(), enabled);
     }
   }
 
@@ -236,7 +237,7 @@ public class UIUtilities
 
   public static List<Widget> findAllChildren(Widget w)
   {
-    ArrayList<Widget> list = new ArrayList<Widget>();
+    ArrayList<Widget> list = new ArrayList<>();
     addChildrenToList(w, list);
     return list;
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2003-2006 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -169,8 +170,8 @@ public class FaceVertexParameterValue implements ParameterValue
   public ParameterValue duplicate()
   {
     FaceVertexParameterValue copy = new FaceVertexParameterValue();
-    copy.values = (double[]) values.clone();
-    copy.faceStartIndex = (int[]) faceStartIndex.clone();
+    copy.values = values.clone();
+    copy.faceStartIndex = faceStartIndex.clone();
     return copy;
   }
 

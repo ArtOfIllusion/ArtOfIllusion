@@ -1,6 +1,6 @@
 /* Copyright (C) 2011-2012 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -53,7 +53,7 @@ public class SVGImage extends ImageMap
     URI uri = universe.loadSVG(new InputStreamReader(new ByteArrayInputStream(xml)), "image");
     svg = universe.getDiagram(uri);
     svg.setIgnoringClipHeuristic(true);
-    tiles = new HashMap<TileKey, SoftReference<int[]>>();
+    tiles = new HashMap<>();
 
     aspectRatio = svg.getWidth()/svg.getHeight();
     BufferedImage pim = createPreview(PREVIEW_SIZE_TEMPLATE);
@@ -76,15 +76,15 @@ public class SVGImage extends ImageMap
     for (int i = 0; i < 4; i++)
       average[i] /= 255.0f*w*h;
     average[3] = 1-average[3];
-    preview = new SoftReference(null);
+    preview = new SoftReference<>(null);
   }
 
   private BufferedImage createPreview(int size) throws SVGException
   {
     float aspectRatio = svg.getWidth()/svg.getHeight();
     int previewWidth, previewHeight;
-    previewWidth  = Math.max(Math.min(size, (int)Math.round(size*aspectRatio)),1);
-    previewHeight = Math.max(Math.min(size, (int)Math.round(size/aspectRatio)),1);
+    previewWidth  = Math.max(Math.min(size, Math.round(size*aspectRatio)),1);
+    previewHeight = Math.max(Math.min(size, Math.round(size/aspectRatio)),1);
     BufferedImage bi = new BufferedImage(previewWidth, previewHeight, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = bi.createGraphics();
     g.setClip(0, 0, (int) svg.getWidth(), (int) svg.getHeight());
@@ -127,14 +127,14 @@ public class SVGImage extends ImageMap
         try
         {
           BufferedImage image = createImage(x, y, scale);
-          tile = ((DataBufferInt) ((BufferedImage) image).getRaster().getDataBuffer()).getData();
+          tile = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         }
         catch (SVGException ex)
         {
           ex.printStackTrace();
           tile = new int[TILE_SIZE*TILE_SIZE];
         }
-        tiles.put(key.clone(), new SoftReference<int[]>(tile));
+        tiles.put(key.clone(), new SoftReference<>(tile));
       }
     }
     return tile;
@@ -420,7 +420,7 @@ public class SVGImage extends ImageMap
       if (size == previewSize && pim != null)
         return pim;
       pim = createPreview(size);
-      preview = new SoftReference(pim);
+      preview = new SoftReference<>((BufferedImage)pim);
       return pim;
     }
     catch(SVGException se)

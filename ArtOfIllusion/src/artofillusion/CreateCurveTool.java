@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes copyrignt (C) 2016 by Petri Ihalainen
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -124,13 +124,13 @@ public class CreateCurveTool extends EditingTool
   {
     if (clickPoint == null)
     {
-      clickPoint = new Vector<Vec3>();
-      smoothness = new Vector<Float>();
+      clickPoint = new Vector<>();
+      smoothness = new Vector<>();
       view.repaint();
     }
     else
     {
-      Vec3 pos = (Vec3) clickPoint.lastElement();
+      Vec3 pos = clickPoint.lastElement();
       Vec2 screenPos = view.getCamera().getWorldToScreen().timesXY(pos);
       view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), e.getPoint()));
     }
@@ -142,7 +142,7 @@ public class CreateCurveTool extends EditingTool
     if (clickPoint.isEmpty())
       return;
     Point dragPoint = e.getPoint();
-    Vec3 pos = (Vec3) clickPoint.lastElement();
+    Vec3 pos = clickPoint.lastElement();
     Vec2 screenPos = view.getCamera().getWorldToScreen().timesXY(pos);
     view.drawDraggedShape(new Line2D.Float(new Point2D.Double(screenPos.x, screenPos.y), dragPoint));
   }
@@ -169,7 +169,7 @@ public class CreateCurveTool extends EditingTool
         orig = new Vec3();
         for (int i = 0; i < vertex.length; i++)
         {
-          vertex[i] = (Vec3) clickPoint.elementAt(i);
+          vertex[i] = clickPoint.elementAt(i);
           s[i] = smoothness.elementAt(i);
           orig = orig.plus(vertex[i]);
         }

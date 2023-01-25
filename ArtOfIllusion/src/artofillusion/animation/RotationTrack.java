@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -123,7 +123,7 @@ public class RotationTrack extends Track
     t.quaternion = quaternion;
     t.tc = tc.duplicate((ObjectInfo) obj);
     t.relObject = relObject.duplicate();
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     t.enablex = enablex;
     t.enabley = enabley;
     t.enablez = enablez;
@@ -147,7 +147,7 @@ public class RotationTrack extends Track
     quaternion = t.quaternion;
     tc = t.tc.duplicate(info);
     relObject = t.relObject.duplicate();
-    theWeight = (WeightTrack) t.theWeight.duplicate(this);
+    theWeight = t.theWeight.duplicate(this);
     enablex = t.enablex;
     enabley = t.enabley;
     enablez = t.enablez;

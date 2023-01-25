@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2012 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -52,7 +53,7 @@ public abstract class ObjectCollection extends Object3D
   {
     if (interactive && cachedObjects != null && info.getDistortion() == previousDistortion)
       return cachedObjects.elements();
-    Vector<ObjectInfo> objectVec = new Vector<ObjectInfo>();
+    Vector<ObjectInfo> objectVec = new Vector<>();
     Enumeration<ObjectInfo> objects = enumerateObjects(info, interactive, scene);
     while (objects.hasMoreElements())
     {
@@ -124,12 +125,11 @@ public abstract class ObjectCollection extends Object3D
   @Override
   public boolean isClosed()
   {
-    for (int i = 0; i < cachedObjects.size(); i++)
-      {
-        ObjectInfo info = (ObjectInfo) cachedObjects.elementAt(i);
-        if (!info.getObject().isClosed())
-          return false;
-      }
+    for (ObjectInfo info: cachedObjects)
+    {        
+      if (!info.getObject().isClosed())
+        return false;
+    }
     return true;
   }
 
@@ -168,10 +168,10 @@ public abstract class ObjectCollection extends Object3D
   {
     Camera theCamera = canvas.getCamera();
     Mat4 m = theCamera.getObjectToWorld();
-    Enumeration enm = getObjects(obj, true, canvas.getScene());
+    Enumeration<ObjectInfo> enm = getObjects(obj, true, canvas.getScene());
     while (enm.hasMoreElements())
     {
-      ObjectInfo info = (ObjectInfo) enm.nextElement();
+      ObjectInfo info = enm.nextElement();
       CoordinateSystem coords = info.getCoords().duplicate();
       coords.transformCoordinates(m);
       theCamera.setObjectTransform(coords.fromLocal());
@@ -192,9 +192,9 @@ public abstract class ObjectCollection extends Object3D
   @Override
   public TriangleMesh convertToTriangleMesh(double tol)
   {
-    ArrayList<Vec3> allVert = new ArrayList<Vec3>();
-    ArrayList<Float> vertSmoothness = new ArrayList<Float>();
-    ArrayList<int[]> allFace = new ArrayList<int[]>();
+    ArrayList<Vec3> allVert = new ArrayList<>();
+    ArrayList<Float> vertSmoothness = new ArrayList<>();
+    ArrayList<int[]> allFace = new ArrayList<>();
     class Edge {
       public int v1, v2;
       public float smoothness;
@@ -205,14 +205,14 @@ public abstract class ObjectCollection extends Object3D
         this.smoothness = smoothness;
       }
     }
-    ArrayList<Edge> edgeSmoothness = new ArrayList<Edge>();
+    ArrayList<Edge> edgeSmoothness = new ArrayList<>();
     int start = 0;
-    Enumeration objects = getObjects(new ObjectInfo(this, lastCoords, ""), false, lastScene);
+    Enumeration<ObjectInfo> objects = getObjects(new ObjectInfo(this, lastCoords, ""), false, lastScene);
     while (objects.hasMoreElements())
       {
         // Convert the object to a TriangleMesh.
 
-        ObjectInfo obj = (ObjectInfo) objects.nextElement();
+        ObjectInfo obj = objects.nextElement();
         if (obj.getObject().canConvertToTriangleMesh() == CANT_CONVERT)
           continue;
         Mat4 trans = obj.getCoords().fromLocal();
@@ -280,13 +280,13 @@ public abstract class ObjectCollection extends Object3D
         lastCoords = info.getCoords().duplicate();
         lastInfo = info;
         cachedObjects = null;
-        Enumeration objects = getObjects(info, true, scene);
+        Enumeration<ObjectInfo> objects = getObjects(info, true, scene);
         if (!objects.hasMoreElements())
           cachedBounds = new BoundingBox(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
         else
           while (objects.hasMoreElements())
             {
-              ObjectInfo obj = (ObjectInfo) objects.nextElement();
+              ObjectInfo obj = objects.nextElement();
               BoundingBox bounds = obj.getBounds();
               bounds = bounds.transformAndOutset(obj.getCoords().fromLocal());
               if (cachedBounds == null)

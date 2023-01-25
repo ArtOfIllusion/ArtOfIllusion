@@ -1,6 +1,6 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
    Changes Copyright 2016-2019 by Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -340,13 +340,13 @@ public class SpotLight extends Light
       case 0:
         return color.duplicate();
       case 1:
-        return new Double(intensity);
+        return Double.valueOf(intensity);
       case 2:
         return angle;
       case 3:
         return falloff;
       case 4:
-        return new Double(decayRate);
+        return Double.valueOf(decayRate);
       case 5:
         return radius;
       case 6:

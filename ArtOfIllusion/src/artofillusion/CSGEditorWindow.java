@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications copyright (C) 2016-2017 Petri Ihalainen
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -117,7 +117,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     menubar.add(viewMenu);
     viewMenu.add(displayMenu = Translate.menu("displayMode"));
     displayItem = new BCheckBoxMenuItem [5];
-    ViewerCanvas view = (ViewerCanvas) theView[currentView];
+    ViewerCanvas view = theView[currentView];
     displayMenu.add(displayItem[0] = Translate.checkboxMenuItem("wireframeDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_WIREFRAME));
     displayMenu.add(displayItem[1] = Translate.checkboxMenuItem("shadedDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_FLAT));
     displayMenu.add(displayItem[2] = Translate.checkboxMenuItem("smoothDisplay", this, "displayModeChanged", view.getRenderMode() == ViewerCanvas.RENDER_SMOOTH));
@@ -622,7 +622,7 @@ public class CSGEditorWindow extends ObjectEditorWindow
     if (selected.length == 0)
       return;
 
-    ArrayList<ObjectInfo> selection = new ArrayList<ObjectInfo>();
+    ArrayList<ObjectInfo> selection = new ArrayList<>();
 
     // This did not work if only object 1 was selected. Strange bug.
     //for (int s : selected)
@@ -636,6 +636,6 @@ public class CSGEditorWindow extends ObjectEditorWindow
   /** Fit the active view to the whole boolean */
   public void fitToBooleanCommand()
   {
-    getView().fitToObjects(theScene.getAllObjects());
+    getView().fitToObjects(theScene.getObjects());
   }
 }

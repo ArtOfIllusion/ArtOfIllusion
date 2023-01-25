@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2017-2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -47,7 +47,7 @@ public class SceneViewer extends ViewerCanvas
     parentFrame = fr;
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     draggingBox = draggingSelectionBox = false;
-    cameras = new Vector<ObjectInfo>();
+    cameras = new Vector<>();
     buildChoices(p);
     rebuildCameraList();
     setRenderMode(ArtOfIllusion.getPreferences().getDefaultDisplayMode());
@@ -77,15 +77,15 @@ public class SceneViewer extends ViewerCanvas
     cameras.clear();
     cameras.addAll(theScene.getCameras());
     
-    for(ObjectInfo info: theScene.getAllObjects())
+    for(ObjectInfo info: theScene.getObjects())
     {
       Object3D obj = info.getObject();
       if(obj instanceof DirectionalLight || obj instanceof SpotLight)
          cameras.add(info);
     }
-    for (Iterator iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
+    for (Iterator<Widget> iter = getViewerControlWidgets().values().iterator(); iter.hasNext(); )
     {
-      Widget w = (Widget) iter.next();
+      Widget w = iter.next();
       if (w instanceof ViewerOrientationControl.OrientationChoice)
         ((ViewerOrientationControl.OrientationChoice) w).rebuildCameraList();
     }
@@ -282,8 +282,8 @@ public class SceneViewer extends ViewerCanvas
 
     if (currentTool.hilightSelection())// && !animation.changingPerspective())
     {
-      ArrayList<Rectangle> selectedBoxes = new ArrayList<Rectangle>();
-      ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<Rectangle>();
+      ArrayList<Rectangle> selectedBoxes = new ArrayList<>();
+      ArrayList<Rectangle> parentSelectedBoxes = new ArrayList<>();
       for (ObjectInfo obj: theScene.getObjects())
       {
         int hsize;

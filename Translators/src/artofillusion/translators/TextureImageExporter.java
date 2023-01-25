@@ -1,4 +1,5 @@
 /* Copyright (C) 2003 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +14,6 @@ package artofillusion.translators;
 import artofillusion.image.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
-import artofillusion.procedural.*;
 import artofillusion.texture.*;
 import java.awt.Image;
 import java.io.*;
@@ -155,7 +155,7 @@ public class TextureImageExporter
 
   /** Get an Enumeration of all TextureImageInfos. */
 
-  public Enumeration getTextures()
+  public Enumeration<TextureImageInfo> getTextures()
   {
     return textureTable.elements();
   }
@@ -164,10 +164,10 @@ public class TextureImageExporter
 
   public void saveImages() throws IOException, InterruptedException
   {
-    Enumeration e = textureTable.keys();
+    Enumeration<Texture> e = textureTable.keys();
     while (e.hasMoreElements())
       {
-        Texture tex = (Texture) e.nextElement();
+        Texture tex = e.nextElement();
         TextureImageInfo info = textureTable.get(tex);
         if ((components&DIFFUSE) != 0)
           writeComponentImage(info, Texture2D.DIFFUSE_COLOR_COMPONENT, info.diffuseFilename);

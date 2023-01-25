@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -77,11 +77,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public static final ImageIcon [] LANGUAGE_ICONS;
   static
   {
-    final List <ImageIcon> icons = new ArrayList <ImageIcon>();
+    final List <ImageIcon> icons = new ArrayList<>();
     for (String language : ScriptRunner.getLanguageNames ()) {
       icons.add (new IconResource("artofillusion/Icons/" + language + ".png"));
     }
-      LANGUAGE_ICONS = (ImageIcon[]) icons.toArray(new ImageIcon [0]);
+      LANGUAGE_ICONS = icons.toArray(new ImageIcon [0]);
   }
  
   /** Create a new LayoutWindow for editing a Scene.  Usually, you will not use this constructor directly.
@@ -407,7 +407,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     // Make a table of all DockableWidgets.
 
-    HashMap<String, DockableWidget> widgets = new HashMap<String, DockableWidget>();
+    HashMap<String, DockableWidget> widgets = new HashMap<>();
     for (int i = 0; i < dock.length; i++)
     {
       for (Widget next : dock[i].getChildren())
@@ -1480,7 +1480,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public Collection<ObjectInfo> getSelectedObjects()
   {
-    ArrayList<ObjectInfo> objects = new ArrayList<ObjectInfo>();
+    ArrayList<ObjectInfo> objects = new ArrayList<>();
     for (int index : theScene.getSelection())
       objects.add(theScene.getObject(index));
     return objects;
@@ -1740,7 +1740,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       else if (command.equals("fitToSelection"))
         getView().fitToObjects(getSelectedObjects());
       else if (command.equals("fitToAll"))
-        getView().fitToObjects(getScene().getAllObjects());
+        getView().fitToObjects(getScene().getObjects());
       else if (command.equals("alignWithClosestAxis"))
         getView().alignWithClosestAxis();
       /*
@@ -1994,7 +1994,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     // Create the duplicates.
 
-    HashMap<ObjectInfo, ObjectInfo> duplicateMap = new HashMap<ObjectInfo, ObjectInfo>();
+    HashMap<ObjectInfo, ObjectInfo> duplicateMap = new HashMap<>();
     for (int i = 0; i < sel.length; i++)
     {
       ObjectInfo original = (ObjectInfo) sel[i];
@@ -2148,7 +2148,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         obj[i].getCoords().setOrientation(angles[0], angles[1], angles[2]);
         obj[i].getObject().setSize(size.x, size.y, size.z);
       }
-      ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+      ArrayList<ObjectInfo> modified = new ArrayList<>();
       for (int index : sel)
         modified.add(theScene.getObject(index));
       theScene.applyTracksAfterModification(modified);
@@ -2205,7 +2205,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     if (!Double.isNaN(values[5]))
       m = m.times(Mat4.zrotation(values[5]*Math.PI/180.0));
     UndoRecord undo = new UndoRecord(this, false);
-    HashSet<Object3D> scaledObjects = new HashSet<Object3D>();
+    HashSet<Object3D> scaledObjects = new HashSet<>();
     for (i = 0; i < sel.length; i++)
     {
       info = theScene.getObject(sel[i]);
@@ -2257,7 +2257,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       info = theScene.getObject(sel[i]);
       theScene.objectModified(info.getObject());
     }
-    ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+    ArrayList<ObjectInfo> modified = new ArrayList<>();
     for (int index : sel)
       modified.add(theScene.getObject(index));
     theScene.applyTracksAfterModification(modified);
@@ -2393,7 +2393,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         orig.z += alignTo.z-orig.z;
       coords.setOrigin(orig);
     }
-    ArrayList<ObjectInfo> modified = new ArrayList<ObjectInfo>();
+    ArrayList<ObjectInfo> modified = new ArrayList<>();
     for (int index : sel)
       modified.add(theScene.getObject(index));
     theScene.applyTracksAfterModification(modified);
@@ -2716,7 +2716,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     BComboBox scriptChoice = new BComboBox();
     scriptChoice.add(Translate.text("newScript"));
     String files[] = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY).list();
-    ArrayList<String> scriptNames = new ArrayList<String>();
+    ArrayList<String> scriptNames = new ArrayList<>();
     if (files != null)
       for (String file : files)
       {
@@ -2781,7 +2781,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       return;
     double t = timeField.getValue();
     double fps = theScene.getFramesPerSecond();
-    t = Math.round(t*fps)/(double) fps;
+    t = Math.round(t * fps) / fps;
     setTime(t);
   }
 

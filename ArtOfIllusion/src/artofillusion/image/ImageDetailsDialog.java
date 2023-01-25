@@ -1,6 +1,6 @@
 /* Copyright (C) 2017 by Petri Ihalainen
    Some methods copyright (C) by Peter Eastman
-   Changes copyright 2019-2020 by Maksim Khramov
+   Changes copyright 2019-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -170,7 +170,7 @@ public class ImageDetailsDialog extends BDialog
     {
         try
         {
-            Graphics2D g = (Graphics2D)canvasImage.createGraphics();
+            Graphics2D g = canvasImage.createGraphics();
             Image image = im.getPreview(600);
             if (image == null)
                 return;
@@ -358,9 +358,9 @@ public class ImageDetailsDialog extends BDialog
         w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
         if (w instanceof WidgetContainer)
         {
-            Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+            Iterator<Widget> iter = ((WidgetContainer) w).getChildren().iterator();
             while (iter.hasNext())
-                addAsListener((Widget) iter.next());
+                addAsListener(iter.next());
         }
     }
     
@@ -371,9 +371,9 @@ public class ImageDetailsDialog extends BDialog
         w.removeEventLink(KeyPressedEvent.class, this);
         if (w instanceof WidgetContainer)
         {
-            Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+            Iterator<Widget> iter = ((WidgetContainer) w).getChildren().iterator();
             while (iter.hasNext())
-                removeAsListener((Widget) iter.next());
+                removeAsListener(iter.next());
         }
     }
     
@@ -503,9 +503,9 @@ public class ImageDetailsDialog extends BDialog
             w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
             if (w instanceof WidgetContainer)
             {
-                Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+                Iterator<Widget> iter = ((WidgetContainer) w).getChildren().iterator();
                 while (iter.hasNext())
-                    addAsListener((Widget) iter.next());
+                    addAsListener(iter.next());
             }
         }
         
@@ -516,9 +516,9 @@ public class ImageDetailsDialog extends BDialog
             w.removeEventLink(KeyPressedEvent.class, this);
             if (w instanceof WidgetContainer)
             {
-                Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+                Iterator<Widget> iter = ((WidgetContainer) w).getChildren().iterator();
                 while (iter.hasNext())
-                    removeAsListener((Widget) iter.next());
+                    removeAsListener(iter.next());
             }
         }
     }

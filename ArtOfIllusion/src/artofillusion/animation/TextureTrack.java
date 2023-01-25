@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -83,7 +83,7 @@ public class TextureTrack extends Track
     t.quantized = quantized;
     t.smoothingMethod = smoothingMethod;
     t.tc = tc.duplicate((ObjectInfo) obj);
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     t.param = param;
     return t;
   }
@@ -100,7 +100,7 @@ public class TextureTrack extends Track
     quantized = t.quantized;
     smoothingMethod = t.smoothingMethod;
     tc = t.tc.duplicate(info);
-    theWeight = (WeightTrack) t.theWeight.duplicate(this);
+    theWeight = t.theWeight.duplicate(this);
     param = t.param;
   }
 
@@ -480,7 +480,7 @@ public class TextureTrack extends Track
     smoothChoice.setSelectedIndex(smoothingMethod);
     TreeList tree = new TreeList(win);
     BScrollPane sp = new BScrollPane(tree);
-    Vector<TreeElement> elements = new Vector<TreeElement>();
+    Vector<TreeElement> elements = new Vector<>();
 
     // Create a tree of all the texture parameters.
 
@@ -492,7 +492,7 @@ public class TextureTrack extends Track
       Texture layer[] = map.getLayers();
       for (int i = 0; i < layer.length; i++)
       {
-        Vector<TreeElement> v = new Vector<TreeElement>();
+        Vector<TreeElement> v = new Vector<>();
         for (TextureParameter p : map.getLayerParameters(i))
         {
           int k;

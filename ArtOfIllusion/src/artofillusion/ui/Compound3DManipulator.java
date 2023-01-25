@@ -1,5 +1,6 @@
 /* Copyright (C) 2006-2009 by Francois Guillet and Peter Eastman
    Changes copyright (C) 2020 by Petri Ihalainen
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -397,8 +398,8 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     yPoint = toPoint(yPos2D);
     zPoint = toPoint(zPos2D);
 
-    boxes[CENTER_INDEX].x  = (int)(centerPoint.x - HANDLE_SIZE/2);
-    boxes[CENTER_INDEX].y  = (int)(centerPoint.y - HANDLE_SIZE/2);
+    boxes[CENTER_INDEX].x  = (centerPoint.x - HANDLE_SIZE/2);
+    boxes[CENTER_INDEX].y  = (centerPoint.y - HANDLE_SIZE/2);
 
     boxes[X_MOVE_INDEX].x  = (int)(xMovePos2D.x  - HANDLE_SIZE/2);
     boxes[X_MOVE_INDEX].y  = (int)(xMovePos2D.y  - HANDLE_SIZE/2);

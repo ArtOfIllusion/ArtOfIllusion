@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
    Changes Copyright (C) 2020 Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -380,9 +380,9 @@ public class JointEditorDialog extends BDialog
     public void setEnabled(boolean enabled)
     {
       super.setEnabled(enabled);
-      Iterator child = getChildren().iterator();
+      Iterator<Widget> child = getChildren().iterator();
       while (child.hasNext())
-        ((Widget) child.next()).setEnabled(enabled);
+         child.next().setEnabled(enabled);
     }
 
     /** Get a graph showing the values for this panel. */
@@ -640,7 +640,7 @@ public class JointEditorDialog extends BDialog
     private void paint(RepaintEvent ev)
     {
       Vec2 arm;
-      Graphics2D g = (Graphics2D)ev.getGraphics();
+      Graphics2D g = ev.getGraphics();
       
       g2.setTransform(atr_init);    
       g2.setBackground(new Color (0, 0, 0, 0));

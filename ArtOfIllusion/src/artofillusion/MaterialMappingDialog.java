@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2004 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@ import java.util.*;
 public class MaterialMappingDialog extends BDialog
 {
   private Object3D obj;
-  private Vector<Class> mappings;
+  private Vector<Class<?>> mappings;
   private BComboBox mapChoice;
   private MaterialPreviewer preview;
   private MaterialMapping map, oldMapping;
@@ -45,7 +45,7 @@ public class MaterialMappingDialog extends BDialog
 
     // Make a list of all material mappings which can be used for this object and material.
 
-    mappings = new Vector<Class>();
+    mappings = new Vector<>();
     Material mat = obj.getMaterial();
     
     for (MaterialMapping mapping: PluginRegistry.getPlugins(MaterialMapping.class))
@@ -80,7 +80,7 @@ public class MaterialMappingDialog extends BDialog
       try
       {
         Method mtd = mappings.get(i).getMethod("getName");
-        mapChoice.add((String) mtd.invoke(null, null));
+        mapChoice.add((String) mtd.invoke(null));
         if (mappings.get(i) == map.getClass())
           mapChoice.setSelectedIndex(i);
       }
@@ -116,10 +116,10 @@ public class MaterialMappingDialog extends BDialog
   {
     try
     {
-      Class cls = mappings.get(mapChoice.getSelectedIndex());
+      Class<?> cls = mappings.get(mapChoice.getSelectedIndex());
       if (cls == map.getClass())
         return;
-      Constructor con = cls.getConstructor(Material.class);
+      Constructor<?> con = cls.getConstructor(Material.class);
       Material mat =  obj.getMaterial();
       setMapping((MaterialMapping) con.newInstance(mat));
       FormContainer content = (FormContainer) getContent();

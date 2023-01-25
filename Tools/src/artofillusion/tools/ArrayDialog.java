@@ -1,5 +1,5 @@
 /* Copyright 2001-2004 by Rick van der Meiden and Peter Eastman
-   Changes copyright (C) 2017-2022 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -54,7 +54,7 @@ public class ArrayDialog extends BDialog
 
     // get available curves
     curvesVector = new Vector<ObjectInfo>(10,10);
-    for (ObjectInfo obj: window.getScene().getAllObjects())
+    for (ObjectInfo obj: window.getScene().getObjects())
     {
       if (obj.getObject() instanceof Curve) curvesVector.add(obj);
     }

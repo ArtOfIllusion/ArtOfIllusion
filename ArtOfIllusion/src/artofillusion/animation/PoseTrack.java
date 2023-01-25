@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -348,8 +348,8 @@ public class PoseTrack extends Track
       {
         try
           {
-            Class cl = ArtOfIllusion.getClass(in.readUTF());
-            Constructor con = cl.getConstructor(DataInputStream.class, Object.class);
+            Class<?> cl = ArtOfIllusion.getClass(in.readUTF());
+            Constructor<?> con = cl.getConstructor(DataInputStream.class, Object.class);
             for (int i = 0; i < keys; i++)
               {
                 t[i] = in.readDouble();

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes Copyrignt (C) 2016-2020 Petri Ihalainen
-   Changes copyright (C) 2016-2022 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -63,7 +63,7 @@ public abstract class ViewerCanvas extends CustomWidget
   public boolean showViewCone = true;
 
   private static boolean openGLAvailable;
-  private static List<ViewerControl> controls = new ArrayList<ViewerControl>();
+  private static List<ViewerControl> controls = new ArrayList<>();
   private CoordinateAxes coordinateAxes;
   
   static
@@ -127,7 +127,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     CoordinateSystem coords = new CoordinateSystem(new Vec3(0.0, 0.0, Camera.DEFAULT_DISTANCE_TO_SCREEN), new Vec3(0.0, 0.0, -1.0), Vec3.vy());
     viewChangedEvent = new ViewChangedEvent(this);
-    controlMap = new HashMap<ViewerControl,Widget>();
+    controlMap = new HashMap<>();
     theCamera = new Camera();
     theCamera.setCameraCoordinates(coords);
     finder = new ClickedPointFinder();
@@ -1609,7 +1609,7 @@ public abstract class ViewerCanvas extends CustomWidget
    * Get the list of ViewerControls which will be added to each new ViewerCanvas.
    */
 
-  public static List getViewerControls()
+  public static List<ViewerControl> getViewerControls()
   {
     return Collections.unmodifiableList(controls);
   }
@@ -1653,7 +1653,7 @@ public abstract class ViewerCanvas extends CustomWidget
    * Widgets for this canvas.
    */
 
-  public Map getViewerControlWidgets()
+  public Map<ViewerControl,Widget> getViewerControlWidgets()
   {
     return Collections.unmodifiableMap(controlMap);
   }

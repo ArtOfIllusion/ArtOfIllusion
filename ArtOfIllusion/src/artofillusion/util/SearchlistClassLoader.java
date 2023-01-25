@@ -1,9 +1,8 @@
-package artofillusion.util;
-
 /*
  * SearchlistClassLoader: class loader which loads classes using a searchlist
  *
  * Copyright (C) 2007-2009 Nik Trevallyn-Jones, Sydney Austraila.
+ * Changes copyright (C) 2023 by Maksim Khramov
  *
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
@@ -44,6 +43,8 @@ package artofillusion.util;
  *		- Initial coding, based on a RemoteClassLoader used in AOS.
  */
 
+package artofillusion.util;
+
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Hashtable;
@@ -51,8 +52,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
 
 /**
  *  A class loader which loads classes using a searchlist of
@@ -120,7 +119,7 @@ public class SearchlistClassLoader extends ClassLoader
 {
     protected Vector<Loader> list;
     protected Vector<Loader> search;
-    protected Hashtable<String, Class> cache;
+    protected Hashtable<String, Class<?>> cache;
     protected Loader content = null;
     protected byte searchMode = SHARED;
     protected int divide = 0;
@@ -190,11 +189,11 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr = new Loader(loader, true);
 
 	// store loaders in order in list
-	if (list == null) list = new Vector<Loader>(16);
+	if (list == null) list = new Vector<>(16);
 	list.add(ldr);
 
 	// store shared loaders in front of non-shared loaders in search.
-	if (search == null) search = new Vector<Loader>(16);
+	if (search == null) search = new Vector<>(16);
 	if (search.size() > divide) search.add(divide, ldr);
 	else search.add(ldr);
 
@@ -214,11 +213,11 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr = new Loader(new URLClassLoader(new URL[] { url }), false);
 
 	// store loaders in order in list
-	if (list == null) list = new Vector<Loader>(16);
+	if (list == null) list = new Vector<>(16);
 	list.add(ldr);
 
 	// store non-shared loaders after shared loaders in search
-	if (search == null) search = new Vector<Loader>(16);
+	if (search == null) search = new Vector<>(16);
 	search.add(ldr);
     }
 
@@ -241,7 +240,7 @@ public class SearchlistClassLoader extends ClassLoader
 	Loader ldr;
 	URL[] url;
 	int j;
-	ArrayList<URL> path = new ArrayList<URL>(8);
+	ArrayList<URL> path = new ArrayList<>(8);
 
 	for (int i = 0; (ldr = getLoader(i++, searchMode)) != null; i++) {
 	    if (ldr.loader instanceof SearchlistClassLoader)
@@ -257,7 +256,7 @@ public class SearchlistClassLoader extends ClassLoader
 	    }
 	}
 
-	return (path.size() > 0 ? (URL[]) path.toArray(EMPTY_URL) : EMPTY_URL);
+	return path.isEmpty() ? EMPTY_URL : path.toArray(EMPTY_URL);
     }
 
     /**
@@ -277,7 +276,7 @@ public class SearchlistClassLoader extends ClassLoader
      *
      *  @throws ClassNotFoundException if the class is not found.
      */
-    public Class loadLocalClass(String name)
+    public Class<?> loadLocalClass(String name)
 	throws ClassNotFoundException
     {
 	ClassNotFoundException err = null;
@@ -293,7 +292,7 @@ public class SearchlistClassLoader extends ClassLoader
 	if (content != null) {
 
 	    // try the cache first
-	    Class result = (cache == null ?  null : cache.get(name));
+	    Class<?> result = (cache == null ?  null : cache.get(name));
 	    if (result != null) return result;
 
 	    // try loading the class data
@@ -308,7 +307,7 @@ public class SearchlistClassLoader extends ClassLoader
 		    //System.out.println("defined class: " + name);
 
 		    // cache the result
-		    if (cache == null) cache = new Hashtable(1024);
+		    if (cache == null) cache = new Hashtable<>(1024);
 		    cache.put(name, result);
 
 		    return result;
@@ -374,12 +373,12 @@ public class SearchlistClassLoader extends ClassLoader
      *  @throws ClassNotFoundException if the class could not be loaded.
      */
     @Override
-    public Class findClass(String name)
+    public Class<?> findClass(String name)
 	throws ClassNotFoundException
     {
 	Loader ldr;
 	Throwable err = null;
-	Class result;
+	Class<?> result;
 	byte[] data;
 
 	for (int i = 0; (ldr = getLoader(i, searchMode)) != null; i++) {
@@ -391,7 +390,7 @@ public class SearchlistClassLoader extends ClassLoader
 		// for non-shared loaders, we have to define the class manually
 		else {
 		    // check the cache first
-		    result = (cache != null ? (Class) cache.get(name) : null);
+		    result = cache == null ? null: cache.get(name);
 		    if (result != null) return result;
 
 		    // try loading the class
@@ -405,7 +404,7 @@ public class SearchlistClassLoader extends ClassLoader
 			    //System.out.println("defined class: " + name);
 
 			    // cache the result
-			    if (cache == null) cache = new Hashtable(1024);
+			    if (cache == null) cache = new Hashtable<>(1024);
 			    cache.put(name, result);
 
 			    return result;
@@ -539,14 +538,14 @@ public class SearchlistClassLoader extends ClassLoader
 	switch (mode) {
 	case SHARED:
 	    // return shared loaders before non-shared loaders
-	    result = (Loader) search.get(index);
+	    result = search.get(index);
 	    break;
 
 	case NONSHARED:
 	    // return non-shared loaders before shared loaders
 	    {
 		int pos = index + divide;
-		result = (Loader) (pos < search.size()
+		result = (pos < search.size()
 					? search.get(pos)
 					: search.get(pos-divide)
 					);
@@ -555,7 +554,7 @@ public class SearchlistClassLoader extends ClassLoader
 
 	default:
 	    // return loaders in the order in which they were added
-	    result = (Loader) list.get(index);
+	    result = list.get(index);
 	}
 
 	return result;

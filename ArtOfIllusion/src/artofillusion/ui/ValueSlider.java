@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2005 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,6 +15,7 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import javax.swing.*;
 
 /** A ValueSlider contains a BTextField and a BSlider which are together used for choosing
@@ -73,7 +75,7 @@ public class ValueSlider extends WidgetContainer
 
     try
     {
-      val = new Double(field.getText());
+      val = Double.parseDouble(field.getText());
     }
     catch (NumberFormatException ex)
     {
@@ -178,12 +180,9 @@ public class ValueSlider extends WidgetContainer
    */
 
   @Override
-  public Collection getChildren()
+  public Collection<Widget> getChildren()
   {
-    ArrayList children = new ArrayList(2);
-    children.add(field);
-    children.add(slider);
-    return children;
+    return List.of(field, slider);
   }
 
   /**

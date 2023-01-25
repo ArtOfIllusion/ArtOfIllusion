@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2008 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
 {
   private Procedure proc;
   private double antialiasing;
-  private ThreadLocal renderingProc;
+  private ThreadLocal<Procedure> renderingProc;
 
   public ProceduralTexture3D()
   {
@@ -64,9 +64,9 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal() {
+    renderingProc = new ThreadLocal<>() {
       @Override
-      protected Object initialValue()
+      protected Procedure initialValue()
       {
         Procedure localProc = createProcedure();
         localProc.copy(proc);
@@ -89,7 +89,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public void getTextureSpec(TextureSpec spec, double x, double y, double z, double xsize, double ysize, double zsize, double angle, double t, double param[])
   {
-    Procedure pr = (Procedure) renderingProc.get();
+    Procedure pr = renderingProc.get();
     OutputModule output[] = pr.getOutputModules();
     PointInfo info = new PointInfo();
     info.x = x;
@@ -143,7 +143,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public void getTransparency(RGBColor trans, double x, double y, double z, double xsize, double ysize, double zsize, double angle, double t, double param[])
   {
-    Procedure pr = (Procedure) renderingProc.get();
+    Procedure pr = renderingProc.get();
     OutputModule output[] = pr.getOutputModules();
     PointInfo info = new PointInfo();
     info.x = x;
@@ -188,7 +188,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
   @Override
   public double getDisplacement(double x, double y, double z, double xsize, double ysize, double zsize, double t, double param[])
   {
-    Procedure pr = (Procedure) renderingProc.get();
+    Procedure pr = renderingProc.get();
     OutputModule output[] = pr.getOutputModules();
     PointInfo info = new PointInfo();
     info.x = x;

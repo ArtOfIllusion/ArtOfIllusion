@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -12,7 +13,6 @@ package artofillusion.ui;
 
 import buoy.widget.*;
 import java.awt.*;
-import javax.swing.*;
 
 /** A ValueField is a BTextField used for entering a numerical value.  Constraints can
     be specified for the value, for example, that it must be positive.  If an illegal
@@ -79,7 +79,7 @@ public class ValueField extends BTextField
         if ((constraints & INTEGER) != 0)
           val = (double) Integer.parseInt(getText());
         else
-          val = new Double(getText());
+          val = Double.valueOf(getText());
       }
     catch (NumberFormatException ex)
       {
@@ -112,7 +112,7 @@ public class ValueField extends BTextField
 
   private void setTextColor(boolean valid)
   {
-    ((JTextField) getComponent()).setForeground(valid ? Color.black : Color.red);
+    getComponent().setForeground(valid ? Color.black : Color.red);
   }
 
   @Override
@@ -125,7 +125,7 @@ public class ValueField extends BTextField
       if ((constraints & INTEGER) != 0)
         val = (double) Integer.parseInt(getText());
       else
-        val = new Double(getText());
+        val = Double.parseDouble(getText());
     }
     catch (NumberFormatException ex)
     {

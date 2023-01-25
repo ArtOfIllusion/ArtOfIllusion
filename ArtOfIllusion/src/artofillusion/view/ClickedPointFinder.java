@@ -1,4 +1,5 @@
 /* Copyright (C) 2016 - 2020 by Petri Ihalainen
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,7 +12,6 @@
 package artofillusion.view;
 
 import artofillusion.math.*;
-import artofillusion.ui.*;
 import artofillusion.object.*;
 import artofillusion.*;
 import java.awt.*;
@@ -165,9 +165,9 @@ public class ClickedPointFinder
   }
   */
 
-  private ArrayList renderableObjects(ViewerCanvas view)
+  private ArrayList<ObjectInfo> renderableObjects(ViewerCanvas view)
   {
-    ArrayList<ObjectInfo> renderable = new ArrayList<ObjectInfo>();
+    ArrayList<ObjectInfo> renderable = new ArrayList<>();
     ObjectInfo oi;
 
     if (view instanceof SceneViewer || (view instanceof ObjectViewer && ((ObjectViewer)view).getSceneVisible()))

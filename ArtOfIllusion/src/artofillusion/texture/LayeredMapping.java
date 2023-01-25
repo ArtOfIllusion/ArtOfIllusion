@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2009 by Peter Eastman
-   Changes copyright (C) 2022 by Maksim Khramov
+   Changes copyright (C) 2022-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -107,7 +107,7 @@ public class LayeredMapping extends TextureMapping
   @Override
   public TextureParameter[] getParameters()
   {
-    Vector<TextureParameter> param = new Vector<TextureParameter>();
+    Vector<TextureParameter> param = new Vector<>();
     TextureParameter p[];
     int i, j;
 
@@ -341,8 +341,8 @@ public class LayeredMapping extends TextureMapping
         fractParamID[i] = TextureParameter.getUniqueID();
         try
           {
-            Class mapClass = ArtOfIllusion.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
+            Class<?> mapClass = ArtOfIllusion.getClass(in.readUTF());
+            Constructor<?> con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
             mapping[i] = (TextureMapping) con.newInstance(in, theObject, texture[i]);
           }
         catch (Exception ex)

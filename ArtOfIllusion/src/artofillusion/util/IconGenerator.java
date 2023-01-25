@@ -1,12 +1,8 @@
-/*  IconGenerator.java  */
-
-package artofillusion.util;
-
 /*
  * IconGenerator: provide editing and compositing features for icon images
  *
  * Copyright (C) 2008 Nik Trevallyn-Jones, Sydney Australia
-   Changes copyright (C) 2017-2018 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
  * Author: Nik Trevallyn-Jones, nik777@users.sourceforge.net
  * $Id: Exp $
@@ -24,6 +20,8 @@ package artofillusion.util;
  * with this program. If not, version 2 of the license is available
  * from the GNU project, at http://www.gnu.org.
  */
+
+package artofillusion.util;
 
 import java.util.*;
 import java.io.FileNotFoundException;
@@ -203,7 +201,7 @@ public class IconGenerator
 
     protected static final float SCALE_DOWN = 1.0f/0xff;
 
-    protected static final Class[] NULL_SIG = new Class[0];
+    protected static final Class<?>[] NULL_SIG = new Class<?>[0];
     protected static final Object[] NULL_ARGS = new Object[0];
 
     private static final String dots =
@@ -1402,7 +1400,7 @@ public class IconGenerator
                     // method call
                     if (pos == end) end = find(macro, end+1, len, ")");
                     if (end > pos) {
-                        if (method == null) method = new ArrayList<String>(4);
+                        if (method == null) method = new ArrayList<>(4);
 
                         method.add(macro.substring(pos+1, end+1).trim());
                     }
@@ -1472,7 +1470,7 @@ public class IconGenerator
 
                 default:
                     if (end < len && macro.charAt(end) == '(') {
-                        if (method == null) method = new ArrayList<String>(4);
+                        if (method == null) method = new ArrayList<>(4);
                         method.add(macro.substring(pos, end-1).trim());
                     }
                     else
@@ -1901,7 +1899,7 @@ public class IconGenerator
             return copy((Image) obj, width, height, scale);
         }
 
-        protected Object resolve(String target, List method, Map namespace)
+        protected Object resolve(String target, List<String> method, Map<String, Object> namespace)
            throws Exception
         {
             Object obj = namespace.get(target);
@@ -1920,7 +1918,7 @@ public class IconGenerator
                 String methName;
                 int cut;
                 for (int i = 0; i < method.size(); i++) {
-                    methName = method.get(i).toString();
+                    methName = method.get(i);
                     cut = methName.indexOf('(');
                     if (cut > 0) methName = methName.substring(0, cut);
                     meth = obj.getClass().getMethod(methName, NULL_SIG);

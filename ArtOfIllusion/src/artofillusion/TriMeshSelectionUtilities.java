@@ -1,5 +1,5 @@
 /* Copyright (C) 2005 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
 This program is free software; you can redistribute it and/or modify it under the
 terms of the GNU General Public License as published by the Free Software
@@ -190,7 +190,7 @@ public class TriMeshSelectionUtilities
   {
     Vertex v[] = (Vertex []) mesh.getVertices();
     Edge e[] = mesh.getEdges();
-    Face f[] = mesh.getFaces();
+    Face[] f = mesh.getFaces();
     boolean newSel[] = new boolean [e.length];
     int currentEdge = startEdge;
     int prevEdge = startEdge;
@@ -212,7 +212,7 @@ public class TriMeshSelectionUtilities
 
       // Record every neighbor of each vertex of the current edge.
 
-      HashSet v1neighbors = new HashSet();
+      Set<Integer> v1neighbors = new HashSet<>();
       int v1edges[] = v[ce.v1].getEdges();
       for (int i = 0; i < v1edges.length; i++)
       {
@@ -220,7 +220,7 @@ public class TriMeshSelectionUtilities
         if (ed != ce)
           v1neighbors.add(ed.v1 == ce.v1 ? ed.v2 : ed.v1);
       }
-      HashSet v2neighbors = new HashSet();
+      Set<Integer> v2neighbors = new HashSet<>();
       int v2edges[] = v[ce.v2].getEdges();
       for (int i = 0; i < v2edges.length; i++)
       {
@@ -232,10 +232,10 @@ public class TriMeshSelectionUtilities
       // Look for candidates to be the next edge in the strip.  A candidate is an edge which connects
       // a neighbor of v1 to a neighbor of v2.
 
-      Iterator n2iter = v2neighbors.iterator();
+      Iterator<Integer> n2iter = v2neighbors.iterator();
       while (n2iter.hasNext())
       {
-        int neighbor = ((Integer) n2iter.next());
+        int neighbor = n2iter.next();
         int neighborEdges[] = v[neighbor].getEdges();
         for (int i = 0; i < neighborEdges.length; i++)
         {
@@ -263,20 +263,20 @@ public class TriMeshSelectionUtilities
       // There may also be a diagonal edge between the current and next edges.  Check for one,
       // and select it.
 
-      ArrayList faceList1 = new ArrayList();
+      List<Face> faceList1 = new ArrayList<>();
       faceList1.add(f[ce.f1]);
       if (ce.f2 != -1)
         faceList1.add(f[ce.f2]);
-      ArrayList faceList2 = new ArrayList();
+      List<Face> faceList2 = new ArrayList<>();
       faceList2.add(f[e[bestEdge].f1]);
       if (e[bestEdge].f2 != -1)
         faceList2.add(f[e[bestEdge].f2]);
       for (int i = 0; i < faceList1.size(); i++)
       {
-        Face fc1 = (Face) faceList1.get(i);
+        Face fc1 = faceList1.get(i);
         for (int j = 0; j < faceList2.size(); j++)
         {
-          Face fc2 = (Face) faceList2.get(j);
+          Face fc2 = faceList2.get(j);
           if (fc1.e1 == fc2.e1 || fc1.e1 == fc2.e2 || fc1.e1 == fc2.e3)
           {
             newSel[fc1.e1] = true;

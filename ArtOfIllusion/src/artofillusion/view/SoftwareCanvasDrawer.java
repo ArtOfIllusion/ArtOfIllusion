@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
    Modifications Copyright (C) 2016-2017 Petri Ihalainen
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,8 +35,8 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   protected Rectangle bounds;
 
   private static Vec2 reuseVec2[];
-  private static WeakHashMap<Image, SoftReference<ImageRecord>> imageMap = new WeakHashMap<Image, SoftReference<ImageRecord>>();
-  private static WeakHashMap<Image, SoftReference<RenderingMesh>> imageMeshMap = new WeakHashMap<Image, SoftReference<RenderingMesh>>();
+  private static WeakHashMap<Image, SoftReference<ImageRecord>> imageMap = new WeakHashMap<>();
+  private static WeakHashMap<Image, SoftReference<RenderingMesh>> imageMeshMap = new WeakHashMap<>();
 
   private static final int MODE_COPY = 0;
   private static final int MODE_ADD = 1;
@@ -115,7 +116,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       if (bounds.width < 0 || bounds.height < 0)
         bounds.width = bounds.height = 0;
       theImage = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_INT_ARGB_PRE);
-      pixel = ((DataBufferInt) ((BufferedImage) theImage).getRaster().getDataBuffer()).getData();
+      pixel = ((DataBufferInt)  theImage.getRaster().getDataBuffer()).getData();
       zbuffer = new int [bounds.width*bounds.height];
       if (imageGraphics != null)
         imageGraphics.dispose();
@@ -390,12 +391,12 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       {
         if (z2 < clip)
           return;
-        double f = ((double) (clip-z1))/(z2-z1);
+        double f = (clip-z1)/(z2-z1);
         p1 = new Vec3(p1.x+f*(p2.x-p1.x), p1.y+f*(p2.y-p1.y), p1.z+f*(p2.z-p1.z));
       }
       else if (z2 < clip)
       {
-        double f = ((double) (clip-z2))/(z1-z2);
+        double f = (clip-z2)/(z1-z2);
         p2 = new Vec3(p2.x+f*(p1.x-p2.x), p2.y+f*(p1.y-p2.y), p2.z+f*(p1.z-p2.z));
       }
     }
@@ -1692,9 +1693,9 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
     // Get a cached RenderingMesh for this image.
 
     RenderingMesh mesh = null;
-    SoftReference ref = (SoftReference) imageMeshMap.get(image);
+    SoftReference<RenderingMesh> ref = imageMeshMap.get(image);
     if (ref != null)
-      mesh = (RenderingMesh) ref.get();
+      mesh = ref.get();
     int width = record.width+1;
     int height = record.height+1;
     Vec3 dx = p2.minus(p1).times(1.0/record.width);
@@ -1768,9 +1769,9 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
   private ImageRecord getCachedImage(Image image)
   {
     ImageRecord record = null;
-    SoftReference ref = (SoftReference) imageMap.get(image);
+    SoftReference<ImageRecord> ref = imageMap.get(image);
     if (ref != null)
-      record = (ImageRecord) ref.get();
+      record = ref.get();
     if (record == null)
     {
       // Grab the pixels from the image and cache them.
@@ -1778,7 +1779,7 @@ public class SoftwareCanvasDrawer implements CanvasDrawer
       try
       {
         record = new ImageRecord(image);
-        imageMap.put(image, new SoftReference<ImageRecord>(record));
+        imageMap.put(image, new SoftReference<>(record));
       }
       catch (InterruptedException ex)
       {

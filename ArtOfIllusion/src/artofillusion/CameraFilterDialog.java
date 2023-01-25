@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
-   Changes copyright (C) 2022 by Maksim Khramov
+   Changes copyright (C) 2022-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -35,11 +35,11 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   private ComplexImage unfilteredImage;
   private Image displayImage;
   private boolean doneRendering, doneFiltering;
-  private Map savedConfiguration;
+  private Map<String, Object> savedConfiguration;
   private Thread filterThread;
 
   private static Renderer previewRenderer = ArtOfIllusion.getPreferences().getTexturePreviewRenderer();
-  private static HashMap<Renderer, Map<String, Object>> rendererConfiguration = new HashMap<Renderer, Map<String, Object>>();
+  private static HashMap<Renderer, Map<String, Object>> rendererConfiguration = new HashMap<>();
 
   private static final int PREVIEW_WIDTH = 200;
   private static final int PREVIEW_HEIGHT = 150;
@@ -59,14 +59,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     FormContainer content = new FormContainer(2, 2);
     setContent(content);
     LayoutInfo fillLayout = new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.BOTH, null, null);
-    filtersPanel = new FiltersPanel(theCamera, new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        applyFilters();
-      }
-    });
+    filtersPanel = new FiltersPanel(theCamera, this::applyFilters);
     BorderContainer previewPanel = new BorderContainer();
     RowContainer okPanel = new RowContainer();
     content.add(filtersPanel, 0, 0, fillLayout);
@@ -108,16 +101,11 @@ public class CameraFilterDialog extends BDialog implements RenderListener
 
   /** Apply a saved configure to the renderer. */
 
-  private void configureRenderer(Map config, Renderer renderer)
+  private void configureRenderer(Map<String, Object> config, Renderer renderer)
   {
     if (config == null)
       return;
-    Iterator options = config.entrySet().iterator();
-    while (options.hasNext())
-    {
-      Map.Entry entry = (Map.Entry) options.next();
-      renderer.setConfiguration((String) entry.getKey(), entry.getValue());
-    }
+    config.forEach((key, value) -> renderer.setConfiguration(key, value));
   }
 
   /** Render the preview image. */
@@ -293,7 +281,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     private BScrollPane editorPane;
     private BList allFiltersList, cameraFiltersList;
     private BButton addButton, deleteButton, upButton, downButton;
-    private Class filterClasses[];
+    private Class<?>[] filterClasses;
     private ArrayList<ImageFilter> filters;
     Runnable filterChangedCallback;
 
@@ -301,7 +289,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     {
       super(1, 2);
       this.filterChangedCallback = filterChangedCallback;
-      filters = new ArrayList<ImageFilter>();
+      filters = new ArrayList<>();
       ImageFilter oldFilters[] = camera.getImageFilters();
       for (int i = 0; i < oldFilters.length; i++)
         filters.add(oldFilters[i]);
@@ -334,7 +322,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       // Fill in the Lists.
 
       List<ImageFilter> filters = PluginRegistry.getPlugins(ImageFilter.class);
-      filterClasses = new Class[filters.size()];
+      filterClasses = new Class<?>[filters.size()];
       for (int i = 0; i < filterClasses.length; i++)
       {
         filterClasses[i] = filters.get(i).getClass();
@@ -371,7 +359,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       upButton.setEnabled(selection > 0);
       downButton.setEnabled(selection > -1 && selection < filters.size()-1);
       if (selection > -1)
-        editorPane.setContent(((ImageFilter) filters.get(cameraFiltersList.getSelectedIndex())).getConfigPanel(filterChangedCallback));
+        editorPane.setContent(filters.get(cameraFiltersList.getSelectedIndex()).getConfigPanel(filterChangedCallback));
       else
         editorPane.setContent(null);
       editorPane.layoutChildren();
@@ -382,8 +370,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     private void rebuildFilterList()
     {
       cameraFiltersList.removeAll();
-      for (int i = 0; i < filters.size(); i++)
-        cameraFiltersList.add(((ImageFilter) filters.get(i)).getName());
+      filters.forEach(filter -> cameraFiltersList.add(filter.getName()));
     }
 
     /** Add a filter to the list. */
@@ -443,7 +430,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
       int sel = cameraFiltersList.getSelectedIndex();
       if (sel == -1 || sel == filters.size()-1)
         return;
-      ImageFilter filt = (ImageFilter) filters.get(sel);
+      ImageFilter filt = filters.get(sel);
       filters.remove(sel);
       filters.add(sel+1, filt);
       rebuildFilterList();

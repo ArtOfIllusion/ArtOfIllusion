@@ -1,6 +1,6 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
    Modifications copyright (C) 2017 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -58,8 +58,8 @@ public class MIPMappedImage extends ImageMap
   {
     buildMipMaps(im);
     findAverage();
-    preview = new SoftReference(null);
-    mapImage = new SoftReference(null);
+    preview = new SoftReference<>(null);
+    mapImage = new SoftReference<>(null);
   }
 
   /** Given an Image object, this method builds the full set of mipmaps for it. */
@@ -595,11 +595,11 @@ public class MIPMappedImage extends ImageMap
     {
       map = getImage(n);
       lastMapNumber = n;
-      mapImage = new SoftReference(map);
+      mapImage = new SoftReference<>((BufferedImage)map);
     }
     lastPreviewSize = size;
     image = createScaledImage(map, size);
-    preview = new SoftReference(image);
+    preview = new SoftReference<>(image);
 
     return image;
   }
@@ -607,8 +607,8 @@ public class MIPMappedImage extends ImageMap
   private int getMapNumber(int size)
   {
     int n, pw, ph;
-    pw = max(min(size, (int)round(size*aspectRatio)),1);
-    ph = max(min(size, (int)round(size/aspectRatio)),1);
+    pw = max(min(size, round(size * aspectRatio)), 1);
+    ph = max(min(size, round(size / aspectRatio)), 1);
     for (n = 0; ((n+1 < maps.length) && (width[n+1] >= pw) && (height[n+1] >= ph)); n++);
     
     return n;
@@ -621,8 +621,8 @@ public class MIPMappedImage extends ImageMap
   {    
     if (getWidth() <= size && getHeight() <= size)
       return im;    
-    int pw = max(min(size, (int)round(size*aspectRatio)),1);
-    int ph = max(min(size, (int)round(size/aspectRatio)),1);
+    int pw = max(min(size, round(size * aspectRatio)), 1);
+    int ph = max(min(size, round(size / aspectRatio)), 1);
     return im.getScaledInstance(pw, ph, Image.SCALE_SMOOTH);
   }
 
@@ -749,8 +749,8 @@ public class MIPMappedImage extends ImageMap
     }
     w = im.getWidth(null);
     h = im.getHeight(null);
-    preview = new SoftReference(null);
-    mapImage = new SoftReference(null);
+    preview = new SoftReference<>(null);
+    mapImage = new SoftReference<>(null);
 
     // Construct the mipmaps, preview image, etc.
 

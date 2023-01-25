@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -332,8 +333,8 @@ public class CSGObject extends Object3D
         from[i] = edge[i].v2;
       }
     WireframeMesh wire = new WireframeMesh(rendering.vert, from, to);
-    cachedMesh = new SoftReference<RenderingMesh>(rendering);
-    cachedWire = new SoftReference<WireframeMesh>(wire);
+    cachedMesh = new SoftReference<>(rendering);
+    cachedWire = new SoftReference<>(wire);
     return new Object[] {rendering, wire}; // Return these to make sure the references don't get cleared instantly.
   }
 
@@ -366,8 +367,8 @@ public class CSGObject extends Object3D
     try
       {
         obj1 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
-        Class cls = ArtOfIllusion.getClass(in.readUTF());
-        Constructor con = cls.getConstructor(DataInputStream.class, Scene.class);
+        Class<?> cls = ArtOfIllusion.getClass(in.readUTF());
+        Constructor<?> con = cls.getConstructor(DataInputStream.class, Scene.class);
         obj1.setObject((Object3D) con.newInstance(in, theScene));
         obj2 = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
         cls = ArtOfIllusion.getClass(in.readUTF());
@@ -680,8 +681,8 @@ public class CSGObject extends Object3D
       coords2 = new CoordinateSystem(in);
       try
       {
-        Class cl = ArtOfIllusion.getClass(in.readUTF());
-        Constructor con = cl.getConstructor(DataInputStream.class, Object.class);
+        Class<?> cl = ArtOfIllusion.getClass(in.readUTF());
+        Constructor<?> con = cl.getConstructor(DataInputStream.class, Object.class);
         key1 = (Keyframe) con.newInstance(in, obj.getObject1().getObject());
         cl = ArtOfIllusion.getClass(in.readUTF());
         con = cl.getConstructor(DataInputStream.class, Object.class);

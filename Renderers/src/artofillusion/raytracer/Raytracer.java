@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2018 by Maksim Khramov
+   Changes copyright (C) 2018-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -319,10 +319,10 @@ public class Raytracer
       theObject = ((ObjectWrapper) theObject).getWrappedObject();
     if (theObject instanceof ObjectCollection)
     {
-      Enumeration enm = ((ObjectCollection) theObject).getObjects(info, false, scene);
+      Enumeration<ObjectInfo> enm = ((ObjectCollection) theObject).getObjects(info, false, scene);
       while (enm.hasMoreElements())
       {
-        ObjectInfo elem = (ObjectInfo) enm.nextElement();
+        ObjectInfo elem = enm.nextElement();
         if (!elem.isVisible())
           continue;
         ObjectInfo copy = elem.duplicate();

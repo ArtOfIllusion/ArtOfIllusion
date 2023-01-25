@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -26,7 +26,7 @@ public class TriMeshBeveler
   private boolean selected[], newSelection[];
   private int mode;
   private Vec3 faceInsets[][], faceNormal[];
-  private Vector newIndex;
+  private Vector<Integer> newIndex;
 
   public static final int BEVEL_FACES = 0;
   public static final int BEVEL_FACE_GROUPS = 1;
@@ -83,10 +83,10 @@ public class TriMeshBeveler
     Vertex v[] = (Vertex []) mesh.getVertices();
     Edge e[] = mesh.getEdges();
     Face f[] = mesh.getFaces();
-    List<int[]> face = new Vector<int[]>();
-    List<Vertex> vert = new Vector<Vertex>();
+    List<int[]> face = new Vector<>();
+    List<Vertex> vert = new Vector<>();
 
-    newIndex = new Vector();
+    newIndex = new Vector<>();
     findVertexInsets(height, width);
 
     // All old vertices will be in the new mesh, so first copy them over.
@@ -133,7 +133,7 @@ public class TriMeshBeveler
 
     newSelection = new boolean [mesh.getFaces().length];
     for (int i = 0; i < newIndex.size(); i++)
-      newSelection[((Integer) newIndex.elementAt(i))] = true;
+      newSelection[newIndex.elementAt(i)] = true;
     return mesh;
   }
 
@@ -197,15 +197,15 @@ public class TriMeshBeveler
     int group[], touchCount[], groupCount;
     Vec3 temp = new Vec3();
     
-    List<int[]> face = new Vector<int[]>();
-    Vector<Vertex> vert = new Vector<Vertex>();
-    List<int[]> bevel = new Vector<int[]>();
+    List<int[]> face = new Vector<>();
+    Vector<Vertex> vert = new Vector<>();
+    List<int[]> bevel = new Vector<>();
     
     boolean someSelected[] = new boolean [v.length], allSelected[] = new boolean [v.length];
     boolean touching[][], inGroup[], beveled[] = new boolean [e.length];
     double coeff[][] = new double [3][3], rhs[] = new double [3];
 
-    newIndex = new Vector();
+    newIndex = new Vector<>();
     findEdgeInsets(height, width);
 
     // First copy over the old faces and vertices.  (Some of these will be modified later.)
@@ -290,7 +290,7 @@ public class TriMeshBeveler
             coeff[2][1] = coeff[1][2];
             SVD.solve(coeff, rhs, 1e-3);
             temp.set(rhs[0], rhs[1], rhs[2]);
-            vert.setElementAt(offsetVertex(mesh, (Vertex) vert.get(i), temp), i);
+            vert.setElementAt(offsetVertex(mesh, vert.get(i), temp), i);
             
           }
         else if (someSelected[i])
@@ -515,7 +515,7 @@ public class TriMeshBeveler
 
     newSelection = new boolean [mesh.getFaces().length];
     for (int i = 0; i < newIndex.size(); i++)
-      newSelection[((Integer) newIndex.elementAt(i))] = true;
+      newSelection[newIndex.elementAt(i)] = true;
     return mesh;
   }
 
@@ -595,8 +595,8 @@ public class TriMeshBeveler
     int vertIndex[] = new int [v.length];
     int extraVertIndex[][] = new int [v.length][], vertEdgeIndex[][] = new int [v.length][];
     boolean forward[] = new boolean [v.length];
-    List<int[]> face = new Vector<int[]>();
-    List<Vertex> vert = new Vector<Vertex>();
+    List<int[]> face = new Vector<>();
+    List<Vertex> vert = new Vector<>();
 
     // Create the vertices of the new mesh.
 
@@ -774,8 +774,8 @@ public class TriMeshBeveler
     int extraVertIndex[][] = new int [v.length][];
     int faceVertIndex[][] = new int [v.length][];
     boolean forward[] = new boolean [v.length];
-    Vector<int []> face = new Vector<int []>();
-    Vector<Vertex> vert = new Vector<Vertex>();
+    Vector<int []> face = new Vector<>();
+    Vector<Vertex> vert = new Vector<>();
 
     // Find the bevel and extrude directions for every edge.
 

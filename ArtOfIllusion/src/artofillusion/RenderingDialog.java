@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -291,9 +292,9 @@ public class RenderingDialog extends BDialog implements RenderListener
       String current = Integer.toString(currentFrame+1);
       String total = Integer.toString(totalFrames);
       if (subimages > 1)
-        label1.setText(Translate.text("renderSubimageLabel", new String [] {current, total, Integer.toString(currentSubimage+1), status}));
+        label1.setText(Translate.text("renderSubimageLabel", current, total, Integer.toString(currentSubimage+1), status));
       else
-        label1.setText(Translate.text("renderFrameLabel", new String [] {current, total, status}));
+        label1.setText(Translate.text("renderFrameLabel", current, total, status));
     }
     else
       label1.setText(status+"...");

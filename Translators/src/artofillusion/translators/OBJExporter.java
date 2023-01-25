@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -346,14 +346,14 @@ public class OBJExporter
     // Write out the .mtl file.
     
     out.println("#Produced by Art of Illusion "+ArtOfIllusion.getVersion()+", "+(new Date()).toString());
-    Enumeration textures = textureExporter.getTextures();
-    Hashtable<String, TextureImageInfo> names = new Hashtable<String, TextureImageInfo>();
+    Enumeration<TextureImageInfo> textures = textureExporter.getTextures();
+    Hashtable<String, TextureImageInfo> names = new Hashtable<>();
     TextureSpec spec = new TextureSpec();
     NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
     nf.setMaximumFractionDigits(5);
     while (textures.hasMoreElements())
       {
-        TextureImageInfo info = (TextureImageInfo) textures.nextElement();
+        TextureImageInfo info = textures.nextElement();
         
         // Select a name for the texture.
         

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -76,9 +77,9 @@ public abstract class Texture2D extends Texture
     final int pixel[] = new int [width*height];
     final double uscale = (maxu-minu)/width;
     final double vscale = (maxv-minv)/height;
-    final ThreadLocal textureSpec = new ThreadLocal() {
+    final ThreadLocal<TextureSpec> textureSpec = new ThreadLocal<>() {
       @Override
-      protected Object initialValue()
+      protected TextureSpec initialValue()
       {
         return new TextureSpec();
       }
@@ -88,7 +89,7 @@ public abstract class Texture2D extends Texture
       @Override
       public void execute(int i)
       {
-        TextureSpec spec = (TextureSpec) textureSpec.get();
+        TextureSpec spec = textureSpec.get();
         for (int j = 0; j < height; j++)
         {
           double u = minu+i*uscale;

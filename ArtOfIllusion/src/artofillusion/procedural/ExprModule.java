@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2011 by David M. Turner <novalis@novalis.org>
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    Various bug fixes and enhancements added by Peter Eastman, Aug. 25, 2001.
 
@@ -112,7 +112,7 @@ class Token {
 
 
     static Hashtable<String, OPort> createFunMap () {
-        Hashtable<String, OPort> fm = new Hashtable<String, OPort> ();
+        Hashtable<String, OPort> fm = new Hashtable<> ();
         //For version two, pull these out of a config file
         fm.put ("sin",  new OPort (new SineModule (new Point ()), 0));
         fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0));
@@ -169,7 +169,7 @@ class Token {
 
 class ModuleLoader {
    public static Module createModule (String name) {
-        Class moduleClass;
+        Class<?> moduleClass;
 
         try {
             moduleClass = ArtOfIllusion.getClass (name);
@@ -195,12 +195,12 @@ class ModuleLoader {
         return new NumberModule (new Point (), 0.1234567);
     }
 
-    public static Module createModule (Class moduleClass) {
-        Constructor cons = null;
+    public static Module createModule (Class<?> moduleClass) {
+        Constructor<?> cons = null;
         Module mod;
 
         try {
-            Class[] parameterTypes = new Class [1];
+            Class<?>[] parameterTypes = new Class<?> [1];
             parameterTypes [0] = Point.class;
             cons = moduleClass.getConstructor (parameterTypes);
         } catch (Exception e) {
@@ -309,7 +309,7 @@ public class ExprModule extends ProceduralModule
           new String [] {"Calculate:"});
         if (!dlg.clickedOk())
             return false;
-        errors = new Vector<String>();
+        errors = new Vector<>();
         try
         {
           setExpr (exprField.getText().toLowerCase ());
@@ -402,7 +402,7 @@ public class ExprModule extends ProceduralModule
                 case '0': case '1': case '2': case '3': case '4':
                 case '5': case '6': case '7': case '8': case '9':
                     addToken (new Token (Token.NUMBER));
-                    currTok.numValue = new Double (tok);
+                    currTok.numValue = Double.valueOf(tok);
                     break;
                 default:
                     addToken (new Token (Token.VARIABLE));
@@ -432,8 +432,8 @@ public class ExprModule extends ProceduralModule
     }
 
     void initVarTable () {
-        varTable = new Hashtable<String, OPort>();
-        moduleVec = new Vector<Module>();
+        varTable = new Hashtable<>();
+        moduleVec = new Vector<>();
 
         CoordinateModule x, y, z, t;
         x = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
@@ -607,7 +607,7 @@ public class ExprModule extends ProceduralModule
 
         OPort func = getOPort (name);
 
-        Vector<OPort> s = new Vector<OPort> ();
+        Vector<OPort> s = new Vector<> ();
         //get args
         while (currTok.ty != Token.RP && currTok.ty != Token.END) {
             s.add (expr (false));
@@ -656,7 +656,7 @@ public class ExprModule extends ProceduralModule
         return new OPort (m);
     }
 
-    OPort binOp (Class parentClass, OPort left, OPort right) {
+    OPort binOp (Class<?> parentClass, OPort left, OPort right) {
         Module parentM = ModuleLoader.createModule (parentClass);
         Arg [] args = {new Arg ("Arg1", 0), new Arg ("Arg1", 1)};
         OPort parent = new OPort (parentM);

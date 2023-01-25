@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -24,7 +25,7 @@ public class ScriptRunner
   private static SearchlistClassLoader parentLoader;
   private static PrintStream output;
   // This is a cache of script engine instances
-  private static final HashMap<String, ScriptEngine> engines = new HashMap<String, ScriptEngine>();
+  private static final HashMap<String, ScriptEngine> engines = new HashMap<>();
   private static final String IMPORTS[] = {"artofillusion.*", "artofillusion.image.*", "artofillusion.material.*",
       "artofillusion.math.*", "artofillusion.object.*", "artofillusion.script.*", "artofillusion.texture.*",
       "artofillusion.ui.*", "buoy.event.*", "buoy.widget.*"};
@@ -49,10 +50,10 @@ public class ScriptRunner
   
   static
   {
-    List <String> names = new ArrayList <String> ();
+    List <String> names = new ArrayList<>();
     for (Language l : Language.values())
       names.add(l.name);
-    languageNames = (String[]) names.toArray(new String [0]);
+    languageNames = names.toArray(new String [0]);
   }
   
   public static String[] getLanguageNames() {
@@ -163,7 +164,7 @@ public class ScriptRunner
     {
       ex2.printStackTrace();
     }
-    ArrayList<String> v = new ArrayList<String>();
+    ArrayList<String> v = new ArrayList<>();
     v.add(head);
     if (message != null)
     {

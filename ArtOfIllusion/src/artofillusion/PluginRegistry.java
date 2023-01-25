@@ -1,6 +1,6 @@
  /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018-2022 by Maksim Khramov
+   Changes copyright (C) 2018-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,12 +29,12 @@ import org.w3c.dom.*;
 
 public class PluginRegistry
 {
-  private static final ArrayList<ClassLoader> pluginLoaders = new ArrayList<ClassLoader>();
-  private static final HashSet<Class> categories = new HashSet<Class>();
-  private static final HashMap<Class, List<Object>> categoryClasses = new HashMap<Class, List<Object>>();
-  private static final HashMap<String, Map<String, PluginResource>> resources = new HashMap<String, Map<String, PluginResource>>();
-  private static final HashMap<String, ExportInfo> exports = new HashMap<String, ExportInfo>();
-  private static final HashMap<String, Object> classMap = new HashMap<String, Object>();
+  private static final ArrayList<ClassLoader> pluginLoaders = new ArrayList<>();
+  private static final HashSet<Class> categories = new HashSet<>();
+  private static final HashMap<Class, List<Object>> categoryClasses = new HashMap<>();
+  private static final HashMap<String, Map<String, PluginResource>> resources = new HashMap<>();
+  private static final HashMap<String, ExportInfo> exports = new HashMap<>();
+  private static final HashMap<String, Object> classMap = new HashMap<>();
 
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
@@ -52,7 +52,7 @@ public class PluginRegistry
 
     // Scan the plugins directory, and parse the index in every jar file.
 
-    HashSet<JarInfo> jars = new HashSet<JarInfo>();
+    HashSet<JarInfo> jars = new HashSet<>();
     for (String file : dir.list())
     {
       try
@@ -79,7 +79,7 @@ public class PluginRegistry
 
   public static void scanPlugins(List<ClassLoader> loaders)
   {
-    HashSet<JarInfo> jars = new HashSet<JarInfo>();
+    HashSet<JarInfo> jars = new HashSet<>();
     for (ClassLoader loader : loaders)
     {
       try
@@ -104,11 +104,11 @@ public class PluginRegistry
     // Build a classloader for each jar, registering plugins, categories, and resources.
     // This needs to be done in the proper order to account for dependencies between plugins.
 
-    HashMap<String, JarInfo> nameMap = new HashMap<String, JarInfo>();
+    HashMap<String, JarInfo> nameMap = new HashMap<>();
     while (jars.size() > 0)
     {
       boolean processedAny = false;
-      for (JarInfo jar : new ArrayList<JarInfo>(jars))
+      for (JarInfo jar : new ArrayList<>(jars))
       {
         // See if we've already processed all other jars it depends on.
 
@@ -183,7 +183,7 @@ public class PluginRegistry
         }
       }
       pluginLoaders.add(jar.loader);
-      HashMap<String, Object> classNameMap = new HashMap<String, Object>();
+      HashMap<String, Object> classNameMap = new HashMap<>();
       if (jar.name != null && jar.name.length() > 0)
         nameMap.put(jar.name, jar);
       for (String category : jar.categories)
@@ -219,7 +219,7 @@ public class PluginRegistry
 
   public static List<ClassLoader> getPluginClassLoaders()
   {
-    return new ArrayList<ClassLoader>(pluginLoaders);
+    return new ArrayList<>(pluginLoaders);
   }
 
   /**
@@ -240,7 +240,7 @@ public class PluginRegistry
 
   public static List<Class> getCategories()
   {
-    return new ArrayList<Class>(categories);
+    return new ArrayList<>(categories);
   }
 
   /**
@@ -252,14 +252,14 @@ public class PluginRegistry
   public static void registerPlugin(Object plugin)
   {
     classMap.put(plugin.getClass().getName(), plugin);
-    for (Class category : categories)
+    for (Class<?> category : categories)
     {
       if (category.isInstance(plugin))
       {
         List<Object> instances = categoryClasses.get(category);
         if (instances == null)
         {
-          instances = new ArrayList<Object>();
+          instances = new ArrayList<>();
           categoryClasses.put(category, instances);
         }
         instances.add(plugin);
@@ -316,7 +316,7 @@ public class PluginRegistry
     Map<String, PluginResource> resourcesForType = resources.get(type);
     if (resourcesForType == null)
     {
-      resourcesForType = new HashMap<String, PluginResource>();
+      resourcesForType = new HashMap<>();
       resources.put(type, resourcesForType);
     }
     PluginResource resource = resourcesForType.get(id);
@@ -334,7 +334,7 @@ public class PluginRegistry
 
   public static List<String> getResourceTypes()
   {
-    return new ArrayList<String>(resources.keySet());
+    return new ArrayList<>(resources.keySet());
   }
 
   /**
@@ -345,8 +345,8 @@ public class PluginRegistry
   {
     Map<String, PluginResource> resourcesForType = resources.get(type);
     if (resourcesForType == null)
-      return new ArrayList<PluginResource>();
-    return new ArrayList<PluginResource>(resourcesForType.values());
+      return new ArrayList<>();
+    return new ArrayList<>(resourcesForType.values());
   }
 
   /**
@@ -395,7 +395,7 @@ public class PluginRegistry
 
   public static List<String> getExportedMethodIds()
   {
-    return new ArrayList<String>(exports.keySet());
+    return new ArrayList<>(exports.keySet());
   }
 
   /**
@@ -456,12 +456,12 @@ public class PluginRegistry
     JarInfo(File file) throws IOException
     {
       this.file = file;
-      imports = new ArrayList<String>();
-      plugins = new ArrayList<String>();
-      categories = new ArrayList<String>();
-      searchpath = new ArrayList<String>();
-      resources = new ArrayList<ResourceInfo>();
-      exports = new ArrayList<ExportInfo>();
+      imports = new ArrayList<>();
+      plugins = new ArrayList<>();
+      categories = new ArrayList<>();
+      searchpath = new ArrayList<>();
+      resources = new ArrayList<>();
+      exports = new ArrayList<>();
       ZipFile zf = new ZipFile(file);
       try
       {
@@ -490,11 +490,11 @@ public class PluginRegistry
     JarInfo(ClassLoader loader) throws IOException
     {
       this.loader = loader;
-      imports = new ArrayList<String>();
-      plugins = new ArrayList<String>();
-      categories = new ArrayList<String>();
-      resources = new ArrayList<ResourceInfo>();
-      exports = new ArrayList<ExportInfo>();
+      imports = new ArrayList<>();
+      plugins = new ArrayList<>();
+      categories = new ArrayList<>();
+      resources = new ArrayList<>();
+      exports = new ArrayList<>();
       InputStream in = loader.getResourceAsStream("extensions.xml");
       if (in != null)
       {
@@ -628,9 +628,9 @@ public class PluginRegistry
     {
       this.type = type;
       this.id = id;
-      names = new ArrayList<String>();
-      loaders = new ArrayList<ClassLoader>();
-      locales = new ArrayList<Locale>();
+      names = new ArrayList<>();
+      loaders = new ArrayList<>();
+      locales = new ArrayList<>();
     }
 
     private void addResource(String name, ClassLoader loader, Locale locale) throws IllegalArgumentException

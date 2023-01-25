@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications copyright (C) 2017-2019 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -74,7 +74,7 @@ public abstract class ObjectViewer extends ViewerCanvas
 
     if (showScene)
     {
-      for(ObjectInfo info: theScene.getAllObjects())
+      for(ObjectInfo info: theScene.getObjects())
       {
         if (info == thisObjectInScene) continue;
 
@@ -330,7 +330,7 @@ public abstract class ObjectViewer extends ViewerCanvas
     squareBox = square;
     dragPoint = null;
     if (freehandSelection)
-      selectBoundsPoints = new Vector<Point>();
+      selectBoundsPoints = new Vector<>();
   }
 
   /** Finish dragging a selection region. */

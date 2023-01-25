@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -162,7 +162,7 @@ public class ConstraintTrack extends Track
     t.pos = new Vec3(pos);
     t.orient = new Vec3(orient);
     t.faceToward = faceToward.duplicate();
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     return t;
   }
 
@@ -184,7 +184,7 @@ public class ConstraintTrack extends Track
     pos = new Vec3(t.pos);
     orient = new Vec3(t.orient);
     faceToward.copy(t.faceToward);
-    theWeight = (WeightTrack) t.theWeight.duplicate(t);
+    theWeight = t.theWeight.duplicate(t);
   }
 
   /** Get a list of all keyframe times for this track. */

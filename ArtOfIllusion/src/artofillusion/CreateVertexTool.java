@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2007 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -224,7 +224,7 @@ public class CreateVertexTool extends MeshEditingTool
   private boolean createBoundaryVertex(TriangleMesh mesh)
   {
     TriangleMesh.Vertex vert[] = (TriangleMesh.Vertex []) mesh.getVertices();
-    TriangleMesh.Vertex v = (TriangleMesh.Vertex) vert[target];
+    TriangleMesh.Vertex v = vert[target];
     TriangleMesh.Edge edge[] = mesh.getEdges();
     TriangleMesh.Face face[] = mesh.getFaces();
     int vertEdge[] = v.getEdges();

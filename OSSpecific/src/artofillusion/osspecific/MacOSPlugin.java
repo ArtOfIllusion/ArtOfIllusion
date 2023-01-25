@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2020 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -45,12 +45,12 @@ public class MacOSPlugin implements Plugin, InvocationHandler
           // Use the old Apple specific API.
 
           appleApi = true;
-          Class appClass = Class.forName("com.apple.eawt.Application");
+          Class<?> appClass = Class.forName("com.apple.eawt.Application");
           Object app = appClass.getMethod("getApplication").invoke(null);
           appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
           appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-          Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
-          Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class[]{listenerClass}, this);
+          Class<?> listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
+          Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class<?>[]{listenerClass}, this);
           appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
         }
         else
@@ -58,11 +58,11 @@ public class MacOSPlugin implements Plugin, InvocationHandler
           // Use the Desktop API introduced in Java 9.
 
           appleApi = false;
-          Class aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
-          Class openHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
-          Class preferencesHandlerClass = Class.forName("java.awt.desktop.PreferencesHandler");
-          Class quiteHandlerClass = Class.forName("java.awt.desktop.QuitHandler");
-          Object proxy = Proxy.newProxyInstance(Desktop.class.getClassLoader(), new Class[]{aboutHandlerClass, openHandlerClass, preferencesHandlerClass, quiteHandlerClass}, this);
+          Class<?> aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
+          Class<?> openHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
+          Class<?> preferencesHandlerClass = Class.forName("java.awt.desktop.PreferencesHandler");
+          Class<?> quiteHandlerClass = Class.forName("java.awt.desktop.QuitHandler");
+          Object proxy = Proxy.newProxyInstance(Desktop.class.getClassLoader(), new Class<?>[]{aboutHandlerClass, openHandlerClass, preferencesHandlerClass, quiteHandlerClass}, this);
           Desktop desktop = Desktop.getDesktop();
           Desktop.class.getMethod("setAboutHandler", aboutHandlerClass).invoke(desktop, proxy);
           Desktop.class.getMethod("setOpenFileHandler", openHandlerClass).invoke(desktop, proxy);
@@ -238,7 +238,7 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     {
       try
       {
-        Method setHandled = args[0].getClass().getMethod("setHandled", new Class[]{Boolean.TYPE});
+        Method setHandled = args[0].getClass().getMethod("setHandled", Boolean.TYPE);
         setHandled.invoke(args[0], handled);
       }
       catch (Exception ex)

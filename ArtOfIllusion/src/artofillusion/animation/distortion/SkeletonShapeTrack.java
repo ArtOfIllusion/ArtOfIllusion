@@ -1,5 +1,5 @@
 /* Copyright (C) 2004-2006 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -80,7 +80,7 @@ public class SkeletonShapeTrack extends Track
     t.smoothingMethod = smoothingMethod;
     t.useGestures = useGestures;
     t.tc = tc.duplicate(((ObjectInfo) obj).getObject());
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     return t;
   }
 
@@ -96,7 +96,7 @@ public class SkeletonShapeTrack extends Track
     smoothingMethod = t.smoothingMethod;
     useGestures = t.useGestures;
     tc = t.tc.duplicate(info.getObject());
-    theWeight = (WeightTrack) t.theWeight.duplicate(this);
+    theWeight = t.theWeight.duplicate(this);
   }
 
   /** Get a list of all keyframe times for this track. */

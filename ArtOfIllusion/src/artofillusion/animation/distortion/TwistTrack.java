@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2004 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -74,7 +74,7 @@ public class TwistTrack extends Track
     t.smoothingMethod = smoothingMethod;
     t.worldCoords = worldCoords;
     t.tc = tc.duplicate((ObjectInfo) obj);
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     return t;
   }
 
@@ -93,7 +93,7 @@ public class TwistTrack extends Track
     smoothingMethod = t.smoothingMethod;
     worldCoords = t.worldCoords;
     tc = t.tc.duplicate(info);
-    theWeight = (WeightTrack) t.theWeight.duplicate(this);
+    theWeight = t.theWeight.duplicate(this);
   }
 
   /** Get a list of all keyframe times for this track. */

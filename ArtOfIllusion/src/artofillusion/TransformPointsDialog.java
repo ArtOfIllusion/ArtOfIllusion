@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -108,9 +109,9 @@ public class TransformPointsDialog extends BDialog
     w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
     if (w instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
+      Iterator<Widget> iter = ((WidgetContainer) w).getChildren().iterator();
       while (iter.hasNext())
-        addAsListener((Widget) iter.next());
+        addAsListener(iter.next());
     }
   }
 }

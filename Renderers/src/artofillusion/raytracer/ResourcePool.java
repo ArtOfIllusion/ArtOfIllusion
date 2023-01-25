@@ -1,5 +1,5 @@
 /* Copyright (C) 2005 by Peter Eastman
-   Changes copyright (C) 2022 by Maksim Khramov
+   Changes copyright (C) 2022-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,7 @@ package artofillusion.raytracer;
 
 public class ResourcePool
 {
-  private Class objectClass;
+  private Class<?> objectClass;
   private Object pool[];
   private int next;
 
@@ -32,7 +32,7 @@ public class ResourcePool
    *                        a constructor which takes no arguments.
    */
 
-  public ResourcePool(Class objectClass)
+  public ResourcePool(Class<?> objectClass)
   {
     this.objectClass = objectClass;
     pool = new Object [0];

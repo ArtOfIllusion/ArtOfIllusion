@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2007 by Norbert Krieg and Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -384,7 +384,7 @@ public class POVExporter
 	    //double radius=light.getRadius();
 	    float dr=light.getDecayRate();
 	    double fadeDistance=MAXIMAL_LIGHT_FADE_DISTANCE;
-	    if (dr!=0.0) fadeDistance=0.5/(new Float(dr).doubleValue());
+	    if (dr!=0.0) fadeDistance=0.5/(Float.valueOf(dr).doubleValue());
 	    double fadePower=2.0;
 	    if (fadeDistance>=5.0) fadePower=1.0;  // only linear instead of squared
 	    write("// "+ info.getName(),out,0);
@@ -425,7 +425,7 @@ public class POVExporter
 	    // calculate the decay rate
 	    float dr=light.getDecayRate();
 	    double fadeDistance=MAXIMAL_LIGHT_FADE_DISTANCE;
-	    if (dr!=0.0) fadeDistance=0.5/(new Float(dr).doubleValue());
+	    if (dr!=0.0) fadeDistance=0.5/(Float.valueOf(dr).doubleValue());
 	    double fadePower=2.0;
 	    if (fadeDistance>=5.0) fadePower=1.0;  // only linear instead of squared
 	    write("// "+ info.getName(),out,0);
@@ -602,9 +602,9 @@ public class POVExporter
 	}
 	// if it is a grouping object
 	else if ((obj.getObject()) instanceof ObjectCollection)    {
-	    Enumeration objects = ((ObjectCollection) obj.getObject()).getObjects(obj, false, theScene);
+	    Enumeration<ObjectInfo> objects = ((ObjectCollection) obj.getObject()).getObjects(obj, false, theScene);
 	    while (objects.hasMoreElements())
-		writeObjects(theScene,(ObjectInfo)objects.nextElement(),out,smooth,tolerance);
+		writeObjects(theScene,objects.nextElement(),out,smooth,tolerance);
 	}
 	// any other object
 	else { /* if smoothed mesh or any other object */

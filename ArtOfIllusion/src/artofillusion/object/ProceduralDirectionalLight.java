@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ import java.util.*;
 public class ProceduralDirectionalLight extends DirectionalLight
 {
   private Procedure procedure;
-  private ThreadLocal renderingProc;
+  private ThreadLocal<Procedure> renderingProc;
   private double currentTime;
   private TextureParameter parameters[];
   private double parameterValues[];
@@ -63,9 +63,9 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal() {
+    renderingProc = new ThreadLocal<>() {
       @Override
-      protected Object initialValue()
+      protected Procedure initialValue()
       {
         Procedure localProc = createProcedure();
         localProc.copy(procedure);
@@ -141,7 +141,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     point.z = position.z;
     point.t = currentTime;
     point.param = parameterValues;
-    Procedure pr = (Procedure) renderingProc.get();
+    Procedure pr = renderingProc.get();
     pr.initForPoint(point);
     OutputModule output[] = pr.getOutputModules();
     output[0].getColor(0, light, 0.0);
@@ -306,7 +306,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
     public ProceduralLightKeyframe(ProceduralDirectionalLight light)
     {
       this.light = light;
-      paramValues = new HashMap<TextureParameter, Double>();
+      paramValues = new HashMap<>();
       for (int i = 0; i < light.parameters.length; i++)
         paramValues.put(light.parameters[i], light.parameterValues[i]);
       radius = light.getRadius();

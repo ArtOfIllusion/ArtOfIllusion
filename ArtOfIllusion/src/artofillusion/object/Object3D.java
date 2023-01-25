@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2012 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -465,8 +465,8 @@ public abstract class Object3D
       {
         try
           {
-            Class mapClass = ArtOfIllusion.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Material.class);
+            Class<?> mapClass = ArtOfIllusion.getClass(in.readUTF());
+            Constructor<?> con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Material.class);
             theMaterial = theScene.getMaterial(i);
             setMaterial(theMaterial, (MaterialMapping) con.newInstance(in, this, theMaterial));
           }
@@ -480,8 +480,8 @@ public abstract class Object3D
       {
         try
           {
-            Class mapClass = ArtOfIllusion.getClass(in.readUTF());
-            Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
+            Class<?> mapClass = ArtOfIllusion.getClass(in.readUTF());
+            Constructor<?> con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
             theTexture = theScene.getTexture(i);
             setTexture(theTexture, (TextureMapping) con.newInstance(in, this, theTexture));
           }
@@ -513,8 +513,8 @@ public abstract class Object3D
   {
     try
     {
-      Class valueClass = ArtOfIllusion.getClass(in.readUTF());
-      Constructor con = valueClass.getConstructor(DataInputStream.class);
+      Class<?> valueClass = ArtOfIllusion.getClass(in.readUTF());
+      Constructor<?> con = valueClass.getConstructor(DataInputStream.class);
       return ((ParameterValue) con.newInstance(in));
     }
     catch (Exception ex)

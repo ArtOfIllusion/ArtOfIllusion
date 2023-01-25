@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2022 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -64,14 +64,14 @@ public class Scene
   {
     UniformTexture defTex = new UniformTexture();
 
-    objects = new Vector<ObjectInfo>();
-    materials = new Vector<Material>();
-    textures = new Vector<Texture>();
-    images = new Vector<ImageMap>();
-    selection = new Vector<Integer>();
-    metadataMap = new HashMap<String, Object>();
-    textureListeners = new Vector<ListChangeListener>();
-    materialListeners = new Vector<ListChangeListener>();
+    objects = new Vector<>();
+    materials = new Vector<>();
+    textures = new Vector<>();
+    images = new Vector<>();
+    selection = new Vector<>();
+    metadataMap = new HashMap<>();
+    textureListeners = new Vector<>();
+    materialListeners = new Vector<>();
     defTex.setName("Default Texture");
     textures.addElement(defTex);
     ambientColor = new RGBColor(0.3f, 0.3f, 0.3f);
@@ -1198,8 +1198,8 @@ public class Scene
     int count;
     short version = in.readShort();
     Hashtable<Integer, Object3D> table;
-    Class cls;
-    Constructor con;
+    Class<?> cls;
+    Constructor<?> con;
 
     if (version < 0 || version > 5)
       throw new InvalidObjectException("");
@@ -1218,7 +1218,7 @@ public class Scene
     // Read the image maps.
 
     count = in.readInt();
-    images = new Vector<ImageMap>(count);
+    images = new Vector<>(count);
     for (int i = 0; i < count; i++)
     {
         if (version == 0)
@@ -1244,7 +1244,7 @@ public class Scene
     // Read the materials.
 
     count = in.readInt();
-    materials = new Vector<Material>(count);
+    materials = new Vector<>(count);
     for (int i = 0; i < count; i++)
       {
         try
@@ -1284,7 +1284,7 @@ public class Scene
     // Read the textures.
 
     count = in.readInt();
-    textures = new Vector<Texture>(count);
+    textures = new Vector<>(count);
     for (int i = 0; i < count; i++)
       {
         try
@@ -1324,12 +1324,12 @@ public class Scene
     // Read the objects.
 
     count = in.readInt();
-    objects = new Vector<ObjectInfo>(count);
-    table = new Hashtable<Integer, Object3D>(count);
+    objects = new Vector<>(count);
+    table = new Hashtable<>(count);
     for (int i = 0; i < count; i++)
       objects.addElement(readObjectFromFile(in, table, version));
     objectIndexMap = null;
-    selection = new Vector<Integer>();
+    selection = new Vector<>();
 
     // Read the list of children for each object.
 
@@ -1374,7 +1374,7 @@ public class Scene
             environTexture = textures.elementAt(texIndex);
             try
               {
-                Class mapClass = ArtOfIllusion.getClass(in.readUTF());
+                Class<?> mapClass = ArtOfIllusion.getClass(in.readUTF());
                 con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
                 environMapping = (TextureMapping) con.newInstance(in, new Sphere(1.0, 1.0, 1.0), environTexture);
               }
@@ -1392,7 +1392,7 @@ public class Scene
 
     // Read the metadata.
 
-    metadataMap = new HashMap<String, Object>();
+    metadataMap = new HashMap<>();
     if (version > 3)
     {
       count = in.readInt();
@@ -1416,16 +1416,16 @@ public class Scene
         }
       }
     }
-    textureListeners = new Vector<ListChangeListener>();
-    materialListeners = new Vector<ListChangeListener>();
+    textureListeners = new Vector<>();
+    materialListeners = new Vector<>();
     setTime(0.0);
   }
 
   private ObjectInfo readObjectFromFile(DataInputStream in, Hashtable<Integer, Object3D> table, int version) throws IOException, InvalidObjectException
   {
     ObjectInfo info = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
-    Class cls;
-    Constructor con;
+    Class<?> cls;
+    Constructor<?> con;
     Object3D obj;
 
     info.setId(in.readInt());
@@ -1541,7 +1541,7 @@ public class Scene
     Material mat;
     Texture tex;
     int i, j, index = 0;
-    Hashtable<Object3D, Integer> table = new Hashtable<Object3D, Integer>(objects.size());
+    Hashtable<Object3D, Integer> table = new Hashtable<>(objects.size());
 
     out.writeShort(5);
     ambientColor.writeToFile(out);

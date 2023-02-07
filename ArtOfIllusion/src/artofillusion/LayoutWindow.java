@@ -48,12 +48,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   FormContainer viewsContainer;
   FormContainer centerContainer;
   private DockingContainer dock[];
-  BScrollPane itemTreeScroller;
+
   Score theScore;
   ToolPalette tools;
   private TexturesAndMaterialsDialog assetsDialog;
   BLabel helpText;
-  TreeList itemTree;
+  private SceneExplorer sceneExplorer;
   Scene theScene;
   BMenuBar menubar;
   BMenu newScriptMenu;
@@ -96,7 +96,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     undoStack = new UndoStack();
     sceneChangedEvent = new SceneChangedEvent(this);
     uiEventProcessor = new ActionProcessor();
-    createItemList();
+    
     objectListShown = true;
 
     // Create the four SceneViewer panels.
@@ -176,7 +176,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     BScrollPane propertiesScroller = new BScrollPane(propertiesPanel, BScrollPane.SCROLLBAR_NEVER, BScrollPane.SCROLLBAR_AS_NEEDED);
     propertiesScroller.getVerticalScrollBar().setUnitIncrement(10);
     propertiesScroller.setBackground(ThemeManager.getAppBackgroundColor());
-    getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DefaultDockableWidget(itemTreeScroller, Translate.text("Objects")));
+    getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(sceneExplorer = new SceneExplorer(this));
     getDockingContainer(BTabbedPane.RIGHT).addDockableWidget(new DefaultDockableWidget(propertiesScroller, Translate.text("Properties")), 0, 1);
     getDockingContainer(BTabbedPane.BOTTOM).addDockableWidget(new DefaultDockableWidget(theScore, Translate.text("Score")));
 
@@ -254,10 +254,10 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         ArtOfIllusion.closeWindow(LayoutWindow.this);
       }
     });
-    itemTree.setPopupMenuManager(this);
+    
     UIUtilities.applyDefaultFont(getContent());
     UIUtilities.applyDefaultBackground(centerContainer);
-    itemTreeScroller.setBackground(Color.white);
+    
     if (ArtOfIllusion.APP_ICON != null)
       setIcon(ArtOfIllusion.APP_ICON);
     Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -302,33 +302,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       KeystrokeManager.executeKeystrokes(e, this);
   }
 
-  /** Create the TreeList containing all the objects in the scene. */
-
-  private void createItemList()
-  {
-    itemTree = new TreeList(this);
-    itemTree.setPreferredSize(new Dimension(130, 300));
-    itemTree.addEventLink(TreeList.ElementMovedEvent.class, theScore, "rebuildList");
-    itemTree.addEventLink(TreeList.ElementDoubleClickedEvent.class, this, "editObjectCommand");
-    itemTree.setUpdateEnabled(false);
-    for (ObjectInfo info: theScene.getObjects())
-    {
-      if (info.getParent() == null)
-        itemTree.addElement(new ObjectTreeElement(info, itemTree));
-    }
-    itemTree.setUpdateEnabled(true);
-    itemTreeScroller = new BScrollPane(itemTree) {
-      @Override
-      public Dimension getMinimumSize()
-      {
-        return new Dimension(0, 0);
-      }
-    };
-    itemTreeScroller.setForceWidth(true);
-    itemTreeScroller.setForceHeight(true);
-    itemTreeScroller.getVerticalScrollBar().setUnitIncrement(10);
-    itemTree.addEventLink(SelectionChangedEvent.class, this, "treeSelectionChanged");
-    new AutoScroller(itemTreeScroller, 0, 10);
+  private void rebuildList() {
+      theScore.rebuildList();
   }
 
   /** Rebuild the TreeList of objects, attempting as much as possible to preserve its
@@ -340,30 +315,28 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
-        ObjectInfo info = theScene.getObject(i);
-        TreeElement el = itemTree.findElement(info);
+        TreeElement el = sceneExplorer.find(theScene.getObject(i));
         if (el == null)
           continue;
         expanded[i] = el.isExpanded();
         selected[i] = el.isSelected();
       }
-    itemTree.setUpdateEnabled(false);
-    itemTree.removeAllElements();
+    sceneExplorer.setUpdateEnabled(false);
+    sceneExplorer.clear();
     for (ObjectInfo info: theScene.getObjects())
     {
       if (info.getParent() == null)
-        itemTree.addElement(new ObjectTreeElement(info, itemTree));
+        sceneExplorer.add(info);
     }
     for (int i = 0; i < theScene.getNumObjects(); i++)
       {
-        ObjectInfo info = theScene.getObject(i);
-        TreeElement el = itemTree.findElement(info);
+        TreeElement el = sceneExplorer.find(theScene.getObject(i));
         if (el == null)
           continue;
         el.setExpanded(expanded[i]);
         el.setSelected(selected[i]);
       }
-    itemTree.setUpdateEnabled(true);
+    sceneExplorer.setUpdateEnabled(true);
     theScore.rebuildList();
   }
 
@@ -828,7 +801,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @Override
   public void showPopupMenu(Widget w, int x, int y)
   {
-    Object sel[] = itemTree.getSelectedObjects();
+    Object sel[] = sceneExplorer.getSelectedObjects();
     boolean canConvert, canSetTexture, canHide, canShow, canLock, canUnlock, hasChildren;
     ObjectInfo info;
     Object3D obj;
@@ -1064,7 +1037,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   @Override
   public void updateMenus()
   {
-    Object sel[] = itemTree.getSelectedObjects();
+    Object sel[] = sceneExplorer.getSelectedObjects();
     int numSelObjects = sel.length;
     Track selTrack[] = theScore.getSelectedTracks();
     int numSelTracks = selTrack.length;
@@ -1232,13 +1205,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void addObject(ObjectInfo info, UndoRecord undo)
   {
     theScene.addObject(info, undo);
-    itemTree.setUpdateEnabled(false);
-    itemTree.addElement(new ObjectTreeElement(info, itemTree));
+    sceneExplorer.setUpdateEnabled(false);
+    sceneExplorer.add(info);
     uiEventProcessor.addEvent(new Runnable()
     {
       public void run()
       {
-        itemTree.setUpdateEnabled(true);
+        sceneExplorer.setUpdateEnabled(true);
         for (int i = 0; i < theView.length ; i++)
              theView[i].rebuildCameraList();
         theScore.rebuildList();
@@ -1254,13 +1227,13 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void addObject(ObjectInfo info, int index, UndoRecord undo)
   {
     theScene.addObject(info, index, undo);
-    itemTree.setUpdateEnabled(false);
-    itemTree.addElement(new ObjectTreeElement(info, itemTree), index);
+    sceneExplorer.setUpdateEnabled(false);
+    sceneExplorer.add(info, index);
     uiEventProcessor.addEvent(new Runnable()
     {
       public void run()
       {
-        itemTree.setUpdateEnabled(true);
+        sceneExplorer.setUpdateEnabled(true);
         for (int i = 0; i < theView.length ; i++)
              theView[i].rebuildCameraList();
         theScore.rebuildList();
@@ -1273,7 +1246,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void removeObject(int which, UndoRecord undo)
   {
-    itemTree.setUpdateEnabled(false);
+    sceneExplorer.setUpdateEnabled(false);
     final ObjectInfo info = theScene.getObject(which);
     ObjectInfo parent = info.getParent();
     int childIndex = -1;
@@ -1281,7 +1254,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       for (int i = 0; i < parent.getChildren().length; i++)
         if (parent.getChildren()[i] == info)
           childIndex = i;
-    itemTree.removeObject(info);
+    sceneExplorer.remove(info);
     if (childIndex > -1 && info.getParent() == null)
       undo.addCommandAtBeginning(UndoRecord.ADD_TO_GROUP, parent, info, childIndex);
     theScene.removeObject(which, undo);
@@ -1289,7 +1262,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     {
       public void run()
       {
-        itemTree.setUpdateEnabled(true);
+        sceneExplorer.setUpdateEnabled(true);
         for (int i = 0; i < theView.length ; i++)
         {
           if (theView[i].getBoundCamera() == info)
@@ -1306,7 +1279,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setObjectName(int which, String name)
   {
     theScene.getObject(which).setName(name);
-    itemTree.repaint();
+    sceneExplorer.repaint();
     for (int i = 0; i < theView.length ; i++)
       theView[i].rebuildCameraList();
     theScore.rebuildList();
@@ -1319,7 +1292,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     theScene.setTime(time);
     theScore.setTime(time);
     theScore.repaint();
-    itemTree.repaint();
+    sceneExplorer.repaint();
     for (SceneViewer view : theView)
       view.viewChanged(false);
     updateImage();
@@ -1410,7 +1383,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void setObjectListVisible(boolean visible)
   {
     objectListShown = visible; // in case this method is called from outside
-    setDockableWidgetVisible((DockableWidget) itemTreeScroller.getParent(), visible);
+    setDockableWidgetVisible(sceneExplorer, visible);
   }
 
   /** Set whether the score should be displayed. */
@@ -1439,7 +1412,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   private void treeSelectionChanged()
   {
-    Object sel[] = itemTree.getSelectedObjects();
+    Object sel[] = sceneExplorer.getSelectedObjects();
     int which[] = new int [sel.length];
 
     for (int i = 0; i < sel.length; i++)
@@ -1480,7 +1453,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public Collection<ObjectInfo> getSelectedObjects()
   {
-    ArrayList<ObjectInfo> objects = new ArrayList<ObjectInfo>();
+    ArrayList<ObjectInfo> objects = new ArrayList<>();
     for (int index : theScene.getSelection())
       objects.add(theScene.getObject(index));
     return objects;
@@ -1512,25 +1485,25 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void setSelection(int which)
   {
-    itemTree.setUpdateEnabled(false);
+    sceneExplorer.setUpdateEnabled(false);
     clearSelection();
     theScene.setSelection(which);
-    itemTree.setSelected(theScene.getObject(which), true);
-    itemTree.setUpdateEnabled(true);
+    sceneExplorer.setSelected(theScene.getObject(which), true);
+    sceneExplorer.setUpdateEnabled(true);
     theScore.rebuildList();
     updateMenus();
   }
 
   /** Set the list of objects in the scene which should be selected. */
 
-  public void setSelection(int which[])
+  public void setSelection(int[] which)
   {
-    itemTree.setUpdateEnabled(false);
+    sceneExplorer.setUpdateEnabled(false);
     clearSelection();
     theScene.setSelection(which);
     for (int i = 0; i < which.length; i++)
-      itemTree.setSelected(theScene.getObject(which[i]), true);
-    itemTree.setUpdateEnabled(true);
+        sceneExplorer.setSelected(theScene.getObject(which[i]), true);
+    sceneExplorer.setUpdateEnabled(true);
     theScore.rebuildList();
     updateMenus();
   }
@@ -1540,7 +1513,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void addToSelection(int which)
   {
     theScene.addToSelection(which);
-    itemTree.setSelected(theScene.getObject(which), true);
+    sceneExplorer.setSelected(theScene.getObject(which), true);
     theScore.rebuildList();
     updateMenus();
   }
@@ -1550,7 +1523,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void clearSelection()
   {
     theScene.clearSelection();
-    itemTree.deselectAll();
+    sceneExplorer.deselectAll();
     theScore.rebuildList();
     updateImage();
     updateMenus();
@@ -1561,7 +1534,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
   public void removeFromSelection(int which)
   {
     theScene.removeFromSelection(which);
-    itemTree.setSelected(theScene.getObject(which), false);
+    sceneExplorer.setSelected(theScene.getObject(which), false);
     theScore.rebuildList();
     updateMenus();
   }
@@ -1634,7 +1607,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
         else if (command.equals("disableTracks"))
           theScore.setTracksEnabled(false);
         else if (command.equals("pathFromCurve"))
-          new PathFromCurveDialog(this, itemTree.getSelectedObjects());
+          new PathFromCurveDialog(this, sceneExplorer.getSelectedObjects());
         else if (command.equals("bindToParent"))
           bindToParentCommand();
       }
@@ -1654,58 +1627,58 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     else if (menu == addTrackMenu)
       {
         if (command.equals("poseTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), PoseTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), PoseTrack.class, null, true);
         else if (command.equals("constraintTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), ConstraintTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), ConstraintTrack.class, null, true);
         else if (command.equals("visibilityTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), VisibilityTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), VisibilityTrack.class, null, true);
         else if (command.equals("textureTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), TextureTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), TextureTrack.class, null, true);
       }
     else if (menu == positionTrackMenu)
       {
         if (command.equals("xyzOneTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), PositionTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), PositionTrack.class, null, true);
         else if (command.equals("xyzThreeTracks"))
           {
-            theScore.addTrack(itemTree.getSelectedObjects(), PositionTrack.class, new Object [] {"Z Position", Boolean.FALSE, Boolean.FALSE, Boolean.TRUE}, true);
-            theScore.addTrack(itemTree.getSelectedObjects(), PositionTrack.class, new Object [] {"Y Position", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE}, false);
-            theScore.addTrack(itemTree.getSelectedObjects(), PositionTrack.class, new Object [] {"X Position", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE}, false);
+            theScore.addTrack(sceneExplorer.getSelectedObjects(), PositionTrack.class, new Object [] {"Z Position", Boolean.FALSE, Boolean.FALSE, Boolean.TRUE}, true);
+            theScore.addTrack(sceneExplorer.getSelectedObjects(), PositionTrack.class, new Object [] {"Y Position", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE}, false);
+            theScore.addTrack(sceneExplorer.getSelectedObjects(), PositionTrack.class, new Object [] {"X Position", Boolean.TRUE, Boolean.FALSE, Boolean.FALSE}, false);
           }
         else if (command.equals("proceduralTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), ProceduralPositionTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), ProceduralPositionTrack.class, null, true);
       }
     else if (menu == rotationTrackMenu)
       {
         if (command.equals("xyzOneTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), RotationTrack.class, new Object [] {"Rotation", Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE}, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), RotationTrack.class, new Object [] {"Rotation", Boolean.FALSE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE}, true);
         else if (command.equals("xyzThreeTracks"))
           {
-            theScore.addTrack(itemTree.getSelectedObjects(), RotationTrack.class, new Object [] {"Z Rotation", Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE}, true);
-            theScore.addTrack(itemTree.getSelectedObjects(), RotationTrack.class, new Object [] {"Y Rotation", Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE}, false);
-            theScore.addTrack(itemTree.getSelectedObjects(), RotationTrack.class, new Object [] {"X Rotation", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE}, false);
+            theScore.addTrack(sceneExplorer.getSelectedObjects(), RotationTrack.class, new Object [] {"Z Rotation", Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE}, true);
+            theScore.addTrack(sceneExplorer.getSelectedObjects(), RotationTrack.class, new Object [] {"Y Rotation", Boolean.FALSE, Boolean.FALSE, Boolean.TRUE, Boolean.FALSE}, false);
+            theScore.addTrack(sceneExplorer.getSelectedObjects(), RotationTrack.class, new Object [] {"X Rotation", Boolean.FALSE, Boolean.TRUE, Boolean.FALSE, Boolean.FALSE}, false);
           }
         else if (command.equals("quaternionTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), RotationTrack.class, new Object [] {"Rotation", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE}, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), RotationTrack.class, new Object [] {"Rotation", Boolean.TRUE, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE}, true);
         else if (command.equals("proceduralTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), ProceduralRotationTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), ProceduralRotationTrack.class, null, true);
       }
     else if (menu == distortionMenu)
       {
         if (command.equals("bendDistortion"))
-          theScore.addTrack(itemTree.getSelectedObjects(), BendTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), BendTrack.class, null, true);
         else if (command.equals("customDistortion"))
-          theScore.addTrack(itemTree.getSelectedObjects(), CustomDistortionTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), CustomDistortionTrack.class, null, true);
         else if (command.equals("scaleDistortion"))
-          theScore.addTrack(itemTree.getSelectedObjects(), ScaleTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), ScaleTrack.class, null, true);
         else if (command.equals("shatterDistortion"))
-          theScore.addTrack(itemTree.getSelectedObjects(), ShatterTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), ShatterTrack.class, null, true);
         else if (command.equals("twistDistortion"))
-          theScore.addTrack(itemTree.getSelectedObjects(), TwistTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), TwistTrack.class, null, true);
         else if (command.equals("IKTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), IKTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), IKTrack.class, null, true);
         else if (command.equals("skeletonShapeTrack"))
-          theScore.addTrack(itemTree.getSelectedObjects(), SkeletonShapeTrack.class, null, true);
+          theScore.addTrack(sceneExplorer.getSelectedObjects(), SkeletonShapeTrack.class, null, true);
       }
     else if (menu == sceneMenu)
       {
@@ -1922,7 +1895,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void clearCommand()
   {
-    Object sel[] = itemTree.getSelectedObjects();
+    Object sel[] = sceneExplorer.getSelectedObjects();
     int selIndex[] = getSelectedIndices();
     boolean any;
     int i;
@@ -1989,7 +1962,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void duplicateCommand()
   {
-    Object sel[] = itemTree.getSelectedObjects();
+    Object sel[] = sceneExplorer.getSelectedObjects();
     int which[] = new int [sel.length], num = theScene.getNumObjects();
 
     // Create the duplicates.
@@ -2024,7 +1997,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void severCommand()
   {
-    Object sel[] = itemTree.getSelectedObjects();
+    Object sel[] = sceneExplorer.getSelectedObjects();
     ObjectInfo info;
     int i;
 
@@ -2556,7 +2529,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     setUndoRecord(undo);
     updateImage();
-    itemTree.repaint();
+    sceneExplorer.repaint();
   }
 
   private void setObjectsLocked(boolean locked, boolean selectionOnly)
@@ -2580,7 +2553,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       }
     setUndoRecord(undo);
     updateImage();
-    itemTree.repaint();
+    sceneExplorer.repaint();
   }
 
 

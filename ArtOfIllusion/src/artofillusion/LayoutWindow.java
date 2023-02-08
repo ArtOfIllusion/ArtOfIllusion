@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -302,8 +302,9 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       KeystrokeManager.executeKeystrokes(e, this);
   }
 
-  private void rebuildList() {
-      theScore.rebuildList();
+  private void rebuildList()
+  {
+    theScore.rebuildList();
   }
 
   /** Rebuild the TreeList of objects, attempting as much as possible to preserve its
@@ -311,32 +312,7 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
 
   public void rebuildItemList()
   {
-    boolean expanded[] = new boolean [theScene.getNumObjects()], selected[] = new boolean [theScene.getNumObjects()];
-
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      {
-        TreeElement el = sceneExplorer.find(theScene.getObject(i));
-        if (el == null)
-          continue;
-        expanded[i] = el.isExpanded();
-        selected[i] = el.isSelected();
-      }
-    sceneExplorer.setUpdateEnabled(false);
-    sceneExplorer.clear();
-    for (ObjectInfo info: theScene.getObjects())
-    {
-      if (info.getParent() == null)
-        sceneExplorer.add(info);
-    }
-    for (int i = 0; i < theScene.getNumObjects(); i++)
-      {
-        TreeElement el = sceneExplorer.find(theScene.getObject(i));
-        if (el == null)
-          continue;
-        el.setExpanded(expanded[i]);
-        el.setSelected(selected[i]);
-      }
-    sceneExplorer.setUpdateEnabled(true);
+    sceneExplorer.rebuildList();
     theScore.rebuildList();
   }
 

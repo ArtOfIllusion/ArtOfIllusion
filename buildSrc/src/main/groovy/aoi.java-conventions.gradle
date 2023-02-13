@@ -25,10 +25,7 @@ repositories {
         url 'https://jitpack.io'
     }
     maven {
-        url 'https://maven.jzy3d.org/snapshots/'
-    }
-    maven {
-        url 'https://maven.jzy3d.org/releases/'
+        url 'https://jogamp.org/deployment/maven/'
     }
     maven {
         url 'https://oss.sonatype.org/content/repositories/snapshots'

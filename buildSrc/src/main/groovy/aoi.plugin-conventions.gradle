@@ -7,5 +7,5 @@ dependencies {
 }
 
 tasks.withType(Jar) {
-    destinationDir = file("${rootProject.projectDir}/Plugins")
+    destinationDirectory = file("${rootProject.projectDir}/Plugins")
 }

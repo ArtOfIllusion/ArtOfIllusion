@@ -8,11 +8,15 @@ plugins {
 
 description = 'Art Of Illusion'
 
-mainClassName = 'artofillusion.ArtOfIllusion'
 
 
 ext {
    joglVersion = "2.4.0"
+   mainClass = "artofillusion.ArtOfIllusion"
+}
+
+application {
+    mainClass =  "artofillusion.ArtOfIllusion"
 }
 
 dependencies {
@@ -37,7 +41,7 @@ dependencies {
 
 jar {
     manifest {
-        attributes('Main-Class': '${mainClassName}', "Class-Path": configurations.default.collect { it.getName() }.join(' '), "Implementation-Version": gitVersion())
+        attributes('Main-Class': "${mainClass}", "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' '), "Implementation-Version": gitVersion())
     }
 }
 
@@ -62,7 +66,7 @@ tasks.assembleDist.configure {
 
 launch4j {
   bundledJrePath = '%JAVA_HOME%;%PATH%'
-  mainClassName = "${application.mainClassName}"
+  mainClassName = "$mainClass"
   dontWrapJar = true
   outfile = "Art Of Illusion.exe"
   icon = "${rootProject.projectDir}/InstallerSrc/aoi.ico"
@@ -103,7 +107,7 @@ distributions {
         }
         into("${description}.app/Contents/Resources") { from("${rootProject.projectDir}/InstallerSrc/apple/") { include "*.icns"}}
         into("${description}.app/Contents/Resources/Java") { from(jar) }
-        into("${description}.app/Contents/Resources/Java") { from(configurations.default).exclude("*windows*").exclude("*linux*").exclude("*android*") }
+        into("${description}.app/Contents/Resources/Java") { from(configurations.runtimeClasspath).exclude("*windows*").exclude("*linux*").exclude("*android*") }
         into("${description}.app/Contents/Resources/Plugins") { from("${rootDir}/Plugins") }
         into("${description}.app/Contents/Resources/Scripts") { from("../Scripts") }
         into("${description}.app/Contents/Resources/Textures And Materials") { from("../Textures And Materials") }

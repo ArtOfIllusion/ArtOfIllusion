@@ -63,7 +63,7 @@ public class ProceduralDirectionalLight extends DirectionalLight
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal<>() {
+    renderingProc = new ThreadLocal<Procedure>() {
       @Override
       protected Procedure initialValue()
       {

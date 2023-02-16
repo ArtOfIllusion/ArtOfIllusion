@@ -163,7 +163,7 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void sortRecords()
   {
-    Collections.sort(records, new Comparator<>()
+    Collections.sort(records, new Comparator<KeystrokeRecord>()
     {
       @Override
       public int compare(KeystrokeRecord r1, KeystrokeRecord r2)

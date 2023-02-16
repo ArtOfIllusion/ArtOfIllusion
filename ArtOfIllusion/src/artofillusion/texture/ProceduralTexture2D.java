@@ -63,7 +63,7 @@ public class ProceduralTexture2D extends Texture2D implements ProcedureOwner
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal<>() {
+    renderingProc = new ThreadLocal<Procedure>() {
       @Override
       protected Procedure initialValue()
       {

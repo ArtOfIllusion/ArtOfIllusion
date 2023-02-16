@@ -253,7 +253,7 @@ public class ArtOfIllusion
          * when interacting with macOS and GLJPanels.
          */
 
-        SwingWorker<Boolean, Void> autoCloseUnmodified = new SwingWorker<>()
+        SwingWorker<Boolean, Void> autoCloseUnmodified = new SwingWorker<Boolean, Void>()
         {
           @Override
           public Boolean doInBackground()

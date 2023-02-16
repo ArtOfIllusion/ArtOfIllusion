@@ -64,7 +64,7 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
 
   private void initThreadLocal()
   {
-    renderingProc = new ThreadLocal<>() {
+    renderingProc = new ThreadLocal<Procedure>() {
       @Override
       protected Procedure initialValue()
       {

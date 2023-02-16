@@ -12,7 +12,7 @@
 
 package artofillusion;
 
-import buoy.widget.*;
+
 
 import java.io.*;
 import java.util.zip.*;
@@ -22,6 +22,9 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.xml.parsers.*;
 
@@ -41,19 +44,19 @@ public class PluginRegistry
    * contained in them.
    */
 
-  public static void scanPlugins()
+  public static List<String> scanPlugins()
   {
-    File dir = new File(ArtOfIllusion.PLUGIN_DIRECTORY);
-    if (!dir.exists())
-    {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("cannotLocatePlugins")), BStandardDialog.ERROR).showMessageDialog(null);
-      return;
-    }
+    Path pluginsPath = Paths.get(ArtOfIllusion.PLUGIN_DIRECTORY);
+    if(Files.notExists(pluginsPath)) return List.of(Translate.text("cannotLocatePlugins"));
 
+    
+    File dir = pluginsPath.toFile();
     // Scan the plugins directory, and parse the index in every jar file.
 
-    HashSet<JarInfo> jars = new HashSet<JarInfo>();
-    for (String file : dir.list())
+    Set<JarInfo> jars = new HashSet<>();
+    List<String> results = new ArrayList<>();
+    
+    for (String file : pluginsPath.toFile().list())
     {
       try
       {
@@ -65,50 +68,26 @@ public class PluginRegistry
       }
       catch (Exception ex)
       {
-        System.err.println("*** Exception loading plugin file "+file);
+        results.add("Error loading plugin file: " + file);
+        System.err.println("*** "+file);
         ex.printStackTrace(System.err);
       }
     }
-    processPlugins(jars);
+    processPlugins(jars,results);
+    return results;
   }
 
-  /**
-   * Process a set of ClassLoaders corresponding to jar files, read in their indices,
-   * and record all plugins contained in them.
-   */
 
-  public static void scanPlugins(List<ClassLoader> loaders)
-  {
-    HashSet<JarInfo> jars = new HashSet<JarInfo>();
-    for (ClassLoader loader : loaders)
-    {
-      try
-      {
-        jars.add(new JarInfo(loader));
-      }
-      catch (IOException ex)
-      {
-        // Not a zip file.
-      }
-      catch (Exception ex)
-      {
-        System.err.println("*** Exception loading plugin classloader");
-        ex.printStackTrace(System.err);
-      }
-    }
-    processPlugins(jars);
-  }
-
-  private static void processPlugins(HashSet<JarInfo> jars)
+  private static void processPlugins(Set<JarInfo> jars, List<String> results)
   {
     // Build a classloader for each jar, registering plugins, categories, and resources.
     // This needs to be done in the proper order to account for dependencies between plugins.
 
-    HashMap<String, JarInfo> nameMap = new HashMap<String, JarInfo>();
+    Map<String, JarInfo> nameMap = new HashMap<>();
     while (jars.size() > 0)
     {
       boolean processedAny = false;
-      for (JarInfo jar : new ArrayList<JarInfo>(jars))
+      for (JarInfo jar : new ArrayList<>(jars))
       {
         // See if we've already processed all other jars it depends on.
 
@@ -121,22 +100,21 @@ public class PluginRegistry
         }
         if (importsOk)
         {
-          processJar(jar, nameMap);
+          processJar(jar, nameMap, results);
           processedAny = true;
           jars.remove(jar);
         }
       }
       if (!processedAny)
       {
-        System.err.println("*** The following plugins were not loaded because their imports could not be resolved:");
+        
         for (JarInfo info : jars)
         {
-          if (info.file == null)
-            System.err.println("(plugin loaded from ClassLoader)");
-          else
-            System.err.println(info.file.getName());
+          Object source = "(plugin loaded from ClassLoader)";
+          if (info.file != null) source = info.file.getName();
+          results.add(Translate.text("cannotLoadPlugin", source));
         }
-        System.err.println();
+        
         break;
       }
     }
@@ -149,7 +127,7 @@ public class PluginRegistry
    * @param nameMap   maps plugin names to JarInfo objects
    */
 
-  private static void processJar(JarInfo jar, Map<String, JarInfo> nameMap)
+  private static void processJar(JarInfo jar, Map<String, JarInfo> nameMap, List<String> results)
   {
     try
     {
@@ -206,7 +184,8 @@ public class PluginRegistry
     }
     catch(Error | Exception ex)
     {
-      new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginLoadError", jar.file.getName())), BStandardDialog.ERROR).showMessageDialog(null);
+      results.add(Translate.text("pluginLoadError", jar.file.getName()));
+      
       System.err.println("*** Exception while initializing plugin " + jar.file.getName() + ":");
       ex.printStackTrace();
     }
@@ -456,12 +435,12 @@ public class PluginRegistry
     JarInfo(File file) throws IOException
     {
       this.file = file;
-      imports = new ArrayList<String>();
-      plugins = new ArrayList<String>();
-      categories = new ArrayList<String>();
-      searchpath = new ArrayList<String>();
-      resources = new ArrayList<ResourceInfo>();
-      exports = new ArrayList<ExportInfo>();
+      imports = new ArrayList<>();
+      plugins = new ArrayList<>();
+      categories = new ArrayList<>();
+      searchpath = new ArrayList<>();
+      resources = new ArrayList<>();
+      exports = new ArrayList<>();
       ZipFile zf = new ZipFile(file);
       try
       {
@@ -485,31 +464,6 @@ public class PluginRegistry
       {
         zf.close();
       }
-    }
-
-    JarInfo(ClassLoader loader) throws IOException
-    {
-      this.loader = loader;
-      imports = new ArrayList<String>();
-      plugins = new ArrayList<String>();
-      categories = new ArrayList<String>();
-      resources = new ArrayList<ResourceInfo>();
-      exports = new ArrayList<ExportInfo>();
-      InputStream in = loader.getResourceAsStream("extensions.xml");
-      if (in != null)
-      {
-        loadExtensionsFile(new BufferedInputStream(in));
-        in.close();
-        return;
-      }
-      in = loader.getResourceAsStream("plugins");
-      if (in != null)
-      {
-        loadPluginsFile(new BufferedReader(new InputStreamReader(in)));
-        in.close();
-        return;
-      }
-      throw new IOException(); // No index found
     }
 
     private void loadExtensionsFile(InputStream in) throws IOException

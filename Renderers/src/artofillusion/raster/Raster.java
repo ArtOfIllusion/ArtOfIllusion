@@ -66,14 +66,14 @@ public class Raster implements Renderer, Runnable
 
   public Raster()
   {
-    threadRasterContext = new ThreadLocal<>() {
+    threadRasterContext = new ThreadLocal<RasterContext>() {
       @Override
       protected RasterContext initialValue()
       {
         return new RasterContext(theCamera, width);
       }
     };
-    threadCompositingContext = new ThreadLocal<>() {
+    threadCompositingContext = new ThreadLocal<CompositingContext>() {
       @Override
       protected CompositingContext initialValue()
       {

@@ -3,7 +3,7 @@ plugins {
  	id 'java' 
 }
 
-sourceCompatibility = '9'
+sourceCompatibility = '1.8'
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 [compileJava, compileTestJava]*.options.collect {options ->
@@ -16,7 +16,7 @@ sourceCompatibility = '9'
 }
 
 compileJava {
-    options.release = 9
+    options.release = 8
 }
 
 repositories {

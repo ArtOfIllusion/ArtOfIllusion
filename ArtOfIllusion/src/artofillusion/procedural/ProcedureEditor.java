@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2012 by Peter Eastman
+   Changes copyright (C) 2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,6 +19,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /** This is the editor for editing procedures.  It subclasses CustomWidget, but you should never
     add it to any Container.  Instead, it will automatically create a BFrame and add itself
@@ -31,7 +33,7 @@ public class ProcedureEditor extends CustomWidget
   private Scene theScene;
   private EditingWindow win;
   private Dimension size;
-  private ModuleMenu moduleMenu;
+  private final ModuleMenu moduleMenu;
   private BMenuItem undoItem, redoItem, cutItem, copyItem, pasteItem, clearItem;
   private BTextField nameField;
   private boolean selectedModule[], selectedLink[], draggingLink, draggingModule, draggingBox, draggingMultiple;
@@ -47,6 +49,11 @@ public class ProcedureEditor extends CustomWidget
   private final Color blueLinkColor = new Color(40, 40, 255);
   private final Color selectedLinkColor = new Color(255, 50, 50);
   private final Color outputBackgroundColor = new Color(210, 210, 240);
+  
+  private static final Color outlineColor = new Color(110, 110, 160);
+  private static final Color selectedColor = new Color(255, 60, 60);  
+  protected static final Stroke contourStroke = new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+  
   private final static float BEZIER_HARDNESS = 0.5f; //increase hardness to a have a more pronouced shape
   private final static Stroke normal = new BasicStroke();
   private final static Stroke bold = new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -117,21 +124,23 @@ public class ProcedureEditor extends CustomWidget
     // Let each output module calculate its preferred width, then set all of them to be
     // as wide as the widest one.
     
-    OutputModule output[] = proc.getOutputModules();
-    int i, widest = 0;
-    for (i = 0; i < output.length; i++)
+    
+    int widest = 0;
+    for (OutputModule om : proc.getOutputModules())
+    {
+      om.calcSize();
+      if (om.getBounds().width > widest)
       {
-        output[i].calcSize();
-        if (output[i].getBounds().width > widest)
-          widest = output[i].getBounds().width;
+        widest = om.getBounds().width;
       }
+    }
     int x = size.width-widest, y = 15;
-    for (i = 0; i < output.length; i++)
-      {
-        output[i].setWidth(widest);
-        output[i].setPosition(x - 15, y);
-        y += output[i].getBounds().height+15;
-      }
+    for (OutputModule om : proc.getOutputModules())
+    {
+      om.setWidth(widest);
+      om.setPosition(x - 15, y);
+      y += om.getBounds().height + 15;
+    }
     
     // Add the menu bar.
     
@@ -220,8 +229,8 @@ public class ProcedureEditor extends CustomWidget
   private void paint(Graphics2D g)
   {
     OutputModule output[] = proc.getOutputModules();
-    Module module[] = proc.getModules();
-    Link link[] = proc.getLinks();
+    
+    
     int divider = output[0].getBounds().x-5;
 
     // Draw the line marking off the output modules.
@@ -232,14 +241,25 @@ public class ProcedureEditor extends CustomWidget
     
     // Draw the output modules.
 
-    for (OutputModule mod : output)
-      mod.draw(g, false);
+    Arrays.stream(output).forEach(mod -> {
+      drawModule(mod, g, false);
+      Arrays.stream(mod.input).forEach(port -> port.draw(g));
+      mod.drawContents(g);
+    });
+
     
     // Draw the modules.
+    Module[] module = proc.getModules();
+    IntStream.range(0, module.length).forEach(index -> {
+      Module mod = module[index];      
+      drawModule(mod, g, selectedModule[index]);
+      Arrays.stream(mod.input).forEach(port -> port.draw(g));
+      Arrays.stream(mod.output).forEach(port -> port.draw(g));
+      mod.drawContents(g);
+    });
+
     
-    for (int i = 0; i < module.length; i++)
-      module[i].draw(g, selectedModule[i]);
-    
+    Link[] link = proc.getLinks();
     // Draw the unselected links.
     
     g.setStroke(bold);
@@ -325,7 +345,22 @@ public class ProcedureEditor extends CustomWidget
     }
   }
 
-  private Shape createBezierCurve(Link link)
+  private static void drawModule(Module module, Graphics2D g, boolean selected)
+  {
+    Rectangle bounds = module.getBounds();
+    
+    Stroke currentStroke = g.getStroke();
+    g.setColor(Color.lightGray);
+    g.fillRoundRect(bounds.x+1, bounds.y+1, bounds.width-2, bounds.height-2, 3, 3);
+    g.setColor(selected ? selectedColor : outlineColor);
+    g.setStroke(contourStroke);
+    g.drawRoundRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2, 4, 4);
+    g.setStroke(currentStroke);
+    
+
+  }
+  
+  private static Shape createBezierCurve(Link link)
   {
     int x1 = link.from.getPosition().x;
     int y1 = link.from.getPosition().y;

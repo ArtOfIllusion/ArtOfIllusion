@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2011 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -34,9 +34,7 @@ public class Module
   protected boolean checked;
   
   protected static final Font defaultFont = Font.decode("SansSerif-10");
-  protected static final Stroke contourStroke = new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-  protected static final Color outlineColor = new Color(110, 110, 160);
-  protected final Color selectedColor = new Color(255, 60, 60);  
+  
   protected static final FontMetrics defaultMetrics = Toolkit.getDefaultToolkit().getFontMetrics(defaultFont);
 
   @Deprecated
@@ -221,21 +219,9 @@ public class Module
   
   /** Draw the module on the screen.  This draws the outline and the ports, then calls
       drawContents() to draw the contents. */
-  
+  // Left empty implementation for binary code compatibility
   public void draw(Graphics2D g, boolean selected)
   {
-    Stroke currentStroke = g.getStroke();
-    g.setColor(Color.lightGray);
-    g.fillRoundRect(bounds.x+1, bounds.y+1, bounds.width-2, bounds.height-2, 3, 3);
-    g.setColor(selected ? selectedColor : outlineColor);
-    g.setStroke(contourStroke);
-    g.drawRoundRect(bounds.x-1, bounds.y-1, bounds.width+2, bounds.height+2, 4, 4);
-    g.setStroke(currentStroke);
-    for (int i = 0; i < input.length; i++)
-      input[i].draw(g);
-    for (int i = 0; i < output.length; i++)
-      output[i].draw(g);
-    drawContents(g);
   }
   
   /** Draw the contents of the module.  The default implementation simply draws the name. */

@@ -1,5 +1,5 @@
 /* Copyright (C) 2002 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -10,6 +10,8 @@
    PARTICULAR PURPOSE.  See the GNU General Public License for more details. */
 
 package artofillusion.procedural;
+
+import artofillusion.MaterialPreviewer;
 
 /** This interface defines an object which "owns" a procedure, and helps
     define the user interface for editing it. */
@@ -22,20 +24,14 @@ public interface ProcedureOwner
   
   /** Create an object which displays a preview of the procedure. */
   
-  default Object getPreview(ProcedureEditor editor)
+  default MaterialPreviewer getPreview()
   {
     return null;
   }
   
   /** Update the display of the preview. */
   
-  default void updatePreview(Object preview)
-  {    
-  }
-  
-  /** Dispose of the preview object when the editor is closed. */
-  
-  default void disposePreview(Object preview)
+  default void updatePreview(MaterialPreviewer preview)
   {    
   }
   

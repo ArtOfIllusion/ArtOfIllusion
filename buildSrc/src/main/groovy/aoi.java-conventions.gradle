@@ -3,7 +3,12 @@ plugins {
  	id 'java' 
 }
 
-sourceCompatibility = '1.8'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
 [compileJava, compileTestJava]*.options.collect {options ->
@@ -13,10 +18,6 @@ sourceCompatibility = '1.8'
   options.compilerArgs.add '-Xlint:-unchecked'
   options.compilerArgs.add '-Xlint:-serial'
   options.compilerArgs.add '-Xlint:-rawtypes'
-}
-
-compileJava {
-    options.release = 8
 }
 
 repositories {

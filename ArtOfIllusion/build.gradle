@@ -1,9 +1,9 @@
 plugins {
     id 'aoi.java-conventions'
     id 'application'
-    id "com.palantir.git-version" version "0.12.2"
-    id 'edu.sc.seis.launch4j' version '2.5.3'
-    id "kr.motd.sphinx" version "2.10.0"
+    id "com.palantir.git-version" version "1.0.0"
+    id 'edu.sc.seis.launch4j' version '2.5.4'
+    id "kr.motd.sphinx" version "2.10.1"
 }
 
 description = 'Art Of Illusion'

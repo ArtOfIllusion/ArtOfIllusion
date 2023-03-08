@@ -128,33 +128,6 @@ public class IOPort
     description = desc;
   }
   
-  /** Draw the port. */
-  
-  public void draw(Graphics g)
-  {
-    if (valueType == NUMBER)
-      g.setColor(Color.BLACK);
-    else
-      g.setColor(Color.BLUE);
-    
-    switch (location) {
-      case TOP:
-        g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y+SIZE}, 3);
-        break;
-      case BOTTOM:
-        g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y-SIZE}, 3);
-        break;
-      case LEFT:
-        g.fillPolygon(new int[] {x, x, x+SIZE}, new int[] {y+SIZE, y-SIZE, y}, 3);
-        break;
-     case RIGHT:
-        g.fillPolygon(new int[] {x-SIZE, x-SIZE, x}, new int[] {y+SIZE, y-SIZE, y}, 3);
-        break;
-     default:
-        break;
-      }
-  }
-  
   
 }
 

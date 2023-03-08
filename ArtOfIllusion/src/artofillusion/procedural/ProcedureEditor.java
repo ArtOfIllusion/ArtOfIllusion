@@ -12,6 +12,7 @@
 package artofillusion.procedural;
 
 import artofillusion.*;
+import static artofillusion.procedural.IOPort.SIZE;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
@@ -243,7 +244,7 @@ public class ProcedureEditor extends CustomWidget
 
     Arrays.stream(output).forEach(mod -> {
       drawModule(mod, g, false);
-      Arrays.stream(mod.input).forEach(port -> port.draw(g));
+      Arrays.stream(mod.input).forEach(port -> drawPort(port,g));
       mod.drawContents(g);
     });
 
@@ -253,8 +254,8 @@ public class ProcedureEditor extends CustomWidget
     IntStream.range(0, module.length).forEach(index -> {
       Module mod = module[index];      
       drawModule(mod, g, selectedModule[index]);
-      Arrays.stream(mod.input).forEach(port -> port.draw(g));
-      Arrays.stream(mod.output).forEach(port -> port.draw(g));
+      Arrays.stream(mod.input).forEach(port ->  drawPort(port,g));
+      Arrays.stream(mod.output).forEach(port ->  drawPort(port,g));
       mod.drawContents(g);
     });
 
@@ -345,6 +346,30 @@ public class ProcedureEditor extends CustomWidget
     }
   }
 
+  private static void drawPort(IOPort port, Graphics2D g) {
+    g.setColor(Color.BLUE);
+    if(port.getValueType() == IOPort.NUMBER) g.setColor(Color.BLACK);
+    int x = port.x;
+    int y = port.y;
+    
+    switch (port.getLocation()) {
+      case IOPort.TOP:
+        g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y+SIZE}, 3);
+        break;
+      case IOPort.BOTTOM:
+        g.fillPolygon(new int[] {x+SIZE, x-SIZE, x}, new int[] {y, y, y-SIZE}, 3);
+        break;
+      case IOPort.LEFT:
+        g.fillPolygon(new int[] {x, x, x+SIZE}, new int[] {y+SIZE, y-SIZE, y}, 3);
+        break;
+     case IOPort.RIGHT:
+        g.fillPolygon(new int[] {x-SIZE, x-SIZE, x}, new int[] {y+SIZE, y-SIZE, y}, 3);
+        break;
+     default:
+        break;
+      }
+  }
+  
   private static void drawModule(Module module, Graphics2D g, boolean selected)
   {
     Rectangle bounds = module.getBounds();

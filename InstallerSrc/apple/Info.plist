@@ -1,75 +1,69 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-  <dict>
-    <key>CFBundleName</key>
-    <string>Art Of Illusion 3.2.0</string>
-    <key>CFBundleShortVersionString</key>
-    <string>3.2.0</string>
-    <key>CFBundleAllowMixedLocalizations</key>
-    <string>true</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundleExecutable</key>
-    <string>universalJavaApplicationStub</string>
-    <key>CFBundleDevelopmentRegion</key>
-    <string>English</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleSignature</key>
-    <string>????</string>
-    <key>CFBundleIconFile</key>
-    <string>aoi.icns</string>
-    <key>CFBundleDocumentTypes</key>
-    <array>
-      <dict>
-        <key>CFBundleTypeName</key>
-        <string>Art Of Illusion 3d scene resource</string>
-        <key>CFBundleTypeRole</key>
-        <string>Editor</string>
-        <key>CFBundleTypeIconFile</key>
-        <string>aoi document.icns</string>
-        <key>CFBundleTypeExtensions</key>
-        <array>
-          <string>aoi</string>
-        </array>
-        <key>CFBundleTypeOSTypes</key>
-        <array>
-          <string>****</string>
-        </array>
-      </dict>
-    </array>
-    <key>JavaX</key>
     <dict>
-      <key>MainClass</key>
-      <string>artofillusion.ArtOfIllusion</string>
-      <key>JVMVersion</key>
-      <string>1.8+</string>
-      <key>WorkingDirectory</key>
-      <string>$JAVAROOT/../</string>
-      <key>ClassPath</key>
-      <key>VMOptions</key>
-      <string>-Xmx16g</string>
-     <array>
-        <string>$JAVAROOT/Buoy.jar</string>
-        <string>$JAVAROOT/Buoyx.jar</string>
-        <string>$JAVAROOT/Jama-1.0.2.jar</string>
-        <string>$JAVAROOT/QuickTimeWriter.jar</string>
-        <string>$JAVAROOT/bsh-2.0b4.jar</string>
-        <string>$JAVAROOT/gluegen-rt.jar</string>
-        <string>$JAVAROOT/groovy-all-2.1.2.jar</string>
-        <string>$JAVAROOT/jogl-all.jar</string>
-        <string>$JAVAROOT/svgSalamander.jar</string>
-        <string>$JAVAROOT/ArtOfIllusion.jar</string>
-        <string>$JAVAROOT/gluegen-rt-natives-macosx-universal.jar</string>
-	<string>$JAVAROOT/jogl-all-natives-macosx-universal.jar</string>
-	<string>$JAVAROOT/rsyntaxtextarea-3.1.1.jar</string>
-      </array>
-      <key>Properties</key>
-      <dict>
-        <key>apple.laf.useScreenMenuBar</key>
-	<string>true</string>
-      </dict>
+        <key>CFBundleName</key>
+        <string>Art Of Illusion ${VERSION}</string>
+        <key>CFBundleShortVersionString</key>
+        <string>${VERSION}</string>
+        <key>CFBundleAllowMixedLocalizations</key>
+        <true/>
+        <key>CFBundleExecutable</key>
+        <string>universalJavaApplicationStub.sh</string>
+
+        <key>CFBundleIconFile</key>
+        <string>aoi.icns</string>
+        <key>CFBundleIdentifier</key>
+        <string>artofillusion.aoi</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+
+		
+        <key>LSRequiresCarbon</key>					
+        <true/>
+
+        <key>NSPrincipalClass</key>					
+        <string>NSApplication</string>
+        <key>NSHighResolutionCapable</key>			
+        <true/>
+        <key>CFBundleDocumentTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleTypeName</key>
+                <string>Art Of Illusion 3d scene resource</string>
+                <key>CFBundleTypeRole</key>
+                <string>Editor</string>
+                <key>CFBundleTypeIconFile</key>
+                <string>aoi document.icns</string>
+                <key>CFBundleTypeExtensions</key>
+                <array>
+                    <string>aoi</string>
+                </array>
+                <key>CFBundleTypeOSTypes</key>
+                <array>
+                    <string>****</string>
+                </array>
+            </dict>
+        </array>
+        <key>JavaX</key>
+        <dict>
+            <key>MainClass</key>					
+            <string>${APPCLASS}</string>
+            <key>JVMVersion</key>					
+            <string>1.8+</string>
+            <key>ClassPath</key>					
+            <string>\$JAVAROOT/${JAR}</string>
+            <key>WorkingDirectory</key>				
+            <string>\$JAVAROOT</string>
+            <key>Properties</key>
+            <dict>
+                <key>apple.laf.useScreenMenuBar</key>
+                <string>true</string>
+            </dict>
+            <key>VMOptions</key>					
+            <string>-Xmx16g</string>
+        </dict>
     </dict>
-  </dict>
 </plist>

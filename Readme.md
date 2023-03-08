@@ -23,8 +23,7 @@ General questions or requests for help can be taken to our
 
 ## Building from source
 
-Experienced Java developers Just run `ant` in this directory.
-Use `ant help` to see more advanced options.
+Experienced Java developers Just run `gradle run` in this directory.
 
 More details are available at (./docs/Building.md)
 

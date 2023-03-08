@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -14,7 +15,7 @@ import artofillusion.*;
 import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
-import ch.randelshofer.media.quicktime.*;
+
 
 import java.awt.*;
 import java.awt.image.*;
@@ -22,6 +23,7 @@ import java.io.*;
 import java.text.*;
 import javax.imageio.*;
 import javax.imageio.stream.*;
+import ch.randelshofer.media.quicktime.QuickTimeWriter;
 
 /** This class is used to save rendered images to disk. */
 
@@ -289,7 +291,7 @@ public class ImageSaver
 
   private static void writeJpegToStream(Image im, OutputStream out, int quality) throws IOException
   {
-    ImageWriter writer = (ImageWriter) ImageIO.getImageWritersBySuffix("jpeg").next();
+    ImageWriter writer = ImageIO.getImageWritersBySuffix("jpeg").next();
     ImageOutputStream ios = ImageIO.createImageOutputStream(out);
     writer.setOutput(ios);
     ImageWriteParam param = writer.getDefaultWriteParam();

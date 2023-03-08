@@ -1,0 +1,152 @@
+plugins {
+    id 'aoi.java-conventions'
+    id 'application'
+    id "com.palantir.git-version" version "1.0.0"
+    id 'edu.sc.seis.launch4j' version '2.5.4'
+    id "kr.motd.sphinx" version "2.10.1"
+}
+
+description = 'Art Of Illusion'
+
+
+
+ext {
+   joglVersion = "2.4.0"
+   mainClass = "artofillusion.ArtOfIllusion"
+}
+
+application {
+    mainClass =  "artofillusion.ArtOfIllusion"
+}
+
+dependencies {
+
+    implementation("org.jogamp.gluegen:gluegen-rt-main:${joglVersion}")
+    implementation("org.jogamp.jogl:jogl-all-main:${joglVersion}")
+    
+    
+    implementation group: 'com.github.blackears', name: 'svgSalamander', version: 'v1.1.3'
+
+    implementation group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+
+    implementation group: 'org.beanshell', name: 'bsh', version: '3.0.0-SNAPSHOT'
+    implementation group: 'org.apache.groovy', name: 'groovy', version: '4.0.0'
+    
+    implementation fileTree(dir: '../lib', include: '*.jar')
+    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.3.1'
+    
+    testImplementation 'org.mockito:mockito-core:3.+'
+    
+}
+
+jar {
+    manifest {
+        attributes('Main-Class': "${mainClass}", "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' '), "Implementation-Version": gitVersion())
+    }
+}
+
+task createAssetsFolder() {
+        ext {
+            buildDir = layout.buildDirectory.dir('assets')
+        }
+        doFirst {
+            File.createTempDir().with {
+                new File(buildDir.get().asFile, 'Textures And Materials').mkdirs()
+                new File(buildDir.get().asFile, 'Scripts/Tools').mkdirs()
+                new File(buildDir.get().asFile, 'Scripts/Objects').mkdirs()
+                new File(buildDir.get().asFile, 'Scripts/Startup').mkdirs()
+            }
+        }
+        outputs.dir(buildDir)
+}
+
+tasks.assembleDist.configure {
+  dependsOn('createAssetsFolder')
+}
+
+launch4j {
+  bundledJrePath = '%JAVA_HOME%;%PATH%'
+  mainClassName = "$mainClass"
+  dontWrapJar = true
+  outfile = "Art Of Illusion.exe"
+  icon = "${rootProject.projectDir}/InstallerSrc/aoi.ico"
+  libraryDir = "../lib"  
+}
+
+assemble.dependsOn subprojects.jar, createExe
+installDist.dependsOn subprojects.jar, createExe
+distZip.dependsOn subprojects.jar, createExe
+
+
+tasks.withType(Zip){
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+distributions {
+    main.contents {
+            it.exclude("*macosx*").exclude("*android*")
+            from("$buildDir/${launch4j.outputDir}/${launch4j.outfile}") { into("bin") }
+            from("${rootDir}/Plugins") { into("Plugins") }
+            from("../Scripts") { into("Scripts") }
+            from tasks.createAssetsFolder {
+                    includeEmptyDirs = true
+            } 
+            from("../Textures And Materials") { into("Textures And Materials") }
+    }
+
+    mac.contents {        
+        into("${description}.app/Contents") { from("${rootProject.projectDir}/InstallerSrc/apple/") {
+                include "Info.plist"
+                expand VERSION: "3.2.0", JAR: file(jar.archivePath).name, APPCLASS: "${mainClassName}"
+            } 
+        }
+        into("${description}.app/Contents/MacOS") { from("${rootProject.projectDir}/InstallerSrc/apple/") {
+                include "universalJavaApplicationStub.sh"
+                fileMode 0755
+            }            
+        }
+        into("${description}.app/Contents/Resources") { from("${rootProject.projectDir}/InstallerSrc/apple/") { include "*.icns"}}
+        into("${description}.app/Contents/Resources/Java") { from(jar) }
+        into("${description}.app/Contents/Resources/Java") { from(configurations.runtimeClasspath).exclude("*windows*").exclude("*linux*").exclude("*android*") }
+        into("${description}.app/Contents/Resources/Plugins") { from("${rootDir}/Plugins") }
+        into("${description}.app/Contents/Resources/Scripts") { from("../Scripts") }
+        into("${description}.app/Contents/Resources/Textures And Materials") { from("../Textures And Materials") }
+        
+    }
+    
+}
+
+//This section suppresses TAR file generation
+tasks.withType(Tar) {
+    enabled = false
+}
+
+startScripts.dependsOn jar
+
+//This passes to startup scripts classpath of main class only as other passed through jar metadata
+startScripts {
+    classpath = files("${jar.archivePath}")
+}
+
+sphinx {
+  sourceDirectory = "${rootProject.projectDir}/docs/manual"
+  configDirectory = "${rootProject.projectDir}/docs/manual"
+}
+
+
+tasks.register("createMacVolume", Exec) {
+    dependsOn "installMacDist"
+        def volumeName = "Art Of Illusion"
+        def volumeFileName = "ArtOfIIllusion"
+        def srcFolder = "$buildDir/install/${project.name}-mac"
+        def mac = org.gradle.internal.os.OperatingSystem.current().isMacOsX()
+
+        
+        if(mac) {
+            println "Creating Mac DMG..."
+            workingDir srcFolder
+            commandLine "hdiutil", "create", "-srcfolder", "${srcFolder}", "-fs", "HFS+", "-format", "UDZO", "${volumeFileName}", "-volname", "${volumeName}"
+        } else {
+            println "Bypass Mac DMG... This requred to run macos hdiutil application"
+        }
+}

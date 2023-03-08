@@ -1,0 +1,6 @@
+plugins {
+  id "io.freefair.aggregate-javadoc" version "6.4.1"
+}
+
+
+

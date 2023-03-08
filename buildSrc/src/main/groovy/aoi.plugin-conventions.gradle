@@ -1,0 +1,11 @@
+plugins {
+	id 'aoi.java-conventions' 
+}
+
+dependencies {
+    implementation project(':ArtOfIllusion')
+}
+
+tasks.withType(Jar) {
+    destinationDirectory = file("${rootProject.projectDir}/Plugins")
+}

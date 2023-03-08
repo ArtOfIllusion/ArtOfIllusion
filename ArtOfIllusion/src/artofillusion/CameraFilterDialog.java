@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
-   Changes copyright (C) 2022 by Maksim Khramov
+   Changes copyright (C) 2020, 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -255,14 +255,6 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     preview.repaint();
   }
 
-  /** The renderer may call this method periodically during rendering, to give the listener text descriptions
-      of the current status of rendering. */
-
-  @Override
-  public void statusChanged(String status)
-  {
-  }
-
   /** This method will be called when rendering is complete. */
 
   @Override
@@ -274,13 +266,6 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     doneRendering = true;
     applyFilters();
     doneFiltering = true;
-  }
-
-  /** This method will be called if rendering is canceled. */
-
-  @Override
-  public void renderingCanceled()
-  {
   }
 
   /**

@@ -1,4 +1,5 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -33,7 +34,7 @@ import org.w3c.dom.Node;
 public class KeystrokeManager
 {
   private static ArrayList<KeystrokeRecord> records = new ArrayList<KeystrokeRecord>();
-  private static HashMap<Integer, ArrayList<KeystrokeRecord>> keyIndex = new HashMap<Integer, ArrayList<KeystrokeRecord>>();
+  private static Map<Integer, List<KeystrokeRecord>> keyIndex = new HashMap<>();
 
   private static final String KEYSTROKE_FILENAME = "keystrokes.xml";
 
@@ -83,7 +84,7 @@ public class KeystrokeManager
 
   public static void recordModified()
   {
-    keyIndex = null;
+    keyIndex.clear();
   }
 
   /**
@@ -94,37 +95,29 @@ public class KeystrokeManager
    */
 
   public static void executeKeystrokes(KeyEvent event, EditingWindow window)
-  {
-    if (keyIndex == null)
+  {   
+    if (keyIndex.isEmpty())
     {
       // We need to build an index for quickly looking up KeystrokeRecords.
-
-      keyIndex = new HashMap<Integer, ArrayList<KeystrokeRecord>>(records.size());
-      for (KeystrokeRecord record : records)
-      {
-        ArrayList<KeystrokeRecord> list = keyIndex.get(record.getKeyCode());
-        if (list == null)
-        {
-          list = new ArrayList<KeystrokeRecord>(1);
-          keyIndex.put(record.getKeyCode(), list);
-        }
-        list.add(record);
-      }
+      keyIndex = new HashMap<>(records.size());
+      records.forEach(record -> {
+          List<KeystrokeRecord> list = keyIndex.computeIfAbsent(record.getKeyCode(), code -> new ArrayList<>());
+          list.add(record);
+      });
     }
 
     // Get the list of all records with the correct ID.
 
-    ArrayList<KeystrokeRecord> list = keyIndex.get(event.getKeyCode());
+    List<KeystrokeRecord> list = keyIndex.get(event.getKeyCode());
     if (list == null)
       return;
+    
+    HashMap<String, Object> variables = new HashMap<>();
+    variables.put("window", window);
     for (KeystrokeRecord record : list)
     {
       if (record.getModifiers() == event.getModifiers())
-      {
-        // Execute it.
-
-        HashMap<String, Object> variables = new HashMap<String, Object>();
-        variables.put("window", window);
+      {       
         ScriptRunner.executeScript(record.getLanguage(), record.getScript(), variables);
         event.consume();
       }
@@ -165,9 +158,8 @@ public class KeystrokeManager
   {
     // Build a table of existing records.
 
-    HashMap<String, KeystrokeRecord> existing = new HashMap<String, KeystrokeRecord>();
-    for (KeystrokeRecord record : records)
-      existing.put(record.getName(), record);
+    HashMap<String, KeystrokeRecord> existing = new HashMap<>();
+    records.forEach(record ->  existing.put(record.getName(), record));
 
     // Parse the XML and load the records.
 
@@ -179,7 +171,7 @@ public class KeystrokeManager
     {
       Node keystroke = keystrokes.item(i);
       String name = keystroke.getAttributes().getNamedItem("name").getNodeValue();
-      String language = (keystroke.getAttributes().getNamedItem("language") == null ? "BeanShell" : keystroke.getAttributes().getNamedItem("language").getNodeValue());
+      String language = (keystroke.getAttributes().getNamedItem("language") == null ? ScriptRunner.Language.BEANSHELL.name : keystroke.getAttributes().getNamedItem("language").getNodeValue());
       int code = Integer.parseInt(keystroke.getAttributes().getNamedItem("code").getNodeValue());
       int modifiers = Integer.parseInt(keystroke.getAttributes().getNamedItem("modifiers").getNodeValue());
       String script = keystroke.getFirstChild().getNodeValue();
@@ -218,13 +210,14 @@ public class KeystrokeManager
 
     File dir = ApplicationPreferences.getPreferencesDirectory();
     File outFile = new File(dir, KEYSTROKE_FILENAME);
-    OutputStream out = new BufferedOutputStream(new SafeFileOutputStream(outFile, SafeFileOutputStream.OVERWRITE));
-    DOMSource source = new DOMSource(doc);
-    StreamResult result = new StreamResult(out);
-    TransformerFactory transFactory = TransformerFactory.newInstance();
-    Transformer transformer = transFactory.newTransformer();
-    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-    transformer.transform(source, result);
-    out.close();
+    try (OutputStream out = new BufferedOutputStream(new SafeFileOutputStream(outFile, SafeFileOutputStream.OVERWRITE)))
+    {
+      DOMSource source = new DOMSource(doc);
+      StreamResult result = new StreamResult(out);
+      TransformerFactory transFactory = TransformerFactory.newInstance();
+      Transformer transformer = transFactory.newTransformer();
+      transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+      transformer.transform(source, result);
+    }
   }
 }

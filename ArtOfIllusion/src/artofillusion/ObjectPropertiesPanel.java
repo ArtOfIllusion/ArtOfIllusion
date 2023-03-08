@@ -1,5 +1,5 @@
 /* Copyright (C) 2006-2009 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -471,7 +471,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       {
         try
         {
-          tex = textureTypes.get(index-scene.getNumTextures()).getClass().newInstance();
+          tex = textureTypes.get(index-scene.getNumTextures()).getClass().getDeclaredConstructor().newInstance();
           int j = 0;
           String name = "";
           do
@@ -523,7 +523,7 @@ public class ObjectPropertiesPanel extends ColumnContainer
       List<Material> materialTypes = PluginRegistry.getPlugins(Material.class);
       try
       {
-        mat = materialTypes.get(index-scene.getNumMaterials()-1).getClass().newInstance();
+        mat = materialTypes.get(index-scene.getNumMaterials()-1).getClass().getDeclaredConstructor().newInstance();
         int j = 0;
         String name = "";
         do

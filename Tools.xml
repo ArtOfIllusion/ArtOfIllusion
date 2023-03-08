@@ -43,7 +43,7 @@
   <target name="dist" depends="compile">
     <!-- Copy all necessary files into ${build}, then create the jar file -->
     <jar jarfile="${assemble}/Tools.jar" basedir="${build}" >
-      <fileset dir="${src}" includes="*.xml" />
+      <fileset dir="${src}" includes="*.xml, **/*.properties" />
     </jar>
   </target>
 

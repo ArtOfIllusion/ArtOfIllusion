@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2022 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.*;
 import java.beans.*;
+import java.util.stream.Collectors;
+
 
 /** The Scene class describes a collection of objects, arranged relative to each other to
     form a scene, as well as the available textures and materials, environment options, etc. */
@@ -132,11 +134,8 @@ public class Scene
   {
     time = t;
     boolean processed[] = new boolean [objects.size()];
-    for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo info = objects.elementAt(i);
-        applyTracksToObject(info, processed, null, i);
-      }
+    objects.forEach(item ->
+        applyTracksToObject(item, processed, null, objects.indexOf(item)));
     for (ObjectInfo obj : objects)
       obj.getObject().sceneChanged(obj, this);
   }
@@ -146,8 +145,7 @@ public class Scene
   public void applyTracksToObject(ObjectInfo info)
   {
     applyTracksToObject(info, new boolean[objects.size()], null, 0);
-    for (ObjectInfo obj : objects)
-      obj.getObject().sceneChanged(obj, this);
+    objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
   /** This should be called after one or more objects have been modified by the user.
@@ -180,11 +178,9 @@ public class Scene
     }
 
     // Now apply tracks to all dependent objects.
-
-    for (ObjectInfo info : objects)
-      applyTracksToObject(info, processed, changed, indexOf(info));
-    for (ObjectInfo info : objects)
-      info.getObject().sceneChanged(info, this);
+    objects.forEach(item ->
+        applyTracksToObject(item, processed, changed, objects.indexOf(item)));
+    objects.forEach(item -> item.getObject().sceneChanged(item, this));
   }
 
   private void applyTracksToObject(ObjectInfo info, boolean processed[], boolean changed[], int index)
@@ -537,25 +533,19 @@ public class Scene
   public void addMaterial(Material mat, int index)
   {
     materials.add(index, mat);
-    for (int i = 0; i < materialListeners.size(); i++)
-      materialListeners.elementAt(i).itemAdded(materials.size()-1, mat);
+    int size = materials.size()-1;
+    materialListeners.forEach(listener -> listener.itemAdded(size, mat));
   }
 
   /** Remove a Material from the scene. */
 
   public void removeMaterial(int which)
   {
-    Material mat = materials.elementAt(which);
-
-    materials.removeElementAt(which);
-    for (int i = 0; i < materialListeners.size(); i++)
-      materialListeners.elementAt(i).itemRemoved(which, mat);
-    for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo obj = objects.elementAt(i);
-        if (obj.getObject().getMaterial() == mat)
-          obj.setMaterial(null, null);
-      }
+    Material mat = materials.remove(which);
+    materialListeners.forEach(listener -> listener.itemRemoved(which, mat));
+    objects.stream()
+           .filter(item -> item.getObject().getMaterial() == mat)
+           .forEach(item -> item.setMaterial(null, null));
   }
 
   /**
@@ -568,7 +558,7 @@ public class Scene
   public void reorderMaterial(int oldIndex, int newIndex)
   {
     if (newIndex < 0 || newIndex >= materials.size())
-      throw new IllegalArgumentException("Illegal value for newIndex: "+newIndex);
+      throw new IllegalArgumentException("Illegal value for newIndex: " + newIndex);
     Material mat = materials.remove(oldIndex);
     materials.add(newIndex, mat);
   }
@@ -665,17 +655,14 @@ public class Scene
 
   public void changeMaterial(int which)
   {
-    Material mat = materials.elementAt(which);
-    Object3D obj;
+    Material mat = materials.get(which);
 
-    for (int i = 0; i < objects.size(); i++)
-      {
-        obj = objects.elementAt(i).getObject();
-        if (obj.getMaterial() == mat)
-          obj.setMaterial(mat, obj.getMaterialMapping());
-      }
-    for (int i = 0; i < materialListeners.size(); i++)
-      materialListeners.elementAt(i).itemChanged(which, mat);
+    objects.stream().filter(item -> item.getObject().getMaterial() == mat).
+      forEach(item -> {
+        Object3D obj = item.getObject();
+        obj.setMaterial(mat, obj.getMaterialMapping());
+      });
+    materialListeners.forEach(listener ->  listener.itemChanged(which, mat));
   }
 
   /** This method should be called after a Texture has been edited.  It notifies
@@ -683,23 +670,23 @@ public class Scene
 
   public void changeTexture(int which)
   {
-    Texture tex = textures.elementAt(which);
+    Texture tex = textures.get(which);
 
-    for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo obj = objects.elementAt(i);
-        if (obj.getObject().getTexture() == tex)
-          obj.setTexture(tex, obj.getObject().getTextureMapping());
-        else if (obj.getObject().getTexture() instanceof LayeredTexture)
-          for (Texture layer : ((LayeredMapping) obj.getObject().getTextureMapping()).getLayers())
-            if (layer == tex)
-            {
-              obj.setTexture(tex, obj.getObject().getTextureMapping());
-              break;
-            }
-      }
-    for (int i = 0; i < textureListeners.size(); i++)
-      textureListeners.elementAt(i).itemChanged(which, tex);
+    for (ObjectInfo obj: objects)
+    {
+      
+      if (obj.getObject().getTexture() == tex)
+        obj.setTexture(tex, obj.getObject().getTextureMapping());
+      else if (obj.getObject().getTexture() instanceof LayeredTexture)
+        for (Texture layer : ((LayeredMapping) obj.getObject().getTextureMapping()).getLayers())
+          if (layer == tex)
+          {
+            obj.setTexture(tex, obj.getObject().getTextureMapping());
+            break;
+          }
+    }
+    textureListeners.forEach(listener -> listener.itemChanged(which, tex));
+    
   }
 
   /** Add an object which wants to be notified when the list of Materials in the Scene changes. */
@@ -810,16 +797,12 @@ public class Scene
 
   public void replaceObject(Object3D original, Object3D replaceWith, UndoRecord undo)
   {
-    for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo info = objects.elementAt(i);
-        if (info.getObject() != original)
-          continue;
-        if (undo != null)
-          undo.addCommand(UndoRecord.SET_OBJECT, info, original);
-        info.setObject(replaceWith);
-        info.clearCachedMeshes();
-      }
+    Optional<UndoRecord> optionalUndo = Optional.ofNullable(undo);
+    objects.stream().filter(item -> item.getObject() == original).forEach(item -> {
+      optionalUndo.ifPresent(command -> command.addCommand(UndoRecord.SET_OBJECT, item, original));
+      item.setObject(replaceWith);
+      item.clearCachedMeshes();
+    });
   }
 
   /** This should be called whenever an object changes.  It clears any cached meshes for
@@ -827,22 +810,19 @@ public class Scene
 
   public void objectModified(Object3D obj)
   {
-    for (int i = 0; i < objects.size(); i++)
-      {
-        ObjectInfo info = objects.elementAt(i);
-        if (info.getObject() == obj)
-          {
-            info.clearCachedMeshes();
-            info.setPose(null);
-          }
-      }
+    objects.stream()
+           .filter(item -> item.getObject() == obj)
+           .forEach(item -> {
+              item.clearCachedMeshes();
+              item.setPose(null);
+           });
   }
 
   /**
    * Set one object to be selected, deselecting all other objects.
    * @deprecated Call setSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void setSelection(int which)
   {
     clearSelection();
@@ -854,7 +834,7 @@ public class Scene
    * Set a list of objects to be selected, deselecting all other objects.
    * @deprecated Call setSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void setSelection(int which[])
   {
     clearSelection();
@@ -871,7 +851,7 @@ public class Scene
    * Add an object to the list of selected objects.
    * @deprecated Call addToSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void addToSelection(int which)
   {
     ObjectInfo info = objects.elementAt(which);
@@ -885,14 +865,13 @@ public class Scene
    * Deselect all objects.
    * @deprecated Call clearSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void clearSelection()
   {
-    if (selection.size() == 0)
-      return;
-    selection.removeAllElements();
-    for (int i = 0; i < objects.size(); i++)
-      objects.elementAt(i).selected = false;
+    if (selection.isEmpty()) return;
+    selection.clear();
+    objects.forEach(item -> { item.selected = false; });
+
     updateSelectionInfo();
   }
 
@@ -900,7 +879,7 @@ public class Scene
    * Deselect a particular object.
    * @deprecated Call removeFromSelection() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public void removeFromSelection(int which)
   {
     ObjectInfo info = objects.elementAt(which);
@@ -1005,14 +984,12 @@ public class Scene
   {
     if (objectIndexMap == null)
     {
-      // Build an index for fast lookup.
-
-      objectIndexMap = new HashMap<ObjectInfo, Integer>();
-      for (int i = 0; i < objects.size(); i++)
-        objectIndexMap.put(objects.get(i), i);
+      // Build an index for fast lookup
+      objectIndexMap = new HashMap<>();
+      objects.forEach(item -> objectIndexMap.put(item, objects.indexOf(item)));
     }
-    Integer index = objectIndexMap.get(info);
-    return (index == null ? -1 : index);
+
+    return objectIndexMap.getOrDefault(info, -1);
   }
 
   /** Get the number of textures in this scene. */
@@ -1026,15 +1003,9 @@ public class Scene
   
   public List<ObjectInfo> getCameras()
   {
-    List<ObjectInfo> list = new ArrayList<ObjectInfo>();
-    for(ObjectInfo sceneObject: objects)
-    {        
-        if(sceneObject.getObject() instanceof SceneCamera)
-        {
-            list.add(sceneObject);
-        }
-    }
-    return list;
+    return objects.stream()
+                  .filter(item -> item.getObject() instanceof SceneCamera)
+                  .collect(Collectors.toList());
   }
 
   /** Get the index of the specified texture. */
@@ -1056,7 +1027,11 @@ public class Scene
 
   public Texture getTexture(String name)
   {
-    return textures.stream().filter(asset -> asset.getName().equals(name)).findFirst().orElse(null);
+    return textures.stream()
+                   .filter(asset -> asset.getName()
+                                         .equals(name))
+                                         .findFirst()
+                                         .orElse(null);
   }
 
   /** Get the number of materials in this scene. */
@@ -1078,7 +1053,9 @@ public class Scene
 
   public Material getMaterial(String name)
   {
-    return materials.stream().filter(asset -> asset.getName().equals(name)).findFirst().orElse(null);
+    return materials.stream()
+                    .filter(asset -> asset.getName().equals(name))
+                    .findFirst().orElse(null);
   }
 
   /** Get the index of the specified material. */
@@ -1120,7 +1097,7 @@ public class Scene
    * Get a list of the indices of all selected objects.
    * @deprecated Call getSelectedIndices() or getSelectedObjects() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public int [] getSelection()
   {
     int sel[] = new int [selection.size()];
@@ -1135,7 +1112,7 @@ public class Scene
    * selected objects.
    * @deprecated Call getSelectionWithChildren() on the LayoutWindow instead.
    */
-
+  @Deprecated
   public int [] getSelectionWithChildren()
   {
     int count = 0;

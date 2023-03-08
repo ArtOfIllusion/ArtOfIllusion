@@ -56,7 +56,7 @@ if [ -z "$JAVACMD" ]; then
 fi 
 
 #default mem
-MEM=-Xmx1500m
+MEM=-Xmx16g
 
 #java command line options
 for option in "$@"; do
@@ -67,20 +67,12 @@ for option in "$@"; do
 		MEM=""
 	fi
 done
-if [ -e $AOIPATH/lib/jogl.jar ]; then
-	JOGL="$AOIPATH/jogl.jar"
-fi
-if [ -e $AOIPATH/lib/gluegen-rt.jar ]; then
-	JOGL="$AOIPATH/gluegen-rt.jar"
-fi
-if [ -e $AOIPATH/lib/jmf.jar ]; then
-	JMF="$AOIPATH/jmf.jar"
-fi
-JAVACMD="$JAVACMD $MEM -cp $AOIPATH/ArtOfIllusion.jar:$JOGL:$JMF artofillusion.ArtOfIllusion"
+
+JAVACMD="$JAVACMD $MEM -jar $AOIPATH/ArtOfIllusion.jar"
 
 #AoI command line options
 for option in "$@"; do
-	if [ "$option" = "${option%-*}" ]; then
+	if [ "$option" = "${option#-*}" ]; then
 		JAVACMD="$JAVACMD $option"
 	fi
 done

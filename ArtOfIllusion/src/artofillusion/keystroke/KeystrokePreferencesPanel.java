@@ -133,7 +133,8 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void addRecord()
   {
-    KeystrokeRecord record = new KeystrokeRecord(0, 0, "", "", ScriptRunner.LANGUAGES[0]);
+    // Beanshell is the only supported language here 
+    KeystrokeRecord record = new KeystrokeRecord(0, 0, "", "", ScriptRunner.Language.BEANSHELL.name);
     KeystrokeRecord edited = KeystrokeEditor.showEditorDialog(record, UIUtilities.findWindow(this));
     if (edited == null)
       return;

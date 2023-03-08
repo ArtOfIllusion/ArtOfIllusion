@@ -52,6 +52,7 @@ public class Translate
   static {
     availableLocales.add(new Locale("af", "ZA"));
     availableLocales.add(Locale.SIMPLIFIED_CHINESE);
+    availableLocales.add(Locale.TRADITIONAL_CHINESE);
     availableLocales.add(new Locale("da", "DK"));
     availableLocales.add(new Locale("nl", "NL"));
     availableLocales.add(Locale.US);

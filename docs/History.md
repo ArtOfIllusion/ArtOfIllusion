@@ -1,7 +1,12 @@
 Art of Illusion Version History
 
 Latest: (Not in stable release yet)
-
+ 
+- Added basic syntax highlighting to script editors
+- Save basic rendering settings as scene meta-data
+- Fix Soft Shadows to only be rendered when AA active
+- Traditional Chinese Translation added courtesy of Distance Learning Center 
+  at the Chinese Culture University (Open Source Software for School project) 
 - Fix bug with distance to plane(View rotates around this distance) 
     when copying/duplicating Scene Camera
 - Fix display bug with Cylinder pose track

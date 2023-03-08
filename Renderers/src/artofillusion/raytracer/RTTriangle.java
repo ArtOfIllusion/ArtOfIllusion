@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Editions copyright (C) by Petri Ihalainen 2020
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -30,9 +31,10 @@ public class RTTriangle extends RTObject
   double d, edge2d1x, edge2d1y, edge2d2x, edge2d2y;
 
   public static final double TOL = 1e-12;
-
   private static final short BUMP_MAPPED = 1;
   private static final short INTERP_NORMALS = 2;
+
+  private double triangleTol;
 
   public RTTriangle(RenderingMesh mesh, int which, Mat4 fromLocal, Mat4 toLocal)
   {
@@ -101,6 +103,12 @@ public class RTTriangle extends RTObject
     edge2d2y *= denom;
     if (tri.theMesh.mapping.getTexture().hasComponent(Texture.BUMP_COMPONENT))
       flags |= BUMP_MAPPED;
+
+    triangleTol = (Math.max(Math.max(Math.abs(fromLocal.m14), Math.abs(fromLocal.m24)), Math.abs(fromLocal.m34)) +
+                   Math.max(Math.max(Math.max(Math.max(vert1.x, vert2.x), vert3.x) - Math.min(Math.min(vert1.x, vert2.x), vert3.x),
+                                     Math.max(Math.max(vert1.y, vert2.y), vert3.y) - Math.min(Math.min(vert1.y, vert2.y), vert3.y)),
+                                     Math.max(Math.max(vert1.z, vert2.z), vert3.z) - Math.min(Math.min(vert1.z, vert2.z), vert3.z))
+                  )*TOL;
   }
 
   /** Get the TextureMapping for this object. */
@@ -132,7 +140,7 @@ public class RTTriangle extends RTObject
       return SurfaceIntersection.NO_INTERSECTION;  // The ray is parallel to the plane.
     v0 = -(trueNorm.dot(orig)+d);
     double t = v0/vd;
-    if (t < TOL)
+    if (t < triangleTol)
       return SurfaceIntersection.NO_INTERSECTION;  // Ray points away from plane of triangle.
 
     // Determine whether the intersection point is inside the triangle.
@@ -272,83 +280,83 @@ public class RTTriangle extends RTObject
     double dirx = p2.x-p1.x, diry = p2.y-p1.y, dirz = p2.z-p1.z;
     double len = Math.sqrt(dirx*dirx + diry*diry + dirz*dirz);
     if (dirx == 0.0)
-      {
-        if (p1.x < node.minx || p1.x > node.maxx)
-          return false;
-      }
+    {
+      if (p1.x < node.minx || p1.x > node.maxx)
+        return false;
+    }
     else
+    {
+      t1 = (node.minx-p1.x)*len/dirx;
+      t2 = (node.maxx-p1.x)*len/dirx;
+      if (t1 < t2)
       {
-        t1 = (node.minx-p1.x)*len/dirx;
-        t2 = (node.maxx-p1.x)*len/dirx;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     if (diry == 0.0)
-      {
-        if (p1.y < node.miny || p1.y > node.maxy)
-          return false;
-      }
+    {
+      if (p1.y < node.miny || p1.y > node.maxy)
+        return false;
+    }
     else
+    {
+      t1 = (node.miny-p1.y)*len/diry;
+      t2 = (node.maxy-p1.y)*len/diry;
+      if (t1 < t2)
       {
-        t1 = (node.miny-p1.y)*len/diry;
-        t2 = (node.maxy-p1.y)*len/diry;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     if (dirz == 0.0)
-      {
-        if (p1.z < node.minz || p1.z > node.maxz)
-          return false;
-      }
+    {
+      if (p1.z < node.minz || p1.z > node.maxz)
+        return false;
+    }
     else
+    {
+      t1 = (node.minz-p1.z)*len/dirz;
+      t2 = (node.maxz-p1.z)*len/dirz;
+      if (t1 < t2)
       {
-        t1 = (node.minz-p1.z)*len/dirz;
-        t2 = (node.maxz-p1.z)*len/dirz;
-        if (t1 < t2)
-          {
-            if (t1 > mint)
-              mint = t1;
-            if (t2 < maxt)
-              maxt = t2;
-          }
-        else
-          {
-            if (t2 > mint)
-              mint = t2;
-            if (t1 < maxt)
-              maxt = t1;
-          }
-        if (mint > maxt || mint > len || maxt < 0.0)
-          return false;
+        if (t1 > mint)
+          mint = t1;
+        if (t2 < maxt)
+          maxt = t2;
       }
+      else
+      {
+        if (t2 > mint)
+          mint = t2;
+        if (t1 < maxt)
+          maxt = t1;
+      }
+      if (mint > maxt || mint > len || maxt < 0.0)
+        return false;
+    }
     return true;
   }
 
@@ -423,24 +431,24 @@ public class RTTriangle extends RTObject
       if ((rtTri.flags&INTERP_NORMALS) == 0)
         n.set(rtTri.trueNorm);
       else
-        {
-          Vec3 normals[] = rtTri.tri.theMesh.norm;
-          Vec3 norm1 = normals[rtTri.tri.n1];
-          Vec3 norm2 = normals[rtTri.tri.n2];
-          Vec3 norm3 = normals[rtTri.tri.n3];
-          n.x = u*norm1.x + v*norm2.x + w*norm3.x;
-          n.y = u*norm1.y + v*norm2.y + w*norm3.y;
-          n.z = u*norm1.z + v*norm2.z + w*norm3.z;
-          n.normalize();
-        }
+      {
+        Vec3 normals[] = rtTri.tri.theMesh.norm;
+        Vec3 norm1 = normals[rtTri.tri.n1];
+        Vec3 norm2 = normals[rtTri.tri.n2];
+        Vec3 norm3 = normals[rtTri.tri.n3];
+        n.x = u*norm1.x + v*norm2.x + w*norm3.x;
+        n.y = u*norm1.y + v*norm2.y + w*norm3.y;
+        n.z = u*norm1.z + v*norm2.z + w*norm3.z;
+        n.normalize();
+      }
       rtTri.tri.getTextureSpec(spec, -n.dot(viewDir), u, v, w, size, time);
       if ((rtTri.flags&BUMP_MAPPED) != 0)
-        {
-          rtTri.fromLocal.transformDirection(spec.bumpGrad);
-          n.scale(spec.bumpGrad.dot(n)+1.0);
-          n.subtract(spec.bumpGrad);
-          n.normalize();
-        }
+      {
+        rtTri.fromLocal.transformDirection(spec.bumpGrad);
+        n.scale(spec.bumpGrad.dot(n)+1.0);
+        n.subtract(spec.bumpGrad);
+        n.normalize();
+      }
     }
 
     @Override

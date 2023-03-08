@@ -12,9 +12,8 @@
 
 package artofillusion;
 
-import artofillusion.animation.*;
 import artofillusion.image.*;
-import artofillusion.image.filter.*;
+import artofillusion.image.filter.ImageFilter;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
@@ -27,7 +26,6 @@ import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
 
-import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -94,41 +92,14 @@ public class ArtOfIllusion
     ImageIcon icon = new IconResource("artofillusion/Icons/appIcon.png");
     APP_ICON = (icon.getIconWidth() == -1 ? null : icon);
 
-    // Build a table of classes which have moved.
-
-    classTranslations.put("artofillusion.tools.CSGObject", "artofillusion.object.CSGObject");
-    classTranslations.put("artofillusion.Cube", "artofillusion.object.Cube");
-    classTranslations.put("artofillusion.Curve", "artofillusion.object.Curve");
-    classTranslations.put("artofillusion.Cylinder", "artofillusion.object.Cylinder");
-    classTranslations.put("artofillusion.DirectionalLight", "artofillusion.object.DirectionalLight");
-    classTranslations.put("artofillusion.NullObject", "artofillusion.object.NullObject");
-    classTranslations.put("artofillusion.PointLight", "artofillusion.object.PointLight");
-    classTranslations.put("artofillusion.SceneCamera", "artofillusion.object.SceneCamera");
-    classTranslations.put("artofillusion.Sphere", "artofillusion.object.Sphere");
-    classTranslations.put("artofillusion.SplineMesh", "artofillusion.object.SplineMesh");
-    classTranslations.put("artofillusion.SpotLight", "artofillusion.object.SpotLight");
-    classTranslations.put("artofillusion.TriangleMesh", "artofillusion.object.TriangleMesh");
-    classTranslations.put("artofillusion.Tube", "artofillusion.object.Tube");
-    classTranslations.put("artofillusion.CylindricalMapping", "artofillusion.texture.CylindricalMapping");
-    classTranslations.put("artofillusion.ImageMapTexture", "artofillusion.texture.ImageMapTexture");
-    classTranslations.put("artofillusion.LayeredMapping", "artofillusion.texture.LayeredMapping");
-    classTranslations.put("artofillusion.LayeredTexture", "artofillusion.texture.LayeredTexture");
-    classTranslations.put("artofillusion.LinearMapping3D", "artofillusion.texture.LinearMapping3D");
-    classTranslations.put("artofillusion.procedural.ProceduralTexture2D", "artofillusion.texture.ProceduralTexture2D");
-    classTranslations.put("artofillusion.procedural.ProceduralTexture3D", "artofillusion.texture.ProceduralTexture3D");
-    classTranslations.put("artofillusion.ProjectionMapping", "artofillusion.texture.ProjectionMapping");
-    classTranslations.put("artofillusion.SphericalMapping", "artofillusion.texture.SphericalMapping");
-    classTranslations.put("artofillusion.UniformMapping", "artofillusion.texture.UniformMapping");
-    classTranslations.put("artofillusion.UniformTexture", "artofillusion.texture.UniformTexture");
-    classTranslations.put("artofillusion.LinearMaterialMapping", "artofillusion.material.LinearMaterialMapping");
-    classTranslations.put("artofillusion.procedural.ProceduralMaterial3D", "artofillusion.material.ProceduralMaterial3D");
-    classTranslations.put("artofillusion.UniformMaterial", "artofillusion.material.UniformMaterial");
-    classTranslations.put("artofillusion.UniformMaterialMapping", "artofillusion.material.UniformMaterialMapping");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapDesignerObjectCollection", "artofillusion.tapDesigner.TapDesignerObjectCollection");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapTube", "artofillusion.tapDesigner.TapTube");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapSplineMesh", "artofillusion.tapDesigner.TapSplineMesh");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapObject", "artofillusion.tapDesigner.TapObject");
-    classTranslations.put("artofillusion.tools.tapDesigner.TapLeaf", "artofillusion.tapDesigner.TapLeaf");
+    // Build a table of classes which have moved.    
+    try {        
+        Properties translations = new Properties();
+        translations.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("mappings.properties"));
+        classTranslations.putAll((Map)translations);
+    } catch(IOException ioe) {        
+    }
+    
   }
 
   public static void main(String args[])
@@ -169,15 +140,6 @@ public class ArtOfIllusion
     PluginRegistry.registerPlugin(new UVMapping(null, null));
     PluginRegistry.registerPlugin(new LinearMapping3D(null, null));
     PluginRegistry.registerPlugin(new LinearMaterialMapping(null, null));
-    PluginRegistry.registerPlugin(new BrightnessFilter());
-    PluginRegistry.registerPlugin(new SaturationFilter());
-    PluginRegistry.registerPlugin(new ExposureFilter());
-    PluginRegistry.registerPlugin(new TintFilter());
-    PluginRegistry.registerPlugin(new BlurFilter());
-    PluginRegistry.registerPlugin(new GlowFilter());
-    PluginRegistry.registerPlugin(new OutlineFilter());
-    PluginRegistry.registerPlugin(new NoiseReductionFilter());
-    PluginRegistry.registerPlugin(new DepthOfFieldFilter());
     PluginRegistry.registerResource("TranslateBundle", "artofillusion", ArtOfIllusion.class.getClassLoader(), "artofillusion", null);
     PluginRegistry.registerResource("UITheme", "default", ArtOfIllusion.class.getClassLoader(), "artofillusion/Icons/defaultTheme.xml", null);
     PluginRegistry.scanPlugins();
@@ -268,7 +230,6 @@ public class ArtOfIllusion
     
     numNewWindows++;
     SwingUtilities.invokeLater(new Runnable() {
-      @Override
       public void run()
       {
         LayoutWindow fr = new LayoutWindow(scene);        
@@ -289,16 +250,59 @@ public class ArtOfIllusion
         fr.setVisible(true);
         fr.arrangeDockableWidgets();
 
-        // If the user opens a file immediately after running the program, close the empty
-        // scene window.
+        /* If the user opens a file immediately after running the program,
+         * close the empty scene window. Delayed to work around timing bugs
+         * when interacting with macOS and GLJPanels.
+         */
 
-        for (int i = windows.size()-2; i >= 0; i--)
-          if (windows.get(i) instanceof LayoutWindow)
+        SwingWorker autoCloseUnmodified = new SwingWorker<Boolean, Void>()
+        {
+          @Override
+          public Boolean doInBackground()
           {
-            LayoutWindow win = (LayoutWindow) windows.get(i);
-            if (win.getScene().getName() == null && !win.isModified())
-              closeWindow(win);
+            try
+            {
+              Thread.sleep(1000); //500 worked ; 250 failed
+            }
+            catch (InterruptedException ex)
+            {
+              System.out.println(ex);
+            }
+
+            for (EditingWindow window : windows)
+            {
+              if (window instanceof LayoutWindow
+                  && window != fr  
+                  && ((LayoutWindow)window).getScene().getName() == null
+                  && ((LayoutWindow)window).isModified() == false
+                  ) closeWindow(window);
+            }
+            return true;
           }
+
+          @Override
+          public void done()
+          {
+            try
+            {
+              Boolean result = get();
+            }
+            catch (InterruptedException ignore) {}
+            catch (java.util.concurrent.ExecutionException e)
+            {
+              String why = null;
+              Throwable cause = e.getCause();
+              if (cause != null)
+              {
+                why = cause.getMessage();
+              } else {
+                why = e.getMessage();
+              }
+              System.err.println("Error: " + why);
+            }
+          }
+        };
+        autoCloseUnmodified.execute();
       }
     });    
   }
@@ -379,22 +383,22 @@ public class ArtOfIllusion
     
     for (String file : files)
     {
-      try
-      {
-        String language = ScriptRunner.getLanguageForFilename(file);
-        try
+      String language = ScriptRunner.getLanguageForFilename(file);
+      if (language != ScriptRunner.UNKNOWN_LANGUAGE)
         {
-          String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
-          ScriptRunner.executeScript(language, script, variables);
-        }
+        try 
+          {
+            String script = loadFile(new File(STARTUP_SCRIPT_DIRECTORY, file));
+            ScriptRunner.executeScript(language, script, variables);
+          }
         catch (IOException ex)
-        {
-          ex.printStackTrace();
+          {
+            ex.printStackTrace();
+          }
         }
-      }
-      catch (IllegalArgumentException ex)
+      else 
       {
-        // This file isn't a known scripting language.
+        System.err.println (Translate.text ("unsupportedFileExtension") + " : " + file);
       }
     }
   }

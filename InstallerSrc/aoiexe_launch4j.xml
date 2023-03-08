@@ -3,37 +3,37 @@
   <dontWrapJar>true</dontWrapJar>
   <headerType>gui</headerType>
   <jar>ArtOfIllusion.jar</jar>
-  <outfile>..\InstallerBuild\Art of Illusion.exe</outfile>
+  <outfile>Art of Illusion.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>http://java.com/download</downloadUrl>
-  <supportUrl>https://soureceforge.net/p/aoi/discussion/</supportUrl>
-  <customProcName>Art Of Illusion 3.1.0</customProcName>
+  <downloadUrl>https://adoptopenjdk.net</downloadUrl>
+  <supportUrl>https://sourceforge.net/p/aoi/discussion/</supportUrl>
+  <customProcName>Art Of Illusion 3.2.0</customProcName>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
   <icon>aoi.ico</icon>
   <jre>
-    <path></path>
+    <path>%JAVA_HOME%;%PATH%</path>
     <bundledJre64Bit>false</bundledJre64Bit>
     <bundledJreAsFallback>false</bundledJreAsFallback>
-    <minVersion>1.6.0</minVersion>
+    <minVersion>1.8.0</minVersion>
     <maxVersion></maxVersion>
     <jdkPreference>preferJre</jdkPreference>
     <runtimeBits>64/32</runtimeBits>
-    <maxHeapSize>1536</maxHeapSize>
+    <maxHeapSize>16384</maxHeapSize>
     <opt>-Dsun.java2d.noddraw=true</opt>
     <opt>-Djava.library.path=lib</opt>
   </jre>
   <versionInfo>
-    <fileVersion>3.1.0.0</fileVersion>
-    <txtFileVersion>3.1.0</txtFileVersion>
+    <fileVersion>3.2.0.0</fileVersion>
+    <txtFileVersion>3.2.0</txtFileVersion>
     <fileDescription>Art of Illusion launcher</fileDescription>
     <copyright>2019 Peter Eastman et. al.</copyright>
-    <productVersion>3.1.0.0</productVersion>
-    <txtProductVersion>3.1.0</txtProductVersion>
+    <productVersion>3.2.0.0</productVersion>
+    <txtProductVersion>3.2.0</txtProductVersion>
     <productName>Art of Illusion</productName>
     <companyName></companyName>
     <internalName>AoI</internalName>

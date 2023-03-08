@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,6 @@ import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 /** This dialog box allows the user to specify options for creating extruded objects. */
 
@@ -42,7 +41,7 @@ public class ExtrudeDialog extends BDialog
 
   public ExtrudeDialog(LayoutWindow window)
   {
-    super(window, "Extrude", true);
+    super(window, Translate.text("Tools:extrude.dialog.name"), true);
     this.window = window;
     Scene scene = window.getScene();
     int selection[] = window.getSelectedIndices();
@@ -73,16 +72,16 @@ public class ExtrudeDialog extends BDialog
     FormContainer content = new FormContainer(4, 10);
     setContent(BOutline.createEmptyBorder(content, UIUtilities.getStandardDialogInsets()));
     content.setDefaultLayout(new LayoutInfo(LayoutInfo.WEST, LayoutInfo.NONE, new Insets(0, 0, 0, 5), null));
-    content.add(new BLabel("Object to Extrude:"), 0, 0, 2, 1);
+    content.add(Translate.label("Tools:extrude.target.label"), 0, 0, 2, 1);
     content.add(objChoice = new BComboBox(), 0, 1, 2, 1);
     for (int i = 0; i < objects.size(); i++)
       objChoice.add(objects.get(i).getName());
     objChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
-    content.add(new BLabel("Extrude Direction:"), 0, 2, 2, 1);
+    content.add(Translate.label("Tools:extrude.direction.label"), 0, 2, 2, 1);
     pathGroup = new RadioButtonGroup();
-    content.add(xBox = new BRadioButton("X", true, pathGroup), 0, 3);
-    content.add(yBox = new BRadioButton("Y", true, pathGroup), 0, 4);
-    content.add(zBox = new BRadioButton("Z", true, pathGroup), 0, 5);
+    content.add(xBox = new BRadioButton(Translate.text("Tools:extrude.xaxis"), true, pathGroup), 0, 3);
+    content.add(yBox = new BRadioButton(Translate.text("Tools:extrude.yaxis"), true, pathGroup), 0, 4);
+    content.add(zBox = new BRadioButton(Translate.text("Tools:extrude.zaxis"), true, pathGroup), 0, 5);
     content.add(pathBox = new BRadioButton("Curve", true, pathGroup), 0, 6);
     content.add(vectorBox = new BRadioButton("Vector", true, pathGroup), 0, 7);
     pathBox.setEnabled(paths.size() > 0);
@@ -99,20 +98,20 @@ public class ExtrudeDialog extends BDialog
     pathChoice.addEventLink(ValueChangedEvent.class, this, "stateChanged");
     RowContainer vectorRow = new RowContainer();
     content.add(vectorRow, 1, 7);
-    vectorRow.add(new BLabel("X"));
+    vectorRow.add(Translate.label("Tools:extrude.xaxis"));
     vectorRow.add(xField = new ValueField(0.0, ValueField.NONE, 4));
     xField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    vectorRow.add(new BLabel("Y"));
+    vectorRow.add(Translate.label("Tools:extrude.yaxis"));
     vectorRow.add(yField = new ValueField(0.0, ValueField.NONE, 4));
     yField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    vectorRow.add(new BLabel("Z"));
+    vectorRow.add(Translate.label("Tools:extrude.zaxis"));
     vectorRow.add(zField = new ValueField(1.0, ValueField.NONE, 4));
     zField.addEventLink(ValueChangedEvent.class, this, "makeObject");
-    content.add(orientBox = new BCheckBox("Orientation Follows Curve", true), 0, 8, 2, 1);
+    content.add(orientBox = new BCheckBox(Translate.text("Tools:extrude.follws.curve.label"), true), 0, 8, 2, 1);
     orientBox.addEventLink(ValueChangedEvent.class, this, "stateChanged");
-    content.add(new BLabel("Number of Segments:"), 2, 0);
-    content.add(new BLabel("Twist (degrees):"), 2, 1);
-    content.add(new BLabel("Surface Accuracy:"), 2, 2);
+    content.add(Translate.label("Tools:extrude.segments.label"), 2, 0);
+    content.add(Translate.label("Tools:extrude.twist.value.label"), 2, 1);
+    content.add(Translate.label("Tools:extrude.surface.accuracy.label"), 2, 2);
     content.add(segField = new ValueField(1.0, ValueField.POSITIVE+ValueField.INTEGER, 5), 3, 0);
     content.add(angleField = new ValueField(0.0, ValueField.NONE, 5), 3, 1);
     content.add(tolField = new ValueField(0.1, ValueField.POSITIVE, 5), 3, 2);
@@ -175,7 +174,7 @@ public class ExtrudeDialog extends BDialog
       Vec3 offset = profile.getCoords().fromLocal().times(((Mesh) profile.getObject()).getVertices()[0].r).minus(coords.fromLocal().times(((Mesh) preview.getObject().getObject()).getVertices()[0].r));
       coords.setOrigin(coords.getOrigin().plus(offset));
     }
-    window.addObject(preview.getObject().getObject(), coords, "Extruded Object "+(counter++), null);
+    window.addObject(preview.getObject().getObject(), coords, "Extruded Object " + (counter++), null);
     window.setSelection(window.getScene().getNumObjects()-1);
     window.setUndoRecord(new UndoRecord(window, false, UndoRecord.DELETE_OBJECT, window.getScene().getNumObjects()-1));
     window.updateImage();

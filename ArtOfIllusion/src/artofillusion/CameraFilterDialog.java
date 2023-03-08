@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020, 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -325,7 +325,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
         filterClasses[i] = filters.get(i).getClass();
         try
         {
-          allFiltersList.add(((ImageFilter) filterClasses[i].newInstance()).getName());
+          allFiltersList.add(((ImageFilter) filterClasses[i].getDeclaredConstructor().newInstance()).getName());
         }
         catch (Exception ex)
         {
@@ -380,7 +380,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
         return;
       try
       {
-        filters.add((ImageFilter) filterClasses[sel].newInstance());
+        filters.add((ImageFilter) filterClasses[sel].getDeclaredConstructor().newInstance());
         rebuildFilterList();
         cameraFiltersList.setSelected(filters.size()-1, true);
       }

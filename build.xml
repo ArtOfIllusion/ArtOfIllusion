@@ -80,12 +80,14 @@
 
   <!-- Build project-wide javadoc -->
   <!-- Hacky, cannot call subant tasks, as Javadoc is not incremental -->
- <target name="docs" description="Generate project-wide javadoc">
+  <target name="docs" description="Generate project-wide javadoc">
+   <fileset id="libraries" dir="${srclib}" includes="*.jar" />
+   <pathconvert property="classpath" refid="libraries" />
    <mkdir dir="${docs}" />
    <javadoc packagenames="artofillusion.*"
-     sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src"
-     classpath="${srclib}/*.jar"
-     source="${java.version}"
+     sourcepath="ArtOfIllusion/src:OSSpecific/src:Renderers/src:Tools/src:Translators/src:Filters/src"
+     classpath="${classpath}"
+     source="${lang.version}"
      defaultexcludes="yes"
      destdir="${docs}"
      author="true"
@@ -95,6 +97,7 @@
      public="true">
      <doctitle><![CDATA[<h1>Art of Illusion</h1>]]></doctitle>
      <bottom><![CDATA[<i>Copyright &copy; 1999-2011 by Peter Eastman.</i>]]></bottom>
+     <link href="http://buoy.sourceforge.net/docs/" />
    </javadoc>
   </target>
 
@@ -109,6 +112,7 @@
       <pathelement location="Tools/build" />
       <pathelement location="Translators/build" />
       <pathelement location="Renderers/build" />
+      <pathelement location="Filters/build" />
       <fileset refid="libraries" />
     </path>
     <javac srcdir="Tests/src"

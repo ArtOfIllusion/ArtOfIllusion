@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2005 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -28,7 +28,7 @@ public class SkinDialog extends BDialog
   private LayoutWindow window;
   private BList curveList;
   private BCheckBox reverseBox;
-  private BButton upButton, downButton, okButton, cancelButton;
+  private BButton upButton, downButton;
   private ObjectPreviewCanvas preview;
   private ObjectInfo curve[];
   private boolean reverse[];
@@ -38,7 +38,7 @@ public class SkinDialog extends BDialog
 
   public SkinDialog(LayoutWindow window, Vector curves)
   {
-    super(window, "Skin", true);
+    super(window, Translate.text("Tools:skin.dialog.title"), true);
     this.window = window;
     curve = new ObjectInfo [curves.size()];
     reverse = new boolean [curves.size()];
@@ -60,18 +60,16 @@ public class SkinDialog extends BDialog
     ColumnContainer col = new ColumnContainer();
     content.add(col, 1, 0);
     col.setDefaultLayout(new LayoutInfo(LayoutInfo.CENTER, LayoutInfo.HORIZONTAL, new Insets(2, 2, 2, 2), null));
-    col.add(upButton = new BButton("Move Up"));
-    upButton.addEventLink(CommandEvent.class, this, "doMoveUp");
-    col.add(downButton = new BButton("Move Down"));
-    downButton.addEventLink(CommandEvent.class, this, "doMoveDown");
-    col.add(reverseBox = new BCheckBox("Reverse Direction", false));
+    col.add(upButton = Translate.button("Tools:skin.dialog.move.up", this, "doMoveUp"));    
+    col.add(downButton = Translate.button("Tools:skin.dialog.move.down", this, "doMoveDown"));    
+    col.add(reverseBox = new BCheckBox(Translate.text("Tools:skin.dialog.reverse"), false));
     reverseBox.addEventLink(ValueChangedEvent.class, this, "selectionChanged");
     content.add(preview = new ObjectPreviewCanvas(null), 2, 0);
     preview.setPreferredSize(new Dimension(150, 150));
     RowContainer buttons = new RowContainer();
     content.add(buttons, 0, 1, 3, 1, new LayoutInfo());
-    buttons.add(okButton = Translate.button("ok", this, "doOk"));
-    buttons.add(cancelButton = Translate.button("cancel", this, "dispose"));
+    buttons.add(Translate.button("ok", this, "doOk"));
+    buttons.add(Translate.button("cancel", this, "dispose"));
     makeObject();
     pack();
     UIUtilities.centerDialog(this, window);

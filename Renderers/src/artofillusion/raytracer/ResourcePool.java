@@ -1,4 +1,5 @@
 /* Copyright (C) 2005 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -41,7 +42,7 @@ public class ResourcePool
   {
     try
     {
-      return objectClass.newInstance();
+      return objectClass.getDeclaredConstructor().newInstance();
     }
     catch (Exception ex)
     {

@@ -217,7 +217,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   /**
    * @deprecated
    * Use setPQNAxes. This method redirects.
-   * x -> p, y -> q, z -> n. N stands for 'normal-direction'
+   * x -&gt; p, y -&gt; q, z -&gt; n. N stands for 'normal-direction'
    */
   @Deprecated
   public void setNPQAxes(Vec3 nDir, Vec3 pDir, Vec3 qDir)

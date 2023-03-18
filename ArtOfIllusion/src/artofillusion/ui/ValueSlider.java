@@ -182,7 +182,7 @@ public class ValueSlider extends WidgetContainer
   @Override
   public Collection<Widget> getChildren()
   {
-    return List.of(field, slider);
+    return Arrays.asList(field, slider);
   }
 
   /**

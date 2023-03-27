@@ -97,7 +97,7 @@ distributions {
     mac.contents {        
         into("${description}.app/Contents") { from("${rootProject.projectDir}/InstallerSrc/apple/") {
                 include "Info.plist"
-                expand VERSION: "3.2.0", JAR: file(jar.archivePath).name, APPCLASS: "${mainClassName}"
+                expand VERSION: "3.2.0", JAR: file(jar.archivePath).name, APPCLASS: "${mainClass}"
             } 
         }
         into("${description}.app/Contents/MacOS") { from("${rootProject.projectDir}/InstallerSrc/apple/") {

@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2021 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ import java.util.*;
 public class FilterParameterTrack extends Track
 {
   private Object parent;
-  private ImageFilter filter;
+  private final ImageFilter filter;
   private Timecourse tc;
   private int smoothingMethod;
 
@@ -119,10 +119,12 @@ public class FilterParameterTrack extends Track
     tc.addTimepoint(k, time, s);
   }
 
-  /** Set a keyframe at the specified time, based on the current state of the Scene. */
+  /**
+   * {@inheritDoc}
+   */
 
   @Override
-  public Keyframe setKeyframe(double time, Scene sc)
+  public Keyframe setKeyframe(double time)
   {
     double key[] = getCurrentValues();
     Keyframe k = new ArrayKeyframe(key);
@@ -135,15 +137,15 @@ public class FilterParameterTrack extends Track
       the new Keyframe, or null if none was set. */
 
   @Override
-  public Keyframe setKeyframeIfModified(double time, Scene sc)
+  public Keyframe setKeyframeIfModified(double time)
   {
     if (tc.getTimes().length == 0)
-      return setKeyframe(time, sc);
+      return setKeyframe(time);
     double val1[] = ((ArrayKeyframe) tc.evaluate(time, smoothingMethod)).val;
     double val2[] = getCurrentValues();
     for (int i = 0; i < val1.length; i++)
       if (val1[i] != val2[i])
-        return setKeyframe(time, sc);
+        return setKeyframe(time);
     return null;
   }
 

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2021 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -2821,11 +2821,11 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
       PositionTrack pt = new PositionTrack(info);
       pt.setCoordsObject(relObj);
       info.addTrack(pt, 0);
-      pt.setKeyframe(theScene.getTime(), theScene);
+      pt.setKeyframe(theScene.getTime());
       RotationTrack rt = new RotationTrack(info);
       rt.setCoordsObject(relObj);
       info.addTrack(rt, 1);
-      rt.setKeyframe(theScene.getTime(), theScene);
+      rt.setKeyframe(theScene.getTime());
     }
     setUndoRecord(undo);
     theScore.rebuildList();

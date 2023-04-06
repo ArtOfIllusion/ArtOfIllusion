@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2020 by Maksim Khramov
+   Changes copyright (C) 2016-2023 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -49,7 +49,7 @@ public class ArtOfIllusion
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
-  private static ArrayList<EditingWindow> windows = new ArrayList<EditingWindow>();
+  private static LinkedList<EditingWindow> windows = new LinkedList<EditingWindow>();
   private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
@@ -233,19 +233,6 @@ public class ArtOfIllusion
       {
         LayoutWindow fr = new LayoutWindow(scene);        
         windows.add(fr);
-        
-        for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-        {
-          try
-          {
-            plugin.processMessage(Plugin.SCENE_WINDOW_CREATED, new Object [] {fr});
-          }
-          catch (Throwable tx)
-          {
-            tx.printStackTrace();
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-          }
-        }
         fr.setVisible(true);
         fr.arrangeDockableWidgets();
 
@@ -317,26 +304,9 @@ public class ArtOfIllusion
   public static void closeWindow(EditingWindow win)
   {
     if (win.confirmClose())
-      {
-        windows.remove(win);
-        if (win instanceof LayoutWindow)
-        {
-          for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-          {
-            try
-            {
-              plugin.processMessage(Plugin.SCENE_WINDOW_CLOSING, new Object [] {win});
-            }
-            catch (Throwable tx)
-            {
-              tx.printStackTrace();
-              new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-            }
-          }
-        }
-      }
-    if (windows.isEmpty())
-      quit();
+    {
+      windows.remove(win);
+    }
   }
 
   /** Get a list of all open windows. */
@@ -349,27 +319,17 @@ public class ArtOfIllusion
   /** Quit Art of Illusion. */
   public static void quit()
   {
-    for (int i = windows.size()-1; i >= 0; i--)
-    {
-      EditingWindow win = windows.get(i);
-      closeWindow(win);
-      if (windows.contains(win))
-        return;
-    }
-    
-    for (Plugin plugin: PluginRegistry.getPlugins(Plugin.class))
-    {
-      try
+      do
       {
-        plugin.processMessage(Plugin.APPLICATION_STOPPING, new Object [0]);
-      }
-      catch (Throwable tx)
-      {
-        tx.printStackTrace();
-        new BStandardDialog("", UIUtilities.breakString(Translate.text("pluginNotifyError", plugin.getClass().getSimpleName())), BStandardDialog.ERROR).showMessageDialog(null);
-      }
-    }
-    System.exit(0);
+        EditingWindow ew = windows.peekLast();
+        if(ew.confirmClose())
+        {
+            windows.removeLast();
+        } else
+        {
+            return;
+        }        
+      } while(!windows.isEmpty());
   }
 
   /** Execute all startup scripts. */
@@ -741,4 +701,23 @@ public class ArtOfIllusion
     ModellingApp.currentDirectory = currentDirectory;
   }
 
+  public static void showErrors(Map<String, Throwable> errors) {
+    java.util.function.Function<Map.Entry<String, Throwable>, String> tmss = (Map.Entry<String, Throwable> t) -> "Plugin: "
+            + t + " throw: " + t.getValue().getMessage()
+            + " with" + Arrays.toString(t.getValue().getStackTrace());
+    List<String> err = errors.entrySet().stream().map(tmss).collect(java.util.stream.Collectors.toList());
+    showErrors(err);
+  }
+  
+  public static void showErrors(List<String> errors)
+  {
+      BTextArea report = new BTextArea(String.join("\n\n", errors));
+      JTextArea area = report.getComponent();
+      area.setPreferredSize(new java.awt.Dimension(500, 200));
+      area.setFont(area.getFont().deriveFont(12f));
+      area.setLineWrap(true);
+      area.setEditable(false);
+      area.setWrapStyleWord(true);      
+      SwingUtilities.invokeLater(() -> new BStandardDialog("Art Of Illusion", new Object[] { new BScrollPane(report) }, BStandardDialog.ERROR).showMessageDialog(null));
+  }
 }

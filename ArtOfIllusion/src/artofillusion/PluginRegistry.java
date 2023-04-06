@@ -1,6 +1,6 @@
  /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018-2022 by Maksim Khramov
+   Changes copyright (C) 2018-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -22,7 +22,6 @@ import java.lang.reflect.*;
 
 import artofillusion.ui.*;
 import artofillusion.util.*;
-
 import javax.xml.parsers.*;
 
 import org.w3c.dom.*;
@@ -36,6 +35,39 @@ public class PluginRegistry
   private static final HashMap<String, ExportInfo> exports = new HashMap<String, ExportInfo>();
   private static final HashMap<String, Object> classMap = new HashMap<String, Object>();
 
+  static {
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Map<String, Throwable> errors = PluginRegistry.notifyPlugins(Plugin.APPLICATION_STOPPING);        
+        errors.forEach((plugin, ex) -> {
+            //NB! At least JUL logger will not outputs log from inside shutdown thread. So I leave System.ouput.println here
+            String out = "Plugin: " + plugin + " throw: " + ex.getMessage() + " with" + Arrays.toString(ex.getStackTrace()) + " at shutdown";
+            System.out.println(out);
+            
+        });
+    }, "Plugin shutdown thread"));
+  }
+  
+  
+  @SuppressWarnings("ThrowableResultIgnored")
+  public static Map<String, Throwable> notifyPlugins(int message, Object... args)
+  {
+    Map<String, Throwable> errors = new HashMap<>();
+    categoryClasses.getOrDefault(Plugin.class, List.of()).forEach(plugin -> {
+      try 
+      {
+        ((Plugin)plugin).processMessage(message, args);
+      } 
+      catch(Throwable tx)
+      {
+        String out = "Plugin: " + plugin.getClass().getSimpleName() + " throw: " + tx.getMessage() + " with" + Arrays.toString(tx.getStackTrace());
+        //TODO: Replace with logger...
+        System.out.println(out);
+        errors.put(plugin.getClass().getSimpleName(), tx);
+      }
+    });
+    return errors;
+  }
+  
   /**
    * Scan all files in the Plugins directory, read in their indices, and record all plugins
    * contained in them.
@@ -754,4 +786,5 @@ public class PluginRegistry
     String type, id, name;
     Locale locale;
   }
+  
 }

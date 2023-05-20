@@ -12,24 +12,22 @@
 
 package artofillusion;
 
+import artofillusion.Renderer;
 import artofillusion.image.*;
 import artofillusion.image.filter.ImageFilter;
+import artofillusion.keystroke.*;
 import artofillusion.material.*;
 import artofillusion.math.*;
 import artofillusion.object.*;
 import artofillusion.script.*;
 import artofillusion.texture.*;
 import artofillusion.ui.*;
-import artofillusion.keystroke.*;
 import artofillusion.view.*;
 import buoy.widget.*;
 import buoy.xml.*;
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.List;
-
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -49,7 +47,7 @@ public class ArtOfIllusion
   private static Texture clipboardTexture[];
   private static Material clipboardMaterial[];
   private static ImageMap clipboardImage[];
-  private static LinkedList<EditingWindow> windows = new LinkedList<EditingWindow>();
+  private static LinkedList<EditingWindow> windows = new LinkedList<>();
   private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
 
@@ -307,6 +305,7 @@ public class ArtOfIllusion
     {
       windows.remove(win);
     }
+    if (windows.isEmpty()) quit();
   }
 
   /** Get a list of all open windows. */
@@ -322,6 +321,7 @@ public class ArtOfIllusion
       do
       {
         EditingWindow ew = windows.peekLast();
+        if(ew == null) break;
         if(ew.confirmClose())
         {
             windows.removeLast();
@@ -330,6 +330,7 @@ public class ArtOfIllusion
             return;
         }        
       } while(!windows.isEmpty());
+      System.exit(0);
   }
 
   /** Execute all startup scripts. */

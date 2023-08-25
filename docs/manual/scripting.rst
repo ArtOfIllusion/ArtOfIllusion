@@ -23,7 +23,7 @@ To add an Object Script, select **Tools -> Create Scripted Object**. This displa
 At this point, you can give it a name by typing into the **Name** box.
 
 To create a new instance of an already written script, select the name of the script from the **Script** drop down menu
-(AoI will automatically list any .bsh files that are in the /Scripts/Objects folder) and click **OK**.
+(AoI will automatically list any .bsh or .groovy files that are in the /Scripts/Objects folder) and click **OK**.
 
 .. figure:: scripting/obj_script_dial1.jpg
 
@@ -47,25 +47,25 @@ Tool Scripts
 
 Tool scripts are used to carry out a single action as they are only evaluated when invoked. Such scripts, for instance,
 can create new objects within the scene or modify existing ones. Tool scripts can also carry out actions on many other
-aspects like textures/materials and animation tracks.
+elements of a scene such as textures, materials and animation tracks.
 
 Existing Tool Scripts can be evoked by selecting **Tools -> Scripts** and then selecting the appropriate script from the
 drop down list. This list contains all the Tool Scripts in the /Scripts/Tools folder. Depending on the script, you may
 need to select at least one object before running the script.
 
-To write a new Tool Script, select **Tools -> Edit Script**. This displays the tool script editor which is similar to
-the Object Script editor described above. The difference is the **Execute** command which runs the tool script.
+To write a new Tool Script, select **Tools -> Edit Tool Script**. This displays the tool script editor, which is similar to
+the Object Script editor described above. The **Run** command runs the tool script. **Run to Cursor** and **Run selected** run only portions of the script. They are primarily used for debugging and experimentation.
 
 .. _startup_scripts:
 
 Startup Scripts
 ***************
 
-Startup scripts are a special sort of script that is executed every time the program starts. Such scripts need to be
+Startup scripts are tool scripts that are executed every time the program starts. Such scripts need to be
 stored in the Scripts/Startup folder. These scripts can be used to configure AoI to maintain a certain layout each time
-it opens, to load a particular file at startup etc.
+it opens, to load a particular file at startup, or even to define and register a small plugin.
 
-Startup scripts are created using the **Tools -> Edit Script** command. This displays the script editor and scripts can
+Startup scripts are created using the **Tools -> Edit Tool Script** command. This displays the script editor; scripts can
 be entered directly or loaded from disk. Use the **Save** command to save the scripts into the Startup folder. See the
 Scripting Tutorial on the AoI web site for details of actual script programming.
 

@@ -469,8 +469,8 @@ public abstract class ViewerCanvas extends CustomWidget
 
   /**
     ViewAnimation calls this when the animation is finished, so the orientation menu
-    will be up to date and the perspective is set to it's value without launched
-    launcing a new animation sequence.
+    will be up to date and the perspective is set to it's value without
+    launching a new animation sequence.
   */
 
   public void finishAnimation(int which, boolean persp, int navi)
@@ -623,7 +623,7 @@ public abstract class ViewerCanvas extends CustomWidget
     Set the distance from drawing plane to view camera. <p>
 
     Depending on the view action this may be used to recalculate
-    the positon of the camera or the rotationCenter or it may be
+    the position of the camera or the rotationCenter. Conversely, it may be
     recalculated from the rotationCenter and camera position.
    */
   public void setDistToPlane(double dist)

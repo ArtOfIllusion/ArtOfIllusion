@@ -213,8 +213,8 @@ public class ViewAnimation
     endDistToScreen = camera.getDistToScreen();
 
     checkPreferences(); // This only works for the 'animate'
-        if (! animate)
-        {
+    if (! animate)
+    {
       endAnimation(); // Go directly to the last frame
       return;
     }
@@ -397,16 +397,16 @@ public class ViewAnimation
     view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work without this too... But not with SceneCamera
     view.setShowGrid(endShowGrid);
     view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
-        if (boundCamera != null)
-            updateBoundCamera();
-        else
-        {
+    if (boundCamera != null)
+        updateBoundCamera();
+    else
+    {
       view.viewChanged(false);
       view.repaint();
     }
     changingPerspective = false;
     animatingMove = false;
-    }
+  }
 
   /**
    * Check if there is anything that should move.

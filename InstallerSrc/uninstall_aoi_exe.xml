@@ -8,9 +8,8 @@
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>https://adoptopenjdk.net</downloadUrl>
+  <downloadUrl>https://adoptium.net/</downloadUrl>
   <supportUrl>https://sourceforge.net/p/aoi/discussion/</supportUrl>
-  <customProcName>Uninstall Art Of Illusion 3.2.0</customProcName>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
@@ -32,8 +31,8 @@
     <txtFileVersion>1</txtFileVersion>
     <fileDescription>Art of Illusion Uninstaller</fileDescription>
     <copyright>2020 Lucas Stanek</copyright>
-    <productVersion>3.2.0.0</productVersion>
-    <txtProductVersion>3.2.0</txtProductVersion>
+    <productVersion>3.2.1.0</productVersion>
+    <txtProductVersion>3.2.1</txtProductVersion>
     <productName>Art of Illusion</productName>
     <companyName></companyName>
     <internalName>AoI</internalName>

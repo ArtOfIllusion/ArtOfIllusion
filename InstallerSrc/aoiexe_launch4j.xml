@@ -8,9 +8,8 @@
   <cmdLine></cmdLine>
   <chdir>.</chdir>
   <priority>normal</priority>
-  <downloadUrl>https://adoptopenjdk.net</downloadUrl>
+  <downloadUrl>https://adoptium.net/</downloadUrl>
   <supportUrl>https://sourceforge.net/p/aoi/discussion/</supportUrl>
-  <customProcName>Art Of Illusion 3.2.1</customProcName>
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>

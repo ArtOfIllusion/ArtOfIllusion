@@ -1211,7 +1211,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
     // Draw the grid, if necessary.
 
-    if (showGrid)
+    if (showGrid && !animation.animatingMove() && !animation.changingPerspective())
     {
       float scale1 = 0.75f/255.0f;
       float scale2 = 0.25f/255.0f;

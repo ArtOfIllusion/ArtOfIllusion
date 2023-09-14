@@ -1,6 +1,6 @@
 Art of Illusion Version History
 
-v3.2.1 (Release Candidate)
+v3.2.1, September 14, 2023
 
 - Multiple patches and fixes to various localizations throughout the
   application

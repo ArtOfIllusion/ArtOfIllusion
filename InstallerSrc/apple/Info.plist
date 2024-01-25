@@ -55,7 +55,7 @@
         <string>$JAVAROOT/Buoyx.jar</string>
         <string>$JAVAROOT/Jama-1.0.2.jar</string>
         <string>$JAVAROOT/QuickTimeWriter.jar</string>
-        <string>$JAVAROOT/bsh-2.0b4.jar</string>
+        <string>$JAVAROOT/bsh-3.0.0-SNAPSHOT.jar</string>
         <string>$JAVAROOT/gluegen-rt.jar</string>
         <string>$JAVAROOT/groovy-all-2.1.2.jar</string>
         <string>$JAVAROOT/jogl-all.jar</string>

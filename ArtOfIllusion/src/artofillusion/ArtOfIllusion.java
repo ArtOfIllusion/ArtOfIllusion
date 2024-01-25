@@ -516,7 +516,7 @@ public class ArtOfIllusion
   /** Copy a list of objects to the clipboard, so they can be pasted into either the same scene or a
       different one. */
 
-  public static void copyToClipboard(ObjectInfo obj[], Scene scene)
+  public static void copyToClipboard(ObjectInfo[] obj, Scene scene)
   {
     // First make a list of all textures used by the objects.
 
@@ -528,7 +528,7 @@ public class ArtOfIllusion
         if (tex instanceof LayeredTexture)
           {
             LayeredMapping map = (LayeredMapping) object.getTextureMapping();
-            Texture layer[] = map.getLayers();
+            Texture[] layer = map.getLayers();
             for (int j = 0; j < layer.length; j++)
               {
                 Texture dup = layer[j].duplicate();
@@ -591,7 +591,7 @@ public class ArtOfIllusion
     Scene scene = win.getScene();
     UndoRecord undo = new UndoRecord(win, false);
     win.setUndoRecord(undo);
-    int sel[] = win.getSelectedIndices();
+    int[] sel = win.getSelectedIndices();
 
     // First, add any new image maps to the scene.
     for (ImageMap map: clipboardImage)
@@ -619,8 +619,8 @@ public class ArtOfIllusion
             Texture current = clipboardObject[j].getObject().getTexture();
             if (current != null)
             {
-              ParameterValue oldParamValues[] = clipboardObject[j].getObject().getParameterValues();
-              ParameterValue newParamValues[] = new ParameterValue[oldParamValues.length];
+              ParameterValue[] oldParamValues = clipboardObject[j].getObject().getParameterValues();
+              ParameterValue[] newParamValues = new ParameterValue[oldParamValues.length];
               for (int k = 0; k < newParamValues.length; k++)
                 newParamValues[k] = oldParamValues[k].duplicate();
               if (current == clipboardTexture[i])
@@ -630,7 +630,7 @@ public class ArtOfIllusion
                   LayeredMapping map = (LayeredMapping) clipboardObject[j].getObject().getTextureMapping();
                   map = (LayeredMapping) map.duplicate();
                   clipboardObject[j].setTexture(new LayeredTexture(map), map);
-                  Texture layer[] = map.getLayers();
+                  Texture[] layer = map.getLayers();
                   for (int k = 0; k < layer.length; k++)
                     if (layer[k] == clipboardTexture[i])
                       {

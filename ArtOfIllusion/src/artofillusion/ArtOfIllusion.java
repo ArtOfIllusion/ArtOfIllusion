@@ -614,20 +614,22 @@ public class ArtOfIllusion
           }
         else
           newtex = scene.getTexture(j);
+
         for (j = 0; j < clipboardObject.length; j++)
           {
-            Texture current = clipboardObject[j].getObject().getTexture();
+            Object3D object = clipboardObject[j].getObject();
+            Texture current = object.getTexture();
             if (current != null)
             {
-              ParameterValue[] oldParamValues = clipboardObject[j].getObject().getParameterValues();
+              ParameterValue[] oldParamValues = object.getParameterValues();
               ParameterValue[] newParamValues = new ParameterValue[oldParamValues.length];
               for (int k = 0; k < newParamValues.length; k++)
                 newParamValues[k] = oldParamValues[k].duplicate();
               if (current == clipboardTexture[i])
-                clipboardObject[j].setTexture(newtex, clipboardObject[j].getObject().getTextureMapping().duplicate(clipboardObject[j].getObject(), newtex));
+                clipboardObject[j].setTexture(newtex, object.getTextureMapping().duplicate(object, newtex));
               else if (current instanceof LayeredTexture)
                 {
-                  LayeredMapping map = (LayeredMapping) clipboardObject[j].getObject().getTextureMapping();
+                  LayeredMapping map = (LayeredMapping) object.getTextureMapping();
                   map = (LayeredMapping) map.duplicate();
                   clipboardObject[j].setTexture(new LayeredTexture(map), map);
                   Texture[] layer = map.getLayers();
@@ -635,10 +637,10 @@ public class ArtOfIllusion
                     if (layer[k] == clipboardTexture[i])
                       {
                         map.setLayer(k, newtex);
-                        map.setLayerMapping(k, map.getLayerMapping(k).duplicate(clipboardObject[j].getObject(), newtex));
+                        map.setLayerMapping(k, map.getLayerMapping(k).duplicate(object, newtex));
                       }
                 }
-              clipboardObject[j].getObject().setParameterValues(newParamValues);
+              object.setParameterValues(newParamValues);
             }
           }
       }

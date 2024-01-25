@@ -549,15 +549,16 @@ public class ArtOfIllusion
     // Next make a list of all materials used by the objects.
 
     List<Material> materials = new ArrayList<>();
-    for (int i = 0; i < obj.length; i++)
+    for (ObjectInfo cObj: obj)
       {
-        Material mat = obj[i].getObject().getMaterial();
+        Object3D object = cObj.getObject();
+        Material mat = object.getMaterial();
         if (mat != null)
           {
             Material dup = mat.duplicate();
             dup.setID(mat.getID());
             materials.add(dup);
-            obj[i].getObject().setMaterial(dup, obj[i].getObject().getMaterialMapping().duplicate(obj[i].getObject(), dup));
+            object.setMaterial(dup, object.getMaterialMapping().duplicate(object, dup));
           }
       }
 
@@ -591,8 +592,7 @@ public class ArtOfIllusion
     win.setUndoRecord(undo);
     int sel[] = win.getSelectedIndices();
 
-    // First add any new image maps to the scene.
-
+    // First, add any new image maps to the scene.
     for (ImageMap map: clipboardImage)
       {
         if(scene.getImages().stream().anyMatch(image -> image.getID() == map.getID()))  continue;
@@ -600,7 +600,6 @@ public class ArtOfIllusion
       }
 
     // Now add any new textures.
-
     for (int i = 0; i < clipboardTexture.length; i++)
       {
         Texture newtex;
@@ -666,9 +665,8 @@ public class ArtOfIllusion
           }
       }
 
-    // Finally add the objects to the scene.
-    for (ObjectInfo obj: ObjectInfo.duplicateAll(clipboardObject))
-      win.addObject(obj, undo);
+    // Finally, add the objects to the scene.
+    for (ObjectInfo obj: ObjectInfo.duplicateAll(clipboardObject)) win.addObject(obj, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, sel);
   }
 

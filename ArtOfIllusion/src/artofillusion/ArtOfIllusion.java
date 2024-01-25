@@ -521,12 +521,13 @@ public class ArtOfIllusion
     // First make a list of all textures used by the objects.
 
     List<Texture> textures = new ArrayList<>();
-    for (int i = 0; i < obj.length; i++)
+    for (ObjectInfo cObj: obj)
       {
-        Texture tex = obj[i].getObject().getTexture();
+        Object3D object = cObj.getObject();
+        Texture tex = object.getTexture();
         if (tex instanceof LayeredTexture)
           {
-            LayeredMapping map = (LayeredMapping) obj[i].getObject().getTextureMapping();
+            LayeredMapping map = (LayeredMapping) object.getTextureMapping();
             Texture layer[] = map.getLayers();
             for (int j = 0; j < layer.length; j++)
               {
@@ -534,7 +535,7 @@ public class ArtOfIllusion
                 dup.setID(layer[j].getID());
                 textures.add(dup);
                 map.setLayer(j, dup);
-                map.setLayerMapping(j, map.getLayerMapping(j).duplicate(obj[i].getObject(), dup));
+                map.setLayerMapping(j, map.getLayerMapping(j).duplicate(object, dup));
               }
           }
         else if (tex != null)
@@ -542,7 +543,7 @@ public class ArtOfIllusion
             Texture dup = tex.duplicate();
             dup.setID(tex.getID());
             textures.add(dup);
-            obj[i].getObject().setTexture(dup, obj[i].getObject().getTextureMapping().duplicate(obj[i].getObject(), dup));
+            object.setTexture(dup, object.getTextureMapping().duplicate(object, dup));
           }
       }
 

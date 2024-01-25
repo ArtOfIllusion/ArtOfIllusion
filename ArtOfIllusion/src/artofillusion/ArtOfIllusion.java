@@ -564,16 +564,12 @@ public class ArtOfIllusion
     // Now make a list of all ImageMaps used by any of them.
 
     List<ImageMap> images = new ArrayList<>();
-    for (int i = 0; i < scene.getNumImages(); i++)
+    for (ImageMap map: scene.getImages())
       {
-        ImageMap map = scene.getImage(i);
-        boolean used = false;
-        for (int j = 0; j < textures.size() && !used; j++)
-          used = textures.get(j).usesImage(map);
-        for (int j = 0; j < materials.size() && !used; j++)
-          used = materials.get(j).usesImage(map);
-        if (used)
+        if(textures.stream().anyMatch(texture -> texture.usesImage(map)) || materials.stream().anyMatch(material -> material.usesImage(map)))
+        {
           images.add(map);
+        }
       }
 
     // Save all of them to the appropriate arrays.
@@ -597,12 +593,10 @@ public class ArtOfIllusion
 
     // First add any new image maps to the scene.
 
-    for (int i = 0; i < clipboardImage.length; i++)
+    for (ImageMap map: clipboardImage)
       {
-        int j;
-        for (j = 0; j < scene.getNumImages() && clipboardImage[i].getID() != scene.getImage(j).getID(); j++);
-        if (j == scene.getNumImages())
-          scene.addImage(clipboardImage[i]);
+        if(scene.getImages().stream().anyMatch(image -> image.getID() == map.getID()))  continue;
+        scene.addImage(map);
       }
 
     // Now add any new textures.

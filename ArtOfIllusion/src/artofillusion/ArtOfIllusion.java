@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.html.Option;
 
 /** This is the main class for Art of Illusion.  All of its methods and variables are static,
     so no instance of this class ever gets created.  It starts up the application, and
@@ -603,19 +604,9 @@ public class ArtOfIllusion
     // Now add any new textures.
     for (int i = 0; i < clipboardTexture.length; i++)
       {
-        Texture newtex;
-        int j;
-        for (j = 0; j < scene.getNumTextures() && clipboardTexture[i].getID() != scene.getTexture(j).getID(); j++);
-        if (j == scene.getNumTextures())
-          {
-            newtex = clipboardTexture[i].duplicate();
-            newtex.setID(clipboardTexture[i].getID());
-            scene.addTexture(newtex);
-          }
-        else
-          newtex = scene.getTexture(j);
+        Texture newTex = ArtOfIllusion.getSceneTextureOrAdd(scene, clipboardTexture[i]);
 
-        for (j = 0; j < clipboardObject.length; j++)
+        for (int j = 0; j < clipboardObject.length; j++)
           {
             Object3D object = clipboardObject[j].getObject();
             Texture current = object.getTexture();
@@ -626,7 +617,7 @@ public class ArtOfIllusion
               for (int k = 0; k < newParamValues.length; k++)
                 newParamValues[k] = oldParamValues[k].duplicate();
               if (current == clipboardTexture[i])
-                clipboardObject[j].setTexture(newtex, object.getTextureMapping().duplicate(object, newtex));
+                clipboardObject[j].setTexture(newTex, object.getTextureMapping().duplicate(object, newTex));
               else if (current instanceof LayeredTexture)
                 {
                   LayeredMapping map = (LayeredMapping) object.getTextureMapping();
@@ -636,8 +627,8 @@ public class ArtOfIllusion
                   for (int k = 0; k < layer.length; k++)
                     if (layer[k] == clipboardTexture[i])
                       {
-                        map.setLayer(k, newtex);
-                        map.setLayerMapping(k, map.getLayerMapping(k).duplicate(object, newtex));
+                        map.setLayer(k, newTex);
+                        map.setLayerMapping(k, map.getLayerMapping(k).duplicate(object, newTex));
                       }
                 }
               object.setParameterValues(newParamValues);
@@ -649,31 +640,41 @@ public class ArtOfIllusion
 
     for (Material mat:  clipboardMaterial)
       {
-        Material newmat;
-        int j;
+        Material newMat = ArtOfIllusion.getSceneMaterialOrAdd(scene, mat);
 
-
-        for (j = 0; j < scene.getNumMaterials() && mat.getID() != scene.getMaterial(j).getID(); j++);
-        if (j == scene.getNumMaterials())
-        {
-          newmat = mat.duplicate();
-          newmat.setID(mat.getID());
-          scene.addMaterial(newmat);
-        }
-        else
-          newmat = scene.getMaterial(j);
-
-        for (j = 0; j < clipboardObject.length; j++)
+        for (int j = 0; j < clipboardObject.length; j++)
           {
             Material current = clipboardObject[j].getObject().getMaterial();
             if (current == mat)
-              clipboardObject[j].setMaterial(newmat, clipboardObject[j].getObject().getMaterialMapping().duplicate(clipboardObject[j].getObject(), newmat));
+              clipboardObject[j].setMaterial(newMat, clipboardObject[j].getObject().getMaterialMapping().duplicate(clipboardObject[j].getObject(), newMat));
           }
       }
 
     // Finally, add the objects to the scene.
     for (ObjectInfo obj: ObjectInfo.duplicateAll(clipboardObject)) win.addObject(obj, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, sel);
+  }
+
+  public static Texture getSceneTextureOrAdd(Scene scene, Texture match) {
+    Optional<Texture> asset = scene.getTextures().stream().filter(texture -> texture.getID() == match.getID()).findFirst();
+
+    return asset.orElseGet(() -> {
+      Texture newTex = match.duplicate();
+      newTex.setID(match.getID());
+      scene.addTexture(newTex);
+      return newTex;
+    });
+  }
+
+  public static Material getSceneMaterialOrAdd(Scene scene, Material match) {
+    Optional<Material> asset = scene.getMaterials().stream().filter(material -> material.getID() == match.getID()).findFirst();
+
+    return asset.orElseGet(() -> {
+      Material newMat = match.duplicate();
+      newMat.setID(match.getID());
+      scene.addMaterial(newMat);
+      return newMat;
+    });
   }
 
   /** Get the number of objects on the clipboard. */

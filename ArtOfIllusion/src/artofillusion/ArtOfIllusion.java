@@ -645,23 +645,26 @@ public class ArtOfIllusion
 
     // Add any new materials.
 
-    for (int i = 0; i < clipboardMaterial.length; i++)
+    for (Material mat:  clipboardMaterial)
       {
         Material newmat;
         int j;
-        for (j = 0; j < scene.getNumMaterials() && clipboardMaterial[i].getID() != scene.getMaterial(j).getID(); j++);
+
+
+        for (j = 0; j < scene.getNumMaterials() && mat.getID() != scene.getMaterial(j).getID(); j++);
         if (j == scene.getNumMaterials())
         {
-          newmat = clipboardMaterial[i].duplicate();
-          newmat.setID(clipboardMaterial[i].getID());
+          newmat = mat.duplicate();
+          newmat.setID(mat.getID());
           scene.addMaterial(newmat);
         }
         else
           newmat = scene.getMaterial(j);
+
         for (j = 0; j < clipboardObject.length; j++)
           {
             Material current = clipboardObject[j].getObject().getMaterial();
-            if (current == clipboardMaterial[i])
+            if (current == mat)
               clipboardObject[j].setMaterial(newmat, clipboardObject[j].getObject().getMaterialMapping().duplicate(clipboardObject[j].getObject(), newmat));
           }
       }

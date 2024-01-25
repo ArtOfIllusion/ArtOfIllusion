@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2023 by Maksim Khramov
+   Changes copyright (C) 2016-2024 by Maksim Khramov
    Changes copyright (C) 2016 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -45,10 +45,12 @@ public class ArtOfIllusion
   public static final ImageIcon APP_ICON;
 
   private static ApplicationPreferences preferences;
-  private static ObjectInfo clipboardObject[];
-  private static Texture clipboardTexture[];
-  private static Material clipboardMaterial[];
-  private static ImageMap clipboardImage[];
+
+  private static ObjectInfo[] clipboardObject;
+  private static Texture[] clipboardTexture;
+  private static Material[] clipboardMaterial;
+  private static ImageMap[] clipboardImage;
+
   private static LinkedList<EditingWindow> windows = new LinkedList<EditingWindow>();
   private static final HashMap<String, String> classTranslations = new HashMap<String, String>();
   private static int numNewWindows = 0;
@@ -518,7 +520,7 @@ public class ArtOfIllusion
   {
     // First make a list of all textures used by the objects.
 
-    ArrayList<Texture> textures = new ArrayList<Texture>();
+    List<Texture> textures = new ArrayList<>();
     for (int i = 0; i < obj.length; i++)
       {
         Texture tex = obj[i].getObject().getTexture();
@@ -546,7 +548,7 @@ public class ArtOfIllusion
 
     // Next make a list of all materials used by the objects.
 
-    ArrayList<Material> materials = new ArrayList<Material>();
+    List<Material> materials = new ArrayList<>();
     for (int i = 0; i < obj.length; i++)
       {
         Material mat = obj[i].getObject().getMaterial();
@@ -561,7 +563,7 @@ public class ArtOfIllusion
 
     // Now make a list of all ImageMaps used by any of them.
 
-    ArrayList<ImageMap> images = new ArrayList<ImageMap>();
+    List<ImageMap> images = new ArrayList<>();
     for (int i = 0; i < scene.getNumImages(); i++)
       {
         ImageMap map = scene.getImage(i);
@@ -577,9 +579,9 @@ public class ArtOfIllusion
     // Save all of them to the appropriate arrays.
 
     clipboardObject = obj;
-    clipboardTexture = textures.toArray(new Texture[textures.size()]);
-    clipboardMaterial = materials.toArray(new Material[materials.size()]);
-    clipboardImage = images.toArray(new ImageMap[images.size()]);
+    clipboardTexture = textures.toArray(new Texture[0]);
+    clipboardMaterial = materials.toArray(new Material[0]);
+    clipboardImage = images.toArray(new ImageMap[0]);
   }
 
   /** Paste the contents of the clipboard into a window. */
@@ -671,10 +673,8 @@ public class ArtOfIllusion
       }
 
     // Finally add the objects to the scene.
-
-    ObjectInfo obj[] = ObjectInfo.duplicateAll(clipboardObject);
-    for (int i = 0; i < obj.length; i++)
-      win.addObject(obj[i], undo);
+    for (ObjectInfo obj: ObjectInfo.duplicateAll(clipboardObject))
+      win.addObject(obj, undo);
     undo.addCommand(UndoRecord.SET_SCENE_SELECTION, sel);
   }
 

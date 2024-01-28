@@ -52,7 +52,7 @@ public class PluginRegistry
   public static Map<String, Throwable> notifyPlugins(int message, Object... args)
   {
     Map<String, Throwable> errors = new HashMap<>();
-    categoryClasses.getOrDefault(Plugin.class, List.of()).forEach(plugin -> {
+    categoryClasses.getOrDefault(Plugin.class, Collections.emptyList()).forEach(plugin -> {
       try 
       {
         ((Plugin)plugin).processMessage(message, args);

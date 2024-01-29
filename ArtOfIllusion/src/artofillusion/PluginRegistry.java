@@ -1,6 +1,6 @@
  /* Copyright (C) 2007-2009 by Peter Eastman
    Some parts copyright (C) 2006 by Nik Trevallyn-Jones
-   Changes copyright (C) 2018-2023 by Maksim Khramov
+   Changes copyright (C) 2018-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,7 +39,7 @@ public class PluginRegistry
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
         Map<String, Throwable> errors = PluginRegistry.notifyPlugins(Plugin.APPLICATION_STOPPING);        
         errors.forEach((plugin, ex) -> {
-            //NB! At least JUL logger will not outputs log from inside shutdown thread. So I leave System.ouput.println here
+            //NB! At least JUL logger will not outputs log from inside shutdown thread. So I leave System.output.println here
             String out = "Plugin: " + plugin + " throw: " + ex.getMessage() + " with" + Arrays.toString(ex.getStackTrace()) + " at shutdown";
             System.out.println(out);
             
@@ -52,7 +52,7 @@ public class PluginRegistry
   public static Map<String, Throwable> notifyPlugins(int message, Object... args)
   {
     Map<String, Throwable> errors = new HashMap<>();
-    categoryClasses.getOrDefault(Plugin.class, List.of()).forEach(plugin -> {
+    categoryClasses.getOrDefault(Plugin.class, Collections.emptyList()).forEach(plugin -> {
       try 
       {
         ((Plugin)plugin).processMessage(message, args);

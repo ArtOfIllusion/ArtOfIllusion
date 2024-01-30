@@ -14,12 +14,13 @@ import artofillusion.ArtOfIllusion;
 import artofillusion.ui.ThemeManager;
 import artofillusion.ui.Translate;
 import artofillusion.ui.UIUtilities;
+import buoy.widget.AWTWidget;
 import buoy.widget.BStandardDialog;
 import buoy.widget.Widget;
 
 
 
-public class AppearancePreferencesPanel extends buoy.widget.AWTWidget implements PreferencesEditor {
+public class AppearancePreferencesPanel extends AWTWidget implements PreferencesEditor {
 
     private final AppearancePreferencesPanelImpl impl;
     

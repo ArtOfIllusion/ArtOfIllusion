@@ -611,6 +611,7 @@ public class ArtOfIllusion
             Texture current = object.getTexture();
             if (current != null)
             {
+              ParameterValue[] newParamValues = copyObjectParameters(object);
               if (current == match)
                 cObj.setTexture(newTex, object.getTextureMapping().duplicate(object, newTex));
               else if (current instanceof LayeredTexture)
@@ -626,7 +627,7 @@ public class ArtOfIllusion
                         map.setLayerMapping(k, map.getLayerMapping(k).duplicate(object, newTex));
                       }
                 }
-              ArtOfIllusion.copyAndSetObjectParameters(object);
+              object.setParameterValues(newParamValues);
             }
           }
       }
@@ -675,12 +676,12 @@ public class ArtOfIllusion
     });
   }
 
-  public static void copyAndSetObjectParameters(Object3D object)
+  private static ParameterValue[] copyObjectParameters(Object3D object)
   {
     ParameterValue[] oldParamValues = object.getParameterValues();
     ParameterValue[] newParamValues = new ParameterValue[oldParamValues.length];
     for (int k = 0; k < newParamValues.length; k++) newParamValues[k] = oldParamValues[k].duplicate();
-    object.setParameterValues(newParamValues);
+    return newParamValues;
   }
 
   /** Get the number of objects on the clipboard. */

@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.html.Option;
+
 
 /** This is the main class for Art of Illusion.  All of its methods and variables are static,
     so no instance of this class ever gets created.  It starts up the application, and
@@ -60,7 +60,7 @@ public class ArtOfIllusion
   {
     // A clever trick for getting the location of the jar file, which David Smiley
     // posted to the Apple java-dev mailing list on April 14, 2002.  It works on
-    // most, but not all, platforms, so in case of a problem we fall back to using
+    // most, but not all, platforms, so in case of a problem, we fall back to using
     // user.dir.
 
     String dir = System.getProperty("user.dir");
@@ -596,41 +596,41 @@ public class ArtOfIllusion
 
     // First, add any new image maps to the scene.
     for (ImageMap map: clipboardImage)
-      {
-        if(scene.getImages().stream().anyMatch(image -> image.getID() == map.getID()))  continue;
-        scene.addImage(map);
-      }
+    {
+      if(scene.getImages().stream().anyMatch(image -> image.getID() == map.getID()))  continue;
+      scene.addImage(map);
+    }
 
     // Now add any new textures.
     for (Texture match: clipboardTexture)
+    {
+      Texture newTex = ArtOfIllusion.getSceneTextureOrAdd(scene, match);
+      for (ObjectInfo cObj: clipboardObject)
       {
-        Texture newTex = ArtOfIllusion.getSceneTextureOrAdd(scene, match);
-        for (ObjectInfo cObj: clipboardObject)
+        Object3D object = cObj.getObject();
+        Texture current = object.getTexture();
+        if (current == null) continue;
+
+        ParameterValue[] newParamValues = copyObjectParameters(object);
+        if (current == match)
+          cObj.setTexture(newTex, object.getTextureMapping().duplicate(object, newTex));
+        else if (current instanceof LayeredTexture)
           {
-            Object3D object = cObj.getObject();
-            Texture current = object.getTexture();
-            if (current != null)
-            {
-              ParameterValue[] newParamValues = copyObjectParameters(object);
-              if (current == match)
-                cObj.setTexture(newTex, object.getTextureMapping().duplicate(object, newTex));
-              else if (current instanceof LayeredTexture)
+            LayeredMapping map = (LayeredMapping) object.getTextureMapping();
+            map = (LayeredMapping) map.duplicate();
+            cObj.setTexture(new LayeredTexture(map), map);
+            Texture[] layer = map.getLayers();
+            for (int k = 0; k < layer.length; k++)
+              if (layer[k] == match)
                 {
-                  LayeredMapping map = (LayeredMapping) object.getTextureMapping();
-                  map = (LayeredMapping) map.duplicate();
-                  cObj.setTexture(new LayeredTexture(map), map);
-                  Texture[] layer = map.getLayers();
-                  for (int k = 0; k < layer.length; k++)
-                    if (layer[k] == match)
-                      {
-                        map.setLayer(k, newTex);
-                        map.setLayerMapping(k, map.getLayerMapping(k).duplicate(object, newTex));
-                      }
+                  map.setLayer(k, newTex);
+                  map.setLayerMapping(k, map.getLayerMapping(k).duplicate(object, newTex));
                 }
-              object.setParameterValues(newParamValues);
-            }
           }
+        object.setParameterValues(newParamValues);
+
       }
+    }
 
     // Add any new materials.
 

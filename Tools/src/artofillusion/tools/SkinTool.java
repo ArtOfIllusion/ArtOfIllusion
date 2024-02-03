@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2008 by Peter Eastman
-   Changes copyright (C) 2022 by Maksim Khramov
+   Changes copyright (C) 2022-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ public class SkinTool implements ModellingTool
   {
   }
 
-  /* Get the text that appear as the menu item.*/
+  /* Get the text that appears as the menu item.*/
 
   @Override
   public String getName()
@@ -34,7 +34,7 @@ public class SkinTool implements ModellingTool
   }
 
   /* See whether an appropriate set of objects is selected and either display an error
-     message, or bring up the extrude window. */
+     message, or bring up the skin tool window. */
 
   @Override
   @SuppressWarnings("ResultOfObjectAllocationIgnored")
@@ -71,7 +71,7 @@ public class SkinTool implements ModellingTool
           }
         if (c2.getSmoothingMethod() != c.getSmoothingMethod() && c.getSmoothingMethod() != Mesh.NO_SMOOTHING && c2.getSmoothingMethod() != Mesh.NO_SMOOTHING)
           {
-            new BStandardDialog("", UIUtilities.breakString(Translate.text("stdtool:skin.tool.curve.same.type")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
+            new BStandardDialog("", UIUtilities.breakString(Translate.text("Tools:skin.tool.curve.same.type")), BStandardDialog.INFORMATION).showMessageDialog(window.getFrame());
             return;
           }
       }

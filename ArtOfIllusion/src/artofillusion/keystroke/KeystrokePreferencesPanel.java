@@ -1,5 +1,5 @@
 /* Copyright (C) 2006-2013 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -11,6 +11,7 @@
 
 package artofillusion.keystroke;
 
+import artofillusion.preferences.PreferencesEditor;
 import artofillusion.script.*;
 import buoy.widget.*;
 import buoy.event.*;
@@ -20,6 +21,7 @@ import java.awt.event.*;
 import java.awt.*;
 import java.util.*;
 import java.text.*;
+import java.util.List;
 
 import artofillusion.ui.*;
 
@@ -27,21 +29,18 @@ import artofillusion.ui.*;
  * This class presents a user interface for editing the list of KeystrokeRecords.
  */
 
-public class KeystrokePreferencesPanel extends FormContainer
+public class KeystrokePreferencesPanel extends FormContainer implements PreferencesEditor
 {
-  private final ArrayList<KeystrokeRecord> records;
-  private BTable table;
-  private BButton editButton, addButton, deleteButton;
+  private final List<KeystrokeRecord> records = new ArrayList<>(Arrays.asList(KeystrokeManager.getAllRecords()));
+  private final BTable table;
+  private final BButton editButton, deleteButton;
   private boolean changed;
   private int sortColumn = 1;
 
   public KeystrokePreferencesPanel()
   {
     super(new double [] {1}, new double [] {1, 0});
-    KeystrokeRecord allRecords[] = KeystrokeManager.getAllRecords();
-    records = new ArrayList<KeystrokeRecord>(allRecords.length);
-    for (int i = 0; i < allRecords.length; i++)
-      records.add(allRecords[i]);
+
     table = new BTable(new KeystrokeTableModel());
     table.setColumnWidth(0, 100);
     table.setColumnWidth(1, 250);
@@ -65,7 +64,7 @@ public class KeystrokePreferencesPanel extends FormContainer
     RowContainer buttons = new RowContainer();
     add(buttons, 0, 1, new LayoutInfo());
     buttons.add(editButton = Translate.button("edit", "...", this, "editRecord"));
-    buttons.add(addButton = Translate.button("add", "...", this, "addRecord"));
+    buttons.add(Translate.button("add", "...", this, "addRecord"));
     buttons.add(deleteButton = Translate.button("delete", this, "deleteRecords"));
     selectionChanged();
   }
@@ -78,7 +77,7 @@ public class KeystrokePreferencesPanel extends FormContainer
   {
     if (!changed)
       return;
-    KeystrokeManager.setAllRecords(records.toArray(new KeystrokeRecord [records.size()]));
+    KeystrokeManager.setAllRecords(records.toArray(new KeystrokeRecord[0]));
     try
     {
       KeystrokeManager.saveRecords();
@@ -133,7 +132,7 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void addRecord()
   {
-    // Beanshell is the only supported language here 
+    // Beanshell is the only supported language here
     KeystrokeRecord record = new KeystrokeRecord(0, 0, "", "", ScriptRunner.Language.BEANSHELL.name);
     KeystrokeRecord edited = KeystrokeEditor.showEditorDialog(record, UIUtilities.findWindow(this));
     if (edited == null)
@@ -149,10 +148,9 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void deleteRecords()
   {
-    int selected[] = table.getSelectedRows();
+    int[] selected = table.getSelectedRows();
     Arrays.sort(selected);
-    for (int i = 0; i < selected.length; i++)
-      records.remove(selected[i]);
+    for (int j : selected) records.remove(j);
     sortRecords();
     changed = true;
   }
@@ -163,25 +161,20 @@ public class KeystrokePreferencesPanel extends FormContainer
 
   private void sortRecords()
   {
-    final Comparator stringComparator = Collator.getInstance(Translate.getLocale());
-    Collections.sort(records, new Comparator<KeystrokeRecord>()
-    {
-      @Override
-      public int compare(KeystrokeRecord r1, KeystrokeRecord r2)
-      {
-        String s1, s2;
-        if (sortColumn == 0)
-        {
-          s1 = getKeyDescription(r1.getKeyCode(), r1.getModifiers());
-          s2 = getKeyDescription(r2.getKeyCode(), r2.getModifiers());
+    final Collator stringComparator = Collator.getInstance(Translate.getLocale());
+    records.sort(new Comparator<KeystrokeRecord>() {
+        @Override
+        public int compare(KeystrokeRecord r1, KeystrokeRecord r2) {
+            String s1, s2;
+            if (sortColumn == 0) {
+                s1 = getKeyDescription(r1.getKeyCode(), r1.getModifiers());
+                s2 = getKeyDescription(r2.getKeyCode(), r2.getModifiers());
+            } else {
+                s1 = r1.getName();
+                s2 = r2.getName();
+            }
+            return stringComparator.compare(s1, s2);
         }
-        else
-        {
-          s1 = r1.getName();
-          s2 = r2.getName();
-        }
-        return stringComparator.compare(s1, s2);
-      }
     });
     ((KeystrokeTableModel) table.getModel()).fireTableDataChanged();
   }
@@ -198,6 +191,21 @@ public class KeystrokePreferencesPanel extends FormContainer
     if (modifiers != 0)
       keyDesc = KeyEvent.getKeyModifiersText(modifiers)+"+"+keyDesc;
     return keyDesc;
+  }
+
+  @Override
+  public Widget getPreferencesPanel() {
+    return this;
+  }
+
+  @Override
+  public void savePreferences() {
+    this.saveChanges();
+  }
+
+  @Override
+  public String getName() {
+    return Translate.text("shortcuts");
   }
 
   /**

@@ -20,5 +20,22 @@
         <export method="createText" id="artofillusion.tools.TextTool.createText"/>
     </plugin>
     <plugin class="artofillusion.tools.TubeTool"/>
+
+    <plugin class="artofillusion.tools.CubeFactory"/>
+    <plugin class="artofillusion.tools.SphereFactory"/>
+    <plugin class="artofillusion.tools.CylinderFactory"/>
+    <plugin class="artofillusion.tools.ConeFactory"/>
+
+    <plugin class="artofillusion.tools.CameraFactory"/>
+
+    <plugin class="artofillusion.tools.PointLightFactory"/>
+    <plugin class="artofillusion.tools.DirectionalLightFactory"/>
+    <plugin class="artofillusion.tools.SpotLightFactory"/>
+    <plugin class="artofillusion.tools.ProceduralPointLightFactory"/>
+    <plugin class="artofillusion.tools.ProceduralDirectionalLightFactory"/>
+
+    <plugin class="artofillusion.tools.ReferenceImageFactory"/>
+    <plugin class="artofillusion.tools.NullFactory"/>
+
 </extension>
 

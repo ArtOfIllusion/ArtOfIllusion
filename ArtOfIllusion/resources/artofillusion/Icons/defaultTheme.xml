@@ -1,0 +1,63 @@
+<?xml version="1.0" standalone="yes" ?>
+
+<theme>
+  <name>Default</name>
+  <author>Peter Eastman</author>
+  <description>The default user interface theme.</description>
+  <buttonmargin value="0"/>
+  <palettemargin value="1"/>
+
+  <colorset name="whiteBackground">
+  	<applicationbackground R="228" G="228" B="242"/>
+  	<palettebackground R="228" G="228" B="242"/>
+  	<viewerbackground R="255" G="255" B="255" />
+  	<viewerline R="0" G="0" B="0"/>
+  	<viewerhandle R="255" G="0" B="0"/>
+  	<viewerhighlight R="255" G="0" B="255"/>
+  	<viewerspecialhighlight R="0" G="255" B="0"/>
+  	<viewerdisabled R="168" G="168" B="168"/>
+
+  	<viewersurface R="204" G="204" B="255"/>
+  	<viewertransparent R="204" G="204" B="255"/>
+    <viewerlowvalue R="230" G="230" B="255"/>
+    <viewerhighvalue R="0" G="255" B="0"/>
+  	<dockablebarcolor2 R="200" G="200" B="200"/>
+  	<dockablebarcolor1 R="255" G="255" B="255"/>
+  	<dockabletitlecolor R="0" G="0" B="0"/>
+  	<textcolor R="0" G="0" B="0"/>
+  </colorset>
+  <colorset name="grayBackground">
+  	<applicationbackground R="228" G="228" B="242"/>
+
+  	<palettebackground R="228" G="228" B="242"/>
+  	<viewerbackground R="40" G="40" B="40" />
+  	<viewerline R="255" G="255" B="255"/>
+  	<viewerhandle R="255" G="0" B="0"/>
+  	<viewerhighlight R="255" G="0" B="255"/>
+  	<viewerspecialhighlight R="0" G="255" B="0"/>
+  	<viewerdisabled R="168" G="168" B="168"/>
+  	<viewersurface R="204" G="204" B="255"/>
+  	<viewertransparent R="38" G="38" B="71"/>
+  	<viewerlowvalue R="230" G="230" B="255"/>
+  	<viewerhighvalue R="0" G="255" B="0"/>
+
+  	<dockablebarcolor2 R="200" G="200" B="200"/>
+  	<dockablebarcolor1 R="255" G="255" B="255"/>
+  	<dockabletitlecolor R="0" G="0" B="0"/>
+  	<textcolor R="0" G="0" B="0"/>
+  </colorset>
+  <button class="artofillusion.ui.DefaultToolButton">
+    <style owner="artofillusion.ui.EditingTool" notFound="toolNotFound"
+	   size="32,32"
+	   raw.icon="{icon}"
+	   normal.icon="ButtonBackground; {icon}"
+	   selected.icon="selected/ButtonBackground; {icon} @(x+1,y+1)" />
+
+    <style owner="artofillusion.view.ViewerControl" notFound="toolNotFound"
+	   size="23,21"
+	   raw.icon="{icon}"
+	   normal.icon="{icon} + #(r=0.35,g=0.35,b=0.35)"
+	   selected.icon="{icon} @(z+1)" />
+
+  </button>
+</theme>

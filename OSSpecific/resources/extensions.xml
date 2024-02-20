@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="yes"?>
+<extension name="OSSpecific" version="2.5">
+  <author>Peter Eastman</author>
+  <date>2007</date>
+  <description>
+This plugin provides platform-specific features to help Art of Illusion behave in ways that are
+expected on particular operating systems.
+  </description>
+  <comments>
+  </comments>
+  <plugin class="artofillusion.osspecific.MacOSPlugin"/>
+</extension>
+

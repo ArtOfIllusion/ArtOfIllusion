@@ -23,10 +23,13 @@ General questions or requests for help can be taken to our
 
 ## Building from source
 
-Experienced Java developers Just run `ant` in this directory.
-Use `ant help` to see more advanced options.
+ArtOfIllusion is built using the [mill build tool.](https://com-lihaoyi.github.io/mill/)
+A wrapper script is included. Just run:
 
-More details are available at (./docs/Building.md)
+`./millw launch` to build and launch the application.
+(Windows users should use `./millw.bat launch`)
+
+More detailed [building documentation](./docs/Building.md) is also available.
 
 ----------------
 

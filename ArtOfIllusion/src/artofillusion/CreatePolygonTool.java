@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modification, Copyright (C) 2020 Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -58,12 +58,6 @@ public class CreatePolygonTool extends EditingTool
     else
       type = "approximatingCurve";
     theWindow.setHelpText(Translate.text("createPolygonTool.helpText", Integer.toString(sides), Translate.text("createPolygonTool."+type)));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override

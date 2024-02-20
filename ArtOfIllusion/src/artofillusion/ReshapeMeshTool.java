@@ -18,7 +18,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** ReshapeMeshTool is an EditingTool used for moving the vertices of TriangleMesh objects. */
-
+@EditingTool.ButtonImage("movePoints")
+@EditingTool.Tooltip("reshapeMeshTool.tipText")
+@EditingTool.ActivatedToolText("reshapeMeshTool.helpText")
 public class ReshapeMeshTool extends MeshEditingTool
 {
   private Point clickPoint;
@@ -28,14 +30,6 @@ public class ReshapeMeshTool extends MeshEditingTool
   public ReshapeMeshTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("movePoints");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("reshapeMeshTool.helpText"));
   }
 
   @Override
@@ -48,12 +42,6 @@ public class ReshapeMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return true;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("reshapeMeshTool.tipText");
   }
 
   @Override

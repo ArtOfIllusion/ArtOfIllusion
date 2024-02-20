@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Changes Copyright (C) 2016, 2019 by Petri Ihalainen
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,9 @@ import buoy.event.*;
 import java.awt.*;
 
 /** CreateCubeTool is an EditingTool used for creating Cube objects. */
-
+@EditingTool.ButtonImage("cube")
+@EditingTool.Tooltip("createCubeTool.tipText")
+@EditingTool.ActivatedToolText("createCubeTool.helpText")
 public class CreateCubeTool extends EditingTool
 {
   static int counter = 1;
@@ -33,26 +35,6 @@ public class CreateCubeTool extends EditingTool
   public CreateCubeTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("cube");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCubeTool.helpText"));
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCubeTool.tipText");
   }
 
   @Override

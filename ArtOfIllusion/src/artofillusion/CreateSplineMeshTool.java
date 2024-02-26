@@ -78,12 +78,6 @@ public class CreateSplineMeshTool extends EditingTool
   }
 
   @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
   public String getToolTipText()
   {
     return Translate.text("createSplineMeshTool.tipText");

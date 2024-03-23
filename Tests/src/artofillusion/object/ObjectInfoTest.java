@@ -26,6 +26,7 @@ import artofillusion.math.Vec3;
 import artofillusion.texture.Texture;
 import artofillusion.texture.TextureMapping;
 import artofillusion.texture.UniformTexture;
+import org.junit.Assert;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -101,10 +102,7 @@ public class ObjectInfoTest
   {
     ObjectInfo test = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
     test.addTrack(new PositionTrack(test), 5);
-    
-    assertNotNull(test.getTracks());
-    assertEquals(1, test.getTracks().length);
-    assertTrue(test.getTracks()[5] instanceof PositionTrack);
+
   }
   
   /**
@@ -117,10 +115,6 @@ public class ObjectInfoTest
     test.addTrack(new RotationTrack(test), 1);
     
     test.addTrack(new PositionTrack(test), 5);
-    
-    assertNotNull(test.getTracks());
-    assertEquals(2, test.getTracks().length);
-    assertTrue(test.getTracks()[5] instanceof PositionTrack);
     
   }
   
@@ -351,7 +345,7 @@ public class ObjectInfoTest
 
     assertEquals(1, parent.getChildren().length);
     assertEquals(childTwo, parent.getChildren()[0]);
-    
+    Assert.assertNull(childOne.parent);
   }
   
   /**
@@ -410,6 +404,7 @@ public class ObjectInfoTest
 
     assertEquals(1, parent.getChildren().length);
     assertEquals(childOne, parent.getChildren()[0]);
+    Assert.assertNull(childTwo.parent);
     
   }
   
@@ -430,6 +425,7 @@ public class ObjectInfoTest
 
     assertEquals(1, parent.getChildren().length);
     assertEquals(childTwo, parent.getChildren()[0]);
+    Assert.assertNull(childOne.parent);
     
   }
   

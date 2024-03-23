@@ -21,7 +21,7 @@ import java.lang.ref.*;
 import java.util.*;
 
 /** ObjectInfo represents information about an object within a Scene: its position, 
-    orientation, name, visibility, etc.  The internal properties (i.e. geometry) of
+    orientation, name, visibility, etc. The internal properties (i.e., geometry) of
     the object are defined by the "object" property.
     <p>
     There may be several ObjectInfos in a scene which all reference
@@ -33,8 +33,11 @@ public class ObjectInfo
   public CoordinateSystem coords;
   public String name;
   public boolean visible, selected, parentSelected;
-  public ObjectInfo parent, children[];
-  public Track tracks[];
+  public ObjectInfo parent;
+  private List<ObjectInfo> children = new ArrayList<>();
+
+  public Track[] tracks;
+
   public Keyframe pose;
   public int id;
   private boolean locked;
@@ -52,7 +55,6 @@ public class ObjectInfo
     setCoords(c);
     this.setName(name);
     setVisible(true);
-    children = new ObjectInfo [0];
     setId(-1);
   }
   
@@ -147,15 +149,7 @@ public class ObjectInfo
   
   public void addChild(ObjectInfo info, int position)
   {
-    ObjectInfo newChildren[] = new ObjectInfo [getChildren().length+1];
-    int i;
-    
-    for (i = 0; i < position; i++)
-      newChildren[i] = getChildren()[i];
-    newChildren[position] = info;
-    for (; i < getChildren().length; i++)
-      newChildren[i+1] = getChildren()[i];
-    children = newChildren;
+    children.add(position, info);
     info.setParent(this);
   }
   
@@ -163,27 +157,14 @@ public class ObjectInfo
   
   public void removeChild(ObjectInfo info)
   {
-    for (int i = 0; i < getChildren().length; i++)
-      if (getChildren()[i] == info)
-        {
-          removeChild(i);
-          return;
-        }
+    if(children.remove(info)) info.setParent(null);
   }
 
   /** Remove a child from this object. */
   
   public void removeChild(int which)
   {
-    ObjectInfo newChildren[] = new ObjectInfo [getChildren().length-1];
-    int i;
-    
-    getChildren()[which].setParent(null);
-    for (i = 0; i < which; i++)
-      newChildren[i] = getChildren()[i];
-    for (i++; i < getChildren().length; i++)
-      newChildren[i-1] = getChildren()[i];
-    children = newChildren;
+    children.remove(which).setParent(null);
   }
 
   /** Add a track to this object. */
@@ -342,7 +323,7 @@ public class ObjectInfo
         double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cached = obj.getRenderingMesh(tol, true, this);
-        cachedMesh = new SoftReference<RenderingMesh>(cached);
+        cachedMesh = new SoftReference<>(cached);
         if (cachedBounds == null)
           cachedBounds = obj.getBounds();
       }
@@ -365,7 +346,7 @@ public class ObjectInfo
         double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cached = obj.getWireframeMesh();
-        cachedWire = new SoftReference<WireframeMesh>(cached);
+        cachedWire = new SoftReference<>(cached);
         if (cachedBounds == null)
           cachedBounds = obj.getBounds();
       }
@@ -391,9 +372,9 @@ public class ObjectInfo
         if (!(realObject instanceof ObjectCollection))
         {
           if (lastPreviewWasWireframe && cachedWire == null)
-            cachedWire = new SoftReference<WireframeMesh>(obj.getWireframeMesh());
+            cachedWire = new SoftReference<>(obj.getWireframeMesh());
           else if (!lastPreviewWasWireframe && cachedMesh == null)
-            cachedMesh = new SoftReference<RenderingMesh>(obj.getRenderingMesh(tol, true, this));
+            cachedMesh = new SoftReference<>(obj.getRenderingMesh(tol, true, this));
         }
       }
     return cachedBounds;
@@ -531,7 +512,11 @@ public class ObjectInfo
 
   public ObjectInfo[] getChildren()
   {
-    return children;
+    return children.toArray(new ObjectInfo[0]);
+  }
+
+  public void setChildren(ObjectInfo[] children) {
+    this.children = new ArrayList<>(Arrays.asList(children));
   }
 
   /** Get the list of Tracks for this object. */

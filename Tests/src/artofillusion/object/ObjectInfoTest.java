@@ -268,11 +268,11 @@ public class ObjectInfoTest
     assertNotEquals(duplicate, test);
     assertEquals(duplicate.getObject(), test.getObject());
     
-    assertNotNull(duplicate.tracks);
-    assertEquals(2, duplicate.tracks.length);
+    assertNotNull(duplicate.getTracks());
+    assertEquals(2, duplicate.getTracks().length);
     
-    assertTrue(duplicate.tracks[0] instanceof PositionTrack);
-    assertTrue(duplicate.tracks[1] instanceof RotationTrack);
+    assertTrue(duplicate.getTracks()[0] instanceof PositionTrack);
+    assertTrue(duplicate.getTracks()[1] instanceof RotationTrack);
     
     assertEquals(duplicate, duplicate.getTracks()[0].getParent());
     assertNull(duplicate.getDistortion());
@@ -294,7 +294,7 @@ public class ObjectInfoTest
   }
   
   /**
-   * Test objectInfo to add child objects at the begin of list
+   * Test objectInfo to add child objects at the beginning of list
    */  
   @Test
   public void testAddChildFirst()

@@ -1,4 +1,4 @@
-/* Copyright (C) 2017 by Maksim Khramov
+/* Copyright (C) 2017-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -57,7 +57,7 @@ public class ObjectInfoTest
     assertNotNull(test.getChildren());
     assertEquals(0, test.getChildren().length);
     
-    assertNull(test.getTracks());
+    assertEquals(0, test.getTracks().length);
     assertNull(test.getDistortion());
     
   }
@@ -97,7 +97,7 @@ public class ObjectInfoTest
   /**
    *
    */
-  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAddTrackToGivenErrorPos()
   {
     ObjectInfo test = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
@@ -108,7 +108,7 @@ public class ObjectInfoTest
   /**
    *
    */
-  @Test(expected = ArrayIndexOutOfBoundsException.class)
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testAddTrackToGivenPosInExistList()
   {
     ObjectInfo test = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
@@ -137,7 +137,47 @@ public class ObjectInfoTest
     assertEquals(1, test.getTracks().length);
     assertTrue(test.getTracks()[0] instanceof RotationTrack);
   }
-  
+
+  @Test
+  public void testAddTracksBatch0() {
+    ObjectInfo test = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
+    test.setTracks();
+
+    assertEquals(0, test.getTracks().length);
+
+  }
+
+  @Test
+  public void testAddTracksBatch() {
+    ObjectInfo test = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
+    Track pTrack = new PositionTrack(test);
+    Track rTrack = new RotationTrack(test);
+    test.setTracks(pTrack, rTrack);
+
+    assertEquals(2, test.getTracks().length);
+    assertTrue(test.getTracks()[1] instanceof RotationTrack);
+  }
+
+  @Test
+  public void testAddChildBatch0() {
+    ObjectInfo test = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
+    test.setChildren();
+
+    assertEquals(0, test.getChildren().length);
+
+  }
+
+  @Test
+  public void testAddChildBatch() {
+    ObjectInfo parent = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Test");
+    ObjectInfo childOne = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Cube");
+    ObjectInfo childTwo = new ObjectInfo(new Sphere(1d,1d,1d), new CoordinateSystem(), "Sphere");
+
+
+    parent.setChildren(childOne, childTwo);
+    assertEquals(2, parent.getChildren().length);
+  }
+
   /**
    * Test to remove track by position 
    */
@@ -457,9 +497,10 @@ public class ObjectInfoTest
   }
   
   /**
-   * Test objectInfo copy data from other objectInfo and points to same geometry
+   * Test objectInfo copy data from other objectInfo and points to the same geometry
    * Checks that source empty tracks overwrite existed one
    */  
+  @Test
   public void testCopyInfoWithEmptyTracksOverExisted()
   {
     ObjectInfo source = new ObjectInfo(new Cube(1d,1d,1d), new CoordinateSystem(), "Source");
@@ -469,7 +510,7 @@ public class ObjectInfoTest
     target.addTrack(new RotationTrack(target), 1);
     
     target.copyInfo(source);
-    assertNull(target.getTracks());
+    assertEquals(0, target.getTracks().length);
     
     
   }
@@ -532,7 +573,7 @@ public class ObjectInfoTest
   }
   
   /**
-   * Test checks new distortion sets for object
+   * Test checks new distortion sets for an object
    */
   @Test
   public void testSetDistortion()
@@ -720,14 +761,14 @@ public class ObjectInfoTest
     
   }  
   
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testGetRenderingMeshWithUnsetTexture()
   {
     Object3D cube = new Cube(1d,1d,1d);
     ObjectInfo test = new ObjectInfo(cube, new CoordinateSystem(), "Test");
-    
-    assertNotNull(test.getRenderingMesh(0.1d));
-    assertTrue(test.getRenderingMesh(0.1d) instanceof RenderingMesh);
+
+    Assert.assertThrows(NullPointerException.class, () -> test.getRenderingMesh(0.1d));
+
   }
   
   @Test
@@ -837,7 +878,7 @@ public class ObjectInfoTest
     }
 
     @Override
-    public void setSize(double xsize, double ysize, double zsize)
+    public void setSize(double xSize, double ySize, double zSize)
     {
       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }

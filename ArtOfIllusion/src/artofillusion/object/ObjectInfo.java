@@ -41,7 +41,8 @@ public class ObjectInfo
   public Keyframe pose;
   public int id;
   private boolean locked;
-  private Distortion distortion, prevDistortion;
+  private Distortion distortion;
+  private Distortion prevDistortion;
   private SoftReference<RenderingMesh> cachedMesh;
   private SoftReference<WireframeMesh> cachedWire;
   private BoundingBox cachedBounds;
@@ -89,7 +90,8 @@ public class ObjectInfo
   public static ObjectInfo[] duplicateAll(ObjectInfo[] info)
   {
     ObjectInfo[] newObj = new ObjectInfo [info.length];
-    Map<ObjectInfo, ObjectInfo> objectMap = new HashMap<ObjectInfo, ObjectInfo>();
+    Map<ObjectInfo, ObjectInfo> objectMap = new HashMap<>();
+
     for (int i = 0; i < newObj.length; i++)
     {
       newObj[i] = info[i].duplicate(info[i].getObject().duplicate());
@@ -103,11 +105,12 @@ public class ObjectInfo
           if (j < info.length)
             newObj[i].addChild(newObj[j], 0);
         }
+
     for (ObjectInfo item: newObj) item.tracks.forEach(track -> track.updateObjectReferences(objectMap));
     return newObj;
   }
 
-  /** Make this ObjectInfo identical to another one.  Both ObjectInfos will reference the
+  /** Make this ObjectInfo identical to another one. Both ObjectInfo's will reference the
       same Object3D object, but all other fields will be cloned. */
   
   public void copyInfo(ObjectInfo info)
@@ -187,11 +190,7 @@ public class ObjectInfo
     clearCachedMeshes();
     
     // Update any texture tracks.
-    
-    if (getTracks() != null)
-      for (int i = 0; i < getTracks().length; i++)
-        if (getTracks()[i] instanceof TextureTrack)
-          ((TextureTrack) getTracks()[i]).parametersChanged();
+    tracks.stream().filter(TextureTrack.class::isInstance).forEach(item -> ((TextureTrack) item).parametersChanged());
   }
   
   /** Set the material and material mapping for this object. */
@@ -481,7 +480,7 @@ public class ObjectInfo
     return children.toArray(new ObjectInfo[0]);
   }
 
-  public void setChildren(ObjectInfo[] children) {
+  public void setChildren(ObjectInfo... children) {
     this.children = new ArrayList<>(Arrays.asList(children));
   }
 
@@ -494,7 +493,7 @@ public class ObjectInfo
 
   /** Set the list of Tracks for this object. */
 
-  public void setTracks(Track[] tracks)
+  public void setTracks(Track... tracks)
   {
     this.tracks = new ArrayList<>(Arrays.asList(tracks));
   }

@@ -235,10 +235,8 @@ public class UndoRecord
               ObjectInfo[] oldObj = group.getChildren();
               ObjectInfo[] newObj = (ObjectInfo []) d[1];
               redoRecord.addCommandAtBeginning(SET_GROUP_CONTENTS, group, oldObj);
-              for (int j = 0; j < oldObj.length; j++)
-                oldObj[j].setParent(null);
-              for (int j = 0; j < newObj.length; j++)
-                newObj[j].setParent(group);
+              for (ObjectInfo item: oldObj) item.setParent(null);
+              for (ObjectInfo item: newObj) item.setParent(group);
               group.setChildren(newObj);
               break;
             }

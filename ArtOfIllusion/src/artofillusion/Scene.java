@@ -1499,8 +1499,6 @@ public class Scene
             tr.initFromStream(in, this);
             info.addTrack(tr, i);
           }
-        if (info.getTracks() == null)
-          info.tracks = new Track [0];
       }
     catch (Exception ex)
       {

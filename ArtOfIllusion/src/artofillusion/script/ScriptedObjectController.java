@@ -104,7 +104,7 @@ public class ScriptedObjectController
 
   public final void addObject(ObjectInfo info)
   {
-    info.tracks = new Track [0];
+    info.setTracks(new Track [0]);
     if (info.getObject().canSetTexture() && info.getObject().getTextureMapping() == null)
       info.setTexture(object.getTexture(), object.getTextureMapping());
     if (info.getObject().canSetMaterial() && info.getObject().getMaterialMapping() == null)

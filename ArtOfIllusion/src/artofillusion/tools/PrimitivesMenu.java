@@ -50,7 +50,7 @@ public final class PrimitivesMenu extends BMenu {
             if(!items.isEmpty()) this.addSeparator();
         });
 
-        this.remove((Widget)this.getChild(this.getChildCount()-1));
+        if(this.getChildCount() > 0) this.remove((Widget)this.getChild(this.getChildCount()-1));
     }
 
     private class PrimitiveAction extends AbstractAction {

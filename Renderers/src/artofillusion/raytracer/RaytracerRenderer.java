@@ -1244,6 +1244,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     Vec3 orig = ray.getOrigin(), dir = ray.getDirection();
     double h = i-rtWidth*0.5+0.5, v = j-rtHeight*0.5+0.5;
     Random random = workspace.context.random;
+    int imgHeight = height;
 
     if (antialiasLevel > 0)
     {
@@ -1254,6 +1255,13 @@ public class RaytracerRenderer implements Renderer, Runnable
       int col = num-row*cols;
       h += (col+random.nextDouble())/cols-0.5;
       v += (row+random.nextDouble())/rows-0.5;
+
+      // To aim the rays correctly we need to use the height of 
+      // the actual image area, not the rendering area with the 
+      // extra antialiasing pixels around the edges. The value is 
+      // the rendering time height in pixels.
+
+      imgHeight = height*2;
     }
     double dof1 = 0.0, dof2 = 0.0;
     if (depth)
@@ -1261,7 +1269,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       dof1 = 0.25*(random.nextDouble()+distrib1[number&15]);
       dof2 = 0.25*(random.nextDouble()+distrib2[number&15]);
     }
-    sceneCamera.getRayFromCamera(h/rtHeight, v/rtHeight, dof1, dof2, orig, dir);
+    sceneCamera.getRayFromCamera(h/imgHeight, v/imgHeight, dof1, dof2, orig, dir);
     theCamera.getCameraCoordinates().fromLocal().transform(orig);
     theCamera.getCameraCoordinates().fromLocal().transformDirection(dir);
     ray.newID();

@@ -859,8 +859,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     final int currentScale[] = new int [1];
     final int currentWidth[] = new int [1];
     final boolean isFirstPass[] = new boolean[] {true};
-    ThreadManager threads = new ThreadManager(width, new ThreadManager.Task() {
-          @Override
+    ThreadManager threads = new ThreadManager(width, new ThreadManager.Task()
+    {
+      @Override
       public void execute(int index)
       {
         if (renderThread != thisThread)
@@ -878,7 +879,7 @@ public class RaytracerRenderer implements Renderer, Runnable
         pixel.add(workspace.color[0], (float) workspace.transparency[0]);
         recordPixel(col*currentScale[0], row*currentScale[0], currentScale[0], pixel);
       }
-          @Override
+      @Override
       public void cleanup()
       {
         getWorkspace().cleanup();
@@ -935,8 +936,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     int minPerSubpixel = minRaysInUse/4, maxPerSubpixel = maxRaysInUse/4;
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];
-    threads = new ThreadManager(rtWidth, new ThreadManager.Task() {
-          @Override
+    threads = new ThreadManager(rtWidth, new ThreadManager.Task()
+    {
+      @Override
       public void execute(int index)
       {
         RenderWorkspace workspace = getWorkspace();
@@ -978,7 +980,7 @@ public class RaytracerRenderer implements Renderer, Runnable
           }
         }
       }
-          @Override
+      @Override
       public void cleanup()
       {
         getWorkspace().cleanup();

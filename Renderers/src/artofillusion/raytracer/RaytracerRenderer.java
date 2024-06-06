@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2014 by Peter Eastman
-   Modifications copyright © 2020 by Petri Ihalainen
+   Modifications copyright © 2020-2024 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -870,11 +870,17 @@ public class RaytracerRenderer implements Renderer, Runnable
         int col = index-row*currentWidth[0];
         if (!isFirstPass[0] && row%2 == 0 && col%2 == 0)
           return;
-        int subsample = (finalMinRays > 1 ? 2 : 1);
+        int subsample = 1;
+        int extraedge = 0;
+        if (finalMinRays > 1)
+        {
+            subsample = 2;
+            extraedge = 1;
+        }
         RenderWorkspace workspace = getWorkspace();
         PixelInfo pixel = workspace.tempPixel;
         pixel.clear();
-        pixel.depth = (float) spawnEyeRay(workspace, col*subsample*currentScale[0], row*subsample*currentScale[0], 4, finalMinRays);
+        pixel.depth = (float) spawnEyeRay(workspace, col*subsample*currentScale[0]+extraedge, row*subsample*currentScale[0]+extraedge, 4, finalMinRays);
         pixel.object = (workspace.firstObjectHit == null ? 0.0f : Float.intBitsToFloat(workspace.firstObjectHit.getObject().hashCode()));
         pixel.add(workspace.color[0], (float) workspace.transparency[0]);
         recordPixel(col*currentScale[0], row*currentScale[0], currentScale[0], pixel);
@@ -930,9 +936,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     for (int i = 0; i < pix.length; i++)
       for (int j = 0; j < pix[i].length; j++)
         pix[i][j] = new PixelInfo();
-    loadRow(pix[0], 0, tempColor);
-    loadRow(pix[2], 1, tempColor);
-    loadRow(pix[4], 2, tempColor);
+    loadRow(pix[1], 0, tempColor);
+    loadRow(pix[3], 1, tempColor);
+    loadRow(pix[5], 2, tempColor);
     int minPerSubpixel = minRaysInUse/4, maxPerSubpixel = maxRaysInUse/4;
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];

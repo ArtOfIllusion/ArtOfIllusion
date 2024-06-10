@@ -41,7 +41,7 @@ public class Camera implements Cloneable
 {
   private Mat4 objectToWorld, objectToView, objectToScreen, worldToView, worldToScreen;
   private Mat4 viewToScreen, viewToWorld;
-  private double viewDist, distToScreen, scale, frontClipPlane, gridSpacing;
+  private double distToScreen, scale, frontClipPlane, gridSpacing;
   private boolean perspective;
   private int hres, vres;
   private int lastX, lastY;
@@ -54,7 +54,7 @@ public class Camera implements Cloneable
   {
     objectToWorld = objectToView = worldToView = viewToWorld = Mat4.identity();
     distToScreen = DEFAULT_DISTANCE_TO_SCREEN;
-    setScreenParams(0.0, 100.0, 100, 100);
+    setScreenParams(100.0, 100, 100);
   }
 
   /**
@@ -140,23 +140,39 @@ public class Camera implements Cloneable
    * Set the camera to perspective mode with the specified parameters.
    */
 
+  public void setScreenParams(double newScale, int newHres, int newVres)
+  {
+    scale = newScale*distToScreen;
+    Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective());
+    screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
+    setScreenTransform(screenTransform, newHres, newVres);
+
+    // This sets clipping plane to 1.0 unless the user has changed <pre>distToScreen</pre>
+    // From the users point of view 0.0 would be perfect. On SWCDrawer just > 0.0 would work for 
+    // objects but not rendering lines (like the grid). GLCanvasDrawer ignores this setting 
+    // entirely and uses its own, that produces the exact same clipping distance.
+
+    frontClipPlane = distToScreen/DEFAULT_DISTANCE_TO_SCREEN;
+    perspective = true;
+  }
+
+  /**
+   * Set the camera to perspective mode with the specified parameters.
+   * With this method you can have the perspective dirtortion origin 
+   * separated from the camera origin. It is recommended to 
+   * use <pre>setScreenParams(double newScale, int newHres, int newVres)</pre> instead.
+   */
+
   public void setScreenParams(double newViewDist, double newScale, int newHres, int newVres)
   {
-    viewDist = newViewDist; // = always 0.0
     scale = newScale*distToScreen;
     Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(newViewDist));
     screenTransform = Mat4.translation((double) hres/2.0, (double) vres/2.0, 0.0).times(screenTransform);
     setScreenTransform(screenTransform, newHres, newVres);
-
-	// From user's point of view 0.0 would be perfect. On SWC that works for objects 
-	// but not for grid. GLCanvasDrawer ignores ignores this setting entirely.
-	// I'd like to be able to go 1E-5 or smaller.
-	
-    frontClipPlane = distToScreen/20.0;
-    //frontClipPlane = 0.05; 
+    frontClipPlane = distToScreen/DEFAULT_DISTANCE_TO_SCREEN;
     perspective = true;
   }
-  
+
   /**
    * Set the camera to parallel projection mode with the specified parameters.
    */
@@ -183,7 +199,7 @@ public class Camera implements Cloneable
     hres = newHres;
     vres = newVres;
     if (perspective)
-      viewToScreen = Mat4.perspective(viewDist);
+      viewToScreen = Mat4.perspective(0.0);
     else
       viewToScreen = Mat4.identity();
     viewToScreen = Mat4.scale(-scale, -scale, scale).times(viewToScreen);

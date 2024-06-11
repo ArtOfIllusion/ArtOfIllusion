@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2005 by Peter Eastman
+   Changes copyringt © 2024 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,10 +16,12 @@ import buoy.widget.*;
 import java.awt.*;
 import java.util.*;
 import javax.swing.*;
+import static javax.swing.SwingUtilities.invokeLater;
 
 /** A ValueSlider contains a BTextField and a BSlider which are together used for choosing
     a value.  Editing either one causes the other to change automatically.  If an illegal
-    value is entered into the BTextField, the text turns red to indicate this. */
+    value is entered into the BTextField, the text turns red to indicate this. The field can 
+    handle a comma or a point as decimal separator. */
 
 public class ValueSlider extends WidgetContainer
 {
@@ -39,6 +42,7 @@ public class ValueSlider extends WidgetContainer
     slider = new BSlider((int) ((value-min)*increments/(max-min)), 0, increments+1, BSlider.HORIZONTAL);
     setText();
     field.addEventLink(ValueChangedEvent.class, this, "textChanged");
+    field.addEventLink(FocusLostEvent.class,    this, "commaToPoint");
     slider.addEventLink(ValueChangedEvent.class, this, "sliderChanged");
     slider.setEnabled(!Double.isNaN(value));
     ((JPanel) component).add(field.getComponent());
@@ -73,7 +77,7 @@ public class ValueSlider extends WidgetContainer
 
     try
     {
-      val = new Double(field.getText());
+      val = new Double(getDecimalText(field.getText()));
     }
     catch (NumberFormatException ex)
     {
@@ -92,6 +96,44 @@ public class ValueSlider extends WidgetContainer
       slider.setEnabled(true);
       dispatchEvent(new ValueChangedEvent(this, ev.isInProgress()));
     }
+  }
+
+  /**
+    Read the given text in a form that treats comma as alternative decimal separator
+    This is used while the text field is being edited. 
+   **/
+
+  private String getDecimalText(String text)
+  {
+    return text.replace(",",".");
+  }
+ 
+  /**
+    Change a decimal comma into a decimal point.
+    This shoud be called, when editing is done.
+  **/
+
+  private void commaToPoint()
+  {
+    if (!field.getText().contains(","))
+      return;
+    try
+    {
+      Double.parseDouble(getDecimalText(field.getText()));
+    }
+    catch (Throwable any)
+    {
+      return;
+    }
+
+    // If the text with comma for point makes a number, let's do the switch.
+    // Using invokeLater here is more a precaution but the same case 
+    // in ValueField produced threading related problems, so let's be safe.
+
+    invokeLater(()->
+    {
+      field.setText(getDecimalText(field.getText()));
+    });
   }
 
   public double getValue()

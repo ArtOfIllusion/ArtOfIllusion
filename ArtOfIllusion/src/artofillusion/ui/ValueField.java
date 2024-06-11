@@ -75,16 +75,16 @@ public class ValueField extends BTextField
     double val = value;
 
     try
-      {
-        if ((constraints & INTEGER) != 0)
-          val = (double) Integer.parseInt(getText());
-        else
-          val = new Double(getText());
-      }
+    {
+      if ((constraints & INTEGER) != 0)
+        val = (double) Integer.parseInt(getText());
+      else
+        val = new Double(getText());
+    }
     catch (NumberFormatException ex)
-      {
-        return false;
-      }
+    {
+      return false;
+    }
     return isValid(val);
   }
 
@@ -188,13 +188,13 @@ public class ValueField extends BTextField
     else if (val == 0.0 || val == -0.0)
       return "0.0";
     else
-      {
-        // Make sure at least three significant digits are visible.
+    {
+      // Make sure at least three significant digits are visible.
 
-        int digits = (int) Math.floor(Math.log(Math.abs(val))/Math.log(10.0));
-        double scale = Math.pow(10.0, digits < 0 ? decimalPlaces-1-digits : decimalPlaces);
-        return Double.toString(Math.round(val*scale)/scale);
-      }
+      int digits = (int) Math.floor(Math.log(Math.abs(val))/Math.log(10.0));
+      double scale = Math.pow(10.0, digits < 0 ? decimalPlaces-1-digits : decimalPlaces);
+      return Double.toString(Math.round(val*scale)/scale);
+    }
   }
 
   /** Set the minimum number of decimal places to display. */

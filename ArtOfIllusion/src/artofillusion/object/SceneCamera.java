@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
-   Modifications Copyright 2016 by Petri Ihalainen
+   Modifications Copyright 2016-2024 by Petri Ihalainen
    Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -264,14 +264,14 @@ public class SceneCamera extends Object3D
   {
     if (perspective)
     {
-      double scale = 0.5*height/Math.tan(getFieldOfView()*Math.PI/360.0);
+      double scale = 0.5*height/Math.tan(fov*Math.PI/360.0);
       Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.perspective(0.0));
       screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
       return screenTransform;
     }
     else
     {
-      double scale = 0.5*height/(Math.tan(getFieldOfView()*Math.PI/360.0)*getFocalDistance());
+      double scale = 0.5*height/(Math.tan(fov*Math.PI/360.0)*distToPlane);
       Mat4 screenTransform = Mat4.scale(-scale, -scale, scale).times(Mat4.identity());
       screenTransform = Mat4.translation((double) width/2.0, (double) height/2.0, 0.0).times(screenTransform);
       return screenTransform;
@@ -295,7 +295,7 @@ public class SceneCamera extends Object3D
     if (perspective)
     {
       origin.set(0.0, 0.0, 0.0);
-      double scale = focalDist*2.0*Math.tan(getFieldOfView()*Math.PI/360.0);
+      double scale = focalDist*2.0*Math.tan(fov*Math.PI/360.0);
       if (dof1 != 0.0)
       {
         double angle = dof1*2.0*Math.PI;
@@ -308,7 +308,7 @@ public class SceneCamera extends Object3D
     }
     else
     {
-      double scale = focalDist*2.0*Math.tan(getFieldOfView()*Math.PI/360.0);
+      double scale = distToPlane*2.0*Math.tan(fov*Math.PI/360.0);
       origin.set(-scale*x, -scale*y, 0);
       if (dof1 != 0.0)
       {

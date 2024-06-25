@@ -1,5 +1,5 @@
 /* Copyright (C) 2000-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -197,6 +197,7 @@ public class LayeredMapping extends TextureMapping
    * @deprecated Use {@link #addLayer(int, Texture, TextureMapping, int)} instead.
    */
 
+  @Deprecated
   public void addLayer(Texture tex)
   {
     Texture newtexture[] = new Texture [texture.length+1];

@@ -290,14 +290,6 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     repaint();
   }
 
-  /** The renderer may call this method periodically during rendering, to give the listener text descriptions
-      of the current status of rendering. */
-
-  @Override
-  public void statusChanged(String status)
-  {
-  }
-
   /** Called when rendering is complete. */
 
   @Override
@@ -306,13 +298,6 @@ public class MaterialPreviewer extends CustomWidget implements RenderListener
     theImage = image.getImage();
     renderInProgress = false;
     repaint();
-  }
-
-  /** Called when rendering is cancelled. */
-
-  @Override
-  public void renderingCanceled()
-  {
   }
 
   private void mouseEntered(MouseEnteredEvent e)

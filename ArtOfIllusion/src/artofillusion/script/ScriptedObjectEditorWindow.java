@@ -1,4 +1,5 @@
 /* Copyright (C) 2002-2013 by Peter Eastman
+   Changes Copyright (C) 2023 by Lucas Stanek
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -18,19 +19,13 @@ import buoy.widget.*;
 import java.awt.*;
 import java.io.*;
 
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
-import org.fife.ui.rsyntaxtextarea.Style;
-import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
-import org.fife.ui.rtextarea.RTextScrollPane;
-
 /** This class presents a user interface for entering object scripts. */
 
 public class ScriptedObjectEditorWindow extends BFrame
 {
   private EditingWindow window;
   private ObjectInfo info;
-  private RSyntaxTextArea scriptText;
+  private ScriptEditingWidget scriptWidget;
   private BComboBox languageChoice;
   private String scriptName;
   private Runnable onClose;
@@ -48,26 +43,18 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptDir = new File(ArtOfIllusion.OBJECT_SCRIPT_DIRECTORY);
     BorderContainer content = new BorderContainer();
     setContent(content);
-    scriptText = new RSyntaxTextArea(((ScriptedObject) info.getObject()).getScript(), 25, 100);
-    SyntaxScheme scheme = scriptText.getSyntaxScheme();
-    Style style = scheme.getStyle(SyntaxScheme.COMMENT_EOL);
-    Style newStyle = new Style(style.foreground, style.background, style.font.deriveFont(Font.PLAIN));
-    scheme.setStyle(SyntaxScheme.COMMENT_EOL, newStyle);
-    scheme.setStyle(SyntaxScheme.COMMENT_MULTILINE, newStyle);
-    scriptText.setAnimateBracketMatching(false);
-    scriptText.setTabSize(2);
-    scriptText.setCodeFoldingEnabled(true);
-    content.add(new AWTWidget(new RTextScrollPane(scriptText))
-                             , BorderContainer.CENTER);
-    languageChoice = new BComboBox(ScriptRunner.LANGUAGES);
+    scriptWidget = new ScriptEditingWidget(((ScriptedObject) info.getObject()).getScript());
+
+    content.add(scriptWidget, BorderContainer.CENTER);
+    languageChoice = new BComboBox(ScriptRunner.getLanguageNames());
     languageChoice.setSelectedValue(((ScriptedObject) info.getObject()).getLanguage());
     RowContainer languageRow = new RowContainer();
     languageRow.add(Translate.label("language"));
     languageRow.add(languageChoice);
     content.add(languageRow, BorderContainer.NORTH,
                 new LayoutInfo(LayoutInfo.EAST, LayoutInfo.NONE));
-    content.add(BOutline.createBevelBorder(new AWTWidget(new RTextScrollPane(scriptText)),
-               false), BorderContainer.CENTER);
+    content.add(BOutline.createBevelBorder(scriptWidget, false)
+               , BorderContainer.CENTER);
     RowContainer buttons = new RowContainer();
     content.add(buttons, BorderContainer.SOUTH, new LayoutInfo());
     buttons.add(Translate.button("ok", this, "commitChanges"));
@@ -77,11 +64,11 @@ public class ScriptedObjectEditorWindow extends BFrame
     buttons.add(Translate.button("cancel", this, "dispose"));
     addEventLink(WindowClosingEvent.class, this, "commitChanges");
     languageChoice.addEventLink(ValueChangedEvent.class, this, "updateLanguage");
-    scriptText.setCaretPosition(0);
+    scriptWidget.getContent().setCaretPosition(0);
     pack();
     updateLanguage();
     UIUtilities.centerWindow(this);
-    scriptText.requestFocus();
+    scriptWidget.requestFocus();
     setVisible(true);
   }
 
@@ -89,9 +76,7 @@ public class ScriptedObjectEditorWindow extends BFrame
 
   private void updateLanguage()
   {
-    scriptText.setSyntaxEditingStyle(
-        "groovy".equalsIgnoreCase((String) languageChoice.getSelectedValue()) ?
-           SyntaxConstants.SYNTAX_STYLE_GROOVY : SyntaxConstants.SYNTAX_STYLE_JAVA);
+    scriptWidget.setLanguage((String) languageChoice.getSelectedValue());
   }
 
   /** Display a dialog for editing the parameters. */
@@ -115,33 +100,35 @@ public class ScriptedObjectEditorWindow extends BFrame
       scriptDir = fc.getDirectory();
       setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
       File f = fc.getSelectedFile();
-      try
+      String filename = fc.getSelectedFile().getName();
+      String language = ScriptRunner.getLanguageForFilename(filename);
+      if (language != ScriptRunner.UNKNOWN_LANGUAGE)
       {
-        BufferedReader in = new BufferedReader(new FileReader(f));
-        StringBuilder buf = new StringBuilder();
-        int c;
-        while ((c = in.read()) != -1)
-          buf.append((char) c);
-        in.close();
-        scriptText.setText(buf.toString());
+        languageChoice.setSelectedValue(language);
+        try
+        {
+          BufferedReader in = new BufferedReader(new FileReader(f));
+          StringBuilder buf = new StringBuilder();
+          int c;
+          while ((c = in.read()) != -1)
+            buf.append((char) c);
+          in.close();
+          scriptWidget.getContent().setText(buf.toString());
+        }
+        catch (Exception ex)
+        {
+          new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
+            ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+        }
+        setScriptNameFromFile(filename);
+        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        updateLanguage();
       }
-      catch (Exception ex)
+      else
       {
         new BStandardDialog(null, new String [] {Translate.text("errorReadingScript"),
-          ex.getMessage() == null ? "" : ex.getMessage()}, BStandardDialog.ERROR).showMessageDialog(this);
+          "Unrecognized file language : " + filename}, BStandardDialog.ERROR).showMessageDialog(this);
       }
-      String filename = fc.getSelectedFile().getName();
-      try
-      {
-        languageChoice.setSelectedValue(ScriptRunner.getLanguageForFilename(filename));
-      }
-      catch (IllegalArgumentException ex)
-      {
-        languageChoice.setSelectedValue(ScriptRunner.LANGUAGES[0]);
-      }
-      setScriptNameFromFile(filename);
-      setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-      updateLanguage();
     }
     // Restore working directory
     fc.setDirectory(workingDir);
@@ -167,7 +154,7 @@ public class ScriptedObjectEditorWindow extends BFrame
       try
       {
         BufferedWriter out = new BufferedWriter(new FileWriter(f));
-        out.write(scriptText.getText().toCharArray());
+        out.write(scriptWidget.getContent().getText().toCharArray());
         out.close();
       }
       catch (Exception ex)
@@ -198,7 +185,7 @@ public class ScriptedObjectEditorWindow extends BFrame
   {
     ScriptedObject so = (ScriptedObject) info.getObject();
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-    so.setScript(scriptText.getText());
+    so.setScript(scriptWidget.getContent().getText());
     so.setLanguage(languageChoice.getSelectedValue().toString());
     so.sceneChanged(info, window.getScene());
     if (onClose != null)

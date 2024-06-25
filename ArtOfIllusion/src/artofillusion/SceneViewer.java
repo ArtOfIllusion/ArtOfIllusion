@@ -233,19 +233,11 @@ public class SceneViewer extends ViewerCanvas
           repaint();
         }
         @Override
-        public void statusChanged(String status)
-        {
-        }
-        @Override
         public void imageComplete(ComplexImage image)
         {
           renderedImage = image.getImage();
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
-        }
-        @Override
-        public void renderingCanceled()
-        {
         }
       };
       rend.renderScene(theScene, cam, listener, sceneCamera);

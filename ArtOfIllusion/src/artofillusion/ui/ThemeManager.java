@@ -1,6 +1,6 @@
 /* Copyright (C) 2007 by François Guillet
    Some parts copyright 2007 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2022 by Maksim Khramov
 
  This program is free software; you can redistribute it and/or modify it under the
  terms of the GNU General Public License as published by the Free Software
@@ -556,6 +556,7 @@ public class ThemeManager {
      *  @deprecated this method allows pre 2.7 plugins to continue to function.
      *                Such code should be ported to the new API as soon as possible.
      */
+    @Deprecated
     public static ToolButton getToolButton(Object owner, String iconName, String selectedIconName)
     {
         System.out.println("**Deprecated method called: ThemeManager.getToolButton(Object, String, String)");

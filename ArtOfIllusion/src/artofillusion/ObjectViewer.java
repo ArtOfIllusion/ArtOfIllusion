@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
    Modifications copyright (C) 2017-2019 Petri Ihalainen
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -161,19 +161,11 @@ public abstract class ObjectViewer extends ViewerCanvas
           repaint();
         }
         @Override
-        public void statusChanged(String status)
-        {
-        }
-        @Override
         public void imageComplete(ComplexImage image)
         {
           renderedImage = image.getImage();
           getCanvasDrawer().imageChanged(renderedImage);
           repaint();
-        }
-        @Override
-        public void renderingCanceled()
-        {
         }
       };
       rend.renderScene(sc, cam, listener, sceneCamera);

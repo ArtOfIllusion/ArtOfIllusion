@@ -58,7 +58,7 @@ public class ViewAnimation
   double   rotSlope = 1.5, moveSlope = 1.5, scaleSlope = .1, distSlope = .1,  perspSlope = 3.0;;
   int      endOrientation, endNavigation;
   long     msStart, msEnd, ms1st=0, msLast, msLatest;
-  boolean  endPerspective,changingPerspective, animatingMove, endShowGrid;
+  boolean  endPerspective, changingPerspective, animatingMove;
   int      viewH, viewW;
 
   /** A new view animation engine. Each view need's it's own.*/
@@ -130,9 +130,6 @@ public class ViewAnimation
       endAnimation(); // Go directly to the last frame
       return;
     }
-
-    endShowGrid = view.getShowGrid();
-    view.setShowGrid(false);
 
     this.refDistToPlane = refDistToPlane;
     startCoords = camera.getCameraCoordinates().duplicate();
@@ -208,13 +205,12 @@ public class ViewAnimation
     else
       this.endPerspective = view.isPerspectiveSwitch();
     this.endNavigation = nextNavigation;
-    this.endShowGrid = view.getShowGrid();
     camera = view.getCamera();
     endDistToScreen = camera.getDistToScreen();
 
     checkPreferences(); // This only works for the 'animate'
-        if (! animate)
-        {
+    if (! animate)
+    {
       endAnimation(); // Go directly to the last frame
       return;
     }
@@ -395,18 +391,17 @@ public class ViewAnimation
     view.setScale(endScale);
     view.setRotationCenter(endRotationCenter);
     view.setDistToPlane(endCoords.getOrigin().minus(endRotationCenter).length()); // It seemed to work without this too... But not with SceneCamera
-    view.setShowGrid(endShowGrid);
     view.finishAnimation(endOrientation, endPerspective, endNavigation); // using set-methods for these would loop back to animation
-        if (boundCamera != null)
-            updateBoundCamera();
-        else
-        {
+    if (boundCamera != null)
+        updateBoundCamera();
+    else
+    {
       view.viewChanged(false);
       view.repaint();
     }
     changingPerspective = false;
     animatingMove = false;
-    }
+  }
 
   /**
    * Check if there is anything that should move.

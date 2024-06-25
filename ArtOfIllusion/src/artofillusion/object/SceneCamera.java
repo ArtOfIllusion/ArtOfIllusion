@@ -19,7 +19,6 @@ import artofillusion.image.filter.*;
 import artofillusion.math.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
-import java.awt.*;
 import java.io.*;
 
 /** SceneCamera is a type of Object3D.  It represents a camera which the user can position
@@ -406,14 +405,6 @@ public class SceneCamera extends Object3D
     Camera cam = createCamera(width, height, cameraPos);
     final ComplexImage theImage[] = new ComplexImage [1];
     RenderListener rl = new RenderListener() {
-      @Override
-      public void imageUpdated(Image image)
-      {
-      }
-      @Override
-      public void statusChanged(String status)
-      {
-      }
       @Override
       public synchronized void imageComplete(ComplexImage image)
       {

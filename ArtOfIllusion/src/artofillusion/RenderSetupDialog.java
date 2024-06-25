@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
    Changes copyright (C) 2016 by Maksim Khramov
-   Changes copyright (C) 2020 by Petri Ihalainen
+   Changes copyright (C) 2020-2024 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,6 +39,7 @@ public class RenderSetupDialog
   private ValueField widthField, heightField, startField, endField, fpsField, subimagesField;
   private Widget configPanel;
   private BorderContainer content;
+  private ViewerCanvas renderedView;
 
   static Renderer currentRenderer;
   static int currentCamera = 0, width = 640, height = 480;
@@ -122,7 +123,15 @@ public class RenderSetupDialog
     rendererConfiguration  = currentRenderer.getConfiguration();
     PanelDialog dlg = new PanelDialog(parent, Translate.text("renderTitle"), content);
     if (dlg.clickedOk())
+    {
+      // Dialog closing causes view to redraw. When that happens, the configuration 
+      // will be overwritten, if the a view is using the same renderer.
+
+      renderedView = checkConcurrentRendering(parent);
+      if (renderedView != null)
+        renderedView.setRenderMode(renderedView.getRenderMode()-1); // Happens to be the trasnparent mode.
       doRender();
+    }
   }
 
   private void doRender()
@@ -148,7 +157,7 @@ public class RenderSetupDialog
           if (!saver.clickedOk())
             return;
           new RenderingDialog(parent, currentRenderer, theScene,
-            cam, cameraInfo, startTime, endTime, fps, subimages, saver);
+            cam, cameraInfo, startTime, endTime, fps, subimages, saver, renderedView);
         }
         catch (IOException ex)
         {
@@ -156,7 +165,7 @@ public class RenderSetupDialog
         }
       }
       else
-        new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo);
+        new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo, renderedView);
     }
   }
 
@@ -164,6 +173,13 @@ public class RenderSetupDialog
 
   public static void renderImmediately(BFrame parent, Scene theScene)
   {
+    ViewerCanvas[] av = ((EditingWindow)parent).getAllViews();
+    ViewerCanvas v = null;
+    int i;
+    for (i = 0; i < av.length; i++)
+      if (av[i].getRenderMode() == ViewerCanvas.RENDER_RENDERED && ArtOfIllusion.getPreferences().getObjectPreviewRenderer() == currentRenderer)
+        break;
+
     // Load the last used settings if available
 
     loadDialogSettings(theScene);
@@ -193,7 +209,7 @@ public class RenderSetupDialog
     SceneCamera sc = (SceneCamera) cameraInfo.getObject();
     cam.setCameraCoordinates(cameraInfo.getCoords().duplicate());
     cam.setScreenTransform(sc.getScreenTransform(width, height), width, height);
-    new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo);
+    new RenderingDialog(parent, currentRenderer, theScene, cam, cameraInfo,  av[i]);
   }
 
   private void rendererChanged()
@@ -387,5 +403,20 @@ public class RenderSetupDialog
     if (modified)
       ((LayoutWindow)parent).setModified();
     return;
+  }
+
+  /** Check if the selected renderer is currently being used by a view. 
+      If so, temporarily change the rendermode of the view.
+      @return the view that was occupying the renderer of <code>null</code> if none are found. */
+
+  private ViewerCanvas checkConcurrentRendering(BFrame parent)
+  {
+    ViewerCanvas[] av = ((EditingWindow)parent).getAllViews();
+    
+    for (ViewerCanvas v : av)
+      if (v.getRenderMode() == ViewerCanvas.RENDER_RENDERED && 
+          ArtOfIllusion.getPreferences().getObjectPreviewRenderer() == currentRenderer)
+        return v;
+    return null;
   }
 }

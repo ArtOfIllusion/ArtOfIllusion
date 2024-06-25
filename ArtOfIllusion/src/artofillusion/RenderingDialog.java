@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2024 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -40,14 +41,23 @@ public class RenderingDialog extends BDialog implements RenderListener
   private int w, h, fps, subimages, currentFrame, currentSubimage, totalFrames;
   private long startTime;
   private boolean done, hasModifiedFilters;
+  private ViewerCanvas renderedView;
 
   /** Render a single frame. */
 
   public RenderingDialog(BFrame parent, Renderer rend, Scene sc, Camera cam, ObjectInfo sceneCamera)
   {
+    this(parent, rend, sc, cam, sceneCamera, null);
+  }
+
+  /** Render a single frame. */
+
+  public RenderingDialog(BFrame parent, Renderer rend, Scene sc, Camera cam, ObjectInfo sceneCamera, ViewerCanvas renderedView)
+  {
     super(parent, true);
     this.parent = parent;
     this.sceneCamera = sceneCamera;
+    this.renderedView = renderedView;
     renderer = rend;
     theScene = sc;
     layoutDialog(parent, cam);
@@ -62,6 +72,14 @@ public class RenderingDialog extends BDialog implements RenderListener
   public RenderingDialog(BFrame parent, Renderer rend, Scene sc, Camera cam, ObjectInfo sceneCamera,
     double start, double end, int fps, int subimages, ImageSaver imgsaver)
   {
+    
+  }
+  
+  /** Render an animation. */
+
+  public RenderingDialog(BFrame parent, Renderer rend, Scene sc, Camera cam, ObjectInfo sceneCamera,
+    double start, double end, int fps, int subimages, ImageSaver imgsaver, ViewerCanvas renderedView)
+  {
     super(parent, true);
     this.parent = parent;
     renderer = rend;
@@ -73,6 +91,7 @@ public class RenderingDialog extends BDialog implements RenderListener
     this.fps = fps;
     this.subimages = subimages;
     this.imgsaver = imgsaver;
+    this.renderedView = renderedView;
     originalTime = theScene.getTime();
     totalFrames = (int) Math.ceil((end-start)*fps);
     if (totalFrames <= 0)
@@ -140,6 +159,11 @@ public class RenderingDialog extends BDialog implements RenderListener
       int choice = new BStandardDialog("", Translate.text("saveModifiedFilters", sceneCamera.getName()), BStandardDialog.QUESTION).showOptionDialog(parent, values, values[0]);
       if (choice == 0)
         ((SceneCamera) sceneCamera.getObject()).setImageFilters(cameraForFilters.getImageFilters());
+    }
+    if (renderedView != null)
+    {
+      renderedView.setRenderMode(ViewerCanvas.RENDER_RENDERED);
+      renderedView = null;
     }
   }
 
@@ -324,6 +348,10 @@ public class RenderingDialog extends BDialog implements RenderListener
             if (currentFrame == totalFrames)
             {
               done = true;
+              {
+                renderedView.setRenderMode(ViewerCanvas.RENDER_RENDERED);
+                renderedView = null; // or else 'doCancel' would do this again.
+              }
               if (imgsaver != null)
                 imgsaver.lastMovieImage();
               label1.setText(Translate.text("doneRendering"));

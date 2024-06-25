@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -38,7 +39,8 @@ public abstract class Mapping3D extends TextureMapping
     return object;
   }
 
-  public static boolean legalMapping(Object3D obj, Texture tex)
+  @Override
+  public boolean legalMapping(Object3D obj, Texture tex)
   {
     return (tex instanceof Texture3D);
   }

@@ -25,7 +25,6 @@ import java.awt.*;
 import java.awt.datatransfer.*;
 import java.io.*;
 import java.lang.ref.*;
-import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
 
@@ -149,30 +148,15 @@ public class TexturesAndMaterialsDialog extends BDialog
     typeChoice = new BComboBox();
     typeChoice.add(Translate.text("button.new") + "...");
 
-    java.lang.reflect.Method mtd;
-
-    for (Texture tex : textureTypes)
+    for (Texture texture : textureTypes)
     {
-      try
-      {
-        mtd = tex.getClass().getMethod("getTypeName", (Class<?>[])null);
-        typeChoice.add((String) mtd.invoke(null, (Object[])null) + " texture");
-      }
-      catch (Exception ex)
-      {
-      }
+      typeChoice.add(texture.getTypeName() + " texture");
     }
-    for (Material mat : materialTypes)
+    for (Material material : materialTypes)
     {
-      try
-      {
-        mtd = mat.getClass().getMethod("getTypeName", (Class<?>[])null);
-        typeChoice.add((String) mtd.invoke(null, (Object[])null) + " material");
-      }
-      catch (Exception ex)
-      {
-      }
+      typeChoice.add(material.getTypeName() + " material");     
     }
+    
     typeChoice.addEventLink(ValueChangedEvent.class, this, "doNew");
 
     buttons.add(typeChoice);
@@ -215,20 +199,6 @@ public class TexturesAndMaterialsDialog extends BDialog
     
   }
 
-  private String getTypeName(Object item)
-  {
-    String typeName = "";
-    try
-    {
-      Method mtd = item.getClass().getMethod("getTypeName", (Class<?>[])null);
-      typeName = (String) mtd.invoke(null, (Object[])null);
-    }
-    catch (Exception ex)
-    {
-    }
-    return typeName;
-  }
-
   public void doSelectionChanged()
   {
     TreePath selection = libraryList.getSelectedNode();
@@ -255,7 +225,7 @@ public class TexturesAndMaterialsDialog extends BDialog
             matPre.setTexture(selectedTexture, selectedTexture.getDefaultMapping(matPre.getObject().getObject()));
             matPre.setMaterial(null, null);
             matPre.render();
-            setInfoText(Translate.text("textureName")+" "+selectedTexture.getName(), Translate.text("textureType")+" "+getTypeName(selectedTexture));
+            setInfoText(Translate.text("textureName")+" "+selectedTexture.getName(), Translate.text("textureType") + " " + selectedTexture.getTypeName());
           }
         }
         else
@@ -267,7 +237,7 @@ public class TexturesAndMaterialsDialog extends BDialog
             matPre.setTexture(tex, tex.getDefaultMapping(matPre.getObject().getObject()));
             matPre.setMaterial(selectedMaterial, selectedMaterial.getDefaultMapping(matPre.getObject().getObject()));
             matPre.render();
-            setInfoText(Translate.text("materialName")+" "+selectedMaterial.getName(), Translate.text("materialType")+" "+getTypeName(selectedMaterial));
+            setInfoText(Translate.text("materialName")+" "+selectedMaterial.getName(), Translate.text("materialType") + " " + selectedMaterial.getTypeName());
           }
         }
       }

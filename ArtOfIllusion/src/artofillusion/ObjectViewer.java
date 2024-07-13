@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Modifications copyright (C) 2017-2019 Petri Ihalainen
+   Modifications copyright (C) 2017-2024 Petri Ihalainen
    Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -28,6 +28,7 @@ import java.util.*;
 public abstract class ObjectViewer extends ViewerCanvas
 {
   protected MeshEditController controller;
+  protected SceneCamera renderedModeCamera;
   protected boolean showScene, useWorldCoords, freehandSelection, draggingBox, squareBox, sentClick;
   protected Point clickPoint, dragPoint;
   protected Vector<Point> selectBoundsPoints;
@@ -39,6 +40,7 @@ public abstract class ObjectViewer extends ViewerCanvas
   {
     super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
     this.controller = controller;
+    renderedModeCamera = null;
     buildChoices(p);
   }
 
@@ -107,7 +109,6 @@ public abstract class ObjectViewer extends ViewerCanvas
       Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
       if (rend == null)
         return;
-      adjustCamera(true);
       Scene sc;
       Camera cam = theCamera.duplicate();
       if (showScene && theScene != null)
@@ -147,9 +148,13 @@ public abstract class ObjectViewer extends ViewerCanvas
         sc.addObject(obj, null);
       }
       rend.configurePreview();
-      Rectangle bounds = getBounds();
-      SceneCamera sceneCamera = new SceneCamera();
-      sceneCamera.setFieldOfView(Math.atan(0.5*bounds.height/(cam.getDistToScreen()*getScale()))*360.0/Math.PI);
+      int h = getBounds().height;
+      if (renderedModeCamera == null)
+        renderedModeCamera = new SceneCamera();
+      renderedModeCamera.setDistToPlane(distToPlane);
+      renderedModeCamera.setFocalDistance(distToPlane);
+      renderedModeCamera.setFieldOfView(2.0*Math.toDegrees(Math.atan(0.5*h/100.0/cam.getDistToScreen())));
+      renderedModeCamera.setPerspective(isPerspective());
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
@@ -168,8 +173,10 @@ public abstract class ObjectViewer extends ViewerCanvas
           repaint();
         }
       };
-      rend.renderScene(sc, cam, listener, sceneCamera);
+      rend.renderScene(sc, cam, listener, renderedModeCamera);
     }
+    else
+      renderedModeCamera = null;
   }
 
   @Override

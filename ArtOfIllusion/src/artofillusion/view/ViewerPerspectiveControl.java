@@ -40,8 +40,6 @@ public class ViewerPerspectiveControl implements ViewerControl
           view.setPerspective(((SceneCamera)view.getBoundCamera().getObject()).isPerspective());
           perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
         }
-        else if (view.getRenderMode() == ViewerCanvas.RENDER_RENDERED)
-          perspectiveChoice.setEnabled(false);
         else
         {
           perspectiveChoice.setEnabled(view.perspectiveControlEnabled);

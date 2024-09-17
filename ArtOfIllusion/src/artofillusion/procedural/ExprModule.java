@@ -35,25 +35,16 @@ class debug {
     }
 }
 
-class Portref {
-    public String module;
-    public int port;
-
-    Portref (String m, int o, int p) {
-        module = m;
-        port = p;
-    }
-}
 
 class OPort {
     public Module module;
     public int oport = 0;
     public Arg [] args = {new Arg ("Arg1", 0)};
 
-    OPort (Module m, int p, Arg [] i) {
+    OPort (Module m, int p, Arg... args) {
         module = m;
         oport = p;
-        args = i;
+        this.args = args;
     }
 
     OPort (Module m, int p) {
@@ -112,39 +103,20 @@ class Token {
 
 
     static Hashtable<String, OPort> createFunMap () {
-        Hashtable<String, OPort> fm = new Hashtable<String, OPort> ();
+        Hashtable<String, OPort> fm = new Hashtable<> ();
         //For version two, pull these out of a config file
-        fm.put ("sin",  new OPort (new SineModule (new Point ()), 0));
-        fm.put ("cos",  new OPort (new CosineModule (new Point ()), 0));
-        fm.put ("sqrt", new OPort (new SqrtModule (new Point ()), 0));
-        fm.put ("pow",  new OPort (new PowerModule (new Point ()), 0, new Arg [] {
-            new Arg ("Base", 1),
-            new Arg ("Exponent", 0)
-                }));
-        fm.put ("log",  new OPort (new LogModule (new Point ()), 0));
-        fm.put ("angle", new OPort (new PolarModule (new Point ()), 1,
-                new Arg [] {
-            new Arg ("X", 0),
-            new Arg ("Y", 1)
-                }));
-        fm.put ("min",  new OPort (new MinModule (new Point ()), 0, new Arg [] {
-            new Arg ("Value 1", 1),
-            new Arg ("Value 2", 0)
-                }));
-        fm.put ("max",  new OPort (new MaxModule (new Point ()), 0, new Arg [] {
-            new Arg ("Value 1", 1),
-            new Arg ("Value 2", 0)
-                }));
-        fm.put ("abs",  new OPort (new AbsModule (new Point ()), 0));
-        fm.put ("exp",  new OPort (new ExpModule (new Point ()), 0));
-        fm.put ("bias",  new OPort (new BiasModule (new Point ()), 0, new Arg [] {
-            new Arg ("Input", 1),
-            new Arg ("Bias", 0)
-                }));
-        fm.put ("gain",  new OPort (new GainModule (new Point ()), 0, new Arg [] {
-            new Arg ("Input", 1),
-            new Arg ("Gain", 0)
-                }));
+        fm.put("sin", new OPort(new SineModule(new Point()), 0));
+        fm.put("cos", new OPort(new CosineModule(new Point()), 0));
+        fm.put("sqrt", new OPort(new SqrtModule(new Point()), 0));
+        fm.put("pow", new OPort(new PowerModule(new Point()), 0, new Arg("Base", 1), new Arg("Exponent", 0)));
+        fm.put("log", new OPort(new LogModule(new Point()), 0));
+        fm.put("angle", new OPort(new PolarModule(new Point()), 1, new Arg("X", 0), new Arg("Y", 1)));
+        fm.put("min", new OPort(new MinModule(new Point()), 0, new Arg("Value 1", 1), new Arg("Value 2", 0)));
+        fm.put("max", new OPort(new MaxModule(new Point()), 0, new Arg("Value 1", 1), new Arg("Value 2", 0)));
+        fm.put("abs", new OPort(new AbsModule(new Point()), 0));
+        fm.put("exp", new OPort(new ExpModule(new Point()), 0));
+        fm.put("bias", new OPort(new BiasModule(new Point()), 0, new Arg("Input", 1), new Arg("Bias", 0)));
+        fm.put("gain", new OPort(new GainModule(new Point()), 0, new Arg("Input", 1), new Arg("Gain", 0)));
 
         return fm;
     }
@@ -167,61 +139,6 @@ class Token {
     }
 }
 
-class ModuleLoader {
-   public static Module createModule (String name) {
-        Class moduleClass;
-
-        try {
-            moduleClass = ArtOfIllusion.getClass (name);
-        } catch (ClassNotFoundException e) {
-            debug.print ("Couldn't get class for " + name + ": " + e);
-            return dummy ();
-
-        }
-        return createModule (moduleClass);
-
-    }
-    public static boolean moduleExists (String name) {
-        try {
-            ArtOfIllusion.getClass (name);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
-        }
-    }
-
-    //to prevent crashes on bad modules
-    public static Module dummy () {
-        return new NumberModule (new Point (), 0.1234567);
-    }
-
-    public static Module createModule (Class moduleClass) {
-        Constructor cons = null;
-        Module mod;
-
-        try {
-            Class[] parameterTypes = new Class [1];
-            parameterTypes [0] = Point.class;
-            cons = moduleClass.getConstructor (parameterTypes);
-        } catch (Exception e) {
-            System.err.println ("Couldn't get constructor for " + moduleClass.getName() + ": " + e);
-            return dummy();
-        }
-        try {
-            mod = (Module) cons.newInstance (new Point ());
-        } catch (InvocationTargetException e) {
-            System.err.println ("Couldn't create a " + moduleClass.getName() + ": (InvocationTargetException)" + e.getTargetException ());
-            return dummy();
-        } catch (Exception e) {
-            System.err.println ("Couldn't create a " + moduleClass.getName() + ": " + e);
-            return dummy();
-        }
-
-        return mod;
-    }
-}
-
-
 /** This is a Module which outputs an expression applied to three numbers. */
 
 public class ExprModule extends ProceduralModule
@@ -236,7 +153,7 @@ public class ExprModule extends ProceduralModule
     Token currTok;
     int tokIdx;
     PointInfo point;
-    Point zero = new Point (0,0);
+    
     String expr;
     private Vector<String> errors;
 
@@ -365,17 +282,15 @@ public class ExprModule extends ProceduralModule
         return !(compiled == null);
     }
 
-    void addToken (Token tok) {
-        debug.print ("Adding token " + tok);
+    void addToken (Token token) {
+        debug.print ("Adding token: " + token);
         if (tokIdx >= tokens.length) {
             Token [] oldtokens = tokens;
             tokens = new Token [tokens.length * 2];
-            for (int i = 0; i < tokens.length; i++) {
-                tokens [i] = oldtokens [i];
-            }
+            System.arraycopy(oldtokens, 0, tokens, 0, tokens.length);
         }
-        tokens [tokIdx++] = tok;
-        currTok = tok;
+        tokens [tokIdx++] = token;
+        currTok = token;
     }
 
     void lex (String str) {
@@ -436,17 +351,13 @@ public class ExprModule extends ProceduralModule
         moduleVec = new Vector<Module>();
 
         CoordinateModule x, y, z, t;
-        x = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
-        x.setCoordinate (CoordinateModule.X);
+        x = new CoordinateModule(new Point(), CoordinateModule.X);
 
-        y = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
-        y.setCoordinate (CoordinateModule.Y);
+        y = new CoordinateModule(new Point(), CoordinateModule.Y);
 
-        z = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
-        z.setCoordinate (CoordinateModule.Z);
+        z = new CoordinateModule(new Point(), CoordinateModule.Z);
 
-        t = (CoordinateModule) ModuleLoader.createModule (CoordinateModule.class);
-        t.setCoordinate (CoordinateModule.T);
+        t = new CoordinateModule(new Point(), CoordinateModule.T);
 
         varTable.put ("x", new OPort (x));
         varTable.put ("y", new OPort (y));
@@ -454,11 +365,11 @@ public class ExprModule extends ProceduralModule
         varTable.put ("t", new OPort (t));
 
         for (int i = 0; i < inputs.length; i++ ){
-            if (inputs [i] != null) {
+            if (inputs [i] == null) {
+                varTable.put ("input" + (i+1), createNumberPort (0));
+            } else {
                 OPort inp = new OPort (inputs [i], linkFromIndex[i]);
                 varTable.put ("input" + (i+1), inp);
-            } else {
-                varTable.put ("input" + (i+1), createNumberPort (0));
             }
         }
 
@@ -638,7 +549,7 @@ public class ExprModule extends ProceduralModule
         return func;
 
     }
-    OPort getOPort (String name) {
+    OPort getOPort (String name) {      
         OPort op;
         //name = "artofillusion.procedural." +name;
         if (!Token.funMap.containsKey (name)) {
@@ -651,13 +562,22 @@ public class ExprModule extends ProceduralModule
 
     //no need to add NumberModules to module list - they don't depend
     //on the point
-    OPort createNumberPort (double v) {
-        Module m = new NumberModule (zero, v);
-        return new OPort (m);
+    OPort createNumberPort (double value) {
+        return new OPort(new NumberModule (new Point(), value));
     }
 
+    private Module createModule (Class moduleClass) {
+    try {
+         Constructor<?> cons = moduleClass.getConstructor (Point.class);
+         return (Module) cons.newInstance (new Point ());
+    } catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+        System.err.println ("Couldn't create module " + moduleClass.getName() + ": " + e);
+        return new NumberModule (new Point (), 0.1234567);
+    }
+    }
+        
     OPort binOp (Class parentClass, OPort left, OPort right) {
-        Module parentM = ModuleLoader.createModule (parentClass);
+        Module parentM = createModule (parentClass);
         Arg [] args = {new Arg ("Arg1", 0), new Arg ("Arg1", 1)};
         OPort parent = new OPort (parentM);
         parent.args = args;

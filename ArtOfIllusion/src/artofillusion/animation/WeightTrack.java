@@ -199,6 +199,12 @@ public class WeightTrack extends Track
     return new double [][] {{0.0, 1.0}};
   }
 
+  @Override
+  public boolean canAcceptAsParent(Object obj)
+  {
+    return false;
+  }
+
   /* Write a serialized representation of this track to a stream. */
 
   @Override

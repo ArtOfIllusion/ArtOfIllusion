@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2013 by Peter Eastman
+   Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -76,21 +77,21 @@ public abstract class Track
   
   /** Get the names of all graphable values for this track. */
   
-  public String [] getValueNames()
+  public String[] getValueNames()
   {
-    return new String [0];
+    return new String[0];
   }
   
   /** Get the list of graphable values for a particular keyframe. */
   
-  public double [] getGraphValues(Keyframe key)
+  public double[] getGraphValues(Keyframe key)
   {
     return new double [0];
   }
   
   /** Get the default list of graphable values (for a track which has no keyframes). */
   
-  public double [] getDefaultGraphValues()
+  public double[] getDefaultGraphValues()
   {
     return new double [0];
   }
@@ -183,16 +184,16 @@ public abstract class Track
   
   /** Get any child tracks of this track. */
   
-  public Track [] getSubtracks()
+  public Track[] getSubtracks()
   {
-    return new Track [0];
+    return new Track[0];
   }
   
   /** Determine whether this track can be added as a child of an object. */
   
   public boolean canAcceptAsParent(Object obj)
   {
-    return false;
+    return obj instanceof ObjectInfo;
   }
   
   /** Get the parent object of this track. */
@@ -211,9 +212,9 @@ public abstract class Track
   /** Get an array of any objects which this track depends on (and which therefore must
       be updated before this track is applied). */ 
   
-  public ObjectInfo [] getDependencies()
+  public ObjectInfo[] getDependencies()
   {
-    return new ObjectInfo [0];
+    return new ObjectInfo[0];
   }
   
   /** Delete all references to the specified object from this track.  This is used when an

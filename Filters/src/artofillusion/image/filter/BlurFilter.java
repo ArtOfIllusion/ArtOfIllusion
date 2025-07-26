@@ -1,5 +1,6 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
    Changes copyright (C) 2018 by Maksim Khramov
+   Bug fix copyright (C) 2025 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -128,7 +129,11 @@ public class BlurFilter extends ImageFilter
   @Override
   public void writeToStream(DataOutputStream out, Scene theScene) throws IOException
   {
-    out.writeDouble((Integer) getPropertyValue(0));
+    // PropertyValues are Objects. Technically the object this one is a Double, but 
+    // conversion directly to the primitive double that we write to the stream 
+    // works as well.
+
+    out.writeDouble((double) getPropertyValue(0));
   }
 
   /** Reconstruct this filter from its serialized representation. */

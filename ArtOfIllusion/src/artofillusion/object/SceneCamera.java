@@ -454,8 +454,9 @@ public class SceneCamera extends Object3D
         temp.fov          = fovSlider.getValue();
         temp.depthOfField = dofField.getValue();
         temp.focalDist    = fdField.getValue();
+        temp.filter       = filter; // We need to edit the current filters, not the duplicates.
         new CameraFilterDialog(UIUtilities.findWindow(fovSlider), parent.getScene(), temp, info.getCoords());
-        filter = temp.filter;
+        filter = temp.filter; // Get the filter set back with added/removed filters.
       }
     }, "processEvent");
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),

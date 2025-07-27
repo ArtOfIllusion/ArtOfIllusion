@@ -448,17 +448,11 @@ public class SceneCamera extends Object3D
     final ValueField fdField    = new ValueField(focalDist, ValueField.POSITIVE);
     BCheckBox perspectiveBox    = new BCheckBox(Translate.text("Perspective"), perspective);
     BButton filtersButton = Translate.button("filters", new Object() {
-      void processEvent()
-      {
-        SceneCamera temp  = SceneCamera.this.duplicate();
-        temp.fov          = fovSlider.getValue();
-        temp.depthOfField = dofField.getValue();
-        temp.focalDist    = fdField.getValue();
-        temp.filter       = filter; // We need to edit the current filters, not the duplicates.
-        new CameraFilterDialog(UIUtilities.findWindow(fovSlider), parent.getScene(), temp, info.getCoords());
-        filter = temp.filter; // Get the filter set back with added/removed filters.
+      void processEvent(){
+        editFilters(parent, info, UIUtilities.findWindow(fovSlider), fovSlider.getValue(), dofField.getValue(), fdField.getValue());
       }
     }, "processEvent");
+
     ComponentsDialog dlg = new ComponentsDialog(parent.getFrame(), Translate.text("editCameraTitle"),
                            new Widget[] {fovSlider, dofField, fdField, perspectiveBox, filtersButton},
                            new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist"), null, null});
@@ -469,6 +463,18 @@ public class SceneCamera extends Object3D
       focalDist = fdField.getValue();
       perspective = perspectiveBox.getState();
     }
+    cb.run();
+  }
+
+  private void editFilters(EditingWindow parent, ObjectInfo info, WindowWidget camDlg, double fov, double dof, double foc)
+  {
+    SceneCamera temp  = SceneCamera.this.duplicate();
+    temp.fov          = fov;
+    temp.depthOfField = dof;
+    temp.focalDist    = foc;
+    temp.filter       = filter; // We need to edit the current filters (if any exist), not the duplicates.
+    new CameraFilterDialog(camDlg, parent.getScene(), temp, info.getCoords());
+    filter = temp.filter; // Get the filter set back with added/removed filters.
 
     // If there are any Pose tracks for this object, they need to have their subtracks updated
     // to reflect the current list of filters.
@@ -479,13 +485,13 @@ public class SceneCamera extends Object3D
       {
         // This ObjectInfo corresponds to this SceneCamera.  Check each of its tracks.
 
-        ObjectInfo obj = sc.getObject(i);
-        for (int j = 0; j < obj.getTracks().length; j++)
-          if (obj.getTracks()[j] instanceof PoseTrack)
+        ObjectInfo camInfo = sc.getObject(i);
+        for (int j = 0; j < camInfo.getTracks().length; j++)
+          if (camInfo.getTracks()[j] instanceof PoseTrack)
           {
             // This is a Pose track, so update its subtracks.
 
-            PoseTrack pose = (PoseTrack) obj.getTracks()[j];
+            PoseTrack pose = (PoseTrack) camInfo.getTracks()[j];
             Track old[] = pose.getSubtracks();
             Track newtracks[] = new Track [filter.length];
             for (int k = 0; k < filter.length; k++)
@@ -503,7 +509,6 @@ public class SceneCamera extends Object3D
       }
     if (parent instanceof LayoutWindow)
       ((LayoutWindow) parent).getScore().rebuildList();
-    cb.run();
   }
 
   /* The following two methods are used for reading and writing files.  The first is a

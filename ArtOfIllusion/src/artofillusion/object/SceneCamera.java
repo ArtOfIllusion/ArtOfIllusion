@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2009 by Peter Eastman
-   Modifications Copyright 2016 by Petri Ihalainen
+   Modifications Copyright 2016-2025 by Petri Ihalainen
    Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -444,16 +444,16 @@ public class SceneCamera extends Object3D
   public void edit(final EditingWindow parent, final ObjectInfo info, Runnable cb)
   {
     final ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
-    final ValueField dofField = new ValueField(depthOfField, ValueField.POSITIVE);
-    final ValueField fdField = new ValueField(focalDist, ValueField.POSITIVE);
-    BCheckBox perspectiveBox = new BCheckBox(Translate.text("Perspective"), perspective);
+    final ValueField dofField   = new ValueField(depthOfField, ValueField.POSITIVE);
+    final ValueField fdField    = new ValueField(focalDist, ValueField.POSITIVE);
+    BCheckBox perspectiveBox    = new BCheckBox(Translate.text("Perspective"), perspective);
     BButton filtersButton = Translate.button("filters", new Object() {
       void processEvent()
       {
-        SceneCamera temp = SceneCamera.this.duplicate();
-        temp.fov = fovSlider.getValue();
+        SceneCamera temp  = SceneCamera.this.duplicate();
+        temp.fov          = fovSlider.getValue();
         temp.depthOfField = dofField.getValue();
-        temp.focalDist = fdField.getValue();
+        temp.focalDist    = fdField.getValue();
         new CameraFilterDialog(UIUtilities.findWindow(fovSlider), parent.getScene(), temp, info.getCoords());
         filter = temp.filter;
       }

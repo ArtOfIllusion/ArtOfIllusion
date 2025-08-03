@@ -20,6 +20,7 @@ import artofillusion.math.*;
 import artofillusion.ui.*;
 import buoy.widget.*;
 import java.io.*;
+import static artofillusion.UndoRecord.*;
 
 /** SceneCamera is a type of Object3D.  It represents a camera which the user can position
     within a scene.  It should not be confused with the Camera class. */
@@ -443,13 +444,19 @@ public class SceneCamera extends Object3D
   @Override
   public void edit(final EditingWindow parent, final ObjectInfo info, Runnable cb)
   {
+    // The Runnable that is passed to all object edit methods does not 
+    // have all the needed functions to cover SceneCamera changes.
+    // Therfore we'll do all those locally.
+
+    UndoRecord undo = new UndoRecord(parent, false);
+ 
     final ValueSlider fovSlider = new ValueSlider(0.0, 180.0, 90, fov);
     final ValueField dofField   = new ValueField(depthOfField, ValueField.POSITIVE);
     final ValueField fdField    = new ValueField(focalDist, ValueField.POSITIVE);
     BCheckBox perspectiveBox    = new BCheckBox(Translate.text("Perspective"), perspective);
     BButton filtersButton = Translate.button("filters", new Object() {
       void processEvent(){
-        editFilters(parent, info, UIUtilities.findWindow(fovSlider), fovSlider.getValue(), dofField.getValue(), fdField.getValue());
+        editFilters(parent, info, UIUtilities.findWindow(fovSlider), fovSlider.getValue(), dofField.getValue(), fdField.getValue(), undo);
       }
     }, "processEvent");
 
@@ -458,23 +465,68 @@ public class SceneCamera extends Object3D
                            new String[] {Translate.text("fieldOfView"), Translate.text("depthOfField"), Translate.text("focalDist"), null, null});
     if (dlg.clickedOk())
     {
+      // This UndoRecord covers the following changes to the camera parameters.
+      // For safety the commands will be executed in reversed order.
+
+      undo.addCommandAtBeginning(COPY_OBJECT, SceneCamera.this, SceneCamera.this.duplicate());
+
       fov = fovSlider.getValue();
       depthOfField = dofField.getValue();
       focalDist = fdField.getValue();
       perspective = perspectiveBox.getState();
     }
-    cb.run();
+
+    // All filter track and camera parameter changes are packed 
+    // in one UndoRecord. If both dialogs were exited by Cancel, the record 
+    // is empty and will not be added to history.
+
+    if (undo.getCommands().size() > 0)
+      parent.setUndoRecord(undo);
+
+    // The rest of the ignored Runnable.
+
+    if (parent.getScene() != null)
+      parent.getScene().objectModified(SceneCamera.this);
+    parent.updateImage();
+    parent.updateMenus();
   }
 
-  private void editFilters(EditingWindow parent, ObjectInfo info, WindowWidget camDlg, double fov, double dof, double foc)
+  private void editFilters(EditingWindow parent, ObjectInfo info, WindowWidget camDlg, double fov, double dof, double foc, UndoRecord undo)
   {
-    SceneCamera temp  = SceneCamera.this.duplicate();
-    temp.fov          = fov;
-    temp.depthOfField = dof;
-    temp.focalDist    = foc;
-    temp.filter       = filter; // We need to edit the current filters (if any exist), not the duplicates.
-    new CameraFilterDialog(camDlg, parent.getScene(), temp, info.getCoords());
-    filter = temp.filter; // Get the filter set back with added/removed filters.
+    // This copy of the camera is there to save the filter settings before they are edited. 
+    // OK in filter dialog already changes the settings, though the filter list on 
+    // this side is still unchanged.
+
+    SceneCamera undoCam  = SceneCamera.this.duplicate(); 
+
+    // This camera carries the camera dialog values (and filters) to the filter dialog
+
+    SceneCamera msgrCam  = SceneCamera.this.duplicate();
+    msgrCam.fov          = fov;
+    msgrCam.depthOfField = dof;
+    msgrCam.focalDist    = foc;
+    msgrCam.filter       = filter; // We need to edit the current filters (if any exist), not the duplicates.
+
+    CameraFilterDialog filtDlg = new CameraFilterDialog(camDlg, parent.getScene(), msgrCam, info.getCoords());
+
+    // If Cancel was pressed, nothing needs to be done.
+    // The filter dialog has reverted any edited values back 
+    // to what they were.
+
+    if (! filtDlg.clickedOk())
+    {
+      filtDlg = null;
+      return;
+    }
+
+    // This addition to undo only covers the filter changes.
+
+    undo.addCommandAtBeginning(COPY_OBJECT, SceneCamera.this, undoCam);
+
+    // Get the modified filter list and dispose of the filter dialog
+
+    filter = msgrCam.filter;
+    filtDlg    = null;
 
     // If there are any Pose tracks for this object, they need to have their subtracks updated
     // to reflect the current list of filters.
@@ -492,6 +544,11 @@ public class SceneCamera extends Object3D
             // This is a Pose track, so update its subtracks.
 
             PoseTrack pose = (PoseTrack) camInfo.getTracks()[j];
+
+            // This addition to undo takes care of the changed, added or removed filter tracks
+
+            undo.addCommandAtBeginning(COPY_TRACK, pose, pose.duplicate(camInfo));
+
             Track old[] = pose.getSubtracks();
             Track newtracks[] = new Track [filter.length];
             for (int k = 0; k < filter.length; k++)

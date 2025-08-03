@@ -1,5 +1,6 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
    Changes copyright (C) 2020, 2022 by Maksim Khramov
+   Changes copyright (C) 2025 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -44,9 +45,12 @@ public class CameraFilterDialog extends BDialog implements RenderListener
   private static final int PREVIEW_WIDTH = 200;
   private static final int PREVIEW_HEIGHT = 150;
 
+  private boolean clickedOk;
+
   public CameraFilterDialog(WindowWidget parent, Scene scene, SceneCamera camera, CoordinateSystem cameraCoords)
   {
     super(parent, Translate.text("Filters"), true);
+    clickedOk = false;
     theCamera = camera;
     theScene = scene;
     this.cameraCoords = cameraCoords;
@@ -135,6 +139,7 @@ public class CameraFilterDialog extends BDialog implements RenderListener
 
   private void doOk()
   {
+    clickedOk = true;
     ImageFilter filt[] = filtersPanel.filters.toArray(new ImageFilter [filtersPanel.filters.size()]);
     theCamera.setImageFilters(filt);
     configureRenderer(savedConfiguration, previewRenderer);
@@ -266,6 +271,13 @@ public class CameraFilterDialog extends BDialog implements RenderListener
     doneRendering = true;
     applyFilters();
     doneFiltering = true;
+  }
+
+  /** Check whether the dialog was exited by clicking OK. **/
+
+  public boolean clickedOk()
+  {
+    return clickedOk;
   }
 
   /**

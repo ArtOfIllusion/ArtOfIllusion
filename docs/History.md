@@ -1,7 +1,22 @@
 Art of Illusion Version History
 
-Latest: (Not in stable release yet)
- 
+v3.2.1, November 14, 2023
+
+- Updated Groovy library - better java version compatibility and overall
+  enhancements in the features available when writing groovy scripts.
+- Small adjustment to grid rendering during automated view movements
+- Multiple patches and fixes to various localizations throughout the
+  application
+- Updates/enhancements to script editor usability and scripting menu options
+- Small enhancement to script load/save. Script location no longer affects
+  current directory for scene load/save.
+- Workaround patch to closing unmodified scenes on opening a file for some 
+  macs.
+- Fix some raytracing glitches with very detailed/very large meshes
+
+v3.2.0, January 13, 2021
+
+- Update linux launcher script. Fix filename passthrough and filetype associations
 - Added basic syntax highlighting to script editors
 - Save basic rendering settings as scene meta-data
 - Fix Soft Shadows to only be rendered when AA active

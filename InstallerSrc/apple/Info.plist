@@ -57,7 +57,7 @@
         <string>$JAVAROOT/QuickTimeWriter.jar</string>
         <string>$JAVAROOT/bsh-2.0b4.jar</string>
         <string>$JAVAROOT/gluegen-rt.jar</string>
-        <string>$JAVAROOT/groovy-all-2.1.2.jar</string>
+        <string>$JAVAROOT/groovy-4.0.15.jar</string>
         <string>$JAVAROOT/jogl-all.jar</string>
         <string>$JAVAROOT/svgSalamander.jar</string>
         <string>$JAVAROOT/ArtOfIllusion.jar</string>

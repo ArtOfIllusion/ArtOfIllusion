@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
   <jar>install.jar</jar>
-  <outfile>ArtOfIllusion-3.2.0-Windows.exe</outfile>
+  <outfile>ArtOfIllusion-3.2.1-Windows.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -25,11 +25,11 @@
     <txtFileVersion>1.1.0</txtFileVersion>
     <fileDescription>Art of Illusion Package for Windows</fileDescription>
     <copyright>2019 Peter Eastman et. al.</copyright>
-    <productVersion>3.2.0.0</productVersion>
-    <txtProductVersion>3.2.0</txtProductVersion>
+    <productVersion>3.2.1.0</productVersion>
+    <txtProductVersion>3.2.1</txtProductVersion>
     <productName>Art of Illusion for Windows</productName>
     <internalName>Art of Illusion</internalName>
-    <originalFilename>ArtOfIllusion-3.2.0-Windows.exe</originalFilename>
+    <originalFilename>ArtOfIllusion-3.2.1-Windows.exe</originalFilename>
     <language>ENGLISH_US</language>
   </versionInfo>
 </launch4jConfig>

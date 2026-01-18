@@ -5,7 +5,7 @@
   <!-- Application Information -->
   <info>
     <appname>ArtOfIllusion</appname>
-    <appversion>3.2.0</appversion>
+    <appversion>3.2.1</appversion>
     <authors>
       <author name="Peter Eastman" email="peastman@users.sourceforge.net"/>
     </authors>
@@ -73,7 +73,7 @@
         <os family="windows" />
       </file>
       <file src="Art of Illusion.exe" targetdir="$INSTALL_PATH"/>
-      <file src="RemoveAoI.exe" targetdir="$INSTALL_PATH"/>
+      <file src="UninstallAoI.exe" targetdir="$INSTALL_PATH"/>
     </pack>
 
     <pack id="jogl-windows" name="Jogamp JOGL" preselected="yes" required="no">

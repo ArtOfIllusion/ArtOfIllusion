@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2009 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -27,15 +27,31 @@ import java.util.Vector;
 
 public class TreeList extends CustomWidget
 {
-  private EditingWindow window;
-  private Vector<TreeElement> elements, showing, selected;
-  private Vector<Integer> indent;
-  private int yoffset, rowHeight, dragStart, lastDrag, lastClickRow, lastIndent, maxRowWidth;
-  private boolean updateDisabled, moving, origSelected[], insertAbove, okToInsert, allowMultiple;
+  private final EditingWindow window;
+  private final Vector<TreeElement> elements = new Vector<>();
+  private final Vector<TreeElement> showing = new Vector<>();
+  private final Vector<TreeElement> selected = new Vector<>();
+  private final Vector<Integer> indent = new Vector<>();
+  private int yOffset;
+  private int rowHeight = 15;
+  private int dragStart;
+  private int lastDrag;
+  private int lastClickRow = -1;
+  private int lastIndent;
+  private int maxRowWidth;
+  private boolean updateDisabled;
+  private boolean moving;
+  private boolean insertAbove;
+  private boolean okToInsert;
+  private boolean allowMultiple = true;
+  private boolean[] origSelected = new boolean[0];
   private PopupMenuManager popupManager;
+
   protected UndoRecord undo;
 
-  private static final Polygon openHandle, closedHandle, insertHandle;
+  private static final Polygon openHandle;
+  private static final Polygon closedHandle;
+  private static final Polygon insertHandle;
   private static final int INDENT_WIDTH = 10;
   private static final int HANDLE_WIDTH = 4;
   private static final int HANDLE_HEIGHT = 8;
@@ -55,23 +71,17 @@ public class TreeList extends CustomWidget
   public TreeList(EditingWindow win)
   {
     window = win;
-    elements = new Vector<TreeElement>();
-    showing = new Vector<TreeElement>();
-    indent = new Vector<Integer>();
-    selected = new Vector<TreeElement>();
-    origSelected = new boolean [0];
-    allowMultiple = true;
-    lastClickRow = -1;
+
     Font font = getFont();
     if (font == null)
       font = UIUtilities.getDefaultFont();
     if (font != null)
     {
       FontMetrics fm = getComponent().getFontMetrics(font);
-      rowHeight = Math.max(fm.getMaxAscent()+fm.getMaxDescent(), HANDLE_HEIGHT)+3;
+      rowHeight = Math.max(fm.getMaxAscent() + fm.getMaxDescent(), HANDLE_HEIGHT) + 3;
     }
-    else
-      rowHeight = 15;
+
+
     buildState();
     addEventLink(MousePressedEvent.class, this, "mousePressed");
     addEventLink(MouseReleasedEvent.class, this, "mouseReleased");
@@ -84,7 +94,7 @@ public class TreeList extends CustomWidget
   public Dimension getPreferredSize()
   {
     Dimension superPref = super.getPreferredSize();
-    return new Dimension(Math.max(superPref.width, maxRowWidth), Math.max(superPref.height, rowHeight*showing.size()));
+    return new Dimension(Math.max(superPref.width, maxRowWidth), Math.max(superPref.height, rowHeight * showing.size()));
   }
 
   @Override
@@ -139,9 +149,8 @@ public class TreeList extends CustomWidget
 
   public TreeElement findElement(Object obj)
   {
-    for (int i = 0; i < elements.size(); i++)
+    for (TreeElement el: elements)
     {
-      TreeElement el = elements.get(i);
       if (el.getObject().equals(obj))
         return el;
       TreeElement subElement = findElement(obj, el);
@@ -198,49 +207,39 @@ public class TreeList extends CustomWidget
 
   /** Get an array of all the TreeElements in the tree. */
 
-  public TreeElement [] getElements()
+  public TreeElement[] getElements()
   {
-    Vector<TreeElement> v = new Vector<TreeElement>();
-    TreeElement el;
+    final List<TreeElement> v = new Vector<>();
 
-    for (int i = 0; i < elements.size(); i++)
-    {
-      el = elements.get(i);
+    elements.forEach(el -> {
       v.add(el);
-      addChildrenToVector(el, v);
-    }
-    TreeElement allEl[] = new TreeElement [v.size()];
-    for (int i = 0; i < allEl.length; i++)
-      allEl[i] = v.get(i);
-    return allEl;
+      addChildrenToList(el, v);
+    });
+    return v.toArray(new TreeElement[0]);
   }
 
-  private void addChildrenToVector(TreeElement el, List<TreeElement> v)
+  private void addChildrenToList(TreeElement el, List<TreeElement> v)
   {
     for (int i = 0; i < el.getNumChildren(); i++)
     {
       TreeElement child = el.getChild(i);
       v.add(child);
-      addChildrenToVector(child, v);
+      addChildrenToList(child, v);
     }
   }
 
   /** Get an array of the objects corresponding to selected TreeElements. */
 
-  public Object [] getSelectedObjects()
+  public Object[] getSelectedObjects()
   {
-    Object sel[] = new Object [selected.size()];
-    for (int i = 0; i < sel.length; i++)
-      sel[i] = selected.get(i).getObject();
-    return sel;
+    return selected.stream().map(TreeElement::getObject).toArray(Object[]::new);
   }
 
   /** Deselect all elements in the tree. */
 
   public void deselectAll()
   {
-    for (int i = 0; i < elements.size(); i++)
-      deselectRecursively(elements.get(i));
+    elements.forEach(this::deselectRecursively);
     if (!updateDisabled)
     {
       buildState();
@@ -258,9 +257,9 @@ public class TreeList extends CustomWidget
   /** Get an array of the objects corresponding to visible TreeElements, in the order that
       they appear. */
 
-  public Object [] getVisibleObjects()
+  public Object[] getVisibleObjects()
   {
-    Object vis[] = new Object [showing.size()];
+    Object[] vis = new Object [showing.size()];
     for (int i = 0; i < vis.length; i++)
       vis[i] = showing.get(i).getObject();
     return vis;
@@ -277,7 +276,7 @@ public class TreeList extends CustomWidget
 
   public void setSelected(Object obj, boolean selected)
   {
-    TreeElement el = (obj instanceof TreeElement ? (TreeElement) obj : findElement(obj));
+    TreeElement el = obj instanceof TreeElement ? (TreeElement) obj : findElement(obj);
     boolean wasDisabled = updateDisabled;
     updateDisabled = true;
     if (el != null)
@@ -334,20 +333,22 @@ public class TreeList extends CustomWidget
 
   private void buildState()
   {
-    if (updateDisabled)
-      return;
+    if (updateDisabled) return;
+
     showing.clear();
     indent.clear();
     selected.clear();
-    for (int i = 0; i < elements.size(); i++)
+
+    for (TreeElement el: elements)
     {
-      TreeElement el = elements.get(i);
+
       showing.add(el);
       indent.add(0);
       if (el.isSelected())
         selected.add(el);
       addChildrenToState(el, 1, el.isExpanded());
     }
+
     if (origSelected.length != showing.size())
       origSelected = new boolean [showing.size()];
     invalidateSize();
@@ -379,7 +380,7 @@ public class TreeList extends CustomWidget
 
   public void setYOffset(int offset)
   {
-    yoffset = offset;
+    yOffset = offset;
   }
 
   /** Paint the tree. */
@@ -389,14 +390,14 @@ public class TreeList extends CustomWidget
     Graphics2D g = ev.getGraphics();
     FontMetrics fm = g.getFontMetrics();
     Rectangle dim = getBounds();
-    int y = yoffset;
+    int y = yOffset;
 
-    rowHeight = Math.max(fm.getMaxAscent()+fm.getMaxDescent(), HANDLE_HEIGHT)+3;
+    rowHeight = Math.max(fm.getMaxAscent() + fm.getMaxDescent(), HANDLE_HEIGHT) + 3;
     maxRowWidth = 0;
     for (int i = 0; i < showing.size(); i++)
     {
       TreeElement el = showing.get(i);
-      int x = indent.get(i)*INDENT_WIDTH;
+      int x = indent.get(i) * INDENT_WIDTH;
       if (el.getNumChildren() > 0)
       {
         // Draw the handle to collapse or expand the hierarchy.
@@ -404,15 +405,15 @@ public class TreeList extends CustomWidget
         g.setColor(Color.black);
         if (el.isExpanded())
         {
-          openHandle.translate(x+INDENT_WIDTH/2, y+rowHeight/2);
+          openHandle.translate(x + INDENT_WIDTH / 2, y + rowHeight / 2);
           g.drawPolygon(openHandle);
-          openHandle.translate(-x-INDENT_WIDTH/2, -y-rowHeight/2);
+          openHandle.translate(-x - INDENT_WIDTH / 2, -y - rowHeight / 2);
         }
         else
         {
-          closedHandle.translate(x+INDENT_WIDTH/2, y+rowHeight/2);
+          closedHandle.translate(x + INDENT_WIDTH / 2, y + rowHeight / 2);
           g.drawPolygon(closedHandle);
-          closedHandle.translate(-x-INDENT_WIDTH/2, -y-rowHeight/2);
+          closedHandle.translate(-x - INDENT_WIDTH / 2, -y - rowHeight / 2);
         }
       }
 
@@ -445,7 +446,7 @@ public class TreeList extends CustomWidget
   private void mousePressed(MousePressedEvent ev)
   {
     Point pos = ev.getPoint();
-    pos.y -= yoffset;
+    pos.y -= yOffset;
     int row = pos.y/rowHeight;
 
     moving = false;
@@ -535,8 +536,11 @@ public class TreeList extends CustomWidget
   private void mouseDragged(MouseDraggedEvent ev)
   {
     Point pos = ev.getPoint();
-    pos.y -= yoffset;
-    int row = pos.y/rowHeight, min, max, i;
+    pos.y -= yOffset;
+    int row = pos.y/rowHeight;
+    int min;
+    int max;
+    int i;
 
     if (moving)
     {
@@ -644,7 +648,8 @@ public class TreeList extends CustomWidget
 
         recordUndo();
         updateDisabled = true;
-        TreeElement el = null, parent;
+        TreeElement el = null;
+        TreeElement parent;
         int position = 0;
 
         // First figure out where to insert them.
@@ -691,22 +696,23 @@ public class TreeList extends CustomWidget
           }
           removeObject(el.getObject());
         }
+
         if (position < 0)
           position = 0;
+
         if (parent == null)
-          for (int i = 0; i < selected.size(); i++)
-          {
-            el = selected.get(i);
-            if (el.getParent() == null || !el.getParent().isSelected())
-              addElement(el, position++);
-          }
+            for (TreeElement treeElement : selected) {
+                el = treeElement;
+                if (el.getParent() == null || !el.getParent().isSelected())
+                    addElement(el, position++);
+            }
         else
-          for (int i = 0; i < selected.size(); i++)
-          {
-            el = selected.get(i);
-            if (el.getParent() == null || !el.getParent().isSelected())
-              parent.addChild(el, position++);
-          }
+            for (TreeElement treeElement : selected) {
+                el = treeElement;
+                if (el.getParent() == null || !el.getParent().isSelected())
+                    parent.addChild(el, position++);
+            }
+
         updateDisabled = false;
         buildState();
         window.setUndoRecord(finishRecording());
@@ -728,9 +734,9 @@ public class TreeList extends CustomWidget
 
   private boolean dragTargetOk(TreeElement parent)
   {
-    for (int i = 0; i < selected.size(); i++)
+    for (TreeElement el: selected)
     {
-      TreeElement el = selected.get(i);
+
       if (el.getParent() != null && el.getParent().isSelected())
         continue;
       if (!el.canAcceptAsParent(parent))
@@ -744,13 +750,13 @@ public class TreeList extends CustomWidget
     if (ev.getClickCount() == 1 && mouseButtonTwo(ev))
 	{
     	window.getView().fitToObjects(((LayoutWindow)window).getSelectedObjects());
-    	return;
 	}
 	else if (ev.getClickCount() == 2)
 	{
 		Point pos = ev.getPoint();
-		pos.y -= yoffset;
-		int row = pos.y/rowHeight, i = pos.x/INDENT_WIDTH;
+		pos.y -= yOffset;
+		int row = pos.y/rowHeight;
+        int i = pos.x/INDENT_WIDTH;
 		if (row >= showing.size())
 			return;
 		int ind = indent.get(row);
@@ -758,7 +764,6 @@ public class TreeList extends CustomWidget
 		if (i < ind)
 			return;
 		dispatchEvent(new ElementDoubleClickedEvent(el));
-		return;
 	}
   }
 
@@ -766,7 +771,8 @@ public class TreeList extends CustomWidget
 
   private void drawInsertionPoint(Graphics g, int pos, int indent)
   {
-    int x = (indent+1)*INDENT_WIDTH, y = pos*rowHeight-2+yoffset;
+    int x = (indent + 1) * INDENT_WIDTH;
+    int y = pos * rowHeight - 2 + yOffset;
     Rectangle dim = getBounds();
 
     insertHandle.translate(x, y);
@@ -797,7 +803,7 @@ public class TreeList extends CustomWidget
 
   public class TreeElementEvent implements WidgetEvent
   {
-    TreeElement elem;
+    final TreeElement elem;
 
     private TreeElementEvent(TreeElement el)
     {

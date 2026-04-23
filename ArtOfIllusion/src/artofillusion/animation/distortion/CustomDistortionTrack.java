@@ -69,7 +69,7 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
   /* Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object obj)
+  public CustomDistortionTrack duplicate(Object obj)
   {
     CustomDistortionTrack t = new CustomDistortionTrack((ObjectInfo) obj);
 
@@ -80,7 +80,7 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
     t.worldCoords = worldCoords;
     t.smoothingMethod = smoothingMethod;
     t.tc = tc.duplicate((ObjectInfo) obj);
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     return t;
   }
 
@@ -178,14 +178,6 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
     return new Track [] {theWeight};
   }
 
-  /* Determine whether this track can be added as a child of an object. */
-
-  @Override
-  public boolean canAcceptAsParent(Object obj)
-  {
-    return (obj instanceof ObjectInfo);
-  }
-
   /* Get the parent object of this track. */
 
   @Override
@@ -253,23 +245,6 @@ public class CustomDistortionTrack extends Track implements ProcedureOwner
 	range[i][1] = parameter[i].maxVal;
       }
     return range;
-  }
-
-  /* Get an array of any objects which this track depends on (and which therefore must
-     be updated before this track is applied). */
-
-  @Override
-  public ObjectInfo [] getDependencies()
-  {
-     return new ObjectInfo [0];
-  }
-
-  /* Delete all references to the specified object from this track.  This is used when an
-     object is deleted from the scene. */
-
-  @Override
-  public void deleteDependencies(ObjectInfo obj)
-  {
   }
 
   /** Find all the parameters for the procedure. */

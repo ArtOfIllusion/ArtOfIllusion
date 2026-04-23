@@ -71,7 +71,7 @@ public class SkeletonShapeTrack extends Track
   /** Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object obj)
+  public SkeletonShapeTrack duplicate(Object obj)
   {
     SkeletonShapeTrack t = new SkeletonShapeTrack((ObjectInfo) obj);
     t.name = name;
@@ -80,7 +80,7 @@ public class SkeletonShapeTrack extends Track
     t.smoothingMethod = smoothingMethod;
     t.useGestures = useGestures;
     t.tc = tc.duplicate(((ObjectInfo) obj).getObject());
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     return t;
   }
 
@@ -96,7 +96,7 @@ public class SkeletonShapeTrack extends Track
     smoothingMethod = t.smoothingMethod;
     useGestures = t.useGestures;
     tc = t.tc.duplicate(info.getObject());
-    theWeight = (WeightTrack) t.theWeight.duplicate(this);
+    theWeight = t.theWeight.duplicate(this);
   }
 
   /** Get a list of all keyframe times for this track. */
@@ -208,22 +208,6 @@ public class SkeletonShapeTrack extends Track
     smoothingMethod = method;
   }
 
-  /** Get the names of all graphable values for this track. */
-
-  @Override
-  public String [] getValueNames()
-  {
-    return new String [0];
-  }
-
-  /** Get the default list of graphable values (for a track which has no keyframes). */
-
-  @Override
-  public double [] getDefaultGraphValues()
-  {
-    return new double [0];
-  }
-
   /** Get the allowed range for graphable values.  This returns a 2D array, where elements
       [n][0] and [n][1] are the minimum and maximum allowed values, respectively, for
       the nth graphable value. */
@@ -232,23 +216,6 @@ public class SkeletonShapeTrack extends Track
   public double[][] getValueRange()
   {
     return new double [][] {{-Double.MAX_VALUE, Double.MAX_VALUE}};
-  }
-
-  /** Get an array of any objects which this track depends on (and which therefore must
-      be updated before this track is applied). */
-
-  @Override
-  public ObjectInfo [] getDependencies()
-  {
-     return new ObjectInfo [0];
-  }
-
-  /** Delete all references to the specified object from this track.  This is used when an
-      object is deleted from the scene. */
-
-  @Override
-  public void deleteDependencies(ObjectInfo obj)
-  {
   }
 
   /** Write a serialized representation of this track to a stream. */

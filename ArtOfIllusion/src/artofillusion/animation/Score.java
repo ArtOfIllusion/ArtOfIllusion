@@ -1,5 +1,5 @@
 /* Copyright (C) 2001-2012 by Peter Eastman
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -41,9 +41,9 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   BLabel helpText;
   BSplitPane div;
   BPopupMenu popupMenu;
-  BMenuItem popupMenuItem[];
+  BMenuItem[] popupMenuItem;
   Marker timeMarker;
-  private SelectionInfo selection[];
+  private SelectionInfo[] selection;
   int scrollPos, mode, view;
   double startTime, timeScale;
   int yoffset;
@@ -152,11 +152,11 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
   {
     popupMenu = new BPopupMenu();
     popupMenuItem = new BMenuItem [5];
-    popupMenu.add(popupMenuItem[0] = Translate.menuItem("editTrack", this, "editSelectedTrack", null));
-    popupMenu.add(popupMenuItem[1] = Translate.menuItem("duplicateTracks", this, "duplicateSelectedTracks", null));
-    popupMenu.add(popupMenuItem[2] = Translate.menuItem("deleteTracks", this, "deleteSelectedTracks", null));
-    popupMenu.add(popupMenuItem[3] = Translate.menuItem("enableTracks", window, "actionPerformed", null));
-    popupMenu.add(popupMenuItem[4] = Translate.menuItem("disableTracks", window, "actionPerformed", null));
+    popupMenu.add(popupMenuItem[0] = Translate.menuItem("editTrack", this, "editSelectedTrack"));
+    popupMenu.add(popupMenuItem[1] = Translate.menuItem("duplicateTracks", this, "duplicateSelectedTracks"));
+    popupMenu.add(popupMenuItem[2] = Translate.menuItem("deleteTracks", this, "deleteSelectedTracks"));
+    popupMenu.add(popupMenuItem[3] = Translate.menuItem("enableTracks", this, "enableTracks"));
+    popupMenu.add(popupMenuItem[4] = Translate.menuItem("disableTracks", this, "disableTracks"));
   }
 
   /** Display the popup menu. */
@@ -770,6 +770,14 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     repaintAll();
   }
 
+  public void enableTracks() {
+    setTracksEnabled(true);
+  }
+
+  public void disableTracks() {
+    setTracksEnabled(false);
+  }
+
   /** Enable or disable all selected tracks. */
 
   public void setTracksEnabled(boolean enable)
@@ -1122,7 +1130,7 @@ public class Score extends BorderContainer implements EditingWindow, PopupMenuMa
     // Find the latest keyframe on any track of any object.
 
     double maxTime = Math.max(0.0, window.getScene().getTime());
-    for (ObjectInfo obj : window.getScene().getAllObjects())
+    for (ObjectInfo obj : window.getScene().getObjects())
     {
       for (Track track : obj.getTracks())
       {

@@ -1189,8 +1189,8 @@ public class Scene
     int count;
     short version = in.readShort();
     Hashtable<Integer, Object3D> table;
-    Class cls;
-    Constructor con;
+    Class<?> cls;
+    Constructor<?> con;
 
     if (version < 0 || version > 5)
       throw new InvalidObjectException("");
@@ -1413,8 +1413,8 @@ public class Scene
   private ObjectInfo readObjectFromFile(DataInputStream in, Hashtable<Integer, Object3D> table, int version) throws IOException, InvalidObjectException
   {
     ObjectInfo info = new ObjectInfo(null, new CoordinateSystem(in), in.readUTF());
-    Class cls;
-    Constructor con;
+    Class<?> cls;
+    Constructor<?> con;
     Object3D obj;
 
     info.setId(in.readInt());

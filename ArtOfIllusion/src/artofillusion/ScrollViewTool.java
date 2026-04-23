@@ -1,4 +1,4 @@
-/* Copyright (C) 2017-2020 by Petri Ihalainen
+/* Copyright (C) 2017-2022 by Petri Ihalainen
    Changes copyright (C) 2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -31,7 +31,7 @@ public class ScrollViewTool
   private Camera camera;
   private double distToPlane, scale;
   private double scrollRadius, scrollBlend, scrollBlendX, scrollBlendY;
-  private int navigationMode, scrollSteps, startOrientation;
+  private int navigationMode, startOrientation;
   private Vec3 startZ, startUp;
   private Rectangle bounds;
   private Point mousePoint;
@@ -46,10 +46,19 @@ public class ScrollViewTool
 
   protected void mouseScrolled(MouseScrolledEvent e, ViewerCanvas v)
   {
-    scrollSteps = v.scrollBuffer;
-    v.scrollBuffer = 0;
-    v.mouseMoving = false;
+    // Igore wheel while processing other mouse events
+
+    if (v.mouseDown || v.rotating || v.moving || v.tilting)
+      return;
+
+    // If the wheel event is a horizontal click, ignore it
+    // The mask, 64 was not mentioned in Java documentation.
+
+    if ((e.getModifiersEx() & 64) > 0)
+      return;
+
     view = v;
+    view.mouseMoving = false;
     view.scrolling = true;
     scale = view.getScale();
     distToPlane = view.getDistToPlane();
@@ -69,7 +78,7 @@ public class ScrollViewTool
     startUp = new Vec3(coords.getUpDirection());
     view.setRotationCenter(coords.getOrigin().plus(startZ.times(distToPlane)));
     mousePoint = view.mousePoint = e.getPoint();
-    scrollTimer.restart(); // The timer takes case of the graphics and updating the children of a camera object
+    scrollTimer.restart(); // The timer takes care of the graphics and updating the children of a camera object
 
     // This could be cleaser if the scrollMoveModel and scrollMoveTravel weres 
     // divided to methods, dedicated to one action only

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2020 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2022 Petri Ihalainen
    Changes copyright (C) 2016-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -39,8 +39,8 @@ public abstract class ViewerCanvas extends CustomWidget
   protected EditingTool currentTool, activeTool, metaTool, altTool;
   protected ScrollViewTool scrollTool;
   protected PopupMenuManager popupManager;
-  protected int renderMode, gridSubdivisions, orientation, navigation, scrollBuffer;
-  protected double gridSpacing, scale, distToPlane, scrollRadius, scrollX, scrollY, scrollBlend, scrollBlendX, scrollBlendY;
+  protected int renderMode, gridSubdivisions, orientation, navigation;
+  protected double gridSpacing, scale, distToPlane;
   protected boolean perspective, perspectiveSwitch, hideBackfaces, showGrid, snapToGrid, drawFocus, showTemplate, showAxes;
   protected boolean lastModelPerspective;
   protected ActionProcessor mouseProcessor;
@@ -266,12 +266,8 @@ public abstract class ViewerCanvas extends CustomWidget
 
     if (mouseProcessor != null)
       mouseProcessor.stopProcessing();
-
     mouseProcessor = new ActionProcessor();
-    if (e.isAltDown())
-        scrollBuffer += e.getWheelRotation();
-    else
-        scrollBuffer += e.getWheelRotation()*10;
+
     final ViewerCanvas viewToProcess = this;
     final MouseScrolledEvent scrollEvent = e;
     mouseProcessor.addEvent(new Runnable() {

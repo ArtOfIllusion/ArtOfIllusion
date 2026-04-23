@@ -139,9 +139,9 @@ public class TreeList extends CustomWidget
 
   public TreeElement findElement(Object obj)
   {
-    for (int i = 0; i < elements.size(); i++)
+    for (TreeElement el: elements)
     {
-      TreeElement el = elements.get(i);
+
       if (el.getObject().equals(obj))
         return el;
       TreeElement subElement = findElement(obj, el);

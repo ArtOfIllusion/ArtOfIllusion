@@ -982,7 +982,11 @@ public class Scene
     return Collections.unmodifiableList(textures);
   }
 
+  /*
+    Get all images from scene as List
+  */
 
+  public List<ImageMap> getImages() { return Collections.unmodifiableList(images); }
 
   /** Get the index of the specified object. */
 

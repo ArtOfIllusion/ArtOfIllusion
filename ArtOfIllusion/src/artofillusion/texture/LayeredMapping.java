@@ -341,7 +341,7 @@ public class LayeredMapping extends TextureMapping
         fractParamID[i] = TextureParameter.getUniqueID();
         try
           {
-            Class mapClass = ArtOfIllusion.getClass(in.readUTF());
+            Class<?> mapClass = ArtOfIllusion.getClass(in.readUTF());
             Constructor con = mapClass.getConstructor(DataInputStream.class, Object3D.class, Texture.class);
             mapping[i] = (TextureMapping) con.newInstance(in, theObject, texture[i]);
           }
@@ -373,7 +373,8 @@ public class LayeredMapping extends TextureMapping
     throw new IllegalStateException();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Layered";
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2001-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,12 +40,14 @@ public class LinearMaterialMapping extends MaterialMapping
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Linear";
   }
 
-  public static boolean legalMapping(Object3D obj, Material mat)
+  @Override
+  public boolean legalMapping(Object3D obj, Material mat)
   {
     return (mat instanceof Material3D);
   }

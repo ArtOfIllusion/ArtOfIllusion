@@ -21,7 +21,9 @@ import java.util.Vector;
 
 /** ScaleObjectTool is an EditingTool used for resizing objects in a scene.  For convenience, it also
     allows users to move objects by clicking on the object itself rather than on a handle.*/
-
+@EditingTool.ButtonImage("resize")
+@EditingTool.Tooltip("scaleObjectTool.tipText")
+@EditingTool.ActivatedToolText("scaleObjectTool.helpText")
 public class ScaleObjectTool extends EditingTool
 {
   static final int TOP = 1;
@@ -51,14 +53,6 @@ public class ScaleObjectTool extends EditingTool
   public ScaleObjectTool(EditingWindow fr)
   {
     super(fr);
-    initButton("resize");
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("scaleObjectTool.helpText"));
   }
 
   @Override
@@ -72,13 +66,7 @@ public class ScaleObjectTool extends EditingTool
   {
     return true;
   }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("scaleObjectTool.tipText");
-  }
-
+  
   @Override
   public void mousePressedOnHandle(WidgetMouseEvent e, ViewerCanvas view, int obj, int handle)
   {

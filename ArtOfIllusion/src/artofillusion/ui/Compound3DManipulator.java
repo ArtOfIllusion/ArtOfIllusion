@@ -344,7 +344,7 @@ public class Compound3DManipulator extends EventSource implements Manipulator
     }
     else
     {
-      if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+      if (view.getSceneCamera() != null)
       {
         double projectionDist = calculateProjectionDistance(view);
         handleSize = HANDLE_SIZE/projectionDist/5.0;
@@ -997,9 +997,9 @@ public class Compound3DManipulator extends EventSource implements Manipulator
   private double calculateProjectionDistance(ViewerCanvas view)
   {
     double projectionDist;
-    if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+    if (view.getSceneCamera() != null)
     {
-      double edgeAngle = (Math.PI - Math.toRadians(((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()))/2.0;
+      double edgeAngle = (Math.PI - Math.toRadians(view.getSceneCamera().getFieldOfView()))/2.0;
       projectionDist = Math.tan(edgeAngle)/Camera.DEFAULT_DISTANCE_TO_SCREEN*view.getBounds().height/10.0;
     }
     else

@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
+   Changes copyright (C) 2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -19,9 +20,10 @@ import artofillusion.texture.*;
 
 import java.lang.ref.*;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /** ObjectInfo represents information about an object within a Scene: its position, 
-    orientation, name, visibility, etc.  The internal properties (i.e. geometry) of
+    orientation, name, visibility, etc. The internal properties (i.e., geometry) of
     the object are defined by the "object" property.
     <p>
     There may be several ObjectInfos in a scene which all reference
@@ -33,12 +35,14 @@ public class ObjectInfo
   public CoordinateSystem coords;
   public String name;
   public boolean visible, selected, parentSelected;
-  public ObjectInfo parent, children[];
-  public Track tracks[];
+  public ObjectInfo parent;
+  private List<ObjectInfo> children = new ArrayList<>();
+  private List<Track> tracks = new ArrayList<>();
   public Keyframe pose;
   public int id;
   private boolean locked;
-  private Distortion distortion, prevDistortion;
+  private Distortion distortion;
+  private Distortion prevDistortion;
   private SoftReference<RenderingMesh> cachedMesh;
   private SoftReference<WireframeMesh> cachedWire;
   private BoundingBox cachedBounds;
@@ -52,7 +56,6 @@ public class ObjectInfo
     setCoords(c);
     this.setName(name);
     setVisible(true);
-    children = new ObjectInfo [0];
     setId(-1);
   }
   
@@ -73,12 +76,9 @@ public class ObjectInfo
     info.setVisible(isVisible());
     info.setLocked(isLocked());
     info.setId(id);
-    if (getTracks() != null)
-      {
-        info.tracks = new Track [getTracks().length];
-        for (int i = 0; i < getTracks().length; i++)
-          info.getTracks()[i] = getTracks()[i].duplicate(info);
-      }
+
+    IntStream.range(0, tracks.size()).forEach(index -> info.addTrack(tracks.get(index).duplicate(info), index));
+
     if (distortion != null)
       info.distortion = distortion.duplicate();
     return info;
@@ -87,14 +87,15 @@ public class ObjectInfo
   /** Given an array of ObjectInfos, duplicate all of them (including the objects they
       point to), keeping parent-child relationships intact. */
   
-  public static ObjectInfo [] duplicateAll(ObjectInfo info[])
+  public static ObjectInfo[] duplicateAll(ObjectInfo[] info)
   {
-    ObjectInfo newobj[] = new ObjectInfo [info.length];
-    HashMap<ObjectInfo, ObjectInfo> objectMap = new HashMap<ObjectInfo, ObjectInfo>();
-    for (int i = 0; i < newobj.length; i++)
+    ObjectInfo[] newObj = new ObjectInfo [info.length];
+    Map<ObjectInfo, ObjectInfo> objectMap = new HashMap<>();
+
+    for (int i = 0; i < newObj.length; i++)
     {
-      newobj[i] = info[i].duplicate(info[i].getObject().duplicate());
-      objectMap.put(info[i], newobj[i]);
+      newObj[i] = info[i].duplicate(info[i].getObject().duplicate());
+      objectMap.put(info[i], newObj[i]);
     }
     for (int i = 0; i < info.length; i++)
       for (int k = info[i].getChildren().length-1; k >= 0; k--)
@@ -102,16 +103,14 @@ public class ObjectInfo
           int j;
           for (j = 0; j < info.length && info[j] != info[i].getChildren()[k]; j++);
           if (j < info.length)
-            newobj[i].addChild(newobj[j], 0);
+            newObj[i].addChild(newObj[j], 0);
         }
-    for (int i = 0; i < newobj.length; i++)
-      if (newobj[i].tracks != null)
-        for (int j = 0; j < newobj[i].tracks.length; j++)
-          newobj[i].tracks[j].updateObjectReferences(objectMap);
-    return newobj;
+
+    for (ObjectInfo item: newObj) item.tracks.forEach(track -> track.updateObjectReferences(objectMap));
+    return newObj;
   }
 
-  /** Make this ObjectInfo identical to another one.  Both ObjectInfos will reference the
+  /** Make this ObjectInfo identical to another one. Both ObjectInfo's will reference the
       same Object3D object, but all other fields will be cloned. */
   
   public void copyInfo(ObjectInfo info)
@@ -125,14 +124,11 @@ public class ObjectInfo
     cachedMesh = info.cachedMesh;
     cachedWire = info.cachedWire;
     cachedBounds = info.cachedBounds;
-    if (info.getTracks() == null)
-      tracks = null;
-    else
-      {
-        tracks = new Track [info.getTracks().length];
-        for (int i = 0; i < getTracks().length; i++)
-          getTracks()[i] = info.getTracks()[i].duplicate(this);
-      }
+
+    tracks.clear();
+    List<Track> st = info.tracks;
+    IntStream.range(0, st.size()).forEach(index -> this.addTrack(st.get(index).duplicate(this), index));
+
     if (info.distortion == null) 
       distortion = null;
     else 
@@ -147,15 +143,7 @@ public class ObjectInfo
   
   public void addChild(ObjectInfo info, int position)
   {
-    ObjectInfo newChildren[] = new ObjectInfo [getChildren().length+1];
-    int i;
-    
-    for (i = 0; i < position; i++)
-      newChildren[i] = getChildren()[i];
-    newChildren[position] = info;
-    for (; i < getChildren().length; i++)
-      newChildren[i+1] = getChildren()[i];
-    children = newChildren;
+    children.add(position, info);
     info.setParent(this);
   }
   
@@ -163,73 +151,35 @@ public class ObjectInfo
   
   public void removeChild(ObjectInfo info)
   {
-    for (int i = 0; i < getChildren().length; i++)
-      if (getChildren()[i] == info)
-        {
-          removeChild(i);
-          return;
-        }
+    if(children.remove(info)) info.setParent(null);
   }
 
   /** Remove a child from this object. */
   
   public void removeChild(int which)
   {
-    ObjectInfo newChildren[] = new ObjectInfo [getChildren().length-1];
-    int i;
-    
-    getChildren()[which].setParent(null);
-    for (i = 0; i < which; i++)
-      newChildren[i] = getChildren()[i];
-    for (i++; i < getChildren().length; i++)
-      newChildren[i-1] = getChildren()[i];
-    children = newChildren;
+    children.remove(which).setParent(null);
   }
 
   /** Add a track to this object. */
   
   public void addTrack(Track tr, int position)
   {
-    if (getTracks() == null)
-      {
-        tracks = new Track [] {tr};
-        return;
-      }
-    Track newTracks[] = new Track [getTracks().length+1];
-    int i;
-    
-    for (i = 0; i < position; i++)
-      newTracks[i] = getTracks()[i];
-    newTracks[position] = tr;
-    for (; i < getTracks().length; i++)
-      newTracks[i+1] = getTracks()[i];
-    tracks = newTracks;
+    tracks.add(position, tr);
   }
   
   /** Remove a track from this object. */
   
   public void removeTrack(Track tr)
   {
-    for (int i = 0; i < getTracks().length; i++)
-      if (getTracks()[i] == tr)
-        {
-          removeTrack(i);
-          return;
-        }
+    tracks.remove(tr);
   }
 
   /** Remove a track from this object. */
 
   public void removeTrack(int which)
   {
-    Track newTracks[] = new Track [getTracks().length-1];
-    int i;
-    
-    for (i = 0; i < which; i++)
-      newTracks[i] = getTracks()[i];
-    for (i++; i < getTracks().length; i++)
-      newTracks[i-1] = getTracks()[i];
-    tracks = newTracks;
+    tracks.remove(which);
   }
   
   /** Set the texture and texture mapping for this object. */
@@ -240,11 +190,7 @@ public class ObjectInfo
     clearCachedMeshes();
     
     // Update any texture tracks.
-    
-    if (getTracks() != null)
-      for (int i = 0; i < getTracks().length; i++)
-        if (getTracks()[i] instanceof TextureTrack)
-          ((TextureTrack) getTracks()[i]).parametersChanged();
+    tracks.stream().filter(TextureTrack.class::isInstance).forEach(item -> ((TextureTrack) item).parametersChanged());
   }
   
   /** Set the material and material mapping for this object. */
@@ -342,7 +288,7 @@ public class ObjectInfo
         double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cached = obj.getRenderingMesh(tol, true, this);
-        cachedMesh = new SoftReference<RenderingMesh>(cached);
+        cachedMesh = new SoftReference<>(cached);
         if (cachedBounds == null)
           cachedBounds = obj.getBounds();
       }
@@ -365,7 +311,7 @@ public class ObjectInfo
         double tol = ArtOfIllusion.getPreferences().getInteractiveSurfaceError();
         Object3D obj = getDistortedObject(tol);
         cached = obj.getWireframeMesh();
-        cachedWire = new SoftReference<WireframeMesh>(cached);
+        cachedWire = new SoftReference<>(cached);
         if (cachedBounds == null)
           cachedBounds = obj.getBounds();
       }
@@ -391,9 +337,9 @@ public class ObjectInfo
         if (!(realObject instanceof ObjectCollection))
         {
           if (lastPreviewWasWireframe && cachedWire == null)
-            cachedWire = new SoftReference<WireframeMesh>(obj.getWireframeMesh());
+            cachedWire = new SoftReference<>(obj.getWireframeMesh());
           else if (!lastPreviewWasWireframe && cachedMesh == null)
-            cachedMesh = new SoftReference<RenderingMesh>(obj.getRenderingMesh(tol, true, this));
+            cachedMesh = new SoftReference<>(obj.getRenderingMesh(tol, true, this));
         }
       }
     return cachedBounds;
@@ -531,13 +477,24 @@ public class ObjectInfo
 
   public ObjectInfo[] getChildren()
   {
-    return children;
+    return children.toArray(new ObjectInfo[0]);
+  }
+
+  public void setChildren(ObjectInfo... children) {
+    this.children = new ArrayList<>(Arrays.asList(children));
   }
 
   /** Get the list of Tracks for this object. */
 
   public Track[] getTracks()
   {
-    return tracks;
+    return tracks.toArray(new Track[0]);
+  }
+
+  /** Set the list of Tracks for this object. */
+
+  public void setTracks(Track... tracks)
+  {
+    this.tracks = new ArrayList<>(Arrays.asList(tracks));
   }
 }

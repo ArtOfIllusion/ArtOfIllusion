@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -48,7 +49,7 @@ public class ColorChooser extends BDialog
       mode = 1;
       rangeMode = 0;
     }
-    recentColors = new ArrayList<RGBColor>();
+    recentColors = new ArrayList<>();
     for (int i = 0; i < RECENT_COLOR_COUNT; i++)
       recentColors.add(new RGBColor(1.0, 1.0, 1.0));
   }
@@ -126,7 +127,7 @@ public class ColorChooser extends BDialog
         }
       });
     }
-    addAsListener(this);
+    recursivelyAddListeners(this);
     modeChanged();
     pack();
     addEventLink(WindowActivatedEvent.class, new Object() {
@@ -156,14 +157,13 @@ public class ColorChooser extends BDialog
 
   /** Add this as a key listener to every component. */
   
-  private void addAsListener(Widget w)
+  private void recursivelyAddListeners(Widget widget)
   {
-    w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
-    if (w instanceof WidgetContainer)
-      {
-        for (Widget child : ((WidgetContainer) w).getChildren())
-          addAsListener(child);
-      }
+    widget.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+    if (widget instanceof WidgetContainer)
+    {
+      ((WidgetContainer) widget).getChildren().forEach(this::recursivelyAddListeners);
+    }
   }
 
   private void doOk()

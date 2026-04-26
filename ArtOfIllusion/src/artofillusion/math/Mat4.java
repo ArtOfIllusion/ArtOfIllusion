@@ -1,4 +1,5 @@
 /* Copyright (C) 1999,2000,2003 by Peter Eastman
+   Modifications Copyright 2019 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -271,6 +272,18 @@ public class Mat4
 		rx.y, ry.y, rz.y, orig.y,
 		rx.z, ry.z, rz.z, orig.z,
 		0.0, 0.0, 0.0, 1.0);
+  }
+
+  /** Create a matrix to implement a perspective projection. This is a "unit matrix" similar 
+      to <pre>identity()</pre> but produces the behavour of a pinhole projection, where the 
+      origin (pinhole) is at (0,0,0) and the projection direction is z. */
+
+  public static Mat4 perspective()
+  {
+    return new Mat4(1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 1.0, 0.0);
   }
 
   /** Create a matrix to implement a perspective projection.  The center of projection is

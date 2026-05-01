@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2014 by Peter Eastman
-   Modifications copyright © 2020 by Petri Ihalainen
+   Modifications copyright © 2020-2024 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -859,8 +859,9 @@ public class RaytracerRenderer implements Renderer, Runnable
     final int currentScale[] = new int [1];
     final int currentWidth[] = new int [1];
     final boolean isFirstPass[] = new boolean[] {true};
-    ThreadManager threads = new ThreadManager(width, new ThreadManager.Task() {
-          @Override
+    ThreadManager threads = new ThreadManager(width, new ThreadManager.Task()
+    {
+      @Override
       public void execute(int index)
       {
         if (renderThread != thisThread)
@@ -869,16 +870,22 @@ public class RaytracerRenderer implements Renderer, Runnable
         int col = index-row*currentWidth[0];
         if (!isFirstPass[0] && row%2 == 0 && col%2 == 0)
           return;
-        int subsample = (finalMinRays > 1 ? 2 : 1);
+        int subsample = 1;
+        int extraedge = 0;
+        if (finalMinRays > 1)
+        {
+            subsample = 2;
+            extraedge = 1;
+        }
         RenderWorkspace workspace = getWorkspace();
         PixelInfo pixel = workspace.tempPixel;
         pixel.clear();
-        pixel.depth = (float) spawnEyeRay(workspace, col*subsample*currentScale[0], row*subsample*currentScale[0], 4, finalMinRays);
+        pixel.depth = (float) spawnEyeRay(workspace, col*subsample*currentScale[0]+extraedge, row*subsample*currentScale[0]+extraedge, 4, finalMinRays);
         pixel.object = (workspace.firstObjectHit == null ? 0.0f : Float.intBitsToFloat(workspace.firstObjectHit.getObject().hashCode()));
         pixel.add(workspace.color[0], (float) workspace.transparency[0]);
         recordPixel(col*currentScale[0], row*currentScale[0], currentScale[0], pixel);
       }
-          @Override
+      @Override
       public void cleanup()
       {
         getWorkspace().cleanup();
@@ -929,14 +936,15 @@ public class RaytracerRenderer implements Renderer, Runnable
     for (int i = 0; i < pix.length; i++)
       for (int j = 0; j < pix[i].length; j++)
         pix[i][j] = new PixelInfo();
-    loadRow(pix[0], 0, tempColor);
-    loadRow(pix[2], 1, tempColor);
-    loadRow(pix[4], 2, tempColor);
+    loadRow(pix[1], 0, tempColor);
+    loadRow(pix[3], 1, tempColor);
+    loadRow(pix[5], 2, tempColor);
     int minPerSubpixel = minRaysInUse/4, maxPerSubpixel = maxRaysInUse/4;
     final int currentRow[] = new int [1];
     final int currentCount[] = new int [1];
-    threads = new ThreadManager(rtWidth, new ThreadManager.Task() {
-          @Override
+    threads = new ThreadManager(rtWidth, new ThreadManager.Task()
+    {
+      @Override
       public void execute(int index)
       {
         RenderWorkspace workspace = getWorkspace();
@@ -978,7 +986,7 @@ public class RaytracerRenderer implements Renderer, Runnable
           }
         }
       }
-          @Override
+      @Override
       public void cleanup()
       {
         getWorkspace().cleanup();
@@ -1236,6 +1244,7 @@ public class RaytracerRenderer implements Renderer, Runnable
     Vec3 orig = ray.getOrigin(), dir = ray.getDirection();
     double h = i-rtWidth*0.5+0.5, v = j-rtHeight*0.5+0.5;
     Random random = workspace.context.random;
+    int imgHeight = height;
 
     if (antialiasLevel > 0)
     {
@@ -1246,6 +1255,13 @@ public class RaytracerRenderer implements Renderer, Runnable
       int col = num-row*cols;
       h += (col+random.nextDouble())/cols-0.5;
       v += (row+random.nextDouble())/rows-0.5;
+
+      // To aim the rays correctly we need to use the height of 
+      // the actual image area, not the rendering area with the 
+      // extra antialiasing pixels around the edges. The value is 
+      // the rendering time height in pixels.
+
+      imgHeight = height*2;
     }
     double dof1 = 0.0, dof2 = 0.0;
     if (depth)
@@ -1253,7 +1269,7 @@ public class RaytracerRenderer implements Renderer, Runnable
       dof1 = 0.25*(random.nextDouble()+distrib1[number&15]);
       dof2 = 0.25*(random.nextDouble()+distrib2[number&15]);
     }
-    sceneCamera.getRayFromCamera(h/rtHeight, v/rtHeight, dof1, dof2, orig, dir);
+    sceneCamera.getRayFromCamera(h/imgHeight, v/imgHeight, dof1, dof2, orig, dir);
     theCamera.getCameraCoordinates().fromLocal().transform(orig);
     theCamera.getCameraCoordinates().fromLocal().transformDirection(dir);
     ray.newID();

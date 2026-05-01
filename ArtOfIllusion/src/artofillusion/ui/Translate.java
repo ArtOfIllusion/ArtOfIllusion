@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2009 by Peter Eastman
-   Changes copyright (C) 2018-2019 by Maksim Khramov
+   Changes copyright (C) 2018-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,6 +13,8 @@ package artofillusion.ui;
 
 import buoy.event.*;
 import buoy.widget.*;
+
+import java.awt.event.ActionListener;
 import java.text.*;
 import java.util.*;
 
@@ -25,7 +27,7 @@ import artofillusion.*;
  * <p>
  * The resource bundle is created from a {@link artofillusion.PluginRegistry.PluginResource PluginResource}
  * of type "TranslateBundle" provided by the {@link artofillusion.PluginRegistry PluginRegistry}.
- * By default it uses the PluginResource with ID "artofillusion" which is built into the application,
+ * By default, it uses the PluginResource with ID "artofillusion" which is built into the application,
  * but you can specify a
  * different one by prefixing its ID to the property name passed to any method of this class.
  * This allows plugins to provide their own ResourceBundles for localizing their strings.  To do
@@ -147,7 +149,38 @@ public class Translate
     menu.setName(name);
     return menu;
   }
-  
+
+  /** Get a BMenuItem whose text is given by the property "menu.(name)".
+   Attach Action listener.
+   */
+
+  public static BMenuItem menuItem(String name, ActionListener listener)
+  {
+    String command = name;
+    try
+    {
+      command = getValue(name, "menu.", null);
+    }
+    catch (MissingResourceException ex)
+    {
+    }
+    BMenuItem item = new BMenuItem(command);
+    item.setActionCommand(name);
+    try
+    {
+      String shortcut = getValue(name, "menu.", ".shortcut");
+      if (shortcut.length() > 1 && shortcut.charAt(0) == '^')
+        item.setShortcut(new Shortcut(shortcut.charAt(1), Shortcut.DEFAULT_MASK|Shortcut.SHIFT_MASK));
+      else if (shortcut.length() > 0)
+        item.setShortcut(new Shortcut(shortcut.charAt(0)));
+    }
+    catch (MissingResourceException ex)
+    {
+    }
+    if (listener != null) item.getComponent().addActionListener(listener);
+    return item;
+  }
+
   /** Get a BMenuItem whose text is given by the property "menu.(name)".
       If listener is not null, the specified method of it will be added to the BMenuItem as an
       event link for CommandEvents, and the menu item's action command will be set to

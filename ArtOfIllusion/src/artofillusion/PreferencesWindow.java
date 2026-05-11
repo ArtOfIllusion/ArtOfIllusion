@@ -1,6 +1,7 @@
 /* Copyright (C) 2002-2009 by Peter Eastman
    Changes Copyright (C) 2016-2019 by Petri Ihalainen
    Changes copyright (C) 2017 by Maksim Khramov
+   Changes Copyright (C) 2026 by Lucas Stanek
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -63,11 +64,13 @@ public class PreferencesWindow
     Locale languages[] = Translate.getAvailableLocales();
     List<Renderer> renderers = PluginRegistry.getPlugins(Renderer.class);
     if (renderers.size() > 0)
+    try //hacky, should not be possible to fail.
     {
-      prefs.setDefaultRenderer(renderers.get(defaultRendChoice.getSelectedIndex()));
-      prefs.setObjectPreviewRenderer(renderers.get(objectRendChoice.getSelectedIndex()));
-      prefs.setTexturePreviewRenderer(renderers.get(texRendChoice.getSelectedIndex()));
+      prefs.setDefaultRenderer(renderers.get(defaultRendChoice.getSelectedIndex()).getClass().newInstance());
+      prefs.setObjectPreviewRenderer(renderers.get(objectRendChoice.getSelectedIndex()).getClass().newInstance());
+      prefs.setTexturePreviewRenderer(renderers.get(texRendChoice.getSelectedIndex()).getClass().newInstance());
     }
+    catch (Exception e) {}
     prefs.setInteractiveSurfaceError(interactiveTolField.getValue());
     prefs.setUndoLevels((int) undoField.getValue());
     if (!prefs.getLocale().equals(languages[localeChoice.getSelectedIndex()]))

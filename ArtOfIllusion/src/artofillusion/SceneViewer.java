@@ -125,9 +125,9 @@ public class SceneViewer extends ViewerCanvas
 
         // SceneCamera does not obey the normal rules here. For now it is assumed to be always in perspective mode
 
-        if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+        if (getSceneCamera() != null)
         {
-          double innerAngle = (Math.PI - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()))/2.0;
+          double innerAngle = (Math.PI - Math.toRadians(getSceneCamera().getFieldOfView()))/2.0;
           projectionDist = Math.tan(innerAngle)*getBounds().height/2.0/100;
         }
         else

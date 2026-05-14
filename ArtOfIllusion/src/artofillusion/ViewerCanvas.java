@@ -443,7 +443,7 @@ public abstract class ViewerCanvas extends CustomWidget
     }
 
     // SceneCamera has logic of it's own, so just jump there!
-    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
+    if (getSceneCamera() != null){
       perspective = perspectiveSwitch = nextPerspective;
       return;
     }
@@ -485,8 +485,8 @@ public abstract class ViewerCanvas extends CustomWidget
   /** Determine whether the view is currently is perspective mode. */
   public boolean isPerspective()
   {
-    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
-      return ((SceneCamera) boundCamera.getObject()).isPerspective();
+    if (getSceneCamera() != null)
+      return getSceneCamera().isPerspective();
     return perspective;
   }
 
@@ -632,7 +632,7 @@ public abstract class ViewerCanvas extends CustomWidget
 
     if (boundCamera != null)
       if (boundCamera.getObject() instanceof SceneCamera)
-        ((SceneCamera)boundCamera.getObject()).setDistToPlane(dist);
+        getSceneCamera().setDistToPlane(dist);
       else if (boundCamera.getObject() instanceof SpotLight)
         ((SpotLight)boundCamera.getObject()).setDistToPlane(dist);
       else if (boundCamera.getObject() instanceof DirectionalLight)
@@ -645,7 +645,7 @@ public abstract class ViewerCanvas extends CustomWidget
   {
     if (boundCamera != null)
         if (boundCamera.getObject() instanceof SceneCamera)
-            return ((SceneCamera)boundCamera.getObject()).getDistToPlane();
+            return getSceneCamera().getDistToPlane();
         else if (boundCamera.getObject() instanceof SpotLight)
             return ((SpotLight)boundCamera.getObject()).getDistToPlane();
         else if (boundCamera.getObject() instanceof DirectionalLight)
@@ -789,8 +789,8 @@ public abstract class ViewerCanvas extends CustomWidget
     Rectangle bounds = getBounds();
     double scale = getScale();
 
-    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera){
-      theCamera.setScreenTransform(((SceneCamera) boundCamera.getObject()).getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
+    if (getSceneCamera() != null){
+      theCamera.setScreenTransform(getSceneCamera().getScreenTransform(bounds.width, bounds.height), bounds.width, bounds.height);
     }
     else if (perspective)
       theCamera.setScreenParams(0, scale, bounds.width, bounds.height);
@@ -798,14 +798,32 @@ public abstract class ViewerCanvas extends CustomWidget
       theCamera.setScreenParamsParallel(scale, bounds.width, bounds.height);
   }
 
-  /** Get the SceneCamera (if any) which is bound to this view. */
+  /** 
+      Get the SceneCamera <b>object</b>, that is bound to this view.<br>
+      Returns <code>null</code>, if no camera object is set or the object is not a SceneCamera.
+   **/
+
+  public SceneCamera getSceneCamera()
+  {
+    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+      return ((SceneCamera)boundCamera.getObject());
+    return null;
+  }
+
+  /** 
+      Get the <b>ObjectInfo</b> containing the cemara object which is bound to this view.<br>
+      Returns <code>null</code>, if no camera object is set.
+   */
 
   public ObjectInfo getBoundCamera()
   {
     return boundCamera;
   }
 
-  /** Set the SceneCamera which is bound to this view (may be null). */
+  /** 
+      Bind an <b>ObjectInfo</b> containing a camera object to this view.<br>
+      To detach the object from the view, set <code>null</code>.
+   **/
 
   public void setBoundCamera(ObjectInfo boundCamera)
   {
@@ -1063,9 +1081,9 @@ public abstract class ViewerCanvas extends CustomWidget
     viewToWorld.transform(newCenter);
 
     double projectionDist;
-    if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+    if (getSceneCamera() != null)
     {
-      double compAngle = (Math.PI - Math.toRadians(((SceneCamera)boundCamera.getObject()).getFieldOfView()))/2;
+      double compAngle = (Math.PI - Math.toRadians(getSceneCamera().getFieldOfView()))/2;
       projectionDist = Math.tan(compAngle)*getBounds().height/2/100;
     }
     else
@@ -1968,7 +1986,7 @@ public abstract class ViewerCanvas extends CustomWidget
       else
         tipPoint = rotPoint;
 
-      if (boundCamera != null && !(boundCamera.getObject() instanceof SceneCamera))
+      if (getSceneCamera() != null)
         viewToDrawOn.drawLine(rotPoint, viewPoint, beam);
 
       for (int c = 0; c < 4; c++)

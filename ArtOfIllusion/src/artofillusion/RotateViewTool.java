@@ -363,10 +363,10 @@ public class RotateViewTool extends EditingTool
     }
     else
     {
-      if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+      if (view.getSceneCamera() != null)
       {
         int yp = view.getBounds().height/2;
-        double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
+        double fa = Math.PI/2.0 - view.getSceneCamera().getFieldOfView()/2.0/180.0*Math.PI;
         dts = Math.tan(fa)*yp/100;
       }
       rotation = Mat4.axisRotation(viewToWorld.timesDirection(Vec3.vx()), -dy*DRAG_SCALE/dts);
@@ -496,9 +496,9 @@ public class RotateViewTool extends EditingTool
     int dy = dragPoint.y-clickPoint.y;
     double dts = camera.getDistToScreen();
 
-    if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera){
+    if (view.getSceneCamera() != null){
       int yp = view.getBounds().height/2;
-      double fa = Math.PI/2.0 - ((SceneCamera)view.getBoundCamera().getObject()).getFieldOfView()/2.0/180.0*Math.PI;
+      double fa = Math.PI/2.0 - view.getSceneCamera().getFieldOfView()/2.0/180.0*Math.PI;
       dts = Math.tan(fa)*yp/100;
     }
 

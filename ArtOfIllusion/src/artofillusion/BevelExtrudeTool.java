@@ -1,5 +1,5 @@
 /* Copyright (C) 2003-2013 by Peter Eastman
-   Changes copyright (C) 2020 by Maksim Khramov
+   Changes copyright (C) 2020-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -20,7 +20,8 @@ import buoy.widget.*;
 import java.awt.*;
 
 /** BevelExtrudeTool is an EditingTool used for beveling and extruding TriangleMesh objects. */
-
+@EditingTool.ButtonImage("bevel")
+@EditingTool.Tooltip("bevelExtrudeTool.tipText")
 public class BevelExtrudeTool extends MeshEditingTool
 {
   private boolean dragInProgress, separateFaces;
@@ -34,17 +35,10 @@ public class BevelExtrudeTool extends MeshEditingTool
   public BevelExtrudeTool(EditingWindow fr, MeshEditController controller)
   {
     super(fr, controller);
-    initButton("bevel");
     manipulator = new NinePointManipulator(new Image[] {null, null, null, null, NinePointManipulator.ARROWS_ALL, null, null, null, null});
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
     manipulator.addEventLink(HandleReleasedEvent.class, this, "handleReleased");
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
   }
 
   @Override
@@ -53,11 +47,6 @@ public class BevelExtrudeTool extends MeshEditingTool
     return !dragInProgress;
   }
 
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("bevelExtrudeTool.tipText");
-  }
 
   @Override
   public void drawOverlay(ViewerCanvas view)

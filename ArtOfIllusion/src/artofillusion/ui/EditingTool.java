@@ -1,5 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes Copyright 2016 by Petri Ihalainen
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -15,13 +16,19 @@ import artofillusion.*;
 import buoy.event.*;
 import buoy.widget.*;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.util.Optional;
+
 /**
  * EditingTool is the superclass of tools for editing objects or scenes.  An EditingTool
  * has an image which appears in a tool palette, allowing the tool to be selected.  When
  * selected, the editing tool responds to events in the scene or object viewer.
  * <p>
  * An EditingTool specifies what types of mouse clicks it wants to receive by the value it
- * returns from its whichClicks() method.  This should be a sum of the contants OBJECT_CLICKS
+ * returns from its whichClicks() method.  This should be a sum of the constants OBJECT_CLICKS
  * (for mouse clicks on objects), HANDLE_CLICKS (for mouse clicks on handles), and ALL_CLICKS
  * (for all mouse clicks regardless of what they are on).  The exact definition of an "object"
  * or "handle" is not specified.  It is up to the ViewerCanvas generating the events to decide
@@ -51,11 +58,16 @@ public abstract class EditingTool
   protected BFrame theFrame;
   protected ToolButton button;
   
+  private final Optional<ButtonImage> buttonImage = Optional.ofNullable(this.getClass().getAnnotation(ButtonImage.class));
+  private final Optional<Tooltip> tooltip = Optional.ofNullable(this.getClass().getAnnotation(Tooltip.class));
+  private final Optional<ActivatedToolText> helpText = Optional.ofNullable(this.getClass().getAnnotation(ActivatedToolText.class));
+  
   public EditingTool(EditingWindow win)
   {
     theWindow = win;
     if (win != null)
       theFrame = win.getFrame();
+    buttonImage.ifPresent(imageAnnotation -> initButton(imageAnnotation.value()));
   }
   
   /** Get the EditingWindow to which this tool belongs. */
@@ -81,7 +93,7 @@ public abstract class EditingTool
   
   public String getToolTipText()
   {
-    return null;
+    return tooltip.isPresent() ? Translate.text(tooltip.get().value()) : null;
   }
   
   public static final int ALL_CLICKS = 1;
@@ -164,6 +176,7 @@ public abstract class EditingTool
   {
     theWindow.setTool(this);
     button.setSelected(true);
+    helpText.ifPresent(text -> theWindow.setHelpText(Translate.text(text.value())));
   }
   
   public void deactivate()
@@ -183,5 +196,23 @@ public abstract class EditingTool
 
   public void iconDoubleClicked()
   {
+  }
+  
+  @Target(value = ElementType.TYPE)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  public static @interface Tooltip {
+      String value();
+  }
+
+  @Target(value = ElementType.TYPE)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  public static @interface ButtonImage {
+      String value();
+  }
+
+  @Target(value = ElementType.TYPE)
+  @Retention(value = RetentionPolicy.RUNTIME)
+  public static @interface ActivatedToolText {
+      String value();
   }
 }

@@ -26,7 +26,8 @@ import buoy.widget.*;
 /**
  * This editing tool presents a compound interface for moving, scaling, and rotating objects.
  */
-
+@EditingTool.ButtonImage("moveScaleRotate")
+@EditingTool.Tooltip("moveScaleRotateObjectTool.tipText")
 public class MoveScaleRotateObjectTool extends EditingTool
 {
   private boolean dragInProgress, draggingObjects;
@@ -55,7 +56,6 @@ public class MoveScaleRotateObjectTool extends EditingTool
   public MoveScaleRotateObjectTool(LayoutWindow fr)
   {
     super(fr);
-    initButton("moveScaleRotate");
     manipulator = new Compound3DManipulator();
     manipulator.addEventLink(HandlePressedEvent.class, this, "handlePressed");
     manipulator.addEventLink(HandleDraggedEvent.class, this, "handleDragged");
@@ -72,12 +72,6 @@ public class MoveScaleRotateObjectTool extends EditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveScaleRotateObjectTool.tipText");
   }
 
   /** Get the LayoutWindow to which this tool belongs. */

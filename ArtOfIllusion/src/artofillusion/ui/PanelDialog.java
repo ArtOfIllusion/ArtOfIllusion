@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2006 by Peter Eastman
+   Changes copyright (C) 2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -13,7 +14,7 @@ package artofillusion.ui;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
-import java.util.*;
+
 
 /** A PanelDialog is a modal dialog containing a line of text at the top, and a single
     Widget (usually a container with other Widgets).  At the bottom are two buttons labeled OK 
@@ -54,7 +55,7 @@ public class PanelDialog extends BDialog
         closeWindow();
       }
     } );
-    addAsListener(this);
+    recursivelyAddListeners(this);
     setDefaultButton(okButton);
     pack();
     setResizable(false);
@@ -83,7 +84,7 @@ public class PanelDialog extends BDialog
   private void closeWindow()
   {
     dispose();
-    removeAsListener(this);
+    recursivelyRemoveAsListener(this);
   }
     
   /** Pressing Return and Escape are equivalent to clicking OK and Cancel. */
@@ -97,27 +98,23 @@ public class PanelDialog extends BDialog
 
   /** Add this as a listener to every Widget. */
   
-  private void addAsListener(Widget w)
+  private void recursivelyAddListeners(Widget widget)
   {
-    w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
-    if (w instanceof WidgetContainer)
+    widget.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+    if (widget instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-      while (iter.hasNext())
-        addAsListener((Widget) iter.next());
+      ((WidgetContainer) widget).getChildren().forEach(this::recursivelyAddListeners);
     }
   }
   
   /** Remove this as a listener before returning. */
   
-  private void removeAsListener(Widget w)
+  private void recursivelyRemoveAsListener(Widget widget)
   {
-    w.removeEventLink(KeyPressedEvent.class, this);
-    if (w instanceof WidgetContainer)
+    widget.removeEventLink(KeyPressedEvent.class, this);
+    if (widget instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-      while (iter.hasNext())
-        removeAsListener((Widget) iter.next());
+      ((WidgetContainer) widget).getChildren().forEach(this::recursivelyRemoveAsListener);
     }
   }
 }

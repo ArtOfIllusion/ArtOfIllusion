@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
+   Changes copyright (C) 2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -149,7 +150,7 @@ public class TransformDialog extends BDialog
     buttons.add(Translate.button("ok", this, "doOk"));
     buttons.add(Translate.button("cancel", this, "dispose"));
     addEventLink(WindowClosingEvent.class, this, "dispose");
-    addAsListener(this);
+    recursivelyAddListeners(this);
   }
 
   private void doOk()
@@ -172,14 +173,12 @@ public class TransformDialog extends BDialog
 
   /** Add this as a listener to every Widget. */
   
-  private void addAsListener(Widget w)
+  private void recursivelyAddListeners(Widget widget)
   {
-    w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
-    if (w instanceof WidgetContainer)
+    widget.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+    if (widget instanceof WidgetContainer)
     {
-      Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-      while (iter.hasNext())
-        addAsListener((Widget) iter.next());
+      ((WidgetContainer) widget).getChildren().forEach(this::recursivelyAddListeners);
     }
   }
 }

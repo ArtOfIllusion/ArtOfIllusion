@@ -1,4 +1,5 @@
 /* Copyright (C) 2004-2009 by Peter Eastman
+   Changes copyright (C) 2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -104,16 +105,14 @@ public class UIUtilities
 
   /** Set up a Widget and all of its children to have the default font for the program. */
   
-  public static void applyDefaultFont(Widget w)
+  public static void applyDefaultFont(Widget widget)
   {
     if (UIUtilities.getDefaultFont() == null)
       return;
-    w.setFont(UIUtilities.getDefaultFont());
-    if (w instanceof WidgetContainer && !(w instanceof BMenuBar))
+    widget.setFont(UIUtilities.getDefaultFont());
+    if (widget instanceof WidgetContainer && !(widget instanceof BMenuBar))
     {
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
-      while (children.hasNext())
-        applyDefaultFont((Widget) children.next());
+      ((WidgetContainer) widget).getChildren().forEach(child -> applyDefaultFont(child));
     }
   }
   
@@ -127,33 +126,29 @@ public class UIUtilities
 
   /** Set up a Widget and all of its children to have a specific background color. */
   
-  public static void applyBackground(Widget w, Color color)
+  public static void applyBackground(Widget widget, Color color)
   {
-    if (w instanceof WidgetContainer)
+    if (widget instanceof WidgetContainer)
     {
-      w.setBackground(color);
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
-      while (children.hasNext())
-        applyBackground((Widget) children.next(), color);
+      widget.setBackground(color);
+      ((WidgetContainer) widget).getChildren().forEach(child -> applyBackground(child, color));
     }
-    else if (w instanceof BLabel)
-      w.setBackground(color);
-    else if (w instanceof BButton || w instanceof BComboBox || w instanceof BCheckBox || w instanceof BRadioButton)
-      ((JComponent) w.getComponent()).setOpaque(false);
+    else if (widget instanceof BLabel)
+      widget.setBackground(color);
+    else if (widget instanceof BButton || widget instanceof BComboBox || widget instanceof BCheckBox || widget instanceof BRadioButton)
+      ((JComponent) widget.getComponent()).setOpaque(false);
   }
 
   /** Set up a Widget and all of its children to have a specific text color. */
 
-  public static void applyTextColor(Widget w, Color color)
+  public static void applyTextColor(Widget widget, Color color)
   {
-    if (w instanceof WidgetContainer)
+    if (widget instanceof WidgetContainer)
     {
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
-      while (children.hasNext())
-        applyTextColor((Widget) children.next(), color);
+      ((WidgetContainer) widget).getChildren().forEach(child -> applyTextColor(child, color));
     }
-    else if (w instanceof BLabel || w instanceof BCheckBox || w instanceof BRadioButton)
-      w.getComponent().setForeground(color);
+    else if (widget instanceof BLabel || widget instanceof BCheckBox || widget instanceof BRadioButton)
+      widget.getComponent().setForeground(color);
   }
 
   /** Given an BList, create an appropriate container for it.  This involves a properly configured
@@ -218,14 +213,12 @@ public class UIUtilities
 
   /** Recursively enable or disable a container and everything inside it. */
 
-  public static void setEnabled(Widget w, boolean enabled)
+  public static void setEnabled(Widget widget, boolean enabled)
   {
-    w.setEnabled(enabled);
-    if (w instanceof WidgetContainer)
+    widget.setEnabled(enabled);
+    if (widget instanceof WidgetContainer)
     {
-      Iterator children = ((WidgetContainer) w).getChildren().iterator();
-      while (children.hasNext())
-        setEnabled((Widget) children.next(), enabled);
+      ((WidgetContainer) widget).getChildren().forEach(child -> setEnabled(child, enabled));
     }
   }
 
@@ -245,14 +238,13 @@ public class UIUtilities
    * Recursively add child Widgets to a list.
    */
 
-  private static void addChildrenToList(Widget w, List<Widget> list)
+  private static void addChildrenToList(Widget widget, List<Widget> list)
   {
-    if (w instanceof WidgetContainer)
-      for (Widget child : ((WidgetContainer) w).getChildren())
-      {
+    if (widget instanceof WidgetContainer)
+      ((WidgetContainer) widget).getChildren().forEach(child -> {
         list.add(child);
         addChildrenToList(child, list);
-      }
+      });
   }
 
   /**

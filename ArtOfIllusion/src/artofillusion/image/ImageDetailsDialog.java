@@ -1,6 +1,6 @@
 /* Copyright (C) 2017 by Petri Ihalainen
    Some methods copyright (C) by Peter Eastman
-   Changes copyright 2019-2020 by Maksim Khramov
+   Changes copyright 2019-2024 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -111,7 +111,7 @@ public class ImageDetailsDialog extends BDialog
         title[0].addEventLink(MouseEnteredEvent.class, this, "nameEntered");
         title[0].addEventLink(MouseExitedEvent.class,  this, "nameExited");
         
-        addAsListener(this);
+        recursivelyAddListeners(this);
         addEventLink(WindowClosingEvent.class, this, "closeDetailsDialog");
         setDataTexts();
         pack();
@@ -338,7 +338,7 @@ public class ImageDetailsDialog extends BDialog
     private void closeDetailsDialog()
     {
       dispose();
-      removeAsListener(this);
+      recursivelyRemoveAsListener(this);
     }
 
     
@@ -353,27 +353,23 @@ public class ImageDetailsDialog extends BDialog
   
     /** Add this as a listener to every Widget. */
     
-    private void addAsListener(Widget w)
+    private void recursivelyAddListeners(Widget widget)
     {
-        w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
-        if (w instanceof WidgetContainer)
+        widget.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+        if (widget instanceof WidgetContainer)
         {
-            Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-            while (iter.hasNext())
-                addAsListener((Widget) iter.next());
+            ((WidgetContainer) widget).getChildren().forEach(this::recursivelyAddListeners);
         }
     }
     
     /** Remove this as a listener before returning. */
     
-    private void removeAsListener(Widget w)
+    private void recursivelyRemoveAsListener(Widget widget)
     {
-        w.removeEventLink(KeyPressedEvent.class, this);
-        if (w instanceof WidgetContainer)
+        widget.removeEventLink(KeyPressedEvent.class, this);
+        if (widget instanceof WidgetContainer)
         {
-            Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-            while (iter.hasNext())
-                removeAsListener((Widget) iter.next());
+            ((WidgetContainer) widget).getChildren().forEach(this::recursivelyRemoveAsListener);
         }
     }
     
@@ -436,7 +432,7 @@ public class ImageDetailsDialog extends BDialog
             buttons.add(okButton = Translate.button("ok", this, "okNameEditor"));
             buttons.add(cancelButton = Translate.button("cancel", this, "cancelNameEditor"));
             addEventLink(WindowClosingEvent.class, this, "cancelNameEditor");
-            addAsListener(this);
+            recursivelyAddListeners(this);
             layoutChildren();            
             pack();
             setResizable(false);
@@ -468,7 +464,7 @@ public class ImageDetailsDialog extends BDialog
         private void cancelNameEditor()
         {
             dispose();
-            removeAsListener(this);
+            recursivelyRemoveAsListener(this);
         }
         
         private void okNameEditor()
@@ -482,7 +478,7 @@ public class ImageDetailsDialog extends BDialog
             im.setDataEdited();
             setDataTexts();
             dispose();
-            removeAsListener(this);
+            recursivelyRemoveAsListener(this);
         }
 
         /** Pressing Return and Escape are equivalent to clicking OK and Cancel. */
@@ -498,27 +494,23 @@ public class ImageDetailsDialog extends BDialog
     
         /** Add this as a listener to every Widget. */
         
-        private void addAsListener(Widget w)
+        private void recursivelyAddListeners(Widget widget)
         {
-            w.addEventLink(KeyPressedEvent.class, this, "keyPressed");
-            if (w instanceof WidgetContainer)
+            widget.addEventLink(KeyPressedEvent.class, this, "keyPressed");
+            if (widget instanceof WidgetContainer)
             {
-                Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-                while (iter.hasNext())
-                    addAsListener((Widget) iter.next());
+                ((WidgetContainer) widget).getChildren().forEach(this::recursivelyAddListeners);
             }
         }
         
         /** Remove this as a listener before returning. */
         
-        private void removeAsListener(Widget w)
+        private void recursivelyRemoveAsListener(Widget widget)
         {
-            w.removeEventLink(KeyPressedEvent.class, this);
-            if (w instanceof WidgetContainer)
+            widget.removeEventLink(KeyPressedEvent.class, this);
+            if (widget instanceof WidgetContainer)
             {
-                Iterator iter = ((WidgetContainer) w).getChildren().iterator();
-                while (iter.hasNext())
-                    removeAsListener((Widget) iter.next());
+                ((WidgetContainer) widget).getChildren().forEach(this::recursivelyRemoveAsListener);
             }
         }
     }

@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2013 by Peter Eastman
-   Changes copyright (C) 2016-2022 by Maksim Khramov
+   Changes copyright (C) 2016-2024 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -825,29 +825,17 @@ public class Scene
   }
 
   /**
-   * Set one object to be selected, deselecting all other objects.
-   * @deprecated Call setSelection() on the LayoutWindow instead.
-   */
-  @Deprecated
-  public void setSelection(int which)
-  {
-    clearSelection();
-    addToSelection(which);
-    updateSelectionInfo();
-  }
-
-  /**
    * Set a list of objects to be selected, deselecting all other objects.
    * @deprecated Call setSelection() on the LayoutWindow instead.
    */
   @Deprecated
-  public void setSelection(int which[])
+  public void setSelection(int... which)
   {
     clearSelection();
     for (int index : which) {
-      ObjectInfo info = objects.elementAt(index);
+      ObjectInfo info = objects.get(index);
       if (!info.selected)
-        selection.addElement(index);
+        selection.add(index);
       info.selected = true;
     }
     updateSelectionInfo();

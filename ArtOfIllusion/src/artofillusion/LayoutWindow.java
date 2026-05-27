@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2023 by Maksim Khramov
+   Changes copyright (C) 2016-2024 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -1526,23 +1526,12 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     return theScene.getSelectionWithChildren();
   }
 
-  /** Set a single object in the scene to be selected. */
-
-  public void setSelection(int which)
-  {
-    itemTree.setUpdateEnabled(false);
-    clearSelection();
-    theScene.setSelection(which);
-    itemTree.setSelected(theScene.getObject(which), true);
-    itemTree.setUpdateEnabled(true);
-    theScore.rebuildList();
-    updateMenus();
-  }
-
   /** Set the list of objects in the scene which should be selected. */
 
-  public void setSelection(int which[])
+  public void setSelection(int... which)
   {
+    if(which.length == 0) return;
+
     itemTree.setUpdateEnabled(false);
     clearSelection();
     theScene.setSelection(which);

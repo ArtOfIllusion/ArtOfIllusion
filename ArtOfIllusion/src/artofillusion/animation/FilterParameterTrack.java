@@ -70,7 +70,7 @@ public class FilterParameterTrack extends Track
   /** Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object obj)
+  public FilterParameterTrack duplicate(Object obj)
   {
     FilterParameterTrack t = new FilterParameterTrack(obj, filter);
     t.name = name;

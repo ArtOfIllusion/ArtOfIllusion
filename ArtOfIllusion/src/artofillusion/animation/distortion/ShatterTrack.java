@@ -58,7 +58,7 @@ public class ShatterTrack extends Track
   /* Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object obj)
+  public ShatterTrack duplicate(Object obj)
   {
     ShatterTrack t = new ShatterTrack((ObjectInfo) obj);
 
@@ -127,14 +127,6 @@ public class ShatterTrack extends Track
   public boolean isNullTrack()
   {
     return false;
-  }
-
-  /* Determine whether this track can be added as a child of an object. */
-
-  @Override
-  public boolean canAcceptAsParent(Object obj)
-  {
-    return (obj instanceof ObjectInfo);
   }
 
   /* Get the parent object of this track. */

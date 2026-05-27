@@ -110,7 +110,7 @@ public class RotationTrack extends Track
   /** Create a duplicate of this track. */
 
   @Override
-  public Track duplicate(Object obj)
+  public RotationTrack duplicate(Object obj)
   {
     RotationTrack t = new RotationTrack((ObjectInfo) obj);
 
@@ -123,7 +123,7 @@ public class RotationTrack extends Track
     t.quaternion = quaternion;
     t.tc = tc.duplicate((ObjectInfo) obj);
     t.relObject = relObject.duplicate();
-    t.theWeight = (WeightTrack) theWeight.duplicate(t);
+    t.theWeight = theWeight.duplicate(t);
     t.enablex = enablex;
     t.enabley = enabley;
     t.enablez = enablez;
@@ -147,7 +147,7 @@ public class RotationTrack extends Track
     quaternion = t.quaternion;
     tc = t.tc.duplicate(info);
     relObject = t.relObject.duplicate();
-    theWeight = (WeightTrack) t.theWeight.duplicate(this);
+    theWeight = t.theWeight.duplicate(this);
     enablex = t.enablex;
     enabley = t.enabley;
     enablez = t.enablez;
@@ -310,14 +310,6 @@ public class RotationTrack extends Track
   public Track [] getSubtracks()
   {
     return new Track [] {theWeight};
-  }
-
-  /** Determine whether this track can be added as a child of an object. */
-
-  @Override
-  public boolean canAcceptAsParent(Object obj)
-  {
-    return (obj instanceof ObjectInfo);
   }
 
   /** Get the parent object of this track. */

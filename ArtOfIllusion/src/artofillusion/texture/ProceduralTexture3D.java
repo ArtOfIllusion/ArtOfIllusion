@@ -75,7 +75,8 @@ public class ProceduralTexture3D extends Texture3D implements ProcedureOwner
     };
   }
 
-  public static String getTypeName()
+  @Override
+  public String getTypeName()
   {
     return "Procedural 3D";
   }

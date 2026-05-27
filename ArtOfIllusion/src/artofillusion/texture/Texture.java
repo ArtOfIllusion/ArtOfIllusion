@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2004 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -38,7 +39,7 @@ public abstract class Texture
   /** Get the name of this type of texture.  Subclasses should override this method to return
      an appropriate name. */
   
-  public static String getTypeName()
+  public String getTypeName()
   {
     return "";
   }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2000-2007 by Peter Eastman
+   Changes copyright (C) 2017 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -39,7 +40,8 @@ public class SphericalMapping extends NonlinearMapping2D
     findCoefficients();
   }
 
-  public static String getName()
+  @Override
+  public String getName()
   {
     return "Spherical";
   }

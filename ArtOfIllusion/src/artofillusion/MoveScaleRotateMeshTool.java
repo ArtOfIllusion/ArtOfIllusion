@@ -25,7 +25,8 @@ import buoy.widget.*;
  * This editing tool presents as a compound interface for move, scale, and rotating parts of
  * a mesh.
  */
-
+@EditingTool.ButtonImage("moveScaleRotate")
+@EditingTool.Tooltip("moveScaleRotateMeshTool.tipText")
 public class MoveScaleRotateMeshTool extends MeshEditingTool
 {
   private boolean dragInProgress;
@@ -58,12 +59,6 @@ public class MoveScaleRotateMeshTool extends MeshEditingTool
   public boolean allowSelectionChanges()
   {
     return !dragInProgress;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("moveScaleRotateMeshTool.tipText");
   }
 
   @Override

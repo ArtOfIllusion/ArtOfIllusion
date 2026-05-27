@@ -1,4 +1,5 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
+   Changes copyright (C) 2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -23,12 +24,6 @@ public class GenericTool extends EditingTool
     super(fr);
     initButton(imageName);
     this.tipText = tipText;
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
   }
 
   @Override

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2007 by Peter Eastman
    Changes copyrignt (C) 2016 by Petri Ihalainen
-   Changes copyright (C) 2017-2020 by Maksim Khramov
+   Changes copyright (C) 2017-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -31,13 +31,15 @@ import java.awt.geom.Point2D;
 import java.util.Vector;
 
 /** CreateCurveTool is an EditingTool used for creating Curve objects. */
-
+@EditingTool.ButtonImage("interpCurve")
+@EditingTool.Tooltip("createCurveTool.tipText")
+@EditingTool.ActivatedToolText("createCurveTool.helpText")
 public class CreateCurveTool extends EditingTool
 {
   static int counter = 1;
   private Vector<Vec3> clickPoint;
   private Vector<Float> smoothness;
-  private int smoothing;
+  private int smoothing = Mesh.APPROXIMATING;
   private Curve theCurve;
   private CoordinateSystem coords;
 
@@ -45,16 +47,7 @@ public class CreateCurveTool extends EditingTool
 
   public CreateCurveTool(EditingWindow fr)
   {
-    super(fr);
-    initButton("interpCurve");
-    smoothing = Mesh.APPROXIMATING;
-  }
-
-  @Override
-  public void activate()
-  {
-    super.activate();
-    theWindow.setHelpText(Translate.text("createCurveTool.helpText"));
+    super(fr);    
   }
 
   @Override
@@ -62,18 +55,6 @@ public class CreateCurveTool extends EditingTool
   {
     super.deactivate();
     addToScene();
-  }
-
-  @Override
-  public int whichClicks()
-  {
-    return ALL_CLICKS;
-  }
-
-  @Override
-  public String getToolTipText()
-  {
-    return Translate.text("createCurveTool.tipText");
   }
 
   @Override

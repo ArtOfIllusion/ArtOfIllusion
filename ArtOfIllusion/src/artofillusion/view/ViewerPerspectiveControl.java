@@ -34,10 +34,10 @@ public class ViewerPerspectiveControl implements ViewerControl
     view.addEventLink(ViewChangedEvent.class, new Object() {
       void processEvent()
       {
-        if (view.getBoundCamera() != null && view.getBoundCamera().getObject() instanceof SceneCamera)
+        if (view.getSceneCamera() != null)
         {
           perspectiveChoice.setEnabled(false);
-          view.setPerspective(((SceneCamera)view.getBoundCamera().getObject()).isPerspective());
+          view.setPerspective(view.getSceneCamera().isPerspective());
           perspectiveChoice.setSelectedIndex(view.isPerspectiveSwitch() ? 0 : 1);
         }
         else if (view.getRenderMode() == ViewerCanvas.RENDER_RENDERED)

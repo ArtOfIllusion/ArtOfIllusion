@@ -133,11 +133,13 @@ public class Actor extends ObjectWrapper
 
   public int getGestureIndex(int id)
   {
-    int which;
-    for (which = 0; which < gestureID.length && gestureID[which] != id; which++);
-    if (which == gestureID.length)
-      return -1;
-    return which;
+    int which = 0;  
+    for(int cg: gestureID)
+    {
+        if(cg == id) break;
+        which++;
+    }
+    return which == gestureID.length ? -1 : which;
   }
 
   /** Create a new object which is an exact duplicate of this one. */
@@ -266,7 +268,7 @@ public class Actor extends ObjectWrapper
   }
 
   /** Given an object (either this Actor's object or a duplicate of it), reshape the object based
-      on this Actor's getures.  This function examines the object's skeleton, finds the combination
+      on this Actor's gestures.  This function examines the object's skeleton, finds the combination
       of gestures that most nearly reproduce that skeleton shape, and then adjusts all of the vertex
       positions based on the gestures. */
 

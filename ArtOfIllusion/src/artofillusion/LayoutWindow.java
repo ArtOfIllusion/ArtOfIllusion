@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2015 by Peter Eastman
-   Changes copyright (C) 2016-2023 by Maksim Khramov
+   Changes copyright (C) 2016-2024 by Maksim Khramov
    Changes copyright (C) 2017-2020 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -759,8 +759,8 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
     animationMenu.add(animationMenuItem[1] = Translate.menuItem("duplicateTracks", theScore, "duplicateSelectedTracks"));
     animationMenu.add(animationMenuItem[2] = Translate.menuItem("deleteTracks", theScore, "deleteSelectedTracks"));
     animationMenu.add(animationMenuItem[3] = Translate.menuItem("selectAllTracks", theScore, "selectAllTracks"));
-    animationMenu.add(animationMenuItem[4] = Translate.menuItem("enableTracks", this, "actionPerformed"));
-    animationMenu.add(animationMenuItem[5] = Translate.menuItem("disableTracks", this, "actionPerformed"));
+    animationMenu.add(animationMenuItem[4] = Translate.menuItem("enableTracks", theScore, "enableTracks"));
+    animationMenu.add(animationMenuItem[5] = Translate.menuItem("disableTracks", theScore, "disableTracks"));
     animationMenu.addSeparator();
     animationMenu.add(animationMenuItem[6] = Translate.menuItem("keyframe", theScore, "keyframeSelectedTracks"));
     animationMenu.add(animationMenuItem[7] = Translate.menuItem("keyframeModified", theScore, "keyframeModifiedTracks"));
@@ -1647,10 +1647,6 @@ public class LayoutWindow extends BFrame implements EditingWindow, PopupMenuMana
             double t = theScene.getTime() - 1.0/theScene.getFramesPerSecond();
             setTime(t);
           }
-        else if (command.equals("enableTracks"))
-          theScore.setTracksEnabled(true);
-        else if (command.equals("disableTracks"))
-          theScore.setTracksEnabled(false);
         else if (command.equals("pathFromCurve"))
           new PathFromCurveDialog(this, itemTree.getSelectedObjects());
         else if (command.equals("bindToParent"))

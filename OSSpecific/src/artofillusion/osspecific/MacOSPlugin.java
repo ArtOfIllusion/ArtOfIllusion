@@ -1,5 +1,5 @@
 /* Copyright (C) 2002-2020 by Peter Eastman
-   Changes copyright (C) 2017 by Maksim Khramov
+   Changes copyright (C) 2017-2023 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -16,93 +16,82 @@ import artofillusion.ui.*;
 import buoy.event.*;
 import buoy.widget.*;
 import java.awt.*;
+import java.awt.desktop.*;
 import java.io.*;
-import java.lang.reflect.*;
+import java.util.Locale;
 import java.util.prefs.*;
 
-/** This is a plugin to make Art of Illusion behave more like a standard Macintosh
-    application when running under Mac OS X. */
-
-public class MacOSPlugin implements Plugin, InvocationHandler
+/**
+ * This is a plugin to make Art of Illusion behave more like a standard
+ * Macintosh application when running under Mac OS X.
+ */
+public class MacOSPlugin implements Plugin, AboutHandler, QuitHandler, OpenFilesHandler, PreferencesHandler
 {
-  private boolean usingAppMenu, appleApi;
 
-  @Override
-  public void processMessage(int message, Object args[])
+  private static final String OS = System.getProperty("os.name", "unknown").toLowerCase(Locale.ROOT);
+
+  private boolean usingAppMenu;
+
+  public void onApplicationStarting()
   {
-    if (message == APPLICATION_STARTING)
+    if (OS.startsWith("mac"))
     {
-      String os = ((String) System.getProperties().get("os.name")).toLowerCase();
-      if (!os.startsWith("mac os x"))
-        return;
+      System.setProperty("apple.laf.useScreenMenuBar", "true");
       ArtOfIllusion.addWindow(new MacMenuBarWindow());
       UIUtilities.setDefaultFont(new Font("Application", Font.PLAIN, 11));
       UIUtilities.setStandardDialogInsets(3);
-      try
-      {
-        if (System.getProperty("java.version").startsWith("1.8."))
-        {
-          // Use the old Apple specific API.
 
-          appleApi = true;
-          Class appClass = Class.forName("com.apple.eawt.Application");
-          Object app = appClass.getMethod("getApplication").invoke(null);
-          appClass.getMethod("setEnabledAboutMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-          appClass.getMethod("setEnabledPreferencesMenu", Boolean.TYPE).invoke(app, Boolean.TRUE);
-          Class listenerClass = Class.forName("com.apple.eawt.ApplicationListener");
-          Object proxy = Proxy.newProxyInstance(appClass.getClassLoader(), new Class[]{listenerClass}, this);
-          appClass.getMethod("addApplicationListener", listenerClass).invoke(app, proxy);
-        }
-        else
-        {
-          // Use the Desktop API introduced in Java 9.
-
-          appleApi = false;
-          Class aboutHandlerClass = Class.forName("java.awt.desktop.AboutHandler");
-          Class openHandlerClass = Class.forName("java.awt.desktop.OpenFilesHandler");
-          Class preferencesHandlerClass = Class.forName("java.awt.desktop.PreferencesHandler");
-          Class quiteHandlerClass = Class.forName("java.awt.desktop.QuitHandler");
-          Object proxy = Proxy.newProxyInstance(Desktop.class.getClassLoader(), new Class[]{aboutHandlerClass, openHandlerClass, preferencesHandlerClass, quiteHandlerClass}, this);
-          Desktop desktop = Desktop.getDesktop();
-          Desktop.class.getMethod("setAboutHandler", aboutHandlerClass).invoke(desktop, proxy);
-          Desktop.class.getMethod("setOpenFileHandler", openHandlerClass).invoke(desktop, proxy);
-          Desktop.class.getMethod("setPreferencesHandler", preferencesHandlerClass).invoke(desktop, proxy);
-          Desktop.class.getMethod("setQuitHandler", quiteHandlerClass).invoke(desktop, proxy);
-        }
-      }
-      catch (Exception ex)
-      {
-        // An error occured trying to set up the application menu, so just stick with the standard
-        // Quit and Preferences menu items in the File and Edit menus.
-
-        ex.printStackTrace();
-      }
+      Desktop desktop = Desktop.getDesktop();
+      desktop.setAboutHandler(this);
+      desktop.setQuitHandler(this);
+      desktop.setOpenFileHandler(this);
+      desktop.setPreferencesHandler(this);
       usingAppMenu = true;
     }
-    else if (message == SCENE_WINDOW_CREATED)
-    {
-      final LayoutWindow win = (LayoutWindow) args[0];
-      win.addEventLink(SceneChangedEvent.class, new Object() {
-        void processEvent()
-        {
-          updateWindowProperties(win);
-        }
-      });
-      updateWindowProperties(win);
-      if (!usingAppMenu)
-        return;
+  }
 
+  public void onSceneWindowCreated(LayoutWindow view)
+  {
+    view.addEventLink(SceneChangedEvent.class, new Object()
+    {
+      void processEvent()
+      {
+        updateWindowProperties(view);
+      }
+    });
+    updateWindowProperties(view);
+
+    if (usingAppMenu)
+    {
       // Remove the Quit and Preferences menu items, since we are using the ones in the application
       // menu instead.
-
-      removeMenuItem(win, Translate.text("menu.file"), Translate.text("menu.quit"));
-      removeMenuItem(win, Translate.text("menu.edit"), Translate.text("menu.preferences"));
+      removeMenuItem(view, Translate.text("menu.file"), Translate.text("menu.quit"));
+      removeMenuItem(view, Translate.text("menu.edit"), Translate.text("menu.preferences"));
     }
-    else if (message == SCENE_SAVED)
+  }
+
+  public void onSceneSaved(File file, LayoutWindow win)
+  {
+    updateWindowProperties(win);
+    win.getComponent().getRootPane().putClientProperty("Window.documentModified", false);
+  }
+
+  @Override
+  public void processMessage(int message, Object... args)
+  {
+    switch (message)
     {
-      LayoutWindow win = (LayoutWindow) args[1];
-      updateWindowProperties(win);
-      win.getComponent().getRootPane().putClientProperty("Window.documentModified", false);
+      case APPLICATION_STARTING:
+        onApplicationStarting();
+        break;
+      case SCENE_WINDOW_CREATED:
+        onSceneWindowCreated((LayoutWindow) args[0]);
+        break;
+      case SCENE_SAVED:
+        onSceneSaved(null, (LayoutWindow) args[1]);
+        break;
+      default:
+        break;
     }
   }
 
@@ -110,12 +99,13 @@ public class MacOSPlugin implements Plugin, InvocationHandler
 
   private void updateWindowProperties(LayoutWindow win)
   {
-    win.getComponent().getRootPane().putClientProperty("Window.documentModified", win.isModified());
+    javax.swing.JRootPane rp = win.getComponent().getRootPane();
+    rp.putClientProperty("Window.documentModified", win.isModified());
     Scene scene = win.getScene();
     if (scene.getName() != null)
     {
       File file = new File(scene.getDirectory(), scene.getName());
-      win.getComponent().getRootPane().putClientProperty("Window.documentFile", file);
+      rp.putClientProperty("Window.documentFile", file);
     }
   }
 
@@ -145,110 +135,60 @@ public class MacOSPlugin implements Plugin, InvocationHandler
     }
   }
 
-  /** Handle ApplicationListener methods. */
+  @Override
+  public void handleAbout(AboutEvent event)
+  {
+    TitleWindow win = new TitleWindow();
+    win.addEventLink(MouseClickedEvent.class, win, "dispose");
+  }
 
   @Override
-  public Object invoke(Object proxy, Method method, Object args[])
+  public void handleQuitRequestWith(QuitEvent e, QuitResponse response)
   {
-    boolean handled = true;
-    if ("handleAbout".equals(method.getName()))
-    {
-      TitleWindow win = new TitleWindow();
-      win.addEventLink(MouseClickedEvent.class, win, "dispose");
-    }
-    else if ("handlePreferences".equals(method.getName()))
-    {
-      Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
-      boolean frontIsLayoutWindow = false;
-      for (EditingWindow window : ArtOfIllusion.getWindows())
-        if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
-        {
-          ((LayoutWindow) window).preferencesCommand();
-          frontIsLayoutWindow = true;
-          break;
-        }
-      if (!frontIsLayoutWindow)
-      {
-        BFrame f = new BFrame();
-        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        f.setBounds(screenBounds);
-        UIUtilities.centerWindow(f);
-        new PreferencesWindow(f);
-        f.dispose();
-      }
-    }
-    else if ("handleQuit".equals(method.getName()))
-    {
-      ArtOfIllusion.quit();
-      handled = false;
-    }
-    else if ("handleQuitRequestWith".equals(method.getName()))
-    {
-      ArtOfIllusion.quit();
-      handled = false;
-      try
-      {
-        Method cancelQuit = args[1].getClass().getMethod("cancelQuit");
-        cancelQuit.invoke(args[1]);
-      }
-      catch (Exception ex)
-      {
-        // Nothing we can really do about it...
+    ArtOfIllusion.quit();
+    response.cancelQuit();
+  }
 
-        ex.printStackTrace();
-      }
-    }
-    else if ("handleOpenFile".equals(method.getName()))
+  @Override
+  public void openFiles(OpenFilesEvent event)
+  {
+    for (File file : event.getFiles())
     {
       try
       {
-        Method getFilename = args[0].getClass().getMethod("getFilename");
-        String path = (String) getFilename.invoke(args[0]);
-        ArtOfIllusion.newWindow(new Scene(new File(path), true));
-      }
-      catch (Exception ex)
+        ArtOfIllusion.newWindow(new Scene(file, true));
+      } catch (IOException ioe)
       {
         // Nothing we can really do about it...
-
-        ex.printStackTrace();
       }
     }
-    else if ("openFiles".equals(method.getName()))
+  }
+
+  @Override
+  @SuppressWarnings("ResultOfObjectAllocationIgnored")
+  public void handlePreferences(PreferencesEvent e)
+  {
+    final Window frontWindow = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+    boolean frontIsLayoutWindow = false;
+    for (EditingWindow window : ArtOfIllusion.getWindows())
     {
-      try
+      if (window instanceof LayoutWindow && window.getFrame().getComponent() == frontWindow)
       {
-        Method getFiles = args[0].getClass().getMethod("getFiles");
-        java.util.List<File> files = (java.util.List<File>) getFiles.invoke(args[0]);
-        for (File file : files)
-          ArtOfIllusion.newWindow(new Scene(file, true));
-      }
-      catch (Exception ex)
-      {
-        // Nothing we can really do about it...
-
-        ex.printStackTrace();
+        ((LayoutWindow) window).preferencesCommand();
+        frontIsLayoutWindow = true;
+        break;
       }
     }
-    else
-      return null;
-
-    // Call setHandled(true) on the event to show we have handled it.
-
-    if (appleApi)
+    if (frontIsLayoutWindow)
     {
-      try
-      {
-        Method setHandled = args[0].getClass().getMethod("setHandled", new Class[]{Boolean.TYPE});
-        setHandled.invoke(args[0], handled);
-      }
-      catch (Exception ex)
-      {
-        // Nothing we can really do about it...
-
-        ex.printStackTrace();
-      }
+      return;
     }
-    return null;
+    BFrame f = new BFrame();
+    Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+    f.setBounds(screenBounds);
+    UIUtilities.centerWindow(f);
+    new PreferencesWindow(f);
+    f.dispose();
   }
 
   /** This is an inner class used to provide a minimal menu bar when all windows are
@@ -270,12 +210,9 @@ public class MacOSPlugin implements Plugin, InvocationHandler
       final BMenu recentMenu = Translate.menu("openRecent");
       RecentFiles.createMenu(recentMenu);
       file.add(recentMenu);
-      Preferences.userNodeForPackage(RecentFiles.class).addPreferenceChangeListener(new PreferenceChangeListener() {
-        @Override
-        public void preferenceChange(PreferenceChangeEvent ev)
-        {
-          RecentFiles.createMenu(recentMenu);
-        }
+      Preferences.userNodeForPackage(RecentFiles.class).addPreferenceChangeListener((PreferenceChangeEvent ev) ->
+      {
+        RecentFiles.createMenu(recentMenu);
       });
       pack();
       setBounds(new Rectangle(-1000, -1000, 0, 0));

@@ -2,11 +2,15 @@
 
 ## Quickstart for the experienced developer:
 
- * Run `ant` in the main directory. Build artifacts are located in
-`Live_Application`.
- * `ant help` to see other targets.
- * For opengl support, copy the correct `*-natives.jar` files from
-`InstallerSrc/` to `Live_Application/lib`.
+ * `millw run` builds and launchs the main application. You can
+pass additional arguments to the JVM, such as `-Xmx=` values and debug
+transport linkages.
+ * `mill _.test` runs the test suites.
+ * `mill clean` clears interim build artifacts and forces a complete
+build on the next run.
+ * There is a very thin ant wrapper in `build.xml`. The targets there
+are intended to ease integration with IDEs, particularly Intellij Idea
+and NetBeans.
 
 If you're new to building java programs, please follow the detailed
 process and explanation below:
@@ -22,17 +26,17 @@ understand. You can download this from
 [the AdoptOpenJDK project.](https://adoptopenjdk.net) 
     - A Linux user should probably use their package mamager
     - macos users who use Homebrew can use `brew install --cask adoptopenjdk`
- * [Apache ant version 1.9.x or compatible.](https://ant.apache.org/bindownload.cgi)
-A simple tool to automate compiling and packaging a large number of
-java files. Again, Linux users can probably get this through their
-package manager.
  * [Git](https://git-scm.com/downloads) is used for tracking changes
 that you have made to the code, and coordinating with other people.
  * An editor suitable for use with program source code. This means
 __something other than notepad or Microsoft Word.__ One good, free
 option for Windows users is [notepad++.](https://notepad-plus-plus.org)
- * [JUnit 4.x](http://junit.org/junit4/) (optional) framework for
-running the automated test suite.
+ * ArtOfIllusion uses the
+[mill build tool](https://com-lihaoyi.github.io/mill/mill/Intro_to_Mill.html)
+to automate the build process and run tests.
+The source archives include wrapper scripts, so you do *not* need to
+install this yourself. Simply replace `mill` with `millw` on linux or
+`millw.bat` on windows throughout these instructions.
 
 ## Obtaining and building the sources
 
@@ -59,32 +63,17 @@ Launching from the command line will allow you to see any console output
 which AOI generates. You can also add command line options to allow AOI
 to use more memory, etc.
 
-### Enabling OpenGL
-
-AOI can use your graphics card to make rendering of scenes in the
-editor windows faster. To make this work in the development build,
-you need to move some files around. Copy all .jar files from
-`InstallerSrc/jogl-<your platform>` to `Live_Application/lib`. Remember to restart
-AOI after doing this.
-
 ### Installing Plugins
 
-A standard Art of Illusion development build does not include the
-SPManager, which is developed as a separate project. You
-can copy `SPManager.jar` and `PostInstall.jar` from the plugins
-directory of a normal AOI installation, or you can [download them
-directly](https://aoisp.sourceforge.net/AoIRepository/Plugins/SPManager)
-Just place them in your `Plugins` directory, and restart AOI. You
-should now be able to install plugins normally.
-
-If you choose to install plugins this way, you should only need to
-install them once. They will not be deleted when you re-build AOI.
+You can install plugins normally through the SPManager. The `LocalInstall/`
+location is not affected by `mill clean`, so you do not need to reinstall
+plugins when you re-build AOI.
 
 
 ### Structure of a development build
 
-If you've followed the above instructions, your `Live_Application` directory will
-contain the following directories and files:
+If you've followed the above instructions, your `LocalInstall` directory
+will contain the following directories and files:
 
  * __Plugins__ directory where AOI looks for installed
 plugins. These include the standard modeling tools and file

@@ -1,6 +1,6 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
    Changes copyright (C) 2016-2020 by Maksim Khramov
-   Changes copyright (C) 2017-2019 by Petri Ihalainen
+   Changes copyright (C) 2017-2026 by Petri Ihalainen
 
    This program is free software; you can redistribute it and/or modify it under the
    terms of the GNU General Public License as published by the Free Software
@@ -29,6 +29,8 @@ public class SceneViewer extends ViewerCanvas
 {
   Scene theScene;
   EditingWindow parentFrame;
+  Renderer viewRenderer;
+  SceneCamera renderedModeCamera;
   private Vector<ObjectInfo> cameras;
   boolean draggingBox, draggingSelectionBox, squareBox, sentClick, dragging;
   Point clickPoint, dragPoint;
@@ -45,6 +47,8 @@ public class SceneViewer extends ViewerCanvas
     super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable() && !forceSoftwareRendering);
     theScene = s;
     parentFrame = fr;
+    viewRenderer = null;
+    renderedModeCamera = null;
     addEventLink(MouseClickedEvent.class, this, "mouseClicked");
     draggingBox = draggingSelectionBox = false;
     cameras = new Vector<ObjectInfo>();
@@ -211,17 +215,29 @@ public class SceneViewer extends ViewerCanvas
     super.viewChanged(selectionOnly);
     if (renderMode == RENDER_RENDERED && !selectionOnly)
     {
-      // Re-render the image.
-
-      Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
-      if (rend == null)
-        return;
-      adjustCamera(true);
+      if (viewRenderer == null)
+        try
+        {
+          viewRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer().getClass().newInstance();
+        }
+        catch(Exception i)
+        {
+          return;
+        };
+      //if (viewRenderer == null)
+      //  return;
       Camera cam = theCamera.duplicate();
-      rend.configurePreview();
-      Rectangle bounds = getBounds();
-      SceneCamera sceneCamera = new SceneCamera();
-      sceneCamera.setFieldOfView(Math.atan(0.5*bounds.height/cam.getViewToScreen().m33)*360.0/Math.PI);
+      viewRenderer.configurePreview();
+      int h = getBounds().height;
+      if (renderedModeCamera == null)
+        renderedModeCamera = new SceneCamera();
+      renderedModeCamera.setDistToPlane(distToPlane);
+      renderedModeCamera.setFocalDistance(distToPlane);
+      renderedModeCamera.setPerspective(isPerspective());
+      if (boundCamera != null && boundCamera.getObject() instanceof SceneCamera)
+        renderedModeCamera.setFieldOfView(((SceneCamera)boundCamera.getObject()).getFieldOfView());
+      else
+        renderedModeCamera.setFieldOfView(2.0*Math.toDegrees(Math.atan(0.5*h/100.0/cam.getDistToScreen())));
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
@@ -240,7 +256,13 @@ public class SceneViewer extends ViewerCanvas
           repaint();
         }
       };
-      rend.renderScene(theScene, cam, listener, sceneCamera);
+      viewRenderer.renderScene(theScene, cam, listener, renderedModeCamera);
+    }
+    else if (viewRenderer != null)
+    {
+      viewRenderer = null;
+      renderedModeCamera = null;
+      System.gc();
     }
   }
 

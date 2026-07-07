@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2011 by Peter Eastman
-   Changes Copyrignt (C) 2016-2020 Petri Ihalainen
+   Changes Copyrignt (C) 2016-2026 Petri Ihalainen
    Changes copyright (C) 2016-2022 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -1321,15 +1321,6 @@ public abstract class ViewerCanvas extends CustomWidget
 
   public void setRenderMode(int mode)
   {
-    if (mode == RENDER_RENDERED && currentTool != null)
-    {
-      for (ViewerCanvas view : currentTool.getWindow().getAllViews())
-        if (view != this && view.getRenderMode() == RENDER_RENDERED)
-        {
-          new BStandardDialog("", Translate.text("renderedModeMultipleViews"), BStandardDialog.ERROR).showMessageDialog(UIUtilities.findWindow(this));
-          return;
-        }
-    }
     renderMode = mode;
     renderedImage = null;
     viewChanged(false);

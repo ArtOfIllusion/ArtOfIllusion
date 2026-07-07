@@ -1,5 +1,5 @@
 /* Copyright (C) 1999-2008 by Peter Eastman
-   Modifications copyright (C) 2017-2019 Petri Ihalainen
+   Changes copyright (C) 2017-2026 Petri Ihalainen
    Changes copyright (C) 2017-2020 by Maksim Khramov
 
    This program is free software; you can redistribute it and/or modify it under the
@@ -28,6 +28,8 @@ import java.util.*;
 public abstract class ObjectViewer extends ViewerCanvas
 {
   protected MeshEditController controller;
+  protected SceneCamera renderedModeCamera;
+  protected Renderer viewRenderer;
   protected boolean showScene, useWorldCoords, freehandSelection, draggingBox, squareBox, sentClick;
   protected Point clickPoint, dragPoint;
   protected Vector<Point> selectBoundsPoints;
@@ -38,7 +40,9 @@ public abstract class ObjectViewer extends ViewerCanvas
   public ObjectViewer(MeshEditController controller, RowContainer p)
   {
     super(ArtOfIllusion.getPreferences().getUseOpenGL() && isOpenGLAvailable());
-    this.controller = controller;
+    this.controller    = controller;
+    viewRenderer       = null;
+    renderedModeCamera = null;
     buildChoices(p);
   }
 
@@ -104,10 +108,17 @@ public abstract class ObjectViewer extends ViewerCanvas
     {
       // Re-render the image.
 
-      Renderer rend = ArtOfIllusion.getPreferences().getObjectPreviewRenderer();
-      if (rend == null)
-        return;
-      adjustCamera(true);
+      if (viewRenderer == null)
+        try
+        {
+          viewRenderer = ArtOfIllusion.getPreferences().getDefaultRenderer().getClass().newInstance();
+        }
+        catch(Exception i)
+        {
+          return;
+        }
+      //if (viewRenderer == null)
+      //  return;
       Scene sc;
       Camera cam = theCamera.duplicate();
       if (showScene && theScene != null)
@@ -146,10 +157,14 @@ public abstract class ObjectViewer extends ViewerCanvas
         obj.getCoords().transformCoordinates(getDisplayCoordinates().fromLocal());
         sc.addObject(obj, null);
       }
-      rend.configurePreview();
-      Rectangle bounds = getBounds();
-      SceneCamera sceneCamera = new SceneCamera();
-      sceneCamera.setFieldOfView(Math.atan(0.5*bounds.height/(cam.getDistToScreen()*getScale()))*360.0/Math.PI);
+      viewRenderer.configurePreview();
+      int h = getBounds().height;
+      if (renderedModeCamera == null)
+        renderedModeCamera = new SceneCamera();
+      renderedModeCamera.setDistToPlane(distToPlane);
+      renderedModeCamera.setFocalDistance(distToPlane);
+      renderedModeCamera.setFieldOfView(2.0*Math.toDegrees(Math.atan(0.5*h/100.0/cam.getDistToScreen())));
+      renderedModeCamera.setPerspective(isPerspective());
       adjustCamera(isPerspective());
       RenderListener listener = new RenderListener()
       {
@@ -168,7 +183,13 @@ public abstract class ObjectViewer extends ViewerCanvas
           repaint();
         }
       };
-      rend.renderScene(sc, cam, listener, sceneCamera);
+      viewRenderer.renderScene(sc, cam, listener, renderedModeCamera);
+    }
+    else if (viewRenderer != null)
+    {
+      viewRenderer = null;
+      renderedModeCamera = null;
+      System.gc();
     }
   }
 
